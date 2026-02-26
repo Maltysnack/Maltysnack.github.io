@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>haikureview — maltysnack</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    /* ── HAIKU PAGE SPECIFIC ─── */
+    .haiku-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 40px;
+      flex-wrap: wrap;
+    }
+
+    .haiku-header-left .page-title {
+      margin-bottom: 8px;
+    }
+
+    .spoiler-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.82rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--red);
+      border: 1.5px solid var(--red-border);
+      padding: 7px 14px;
+      border-radius: 3px;
+      background: var(--red-pale);
+      transition: background 0.15s ease, color 0.15s ease;
+      white-space: nowrap;
+      align-self: flex-start;
+      margin-top: 6px;
+    }
+
+    .spoiler-link:hover {
+      background: var(--red);
+      color: #fff;
+      border-color: var(--red);
+    }
+
+    .spoiler-link svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Letterboxd live badge */
+    .letterboxd-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 10px;
+    }
+
+    .letterboxd-badge a {
+      color: var(--text-muted);
+      text-decoration: underline;
+      text-underline-offset: 2px;
+    }
+
+    .letterboxd-badge a:hover {
+      color: var(--accent);
+    }
+
+    .lbxd-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #00c030;
+      display: inline-block;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.4; }
+    }
+
+    /* ── FILM GRID ── */
+    .film-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 24px;
+    }
+
+    /* ── FILM CARD ── */
+    .film-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow: hidden;
+      transition: box-shadow 0.2s ease, transform 0.2s ease;
+    }
+
+    .film-card:hover {
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      transform: translateY(-2px);
+    }
+
+    /* Poster area */
+    .film-poster-wrap {
+      position: relative;
+      aspect-ratio: 2/3;
+      overflow: hidden;
+      background: #1a1a1a;
+      cursor: pointer;
+    }
+
+    .film-poster-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: opacity 0.4s ease;
+      opacity: 0;
+    }
+
+    .film-poster-img.loaded {
+      opacity: 1;
+    }
+
+    /* Mystery overlay — shown before reveal */
+    .film-mystery {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, #1a1211 0%, #2a1f1a 50%, #1c1a18 100%);
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+      gap: 12px;
+      padding: 20px;
+    }
+
+    .film-mystery.hidden {
+      opacity: 0;
+      visibility: hidden;
+    }
+
+    .mystery-num {
+      font-family: var(--font-display);
+      font-size: 3rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.08);
+      line-height: 1;
+      position: absolute;
+      bottom: 10px;
+      right: 14px;
+    }
+
+    .mystery-icon {
+      font-size: 2.2rem;
+      opacity: 0.6;
+    }
+
+    .mystery-prompt {
+      font-size: 0.72rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.35);
+      text-align: center;
+    }
+
+    /* Revealed title overlay at bottom of poster */
+    .film-reveal-title {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 36px 14px 12px;
+      background: linear-gradient(transparent, rgba(0,0,0,0.85));
+      opacity: 0;
+      transition: opacity 0.4s ease;
+      pointer-events: none;
+    }
+
+    .film-card.revealed .film-reveal-title {
+      opacity: 1;
+    }
+
+    .film-reveal-title-text {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #fff;
+      line-height: 1.3;
+    }
+
+    .film-reveal-year {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.55);
+      font-family: var(--font-body);
+    }
+
+    /* Papyrus easter egg for Avatar entries */
+    .film-card[data-papyrus="true"] .film-reveal-title-text {
+      font-family: Papyrus, fantasy;
+      font-weight: bold;
+    }
+
+    /* ── CARD BODY (haiku area) ── */
+    .film-card-body {
+      padding: 18px 18px 16px;
+    }
+
+    .haiku-text {
+      font-family: var(--font-body);
+      font-style: italic;
+      font-size: 0.9rem;
+      line-height: 1.9;
+      color: var(--text);
+      margin-bottom: 16px;
+      white-space: pre-line;
+    }
+
+    .haiku-line {
+      display: block;
+    }
+
+    .card-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .reveal-btn {
+      font-size: 0.75rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: none;
+      border: 1px solid var(--border);
+      padding: 5px 12px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: color 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+    }
+
+    .reveal-btn:hover {
+      color: var(--text);
+      border-color: var(--text-muted);
+    }
+
+    .film-card.revealed .reveal-btn {
+      background: var(--red-pale);
+      color: var(--red);
+      border-color: var(--red-border);
+    }
+
+    .film-date {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .lbxd-link {
+      display: none;
+      font-size: 0.75rem;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .film-card.revealed .lbxd-link {
+      display: inline;
+    }
+
+    /* Poster placeholder (gradient, shown when no real poster) */
+    .film-poster-placeholder {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    /* Score counter */
+    .score-bar {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .score-val {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--text);
+    }
+
+    @media (max-width: 700px) {
+      .film-grid {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+      }
+      .haiku-header {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 420px) {
+      .film-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a href="../index.html" class="logo-link">
+        <img src="https://github.com/maltysnack.png" alt="maltysnack avatar" class="avatar" />
+        <span class="site-name">maltysnack</span>
+      </a>
+      <p class="site-tagline">films · games · words</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">
+        <span class="nav-label">Films</span>
+        <ul>
+          <li><a href="haikureview.html" style="color: var(--text);">haikureview</a></li>
+          <li><a href="SPOILERALERT.html">SPOILERALERT</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Projects</span>
+        <ul>
+          <li><a href="../projects/mothership.html">Mothership</a></li>
+          <li><a href="../projects/trolley-run.html">Trolley Run</a></li>
+          <li><a href="../projects/saltysnacks.html">Saltysnacks</a></li>
+          <li><a href="../projects/sidequest.html">SideQuest</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">README</span>
+        <ul>
+          <li><a href="../writings/poems.html">Poems</a></li>
+          <li><a href="../writings/thoughts.html">Thoughts</a></li>
+        </ul>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../red-rebels.html" class="nav-label nav-label--link nav-label--rebels">Red Rebels</a>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../quiz.html" class="nav-label nav-label--link">Quiz</a>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../shop.html" class="nav-label nav-label--link">Shop</a>
+      </div>
+    </nav>
+    <footer class="sidebar-footer">
+      <a href="https://github.com/maltysnack" target="_blank" rel="noopener" title="GitHub">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.907-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.912.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      </a>
+      <a href="https://twitch.tv/maltysnack" target="_blank" rel="noopener" title="Twitch" class="twitch-link">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+      </a>
+      <a href="https://youtube.com/@Maltysnack" target="_blank" rel="noopener" title="YouTube" class="youtube-link">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+    </footer>
+  </aside>
+
+  <main class="main">
+
+    <div class="haiku-header">
+      <div class="haiku-header-left">
+        <h1 class="page-title" style="font-size: 2rem; margin-bottom: 6px;">haikureview</h1>
+        <p class="page-subtitle" style="font-size: 0.9rem;">
+          one haiku. one film. hidden until you're ready.<br>
+          guess the film — then click to reveal.
+        </p>
+        <p class="letterboxd-badge">
+          <span class="lbxd-dot" id="lbxd-status-dot" style="background:#ccc;"></span>
+          <span id="lbxd-status-text">fetching from <a href="https://letterboxd.com/maltysnack" target="_blank">letterboxd</a></span>
+        </p>
+      </div>
+      <a href="SPOILERALERT.html" class="spoiler-link">
+        <svg viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 15a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm1-4h-2V7h2z"/>
+        </svg>
+        SPOILERALERT
+      </a>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="score-bar">
+      Revealed: <span class="score-val" id="reveal-count">0</span> / <span id="total-count">83</span>
+    </div>
+
+    <div class="film-grid" id="film-grid">
+      <!-- Cards injected by JS -->
+    </div>
+
+  </main>
+
+  <script>
+    // ── FILM DATA (from letterboxd CSV, newest first) ──
+    const films = [
+      { date:"2026-02-25", title:"Wuthering Heights",                      year:2026, uri:"https://boxd.it/OdIa" },
+      { date:"2026-02-22", title:"Now You See Me",                          year:2013, uri:"https://boxd.it/2Bsu" },
+      { date:"2026-02-19", title:"The Roses",                               year:2025, uri:"https://boxd.it/MjnI" },
+      { date:"2026-02-10", title:"Scarlet",                                  year:2025, uri:"https://boxd.it/S6iW" },
+      { date:"2026-02-08", title:"Marty Supreme",                            year:2025, uri:"https://boxd.it/Off0" },
+      { date:"2026-02-07", title:"Mortdecai",                                year:2015, uri:"https://boxd.it/6ioc" },
+      { date:"2026-02-03", title:"Die My Love",                              year:2025, uri:"https://boxd.it/D5cI" },
+      { date:"2026-02-01", title:"Ideal Home",                               year:2018, uri:"https://boxd.it/e0Ei" },
+      { date:"2026-01-21", title:"Zootopia",                                 year:2016, uri:"https://boxd.it/84xS" },
+      { date:"2026-01-18", title:"Soul",                                     year:2020, uri:"https://boxd.it/ioLA" },
+      { date:"2026-01-17", title:"Avatar",                                   year:2009, uri:"https://boxd.it/1Efm", papyrus:true },
+      { date:"2026-01-10", title:"Avatar: Fire and Ash",                     year:2025, uri:"https://boxd.it/2W7s", papyrus:true },
+      { date:"2026-01-09", title:"St. Vincent",                              year:2014, uri:"https://boxd.it/73bE" },
+      { date:"2026-01-02", title:"Wake Up Dead Man",                         year:2025, uri:"https://boxd.it/uAKS" },
+      { date:"2025-12-25", title:"National Lampoon's Christmas Vacation",    year:1989, uri:"https://boxd.it/22wQ" },
+      { date:"2025-12-06", title:"Sherpa",                                   year:2015, uri:"https://boxd.it/bnK8" },
+      { date:"2025-11-17", title:"Bugonia",                                  year:2025, uri:"https://boxd.it/qeWY" },
+      { date:"2025-11-15", title:"Fool's Gold",                              year:2008, uri:"https://boxd.it/1ZXE" },
+      { date:"2025-10-24", title:"The Woman in Cabin 10",                    year:2025, uri:"https://boxd.it/NfTM" },
+      { date:"2025-10-22", title:"Grimsby",                                  year:2016, uri:"https://boxd.it/7ZkO" },
+      { date:"2025-10-21", title:"Love Lies Bleeding",                       year:2024, uri:"https://boxd.it/zN4q" },
+      { date:"2025-10-20", title:"The Princess Bride",                       year:1987, uri:"https://boxd.it/26EY" },
+      { date:"2025-10-09", title:"I Want to Be Neenja! The Movie",           year:2024, uri:"https://boxd.it/G2Fy" },
+      { date:"2025-09-19", title:"KPop Demon Hunters",                       year:2025, uri:"https://boxd.it/ufwK" },
+      { date:"2025-09-07", title:"The Thursday Murder Club",                 year:2025, uri:"https://boxd.it/rXju" },
+      { date:"2025-09-07", title:"Caught Stealing",                          year:2025, uri:"https://boxd.it/LnyS" },
+      { date:"2025-08-19", title:"Rat Race",                                 year:2001, uri:"https://boxd.it/1XAo" },
+      { date:"2025-07-22", title:"Kneecap",                                  year:2024, uri:"https://boxd.it/ILxI" },
+      { date:"2025-07-01", title:"F1",                                       year:2025, uri:"https://boxd.it/yjVM" },
+      { date:"2025-06-24", title:"Deep Cover",                               year:2025, uri:"https://boxd.it/L6ec" },
+      { date:"2025-05-16", title:"Layer Cake",                               year:2004, uri:"https://boxd.it/23LC" },
+      { date:"2025-05-16", title:"Juno",                                     year:2007, uri:"https://boxd.it/210a" },
+      { date:"2025-05-10", title:"The Gorge",                                year:2025, uri:"https://boxd.it/zRqK" },
+      { date:"2025-05-10", title:"Thunderbolts*",                            year:2025, uri:"https://boxd.it/BfbQ" },
+      { date:"2025-05-04", title:"The Cloverfield Paradox",                  year:2018, uri:"https://boxd.it/doVA" },
+      { date:"2025-04-30", title:"The Man from Earth",                       year:2007, uri:"https://boxd.it/1Ql2" },
+      { date:"2025-04-30", title:"Batman Begins",                            year:2005, uri:"https://boxd.it/2aIg" },
+      { date:"2025-03-06", title:"The Grand Budapest Hotel",                 year:2014, uri:"https://boxd.it/3ZqO" },
+      { date:"2025-01-28", title:"Paddington 2",                             year:2017, uri:"https://boxd.it/bCF8" },
+      { date:"2025-01-28", title:"Paddington",                               year:2014, uri:"https://boxd.it/3RKw" },
+      { date:"2025-01-28", title:"The Dead Don't Die",                       year:2019, uri:"https://boxd.it/juZg" },
+      { date:"2025-01-28", title:"Nightcrawler",                             year:2014, uri:"https://boxd.it/780m" },
+      { date:"2025-01-28", title:"The Brutalist",                            year:2024, uri:"https://boxd.it/k4BO" },
+      { date:"2025-01-07", title:"The Room Next Door",                       year:2024, uri:"https://boxd.it/Fb4k" },
+      { date:"2025-01-07", title:"Carry-On",                                 year:2024, uri:"https://boxd.it/C0B2" },
+      { date:"2025-01-07", title:"2 Guns",                                   year:2013, uri:"https://boxd.it/4oAk" },
+      { date:"2025-01-06", title:"A Real Pain",                              year:2024, uri:"https://boxd.it/CjNG" },
+      { date:"2024-12-25", title:"Wicked",                                   year:2024, uri:"https://boxd.it/e8ME" },
+      { date:"2024-12-04", title:"Heretic",                                  year:2024, uri:"https://boxd.it/H1lY" },
+      { date:"2024-12-03", title:"American Fiction",                         year:2023, uri:"https://boxd.it/DYHm" },
+      { date:"2024-11-05", title:"Special Correspondents",                   year:2016, uri:"https://boxd.it/bYUY" },
+      { date:"2024-10-27", title:"Smile 2",                                  year:2024, uri:"https://boxd.it/FDA4" },
+      { date:"2024-09-18", title:"Dead Poets Society",                       year:1989, uri:"https://boxd.it/2aSg" },
+      { date:"2024-09-17", title:"American Psycho",                          year:2000, uri:"https://boxd.it/28Vs" },
+      { date:"2024-09-17", title:"Léon: The Professional",                   year:1994, uri:"https://boxd.it/2b8S" },
+      { date:"2024-08-15", title:"Million Dollar Baby",                      year:2004, uri:"https://boxd.it/2bdI" },
+      { date:"2024-08-13", title:"Leave the World Behind",                   year:2023, uri:"https://boxd.it/re0i" },
+      { date:"2024-08-13", title:"Ad Astra",                                 year:2019, uri:"https://boxd.it/ePzI" },
+      { date:"2024-08-13", title:"The Iron Claw",                            year:2023, uri:"https://boxd.it/w5Pm" },
+      { date:"2024-08-02", title:"MaXXXine",                                 year:2024, uri:"https://boxd.it/CIM4" },
+      { date:"2024-07-21", title:"Longlegs",                                 year:2024, uri:"https://boxd.it/KzLM" },
+      { date:"2024-07-20", title:"Red Eye",                                  year:2005, uri:"https://boxd.it/1TNy" },
+      { date:"2024-07-20", title:"Hundreds of Beavers",                      year:2022, uri:"https://boxd.it/CyUM" },
+      { date:"2024-07-20", title:"A Quiet Place: Day One",                   year:2024, uri:"https://boxd.it/sDAi" },
+      { date:"2024-06-14", title:"The Sweet East",                           year:2023, uri:"https://boxd.it/CcHw" },
+      { date:"2024-06-14", title:"The Devil All the Time",                   year:2020, uri:"https://boxd.it/i2tY" },
+      { date:"2024-06-14", title:"Furiosa: A Mad Max Saga",                  year:2024, uri:"https://boxd.it/tABk" },
+      { date:"2024-05-08", title:"Kingdom of the Planet of the Apes",        year:2024, uri:"https://boxd.it/ohEE" },
+      { date:"2024-04-11", title:"Monkey Man",                               year:2024, uri:"https://boxd.it/kvsO" },
+      { date:"2024-04-03", title:"Taxi Driver",                              year:1976, uri:"https://boxd.it/2b8y" },
+      { date:"2024-04-03", title:"Fantastic Mr. Fox",                        year:2009, uri:"https://boxd.it/1WyQ" },
+      { date:"2024-04-03", title:"Troll",                                    year:2022, uri:"https://boxd.it/rDsQ" },
+      { date:"2024-04-03", title:"Midsommar",                                year:2019, uri:"https://boxd.it/jhxe" },
+      { date:"2024-03-31", title:"Renfield",                                 year:2023, uri:"https://boxd.it/o8vy" },
+      { date:"2024-03-31", title:"Bones and All",                            year:2022, uri:"https://boxd.it/tLd4" },
+      { date:"2024-03-31", title:"Perfect Days",                             year:2023, uri:"https://boxd.it/ATh8" },
+      { date:"2024-03-21", title:"Dune",                                     year:2021, uri:"https://boxd.it/fA7G" },
+      { date:"2024-03-16", title:"The Monuments Men",                        year:2014, uri:"https://boxd.it/4OxQ" },
+      { date:"2024-03-10", title:"The Dry",                                  year:2020, uri:"https://boxd.it/kOXG" },
+    ];
+
+    // Haiku placeholder (lorem ipsum, 5-7-5)
+    const HAIKU_PLACEHOLDER = [
+      "Lorem ipsum now",
+      "dolor sit amet flowing",
+      "consectetur end"
+    ];
+
+    let revealCount = 0;
+    const totalCount = films.length;
+    document.getElementById('total-count').textContent = totalCount;
+
+    // Map to hold poster images fetched from Letterboxd RSS
+    const posterMap = {};
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
+    }
+
+    function buildCards() {
+      const grid = document.getElementById('film-grid');
+      films.forEach((film, i) => {
+        const num = String(i + 1).padStart(2, '0');
+        const card = document.createElement('article');
+        card.className = 'film-card';
+        card.dataset.index = i;
+        if (film.papyrus) card.dataset.papyrus = 'true';
+
+        card.innerHTML = `
+          <div class="film-poster-wrap" onclick="revealFilm(${i})">
+            <img class="film-poster-img" id="poster-${i}" src="" alt="" loading="lazy" />
+            <div class="film-mystery" id="mystery-${i}">
+              <div class="mystery-icon">🎬</div>
+              <div class="mystery-prompt">guess the film</div>
+              <div class="mystery-num">#${num}</div>
+            </div>
+            <div class="film-reveal-title">
+              <div class="film-reveal-title-text">${film.title}</div>
+              <div class="film-reveal-year">${film.year}</div>
+            </div>
+          </div>
+          <div class="film-card-body">
+            <div class="haiku-text">
+              <span class="haiku-line">${HAIKU_PLACEHOLDER[0]}</span>
+              <span class="haiku-line">${HAIKU_PLACEHOLDER[1]}</span>
+              <span class="haiku-line">${HAIKU_PLACEHOLDER[2]}</span>
+            </div>
+            <div class="card-footer">
+              <button class="reveal-btn" id="btn-${i}" onclick="revealFilm(${i})">reveal</button>
+              <span class="film-date">${formatDate(film.date)}</span>
+              <a class="lbxd-link" href="${film.uri}" target="_blank" rel="noopener">↗ letterboxd</a>
+            </div>
+          </div>
+        `;
+        grid.appendChild(card);
+      });
+    }
+
+    function revealFilm(i) {
+      const card = document.querySelector(`.film-card[data-index="${i}"]`);
+      if (!card) return;
+      if (card.classList.contains('revealed')) {
+        // toggle back to mystery
+        card.classList.remove('revealed');
+        document.getElementById(`mystery-${i}`).classList.remove('hidden');
+        document.getElementById(`btn-${i}`).textContent = 'reveal';
+        revealCount = Math.max(0, revealCount - 1);
+      } else {
+        card.classList.add('revealed');
+        document.getElementById(`mystery-${i}`).classList.add('hidden');
+        document.getElementById(`btn-${i}`).textContent = 'hide';
+        // Load poster if available
+        const poster = document.getElementById(`poster-${i}`);
+        if (posterMap[films[i].title]) {
+          poster.src = posterMap[films[i].title];
+          poster.onload = () => poster.classList.add('loaded');
+        }
+        revealCount++;
+      }
+      document.getElementById('reveal-count').textContent = revealCount;
+    }
+
+    // ── LETTERBOXD RSS INTEGRATION ──
+    // Letterboxd provides an RSS feed at https://letterboxd.com/USERNAME/rss/
+    // We fetch it via a CORS proxy (allorigins.win) to extract poster images.
+    // Posters are embedded as <img> tags in the RSS description HTML.
+    async function fetchLetterboxdPosters() {
+      const dot   = document.getElementById('lbxd-status-dot');
+      const label = document.getElementById('lbxd-status-text');
+      try {
+        const proxyUrl = 'https://api.allorigins.win/get?url=' +
+          encodeURIComponent('https://letterboxd.com/maltysnack/rss/');
+        const res  = await fetch(proxyUrl, { signal: AbortSignal.timeout(8000) });
+        const json = await res.json();
+        const xml  = new DOMParser().parseFromString(json.contents, 'text/xml');
+        const items = xml.querySelectorAll('item');
+        let matched = 0;
+        items.forEach(item => {
+          const rawTitle = item.querySelector('title')?.textContent || '';
+          // Letterboxd RSS titles look like "John, 2024 - ★★★★"
+          const filmTitle = rawTitle.replace(/,\s*\d{4}.*$/, '').trim();
+          const desc = item.querySelector('description')?.textContent || '';
+          // Poster img src is inside the description HTML
+          const imgMatch = desc.match(/<img[^>]+src="([^"]+)"/i);
+          if (imgMatch && filmTitle) {
+            posterMap[filmTitle] = imgMatch[1];
+            matched++;
+          }
+        });
+        dot.style.background   = '#00c030';
+        label.innerHTML = `connected to <a href="https://letterboxd.com/maltysnack" target="_blank">letterboxd</a> — ${matched} posters loaded`;
+      } catch (e) {
+        dot.style.background = '#ccc';
+        label.innerHTML = `letterboxd offline — <a href="https://letterboxd.com/maltysnack" target="_blank">view profile</a>`;
+      }
+    }
+
+    buildCards();
+    fetchLetterboxdPosters();
+  </script>
+</body>
+</html>

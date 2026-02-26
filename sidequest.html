@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SideQuest — maltysnack</title>
+  <link rel="stylesheet" href="../style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    .project-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 16px;
+    }
+
+    .app-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: #fff;
+      border: 1px solid var(--border);
+      padding: 4px 12px;
+      border-radius: 20px;
+      margin-top: 6px;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+    }
+
+    .status-bar {
+      display: flex;
+      gap: 20px;
+      flex-wrap: wrap;
+      margin: 24px 0 32px;
+    }
+
+    .status-item {
+      font-size: 0.8rem;
+    }
+
+    .status-label {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      font-size: 0.68rem;
+      letter-spacing: 0.08em;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .status-val {
+      color: var(--text);
+    }
+
+    /* Feature grid */
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
+      gap: 16px;
+      margin-top: 36px;
+    }
+
+    .feature-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 20px 18px;
+    }
+
+    .feature-icon {
+      font-size: 1.7rem;
+      margin-bottom: 10px;
+    }
+
+    .feature-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .feature-desc {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .coming-soon {
+      display: inline-block;
+      font-size: 0.65rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border);
+      padding: 2px 8px;
+      border-radius: 10px;
+      margin-top: 36px;
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="sidebar-top">
+      <a href="../index.html" class="logo-link">
+        <img src="https://github.com/maltysnack.png" alt="maltysnack avatar" class="avatar" />
+        <span class="site-name">maltysnack</span>
+      </a>
+      <p class="site-tagline">films · games · words</p>
+    </div>
+    <nav class="nav">
+      <div class="nav-section">
+        <span class="nav-label">Films</span>
+        <ul>
+          <li><a href="../films/haikureview.html">haikureview</a></li>
+          <li><a href="../films/SPOILERALERT.html">SPOILERALERT</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">Projects</span>
+        <ul>
+          <li><a href="mothership.html">Mothership</a></li>
+          <li><a href="trolley-run.html">Trolley Run</a></li>
+          <li><a href="saltysnacks.html">Saltysnacks</a></li>
+          <li><a href="sidequest.html" style="color: var(--text);">SideQuest</a></li>
+        </ul>
+      </div>
+      <div class="nav-section">
+        <span class="nav-label">README</span>
+        <ul>
+          <li><a href="../writings/poems.html">Poems</a></li>
+          <li><a href="../writings/thoughts.html">Thoughts</a></li>
+        </ul>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../red-rebels.html" class="nav-label nav-label--link nav-label--rebels">Red Rebels</a>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../quiz.html" class="nav-label nav-label--link">Quiz</a>
+      </div>
+      <div class="nav-section nav-section--single">
+        <a href="../shop.html" class="nav-label nav-label--link">Shop</a>
+      </div>
+    </nav>
+    <footer class="sidebar-footer">
+      <a href="https://github.com/maltysnack" target="_blank" rel="noopener" title="GitHub">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.907-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.912.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
+      </a>
+      <a href="https://twitch.tv/maltysnack" target="_blank" rel="noopener" title="Twitch" class="twitch-link">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
+      </a>
+      <a href="https://youtube.com/@Maltysnack" target="_blank" rel="noopener" title="YouTube" class="youtube-link">
+        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
+      </a>
+    </footer>
+  </aside>
+
+  <main class="main">
+
+    <span class="project-tag">Project — iPhone App</span>
+    <h1 class="page-title">SideQuest</h1>
+    <div>
+      <span class="app-pill">📱 iPhone · iOS</span>
+    </div>
+
+    <div class="status-bar" style="margin-top: 24px;">
+      <div class="status-item">
+        <span class="status-label">Status</span>
+        <span class="status-val">In design</span>
+      </div>
+      <div class="status-item">
+        <span class="status-label">Platform</span>
+        <span class="status-val">iOS</span>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <p class="page-subtitle" style="max-width: 560px; font-size: 0.98rem;">
+      SideQuest is a lightweight daily habit and goal tracker, built around the idea that 
+      small wins matter. Set daily or weekly sidequests — drink more water, go outside, 
+      stretch for five minutes — and get gentle nudges when you haven't ticked them off. 
+      Complete a quest and earn XP. Nothing punishing, nothing streaks-or-die. 
+      Just quiet, encouraging progress. There's also a Missions area that works like 
+      a clean todo list for slightly bigger tasks that don't fit the daily rhythm.
+      The whole thing should feel like a cosy game that happens to make your actual life a bit better.
+    </p>
+
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="feature-icon">⚔️</div>
+        <div class="feature-title">Sidequests</div>
+        <p class="feature-desc">Daily and weekly micro-goals you set yourself. Exercise, water, sunlight, whatever your thing is. Repeatable, lightweight, trackable.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">✅</div>
+        <div class="feature-title">Missions</div>
+        <p class="feature-desc">A clean todo-list area for bigger, one-off tasks. Separate from your daily habits but part of the same system.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">⭐</div>
+        <div class="feature-title">XP + Progress</div>
+        <p class="feature-desc">Finish a quest and earn XP. Nothing intense. Just a small satisfying thing that says: you did the thing.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">🔔</div>
+        <div class="feature-title">Gentle reminders</div>
+        <p class="feature-desc">Cute, non-aggressive nudges when you haven't done a quest yet. No guilt. Just a little hey.</p>
+      </div>
+    </div>
+
+    <span class="coming-soon">App Store · Coming eventually</span>
+
+  </main>
+
+</body>
+</html>

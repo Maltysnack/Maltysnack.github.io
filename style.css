@@ -2,6 +2,7 @@
    MALTYSNACK.GITHUB.IO — STYLESHEET
    Editorial minimalism. Serif warmth.
    Blue accent. White/grey palette.
+   A hint of red for flavour.
 ═══════════════════════════════════════ */
 
 /* ── VARIABLES ─────────────────────── */
@@ -11,12 +12,21 @@
   --border:       #dddbd7;
   --text:         #1c1b19;
   --text-muted:   #7a7875;
-  --accent:       #2357c4;          /* blue, close to GitHub link blue */
+  --accent:       #2357c4;
   --accent-hover: #1a44a0;
+
+  /* Red palette — dark and pale, used sparingly */
+  --red:          #7a1a1a;
+  --red-hover:    #5e1212;
+  --red-pale:     #f9eded;
+  --red-muted:    #b84040;
+  --red-border:   #d4a0a0;
+
   --tag-film:     #e8f0fc;
   --tag-quiz:     #eaf5ec;
   --tag-project:  #fef3e2;
   --tag-writing:  #f4eef8;
+  --tag-rebels:   #f9eded;
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body:    'Source Serif 4', Georgia, serif;
@@ -156,6 +166,15 @@ ul {
   color: var(--accent);
 }
 
+/* Red Rebels — special nav treatment */
+.nav-label--rebels {
+  color: var(--red);
+}
+
+.nav-label--rebels:hover {
+  color: var(--red-hover);
+}
+
 .nav-section ul {
   display: flex;
   flex-direction: column;
@@ -170,7 +189,7 @@ ul {
   color: var(--text-muted);
   display: block;
   padding: 1px 0 1px 10px;
-  transition: color 0.15s ease, border-color 0.15s ease;
+  transition: color 0.15s ease;
   position: relative;
 }
 
@@ -204,6 +223,9 @@ ul {
   margin-top: 32px;
   padding-top: 20px;
   border-top: 1px solid var(--border);
+  display: flex;
+  gap: 14px;
+  align-items: center;
 }
 
 .icon {
@@ -216,6 +238,16 @@ ul {
 
 .sidebar-footer a:hover .icon {
   color: var(--accent);
+}
+
+/* Twitch hover — a hint of purple */
+.sidebar-footer a.twitch-link:hover .icon {
+  color: #9146ff;
+}
+
+/* YouTube hover — red */
+.sidebar-footer a.youtube-link:hover .icon {
+  color: #ff0000;
 }
 
 
@@ -303,6 +335,7 @@ ul {
 .post-tag--quiz    { background: var(--tag-quiz);    color: #2a7a3e; }
 .post-tag--project { background: var(--tag-project); color: #b56a00; }
 .post-tag--writing { background: var(--tag-writing); color: #7b3fa0; }
+.post-tag--rebels  { background: var(--tag-rebels);  color: var(--red); }
 
 .post-date {
   font-size: 0.8rem;
@@ -346,11 +379,51 @@ ul {
   font-weight: 400;
   color: var(--accent);
   letter-spacing: 0.01em;
-  transition: gap 0.15s ease;
 }
 
 .post-cta:hover {
   color: var(--accent-hover);
+}
+
+
+/* ── PAGE HEADER (shared across sub-pages) ── */
+.page-header {
+  margin-bottom: 40px;
+}
+
+.page-header-meta {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+
+.back-link {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.back-link:hover {
+  color: var(--accent);
+}
+
+.page-title {
+  font-family: var(--font-display);
+  font-size: 2.2rem;
+  font-weight: 400;
+  line-height: 1.15;
+  color: var(--text);
+  margin-bottom: 12px;
+}
+
+.page-subtitle {
+  font-size: 0.95rem;
+  color: var(--text-muted);
+  max-width: 520px;
+  line-height: 1.7;
 }
 
 
