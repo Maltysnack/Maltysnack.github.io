@@ -1,0 +1,242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Saltysnacks — maltysnack</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <style>
+    .project-tag {
+      display: inline-block;
+      font-size: 0.68rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 3px 10px;
+      border-radius: 3px;
+      margin-bottom: 16px;
+    }
+
+    .recipe { padding: 48px 0; border-bottom: 1px solid var(--border); }
+    .recipe:first-of-type { border-top: 1px solid var(--border); margin-top: 36px; }
+
+    .recipe-photo {
+      width: 100%;
+      max-width: 640px;
+      aspect-ratio: 16/9;
+      object-fit: cover;
+      border-radius: 4px;
+      display: block;
+      margin-bottom: 28px;
+      background: var(--sidebar-bg);
+    }
+
+    .recipe-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .recipe-meta-row {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-bottom: 28px;
+    }
+
+    .recipe-meta-row span + span::before { content: ' · '; }
+
+    .recipe-body {
+      display: grid;
+      grid-template-columns: 200px 1fr;
+      gap: 36px;
+      max-width: 640px;
+    }
+
+    .recipe-ingredients h3, .recipe-method h3 {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 14px;
+    }
+
+    .recipe-ingredients ul { list-style: none; display: flex; flex-direction: column; gap: 7px; }
+    .recipe-ingredients ul li {
+      font-size: 0.88rem; color: var(--text); line-height: 1.5;
+      padding-left: 12px; position: relative;
+    }
+    .recipe-ingredients ul li::before { content: '—'; position: absolute; left: 0; color: var(--text-muted); }
+
+    .recipe-method ol { list-style: none; counter-reset: steps; display: flex; flex-direction: column; gap: 14px; }
+    .recipe-method ol li {
+      counter-increment: steps; font-size: 0.9rem; color: var(--text);
+      line-height: 1.75; padding-left: 30px; position: relative;
+    }
+    .recipe-method ol li::before {
+      content: counter(steps); position: absolute; left: 0;
+      font-family: var(--font-display); font-weight: 600; font-size: 0.75rem;
+      color: var(--text-muted); top: 3px;
+    }
+
+    @media (max-width: 600px) {
+      .recipe-body { grid-template-columns: 1fr; gap: 24px; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <span class="project-tag">Project — Recipes</span>
+    <h1 class="page-title">Saltysnacks</h1>
+    <p class="page-subtitle">Recipes without the garbage. Photo, ingredients, method. That's it.</p>
+
+    <div class="divider"></div>
+
+    <!-- ── RECIPE 1 ── -->
+    <article class="recipe">
+      <h2 class="recipe-title">Roast Chicken Pearl Couscous Salad</h2>
+      <div class="recipe-meta-row">
+        <span>50 min</span><span>3–4 servings</span><span>Salad · Chicken</span>
+      </div>
+      <img
+        class="recipe-photo"
+        src="https://images.unsplash.com/photo-1604909052743-94e838986d24?w=1200&auto=format&fit=crop&q=80"
+        alt="Roast Chicken Pearl Couscous Salad"
+        loading="lazy"
+      />
+      <div class="recipe-body">
+        <div class="recipe-ingredients">
+          <h3>Ingredients</h3>
+          <ul>
+            <li>4 chicken thighs, bone-in skin-on</li>
+            <li>200g pearl couscous</li>
+            <li>1 lemon, zested and juiced</li>
+            <li>3 tbsp olive oil</li>
+            <li>1 tsp smoked paprika</li>
+            <li>1 tsp cumin</li>
+            <li>2 garlic cloves, minced</li>
+            <li>100g baby spinach</li>
+            <li>Handful cherry tomatoes, halved</li>
+            <li>½ cucumber, diced</li>
+            <li>50g feta, crumbled</li>
+            <li>Fresh mint and parsley</li>
+            <li>Salt &amp; pepper</li>
+          </ul>
+        </div>
+        <div class="recipe-method">
+          <h3>Method</h3>
+          <ol>
+            <li>Preheat oven to 200°C. Mix paprika, cumin, half the garlic, and 1 tbsp olive oil into a paste. Rub all over chicken. Season generously. Roast 35–40 min until skin is crisp and deep golden.</li>
+            <li>While chicken rests, cook pearl couscous in salted boiling water for 8–10 min until tender but with a slight bite. Drain and rinse under cold water.</li>
+            <li>Make dressing: whisk together lemon juice, lemon zest, remaining garlic, 2 tbsp olive oil, salt and pepper.</li>
+            <li>Toss couscous with dressing while still warm. Add spinach, tomatoes, cucumber, and most of the herbs. Toss.</li>
+            <li>Pull chicken off the bone into large pieces and lay over the salad. Scatter feta and remaining herbs. Serve at room temperature.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── RECIPE 2 ── -->
+    <article class="recipe">
+      <h2 class="recipe-title">Chicken Mexican Burrito Bowl</h2>
+      <div class="recipe-meta-row">
+        <span>30 min</span><span>2 servings</span><span>Mexican · Chicken</span>
+      </div>
+      <img
+        class="recipe-photo"
+        src="https://images.unsplash.com/photo-1540420773420-3366772f4999?w=1200&auto=format&fit=crop&q=80"
+        alt="Chicken Mexican Burrito Bowl"
+        loading="lazy"
+      />
+      <div class="recipe-body">
+        <div class="recipe-ingredients">
+          <h3>Ingredients</h3>
+          <ul>
+            <li>2 chicken breasts</li>
+            <li>1 tsp each: cumin, paprika, garlic powder, oregano</li>
+            <li>Pinch cayenne</li>
+            <li>1 cup long grain rice</li>
+            <li>1 can black beans, drained</li>
+            <li>1 can corn kernels, drained</li>
+            <li>2 limes</li>
+            <li>Handful fresh coriander</li>
+            <li>2 tbsp sour cream</li>
+            <li>1 avocado, sliced</li>
+            <li>Salsa, to serve</li>
+            <li>Salt, olive oil</li>
+          </ul>
+        </div>
+        <div class="recipe-method">
+          <h3>Method</h3>
+          <ol>
+            <li>Mix all spices with a good pinch of salt and 1 tbsp olive oil. Coat chicken thoroughly. Leave 10 min if you have time.</li>
+            <li>Cook rice. When done, stir through lime juice and chopped coriander.</li>
+            <li>Sear chicken in a hot pan 5–6 min per side until cooked through and charred at the edges. Rest 5 min then slice.</li>
+            <li>Warm beans and corn separately in a small pan. Season.</li>
+            <li>Build the bowl: rice base, beans, corn, sliced chicken, avocado. Add sour cream, salsa, and extra coriander. Finish with a lime wedge.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── RECIPE 3 ── -->
+    <article class="recipe">
+      <h2 class="recipe-title">Beef Steak Stir Fry</h2>
+      <div class="recipe-meta-row">
+        <span>25 min</span><span>2 servings</span><span>Beef · Stir Fry</span>
+      </div>
+      <img
+        class="recipe-photo"
+        src="https://images.unsplash.com/photo-1603360946369-dc9bb6258143?w=1200&auto=format&fit=crop&q=80"
+        alt="Beef Steak Stir Fry"
+        loading="lazy"
+      />
+      <div class="recipe-body">
+        <div class="recipe-ingredients">
+          <h3>Ingredients</h3>
+          <ul>
+            <li>350g rump or sirloin steak, sliced thin against the grain</li>
+            <li>2 tbsp soy sauce</li>
+            <li>1 tbsp oyster sauce</li>
+            <li>1 tbsp hoisin sauce</li>
+            <li>1 tsp sesame oil</li>
+            <li>1 tsp cornflour</li>
+            <li>4 garlic cloves, sliced</li>
+            <li>1 thumb ginger, julienned</li>
+            <li>1 red capsicum, sliced</li>
+            <li>1 head broccolini</li>
+            <li>3 spring onions, cut into batons</li>
+            <li>Steamed rice, to serve</li>
+            <li>Sesame seeds, to finish</li>
+          </ul>
+        </div>
+        <div class="recipe-method">
+          <h3>Method</h3>
+          <ol>
+            <li>Combine soy, oyster sauce, hoisin, sesame oil, and cornflour. Toss with beef and set aside 10 min.</li>
+            <li>Get a wok or heavy pan ripping hot — this is non-negotiable. Add oil and cook beef in a single layer in batches, 1–2 min per side. Remove and rest.</li>
+            <li>In the same pan, stir-fry garlic and ginger for 30 seconds. Add capsicum and broccolini, cook 3–4 min, keeping the veg with some crunch.</li>
+            <li>Return beef. Add spring onions and a splash of water if the sauce is too thick. Toss everything together and serve immediately over rice, scattered with sesame seeds.</li>
+          </ol>
+        </div>
+      </div>
+    </article>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>

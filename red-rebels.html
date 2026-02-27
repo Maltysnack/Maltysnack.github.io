@@ -4,114 +4,224 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Red Rebels — maltysnack</title>
-  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
   <style>
     .rebels-heading {
       font-family: var(--font-display);
-      font-size: 2.6rem;
+      font-size: 3rem;
       font-weight: 600;
       color: var(--red);
-      line-height: 1.1;
-      margin-bottom: 16px;
+      line-height: 1.05;
+      margin-bottom: 20px;
     }
 
-    .rebels-tagline {
-      font-size: 1rem;
-      color: var(--text-muted);
-      max-width: 480px;
-      line-height: 1.75;
-      margin-bottom: 40px;
+    .tenets {
+      margin-top: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      max-width: 580px;
     }
 
-    .rebels-placeholder {
-      padding: 48px;
-      border: 1.5px dashed var(--red-border);
-      border-radius: 4px;
-      background: var(--red-pale);
-      max-width: 480px;
-      text-align: center;
+    .tenet {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .rebels-placeholder p {
-      font-size: 0.88rem;
+    .tenet:first-child { border-top: 1px solid var(--border); }
+
+    .tenet-num {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
       color: var(--red-muted);
-      font-style: italic;
-      line-height: 1.7;
+      margin-bottom: 8px;
+    }
+
+    .tenet-title {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 10px;
+    }
+
+    .tenet-body {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+    }
+
+    /* Neutral parties section */
+    .neutrals {
+      margin-top: 48px;
+      max-width: 580px;
+    }
+
+    .neutrals-heading {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    .neutral-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 12px;
+    }
+
+    .neutral-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 16px;
+    }
+
+    .neutral-name {
+      font-family: var(--font-display);
+      font-size: 0.92rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+
+    .neutral-desc {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    .enemy-callout {
+      background: var(--red-pale);
+      border: 1px solid var(--red-border);
+      border-left: 3px solid var(--red);
+      border-radius: 3px;
+      padding: 16px 20px;
+      margin: 32px 0 0;
+      max-width: 580px;
+      font-size: 0.88rem;
+      color: var(--red);
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      line-height: 1.6;
     }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <a href="index.html" class="logo-link">
-        <img src="https://github.com/maltysnack.png" alt="maltysnack avatar" class="avatar" />
-        <span class="site-name">maltysnack</span>
-      </a>
-      <p class="site-tagline">films · games · words</p>
-    </div>
-    <nav class="nav">
-      <div class="nav-section">
-        <span class="nav-label">Films</span>
-        <ul>
-          <li><a href="films/haikureview.html">haikureview</a></li>
-          <li><a href="films/SPOILERALERT.html">SPOILERALERT</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">Projects</span>
-        <ul>
-          <li><a href="projects/mothership.html">Mothership</a></li>
-          <li><a href="projects/trolley-run.html">Trolley Run</a></li>
-          <li><a href="projects/saltysnacks.html">Saltysnacks</a></li>
-          <li><a href="projects/sidequest.html">SideQuest</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">README</span>
-        <ul>
-          <li><a href="writings/poems.html">Poems</a></li>
-          <li><a href="writings/thoughts.html">Thoughts</a></li>
-        </ul>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="red-rebels.html" class="nav-label nav-label--link nav-label--rebels" style="color: var(--red);">Red Rebels</a>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="quiz.html" class="nav-label nav-label--link">Quiz</a>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="shop.html" class="nav-label nav-label--link">Shop</a>
-      </div>
-    </nav>
-    <footer class="sidebar-footer">
-      <a href="https://github.com/maltysnack" target="_blank" rel="noopener" title="GitHub">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.907-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.912.832.092-.647.35-1.094.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-      </a>
-      <a href="https://twitch.tv/maltysnack" target="_blank" rel="noopener" title="Twitch" class="twitch-link">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
-      </a>
-      <a href="https://youtube.com/@Maltysnack" target="_blank" rel="noopener" title="YouTube" class="youtube-link">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
-    </footer>
-  </aside>
+  <aside class="sidebar"></aside>
 
   <main class="main">
 
-    <h1 class="rebels-heading">Red Rebels.</h1>
-    <p class="rebels-tagline">
-      Something is coming here. What exactly — still forming.
+    <h1 class="rebels-heading">Red<br>Rebels.</h1>
+
+    <p class="page-subtitle" style="max-width: 520px;">
+      A cause worth having. A colour worth wearing. An enemy worth defeating.
+      The Red Rebels are not a club. They are a conviction.
     </p>
 
-    <div class="rebels-placeholder">
-      <p>This space is reserved.<br>Check back soon.</p>
+    <div class="enemy-callout">
+      ⚠ The Blue Bandits are cowards. They always have been. Remain vigilant.
+    </div>
+
+    <div class="tenets">
+
+      <div class="tenet">
+        <div class="tenet-num">Tenet I</div>
+        <div class="tenet-title">The Mission is Constant</div>
+        <p class="tenet-body">
+          There is no off-season. No ceasefire. No moment when it is acceptable to lower your guard
+          against the Blue Bandits and their cowardly scheming. A Red Rebel is always watching,
+          always ready, always aware that the Bandits are looking for any crack to exploit.
+          Vigilance is not paranoia — it is simply what the situation demands.
+        </p>
+      </div>
+
+      <div class="tenet">
+        <div class="tenet-num">Tenet II</div>
+        <div class="tenet-title">Loyalty is Non-Negotiable</div>
+        <p class="tenet-body">
+          A fellow Red Rebel is owed your full faith. You do not question their motives,
+          you do not leave them exposed, and you do not negotiate their interests away for
+          convenience. The Bandits win through division. We win through solidarity.
+          If a Rebel is in the field, you are in the field with them.
+        </p>
+      </div>
+
+      <div class="tenet">
+        <div class="tenet-num">Tenet III</div>
+        <div class="tenet-title">Best Them in Every Arena</div>
+        <p class="tenet-body">
+          Not just the obvious ones. The Blue Bandits should lose on the scoreboard,
+          in the argument, in the room, and in the record books. Every contest counts.
+          Mediocrity is a Bandit gift we refuse to accept. When a Red Rebel competes,
+          they compete to win — and they win in a way the Bandits cannot ignore or explain away.
+        </p>
+      </div>
+
+      <div class="tenet">
+        <div class="tenet-num">Tenet IV</div>
+        <div class="tenet-title">Thwart Them at Every Turn</div>
+        <p class="tenet-body">
+          If the Bandits have a plan, your job is to know it before they execute it.
+          If they have a moment, your job is to take it from them. This is not pettiness —
+          this is strategic excellence. A Blue Bandit victory, no matter how small,
+          is a failure of our vigilance. We thwart not out of spite, but out of principle.
+        </p>
+      </div>
+
+      <div class="tenet">
+        <div class="tenet-num">Tenet V</div>
+        <div class="tenet-title">Red is a Standard, Not Just a Colour</div>
+        <p class="tenet-body">
+          You don't wear red by accident. Wearing it means something. It means you have
+          chosen a side, understood what that side stands for, and decided it was worth
+          the opposition. Do not embarrass the colour. Carry it with conviction,
+          or not at all.
+        </p>
+      </div>
+
+    </div>
+
+    <div class="neutrals">
+      <div class="neutrals-heading">Neutral Parties</div>
+      <p class="tenet-body" style="margin-bottom: 20px; max-width: 560px;">
+        Not everyone is against us, but not everyone is with us either. The following
+        factions act in their own interests and may at any moment drift blue. Relationships
+        can be built slowly, cautiously, and with open eyes.
+      </p>
+      <div class="neutral-grid">
+        <div class="neutral-card">
+          <div class="neutral-name">🌸 Pink Panthers</div>
+          <p class="neutral-desc">Sympathetic by instinct but unpredictable under pressure. Handle with warmth, not dependency.</p>
+        </div>
+        <div class="neutral-card">
+          <div class="neutral-name">💚 Green Goblins</div>
+          <p class="neutral-desc">Opportunistic and sharp. They'll work with you when it suits them. Make sure it suits them more than it suits the Bandits.</p>
+        </div>
+        <div class="neutral-card">
+          <div class="neutral-name">🟠 Oranges</div>
+          <p class="neutral-desc">Principled but self-interested. Earn their respect through results rather than rhetoric.</p>
+        </div>
+        <div class="neutral-card">
+          <div class="neutral-name">🍋 Lemon Lickers</div>
+          <p class="neutral-desc">Volatile. They may float blue without warning. Treat as tentative allies, never assumed ones.</p>
+        </div>
+      </div>
     </div>
 
   </main>
 
+  <script src="/sidebar.js"></script>
 </body>
 </html>
