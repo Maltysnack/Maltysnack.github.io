@@ -1,0 +1,1185 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Yonder — Dawnhearth</title>
+<link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --black:      #050403;
+  --deep:       #0d0a07;
+  --stone:      #181410;
+  --mud:        #231d14;
+  --ash:        #332a1e;
+  --bone:       #7a6e5c;
+  --parchment:  #b89a5c;
+  --gold:       #c9963a;
+  --gold-bright:#e0b050;
+  --ember:      #b84a25;
+  --ember-dim:  #6e2d15;
+  --blood:      #7a1515;
+  --text:       #a89878;
+  --text-dim:   #5a4f3d;
+  --text-bright:#c8b890;
+  --border:     #2a2218;
+}
+
+*{margin:0;padding:0;box-sizing:border-box;}
+
+body {
+  background:var(--black);
+  color:var(--text);
+  font-family:'Crimson Text',Georgia,serif;
+  height:100vh;
+  overflow:hidden;
+  display:flex;
+  flex-direction:column;
+  user-select:none;
+}
+
+/* ── HEADER ── */
+header {
+  height:50px;
+  background:linear-gradient(180deg,#0f0c08,var(--deep));
+  border-bottom:1px solid var(--border);
+  display:flex;
+  align-items:center;
+  padding:0 16px;
+  gap:14px;
+  flex-shrink:0;
+  position:relative;
+  z-index:20;
+}
+header::after {
+  content:'';position:absolute;bottom:0;left:0;right:0;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+  opacity:.3;
+}
+.game-title {
+  font-family:'Cinzel Decorative',serif;
+  font-size:17px;letter-spacing:4px;
+  color:var(--gold);
+  text-shadow:0 0 20px rgba(201,150,58,.4);
+  flex-shrink:0;
+}
+.h-sep{width:1px;height:18px;background:var(--ash);flex-shrink:0;}
+.town-label {
+  font-family:'Cinzel',serif;font-size:10px;
+  letter-spacing:3px;color:var(--bone);flex-shrink:0;
+}
+.h-status {
+  flex:1;text-align:center;
+  font-family:'Cinzel',serif;font-size:9px;
+  letter-spacing:2px;color:var(--text-dim);
+}
+.h-char {
+  font-family:'Cinzel',serif;font-size:11px;
+  color:var(--text);letter-spacing:1px;flex-shrink:0;
+}
+.h-gold {color:var(--gold);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;flex-shrink:0;}
+
+.hud-icons{display:flex;gap:4px;margin-left:8px;}
+.hud-btn {
+  background:var(--stone);border:1px solid var(--ash);
+  color:var(--bone);width:32px;height:32px;
+  cursor:pointer;font-size:15px;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .2s;position:relative;
+}
+.hud-btn:hover{border-color:var(--parchment);color:var(--parchment);background:var(--mud);}
+.hud-btn .tip {
+  position:absolute;bottom:-28px;left:50%;transform:translateX(-50%);
+  background:var(--mud);border:1px solid var(--ash);
+  font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;
+  color:var(--text-dim);padding:3px 7px;white-space:nowrap;
+  pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;
+}
+.hud-btn:hover .tip{opacity:1;}
+
+/* ── MAIN ── */
+.game-main{flex:1;position:relative;overflow:hidden;}
+
+/* ── TOWN VIEW ── */
+.town-view{position:absolute;inset:0;display:flex;flex-direction:column;}
+.town-sky{
+  flex:1;
+  background:linear-gradient(180deg,#030202 0%,#080604 50%,#12090a 100%);
+  position:relative;overflow:hidden;
+}
+.star{position:absolute;border-radius:50%;background:#fff;}
+.moon {
+  position:absolute;top:12%;right:14%;
+  width:48px;height:48px;
+}
+.moon::before{
+  content:'';position:absolute;inset:-20px;border-radius:50%;
+  background:radial-gradient(circle,rgba(180,170,140,.12) 0%,transparent 70%);
+}
+.moon-disc{
+  width:48px;height:48px;border-radius:50%;
+  background:#242018;border:1px solid #38321e;
+  box-shadow:0 0 25px rgba(180,170,140,.08);
+  overflow:hidden;position:relative;
+}
+.moon-disc::after{
+  content:'';position:absolute;top:-5px;right:-5px;
+  width:42px;height:42px;border-radius:50%;background:#070504;
+}
+.town-ground{height:44px;background:linear-gradient(180deg,#0c0906,#060402);border-top:1px solid #1a1408;flex-shrink:0;}
+
+/* ── BUILDINGS ── */
+.buildings-layer{
+  position:absolute;bottom:44px;left:0;right:0;
+  display:flex;align-items:flex-end;
+  justify-content:space-around;
+  padding:0 30px;
+  pointer-events:none;
+}
+
+.bld {
+  position:relative;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;
+  background:none;border:none;padding:0;
+  pointer-events:all;
+  transition:filter .25s;
+  outline:none;
+}
+.bld:hover{filter:brightness(1.5);}
+.bld:hover .bld-glow{opacity:1;}
+.bld:hover .bld-label{opacity:1;transform:translateY(0);}
+
+.bld-glow{
+  position:absolute;inset:-20px -30px;
+  background:radial-gradient(ellipse,rgba(201,150,58,.08) 0%,transparent 70%);
+  opacity:0;transition:opacity .3s;pointer-events:none;
+}
+
+.bld-label{
+  position:absolute;bottom:-26px;left:50%;
+  transform:translateX(-50%) translateY(4px);
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;
+  color:var(--parchment);white-space:nowrap;
+  opacity:0;transition:all .2s;pointer-events:none;
+  text-shadow:0 1px 4px rgba(0,0,0,.9);
+}
+
+.bld-roof{
+  width:0;height:0;
+  border-left-style:solid;border-left-color:transparent;
+  border-right-style:solid;border-right-color:transparent;
+  border-bottom-style:solid;border-bottom-color:#100d09;
+  flex-shrink:0;
+}
+
+.bld-body{
+  background:#100d09;border:1px solid #1e1810;
+  position:relative;flex-shrink:0;
+}
+
+.bld-win{
+  position:absolute;
+  background:rgba(210,155,55,.1);
+  border:1px solid rgba(210,155,55,.22);
+  box-shadow:0 0 7px rgba(210,155,55,.08) inset;
+}
+.bld-win.bright{
+  background:rgba(210,155,55,.18);
+  border-color:rgba(210,155,55,.35);
+  box-shadow:0 0 10px rgba(210,155,55,.15) inset,0 0 6px rgba(210,155,55,.1);
+}
+
+.bld-door{
+  position:absolute;bottom:0;left:50%;
+  transform:translateX(-50%);
+  background:#070503;border:1px solid #1a1208;border-bottom:none;
+}
+
+.bld-torch{
+  position:absolute;
+  width:12px;height:12px;border-radius:50%;
+  background:radial-gradient(circle,rgba(200,145,40,.7),transparent 70%);
+  animation:tFlicker 2.2s ease-in-out infinite alternate;
+}
+
+@keyframes tFlicker{
+  from{opacity:.55;transform:scale(1);}
+  to{opacity:1;transform:scale(1.4);}
+}
+
+/* ── Specific building sizes ── */
+/* TAVERN */
+#b-tavern .bld-roof{border-left-width:68px;border-right-width:68px;border-bottom-width:26px;}
+#b-tavern .bld-body{width:136px;height:108px;}
+
+/* SHOP */
+#b-shop .bld-roof{border-left-width:46px;border-right-width:46px;border-bottom-width:30px;}
+#b-shop .bld-body{width:92px;height:88px;}
+
+/* TOWN HALL */
+#b-hall .bld-roof{border-left-width:55px;border-right-width:55px;border-bottom-width:42px;}
+#b-hall .bld-body{width:110px;height:148px;}
+
+/* ACADEMY */
+#b-academy .bld-roof{border-left-width:37px;border-right-width:37px;border-bottom-width:58px;}
+#b-academy .bld-body{width:74px;height:130px;}
+
+/* GATE */
+.gate-wrap{
+  display:flex;align-items:flex-end;gap:0;position:relative;
+}
+.gate-tower{
+  background:#100d09;border:1px solid #1e1810;
+  width:44px;height:95px;position:relative;flex-shrink:0;
+}
+.gate-tower .tower-roof{
+  position:absolute;bottom:100%;left:-1px;
+  width:0;height:0;
+  border-left:23px solid transparent;
+  border-right:23px solid transparent;
+  border-bottom:18px solid #100d09;
+}
+.gate-arch{
+  width:52px;height:78px;background:#100d09;
+  border-top:1px solid #1e1810;
+  border-radius:26px 26px 0 0;
+  position:relative;overflow:hidden;align-self:flex-end;
+}
+.gate-arch::after{
+  content:'';position:absolute;
+  top:8px;left:50%;transform:translateX(-50%);
+  width:36px;height:62px;
+  background:#040302;
+  border-radius:18px 18px 0 0;
+}
+
+/* Chimney on tavern */
+.chimney{
+  position:absolute;
+  bottom:100%;left:18px;
+  width:16px;height:28px;
+  background:#0e0b07;border:1px solid #1a1508;
+}
+
+/* Academy spire */
+.spire{
+  position:absolute;bottom:100%;left:50%;
+  transform:translateX(-50%);
+  width:0;height:0;
+  border-left:9px solid transparent;
+  border-right:9px solid transparent;
+  border-bottom:50px solid #100d09;
+}
+
+/* Town hall bell tower */
+.bell-tower{
+  position:absolute;bottom:100%;left:50%;
+  transform:translateX(-50%);
+  width:30px;height:30px;
+  background:#100d09;border:1px solid #1e1810;
+}
+.bell-tower-roof{
+  position:absolute;bottom:100%;left:-3px;
+  width:0;height:0;
+  border-left:18px solid transparent;
+  border-right:18px solid transparent;
+  border-bottom:18px solid #100d09;
+}
+
+/* ── JOURNEY VIEW ── */
+.journey-view{
+  position:absolute;inset:0;
+  display:none;flex-direction:column;align-items:center;
+  background:radial-gradient(ellipse at 50% 30%,rgba(20,14,6,.5) 0%,var(--black) 65%);
+}
+.journey-view.active{display:flex;}
+
+.progress-strip{
+  width:100%;height:3px;
+  background:var(--stone);flex-shrink:0;
+  position:relative;cursor:default;
+}
+.progress-fill{
+  height:100%;
+  background:linear-gradient(90deg,var(--ember-dim),var(--gold));
+  transition:width 1s linear;
+}
+.timer-hover{
+  position:absolute;right:10px;top:6px;
+  font-family:'Cinzel',serif;font-size:10px;
+  letter-spacing:2px;color:var(--text-dim);
+  opacity:0;transition:opacity .2s;pointer-events:none;
+}
+.progress-strip:hover .timer-hover{opacity:1;}
+
+.journey-header{
+  padding:28px 24px 16px;text-align:center;flex-shrink:0;
+}
+.journey-title{
+  font-family:'Cinzel',serif;font-size:21px;
+  color:var(--text-bright);margin-bottom:4px;
+}
+.journey-type{
+  font-family:'Cinzel',serif;font-size:9px;
+  letter-spacing:3px;color:var(--ember);text-transform:uppercase;
+}
+
+.journey-log{
+  flex:1;width:100%;max-width:580px;
+  padding:16px 24px 24px;
+  display:flex;flex-direction:column;gap:14px;
+  overflow-y:auto;scrollbar-width:none;
+}
+.journey-log::-webkit-scrollbar{display:none;}
+
+.j-entry{
+  display:flex;gap:14px;align-items:flex-start;
+  animation:fadeUp .6s ease forwards;opacity:0;
+}
+@keyframes fadeUp{
+  from{opacity:0;transform:translateY(8px);}
+  to{opacity:1;transform:translateY(0);}
+}
+.j-dot{
+  width:7px;height:7px;border-radius:50%;
+  margin-top:6px;flex-shrink:0;background:var(--ash);
+}
+.j-dot.em{background:var(--ember);}
+.j-dot.go{background:var(--gold);}
+.j-dot.bl{background:var(--blood);}
+.j-dot.wh{background:#a0968a;}
+
+.j-text{font-size:15px;color:var(--bone);line-height:1.7;font-style:italic;}
+.j-text.act{color:var(--text-bright);font-style:normal;}
+.j-text.loot{color:var(--gold);}
+.j-text.danger{color:var(--ember);}
+
+/* ── ACTIVITY DOCK ── */
+.activity-dock{
+  height:108px;background:rgba(4,3,2,.97);
+  border-top:1px solid var(--border);
+  padding:10px 20px;flex-shrink:0;
+  position:relative;z-index:10;
+}
+.dock-top{display:flex;gap:8px;margin-bottom:8px;}
+
+.act-btn{
+  flex:1;background:var(--stone);border:1px solid var(--ash);
+  padding:7px 6px;cursor:pointer;text-align:center;
+  transition:all .2s;position:relative;
+}
+.act-btn:hover{background:var(--mud);border-color:var(--bone);}
+.act-btn.sel{background:var(--mud);border-color:var(--gold);}
+.act-btn.sel::after{
+  content:'';position:absolute;
+  bottom:-1px;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),transparent);
+}
+.act-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--parchment);display:block;}
+.act-time{font-size:10px;color:var(--text-dim);display:block;margin-top:1px;}
+.act-risk{font-size:9px;font-family:'Cinzel',serif;letter-spacing:1px;display:block;margin-top:1px;}
+.r0{color:#5a9a6a;}.r1{color:var(--parchment);}.r2{color:var(--ember);}.r3{color:#c03040;}
+
+.dock-bottom{display:flex;align-items:center;gap:14px;}
+.act-desc{flex:1;font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.4;}
+.depart-btn{
+  background:linear-gradient(180deg,var(--ember),var(--ember-dim));
+  border:1px solid #8a3515;color:var(--text-bright);
+  font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;
+  padding:9px 26px;cursor:pointer;text-transform:uppercase;
+  transition:all .2s;flex-shrink:0;position:relative;overflow:hidden;
+}
+.depart-btn::before{
+  content:'';position:absolute;top:0;left:-100%;
+  width:100%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);
+  transition:left .4s;
+}
+.depart-btn:hover::before{left:100%;}
+.depart-btn:hover{box-shadow:0 0 18px rgba(184,74,37,.3);}
+.depart-btn:disabled{background:var(--mud);border-color:var(--ash);opacity:.4;cursor:not-allowed;box-shadow:none;}
+
+/* ── MODAL ── */
+.overlay{
+  display:none;position:fixed;inset:0;
+  background:rgba(0,0,0,.78);z-index:200;
+  align-items:center;justify-content:center;
+  backdrop-filter:blur(3px);
+}
+.overlay.open{display:flex;}
+
+.modal{
+  background:var(--deep);border:1px solid var(--ash);
+  width:min(520px,92vw);max-height:82vh;
+  display:flex;flex-direction:column;
+  position:relative;overflow:hidden;
+}
+.modal::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--gold),var(--ember),var(--gold),transparent);
+  opacity:.6;
+}
+.modal-head{
+  padding:15px 18px 12px;border-bottom:1px solid var(--ash);
+  display:flex;justify-content:space-between;align-items:center;flex-shrink:0;
+}
+.modal-title{font-family:'Cinzel',serif;font-size:15px;color:var(--parchment);letter-spacing:1px;}
+.modal-x{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;transition:color .2s;}
+.modal-x:hover{color:var(--parchment);}
+.modal-body{padding:18px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--ash) transparent;}
+
+.mflavour{
+  font-style:italic;color:var(--text-dim);font-size:13px;
+  border-left:2px solid var(--ember-dim);padding-left:12px;
+  margin-bottom:18px;line-height:1.7;
+}
+
+/* Character sheet */
+.cs-name{font-family:'Cinzel',serif;font-size:21px;color:var(--text-bright);margin-bottom:3px;}
+.cs-class{font-size:14px;color:var(--ember);font-style:italic;margin-bottom:18px;}
+.cs-divider{height:1px;background:linear-gradient(90deg,transparent,var(--ash),transparent);margin:14px 0;}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px;}
+.stat-card{background:var(--stone);border:1px solid var(--ash);padding:12px 8px;text-align:center;}
+.sc-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);display:block;margin-bottom:5px;}
+.sc-val{font-size:26px;font-family:'Cinzel',serif;display:block;}
+.c-str{color:#d06040;}.c-agi{color:#60b070;}.c-int{color:#5080c0;}
+.xp-wrap{margin-bottom:12px;}
+.xp-labels{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;}
+.xp-bar{height:4px;background:var(--stone);border-radius:2px;overflow:hidden;}
+.xp-fill{height:100%;background:linear-gradient(90deg,var(--ember-dim),var(--gold));border-radius:2px;transition:width .5s;}
+.small-stat{display:flex;justify-content:space-between;font-size:13px;padding:4px 0;}
+.ss-label{color:var(--text-dim);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;}
+.ss-val{color:var(--text-bright);}
+.ss-val.g{color:var(--gold);}
+.ss-val.r{color:var(--blood);}
+
+/* Inventory */
+.inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.inv-slot{
+  background:var(--stone);border:1px solid var(--ash);
+  padding:9px 11px;display:flex;align-items:center;
+  gap:9px;cursor:pointer;transition:all .15s;min-height:44px;
+}
+.inv-slot:hover{border-color:var(--bone);background:var(--mud);}
+.inv-slot.filled{border-color:var(--parchment);}
+.is-icon{font-size:15px;opacity:.45;flex-shrink:0;}
+.inv-slot.filled .is-icon{opacity:1;}
+.is-info{flex:1;min-width:0;}
+.is-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;display:block;}
+.is-item{font-size:12px;display:block;color:var(--text-dim);font-style:italic;}
+.inv-slot.filled .is-item{color:var(--text-bright);font-style:normal;}
+
+/* World Map */
+.map-wrap{position:relative;width:100%;padding-bottom:56.25%;background:#040302;border:1px solid var(--ash);overflow:hidden;}
+.map-inner{position:absolute;inset:0;}
+.map-fog{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 180px 130px at 50% 52%,transparent 20%,rgba(3,2,1,.97) 68%);
+}
+.map-fog2{
+  position:absolute;inset:0;
+  background:radial-gradient(ellipse 260px 190px at 50% 52%,transparent 35%,rgba(3,2,1,.5) 80%);
+}
+.map-grid{
+  position:absolute;inset:0;
+  background-image:linear-gradient(rgba(40,30,15,.08) 1px,transparent 1px),linear-gradient(90deg,rgba(40,30,15,.08) 1px,transparent 1px);
+  background-size:30px 30px;
+}
+.map-dot{
+  position:absolute;top:50%;left:50%;
+  transform:translate(-50%,-50%);
+}
+.map-dot::before{
+  content:'';position:absolute;inset:-18px;border-radius:50%;
+  background:radial-gradient(circle,rgba(201,150,58,.18) 0%,transparent 70%);
+  animation:mapPulse 2.5s ease-in-out infinite;
+}
+@keyframes mapPulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.4);opacity:1;}}
+.dot-inner{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,150,58,.6);position:relative;z-index:1;}
+.map-town-label{
+  position:absolute;top:14px;left:50%;transform:translateX(-50%);
+  font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment);white-space:nowrap;
+}
+.map-fog-label{
+  margin-top:12px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;
+  color:var(--text-dim);text-align:center;font-style:italic;
+}
+.map-unknown{
+  position:absolute;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;
+  color:rgba(90,79,61,.25);
+}
+
+/* Diary */
+.diary-empty{text-align:center;color:var(--text-dim);font-style:italic;padding:28px 0;font-size:14px;}
+.d-entry{padding:12px 0;border-bottom:1px solid rgba(50,40,28,.4);}
+.d-entry:last-child{border-bottom:none;}
+.d-date{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;display:block;}
+.d-text{font-size:14px;color:var(--bone);line-height:1.7;font-style:italic;}
+.d-entry.death .d-text{color:#c07070;}
+.d-entry.discovery .d-date::before{content:'✦ ';color:var(--gold);}
+.d-entry.death .d-date::before{content:'⚰ ';color:var(--blood);}
+
+/* Tavern rumours */
+.rumour{
+  border-left:2px solid var(--ember-dim);padding-left:14px;
+  margin-bottom:14px;font-style:italic;font-size:14px;
+  color:var(--bone);line-height:1.7;
+}
+
+.coming-soon{text-align:center;color:var(--text-dim);font-style:italic;padding:22px 0;font-size:13px;}
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="game-title">YONDER</div>
+  <div class="h-sep"></div>
+  <div class="town-label">✦ DAWNHEARTH ✦</div>
+  <div class="h-status" id="h-status">IN TOWN</div>
+  <div class="h-char" id="h-char">Edric Vane · Lv1</div>
+  <div class="h-sep"></div>
+  <div class="h-gold" id="h-gold">0 gp</div>
+  <div class="hud-icons">
+    <button class="hud-btn" onclick="openModal('character')">⚔<span class="tip">CHARACTER</span></button>
+    <button class="hud-btn" onclick="openModal('inventory')">🎒<span class="tip">INVENTORY</span></button>
+    <button class="hud-btn" onclick="openModal('diary')">📖<span class="tip">DIARY</span></button>
+    <button class="hud-btn" onclick="openModal('map')">🗺<span class="tip">WORLD MAP</span></button>
+  </div>
+</header>
+
+<!-- MAIN -->
+<div class="game-main">
+
+  <!-- TOWN VIEW -->
+  <div class="town-view" id="town-view">
+    <div class="town-sky" id="town-sky">
+      <div class="moon"><div class="moon-disc"></div></div>
+
+      <!-- BUILDINGS -->
+      <div class="buildings-layer">
+
+        <!-- TAVERN -->
+        <button class="bld" id="b-tavern" onclick="openModal('tavern')">
+          <div class="bld-glow"></div>
+          <div class="chimney"></div>
+          <div class="bld-roof" id="tavern-roof"></div>
+          <div class="bld-body" id="tavern-body">
+            <div class="bld-win bright" style="top:14px;left:14px;width:24px;height:20px;"></div>
+            <div class="bld-win bright" style="top:14px;right:14px;width:24px;height:20px;"></div>
+            <div class="bld-win" style="top:56px;left:18px;width:20px;height:16px;"></div>
+            <div class="bld-win" style="top:56px;right:18px;width:20px;height:16px;"></div>
+            <div class="bld-door" style="width:26px;height:34px;border-radius:3px 3px 0 0;"></div>
+            <div class="bld-torch" style="bottom:28px;left:6px;"></div>
+            <div class="bld-torch" style="bottom:28px;right:6px;animation-delay:.6s;"></div>
+          </div>
+          <div class="bld-label">The Ashen Flagon</div>
+        </button>
+
+        <!-- SHOP -->
+        <button class="bld" id="b-shop" onclick="openModal('shop')">
+          <div class="bld-glow"></div>
+          <div class="bld-roof" id="shop-roof"></div>
+          <div class="bld-body" id="shop-body">
+            <div class="bld-win bright" style="top:12px;left:12px;width:28px;height:22px;"></div>
+            <div class="bld-win" style="top:12px;right:12px;width:16px;height:18px;"></div>
+            <div class="bld-door" style="width:22px;height:30px;border-radius:2px 2px 0 0;left:14px;transform:none;"></div>
+            <div class="bld-torch" style="bottom:22px;right:8px;animation-delay:.3s;"></div>
+          </div>
+          <div class="bld-label">Morrow's Sundries</div>
+        </button>
+
+        <!-- TOWN HALL -->
+        <button class="bld" id="b-hall" onclick="openModal('noticeboard')">
+          <div class="bld-glow"></div>
+          <div class="bell-tower">
+            <div class="bell-tower-roof"></div>
+            <div class="bld-win" style="top:8px;left:50%;transform:translateX(-50%);width:12px;height:14px;border-radius:6px 6px 0 0;"></div>
+          </div>
+          <div class="bld-roof" id="hall-roof"></div>
+          <div class="bld-body" id="hall-body">
+            <div class="bld-win bright" style="top:14px;left:14px;width:18px;height:22px;border-radius:4px 4px 0 0;"></div>
+            <div class="bld-win bright" style="top:14px;right:14px;width:18px;height:22px;border-radius:4px 4px 0 0;"></div>
+            <div class="bld-win" style="top:14px;left:50%;transform:translateX(-50%);width:20px;height:26px;border-radius:5px 5px 0 0;"></div>
+            <div class="bld-win" style="top:72px;left:14px;width:16px;height:18px;"></div>
+            <div class="bld-win" style="top:72px;right:14px;width:16px;height:18px;"></div>
+            <div class="bld-door" style="width:30px;height:42px;border-radius:4px 4px 0 0;"></div>
+            <div class="bld-torch" style="bottom:36px;left:6px;animation-delay:.2s;"></div>
+            <div class="bld-torch" style="bottom:36px;right:6px;animation-delay:.8s;"></div>
+          </div>
+          <div class="bld-label">Town Hall · Notice Board</div>
+        </button>
+
+        <!-- ACADEMY -->
+        <button class="bld" id="b-academy" onclick="openModal('academy')">
+          <div class="bld-glow"></div>
+          <div class="spire"></div>
+          <div class="bld-roof" id="academy-roof"></div>
+          <div class="bld-body" id="academy-body">
+            <div class="bld-win bright" style="top:12px;left:50%;transform:translateX(-50%);width:14px;height:22px;border-radius:7px 7px 0 0;"></div>
+            <div class="bld-win" style="top:60px;left:8px;width:12px;height:18px;border-radius:6px 6px 0 0;"></div>
+            <div class="bld-win" style="top:60px;right:8px;width:12px;height:18px;border-radius:6px 6px 0 0;"></div>
+            <div class="bld-win" style="top:98px;left:50%;transform:translateX(-50%);width:14px;height:20px;border-radius:7px 7px 0 0;"></div>
+            <div class="bld-door" style="width:20px;height:30px;border-radius:3px 3px 0 0;"></div>
+            <div class="bld-torch" style="bottom:24px;left:4px;animation-delay:.5s;"></div>
+          </div>
+          <div class="bld-label">The Ember Sanctum</div>
+        </button>
+
+        <!-- GATE -->
+        <button class="bld" id="b-gate" onclick="highlightDock()">
+          <div class="bld-glow"></div>
+          <div class="gate-wrap">
+            <div class="gate-tower">
+              <div class="tower-roof"></div>
+              <div class="bld-win" style="top:12px;left:50%;transform:translateX(-50%);width:12px;height:16px;border-radius:4px 4px 0 0;"></div>
+              <div class="bld-torch" style="bottom:20px;right:-4px;animation-delay:.4s;"></div>
+            </div>
+            <div class="gate-arch"></div>
+            <div class="gate-tower">
+              <div class="tower-roof"></div>
+              <div class="bld-win" style="top:12px;left:50%;transform:translateX(-50%);width:12px;height:16px;border-radius:4px 4px 0 0;"></div>
+              <div class="bld-torch" style="bottom:20px;left:-4px;animation-delay:.9s;"></div>
+            </div>
+          </div>
+          <div class="bld-label">The Town Gate · Set Forth</div>
+        </button>
+
+      </div><!-- /buildings-layer -->
+    </div><!-- /town-sky -->
+    <div class="town-ground"></div>
+  </div><!-- /town-view -->
+
+  <!-- JOURNEY VIEW -->
+  <div class="journey-view" id="journey-view">
+    <div class="progress-strip" id="progress-strip">
+      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+      <div class="timer-hover" id="timer-hover">00:00</div>
+    </div>
+    <div class="journey-header">
+      <div class="journey-title" id="j-title">Into the Yonder</div>
+      <div class="journey-type" id="j-type">— JOB —</div>
+    </div>
+    <div class="journey-log" id="journey-log"></div>
+  </div>
+
+</div><!-- /game-main -->
+
+<!-- ACTIVITY DOCK -->
+<div class="activity-dock" id="activity-dock">
+  <div class="dock-top">
+    <button class="act-btn sel" id="ab-job" onclick="selectAct(this,'job')">
+      <span class="act-name">Job</span>
+      <span class="act-time">~1 min</span>
+      <span class="act-risk r0">Safe</span>
+    </button>
+    <button class="act-btn" id="ab-bounty" onclick="selectAct(this,'bounty')">
+      <span class="act-name">Bounty</span>
+      <span class="act-time">~5 min</span>
+      <span class="act-risk r1">Risky</span>
+    </button>
+    <button class="act-btn" id="ab-quest" onclick="selectAct(this,'quest')">
+      <span class="act-name">Quest</span>
+      <span class="act-time">~20 min</span>
+      <span class="act-risk r2">Dangerous</span>
+    </button>
+    <button class="act-btn" id="ab-adventure" onclick="selectAct(this,'adventure')">
+      <span class="act-name">Adventure</span>
+      <span class="act-time">~1 hr</span>
+      <span class="act-risk r3">Deadly</span>
+    </button>
+  </div>
+  <div class="dock-bottom">
+    <div class="act-desc" id="act-desc">Fetch timber from the ashwood. The wolves haven't been bold lately. Probably.</div>
+    <button class="depart-btn" id="depart-btn" onclick="depart()">Set Forth</button>
+  </div>
+</div>
+
+<!-- MODAL OVERLAY -->
+<div class="overlay" id="overlay" onclick="overlayClick(event)">
+  <div class="modal" id="modal">
+    <div class="modal-head">
+      <span class="modal-title" id="m-title">Title</span>
+      <button class="modal-x" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="m-body"></div>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════════════════
+// STATE
+// ════════════════════════════════════════════
+const S = {
+  c: {
+    name:'Edric Vane', charClass:'Citizen',
+    level:1, xp:0, xpNext:83,
+    str:8, agi:8, int:8,
+    gold:0, rep:0, deaths:0,
+  },
+  journey:null,
+  act:'job',
+};
+
+// ════════════════════════════════════════════
+// ACTIVITY CONFIG
+// ════════════════════════════════════════════
+const ACTS = {
+  job:{
+    label:'Job', duration:60,
+    xp:[8,18], gold:[3,9], death:0,
+    desc:'Fetch timber from the ashwood. The wolves haven\'t been bold lately. Probably.',
+    titles:['Into the Ashwood','Down the Millroad','The Old Quarry Run','Cartwright\'s Errand'],
+  },
+  bounty:{
+    label:'Bounty', duration:300,
+    xp:[28,65], gold:[14,38], death:0.06,
+    desc:'A creature with a price on its head. Bring back proof. Don\'t ask what counts as proof.',
+    titles:['Blood and Coin','The Hunter and the Hunted','Mark of the Guild','Wanted: Dead'],
+  },
+  quest:{
+    label:'Quest', duration:1200,
+    xp:[95,210], gold:[48,130], death:0.18,
+    desc:'Beyond the ridge. A proper undertaking. The kind that separates the living from the storied.',
+    titles:['Beyond the Ridge','Where the Map Ends','The Long Dark','Echoes in the Stone'],
+  },
+  adventure:{
+    label:'Adventure', duration:3600,
+    xp:[280,650], gold:[140,420], death:0.38,
+    desc:'Into the true yonder. Days of travel. Things that haven\'t been named yet. Glory or burial.',
+    titles:['Into the Yonder','The Wandering Road','Where Heroes Fall','The Deep Wild'],
+  },
+};
+
+// ════════════════════════════════════════════
+// NARRATIVE STAGES (per activity)
+// ════════════════════════════════════════════
+const NARR = {
+  job:[
+    {at:0,  dot:'em', cls:'',     text:'{name} passes through the town gate. The cobblestones give way to dirt, then to something less considered.'},
+    {at:30, dot:'wh', cls:'',     text:'The work is quiet. The kind the world forgets, and the coin purse does not.'},
+    {at:65, dot:'wh', cls:'',     text:'Something watches from the treeline. It decides, wisely, against it.'},
+    {at:88, dot:'go', cls:'loot', text:'Pockets heavier. The gate of Dawnhearth rises ahead.'},
+  ],
+  bounty:[
+    {at:0,  dot:'em', cls:'',      text:'{name} sets out with a name and a description. Neither is flattering.'},
+    {at:18, dot:'wh', cls:'',      text:'Tracks in the mud. Fresh enough to follow. Old enough to worry about.'},
+    {at:42, dot:'em', cls:'danger',text:'The quarry is found. It does not intend to make this simple.'},
+    {at:60, dot:'em', cls:'act',   text:'Steel meets flesh. One of them is more vocal about it.'},
+    {at:80, dot:'go', cls:'loot',  text:'The contract is settled. Evidence collected. Some of it still warm.'},
+    {at:92, dot:'wh', cls:'',      text:'Dawnhearth, ahead. Its fires look better every time.'},
+  ],
+  quest:[
+    {at:0,  dot:'em', cls:'',      text:'{name} leaves the warmth of Dawnhearth behind. The road is cold in the way that means something.'},
+    {at:12, dot:'wh', cls:'',      text:'The forest thickens. The path narrows. The light makes its best effort.'},
+    {at:30, dot:'wh', cls:'',      text:'A ruined waystone. Someone carved a warning into it. {name} reads it carefully, then continues.'},
+    {at:48, dot:'em', cls:'danger',text:'Combat. Brief, brutal, and not entirely one-sided.'},
+    {at:62, dot:'em', cls:'act',   text:'The second encounter is worse than the first. They always are.'},
+    {at:76, dot:'go', cls:'loot',  text:'The fallen yield what the living couldn\'t hold onto. A fair arrangement.'},
+    {at:90, dot:'wh', cls:'',      text:'Home. The fires of Dawnhearth glow on the horizon like an old promise.'},
+  ],
+  adventure:[
+    {at:0,  dot:'em', cls:'',      text:'{name} steps past the last road marker. The map ends here. Everything beyond is inference.'},
+    {at:8,  dot:'wh', cls:'',      text:'A ruined waystation offers shelter. Someone carved a warning into the doorframe. {name} sleeps there anyway.'},
+    {at:20, dot:'em', cls:'danger',text:'The first encounter. Whatever it was, it wasn\'t expecting company either.'},
+    {at:35, dot:'wh', cls:'',      text:'Deeper now. The quality of the light has changed in ways that resist explanation.'},
+    {at:50, dot:'em', cls:'act',   text:'A worthy opponent at last. This one has killed before. The evidence is scattered across the ground.'},
+    {at:65, dot:'em', cls:'danger',text:'The third day. Supplies thin. Resolve holds, for now.'},
+    {at:75, dot:'go', cls:'loot',  text:'The thing is done. {name} stands in the aftermath, breathing carefully, hands not entirely steady.'},
+    {at:86, dot:'wh', cls:'',      text:'Looting the fallen. The victor\'s right. Something rare catches the eye. Pocketed without ceremony.'},
+    {at:94, dot:'wh', cls:'',      text:'The long road home. Dawnhearth won\'t know what came back. Neither will {name}, quite.'},
+  ],
+};
+
+// ════════════════════════════════════════════
+// XP TABLE (OSRS-style)
+// ════════════════════════════════════════════
+function xpForLevel(l){
+  let t=0;
+  for(let i=1;i<l;i++) t+=Math.floor(i+300*Math.pow(2,i/7));
+  return Math.floor(t/4);
+}
+
+// ════════════════════════════════════════════
+// RENDER
+// ════════════════════════════════════════════
+function render(){
+  const c=S.c;
+  document.getElementById('h-char').textContent=`${c.name} · Lv${c.level}`;
+  document.getElementById('h-gold').textContent=`${c.gold} gp`;
+}
+
+// ════════════════════════════════════════════
+// STARS
+// ════════════════════════════════════════════
+function makeStars(){
+  const sky=document.getElementById('town-sky');
+  for(let i=0;i<120;i++){
+    const s=document.createElement('div');
+    s.className='star';
+    const sz=Math.random()<0.1?2:Math.random()<0.3?1.5:1;
+    const op=0.1+Math.random()*0.5;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*80}%;left:${Math.random()*100}%;opacity:${op};`;
+    if(Math.random()<0.15){
+      s.style.animation=`starTwinkle ${2+Math.random()*3}s ease-in-out ${Math.random()*3}s infinite alternate`;
+    }
+    sky.appendChild(s);
+  }
+  // Add twinkle keyframes
+  const style=document.createElement('style');
+  style.textContent='@keyframes starTwinkle{from{opacity:0.1;}to{opacity:0.7;}}';
+  document.head.appendChild(style);
+}
+
+// ════════════════════════════════════════════
+// ACTIVITY SELECT
+// ════════════════════════════════════════════
+function selectAct(btn, type){
+  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');
+  S.act=type;
+  document.getElementById('act-desc').textContent=ACTS[type].desc;
+}
+
+// ════════════════════════════════════════════
+// DEPART
+// ════════════════════════════════════════════
+function depart(){
+  const cfg=ACTS[S.act];
+  const endTime=Date.now()+cfg.duration*1000;
+  S.journey={type:S.act, label:cfg.label, endTime, duration:cfg.duration, cfg, shownStages:[]};
+  localStorage.setItem('yonder_journey',JSON.stringify(S.journey));
+
+  // Switch views
+  document.getElementById('town-view').style.display='none';
+  document.getElementById('journey-view').classList.add('active');
+  document.getElementById('h-status').textContent=`ON ${cfg.label.toUpperCase()}`;
+  document.getElementById('depart-btn').disabled=true;
+
+  // Title
+  const titles=cfg.titles;
+  document.getElementById('j-title').textContent=titles[ri(0,titles.length-1)];
+  document.getElementById('j-type').textContent=`— ${cfg.label.toUpperCase()} —`;
+
+  // Clear log
+  document.getElementById('journey-log').innerHTML='';
+
+  startTimer();
+}
+
+// ════════════════════════════════════════════
+// TIMER
+// ════════════════════════════════════════════
+let timerInterval=null;
+
+function startTimer(){
+  if(timerInterval)clearInterval(timerInterval);
+  timerInterval=setInterval(tickTimer,1000);
+  tickTimer();
+}
+
+function tickTimer(){
+  if(!S.journey)return;
+  const now=Date.now();
+  const rem=Math.max(0,S.journey.endTime-now);
+  const elapsed=S.journey.duration*1000-rem;
+  const pct=Math.min(100,(elapsed/(S.journey.duration*1000))*100);
+
+  document.getElementById('progress-fill').style.width=pct+'%';
+  const m=Math.floor(rem/60000);
+  const s=Math.floor((rem%60000)/1000);
+  document.getElementById('timer-hover').textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')} remaining`;
+
+  // Narrative stages
+  const stages=NARR[S.journey.type];
+  stages.forEach((stage,i)=>{
+    if(pct>=stage.at && !S.journey.shownStages.includes(i)){
+      S.journey.shownStages.push(i);
+      addJourneyEntry(stage.dot, stage.cls, stage.text.replace(/{name}/g,S.c.name));
+    }
+  });
+
+  if(rem<=0){clearInterval(timerInterval);resolveJourney();}
+}
+
+function addJourneyEntry(dot,cls,text){
+  const log=document.getElementById('journey-log');
+  const el=document.createElement('div');
+  el.className='j-entry';
+  el.innerHTML=`<div class="j-dot ${dot}"></div><div class="j-text ${cls}">${text}</div>`;
+  log.appendChild(el);
+  log.scrollTop=log.scrollHeight;
+}
+
+// ════════════════════════════════════════════
+// RESOLVE
+// ════════════════════════════════════════════
+function resolveJourney(){
+  const j=S.journey;
+  const died=Math.random()<j.cfg.death;
+
+  if(died){
+    addJourneyEntry('bl','danger',`The journey ends here. ${S.c.name} does not return.`);
+    addDiaryEntry(`${S.c.name} fell on a ${j.label.toLowerCase()}. Their story joins the dark.`,'death');
+    setTimeout(()=>handleDeath(),2200);
+  } else {
+    const xpGained=ri(...j.cfg.xp);
+    const goldGained=ri(...j.cfg.gold);
+    S.c.xp+=xpGained;
+    S.c.gold+=goldGained;
+    S.c.rep=Math.min(100,S.c.rep+ri(1,4));
+    checkLevelUp();
+    addJourneyEntry('go','loot',`${S.c.name} returns to Dawnhearth. +${xpGained} xp, +${goldGained} gp.`);
+    addDiaryEntry(`Survived a ${j.label.toLowerCase()}. ${xpGained} experience earned, ${goldGained} gold recovered.`,'entry');
+    setTimeout(()=>returnToTown(),1800);
+  }
+
+  S.journey=null;
+  localStorage.removeItem('yonder_journey');
+}
+
+function handleDeath(){
+  const oldName=S.c.name;
+  const deaths=S.c.deaths+1;
+  S.c={
+    name:genName(), charClass:'Citizen',
+    level:1, xp:0, xpNext:xpForLevel(2),
+    str:ri(6,10),agi:ri(6,10),int:ri(6,10),
+    gold:0, rep:0, deaths,
+  };
+  addDiaryEntry(`A new wanderer arrives: ${S.c.name}. They do not yet know what they are.`,'entry');
+  returnToTown();
+}
+
+function returnToTown(){
+  document.getElementById('town-view').style.display='';
+  document.getElementById('journey-view').classList.remove('active');
+  document.getElementById('h-status').textContent='IN TOWN';
+  document.getElementById('depart-btn').disabled=false;
+  render();
+}
+
+function checkLevelUp(){
+  while(S.c.xp>=S.c.xpNext){
+    S.c.level++;
+    S.c.xpNext=xpForLevel(S.c.level+1);
+    const stat=S.c.charClass==='Knight'?'str':S.c.charClass==='Ranger'?'agi':S.c.charClass==='Acolyte'?'int':['str','agi','int'][ri(0,2)];
+    S.c[stat]++;
+    addDiaryEntry(`Level ${S.c.level} reached. The body learns what the mind already knew.`,'discovery');
+  }
+}
+
+// ════════════════════════════════════════════
+// DIARY
+// ════════════════════════════════════════════
+function getDiary(){return JSON.parse(localStorage.getItem('yonder_diary')||'[]');}
+function addDiaryEntry(text,type='entry'){
+  const diary=getDiary();
+  const now=new Date();
+  const dateStr=`${now.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})} · ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+  diary.unshift({text,type,date:dateStr});
+  localStorage.setItem('yonder_diary',JSON.stringify(diary.slice(0,120)));
+}
+
+// ════════════════════════════════════════════
+// GATE HIGHLIGHT
+// ════════════════════════════════════════════
+function highlightDock(){
+  const dock=document.getElementById('activity-dock');
+  dock.style.boxShadow='0 0 20px rgba(201,150,58,0.2)';
+  dock.style.borderTopColor='var(--gold)';
+  setTimeout(()=>{dock.style.boxShadow='';dock.style.borderTopColor='';},800);
+}
+
+// ════════════════════════════════════════════
+// MODAL SYSTEM
+// ════════════════════════════════════════════
+function openModal(key){
+  document.getElementById('overlay').classList.add('open');
+  const builders={character,inventory,diary,map,tavern,shop,academy,noticeboard};
+  builders[key]();
+}
+function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
+
+function setModal(title,html){
+  document.getElementById('m-title').textContent=title;
+  document.getElementById('m-body').innerHTML=html;
+}
+
+function character(){
+  const c=S.c;
+  const xpPct=Math.min(100,(c.xp/c.xpNext)*100);
+  setModal('The Wanderer',`
+    <div class="cs-name">${c.name}</div>
+    <div class="cs-class">${c.charClass} of Dawnhearth</div>
+    <div class="xp-wrap">
+      <div class="xp-labels"><span>Level ${c.level}</span><span>${c.xp} / ${c.xpNext} xp</span></div>
+      <div class="xp-bar"><div class="xp-fill" style="width:${xpPct}%"></div></div>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card"><span class="sc-label c-str">STR</span><span class="sc-val c-str">${c.str}</span></div>
+      <div class="stat-card"><span class="sc-label c-agi">AGI</span><span class="sc-val c-agi">${c.agi}</span></div>
+      <div class="stat-card"><span class="sc-label c-int">INT</span><span class="sc-val c-int">${c.int}</span></div>
+    </div>
+    <div class="cs-divider"></div>
+    <div class="small-stat"><span class="ss-label">GOLD</span><span class="ss-val g">${c.gold} gp</span></div>
+    <div class="small-stat"><span class="ss-label">REPUTATION</span><span class="ss-val">${c.rep} / 100</span></div>
+    <div class="small-stat"><span class="ss-label">SOULS LOST</span><span class="ss-val r">${c.deaths}</span></div>
+    <div class="cs-divider"></div>
+    <p style="font-style:italic;font-size:13px;color:var(--text-dim);line-height:1.6;">
+      ${c.charClass==='Citizen'?
+        '"Unblooded. Unnamed in any record that matters. The world has not yet decided what to make of you — and you haven\'t decided either."':
+        `"A ${c.charClass} of Dawnhearth. The fires have marked them now."`}
+    </p>
+  `);
+}
+
+function inventory(){
+  const slots=[
+    {key:'head',icon:'⛑',label:'Head'},
+    {key:'shoulder',icon:'🪬',label:'Shoulders'},
+    {key:'body',icon:'🛡',label:'Body'},
+    {key:'gloves',icon:'🧤',label:'Gloves'},
+    {key:'boots',icon:'👢',label:'Boots'},
+    {key:'amulet',icon:'📿',label:'Amulet'},
+    {key:'ring1',icon:'💍',label:'Ring'},
+    {key:'ring2',icon:'💍',label:'Ring'},
+    {key:'weapon',icon:'⚔',label:'Weapon'},
+    {key:'offhand',icon:'🗡',label:'Off Hand'},
+    {key:'pack',icon:'🎒',label:'Pack Item'},
+    {key:'pack2',icon:'🎒',label:'Pack Item'},
+  ];
+  const html=`<div class="inv-grid">${slots.map(s=>`
+    <div class="inv-slot">
+      <span class="is-icon">${s.icon}</span>
+      <div class="is-info">
+        <span class="is-label">${s.label}</span>
+        <span class="is-item">— Empty —</span>
+      </div>
+    </div>`).join('')}
+  </div>
+  <p class="coming-soon" style="margin-top:14px;">Visit Morrow's Sundries to find equipment.<br><span style="font-size:11px;">(Shop coming in v0.3)</span></p>`;
+  setModal('Loadout',html);
+}
+
+function diary(){
+  const entries=getDiary();
+  const html=entries.length===0
+    ? `<p class="diary-empty">"The pages are bare. The story has not yet earned its words.<br>Set out. Come back. Or don't."</p>`
+    : entries.map(e=>`
+        <div class="d-entry ${e.type}">
+          <span class="d-date">${e.date}</span>
+          <div class="d-text">${e.text}</div>
+        </div>`).join('');
+  setModal('The Chronicle',`
+    <p class="mflavour">"All that is learned passes into these pages. All who read them carry the dead forward."</p>
+    ${html}
+  `);
+}
+
+function map(){
+  setModal('The Known World',`
+    <p class="mflavour">"The map runs out faster than the road does. Everything beyond the marked edge is rumour and optimism."</p>
+    <div class="map-wrap">
+      <div class="map-inner">
+        <div class="map-grid"></div>
+        <div class="map-fog2"></div>
+        <div class="map-fog"></div>
+        <div class="map-dot">
+          <div class="dot-inner"></div>
+          <div class="map-town-label">DAWNHEARTH</div>
+        </div>
+        <div class="map-unknown" style="top:22%;left:15%;transform:rotate(-8deg);">??? Road</div>
+        <div class="map-unknown" style="top:68%;right:18%;transform:rotate(5deg);">??? Keep</div>
+        <div class="map-unknown" style="top:30%;right:22%;transform:rotate(-3deg);">The Ashwood?</div>
+      </div>
+    </div>
+    <p class="map-fog-label">Venture further. The fog retreats as the world is walked.</p>
+  `);
+}
+
+function tavern(){
+  setModal('The Ashen Flagon',`
+    <p class="mflavour">"The Flagon never closes. The regulars never leave. Some say a few of them have been sitting in the same corner since before the town was founded. Nobody asks."</p>
+    <div class="rumour">"Took a bounty past Coldgrave last season. Came back without two fingers and a perfectly good explanation. Worth every copper."</div>
+    <div class="rumour">"Bring rope on the cave jobs. Don't ask me how I know. Just bring the rope."</div>
+    <div class="rumour">"There's a fellow at the gate who's been a Knight since before your grandfather's grandfather was inconvenient. If you want to learn the trade, start by not annoying him."</div>
+    <div class="rumour">"Every hero starts in a town. Not every town earns a hero. Dawnhearth's trying."</div>
+    <p style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:8px;text-align:right;">~ Overheard at the bar</p>
+  `);
+}
+
+function shop(){
+  setModal("Morrow's Sundries",`
+    <p class="mflavour">"Old Morrow asks no questions. He only asks for coin. The things on his shelves have seen better owners — most of whom are no longer in a position to care."</p>
+    <p class="coming-soon">The shelves are being restocked.<br><span style="font-size:11px;">(Shop coming in v0.3)</span></p>
+  `);
+}
+
+function academy(){
+  setModal('The Ember Sanctum',`
+    <p class="mflavour">"The Sanctum has trained warriors and scholars for three hundred years. It will train three hundred more. Whether you survive the training is considered your own concern."</p>
+    ${S.c.charClass==='Citizen'?
+      `<p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:14px;">A grizzled Knight at the door eyes you over. He doesn't speak immediately. Men like him never waste words on the unproven.</p>
+       <p style="font-size:14px;color:var(--text);line-height:1.7;font-style:italic;color:var(--bone);">"Come back when you've bled for something. Then we'll talk about what you want to become."</p>
+       <p class="coming-soon" style="margin-top:14px;">Class unlock events coming in v0.3.</p>`:
+      `<p class="coming-soon">Training and stat allocation coming in v0.3.</p>`}
+  `);
+}
+
+function noticeboard(){
+  setModal('Notice Board',`
+    <p class="mflavour">"Parchment upon parchment. Some dated years ago. Some dated tomorrow. The board doesn't judge what gets pinned to it."</p>
+    <p class="coming-soon">Job listings and bounty contracts coming in v0.3.</p>
+  `);
+}
+
+// ════════════════════════════════════════════
+// HELPERS
+// ════════════════════════════════════════════
+function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
+
+const FN=['Edric','Maren','Aldric','Solin','Brynn','Kaera','Torvin','Lyss','Davin','Vex','Corrin','Ashel','Rue','Brennan','Ivara','Dusk'];
+const SN=['Vane','Coldwater','Ashford','the Grey','Thornwood','Fell','of No House','Briar','Morne','Coalborn','Undset'];
+function genName(){return FN[ri(0,FN.length-1)]+' '+SN[ri(0,SN.length-1)];}
+
+// ════════════════════════════════════════════
+// INIT
+// ════════════════════════════════════════════
+function init(){
+  S.c.xpNext=xpForLevel(2);
+  makeStars();
+  render();
+
+  // Restore journey from localStorage
+  const saved=localStorage.getItem('yonder_journey');
+  if(saved){
+    const j=JSON.parse(saved);
+    j.cfg=ACTS[j.type];
+    j.shownStages=j.shownStages||[];
+    S.journey=j;
+    if(Date.now()>=j.endTime){
+      document.getElementById('town-view').style.display='none';
+      document.getElementById('journey-view').classList.add('active');
+      document.getElementById('j-title').textContent='The journey has concluded.';
+      document.getElementById('j-type').textContent=`— ${j.cfg.label.toUpperCase()} —`;
+      addJourneyEntry('wh','','You were away. The world did not wait.');
+      setTimeout(()=>resolveJourney(),1200);
+    } else {
+      document.getElementById('town-view').style.display='none';
+      document.getElementById('journey-view').classList.add('active');
+      document.getElementById('j-title').textContent='Still out there...';
+      document.getElementById('j-type').textContent=`— ${j.cfg.label.toUpperCase()} —`;
+      document.getElementById('h-status').textContent=`ON ${j.cfg.label.toUpperCase()}`;
+      document.getElementById('depart-btn').disabled=true;
+      addJourneyEntry('wh','','The journey continues, whether you watch or not.');
+      startTimer();
+    }
+  }
+}
+
+init();
+</script>
+</body>
+</html>
