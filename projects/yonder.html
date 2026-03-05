@@ -1,246 +1,424 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Yonder — Dawnhearth</title>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Yonder</title>
 <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@400;700&family=Cinzel:wght@400;600&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
 <style>
 :root{
   --black:#050403;--deep:#0d0a07;--stone:#181410;--mud:#231d14;
   --ash:#332a1e;--bone:#7a6e5c;--parchment:#b89a5c;--gold:#c9963a;
-  --gold-bright:#e0b050;--ember:#b84a25;--ember-dim:#6e2d15;
-  --blood:#7a1515;--text:#a89878;--text-dim:#5a4f3d;
-  --text-bright:#c8b890;--border:#2a2218;
+  --ember:#b84a25;--ember-dim:#6e2d15;--blood:#7a1515;
+  --text:#a89878;--text-dim:#5a4f3d;--text-bright:#c8b890;--border:#2a2218;
+  --worn:#6a6560;--common:#c8b890;--crafted:#5a9a5a;
+  --enchanted:#4a7abd;--legendary:#8050b0;--mythic:#c07030;
 }
 *{margin:0;padding:0;box-sizing:border-box;}
-body{background:var(--black);color:var(--text);font-family:'Crimson Text',Georgia,serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;user-select:none;}
+body{background:var(--black);color:var(--text);font-family:'Crimson Text',Georgia,serif;height:100vh;overflow:hidden;display:flex;flex-direction:column;}
 
-/* HEADER */
+/* ── FULL SCREENS ── */
+.fullscreen{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:300;background:var(--black);}
+.fullscreen.hidden{display:none;}
+
+/* HOME */
+#screen-home{background:radial-gradient(ellipse at 50% 30%,rgba(30,20,8,.8) 0%,var(--black) 70%);}
+.home-title{font-family:'Cinzel Decorative',serif;font-size:clamp(32px,6vw,64px);letter-spacing:8px;color:var(--gold);text-shadow:0 0 40px rgba(201,150,58,.4),0 0 80px rgba(184,74,37,.15);margin-bottom:6px;animation:homeGlow 3s ease-in-out infinite alternate;}
+@keyframes homeGlow{from{text-shadow:0 0 30px rgba(201,150,58,.3),0 0 60px rgba(184,74,37,.1);}to{text-shadow:0 0 60px rgba(201,150,58,.6),0 0 120px rgba(184,74,37,.2);}}
+.home-sub{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;color:var(--text-dim);text-transform:uppercase;margin-bottom:48px;}
+.home-char-card{background:rgba(17,14,9,.9);border:1px solid var(--ash);padding:24px 32px;text-align:center;margin-bottom:32px;min-width:280px;position:relative;}
+.home-char-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;}
+.hcc-name{font-family:'Cinzel',serif;font-size:18px;color:var(--text-bright);margin-bottom:3px;}
+.hcc-class{font-size:13px;color:var(--ember);font-style:italic;margin-bottom:12px;}
+.hcc-detail{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.hcc-detail span{color:var(--parchment);}
+.hcc-journey{font-size:13px;color:var(--gold);font-style:italic;margin-top:10px;}
+.big-btn{font-family:'Cinzel',serif;font-size:12px;letter-spacing:3px;text-transform:uppercase;background:linear-gradient(180deg,var(--mud),var(--stone));border:1px solid var(--parchment);color:var(--parchment);padding:13px 40px;cursor:pointer;transition:all .25s;position:relative;overflow:hidden;}
+.big-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);transition:left .4s;}
+.big-btn:hover::before{left:100%;}
+.big-btn:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 20px rgba(201,150,58,.15);}
+.home-footer{position:absolute;bottom:20px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+
+/* CHAR CREATE */
+#screen-create{background:radial-gradient(ellipse at 50% 20%,rgba(30,20,8,.7) 0%,var(--black) 65%);overflow-y:auto;}
+.create-inner{width:min(560px,94vw);padding:40px 0;}
+.create-title{font-family:'Cinzel Decorative',serif;font-size:22px;letter-spacing:4px;color:var(--gold);text-align:center;margin-bottom:4px;}
+.create-sub{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-align:center;text-transform:uppercase;margin-bottom:36px;}
+.create-section{margin-bottom:28px;}
+.create-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;display:block;}
+.name-input{width:100%;background:var(--stone);border:1px solid var(--ash);color:var(--text-bright);font-family:'Cinzel',serif;font-size:16px;letter-spacing:2px;padding:12px 16px;outline:none;transition:border-color .2s;}
+.name-input:focus{border-color:var(--parchment);}
+.name-input::placeholder{color:var(--text-dim);}
+.class-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.class-card{background:var(--stone);border:1px solid var(--ash);padding:14px 8px;text-align:center;cursor:pointer;transition:all .2s;position:relative;}
+.class-card:hover:not(.locked){border-color:var(--parchment);background:var(--mud);}
+.class-card.selected{border-color:var(--gold);background:var(--mud);}
+.class-card.selected::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
+.class-card.locked{opacity:.35;cursor:default;}
+.cc-icon{font-size:22px;display:block;margin-bottom:6px;}
+.cc-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--parchment);display:block;margin-bottom:4px;}
+.cc-blurb{font-size:11px;color:var(--text-dim);font-style:italic;line-height:1.3;}
+.cc-lock{font-size:18px;display:block;margin-bottom:6px;color:var(--text-dim);}
+.stat-preview{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:14px;}
+.sp-card{background:var(--stone);border:1px solid var(--ash);padding:10px 6px;text-align:center;}
+.sp-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);display:block;margin-bottom:4px;}
+.sp-val{font-size:18px;font-family:'Cinzel',serif;display:block;}
+.c-str{color:#d06040;}.c-agi{color:#60b070;}.c-int{color:#5080c0;}.c-con{color:#b06080;}
+
+/* ── HEADER ── */
 header{height:50px;background:linear-gradient(180deg,#0f0c08,var(--deep));border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0;position:relative;z-index:20;}
 header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.3;}
-.game-title{font-family:'Cinzel Decorative',serif;font-size:17px;letter-spacing:4px;color:var(--gold);text-shadow:0 0 20px rgba(201,150,58,.4);flex-shrink:0;}
-.h-sep{width:1px;height:18px;background:var(--ash);flex-shrink:0;}
-.town-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--bone);flex-shrink:0;}
+.game-title{font-family:'Cinzel Decorative',serif;font-size:17px;letter-spacing:4px;color:var(--gold);text-shadow:0 0 20px rgba(201,150,58,.4);flex-shrink:0;cursor:pointer;transition:text-shadow .2s;}
+.game-title:hover{text-shadow:0 0 30px rgba(201,150,58,.7);}
+.h-sep{width:1px;height:18px;background:var(--ash);}
+.town-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--bone);}
 .h-status{flex:1;text-align:center;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
-.h-char{font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;flex-shrink:0;}
-.h-gold{color:var(--gold);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;flex-shrink:0;}
+.h-char{font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;}
+.h-gold{color:var(--gold);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;}
 .hud-icons{display:flex;gap:4px;margin-left:6px;}
 .hud-btn{background:var(--stone);border:1px solid var(--ash);color:var(--bone);width:32px;height:32px;cursor:pointer;font-size:15px;display:flex;align-items:center;justify-content:center;transition:all .2s;position:relative;}
 .hud-btn:hover{border-color:var(--parchment);color:var(--parchment);background:var(--mud);}
 .hud-btn .tip{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%);background:var(--mud);border:1px solid var(--ash);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);padding:3px 7px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;z-index:100;}
 .hud-btn:hover .tip{opacity:1;}
 
-/* GAME MAIN */
+/* ── GAME MAIN ── */
 .game-main{flex:1;position:relative;overflow:hidden;}
 
-/* TOWN VIEW */
+/* ── TOWN VIEW ── */
 .town-view{position:absolute;inset:0;display:flex;flex-direction:column;}
-.town-sky{flex:1;background:linear-gradient(180deg,#030202 0%,#080604 50%,#12090a 100%);position:relative;overflow:hidden;}
+.town-sky{flex:1;background:linear-gradient(180deg,#030202 0%,#080604 55%,#0e0707 100%);position:relative;overflow:hidden;}
 .star{position:absolute;border-radius:50%;background:#fff;}
-.moon{position:absolute;top:10%;right:12%;width:52px;height:52px;cursor:pointer;}
-.moon::before{content:'';position:absolute;inset:-25px;border-radius:50%;background:radial-gradient(circle,rgba(180,170,140,.1) 0%,transparent 70%);}
-.moon-disc{width:52px;height:52px;border-radius:50%;background:#1e1c14;border:1px solid #32301e;box-shadow:0 0 28px rgba(180,170,140,.07);overflow:hidden;position:relative;transition:filter .3s;}
+.moon{position:absolute;top:9%;right:11%;width:54px;height:54px;cursor:pointer;}
+.moon-disc{width:54px;height:54px;border-radius:50%;background:#1c1a12;border:1px solid #2e2c1a;position:relative;overflow:hidden;transition:filter .3s;}
 .moon-disc:hover{filter:brightness(1.4);}
-.moon-disc::after{content:'';position:absolute;top:-6px;right:-5px;width:46px;height:46px;border-radius:50%;background:#070504;}
-.town-ground{height:44px;background:linear-gradient(180deg,#0c0906,#060402);border-top:1px solid #1a1408;flex-shrink:0;}
+.moon-disc::after{content:'';position:absolute;top:-7px;right:-6px;width:48px;height:48px;border-radius:50%;background:#070504;}
+/* Moon face */
+.moon-face{position:absolute;top:12px;left:10px;z-index:2;pointer-events:none;}
+.mf-eye{position:absolute;width:3px;height:3px;border-radius:50%;background:rgba(210,200,160,.18);}
+.mf-eye.l{top:0;left:0;}
+.mf-eye.r{top:0;left:9px;}
+.mf-mouth{position:absolute;top:8px;left:1px;width:9px;height:4px;border-bottom:1px solid rgba(210,200,160,.14);border-radius:0 0 50% 50%;}
+.town-ground{height:48px;background:linear-gradient(180deg,#0c0906,#040302);border-top:1px solid #161008;flex-shrink:0;position:relative;}
+/* Cobblestone hint */
+.town-ground::before{content:'';position:absolute;inset:0;background-image:radial-gradient(ellipse 8px 4px at 20% 60%,rgba(30,24,14,.8) 0%,transparent 100%),radial-gradient(ellipse 8px 4px at 45% 40%,rgba(30,24,14,.6) 0%,transparent 100%),radial-gradient(ellipse 8px 4px at 70% 65%,rgba(30,24,14,.7) 0%,transparent 100%),radial-gradient(ellipse 8px 4px at 88% 45%,rgba(30,24,14,.5) 0%,transparent 100%);opacity:.5;}
 
-/* BUILDINGS */
-.buildings-layer{position:absolute;bottom:44px;left:0;right:0;display:flex;align-items:flex-end;justify-content:space-around;padding:0 20px;pointer-events:none;}
-.bld{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:none;border:none;padding:0;pointer-events:all;transition:filter .25s;outline:none;}
+/* ── BUILDINGS ── */
+.buildings-layer{position:absolute;bottom:48px;left:0;right:0;display:flex;align-items:flex-end;justify-content:space-around;padding:0 8px;}
+.bld{position:relative;cursor:pointer;display:flex;flex-direction:column;align-items:center;background:none;border:none;padding:0;transition:filter .25s;outline:none;pointer-events:all;}
 .bld:hover{filter:brightness(1.6);}
 .bld:hover .bld-label{opacity:1;transform:translateX(-50%) translateY(0);}
-.bld-label{position:absolute;bottom:-26px;left:50%;transform:translateX(-50%) translateY(4px);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1.5px;color:var(--parchment);white-space:nowrap;opacity:0;transition:all .2s;pointer-events:none;text-shadow:0 1px 4px rgba(0,0,0,.9);}
-.bld-roof{width:0;height:0;border-left-style:solid;border-left-color:transparent;border-right-style:solid;border-right-color:transparent;border-bottom-style:solid;border-bottom-color:#100d09;flex-shrink:0;}
-.bld-body{background:#100d09;border:1px solid #1e1810;position:relative;flex-shrink:0;}
-.bld-win{position:absolute;background:rgba(210,155,55,.1);border:1px solid rgba(210,155,55,.22);}
-.bld-win.lit{background:rgba(210,155,55,.18);border-color:rgba(210,155,55,.35);box-shadow:0 0 10px rgba(210,155,55,.14) inset,0 0 6px rgba(210,155,55,.08);}
+.bld-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%) translateY(4px);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--parchment);white-space:nowrap;opacity:0;transition:all .2s;pointer-events:none;text-shadow:0 1px 4px #000;}
+.bld-roof{width:0;height:0;border-left-style:solid;border-left-color:transparent;border-right-style:solid;border-right-color:transparent;border-bottom-style:solid;border-bottom-color:#100d09;}
+.bld-body{background:#100d09;border:1px solid #1e1810;position:relative;}
+.bld-win{position:absolute;background:rgba(210,155,55,.1);border:1px solid rgba(210,155,55,.2);}
+.bld-win.lit{background:rgba(210,155,55,.18);border-color:rgba(210,155,55,.35);box-shadow:0 0 8px rgba(210,155,55,.12) inset;}
 .bld-door{position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:#070503;border:1px solid #1a1208;border-bottom:none;}
-.bld-torch{position:absolute;width:11px;height:11px;border-radius:50%;background:radial-gradient(circle,rgba(200,145,40,.7),transparent 70%);animation:tFlicker 2.2s ease-in-out infinite alternate;}
+.bld-torch{position:absolute;width:10px;height:10px;border-radius:50%;background:radial-gradient(circle,rgba(200,145,40,.7),transparent 70%);animation:tFlicker 2.2s ease-in-out infinite alternate;}
 @keyframes tFlicker{from{opacity:.5;transform:scale(1);}to{opacity:1;transform:scale(1.5);}}
-.chimney{position:absolute;bottom:100%;left:16px;width:15px;height:26px;background:#0e0b07;border:1px solid #1a1508;}
-.spire{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:0;height:0;border-left:8px solid transparent;border-right:8px solid transparent;border-bottom:48px solid #100d09;}
-.bell-tower{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:28px;height:28px;background:#100d09;border:1px solid #1e1810;}
-.bell-tower-roof{position:absolute;bottom:100%;left:-3px;width:0;height:0;border-left:17px solid transparent;border-right:17px solid transparent;border-bottom:16px solid #100d09;}
-.gate-wrap{display:flex;align-items:flex-end;}
-.gate-tower{background:#100d09;border:1px solid #1e1810;width:42px;height:92px;position:relative;flex-shrink:0;}
-.gate-tower .tr{position:absolute;bottom:100%;left:-1px;width:0;height:0;border-left:22px solid transparent;border-right:22px solid transparent;border-bottom:16px solid #100d09;}
-.gate-arch{width:50px;height:76px;background:#100d09;border-top:1px solid #1e1810;border-radius:25px 25px 0 0;position:relative;overflow:hidden;align-self:flex-end;}
-.gate-arch::after{content:'';position:absolute;top:8px;left:50%;transform:translateX(-50%);width:34px;height:60px;background:#040302;border-radius:17px 17px 0 0;}
+.chimney{position:absolute;bottom:100%;left:14px;width:13px;height:22px;background:#0e0b07;border:1px solid #1a1508;}
+.spire{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:0;height:0;border-left:7px solid transparent;border-right:7px solid transparent;border-bottom:44px solid #100d09;}
+.bld-cross{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:10px;margin-bottom:2px;}
+.bld-cross-h{width:18px;height:3px;background:#100d09;border:1px solid #1e1810;position:absolute;top:8px;left:50%;transform:translateX(-50%);}
+.bld-cross-v{width:3px;height:28px;background:#100d09;border:1px solid #1e1810;position:absolute;left:50%;transform:translateX(-50%);}
+.bell-tower{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);width:26px;height:26px;background:#100d09;border:1px solid #1e1810;}
+.bell-tower-roof{position:absolute;bottom:100%;left:-2px;width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-bottom:14px solid #100d09;}
+.gate-tower{background:#100d09;border:1px solid #1e1810;width:40px;height:88px;position:relative;}
+.gate-tower .tr{position:absolute;bottom:100%;left:-1px;width:0;height:0;border-left:21px solid transparent;border-right:21px solid transparent;border-bottom:15px solid #100d09;}
+.gate-arch{width:48px;height:72px;background:#100d09;border-top:1px solid #1e1810;border-radius:24px 24px 0 0;position:relative;overflow:hidden;align-self:flex-end;}
+.gate-arch::after{content:'';position:absolute;top:7px;left:50%;transform:translateX(-50%);width:32px;height:57px;background:#040302;border-radius:16px 16px 0 0;}
+/* Grave markers for graveyard */
+.grave-area{position:absolute;bottom:0;left:0;right:0;height:40px;}
+.grave{position:absolute;bottom:0;background:#0e0b08;border:1px solid #1e1810;}
+.grave.sm{width:10px;height:16px;border-radius:5px 5px 0 0;}
+.grave.md{width:13px;height:22px;border-radius:6px 6px 0 0;}
+.grave.lg{width:16px;height:28px;border-radius:7px 7px 0 0;}
+/* Arc curve offsets for buildings (translateY, positive = lower) */
+.arc0{transform:translateY(22px);}
+.arc1{transform:translateY(13px);}
+.arc2{transform:translateY(5px);}
+.arc3{transform:translateY(0);}   /* center - notice board */
+.arc4{transform:translateY(5px);}
+.arc5{transform:translateY(11px);}
+.arc6{transform:translateY(17px);}
+.arc7{transform:translateY(24px);}
 
-/* JOURNEY VIEW */
-.journey-view{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% 30%,rgba(20,14,6,.5) 0%,var(--black) 65%);}
+/* ── JOURNEY VIEW ── */
+.journey-view{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;background:radial-gradient(ellipse at 50% 25%,rgba(20,14,6,.5) 0%,var(--black) 60%);}
 .journey-view.active{display:flex;}
-.progress-strip{width:100%;height:3px;background:var(--stone);flex-shrink:0;position:relative;cursor:default;}
+.progress-strip{width:100%;height:3px;background:var(--stone);flex-shrink:0;position:relative;}
 .progress-fill{height:100%;background:linear-gradient(90deg,var(--ember-dim),var(--gold));transition:width 1s linear;}
-.timer-hover{position:absolute;right:10px;top:6px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--text-dim);opacity:0;transition:opacity .2s;pointer-events:none;}
+.timer-hover{position:absolute;right:10px;top:6px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);opacity:0;transition:opacity .2s;pointer-events:none;}
 .progress-strip:hover .timer-hover{opacity:1;}
-.journey-header{padding:28px 24px 16px;text-align:center;flex-shrink:0;}
-.journey-title{font-family:'Cinzel',serif;font-size:21px;color:var(--text-bright);margin-bottom:4px;}
-.journey-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--ember);text-transform:uppercase;}
-.journey-log{flex:1;width:100%;max-width:580px;padding:16px 24px 24px;display:flex;flex-direction:column;gap:14px;overflow-y:auto;scrollbar-width:none;}
-.journey-log::-webkit-scrollbar{display:none;}
-.j-entry{display:flex;gap:14px;align-items:flex-start;animation:fadeUp .6s ease forwards;opacity:0;}
-@keyframes fadeUp{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:translateY(0);}}
-.j-dot{width:7px;height:7px;border-radius:50%;margin-top:7px;flex-shrink:0;background:var(--ash);}
-.j-dot.em{background:var(--ember);}.j-dot.go{background:var(--gold);}.j-dot.bl{background:var(--blood);}.j-dot.wh{background:#8a8070;}
-.j-text{font-size:15px;color:var(--bone);line-height:1.7;font-style:italic;}
-.j-text.act{color:var(--text-bright);font-style:normal;}.j-text.loot{color:var(--gold);}.j-text.danger{color:var(--ember);}
-.j-text.discovery{color:#90c0a0;font-style:normal;}
+.j-header{padding:22px 24px 12px;text-align:center;flex-shrink:0;}
+.j-title{font-family:'Cinzel',serif;font-size:20px;color:var(--text-bright);margin-bottom:4px;}
+.j-type{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--ember);text-transform:uppercase;}
+.j-log{flex:1;width:100%;max-width:600px;padding:14px 24px 20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto;scrollbar-width:none;}
+.j-log::-webkit-scrollbar{display:none;}
+.j-entry{display:flex;gap:12px;align-items:flex-start;animation:fadeUp .5s ease forwards;opacity:0;}
+@keyframes fadeUp{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:translateY(0);}}
+.j-dot{width:6px;height:6px;border-radius:50%;margin-top:7px;flex-shrink:0;}
+.jd-em{background:var(--ember);}.jd-go{background:var(--gold);}.jd-bl{background:var(--blood);}.jd-wh{background:#7a7060;}.jd-gr{background:#50a060;}.jd-fight{background:#c05070;}
+.j-text{font-size:14px;color:var(--bone);line-height:1.7;font-style:italic;}
+.j-text.act{color:var(--text-bright);font-style:normal;}.j-text.loot{color:var(--gold);}.j-text.danger{color:var(--ember);}.j-text.disc{color:#70b080;font-style:normal;}
+/* Combat entries */
+.combat-block{width:100%;max-width:600px;flex-shrink:0;padding:0 24px;}
+.combat-header{border:1px solid var(--ash);padding:10px 14px;background:rgba(15,10,5,.8);margin-bottom:4px;}
+.ch-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--ember);margin-bottom:6px;display:block;}
+.ch-bars{display:flex;flex-direction:column;gap:4px;}
+.hp-bar-wrap{display:flex;align-items:center;gap:8px;font-size:11px;}
+.hp-name{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;width:90px;color:var(--text-dim);flex-shrink:0;}
+.hp-track{flex:1;height:5px;background:var(--stone);border-radius:2px;overflow:hidden;}
+.hp-fill{height:100%;border-radius:2px;transition:width .4s ease;}
+.hp-fill.player{background:linear-gradient(90deg,#4a9a4a,#80c060);}
+.hp-fill.enemy{background:linear-gradient(90deg,#8a2020,#c04040);}
+.hp-val{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text-dim);width:50px;text-align:right;flex-shrink:0;}
+.combat-line{font-size:13px;padding:1px 14px;color:var(--text-dim);border-left:1px solid var(--border);}
+.combat-line.hit{color:var(--text);}
+.combat-line.crit{color:var(--gold);}
+.combat-line.ehit{color:#b07060;}
+.combat-line.ecrit{color:var(--ember);}
+.combat-line.heal{color:#70b080;}
+.combat-line.result{border-left-color:var(--gold);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;margin-top:4px;padding-top:4px;border-top:1px solid var(--border);}
+/* Proceed & Loot */
+.mission-end{width:100%;max-width:600px;padding:20px 24px;flex-shrink:0;}
+.loot-box{background:var(--stone);border:1px solid var(--ash);padding:16px;margin-bottom:12px;position:relative;overflow:hidden;}
+.loot-box::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;}
+.lb-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;}
+.lb-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);}
+.lb-item:last-child{border-bottom:none;}
+.lb-icon{font-size:18px;}
+.lb-info{flex:1;}
+.lb-name{font-size:14px;font-family:'Cinzel',serif;display:block;margin-bottom:1px;}
+.lb-sub{font-size:11px;color:var(--text-dim);font-style:italic;}
+.lb-take{background:none;border:1px solid currentColor;font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;padding:5px 12px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.lb-take:hover{background:rgba(255,255,255,.05);}
+.proceed-btn{width:100%;background:linear-gradient(180deg,var(--mud),var(--stone));border:1px solid var(--parchment);color:var(--parchment);font-family:'Cinzel',serif;font-size:11px;letter-spacing:3px;padding:12px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.proceed-btn:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 16px rgba(201,150,58,.15);}
 
-/* CROSSROADS VIEW */
-.crossroads-view{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#0a0806 0%,var(--black) 70%);}
+/* ── CROSSROADS ── */
+.crossroads-view{position:absolute;inset:0;display:none;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(ellipse at 50% 40%,#0a0806,var(--black) 70%);}
 .crossroads-view.active{display:flex;}
-.crossroads-title{font-family:'Cinzel',serif;font-size:11px;letter-spacing:4px;color:var(--text-dim);text-transform:uppercase;margin-bottom:32px;}
-.signpost{position:relative;display:flex;flex-direction:column;align-items:center;}
-.sign-post-pole{width:12px;height:140px;background:linear-gradient(90deg,#1c1508,#2a1e0c,#1c1508);border:1px solid #2e2210;flex-shrink:0;}
-.sign-arms{position:absolute;top:20px;display:flex;flex-direction:column;gap:20px;align-items:center;width:100%;}
-.sign-arm{display:flex;align-items:center;justify-content:center;cursor:pointer;transition:filter .2s;}
+.cr-title{font-family:'Cinzel',serif;font-size:10px;letter-spacing:4px;color:var(--text-dim);text-transform:uppercase;margin-bottom:30px;}
+.sign-pole{width:10px;height:130px;background:linear-gradient(90deg,#1c1508,#281e0c,#1c1508);border:1px solid #2a1e0a;flex-shrink:0;}
+.sign-arms{position:absolute;top:18px;display:flex;flex-direction:column;gap:18px;align-items:center;width:100%;}
+.sign-arm{cursor:pointer;transition:filter .2s;}
 .sign-arm:hover .sign-tag{border-color:var(--parchment);color:var(--parchment);}
-.sign-arm.locked:hover .sign-tag{border-color:var(--text-dim);color:var(--text-dim);cursor:default;}
-.sign-tag{background:#18130a;border:1px solid var(--ash);padding:7px 14px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--bone);white-space:nowrap;transition:all .2s;position:relative;}
-.sign-tag::before{content:attr(data-dir);position:absolute;font-size:9px;color:var(--text-dim);top:-14px;left:50%;transform:translateX(-50%);letter-spacing:1px;}
-.sign-tag .sub{display:block;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px;font-style:italic;}
-.sign-arm.locked .sign-tag{opacity:.5;}
-.crossroads-back{margin-top:36px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;padding:8px 16px;border:1px solid var(--ash);transition:all .2s;}
-.crossroads-back:hover{color:var(--parchment);border-color:var(--parchment);}
+.sign-tag{background:#16110a;border:1px solid var(--ash);padding:7px 14px;font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;color:var(--bone);white-space:nowrap;transition:all .2s;position:relative;}
+.sign-tag::before{content:attr(data-dir);position:absolute;font-size:8px;color:var(--text-dim);top:-13px;left:50%;transform:translateX(-50%);letter-spacing:1px;}
+.sign-sub{display:block;font-size:9px;color:var(--text-dim);letter-spacing:1px;margin-top:2px;font-style:italic;}
+.sign-post-wrap{position:relative;display:flex;flex-direction:column;align-items:center;}
+.cr-back{margin-top:32px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);cursor:pointer;text-transform:uppercase;padding:7px 16px;border:1px solid var(--ash);transition:all .2s;}
+.cr-back:hover{color:var(--parchment);border-color:var(--parchment);}
 
-/* ACTIVITY DOCK */
-.activity-dock{height:88px;background:rgba(4,3,2,.97);border-top:1px solid var(--border);padding:8px 18px;flex-shrink:0;position:relative;z-index:10;}
-.dock-top{display:flex;gap:7px;margin-bottom:7px;}
-.act-btn{flex:1;background:var(--stone);border:1px solid var(--ash);padding:7px 5px;cursor:pointer;text-align:center;transition:all .2s;position:relative;}
-.act-btn:hover{background:var(--mud);border-color:var(--bone);}
-.act-btn.sel{background:var(--mud);border-color:var(--gold);}
-.act-btn.sel::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),transparent);}
-.act-name{font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;color:var(--parchment);display:block;}
-.act-risk{font-size:9px;font-family:'Cinzel',serif;letter-spacing:1px;display:block;margin-top:2px;}
-.r0{color:#5a9a6a;}.r1{color:var(--parchment);}.r2{color:var(--ember);}.r3{color:#c03040;}
-.dock-bottom{display:flex;align-items:center;gap:12px;}
-.act-desc{flex:1;font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.3;}
-.depart-btn{background:linear-gradient(180deg,var(--ember),var(--ember-dim));border:1px solid #8a3515;color:var(--text-bright);font-family:'Cinzel',serif;font-size:11px;letter-spacing:2px;padding:9px 24px;cursor:pointer;text-transform:uppercase;transition:all .2s;flex-shrink:0;position:relative;overflow:hidden;}
-.depart-btn::before{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.06),transparent);transition:left .4s;}
-.depart-btn:hover::before{left:100%;}
-.depart-btn:hover{box-shadow:0 0 18px rgba(184,74,37,.3);}
-.depart-btn:disabled{background:var(--mud);border-color:var(--ash);opacity:.4;cursor:not-allowed;box-shadow:none;}
-
-/* MODAL */
-.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:200;align-items:center;justify-content:center;backdrop-filter:blur(3px);}
 .overlay.open{display:flex;}
-.modal{background:var(--deep);border:1px solid var(--ash);width:min(540px,94vw);max-height:84vh;display:flex;flex-direction:column;position:relative;overflow:hidden;}
-.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--ember),var(--gold),transparent);opacity:.6;}
-.modal-head{padding:14px 18px 11px;border-bottom:1px solid var(--ash);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
-.modal-title{font-family:'Cinzel',serif;font-size:14px;color:var(--parchment);letter-spacing:1px;}
-.modal-x{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:2px 6px;line-height:1;transition:color .2s;}
-.modal-x:hover{color:var(--parchment);}
-.modal-body{padding:18px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--ash) transparent;}
+.modal{background:var(--deep);border:1px solid var(--ash);width:min(560px,94vw);max-height:86vh;display:flex;flex-direction:column;position:relative;overflow:hidden;}
+.modal::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--gold),var(--ember),var(--gold),transparent);opacity:.55;}
+.m-head{padding:13px 18px 10px;border-bottom:1px solid var(--ash);display:flex;justify-content:space-between;align-items:center;flex-shrink:0;}
+.m-title{font-family:'Cinzel',serif;font-size:14px;color:var(--parchment);letter-spacing:1px;}
+.m-x{background:none;border:none;color:var(--text-dim);cursor:pointer;font-size:16px;padding:2px 6px;transition:color .2s;}
+.m-x:hover{color:var(--parchment);}
+.m-body{padding:18px;overflow-y:auto;flex:1;scrollbar-width:thin;scrollbar-color:var(--ash) transparent;}
 .mflavour{font-style:italic;color:var(--text-dim);font-size:13px;border-left:2px solid var(--ember-dim);padding-left:12px;margin-bottom:18px;line-height:1.7;}
-.coming-soon{text-align:center;color:var(--text-dim);font-style:italic;padding:22px 0;font-size:13px;}
 
-/* SHOP */
-.shop-grid{display:flex;flex-direction:column;gap:6px;}
-.shop-item{background:var(--stone);border:1px solid var(--ash);padding:11px 13px;display:flex;align-items:center;gap:12px;transition:border-color .2s;}
+/* Character sheet */
+.cs-name{font-family:'Cinzel',serif;font-size:20px;color:var(--text-bright);margin-bottom:2px;}
+.cs-class{font-size:13px;color:var(--ember);font-style:italic;margin-bottom:14px;}
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-bottom:12px;}
+.sc{background:var(--stone);border:1px solid var(--ash);padding:10px 6px;text-align:center;}
+.sc-l{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);display:block;margin-bottom:4px;}
+.sc-v{font-size:22px;font-family:'Cinzel',serif;display:block;}
+.xpw{margin-bottom:12px;}
+.xpl{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;}
+.xpb{height:3px;background:var(--stone);border-radius:2px;overflow:hidden;}
+.xpf{height:100%;background:linear-gradient(90deg,var(--ember-dim),var(--gold));border-radius:2px;transition:width .5s;}
+.ss{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
+.ssl{color:var(--text-dim);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;}
+.ssv{color:var(--text-bright);}
+.ssv.g{color:var(--gold);}.ssv.r{color:var(--blood);}
+.cdiv{height:1px;background:linear-gradient(90deg,transparent,var(--ash),transparent);margin:10px 0;}
+/* Perks */
+.perk-row{display:flex;align-items:flex-start;gap:10px;padding:6px 0;}
+.perk-dot{width:6px;height:6px;border-radius:50%;margin-top:5px;flex-shrink:0;}
+.pd-class{background:var(--gold);}.pd-item{background:var(--crafted);}
+.perk-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);display:block;margin-bottom:1px;}
+.perk-desc{font-size:12px;color:var(--text-dim);font-style:italic;}
+
+/* Inventory grid */
+.inv-grid-wrap{display:grid;grid-template-columns:repeat(6,1fr);gap:5px;margin-bottom:16px;}
+.inv-cell{background:var(--stone);border:1px solid var(--ash);width:100%;aspect-ratio:1;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;transition:border-color .15s;font-size:20px;}
+.inv-cell:hover{border-color:var(--bone);}
+.inv-cell.filled{border-color:var(--parchment);}
+.inv-cell.filled:hover{border-color:var(--gold);}
+.inv-tooltip{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--deep);border:1px solid var(--ash);padding:9px 12px;min-width:150px;z-index:50;pointer-events:none;white-space:nowrap;}
+.inv-cell:hover .inv-tooltip{display:block;}
+.it-name{font-family:'Cinzel',serif;font-size:11px;margin-bottom:3px;display:block;}
+.it-stat{font-size:11px;color:var(--gold);display:block;margin-bottom:2px;}
+.it-rar{font-size:10px;font-style:italic;}
+.it-desc{font-size:11px;color:var(--text-dim);font-style:italic;margin-top:3px;display:block;white-space:normal;max-width:180px;}
+/* Equip slots */
+.equip-slots{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.es{background:var(--stone);border:1px solid var(--ash);padding:8px 10px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;min-height:40px;}
+.es:hover{border-color:var(--bone);background:var(--mud);}
+.es.filled{border-color:var(--parchment);}
+.es-icon{font-size:14px;opacity:.4;flex-shrink:0;}
+.es.filled .es-icon{opacity:1;}
+.es-info{flex:1;min-width:0;}
+.es-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;display:block;}
+.es-item{font-size:11px;color:var(--text-dim);font-style:italic;display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.es.filled .es-item{color:var(--text-bright);font-style:normal;}
+
+/* Mission board */
+.mission-tier{margin-bottom:16px;}
+.mt-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;}
+.mission-card{background:var(--stone);border:1px solid var(--ash);padding:13px 15px;cursor:pointer;transition:all .2s;position:relative;}
+.mission-card:hover{border-color:var(--parchment);background:var(--mud);}
+.mc-title{font-family:'Cinzel',serif;font-size:13px;color:var(--parchment);margin-bottom:4px;display:flex;justify-content:space-between;align-items:center;}
+.mc-type{font-size:9px;font-family:'Cinzel',serif;letter-spacing:2px;padding:2px 7px;border:1px solid currentColor;opacity:.7;}
+.mc-type.job{color:#5a9a6a;}.mc-type.bounty{color:var(--parchment);}.mc-type.quest{color:var(--ember);}.mc-type.adventure{color:#c03040;}
+.mc-desc{font-size:13px;color:var(--text-dim);font-style:italic;line-height:1.5;margin-bottom:8px;}
+.mc-hints{display:flex;flex-direction:column;gap:3px;margin-bottom:10px;}
+.mc-hint{font-size:12px;color:var(--bone);font-style:italic;padding-left:10px;border-left:2px solid var(--ember-dim);}
+.mc-hint::before{content:'✦ ';}
+.mc-footer{display:flex;align-items:center;justify-content:space-between;}
+.mc-reward{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text-dim);}
+.mc-depart{background:linear-gradient(180deg,var(--ember),var(--ember-dim));border:1px solid #8a3515;color:var(--text-bright);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;padding:8px 20px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.mc-depart:hover{box-shadow:0 0 14px rgba(184,74,37,.3);}
+.mc-locked{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);padding:8px 0;font-style:italic;}
+
+/* Shop */
+.shop-item{background:var(--stone);border:1px solid var(--ash);padding:10px 13px;display:flex;align-items:center;gap:11px;margin-bottom:6px;transition:border-color .2s;}
 .shop-item:hover{border-color:var(--bone);}
-.si-icon{font-size:20px;flex-shrink:0;}
+.si-icon{font-size:18px;flex-shrink:0;}
 .si-info{flex:1;}
-.si-name{font-family:'Cinzel',serif;font-size:12px;color:var(--parchment);display:block;margin-bottom:2px;}
-.si-desc{font-size:12px;color:var(--text-dim);font-style:italic;}
-.si-stats{font-size:11px;color:var(--gold);margin-top:2px;display:block;}
-.si-price{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);flex-shrink:0;margin-right:10px;}
-.buy-btn{background:var(--mud);border:1px solid var(--parchment);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;padding:6px 14px;cursor:pointer;transition:all .2s;white-space:nowrap;}
-.buy-btn:hover{background:var(--ash);border-color:var(--gold);color:var(--gold);}
+.si-name{font-family:'Cinzel',serif;font-size:12px;color:var(--parchment);display:block;margin-bottom:1px;}
+.si-desc{font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:2px;}
+.si-stats{font-size:11px;color:var(--gold);}
+.si-price{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);flex-shrink:0;margin-right:8px;}
+.buy-btn{background:var(--mud);border:1px solid var(--parchment);color:var(--parchment);font-family:'Cinzel',serif;font-size:10px;letter-spacing:1px;padding:6px 12px;cursor:pointer;transition:all .2s;white-space:nowrap;}
+.buy-btn:hover{border-color:var(--gold);color:var(--gold);}
 .buy-btn:disabled{opacity:.35;cursor:not-allowed;}
 .buy-btn.owned{border-color:var(--text-dim);color:var(--text-dim);cursor:default;}
 
-/* INVENTORY */
-.inv-section{margin-bottom:16px;}
-.inv-section-title{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;}
-.inv-grid{display:grid;grid-template-columns:1fr 1fr;gap:5px;}
-.inv-slot{background:var(--stone);border:1px solid var(--ash);padding:9px 11px;display:flex;align-items:center;gap:8px;cursor:pointer;transition:all .15s;min-height:42px;}
-.inv-slot:hover{border-color:var(--bone);background:var(--mud);}
-.inv-slot.filled{border-color:var(--parchment);}
-.inv-slot.filled::before{content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:var(--gold);}
-.inv-slot{position:relative;}
-.is-icon{font-size:14px;opacity:.4;flex-shrink:0;}
-.inv-slot.filled .is-icon{opacity:1;}
-.is-info{flex:1;min-width:0;}
-.is-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase;display:block;}
-.is-item{font-size:12px;display:block;color:var(--text-dim);font-style:italic;}
-.inv-slot.filled .is-item{color:var(--text-bright);font-style:normal;}
-.bag-item{background:var(--stone);border:1px solid var(--ash);padding:9px 12px;display:flex;align-items:center;gap:10px;cursor:pointer;transition:all .15s;margin-bottom:5px;}
-.bag-item:hover{border-color:var(--gold);background:var(--mud);}
-.bi-name{font-family:'Cinzel',serif;font-size:11px;color:var(--parchment);flex:1;}
-.bi-action{font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--ember);text-transform:uppercase;}
+/* Chronicle / Diary */
+.log-entry{padding:9px 0;border-bottom:1px solid rgba(50,40,28,.35);}
+.log-entry:last-child{border-bottom:none;}
+.le-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;}
+.le-date{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);}
+.le-grave{font-size:14px;cursor:pointer;transition:opacity .2s;}
+.le-grave:hover{opacity:.7;}
+.le-text{font-size:13px;color:var(--bone);line-height:1.65;}
+.log-entry.death .le-text{color:#c07070;}
+.log-entry.milestone .le-date::before{content:'✦ ';color:var(--gold);}
+.log-entry.death .le-date::before{content:'⚰ ';color:var(--blood);}
+.log-entry.unlock .le-date::before{content:'❋ ';color:#70b080;}
+/* Diary is italic/first person */
+.diary-text{font-style:italic;color:var(--text);}
 
-/* CHAR SHEET */
-.cs-name{font-family:'Cinzel',serif;font-size:20px;color:var(--text-bright);margin-bottom:2px;}
-.cs-class{font-size:13px;color:var(--ember);font-style:italic;margin-bottom:14px;}
-.stat-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px;}
-.stat-card{background:var(--stone);border:1px solid var(--ash);padding:11px 8px;text-align:center;}
-.sc-label{font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);display:block;margin-bottom:4px;}
-.sc-val{font-size:24px;font-family:'Cinzel',serif;display:block;}
-.c-str{color:#d06040;}.c-agi{color:#60b070;}.c-int{color:#5080c0;}
-.xp-wrap{margin-bottom:10px;}
-.xp-labels{display:flex;justify-content:space-between;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;}
-.xp-bar{height:3px;background:var(--stone);border-radius:2px;overflow:hidden;}
-.xp-fill{height:100%;background:linear-gradient(90deg,var(--ember-dim),var(--gold));border-radius:2px;transition:width .5s;}
-.small-stat{display:flex;justify-content:space-between;font-size:13px;padding:3px 0;}
-.ss-label{color:var(--text-dim);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;}
-.ss-val{color:var(--text-bright);}.ss-val.g{color:var(--gold);}.ss-val.r{color:var(--blood);}
-.cs-divider{height:1px;background:linear-gradient(90deg,transparent,var(--ash),transparent);margin:10px 0;}
+/* Bank */
+.bank-item{background:var(--stone);border:1px solid var(--ash);padding:11px 14px;margin-bottom:6px;position:relative;}
+.bank-item::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;}
+.bank-item.enchanted::before{background:var(--enchanted);}
+.bank-item.legendary::before{background:var(--legendary);}
+.bank-item.mythic::before{background:var(--mythic);}
+.bi-name{font-family:'Cinzel',serif;font-size:13px;margin-bottom:3px;display:block;}
+.bi-prov{font-size:12px;color:var(--text-dim);font-style:italic;margin-bottom:6px;display:block;line-height:1.5;}
+.bi-stats{font-size:11px;color:var(--gold);margin-bottom:6px;display:block;}
+.bi-actions{display:flex;gap:8px;}
+.bi-btn{background:none;border:1px solid var(--ash);color:var(--text-dim);font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;padding:5px 12px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.bi-btn:hover{border-color:var(--parchment);color:var(--parchment);}
 
-/* MAP */
-.map-wrap{position:relative;width:100%;padding-bottom:56%;background:#040302;border:1px solid var(--ash);overflow:hidden;margin-bottom:12px;}
-.map-inner{position:absolute;inset:0;}
-.map-grid{position:absolute;inset:0;background-image:linear-gradient(rgba(40,30,15,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(40,30,15,.07) 1px,transparent 1px);background-size:30px 30px;}
-.map-fog{position:absolute;inset:0;background:radial-gradient(ellipse 190px 130px at 50% 52%,transparent 25%,rgba(3,2,1,.96) 65%);}
-.map-fog2{position:absolute;inset:0;background:radial-gradient(ellipse 270px 190px at 50% 52%,transparent 38%,rgba(3,2,1,.5) 80%);}
-.map-dot{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);}
-.map-dot::before{content:'';position:absolute;inset:-18px;border-radius:50%;background:radial-gradient(circle,rgba(201,150,58,.18) 0%,transparent 70%);animation:mapPulse 2.5s ease-in-out infinite;}
-@keyframes mapPulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.4);opacity:1;}}
-.dot-inner{width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 8px rgba(201,150,58,.6);position:relative;z-index:1;}
-.map-town-label{position:absolute;top:13px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--parchment);white-space:nowrap;}
-.map-unknown{position:absolute;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:rgba(90,79,61,.2);}
+/* Church */
+.church-option{background:var(--stone);border:1px solid var(--ash);padding:12px 15px;margin-bottom:8px;cursor:pointer;transition:all .2s;display:flex;justify-content:space-between;align-items:center;}
+.church-option:hover{border-color:var(--parchment);background:var(--mud);}
+.co-info{}
+.co-name{font-family:'Cinzel',serif;font-size:13px;color:var(--parchment);display:block;margin-bottom:3px;}
+.co-desc{font-size:12px;color:var(--text-dim);font-style:italic;}
+.co-price{font-family:'Cinzel',serif;font-size:13px;color:var(--gold);}
 
-/* DIARY */
-.d-entry{padding:11px 0;border-bottom:1px solid rgba(50,40,28,.4);}
-.d-entry:last-child{border-bottom:none;}
-.d-date{font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:4px;display:block;}
-.d-text{font-size:14px;color:var(--bone);line-height:1.7;font-style:italic;}
-.d-entry.death .d-text{color:#c07070;}
-.d-entry.discovery .d-date::before{content:'✦ ';color:var(--gold);}
-.d-entry.death .d-date::before{content:'⚰ ';color:var(--blood);}
-.d-entry.class-unlock .d-date::before{content:'❋ ';color:#90c0a0;}
+/* Graveyard */
+.grave-card{background:var(--stone);border:1px solid var(--ash);padding:12px 15px;margin-bottom:7px;display:flex;justify-content:space-between;align-items:flex-start;}
+.gc-name{font-family:'Cinzel',serif;font-size:14px;color:var(--text-bright);display:block;margin-bottom:2px;}
+.gc-class{font-size:12px;color:var(--ember);font-style:italic;display:block;margin-bottom:5px;}
+.gc-epitaph{font-size:12px;color:var(--text-dim);font-style:italic;line-height:1.5;}
+.gc-level{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--text-dim);text-align:right;}
 
-/* TAVERN */
-.rumour{border-left:2px solid var(--ember-dim);padding-left:14px;margin-bottom:12px;font-style:italic;font-size:14px;color:var(--bone);line-height:1.7;}
+/* Rarity colours applied to text */
+.rar-worn{color:var(--worn);}.rar-common{color:var(--common);}.rar-crafted{color:var(--crafted);}.rar-enchanted{color:var(--enchanted);}.rar-legendary{color:var(--legendary);}.rar-mythic{color:var(--mythic);}
 
-/* MOON OVERLAY */
+/* Encounter card */
+.enc-card{background:var(--stone);border:1px solid var(--parchment);padding:16px;margin-top:14px;position:relative;}
+.enc-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.4;}
+.enc-npc{font-family:'Cinzel',serif;font-size:14px;color:var(--parchment);margin-bottom:8px;}
+.enc-speech{font-size:14px;color:var(--text);line-height:1.7;font-style:italic;margin-bottom:14px;}
+.enc-btn{width:100%;background:var(--mud);border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;padding:9px;cursor:pointer;text-transform:uppercase;transition:all .2s;}
+.enc-btn:hover{box-shadow:0 0 12px rgba(201,150,58,.2);}
+
+/* Moon overlay */
 .moon-overlay{display:none;position:fixed;inset:0;background:#000;z-index:500;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;}
 .moon-overlay.open{display:flex;}
-.big-moon{width:160px;height:160px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#2a2618,#0f0c08);box-shadow:0 0 80px rgba(180,170,130,.12),0 0 160px rgba(180,170,130,.05);margin-bottom:40px;position:relative;overflow:hidden;animation:moonGlow 4s ease-in-out infinite alternate;}
-@keyframes moonGlow{from{box-shadow:0 0 60px rgba(180,170,130,.1),0 0 120px rgba(180,170,130,.04);}to{box-shadow:0 0 100px rgba(180,170,130,.18),0 0 200px rgba(180,170,130,.08);}}
-.big-moon::after{content:'';position:absolute;top:-10px;right:-8px;width:145px;height:145px;border-radius:50%;background:#000;}
-.moon-text{font-family:'Cinzel',serif;font-size:13px;letter-spacing:3px;color:rgba(180,170,130,.4);text-align:center;line-height:2;}
-.moon-close{margin-top:40px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:rgba(100,90,70,.3);text-transform:uppercase;}
+.big-moon{width:150px;height:150px;border-radius:50%;background:radial-gradient(circle at 40% 38%,#24221a,#0e0b06);box-shadow:0 0 70px rgba(180,170,130,.1);margin-bottom:36px;position:relative;overflow:hidden;animation:mGlow 4s ease-in-out infinite alternate;}
+@keyframes mGlow{from{box-shadow:0 0 50px rgba(180,170,130,.08);}to{box-shadow:0 0 90px rgba(180,170,130,.16);}}
+.big-moon::after{content:'';position:absolute;top:-9px;right:-7px;width:135px;height:135px;border-radius:50%;background:#000;}
+.moon-face-big{position:absolute;top:40px;left:36px;z-index:2;}
+.mfb-eye{position:absolute;width:6px;height:6px;border-radius:50%;background:rgba(210,200,160,.22);}
+.mfb-eye.l{top:0;left:0;}.mfb-eye.r{top:0;left:18px;}
+.mfb-mouth{position:absolute;top:14px;left:2px;width:17px;height:7px;border-bottom:1px solid rgba(210,200,160,.18);border-radius:0 0 50% 50%;}
+.moon-quote{font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:rgba(180,170,130,.45);text-align:center;line-height:2;max-width:360px;}
+.moon-dismiss{margin-top:36px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:rgba(100,90,70,.3);text-transform:uppercase;}
 
-/* CLASS ENCOUNTER */
-.encounter-card{background:var(--stone);border:1px solid var(--parchment);padding:18px;margin-top:14px;position:relative;}
-.encounter-card::before{content:'';position:absolute;top:0;left:0;right:0;height:1px;background:linear-gradient(90deg,transparent,var(--gold),transparent);opacity:.5;}
-.enc-name{font-family:'Cinzel',serif;font-size:15px;color:var(--parchment);margin-bottom:6px;}
-.enc-desc{font-size:14px;color:var(--text);line-height:1.7;margin-bottom:14px;font-style:italic;}
-.enc-btn{background:linear-gradient(180deg,var(--mud),var(--stone));border:1px solid var(--gold);color:var(--gold);font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;padding:9px 20px;cursor:pointer;text-transform:uppercase;width:100%;transition:all .2s;}
-.enc-btn:hover{background:var(--mud);box-shadow:0 0 12px rgba(201,150,58,.2);}
-
-/* RARITY COLOURS */
-.r-common{color:var(--text-bright);}.r-uncommon{color:#80c080;}.r-rare{color:#6090e0;}.r-epic{color:#a060d0;}.r-mythic{color:#d0804a;}
+.coming-soon{text-align:center;color:var(--text-dim);font-style:italic;padding:20px 0;font-size:13px;}
+.small-btn{background:none;border:1px solid var(--ash);color:var(--text-dim);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:6px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
+.small-btn:hover{border-color:var(--parchment);color:var(--parchment);}
 </style>
 </head>
 <body>
 
+<!-- ══════════════════ HOMESCREEN ══════════════════ -->
+<div class="fullscreen" id="screen-home">
+  <div class="home-title">YONDER</div>
+  <div class="home-sub">A dark fantasy idle</div>
+  <div id="home-char-area"></div>
+  <button class="big-btn" id="home-btn" onclick="homeAction()">Begin Your Story</button>
+  <div class="home-footer">Dawnhearth burns. It always burns.</div>
+</div>
+
+<!-- ══════════════════ CHAR CREATE ══════════════════ -->
+<div class="fullscreen hidden" id="screen-create" style="overflow-y:auto;justify-content:flex-start;padding:30px 0;">
+  <div class="create-inner">
+    <div class="create-title">YONDER</div>
+    <div class="create-sub">Your story begins here</div>
+    <div class="create-section">
+      <label class="create-label">Your Name</label>
+      <input class="name-input" id="name-input" type="text" maxlength="24" placeholder="Enter a name..." spellcheck="false">
+    </div>
+    <div class="create-section">
+      <label class="create-label">Choose Your Path</label>
+      <div class="class-grid" id="class-grid"></div>
+    </div>
+    <div class="create-section" id="stat-preview-section">
+      <label class="create-label">Starting Form</label>
+      <div class="stat-preview" id="stat-preview">
+        <div class="sp-card"><span class="sp-label c-str">STR</span><span class="sp-val c-str" id="prev-str">8</span></div>
+        <div class="sp-card"><span class="sp-label c-agi">AGI</span><span class="sp-val c-agi" id="prev-agi">8</span></div>
+        <div class="sp-card"><span class="sp-label c-int">INT</span><span class="sp-val c-int" id="prev-int">8</span></div>
+        <div class="sp-card"><span class="sp-label c-con">CON</span><span class="sp-val c-con" id="prev-con">8</span></div>
+      </div>
+    </div>
+    <button class="big-btn" style="width:100%;margin-top:8px;" onclick="beginGame()">Begin</button>
+    <div style="text-align:center;margin-top:12px;">
+      <button class="small-btn" onclick="showScreen('home')">← Back</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════ GAME ══════════════════ -->
+<div id="screen-game" style="display:none;flex:1;flex-direction:column;overflow:hidden;display:flex;">
+
 <header>
-  <div class="game-title">YONDER</div>
+  <div class="game-title" onclick="showScreen('home')">YONDER</div>
   <div class="h-sep"></div>
-  <div class="town-label" id="h-town-label">✦ DAWNHEARTH ✦</div>
+  <div class="town-label" id="h-town">✦ DAWNHEARTH ✦</div>
   <div class="h-status" id="h-status">IN TOWN</div>
   <div class="h-char" id="h-char">— · Lv1</div>
   <div class="h-sep"></div>
@@ -248,164 +426,204 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
   <div class="hud-icons">
     <button class="hud-btn" onclick="openModal('character')">⚔<span class="tip">CHARACTER</span></button>
     <button class="hud-btn" onclick="openModal('inventory')">🎒<span class="tip">INVENTORY</span></button>
-    <button class="hud-btn" onclick="openModal('diary')">📖<span class="tip">DIARY</span></button>
+    <button class="hud-btn" onclick="openModal('diary')">📓<span class="tip">DIARY</span></button>
+    <button class="hud-btn" onclick="openModal('chronicle')">📜<span class="tip">CHRONICLE</span></button>
     <button class="hud-btn" onclick="openModal('map')">🗺<span class="tip">WORLD MAP</span></button>
   </div>
 </header>
 
 <div class="game-main">
 
-  <!-- TOWN VIEW -->
-  <div class="town-view" id="town-view">
-    <div class="town-sky" id="town-sky">
-      <div class="moon" onclick="openMoon()"><div class="moon-disc"></div></div>
-      <div class="buildings-layer">
-
-        <!-- TAVERN -->
-        <button class="bld" onclick="openModal('tavern')">
-          <div class="chimney"></div>
-          <div class="bld-roof" style="border-left-width:64px;border-right-width:64px;border-bottom-width:24px;"></div>
-          <div class="bld-body" style="width:128px;height:104px;">
-            <div class="bld-win lit" style="top:12px;left:12px;width:22px;height:18px;"></div>
-            <div class="bld-win lit" style="top:12px;right:12px;width:22px;height:18px;"></div>
-            <div class="bld-win" style="top:52px;left:16px;width:18px;height:14px;"></div>
-            <div class="bld-win" style="top:52px;right:16px;width:18px;height:14px;"></div>
-            <div class="bld-door" style="width:24px;height:32px;border-radius:2px 2px 0 0;"></div>
-            <div class="bld-torch" style="bottom:26px;left:5px;"></div>
-            <div class="bld-torch" style="bottom:26px;right:5px;animation-delay:.6s;"></div>
-          </div>
-          <div class="bld-label">The Ashen Flagon</div>
-        </button>
-
-        <!-- SHOP -->
-        <button class="bld" onclick="openModal('shop')">
-          <div class="bld-roof" style="border-left-width:44px;border-right-width:44px;border-bottom-width:28px;"></div>
-          <div class="bld-body" style="width:88px;height:84px;">
-            <div class="bld-win lit" style="top:11px;left:10px;width:26px;height:20px;"></div>
-            <div class="bld-win" style="top:11px;right:10px;width:14px;height:16px;"></div>
-            <div class="bld-door" style="width:20px;height:28px;border-radius:2px 2px 0 0;left:12px;transform:none;"></div>
-            <div class="bld-torch" style="bottom:20px;right:7px;animation-delay:.3s;"></div>
-          </div>
-          <div class="bld-label">Morrow's Sundries</div>
-        </button>
-
-        <!-- TOWN HALL -->
-        <button class="bld" onclick="openModal('noticeboard')">
-          <div class="bell-tower"><div class="bell-tower-roof"></div><div class="bld-win" style="top:7px;left:50%;transform:translateX(-50%);width:11px;height:13px;border-radius:5px 5px 0 0;"></div></div>
-          <div class="bld-roof" style="border-left-width:52px;border-right-width:52px;border-bottom-width:38px;"></div>
-          <div class="bld-body" style="width:104px;height:140px;">
-            <div class="bld-win lit" style="top:12px;left:12px;width:16px;height:20px;border-radius:3px 3px 0 0;"></div>
-            <div class="bld-win lit" style="top:12px;right:12px;width:16px;height:20px;border-radius:3px 3px 0 0;"></div>
-            <div class="bld-win" style="top:12px;left:50%;transform:translateX(-50%);width:18px;height:24px;border-radius:4px 4px 0 0;"></div>
-            <div class="bld-win" style="top:66px;left:12px;width:14px;height:16px;"></div>
-            <div class="bld-win" style="top:66px;right:12px;width:14px;height:16px;"></div>
-            <div class="bld-door" style="width:28px;height:40px;border-radius:3px 3px 0 0;"></div>
-            <div class="bld-torch" style="bottom:34px;left:5px;animation-delay:.2s;"></div>
-            <div class="bld-torch" style="bottom:34px;right:5px;animation-delay:.8s;"></div>
-          </div>
-          <div class="bld-label">Town Hall · Notice Board</div>
-        </button>
-
-        <!-- ACADEMY -->
-        <button class="bld" onclick="openModal('academy')">
-          <div class="spire"></div>
-          <div class="bld-roof" style="border-left-width:34px;border-right-width:34px;border-bottom-width:54px;"></div>
-          <div class="bld-body" style="width:68px;height:124px;">
-            <div class="bld-win lit" style="top:10px;left:50%;transform:translateX(-50%);width:13px;height:20px;border-radius:6px 6px 0 0;"></div>
-            <div class="bld-win" style="top:54px;left:7px;width:11px;height:16px;border-radius:5px 5px 0 0;"></div>
-            <div class="bld-win" style="top:54px;right:7px;width:11px;height:16px;border-radius:5px 5px 0 0;"></div>
-            <div class="bld-win" style="top:90px;left:50%;transform:translateX(-50%);width:12px;height:18px;border-radius:6px 6px 0 0;"></div>
-            <div class="bld-door" style="width:18px;height:28px;border-radius:3px 3px 0 0;"></div>
-            <div class="bld-torch" style="bottom:22px;left:3px;animation-delay:.5s;"></div>
-          </div>
-          <div class="bld-label">The Ember Sanctum</div>
-        </button>
-
-        <!-- GATE -->
-        <button class="bld" onclick="showCrossroads()">
-          <div class="gate-wrap">
-            <div class="gate-tower"><div class="tr"></div><div class="bld-win" style="top:10px;left:50%;transform:translateX(-50%);width:11px;height:15px;border-radius:3px 3px 0 0;"></div><div class="bld-torch" style="bottom:18px;right:-3px;animation-delay:.4s;"></div></div>
-            <div class="gate-arch"></div>
-            <div class="gate-tower"><div class="tr"></div><div class="bld-win" style="top:10px;left:50%;transform:translateX(-50%);width:11px;height:15px;border-radius:3px 3px 0 0;"></div><div class="bld-torch" style="bottom:18px;left:-3px;animation-delay:.9s;"></div></div>
-          </div>
-          <div class="bld-label">The Town Gate · Roads Beyond</div>
-        </button>
-
-      </div>
-    </div>
-    <div class="town-ground"></div>
-  </div>
-
-  <!-- JOURNEY VIEW -->
-  <div class="journey-view" id="journey-view">
-    <div class="progress-strip" id="progress-strip">
-      <div class="progress-fill" id="progress-fill" style="width:0%"></div>
-      <div class="timer-hover" id="timer-hover">—</div>
-    </div>
-    <div class="journey-header">
-      <div class="journey-title" id="j-title">Into the Yonder</div>
-      <div class="journey-type" id="j-type">— JOB —</div>
-    </div>
-    <div class="journey-log" id="journey-log"></div>
-  </div>
-
-  <!-- CROSSROADS VIEW -->
-  <div class="crossroads-view" id="crossroads-view">
-    <div class="crossroads-title">The Roads Beyond Dawnhearth</div>
-    <div class="signpost">
-      <div class="sign-arms">
-        <div class="sign-arm" onclick="showCrossroads('millhaven')">
-          <div class="sign-tag" data-dir="NORTH">Millhaven<span class="sub">Where the bread is good</span></div>
-        </div>
-        <div class="sign-arm" onclick="showCrossroads('dawnhearth')">
-          <div class="sign-tag" data-dir="← WEST">Dawnhearth<span class="sub">Home. For now.</span></div>
-        </div>
-        <div class="sign-arm" onclick="showCrossroads('grimhollow')">
-          <div class="sign-tag" data-dir="EAST →">Grimhollow<span class="sub">Where the bells toll</span></div>
+<!-- TOWN -->
+<div class="town-view" id="town-view">
+  <div class="town-sky" id="town-sky">
+    <div class="moon" onclick="openMoon()">
+      <div class="moon-disc">
+        <div class="moon-face">
+          <div class="mf-eye l"></div><div class="mf-eye r"></div>
+          <div class="mf-mouth"></div>
         </div>
       </div>
-      <div class="sign-post-pole"></div>
     </div>
-    <div class="crossroads-back" onclick="showScreen('town')">← Return to Dawnhearth</div>
-  </div>
+    <div class="buildings-layer">
 
-</div><!-- /game-main -->
+      <!-- GRAVEYARD -->
+      <button class="bld arc0" onclick="openModal('graveyard')">
+        <div class="bld-body" style="width:72px;height:50px;background:#0c0a07;position:relative;">
+          <div class="grave sm" style="left:10px;bottom:0;"></div>
+          <div class="grave lg" style="left:26px;bottom:0;"></div>
+          <div class="grave md" style="left:45px;bottom:0;"></div>
+          <div class="grave sm" style="left:58px;bottom:0;"></div>
+          <div class="bld-win" style="top:8px;left:28px;width:16px;height:12px;opacity:.5;"></div>
+        </div>
+        <div class="bld-label">The Remembrance Ground</div>
+      </button>
 
-<!-- ACTIVITY DOCK -->
-<div class="activity-dock" id="activity-dock">
-  <div class="dock-top">
-    <button class="act-btn sel" id="ab-job" onclick="selectAct(this,'job')"><span class="act-name">Job</span><span class="act-risk r0">In Town</span></button>
-    <button class="act-btn" id="ab-bounty" onclick="selectAct(this,'bounty')"><span class="act-name">Bounty</span><span class="act-risk r1">Risky</span></button>
-    <button class="act-btn" id="ab-quest" onclick="selectAct(this,'quest')"><span class="act-name">Quest</span><span class="act-risk r2">Dangerous</span></button>
-    <button class="act-btn" id="ab-adventure" onclick="selectAct(this,'adventure')"><span class="act-name">Adventure</span><span class="act-risk r3">Deadly</span></button>
+      <!-- TAVERN -->
+      <button class="bld arc1" onclick="openModal('tavern')">
+        <div class="chimney"></div>
+        <div class="bld-roof" style="border-left-width:58px;border-right-width:58px;border-bottom-width:22px;"></div>
+        <div class="bld-body" style="width:116px;height:96px;">
+          <div class="bld-win lit" style="top:10px;left:10px;width:20px;height:16px;"></div>
+          <div class="bld-win lit" style="top:10px;right:10px;width:20px;height:16px;"></div>
+          <div class="bld-win" style="top:48px;left:14px;width:16px;height:13px;"></div>
+          <div class="bld-win" style="top:48px;right:14px;width:16px;height:13px;"></div>
+          <div class="bld-door" style="width:22px;height:30px;border-radius:2px 2px 0 0;"></div>
+          <div class="bld-torch" style="bottom:24px;left:4px;"></div>
+          <div class="bld-torch" style="bottom:24px;right:4px;animation-delay:.6s;"></div>
+        </div>
+        <div class="bld-label">The Ashen Flagon</div>
+      </button>
+
+      <!-- SHOP -->
+      <button class="bld arc2" onclick="openModal('shop')">
+        <div class="bld-roof" style="border-left-width:40px;border-right-width:40px;border-bottom-width:26px;"></div>
+        <div class="bld-body" style="width:80px;height:78px;">
+          <div class="bld-win lit" style="top:10px;left:9px;width:24px;height:18px;"></div>
+          <div class="bld-win" style="top:10px;right:9px;width:13px;height:14px;"></div>
+          <div class="bld-door" style="width:18px;height:26px;border-radius:2px 2px 0 0;left:10px;transform:none;"></div>
+          <div class="bld-torch" style="bottom:18px;right:6px;animation-delay:.3s;"></div>
+        </div>
+        <div class="bld-label">Morrow's Sundries</div>
+      </button>
+
+      <!-- NOTICE BOARD / TOWN HALL (CENTER, ELEVATED) -->
+      <button class="bld arc3" onclick="openModal('noticeboard')" id="notice-board-bld">
+        <div class="bell-tower"><div class="bell-tower-roof"></div><div class="bld-win" style="top:6px;left:50%;transform:translateX(-50%);width:10px;height:12px;border-radius:4px 4px 0 0;"></div></div>
+        <div class="bld-roof" style="border-left-width:56px;border-right-width:56px;border-bottom-width:40px;"></div>
+        <div class="bld-body" style="width:112px;height:148px;">
+          <div class="bld-win lit" style="top:12px;left:12px;width:15px;height:20px;border-radius:3px 3px 0 0;"></div>
+          <div class="bld-win lit" style="top:12px;right:12px;width:15px;height:20px;border-radius:3px 3px 0 0;"></div>
+          <div class="bld-win" style="top:12px;left:50%;transform:translateX(-50%);width:17px;height:24px;border-radius:4px 4px 0 0;"></div>
+          <div class="bld-win" style="top:64px;left:12px;width:13px;height:15px;"></div>
+          <div class="bld-win" style="top:64px;right:12px;width:13px;height:15px;"></div>
+          <div class="bld-door" style="width:26px;height:38px;border-radius:3px 3px 0 0;"></div>
+          <div class="bld-torch" style="bottom:32px;left:5px;animation-delay:.2s;"></div>
+          <div class="bld-torch" style="bottom:32px;right:5px;animation-delay:.8s;"></div>
+        </div>
+        <div class="bld-label">Town Hall · Notice Board</div>
+      </button>
+
+      <!-- ACADEMY -->
+      <button class="bld arc4" onclick="openModal('academy')">
+        <div class="spire"></div>
+        <div class="bld-roof" style="border-left-width:32px;border-right-width:32px;border-bottom-width:50px;"></div>
+        <div class="bld-body" style="width:64px;height:118px;">
+          <div class="bld-win lit" style="top:9px;left:50%;transform:translateX(-50%);width:12px;height:18px;border-radius:5px 5px 0 0;"></div>
+          <div class="bld-win" style="top:50px;left:6px;width:10px;height:14px;border-radius:4px 4px 0 0;"></div>
+          <div class="bld-win" style="top:50px;right:6px;width:10px;height:14px;border-radius:4px 4px 0 0;"></div>
+          <div class="bld-win" style="top:84px;left:50%;transform:translateX(-50%);width:11px;height:16px;border-radius:5px 5px 0 0;"></div>
+          <div class="bld-door" style="width:16px;height:26px;border-radius:2px 2px 0 0;"></div>
+          <div class="bld-torch" style="bottom:20px;left:3px;animation-delay:.5s;"></div>
+        </div>
+        <div class="bld-label">The Ember Sanctum</div>
+      </button>
+
+      <!-- CHURCH -->
+      <button class="bld arc5" onclick="openModal('church')">
+        <div style="position:absolute;bottom:100%;left:50%;transform:translateX(-50%);margin-bottom:0;">
+          <div class="bld-cross-v" style="height:30px;"></div>
+          <div class="bld-cross-h"></div>
+        </div>
+        <div class="bld-roof" style="border-left-width:40px;border-right-width:40px;border-bottom-width:30px;"></div>
+        <div class="bld-body" style="width:80px;height:110px;">
+          <div class="bld-win lit" style="top:10px;left:50%;transform:translateX(-50%);width:14px;height:22px;border-radius:7px 7px 0 0;"></div>
+          <div class="bld-win" style="top:52px;left:8px;width:12px;height:18px;border-radius:6px 6px 0 0;"></div>
+          <div class="bld-win" style="top:52px;right:8px;width:12px;height:18px;border-radius:6px 6px 0 0;"></div>
+          <div class="bld-door" style="width:20px;height:30px;border-radius:10px 10px 0 0;"></div>
+          <div class="bld-torch" style="bottom:24px;left:3px;animation-delay:.7s;"></div>
+          <div class="bld-torch" style="bottom:24px;right:3px;animation-delay:.1s;"></div>
+        </div>
+        <div class="bld-label">The Ember Church</div>
+      </button>
+
+      <!-- BANK -->
+      <button class="bld arc6" onclick="openModal('bank')">
+        <div class="bld-roof" style="border-left-width:38px;border-right-width:38px;border-bottom-width:18px;"></div>
+        <div class="bld-body" style="width:76px;height:72px;">
+          <div class="bld-win" style="top:10px;left:8px;width:18px;height:14px;border:2px solid rgba(210,155,55,.25);"></div>
+          <div class="bld-win" style="top:10px;right:8px;width:18px;height:14px;border:2px solid rgba(210,155,55,.25);"></div>
+          <div class="bld-door" style="width:20px;height:26px;border-radius:0;border:2px solid #1a1208;border-bottom:none;left:50%;transform:translateX(-50%);background:#050402;"></div>
+        </div>
+        <div class="bld-label">The Iron Vault</div>
+      </button>
+
+      <!-- GATE -->
+      <button class="bld arc7" onclick="showScreen('crossroads')">
+        <div style="display:flex;align-items:flex-end;">
+          <div class="gate-tower"><div class="tr"></div><div class="bld-win" style="top:9px;left:50%;transform:translateX(-50%);width:10px;height:13px;border-radius:2px 2px 0 0;"></div><div class="bld-torch" style="bottom:16px;right:-3px;animation-delay:.4s;"></div></div>
+          <div class="gate-arch"></div>
+          <div class="gate-tower"><div class="tr"></div><div class="bld-win" style="top:9px;left:50%;transform:translateX(-50%);width:10px;height:13px;border-radius:2px 2px 0 0;"></div><div class="bld-torch" style="bottom:16px;left:-3px;animation-delay:.9s;"></div></div>
+        </div>
+        <div class="bld-label">Town Gate · Roads Beyond</div>
+      </button>
+
+    </div><!-- /buildings-layer -->
+  </div><!-- /town-sky -->
+  <div class="town-ground"></div>
+</div><!-- /town-view -->
+
+<!-- JOURNEY -->
+<div class="journey-view" id="journey-view">
+  <div class="progress-strip" id="progress-strip">
+    <div class="progress-fill" id="progress-fill" style="width:0%"></div>
+    <div class="timer-hover" id="timer-hover">—</div>
   </div>
-  <div class="dock-bottom">
-    <div class="act-desc" id="act-desc">Run a message to the dockmaster. Easy coin, steady legs.</div>
-    <button class="depart-btn" id="depart-btn" onclick="depart()">Set Forth</button>
+  <div class="j-header">
+    <div class="j-title" id="j-title">Into the Yonder</div>
+    <div class="j-type" id="j-type">— MISSION —</div>
   </div>
+  <div class="j-log" id="j-log"></div>
 </div>
 
-<!-- MODAL -->
+<!-- CROSSROADS -->
+<div class="crossroads-view" id="crossroads-view">
+  <div class="cr-title">The Roads Beyond Dawnhearth</div>
+  <div class="sign-post-wrap">
+    <div class="sign-arms">
+      <div class="sign-arm" onclick="openLockedTown('Millhaven','Where the bread is good and the roads are quiet. North along the King\'s Road.')">
+        <div class="sign-tag" data-dir="NORTH">Millhaven<span class="sign-sub">Two days north</span></div>
+      </div>
+      <div class="sign-arm" onclick="showScreen('town')">
+        <div class="sign-tag" data-dir="← WEST">Dawnhearth<span class="sign-sub">Home. For now.</span></div>
+      </div>
+      <div class="sign-arm" onclick="openLockedTown('Grimhollow','The bells toll here out of habit rather than occasion. East where the road turns dark.')">
+        <div class="sign-tag" data-dir="EAST →">Grimhollow<span class="sign-sub">Where the bells toll</span></div>
+      </div>
+    </div>
+    <div class="sign-pole"></div>
+  </div>
+  <div class="cr-back" onclick="showScreen('town')">← Return to Dawnhearth</div>
+</div>
+
+</div><!-- /game-main -->
+</div><!-- /screen-game -->
+
+<!-- ══════════════════ MODAL ══════════════════ -->
 <div class="overlay" id="overlay" onclick="overlayClick(event)">
-  <div class="modal"><div class="modal-head"><span class="modal-title" id="m-title">—</span><button class="modal-x" onclick="closeModal()">✕</button></div><div class="modal-body" id="m-body"></div></div>
+  <div class="modal"><div class="m-head"><span class="m-title" id="m-title">—</span><button class="m-x" onclick="closeModal()">✕</button></div><div class="m-body" id="m-body"></div></div>
 </div>
 
 <!-- MOON OVERLAY -->
 <div class="moon-overlay" id="moon-overlay" onclick="closeMoon()">
-  <div class="big-moon"></div>
-  <div class="moon-text">The moon has watched every wanderer that ever left Dawnhearth.<br>Some came back. All are remembered.</div>
-  <div class="moon-close">click anywhere to return</div>
+  <div class="big-moon">
+    <div class="moon-face-big">
+      <div class="mfb-eye l"></div><div class="mfb-eye r"></div>
+      <div class="mfb-mouth"></div>
+    </div>
+  </div>
+  <div class="moon-quote" id="moon-quote"></div>
+  <div class="moon-dismiss">— click to return —</div>
 </div>
 
-<!-- DEV SKIP BUTTON (not part of UI) -->
-<button onclick="devSkip()" style="position:fixed;top:60px;right:8px;z-index:9999;background:yellow;color:#000;border:2px solid red;padding:4px 10px;font-size:11px;font-weight:bold;cursor:pointer;display:none;" id="dev-skip">DEV: SKIP JOURNEY</button>
+<!-- DEV SKIP (not part of game UI) -->
+<button id="dev-skip" onclick="devSkip()" style="display:none;position:fixed;top:58px;right:8px;z-index:9999;background:yellow;color:#000;border:2px solid red;padding:4px 10px;font-size:11px;font-weight:bold;cursor:pointer;">DEV: SKIP</button>
 
 <script>
-// ════════════════════════════════════════════════════════
-// DATA — ENEMIES (100)
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DATA — ENEMIES (abbreviated, lv1-20 shown, rest by level)
+// ══════════════════════════════════════════════════════════════
 const ENEMIES=[
-  /* 1-10 */
   {name:'Giant Rat',lv:1,desc:'Large for a rat. That is the most alarming thing about it.'},
   {name:'Cave Frog',lv:2,desc:'Bloated and patient. The patience is unsettling.'},
   {name:'Rabid Crow',lv:3,desc:'Something has gone wrong with this bird. Several things.'},
@@ -413,514 +631,934 @@ const ENEMIES=[
   {name:'Goblin Scout',lv:5,desc:'Sent ahead to see if you are dangerous. Now academic.'},
   {name:'Rotting Zombie',lv:6,desc:'Whatever drove it here has outlasted the flesh.'},
   {name:'Grave Skeleton',lv:7,desc:'Patient. Has been waiting. Does not mind more waiting.'},
-  {name:'Bandit Cutpurse',lv:8,desc:'Quick hands, slow learning. A career doomed from birth.'},
+  {name:'Bandit Cutpurse',lv:8,desc:'Quick hands, slow learning.'},
   {name:'Timber Wolf',lv:9,desc:'Thinks of you as prey. It has done this before.'},
   {name:'Giant Spider',lv:10,desc:'Eight eyes. None of them friendly.'},
-  /* 11-20 */
-  {name:'Kobold Pack',lv:11,desc:'Individually: laughable. Together: a problem.'},
-  {name:'Ghoul',lv:12,desc:'Hunger made ambulatory. It is very hungry.'},
+  {name:'Kobold Pack',lv:11,desc:'Individually laughable. Together: a problem.'},
+  {name:'Ghoul',lv:12,desc:'Hunger made ambulatory.'},
   {name:'Marsh Toad',lv:13,desc:'The size makes the poison worse, not better.'},
   {name:'Bandit Thug',lv:14,desc:'Blunt instrument. Deployed bluntly.'},
   {name:'Harpy Fledgling',lv:15,desc:'Still learning to scream. Loud enough already.'},
   {name:'Orc Scout',lv:16,desc:'Faster than they look. They look fast.'},
   {name:'Dire Wolf',lv:17,desc:'A wolf reconsidered. The answer was larger.'},
-  {name:'Forest Wraith',lv:18,desc:'The trees around it have gone quiet for some years.'},
+  {name:'Forest Wraith',lv:18,desc:'The trees around it have been quiet for years.'},
   {name:'Bog Witch',lv:19,desc:'Her curse outlives her grudges. Both are long.'},
   {name:'Cave Troll',lv:20,desc:'Its knuckles are more calloused than your entire body.'},
-  /* 21-30 */
   {name:'Bandit Captain',lv:21,desc:'Has survived long enough to know something you don\'t.'},
   {name:'Imp',lv:22,desc:'Small enough to overlook. Clever enough to use that.'},
-  {name:'Wererat',lv:23,desc:'The plague comes free with the biting.'},
-  {name:'Stone Gargoyle',lv:24,desc:'Has been waiting since before your town existed.'},
-  {name:'Swamp Hag',lv:25,desc:'The smell is a warning. You got the warning.'},
   {name:'Undead Knight',lv:26,desc:'Death only improved its commitment to the job.'},
   {name:'Orc Warrior',lv:27,desc:'Old scars. Older grudges. Good posture.'},
   {name:'Dark Cultist',lv:28,desc:'Believes in something. Would rather show you.'},
-  {name:'Basilisk Whelp',lv:29,desc:'Young. The eyes still work. Unfortunately.'},
   {name:'Flesh Golem',lv:30,desc:'Made from parts. The parts remember being people.'},
-  /* 31-40 */
-  {name:'Vampire Thrall',lv:31,desc:'Serves without question. It no longer has questions.'},
-  {name:'Sea Serpent',lv:32,desc:'The sea wanted something worse. Obliged.'},
-  {name:'Manticore Cub',lv:33,desc:'Young enough to be reckless. Old enough to kill you.'},
-  {name:'Cyclops',lv:34,desc:'One eye. Perfect aim. Deeply inconvenient.'},
-  {name:'Medusa',lv:35,desc:'Do not look. You looked.'},
-  {name:'Hydra Hatchling',lv:36,desc:'Two heads. You made it three.'},
-  {name:'Troll King',lv:37,desc:'Wears a crown made of things that didn\'t run fast enough.'},
-  {name:'Minotaur',lv:38,desc:'Built for a labyrinth. Out here it improvises.'},
-  {name:'Dark Mage',lv:39,desc:'Studied for this. You are the practical exam.'},
   {name:'Wyvern',lv:40,desc:'A dragon\'s smaller, meaner, faster cousin.'},
-  /* 41-50 */
-  {name:'Vampire Lord',lv:41,desc:'Centuries of patience. None of it directed at you.'},
-  {name:'Iron Golem',lv:42,desc:'Slow. Inevitable. Uninterested in your arguments.'},
-  {name:'Griffon',lv:43,desc:'The best parts of an eagle and a lion. You get all of them.'},
-  {name:'Chimera',lv:44,desc:'Three creatures that hate each other. They have agreed on you.'},
-  {name:'Lich Apprentice',lv:45,desc:'Has read the books. Has not survived the field.'},
-  {name:'Shadow Drake',lv:46,desc:'Breathes darkness. The darkness breathes back.'},
-  {name:'Storm Elemental',lv:47,desc:'The weather, reconsidered as an opponent.'},
-  {name:'Kraken Spawn',lv:48,desc:'Baby. The parent is not in view. It is somewhere.'},
-  {name:'Banshee',lv:49,desc:'The scream is not the worst part.'},
   {name:'Death Knight',lv:50,desc:'Chose this. Would choose it again.'},
-  /* 51-60 */
-  {name:'Frost Giant',lv:51,desc:'Cold and very large and unimpressed with you.'},
-  {name:'Beholder',lv:52,desc:'Many eyes. None of them blinking. All of them problems.'},
-  {name:'Mind Flayer',lv:53,desc:'Knows what you are thinking. Disagrees with your plan.'},
-  {name:'Demon Scout',lv:54,desc:'Hell\'s advance party. You are the report.'},
-  {name:'Elder Basilisk',lv:55,desc:'Older than the road you walked to find it.'},
-  {name:'Sand Wyrm',lv:56,desc:'The desert moves. Some of it has teeth.'},
-  {name:'Ancient Ghoul',lv:57,desc:'Has eaten heroes since before the word existed.'},
-  {name:'Bone Dragon',lv:58,desc:'Once was something magnificent. Now is something worse.'},
-  {name:'Chaos Demon',lv:59,desc:'Doesn\'t have a plan. Doesn\'t need one.'},
-  {name:'Arch Troll',lv:60,desc:'The king of trolls knelt. This one did not kneel.'},
-  /* 61-70 */
-  {name:'Night Stalker',lv:61,desc:'You did not hear it coming. You won\'t hear it going.'},
-  {name:'Void Wraith',lv:62,desc:'Comes from somewhere that isn\'t. Brings pieces of it.'},
-  {name:'Dragon Whelp',lv:63,desc:'Young. Fire is still a new concept to it. A favourite.'},
   {name:'Ancient Lich',lv:64,desc:'Has died before. Filed the experience away.'},
-  {name:'Demon Prince',lv:65,desc:'Royalty, of a kind. Holds court in ruin.'},
-  {name:'Kraken',lv:66,desc:'The sea emptied out to give it room.'},
-  {name:'Sea Witch',lv:67,desc:'The ocean gave her what she asked for. Regrets this.'},
-  {name:'Spectral Knight',lv:68,desc:'The armour is still moving. The body isn\'t.'},
-  {name:'Ancient Hydra',lv:69,desc:'You lost count. That was your last mistake.'},
-  {name:'Elder Cyclops',lv:70,desc:'Has watched civilisations. Has not been impressed.'},
-  /* 71-80 */
-  {name:'Primordial Wyvern',lv:71,desc:'Old as the mountains. The mountains are nervous.'},
-  {name:'Titan Spawn',lv:72,desc:'Child of something immeasurable. Inherits the scale.'},
-  {name:'Arch Demon',lv:73,desc:'Commands legions. Today it is taking a personal interest.'},
-  {name:'Ancient Vampire',lv:74,desc:'Has had centuries to refine its disappointment in you.'},
-  {name:'Shadow Titan',lv:75,desc:'The shadow of something even larger.'},
-  {name:'Elder Mind Flayer',lv:76,desc:'Has tasted the thoughts of gods. Yours are a palate cleanser.'},
-  {name:'Storm Dragon',lv:77,desc:'The storm was a warning. You were in the warning.'},
-  {name:'Void Drake',lv:78,desc:'Flies between the spaces where things are.'},
-  {name:'World Serpent Spawn',lv:79,desc:'Small. Compared to its parent.'},
-  {name:'Undead God-King',lv:80,desc:'Once ruled everything. Death renegotiated the terms.'},
-  /* 81-90 */
-  {name:'Lich Sovereign',lv:81,desc:'Its phylactery has phylacteries.'},
-  {name:'Elder Vampire Lord',lv:82,desc:'Predates the language used to name what it is.'},
-  {name:'Ancient Chimera',lv:83,desc:'Old enough that the three heads have learned to cooperate.'},
-  {name:'Dragon Ancient',lv:84,desc:'The younger dragons call it something untranslatable.'},
-  {name:'Abyssal Horror',lv:85,desc:'Came from the deep places. Brought the deep with it.'},
-  {name:'Demon Overlord',lv:86,desc:'There is a throne in Hell with its shape worn into it.'},
-  {name:'Ancient Arch Lich',lv:87,desc:'Has practiced dying. Very good at avoiding it.'},
-  {name:'Void God Fragment',lv:88,desc:'Part of something bigger. This part alone is enough.'},
-  {name:'World Titan',lv:89,desc:'Was here before the world named itself.'},
-  {name:'Primordial Shadow',lv:90,desc:'The dark before fire. It remembers fire as an insult.'},
-  /* 91-100 */
-  {name:'Ancient Demon Lord',lv:91,desc:'Commands everything below. Answers to nothing above.'},
-  {name:'Elder Void Walker',lv:92,desc:'Has walked the space between realities. Left footprints.'},
-  {name:'World Serpent',lv:93,desc:'The sea is its bath. The mountains are features of its scale.'},
-  {name:'Arch Lich',lv:94,desc:'Death is a formality it stopped observing long ago.'},
-  {name:'Ancient Storm Drake',lv:95,desc:'The sky was its first kill. The sky hasn\'t forgotten.'},
-  {name:'Dragon Elder',lv:96,desc:'The oldest name for fire is also its name.'},
-  {name:'Lich King',lv:97,desc:'Death reports to it. Death takes the job seriously.'},
-  {name:'Ancient World Serpent',lv:98,desc:'The ouroboros that swallowed the first one.'},
-  {name:'The Pale Hunger',lv:99,desc:'Does not have a name. Has everything else.'},
   {name:'Elder Dragon',lv:100,desc:'The first fire. Still burning.'},
 ];
 
-// ════════════════════════════════════════════════════════
-// DATA — ITEMS DB (100 + shop items)
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// DATA — ITEMS DB
+// ══════════════════════════════════════════════════════════════
 const ITEMS_DB={
-  wooden_sword:    {name:'Wooden Sword',       slot:'weapon', price:0,  rarity:'common',   stats:{attack:1},   icon:'🗡', desc:'Splinters with ambition.'},
-  chipped_sword:   {name:'Chipped Iron Sword', slot:'weapon', price:15, rarity:'common',   stats:{attack:3},   icon:'⚔', desc:'The edge is arguable. Still a sword.'},
-  rusty_shield:    {name:'Rusty Shield',       slot:'offhand',price:10, rarity:'common',   stats:{defense:2},  icon:'🛡', desc:'Rust is just iron with history.'},
-  leather_cap:     {name:'Leather Cap',        slot:'head',   price:8,  rarity:'common',   stats:{defense:1},  icon:'⛑', desc:'Keeps the sun off. Might slow a blade.'},
-  leather_vest:    {name:'Leather Vest',       slot:'body',   price:18, rarity:'common',   stats:{defense:2},  icon:'🛡', desc:'Tanned hide. Better than nothing.'},
-  worn_boots:      {name:'Worn Leather Boots', slot:'boots',  price:5,  rarity:'common',   stats:{defense:1},  icon:'👢', desc:'Someone else\'s miles in these soles.'},
-  rope:            {name:'Coil of Rope',       slot:'pack',   price:3,  rarity:'common',   stats:{special:'cave'}, icon:'🧵', desc:'You won\'t know why you needed it until you do.'},
+  wooden_sword:   {name:'Wooden Sword',       slot:'weapon', price:0,  rarity:'worn',    icon:'🗡',stats:{attack:1},combat:{dmgMin:2,dmgMax:5,speed:2.0,crit:.04,type:'sword'},desc:'Splinters with ambition.'},
+  chipped_sword:  {name:'Chipped Iron Sword', slot:'weapon', price:15, rarity:'common',  icon:'⚔',stats:{attack:3},combat:{dmgMin:4,dmgMax:9,speed:2.2,crit:.05,type:'sword'},desc:'The edge is arguable. Still a sword.'},
+  short_bow:      {name:'Short Bow',          slot:'weapon', price:28, rarity:'common',  icon:'🏹',stats:{attack:4},combat:{dmgMin:5,dmgMax:10,speed:1.8,crit:.08,type:'bow'},desc:'Light. Honest work.'},
+  rusty_shield:   {name:'Rusty Shield',       slot:'offhand',price:10, rarity:'worn',    icon:'🛡',stats:{defense:2},combat:{type:'shield'},desc:'Rust is just iron with history.'},
+  wooden_shield:  {name:'Wooden Shield',      slot:'offhand',price:7,  rarity:'worn',    icon:'🛡',stats:{defense:1},combat:{type:'shield'},desc:'Better than nothing. Not by much.'},
+  leather_cap:    {name:'Leather Cap',        slot:'head',   price:8,  rarity:'worn',    icon:'⛑',stats:{defense:1},desc:'Keeps the sun off.'},
+  leather_vest:   {name:'Leather Vest',       slot:'body',   price:18, rarity:'common',  icon:'🥋',stats:{defense:2},desc:'Tanned hide.'},
+  cloth_robe:     {name:'Simple Cloth Robe',  slot:'body',   price:6,  rarity:'worn',    icon:'👘',stats:{defense:1,int:1},desc:'Rough-spun and functional.'},
+  worn_boots:     {name:'Worn Leather Boots', slot:'boots',  price:5,  rarity:'worn',    icon:'👢',stats:{defense:1},desc:'Someone else\'s miles in these.'},
+  rope:           {name:'Coil of Rope',       slot:'pack',   price:3,  rarity:'worn',    icon:'🧵',stats:{special:'rope'},desc:'You won\'t know why you needed it until you do.'},
+  healing_potion: {name:'Healing Potion',     slot:'pack',   price:12, rarity:'common',  icon:'🧪',stats:{special:'heal'},desc:'Smells like burnt herbs.'},
+  blessed_amulet: {name:'Blessed Iron Amulet',slot:'amulet', price:0,  rarity:'crafted', icon:'📿',stats:{con:2},desc:'Cold iron warmed by something older than prayer.'},
+  sigil_ring:     {name:'Dawnhearth Sigil Ring',slot:'ring1',price:0,  rarity:'enchanted',icon:'💍',stats:{str:3,agi:3,int:3,con:3},desc:'The sigil of the dawn. +3 to all.'},
 };
 
-const SHOP_STOCK=['chipped_sword','rusty_shield','leather_cap','leather_vest','worn_boots','rope'];
-
-// Full 100-item loot table (name + rarity tier for future use)
-const LOOT_TABLE=[
-  /* Common 1-20 */
-  'Wooden Sword','Leather Cap','Rough Cloth Tunic','Worn Sandals','Frayed Rope',
-  'Tallow Candle','Beggars Coin Pouch','Walking Stick','Moth-eaten Cloak','River Stone',
-  'Iron Dagger','Leather Vest','Wool Gloves','Muddy Boots','Hemp Rope',
-  'Iron Ration Pouch','Whetstone','Tin Lantern','Copper Ring','Apprentice Robe',
-  /* Uncommon 21-40 */
-  'Chipped Iron Sword','Studded Leather Cap','Chainmail Coif','Iron Gauntlets','Soldier Boots',
-  'Silver Ring','Bone Amulet','Hunter Cloak','Steel Dagger','Buckler Shield',
-  'Hunting Longbow','Quiver of Iron Arrows','Apprentice Staff','Focus Crystal','Healing Salve',
-  'Traveller Pack','Lucky Charm','Iron Shortsword','Scale Armour Vest','Copper Amulet',
-  /* Rare 41-60 */
-  'Engraved Longsword','Knight Helm','Chainmail Hauberk','Mailed Gauntlets','Steel-toed Boots',
-  'Ring of Minor Fortitude','Amulet of Fireblood','Shadowweave Cloak','Elven Shortbow','Tome of Minor Flame',
-  'Enchanted Buckler','Battle-Scarred Axe','Mage Circlet','Voidsilk Robe','Ring of the Deep',
-  'Wolf-Fang Amulet','Runic Gauntlets','Stormstep Boots','Warped Wand','Gloves of the Thief',
-  /* Epic 61-80 */
-  'Sundering Greataxe','Dragonscale Helm','Stormweave Chainmail','Ironclad Gauntlets','Shadowstep Boots',
-  'Ring of Greater Fortitude','Amulet of the Undying','Wraithcloak','Dragonbone Bow','Tome of Wildfire',
-  'Aegis of the Dawn','Runeblade','Sorcerer Crown','Abyssal Robe','Ring of Void-Sight',
-  'Deathwarden Amulet','Titan Gauntlets','Boots of Fleeting Shadow','Staff of the Storm','Ring of Endless Night',
-  /* Mythic 81-100 */
-  'Sovereign Greatsword','Helm of the Elder King','Armour of the Fallen God','Gauntlets of the Worldbreaker','Boots of the Void Walker',
-  'Ring of the Dragon Emperor','Amulet of the Unbroken Chain','Cloak of Eternal Night','Bow of the Last Dawn','Grimoire of the Arch-Lich',
-  'Shield of the Ashen God','The Sorrow Blade','Crown of a Thousand Suns','Robe of Unmade Stars','Ring of the Forgotten King',
-  'Necklace of Dying Stars','Gauntlets of the Void','Boots of the Worlds End','Staff of the Elder Dragon','The Chronicle Blade',
-];
-
-// ════════════════════════════════════════════════════════
-// ACTIVITY CONFIG
-// ════════════════════════════════════════════════════════
-const ACTS={
-  job:{
-    label:'Job', duration:60, xp:[8,18], gold:[6,14], death:0,
-    desc:'Run a message to the dockmaster. Easy coin, steady legs.',
-    titles:['The Dockmaster\'s Errand','Debt Recovery on Ember Lane','A Message, Urgently','Cartwright\'s Favour','Crier\'s Route'],
-    city:true,
-  },
-  bounty:{
-    label:'Bounty', duration:180, xp:[28,65], gold:[14,38], death:0.08,
-    desc:'A creature with a price. Bring back proof. Don\'t ask what counts as proof.',
-    titles:['Blood and Coin','The Hunter and the Hunted','Mark of the Guild','Wanted: Dead'],
-  },
-  quest:{
-    label:'Quest', duration:480, xp:[95,210], gold:[48,130], death:0.20,
-    desc:'Beyond the ridge. The kind of undertaking that separates the living from the storied.',
-    titles:['Beyond the Ridge','Where the Map Ends','The Long Dark','Echoes in the Stone'],
-  },
-  adventure:{
-    label:'Adventure', duration:1200, xp:[280,650], gold:[140,420], death:0.40,
-    desc:'Into the true yonder. Things that haven\'t been named yet. Glory or burial.',
-    titles:['Into the Yonder','The Wandering Road','Where Heroes Fall','The Deep Wild'],
-  },
+const RARITY_CONFIG={
+  worn:     {label:'Worn',      color:'var(--worn)',     cls:'rar-worn',     bankable:false},
+  common:   {label:'Common',    color:'var(--common)',   cls:'rar-common',   bankable:false},
+  crafted:  {label:'Crafted',   color:'var(--crafted)',  cls:'rar-crafted',  bankable:false},
+  enchanted:{label:'Enchanted', color:'var(--enchanted)',cls:'rar-enchanted',bankable:true},
+  legendary:{label:'Legendary', color:'var(--legendary)',cls:'rar-legendary',bankable:true},
+  mythic:   {label:'Mythic',    color:'var(--mythic)',   cls:'rar-mythic',   bankable:true},
 };
 
-// ════════════════════════════════════════════════════════
-// JOURNEY NARRATIVES
-// ════════════════════════════════════════════════════════
-const NARR={
+// ══════════════════════════════════════════════════════════════
+// DATA — LOOT NAMES BY RARITY (20 each = 100)
+// ══════════════════════════════════════════════════════════════
+const LOOT_NAMES={
+  worn:     ['Splintered Club','Tattered Cloak','Cracked Buckler','Mud-Caked Boots','Frayed Rope','Chipped Dagger','Moth-Eaten Hood','Bent Shortsword','Straw Hat','Rough Gloves','Old Sandals','Torn Vest','Broken Lantern','Rusted Knife','Scuffed Amulet','Dull Hatchet','Worn Leather Belt','Clay Charm','Blunt Arrow','Patched Boots'],
+  common:   ['Iron Dagger','Leather Vest','Wool Travelling Cloak','Iron Shortsword','Bone Ring','Studded Leather Cap','Soldier\'s Buckler','Hunter\'s Bow','Apprentice Staff','Copper Ring','Iron Gauntlets','Militia Boots','Hemp Rope','Traveller\'s Pack','Iron Arrowheads','Chain Coif','Simple Amulet','Quiver','Whetstone Pouch','Sailor\'s Knife'],
+  crafted:  ['Engraved Dagger','Scale Armour Vest','Shadowweave Cloak','Balanced Shortsword','Silver Ring','Huntsman\'s Cap','Steel Buckler','Recurve Bow','Focus Staff','Ring of Minor Fortitude','Mailed Gauntlets','Swift Boots','Silken Rope','Pack of Holding','Elf-Fletched Arrows','Forge-Tempered Coif','Bone Amulet','Quiver of Craft','Blade Oil','Sailor\'s Sabre'],
+  enchanted:['Dawnfire Sword','Dragonscale Vest','Wraithcloak','Stormstrike Blade','Ring of Greater Fortitude','Mage Circlet','Aegis of the Keep','Longbow of Precision','Staff of Embers','Amulet of the Fireblood','Gauntlets of the Forge','Boots of Fleeting Shadow','Tome of Minor Flame','Void Trinket','Arcanist\'s Focus','Helm of the Iron Watch','Ring of Void-Sight','Quiver of Haste','Runic Shield','Elven Shortblade'],
+  legendary:['Sovereign Blade','Armour of the Fallen','Cloak of Eternal Night','Greatsword of the Keep','Ring of the Dragon','Warlock\'s Circlet','Shield of the Ashen God','Bow of the Last Dawn','Grimoire of the Lich','Amulet of the Unbroken','Titan Gauntlets','Void Walker\'s Boots','Staff of the Storm','Chronicle Blade','Crown of Suns','Necklace of Dying Stars','Ring of the Forgotten King','Deathwarden Amulet','Bone Dragon Shield','World Serpent Band'],
+  mythic:   ['The First Flame Sword','God-Forged Armour','Shadow of All Nights','The Undying Blade','Eye of the World Serpent','Arch-Lich\'s Crown','Primordial Shield','Arrow of the Last God','The Shattered Grimoire','Breath of the Void','Gauntlets of the World','Boots of the End','The Sorrow Staff','World\'s Last Chronicle','Sun\'s Final Crown','Tears of the Void','The Unmaking Ring','Soul of the Dragon Emperor','Silence of the Arch-Lich','Fragment of the First Dark'],
+};
+
+// ══════════════════════════════════════════════════════════════
+// DATA — MISSIONS
+// ══════════════════════════════════════════════════════════════
+const HOLY_RELIC={
+  id:'holy_relic',type:'quest',
+  title:'The Broken Chapel',
+  desc:'The chapel east of the mill went dark three nights ago. Brother Aldous says the holy relic kept there — a small iron disc, older than Dawnhearth itself — has vanished, along with the monks who tended it. Something has moved into the ruin.',
+  hints:['The chapel stones run cold even in summer.','Whatever moves in there does not bleed like the living do.'],
+  enemyName:'Grave Skeleton',enemyLevel:7,
+  guaranteedItem:'blessed_amulet',
+  storyText:'Among the scattered papers you find a symbol burned into the stone floor: a circle with a broken crown. Someone knew this relic was here. Someone wanted it moved — or they\'re still east of here, in the dark past the ridge.',
+  unlocks:'Acolyte',source:'the Broken Chapel near Dawnhearth',
+};
+
+const MISSION_POOL={
   job:[
-    {at:0,  dot:'em',cls:'',     mk:(n)=>`${n} steps out into Dawnhearth's streets. The work is already waiting.`},
-    {at:30, dot:'wh',cls:'',     mk:()=>`The errand is straightforward. The town smells of bread and smoke and people getting on with things.`},
-    {at:70, dot:'wh',cls:'',     mk:()=>`It occurs to ${S.c.name} that there are easier lives. This thought passes quickly. The coin does not.`},
-    {at:90, dot:'go',cls:'loot', mk:(n)=>`${n} returns. The work is done. The purse is heavier.`},
+    {id:'j1',type:'job',title:"The Dockmaster's Errand",desc:"Old Fenwick needs a sealed letter delivered to the miller before the morning bell. He doesn't say what's in it. You don't ask.",hints:[],enemyName:null,source:'an errand in Dawnhearth'},
+    {id:'j2',type:'job',title:"Debt Recovery",desc:"A merchant on the eastern lane owes Morrow three weeks of unpaid credit. Go remind him. Politely first.",hints:[],enemyName:null,source:'debt collection in Dawnhearth'},
+    {id:'j3',type:'job',title:"The Missing Shipment",desc:"A cart of supplies was due at the inn two days ago. The driver says it arrived. The inn says it didn't. One of them is lying.",hints:[],enemyName:null,source:'missing goods work near Dawnhearth'},
+    {id:'j4',type:'job',title:"Night Watch",desc:"Stand at the east gate from dusk to bell-ring. Keep the fire lit. Report anything that comes out of the dark. Don't follow it.",hints:['The nights have been strange lately.'],enemyName:null,source:'a night watch at Dawnhearth gate'},
+    {id:'j5',type:'job',title:"The Herbalist's Gathering",desc:"Mira the herbalist needs nightbloom from the meadow past the mill. She says it's safe enough. She doesn't come herself.",hints:['It is a nice evening. Probably.'],enemyName:null,source:'an herbalist\'s errand near Dawnhearth'},
+    {id:'j6',type:'job',title:"Crier's Round",desc:"Ring the bell. Announce the market. Wake the smith. Simple work for simple coin. The town barely notices you.",hints:[],enemyName:null,source:'crier work in Dawnhearth'},
   ],
   bounty:[
-    {at:0,  dot:'em',cls:'',       mk:(n)=>`${n} passes through the gate, parchment with a name on it folded in one hand.`},
-    {at:18, dot:'wh',cls:'',       mk:()=>`Tracks. Fresh enough to follow. Old enough to worry about.`},
-    {at:42, dot:'em',cls:'danger', mk:()=>`Contact. The quarry does not intend to make this simple.`},
-    {at:58, dot:'em',cls:'act',    mk:()=>`Steel or spell. Something decides the matter.`},
-    {at:78, dot:'go',cls:'loot',   mk:()=>`The contract is settled. Proof collected. Some of it still warm.`},
-    {at:92, dot:'wh',cls:'',       mk:(n)=>`${n} turns toward Dawnhearth. The gate looks better every time.`},
+    {id:'b1',type:'bounty',title:'Wolves at the Mill',desc:"A pack of timber wolves has been circling the mill at night. The miller is losing sleep and livestock. Bring back proof. Claws will do.",hints:['The tracks go deep into the treeline.'],enemyName:'Timber Wolf',enemyLevel:9,source:'wolf hunting near Dawnhearth mill'},
+    {id:'b2',type:'bounty',title:'The Watchtower Nest',desc:"Giant spiders have claimed the old watchtower south of town. Nobody goes up there anymore. That is now the problem.",hints:['It will be dark in there.','The stairs might be covered.'],enemyName:'Giant Spider',enemyLevel:10,source:'the old watchtower south of Dawnhearth'},
+    {id:'b3',type:'bounty',title:'Bone Collectors',desc:"Grave skeletons seen walking the crossroads at night. Nobody knows who raised them. Nobody wants to find out.",hints:['They don\'t feel pain. You do.'],enemyName:'Grave Skeleton',enemyLevel:7,source:'the crossroads near Dawnhearth'},
+    {id:'b4',type:'bounty',title:'The Hollow Man',desc:"Something is walking through the market after the stalls close. It looks like a person. It sounds like a person. The details stop being right if you look closely.",hints:['Whatever it is, it isn\'t warm.'],enemyName:'Forest Wraith',enemyLevel:18,source:'the market district in Dawnhearth'},
+    {id:'b5',type:'bounty',title:'Foul Harvest',desc:"The eastern fields are being torn up by something. The farmers say it comes from underground. The tracks don\'t match anything in the field guide.",hints:['The ground is soft out there after rain.'],enemyName:'Giant Rat',enemyLevel:1,source:'the eastern fields near Dawnhearth'},
+    {id:'b6',type:'bounty',title:'The River Bandit',desc:"A cutpurse has been working the river crossing. Three travellers robbed this week. The guild wants a resolution.",hints:[],enemyName:'Bandit Cutpurse',enemyLevel:8,source:'the river crossing near Dawnhearth'},
   ],
   quest:[
-    {at:0,  dot:'em',cls:'',       mk:(n)=>`${n} leaves Dawnhearth behind. The road is cold in the way that means something.`},
-    {at:12, dot:'wh',cls:'',       mk:()=>`The forest thickens. The path narrows. The light tries its best.`},
-    {at:28, dot:'wh',cls:'',       mk:()=>`A ruined waystone. Someone carved a warning into it. ${S.c.name} reads it. Continues anyway.`},
-    {at:46, dot:'em',cls:'danger', mk:()=>`The first encounter: ${randEnemy(S.c.level)}. The air changes in advance.`},
-    {at:62, dot:'em',cls:'act',    mk:()=>`The second encounter is worse. They always are.`},
-    {at:78, dot:'go',cls:'loot',   mk:()=>`The fallen yield what the living couldn\'t hold onto.`},
-    {at:91, dot:'wh',cls:'',       mk:(n)=>`${n} turns for home. The fires of Dawnhearth ahead, like an old promise.`},
+    {id:'q1',type:'quest',title:'The Drowning Mine',desc:"The Ashvale mine flooded two seasons ago. They say something moved in when the workers moved out. The company wants their equipment back. The company won't go themselves.",hints:['It will be wet. Then deeper wet.','The dark down there is thick.'],enemyName:'Ghoul',enemyLevel:12,source:'the Ashvale mine near Dawnhearth'},
+    {id:'q2',type:'quest',title:'The Warden\'s Letter',desc:"A letter must reach the warden at Coldkeep. The road is considered safe. The road has been considered safe before.",hints:['The ridge pass runs cold at night.'],enemyName:'Bandit Thug',enemyLevel:14,source:'the road to Coldkeep near Dawnhearth'},
+    {id:'q3',type:'quest',title:'Blood on the King\'s Road',desc:"Three merchants found dead on the road east. No coin taken. No horses. Just the bodies and something drawn in the mud beside each one.",hints:['The symbol means something to someone.','It might get cold on that road.'],enemyName:'Dark Cultist',enemyLevel:28,source:'the King\'s Road near Dawnhearth'},
+    {id:'q4',type:'quest',title:'The Missing Apprentice',desc:"Mira the herbalist\'s apprentice went into the Ashwood three days ago for research. Research takes a day. Three days is a different thing.",hints:['The wood gets strange past the second stream.','Bring something bright.'],enemyName:'Kobold Pack',enemyLevel:11,source:'the Ashwood near Dawnhearth'},
   ],
   adventure:[
-    {at:0,  dot:'em',cls:'',       mk:(n)=>`${n} steps past the last road marker. The map ends here.`},
-    {at:8,  dot:'wh',cls:'',       mk:()=>`A ruined waystation. A warning carved in the doorframe. ${S.c.name} sleeps there anyway.`},
-    {at:20, dot:'em',cls:'danger', mk:()=>`The first encounter: ${randEnemy(S.c.level)}. Neither party is ready.`},
-    {at:35, dot:'wh',cls:'',       mk:()=>`Deeper. The quality of the light has changed in ways that resist explanation.`},
-    {at:50, dot:'em',cls:'act',    mk:()=>`A worthy opponent. This one has killed before. The evidence is scattered across the ground.`},
-    {at:64, dot:'em',cls:'danger', mk:()=>`The third encounter. Something at the edge of naming: ${randEnemy(S.c.level+5)}.`},
-    {at:76, dot:'go',cls:'loot',   mk:()=>`The thing is done. Hands not entirely steady. Something rare found in the wreckage.`},
-    {at:88, dot:'wh',cls:'',       mk:()=>`Looting the fallen. The victor\'s right. Something glints: ${randLoot()}.`},
-    {at:95, dot:'wh',cls:'',       mk:(n)=>`The long road home. Dawnhearth won\'t know what came back.`},
+    {id:'a1',type:'adventure',title:'The Deep Ashwood',desc:"Beyond the known paths of the Ashwood lies something the maps don\'t show. Hunters who pushed past the second ridge don\'t all come back. Those who do don\'t talk much about what they saw.",hints:['The trees get older out there. Older than seems right.','Things that live deep don\'t like visitors.'],enemyName:'Forest Wraith',enemyLevel:18,source:'the Deep Ashwood near Dawnhearth'},
+    {id:'a2',type:'adventure',title:'The Forgotten Keep',desc:"Before Dawnhearth, there was a fortress on the high ridge. History says it fell in a siege. The ruins say the siege never quite ended.",hints:['Ruins that old don\'t stay empty.','Old armour won\'t protect against old things.'],enemyName:'Undead Knight',enemyLevel:26,source:'the Forgotten Keep in the high ridge'},
+    {id:'a3',type:'adventure',title:'The Black Mere',desc:"There is a lake three days east where the water is black at any depth. Fishermen gave up on it two generations ago. Whatever they found, they didn\'t write it down.",hints:['The cold there is not just cold.','What lives beneath doesn\'t breathe air.'],enemyName:'Bog Witch',enemyLevel:19,source:'the Black Mere east of Dawnhearth'},
   ],
 };
 
-// ════════════════════════════════════════════════════════
-// CLASS ENCOUNTERS
-// ════════════════════════════════════════════════════════
-const CLASS_ENCOUNTERS={
-  Knight:{
-    name:'A Weathered Knight',
-    desc:'"You\'ve got the look of someone who hasn\'t yet decided what to fight for. Come find me when you have." He returns to sharpening his blade. The sound of it follows you home.',
-    unlock:'Knight',
-    flavour:'Sworn to a cause that outlived its kingdom. Still sworn.',
-  },
-  Ranger:{
-    name:'A Silent Ranger',
-    desc:'She doesn\'t speak immediately. She\'s reading something in the treeline you can\'t see. Then: "You\'re soft on your feet. The forest notices. Come to the gate before dawn if you want to be less soft."',
-    unlock:'Ranger',
-    flavour:'The roads remember her. The roads don\'t remember many people.',
-  },
-  Acolyte:{
-    name:'An Acolyte of the Ember Path',
-    desc:'"The pain you\'re carrying — not from today, from before. I can see it." He offers a hand. Not to heal. Just to hold, for a moment. "When you\'re ready to learn what it means, find the Sanctum."',
-    unlock:'Acolyte',
-    flavour:'Serves the flame not for warmth, but for what it shows in the dark.',
-  },
+// ══════════════════════════════════════════════════════════════
+// CLASS ENCOUNTERS & CONFIG
+// ══════════════════════════════════════════════════════════════
+const CLASS_CONFIG={
+  Citizen:{icon:'👤',stats:{str:8,agi:8,int:8,con:8},startLevel:1,blurb:'A fresh face. No history. No enemies. Not yet.',
+    startItems:['wooden_sword'],
+    perks:[{name:'Unremarkable',desc:'You are, in every measurable way, average.',dot:'pd-class'}]},
+  Knight:{icon:'⚔',stats:{str:12,agi:8,int:6,con:10},startLevel:3,blurb:'Steel and oaths. Some oaths predate their kingdoms.',
+    startItems:['chipped_sword','wooden_shield','leather_vest'],
+    unlockCondition:'Complete a bounty at level 3+',
+    perks:[
+      {name:'Oath of Steel',desc:'Sword and axe damage +5%.',dot:'pd-class'},
+      {name:'Shield Wall',desc:'Damage reduction +10% while a shield is equipped.',dot:'pd-class'},
+    ]},
+  Ranger:{icon:'🏹',stats:{str:8,agi:12,int:7,con:9},startLevel:3,blurb:'The road knows her. She knows the road.',
+    startItems:['short_bow','leather_cap','worn_boots'],
+    unlockCondition:'Find a Short Bow on a bounty',
+    perks:[
+      {name:'Light Foot',desc:'AGI reduces attack speed by 0.5% per point.',dot:'pd-class'},
+      {name:"Hunter's Eye",desc:'Crit chance +8% while a bow is equipped.',dot:'pd-class'},
+    ]},
+  Acolyte:{icon:'✨',stats:{str:6,agi:8,int:12,con:10},startLevel:5,blurb:'Faith is a weapon. Patience is its edge.',
+    startItems:['cloth_robe','healing_potion','blessed_amulet'],
+    unlockCondition:'Complete the Broken Chapel quest',
+    perks:[
+      {name:'Lay on Hands',desc:'Heals 15% of max HP between combat rounds.',dot:'pd-class'},
+      {name:'Ward',desc:'Magic resistance +10%.',dot:'pd-class'},
+    ]},
 };
 
-// ════════════════════════════════════════════════════════
+const CLASS_ENCOUNTERS={
+  Knight:{npc:'A Weathered Knight at the gate',speech:'"You\'ve got the look of someone who hasn\'t decided what to fight for. Come find me when you have." He returns to sharpening his blade. The sound of it follows you home.'},
+  Ranger:{npc:'A Silent Ranger in the treeline',speech:'"You\'re soft on your feet. The forest notices." She doesn\'t look at you when she says it. "Come to the gate before dawn if you want to be less soft."'},
+  Acolyte:{npc:'An Acolyte of the Ember Path',speech:'"The pain you\'re carrying — I can see it." He offers his hand. Not to heal. Just to hold a moment. "When you\'re ready to understand it, find the Sanctum."'},
+};
+
+const MOON_QUOTES=[
+  "I have watched every wanderer who ever left Dawnhearth.\nI remember all of them.\nThe ones who came back too.",
+  "The dark is not my doing.\nI only light what the dark allows.\nTonight it is generous.",
+  "I have been here since before the first fire.\nI will be here after the last.\nYou are somewhere between, and that is the interesting part.",
+  "They ask me for signs.\nI give them light.\nWhat they do with it is not my concern.",
+  "Every hero who ever walked these roads looked up at me.\nI watched them go.\nI watched what came after.",
+];
+
+// ══════════════════════════════════════════════════════════════
 // STATE
-// ════════════════════════════════════════════════════════
-const S={
-  c:{name:'',charClass:'Citizen',level:1,xp:0,xpNext:83,str:8,agi:8,int:8,gold:0,rep:0,deaths:0},
+// ══════════════════════════════════════════════════════════════
+const G={
+  c:null,
   equipped:{head:null,shoulder:null,body:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:'wooden_sword',offhand:null,pack:null,pack2:null},
   bag:[],
   journey:null,
-  act:'job',
-  screen:'town',
+  screen:'home',
+  selectedClass:'Citizen',
+  pendingLoot:[],
+  journeyEnded:false,
   pendingEncounter:null,
 };
 
-function getDiscovered(){return JSON.parse(localStorage.getItem('yonder_classes')||'[]');}
-function discoverClass(cls){
-  const d=getDiscovered();
-  if(!d.includes(cls)){d.push(cls);localStorage.setItem('yonder_classes',JSON.stringify(d));}
-  addDiary(`${S.c.name} encountered a ${cls} in Dawnhearth. A path opens.`,'class-unlock');
+function save(){
+  const data={c:G.c,equipped:G.equipped,bag:G.bag,journey:G.journey};
+  localStorage.setItem('yonder_save',JSON.stringify(data));
 }
 
-// ════════════════════════════════════════════════════════
+function loadSave(){
+  const d=localStorage.getItem('yonder_save');
+  return d?JSON.parse(d):null;
+}
+
+function getChronicle(){return JSON.parse(localStorage.getItem('yonder_chronicle')||'[]');}
+function addChronicle(text,type='milestone',grave){
+  const ch=getChronicle();
+  const now=new Date();
+  const ds=`${now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} · ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+  ch.unshift({text,type,date:ds,grave:grave||false});
+  localStorage.setItem('yonder_chronicle',JSON.stringify(ch.slice(0,200)));
+}
+
+function getDiary(){return JSON.parse(localStorage.getItem('yonder_diary')||'[]');}
+function addDiary(text){
+  const d=getDiary();
+  const now=new Date();
+  const ds=`${now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} · ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
+  d.unshift({text,date:ds});
+  localStorage.setItem('yonder_diary',JSON.stringify(d.slice(0,100)));
+}
+
+function getGraveyard(){return JSON.parse(localStorage.getItem('yonder_graveyard')||'[]');}
+function addToGraveyard(char,level,cause){
+  const g=getGraveyard();
+  g.unshift({name:char.name,charClass:char.charClass,level,cause,date:new Date().toLocaleDateString('en-GB')});
+  localStorage.setItem('yonder_graveyard',JSON.stringify(g.slice(0,50)));
+}
+
+function getUnlocked(){return JSON.parse(localStorage.getItem('yonder_unlocked')||'["Citizen"]');}
+function addUnlocked(cls){const u=getUnlocked();if(!u.includes(cls)){u.push(cls);localStorage.setItem('yonder_unlocked',JSON.stringify(u));}}
+
+function getTownMissions(){return JSON.parse(localStorage.getItem('yonder_town_missions')||'null');}
+function setTownMissions(m){localStorage.setItem('yonder_town_missions',JSON.stringify(m));}
+
+function isFirstAdventureDone(){return localStorage.getItem('yonder_first_adv')==='true';}
+function setFirstAdventureDone(){localStorage.setItem('yonder_first_adv','true');}
+
+function getCharacterIndex(){return parseInt(localStorage.getItem('yonder_char_idx')||'0');}
+function incCharacterIndex(){localStorage.setItem('yonder_char_idx',String(getCharacterIndex()+1));}
+
+function getBank(){return JSON.parse(localStorage.getItem('yonder_bank')||'[]');}
+function saveBank(b){localStorage.setItem('yonder_bank',JSON.stringify(b));}
+
+// ══════════════════════════════════════════════════════════════
 // XP
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function xpForLevel(l){let t=0;for(let i=1;i<l;i++)t+=Math.floor(i+300*Math.pow(2,i/7));return Math.floor(t/4);}
 
-// ════════════════════════════════════════════════════════
-// SCREEN MANAGEMENT
-// ════════════════════════════════════════════════════════
-function showScreen(s){
-  S.screen=s;
-  document.getElementById('town-view').style.display=s==='town'?'':'none';
-  document.getElementById('journey-view').classList.toggle('active',s==='journey');
-  document.getElementById('crossroads-view').classList.toggle('active',s==='crossroads');
-  document.getElementById('activity-dock').style.display=(s==='town')?'':'none';
-}
-
-function showCrossroads(dest){
-  if(!dest){showScreen('crossroads');return;}
-  if(dest==='dawnhearth'){showScreen('town');return;}
-  // Locked towns
-  const data={
-    grimhollow:{name:'Grimhollow',quote:'"The bells toll there out of habit rather than occasion. The road is long. You are not ready. Not yet."'},
-    millhaven:{name:'Millhaven',quote:'"They say the bread in Millhaven is the best in the region. The road is pleasant. Whether you are ready is another matter."'},
+// ══════════════════════════════════════════════════════════════
+// COMBAT SYSTEM
+// ══════════════════════════════════════════════════════════════
+function buildPlayerStats(){
+  const c=G.c;
+  const wk=G.equipped.weapon||'wooden_sword';
+  const w=ITEMS_DB[wk];
+  const wc=w.combat||{dmgMin:2,dmgMax:5,speed:2.0,crit:.04,type:'sword'};
+  let totalDef=0;
+  Object.values(G.equipped).forEach(k=>{if(!k)return;const it=ITEMS_DB[k];if(it&&it.stats.defense)totalDef+=it.stats.defense;});
+  // Also count loot items in bag that are equipped... (simplified: just use equip slots)
+  const armourPct=Math.min(0.75,totalDef*0.03);
+  const hp=10+(c.level*2)+(c.con*2);
+  let dmgMult=1,critBonus=0,speedBonus=0,resPct=0;
+  if(c.charClass==='Knight'){
+    dmgMult+=.05;
+    const oh=G.equipped.offhand?ITEMS_DB[G.equipped.offhand]:null;
+    if(oh&&oh.combat&&oh.combat.type==='shield') totalDef+=3; // shield wall
+  }
+  if(c.charClass==='Ranger'){
+    speedBonus=c.agi*.005;
+    if(wc.type==='bow') critBonus=.08;
+  }
+  if(c.charClass==='Acolyte') resPct=.10;
+  return{
+    name:c.name,charClass:c.charClass,
+    hp,maxHp:hp,
+    dmgMin:Math.max(1,Math.floor(wc.dmgMin*dmgMult)),
+    dmgMax:Math.floor(wc.dmgMax*dmgMult),
+    speed:Math.max(.8,wc.speed-speedBonus),
+    crit:Math.min(.5,wc.crit+(c.agi*.002)+critBonus),
+    armour:armourPct,resistance:resPct,
+    isAcolyte:c.charClass==='Acolyte',
   };
-  const d=data[dest];
-  if(d) openModal('locked_town',d);
 }
 
-// ════════════════════════════════════════════════════════
-// RENDER
-// ════════════════════════════════════════════════════════
-function render(){
-  const c=S.c;
-  document.getElementById('h-char').textContent=`${c.name} · Lv${c.level} ${c.charClass}`;
-  document.getElementById('h-gold').textContent=`${c.gold} gp`;
+function buildEnemyStats(name,level){
+  return{
+    name,
+    hp:8+level*4,maxHp:8+level*4,
+    dmgMin:Math.max(1,Math.floor(level*1.2)),
+    dmgMax:Math.floor(level*2.2),
+    speed:2.0+Math.random()*.8,
+    crit:.05,
+    armour:Math.min(.35,level*.004),
+    resistance:0,
+  };
 }
 
-// ════════════════════════════════════════════════════════
-// ACTIVITY SELECT
-// ════════════════════════════════════════════════════════
-function selectAct(btn,type){
-  document.querySelectorAll('.act-btn').forEach(b=>b.classList.remove('sel'));
-  btn.classList.add('sel');S.act=type;
-  document.getElementById('act-desc').textContent=ACTS[type].desc;
+function simulateCombat(player,enemy){
+  let pH=player.hp,eH=enemy.hp;
+  let pT=0,eT=0;
+  const events=[];let loops=0;
+  let healTick=0;
+  while(pH>0&&eH>0&&loops<300){
+    loops++;
+    const pN=player.speed-pT,eN=enemy.speed-eT;
+    if(pN<=eN){
+      pT=0;eT+=pN;
+      let d=ri(player.dmgMin,player.dmgMax);
+      const cr=Math.random()<player.crit;if(cr)d=Math.floor(d*1.5);
+      d=Math.max(1,Math.floor(d*(1-enemy.armour)));
+      eH=Math.max(0,eH-d);
+      events.push({a:'p',d,cr,pH,eH});
+    }else{
+      eT=0;pT+=eN;
+      let d=ri(enemy.dmgMin,enemy.dmgMax);
+      const cr=Math.random()<enemy.crit;if(cr)d=Math.floor(d*1.5);
+      d=Math.max(1,Math.floor(d*(1-player.armour)));
+      pH=Math.max(0,pH-d);
+      events.push({a:'e',d,cr,pH,eH});
+      if(player.isAcolyte){
+        healTick++;
+        if(healTick%5===0&&pH>0){
+          const h=Math.floor(player.maxHp*.15);
+          pH=Math.min(player.maxHp,pH+h);
+          events.push({a:'heal',h,pH,eH});
+        }
+      }
+    }
+  }
+  return{events,won:pH>0,finalPH:pH,finalEH:eH,player,enemy};
 }
 
-// ════════════════════════════════════════════════════════
-// DEPART
-// ════════════════════════════════════════════════════════
-function depart(){
-  const cfg=ACTS[S.act];
-  const endTime=Date.now()+cfg.duration*1000;
-  S.journey={type:S.act,label:cfg.label,endTime,duration:cfg.duration,cfg,shown:[],enemyEncounterDone:false};
-  localStorage.setItem('yonder_journey',JSON.stringify(S.journey));
-  showScreen('journey');
-  document.getElementById('h-status').textContent=`ON ${cfg.label.toUpperCase()}`;
-  document.getElementById('depart-btn').disabled=true;
+function renderCombat(sim){
+  const log=document.getElementById('j-log');
+  const wrap=document.createElement('div');wrap.className='combat-block';
+  const pMaxH=sim.player.maxHp,eMaxH=sim.enemy.maxHp;
+  let pCurH=sim.player.hp,eCurH=sim.enemy.maxHp;
+  const pPct=()=>Math.max(0,(pCurH/pMaxH)*100);
+  const ePct=()=>Math.max(0,(eCurH/eMaxH)*100);
+  const header=document.createElement('div');header.className='combat-header';
+  header.innerHTML=`<span class="ch-label">⚔ COMBAT — ${sim.player.name} vs ${sim.enemy.name}</span>
+    <div class="ch-bars">
+      <div class="hp-bar-wrap"><span class="hp-name">${sim.player.name}</span><div class="hp-track"><div class="hp-fill player" id="cb-php" style="width:100%"></div></div><span class="hp-val" id="cb-phv">${pCurH}/${pMaxH}</span></div>
+      <div class="hp-bar-wrap"><span class="hp-name">${sim.enemy.name}</span><div class="hp-track"><div class="hp-fill enemy" id="cb-ehp" style="width:100%"></div></div><span class="hp-val" id="cb-ehv">${eCurH}/${eMaxH}</span></div>
+    </div>`;
+  wrap.appendChild(header);
+  // Render events (limit to ~15 lines for readability)
+  const show=sim.events.slice(0,18);
+  show.forEach(ev=>{
+    const line=document.createElement('div');
+    if(ev.a==='p'){
+      pCurH=ev.pH;eCurH=ev.eH;
+      line.className=`combat-line ${ev.cr?'crit':'hit'}`;
+      line.textContent=`${sim.player.name} ${ev.cr?'⚡ CRITICAL ':''} strikes for ${ev.d} — ${sim.enemy.name} at ${ev.eH}hp`;
+    }else if(ev.a==='e'){
+      pCurH=ev.pH;eCurH=ev.eH;
+      line.className=`combat-line ${ev.cr?'ecrit':'ehit'}`;
+      line.textContent=`${sim.enemy.name}${ev.cr?' CRITS':''} hits for ${ev.d} — ${sim.player.name} at ${ev.pH}hp`;
+    }else{
+      pCurH=ev.pH;
+      line.className='combat-line heal';
+      line.textContent=`${sim.player.name} draws on their faith, recovering ${ev.h}hp`;
+    }
+    wrap.appendChild(line);
+  });
+  if(sim.events.length>18){const el=document.createElement('div');el.className='combat-line';el.textContent=`... ${sim.events.length-18} more exchanges ...`;wrap.appendChild(el);}
+  const result=document.createElement('div');result.className='combat-line result';
+  result.textContent=sim.won?`✦ ${sim.player.name} stands. ${sim.enemy.name} does not.`:`⚰ ${sim.player.name} falls. ${sim.enemy.name} remains.`;
+  wrap.appendChild(result);
+  log.appendChild(wrap);
+  // Update HP bars to final state
+  setTimeout(()=>{
+    const pb=document.getElementById('cb-php');const eb=document.getElementById('cb-ehp');
+    const pv=document.getElementById('cb-phv');const ev2=document.getElementById('cb-ehv');
+    if(pb) pb.style.width=pPct()+'%';if(eb) eb.style.width=ePct()+'%';
+    if(pv) pv.textContent=`${sim.finalPH}/${pMaxH}`;if(ev2) ev2.textContent=`${sim.finalEH}/${eMaxH}`;
+  },400);
+  log.scrollTop=log.scrollHeight;
+  return sim.won;
+}
+
+// ══════════════════════════════════════════════════════════════
+// LOOT SYSTEM
+// ══════════════════════════════════════════════════════════════
+function rollRarity(missionType){
+  const weights={
+    job:     {worn:70,common:30,crafted:0,enchanted:0,legendary:0,mythic:0},
+    bounty:  {worn:25,common:55,crafted:18,enchanted:2,legendary:0,mythic:0},
+    quest:   {worn:10,common:40,crafted:35,enchanted:13,legendary:2,mythic:0},
+    adventure:{worn:5,common:20,crafted:38,enchanted:25,legendary:10,mythic:2},
+  };
+  const w=weights[missionType];
+  if(!isFirstAdventureDone()){delete w.enchanted;delete w.legendary;delete w.mythic;}
+  const pool=[];
+  const lv=Math.floor(G.c.level/10);
+  Object.entries(w).forEach(([r,wt])=>{
+    const boost=(['enchanted','legendary','mythic'].includes(r)?lv:0);
+    for(let i=0;i<wt+boost;i++) pool.push(r);
+  });
+  return pool[ri(0,pool.length-1)];
+}
+
+function generateLootItem(missionType,source,guaranteed){
+  if(guaranteed){
+    const it=ITEMS_DB[guaranteed];
+    return{key:guaranteed,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats,source,desc:it.desc,isDBItem:true};
+  }
+  const rarity=rollRarity(missionType);
+  const names=LOOT_NAMES[rarity];
+  const name=names[ri(0,names.length-1)];
+  const rc=RARITY_CONFIG[rarity];
+  // Generate a simple stat based on rarity
+  const statMag={worn:1,common:2,crafted:ri(3,4),enchanted:ri(3,5),legendary:ri(5,8),mythic:ri(8,15)};
+  const statKeys=['attack','defense','str','agi','int','con'];
+  const stat=statKeys[ri(0,statKeys.length-1)];
+  const mag=statMag[rarity];
+  return{key:`loot_${Date.now()}`,name,rarity,icon:iconForName(name),stats:{[stat]:mag},source,desc:`A ${rc.label.toLowerCase()} find.`,isDBItem:false};
+}
+
+function iconForName(n){
+  if(/sword|blade|sabre|dagger|knife|axe|hatchet/i.test(n)) return'⚔';
+  if(/bow|arrow|quiver/i.test(n)) return'🏹';
+  if(/staff|wand|grimoire|tome|focus/i.test(n)) return'🔮';
+  if(/shield|buckler|aegis/i.test(n)) return'🛡';
+  if(/helm|cap|hood|crown|circlet/i.test(n)) return'⛑';
+  if(/cloak|robe|vest|armour|coif/i.test(n)) return'🥋';
+  if(/boot|sandal/i.test(n)) return'👢';
+  if(/ring|band/i.test(n)) return'💍';
+  if(/amulet|necklace|tears|breath/i.test(n)) return'📿';
+  if(/gauntlet|glove/i.test(n)) return'🧤';
+  return'✦';
+}
+
+function itemRarityClass(rarity){return RARITY_CONFIG[rarity]?.cls||'rar-common';}
+
+// ══════════════════════════════════════════════════════════════
+// TOWN MISSIONS STATE
+// ══════════════════════════════════════════════════════════════
+function initTownMissions(){
+  const existing=getTownMissions();
+  if(existing) return;
+  // Generate one of each type
+  const gen=(pool)=>pool[ri(0,pool.length-1)];
+  const missions={
+    holy_relic_done:false,
+    job:gen(MISSION_POOL.job),
+    bounty:gen(MISSION_POOL.bounty),
+    quest:null, // holy relic is first quest
+    adventure:gen(MISSION_POOL.adventure),
+  };
+  setTownMissions(missions);
+}
+
+function completeMission(type){
+  const missions=getTownMissions()||{};
+  if(type==='quest'&&!missions.holy_relic_done){
+    missions.holy_relic_done=true;
+    missions.quest=MISSION_POOL.quest[ri(0,MISSION_POOL.quest.length-1)];
+  }else{
+    const pool=MISSION_POOL[type];
+    missions[type]=pool[ri(0,pool.length-1)];
+  }
+  setTownMissions(missions);
+}
+
+function getActiveMissions(){
+  const m=getTownMissions();
+  if(!m) return [];
+  const result=[];
+  if(!m.holy_relic_done){
+    result.push({...HOLY_RELIC,_isHolyRelic:true});
+  }else{
+    if(m.job) result.push(m.job);
+    if(m.bounty) result.push(m.bounty);
+    if(m.quest) result.push(m.quest);
+    if(m.adventure) result.push(m.adventure);
+  }
+  return result;
+}
+
+// ══════════════════════════════════════════════════════════════
+// JOURNEY SYSTEM
+// ══════════════════════════════════════════════════════════════
+const JOURNEY_NARR={
+  job:[
+    {at:0,  dot:'jd-em',cls:'',     mk:n=>`${n} steps out into Dawnhearth's streets. The work is already waiting.`},
+    {at:40, dot:'jd-wh',cls:'',     mk:()=>`The errand is straightforward. The town smells of bread and smoke.`},
+    {at:80, dot:'jd-go',cls:'loot', mk:n=>`${n} returns. The work is done.`},
+  ],
+  bounty:[
+    {at:0,  dot:'jd-em',cls:'',      mk:n=>`${n} passes through the gate with a name and a description.`},
+    {at:20, dot:'jd-wh',cls:'',      mk:()=>`Tracks in the mud. Fresh enough to follow.`},
+    {at:50, dot:'jd-fight',cls:'danger',mk:()=>`Contact.`,combat:true},
+    {at:85, dot:'jd-go',cls:'loot',  mk:n=>`${n} turns back toward Dawnhearth.`},
+  ],
+  quest:[
+    {at:0,  dot:'jd-em',cls:'',      mk:n=>`${n} leaves the warmth of Dawnhearth behind.`},
+    {at:15, dot:'jd-wh',cls:'',      mk:()=>`The forest thickens. The path narrows.`},
+    {at:35, dot:'jd-fight',cls:'danger',mk:()=>`The first encounter.`,combat:true},
+    {at:65, dot:'jd-em',cls:'danger',mk:()=>`The way back is longer than the way in.`},
+    {at:88, dot:'jd-go',cls:'loot',  mk:n=>`${n} turns for home.`},
+  ],
+  adventure:[
+    {at:0,  dot:'jd-em',cls:'',      mk:n=>`${n} steps past the last road marker. The map ends here.`},
+    {at:12, dot:'jd-wh',cls:'',      mk:()=>`A ruined waystation. A warning carved in the doorframe. Continued anyway.`},
+    {at:28, dot:'jd-fight',cls:'danger',mk:()=>`The first encounter.`,combat:true},
+    {at:50, dot:'jd-wh',cls:'',      mk:()=>`Deeper. The quality of the light has changed.`},
+    {at:68, dot:'jd-fight',cls:'danger',mk:()=>`A second encounter. Worse than the first.`,combat:true},
+    {at:84, dot:'jd-go',cls:'loot',  mk:()=>`The thing is done.`},
+    {at:94, dot:'jd-wh',cls:'',      mk:n=>`The long road home.`},
+  ],
+};
+
+let timerInt=null;
+
+function startMission(missionData){
+  const dur={job:60,bounty:180,quest:480,adventure:1200}[missionData.type];
+  const endTime=Date.now()+dur*1000;
+  G.journey={
+    mission:missionData,
+    type:missionData.type,
+    endTime,duration:dur,
+    shown:[],combatDone:[],
+    encounterDone:false,
+    bountyCompleted:false,
+  };
+  G.journeyEnded=false;
+  G.pendingLoot=[];
+  save();
+  showJourneyScreen(missionData);
   document.getElementById('dev-skip').style.display='block';
-  const titles=cfg.titles;
-  document.getElementById('j-title').textContent=titles[ri(0,titles.length-1)];
-  document.getElementById('j-type').textContent=`— ${cfg.label.toUpperCase()} —`;
-  document.getElementById('journey-log').innerHTML='';
   startTimer();
 }
 
-// ════════════════════════════════════════════════════════
-// TIMER
-// ════════════════════════════════════════════════════════
-let timerInterval=null;
-function startTimer(){if(timerInterval)clearInterval(timerInterval);timerInterval=setInterval(tick,1000);tick();}
+function showJourneyScreen(m){
+  showScreen('journey');
+  document.getElementById('h-status').textContent=`ON ${m.type.toUpperCase()}`;
+  document.getElementById('j-title').textContent=m.title;
+  document.getElementById('j-type').textContent=`— ${m.type.toUpperCase()} —`;
+  document.getElementById('j-log').innerHTML='';
+}
 
-function tick(){
-  if(!S.journey)return;
+function startTimer(){
+  if(timerInt) clearInterval(timerInt);
+  timerInt=setInterval(tickJourney,1000);
+  tickJourney();
+}
+
+function tickJourney(){
+  if(!G.journey) return;
   const now=Date.now();
-  const rem=Math.max(0,S.journey.endTime-now);
-  const elapsed=S.journey.duration*1000-rem;
-  const pct=Math.min(100,(elapsed/(S.journey.duration*1000))*100);
+  const rem=Math.max(0,G.journey.endTime-now);
+  const elapsed=G.journey.duration*1000-rem;
+  const pct=Math.min(100,(elapsed/(G.journey.duration*1000))*100);
   document.getElementById('progress-fill').style.width=pct+'%';
-  const m=Math.floor(rem/60000),s2=Math.floor((rem%60000)/1000);
-  document.getElementById('timer-hover').textContent=`${String(m).padStart(2,'0')}:${String(s2).padStart(2,'0')} remaining`;
+  const m2=Math.floor(rem/60000),s2=Math.floor((rem%60000)/1000);
+  document.getElementById('timer-hover').textContent=`${String(m2).padStart(2,'0')}:${String(s2).padStart(2,'0')} remaining`;
 
-  // Narrative
-  const stages=NARR[S.journey.type];
+  const stages=JOURNEY_NARR[G.journey.type];
   stages.forEach((stage,i)=>{
-    if(pct>=stage.at&&!S.journey.shown.includes(i)){
-      S.journey.shown.push(i);
-      addJEntry(stage.dot,stage.cls,stage.mk(S.c.name));
+    if(pct>=stage.at&&!G.journey.shown.includes(i)){
+      G.journey.shown.push(i);
+      if(stage.combat){
+        // Simulate combat
+        const miss=G.journey.mission;
+        const eN=miss.enemyName||randEnemy(G.c.level);
+        const eLv=miss.enemyLevel||Math.max(1,G.c.level+ri(-2,3));
+        const pStats=buildPlayerStats();
+        const eStats=buildEnemyStats(eN,eLv);
+        const sim=simulateCombat(pStats,eStats);
+        G.journey.combatDone.push({sim,index:i});
+        addJEntry(stage.dot,stage.cls,`${G.c.name} faces a ${eN}.`);
+        setTimeout(()=>renderCombat(sim),300);
+        if(!sim.won){
+          clearInterval(timerInt);
+          setTimeout(()=>endJourneyDead(eN),1200);
+        }
+      }else{
+        addJEntry(stage.dot,stage.cls,stage.mk(G.c.name));
+      }
     }
   });
 
-  // Class encounter check (city jobs only, 15% chance, once per run)
-  if(S.journey.type==='job'&&!S.journey.encounterDone&&pct>=50){
-    S.journey.encounterDone=true;
-    if(Math.random()<0.18) rollClassEncounter();
+  // Class encounter on job (18% chance, once)
+  if(G.journey.type==='job'&&!G.journey.encounterDone&&pct>=50){
+    G.journey.encounterDone=true;
+    if(Math.random()<.18) rollClassEncounterEvent();
   }
 
-  if(rem<=0){clearInterval(timerInterval);resolveJourney();}
+  if(rem<=0&&!G.journeyEnded){
+    clearInterval(timerInt);
+    resolveJourney();
+  }
 }
 
-function rollClassEncounter(){
-  const discovered=getDiscovered();
-  const available=Object.keys(CLASS_ENCOUNTERS).filter(c=>!discovered.includes(c));
-  if(available.length===0)return;
+function rollClassEncounterEvent(){
+  const unlocked=getUnlocked();
+  const all=['Knight','Ranger','Acolyte'];
+  const available=all.filter(c=>!unlocked.includes(c));
+  if(available.length===0) return;
   const cls=available[ri(0,available.length-1)];
-  S.pendingEncounter=cls;
-  addJEntry('go','discovery',`Returning through town, ${S.c.name} pauses. Someone unexpected catches the eye...`);
+  G.pendingEncounter=cls;
+  addJEntry('jd-gr','disc',`Returning through town, ${G.c.name} pauses. Someone catches the eye...`);
 }
 
-// ════════════════════════════════════════════════════════
-// RESOLVE
-// ════════════════════════════════════════════════════════
+function endJourneyDead(enemy){
+  G.journeyEnded=true;
+  addJEntry('jd-bl','danger',`${G.c.name} does not return from the encounter with a ${enemy}.`);
+  addChronicle(`${G.c.name} (${G.c.charClass}, Lv${G.c.level}) fell to a ${enemy}. They never returned.`,'death',true);
+  addToGraveyard(G.c,G.c.level,`Slain by a ${enemy}`);
+  showMissionEnd(true,null);
+}
+
 function resolveJourney(){
-  const j=S.journey;
-  const deathChance=calcDeathChance(j.cfg.death);
-  const died=Math.random()<deathChance;
-  document.getElementById('dev-skip').style.display='none';
+  if(G.journeyEnded) return;
+  G.journeyEnded=true;
+  const j=G.journey;
+  const xpG=ri(...{job:[8,18],bounty:[28,65],quest:[95,210],adventure:[280,650]}[j.type]);
+  const gG=ri(...{job:[6,14],bounty:[14,38],quest:[48,130],adventure:[140,420]}[j.type]);
+  G.c.xp+=xpG;G.c.gold+=gG;G.c.rep=Math.min(100,G.c.rep+ri(1,4));
 
-  if(died){
-    addJEntry('bl','danger',`The journey ends here. ${S.c.name} does not return.`);
-    addDiary(`${S.c.name} fell on a ${j.label.toLowerCase()}. Their story joins the dark.`,'death');
-    setTimeout(()=>handleDeath(),2500);
-  } else {
-    const xpG=ri(...j.cfg.xp);const goldG=ri(...j.cfg.gold);
-    S.c.xp+=xpG;S.c.gold+=goldG;S.c.rep=Math.min(100,S.c.rep+ri(1,4));
-    checkLevelUp();
-    addJEntry('go','loot',`${S.c.name} returns. +${xpG} xp, +${goldG} gp.`);
-    addDiary(`Survived a ${j.label.toLowerCase()}. ${xpG} xp, ${goldG} gold.`,'entry');
-    setTimeout(()=>{
-      returnToTown();
-      if(S.pendingEncounter){
-        setTimeout(()=>showEncounterModal(S.pendingEncounter),400);
-        S.pendingEncounter=null;
-      }
-    },1800);
+  // Check bounty completion for Knight unlock
+  if(j.type==='bounty'){
+    G.c.bountiesCompleted=(G.c.bountiesCompleted||0)+1;
+    if(G.c.level>=3&&G.c.bountiesCompleted>=1&&!getUnlocked().includes('Knight')){
+      addUnlocked('Knight');
+      addChronicle(`The path of the Knight revealed itself to ${G.c.name} at level ${G.c.level}.`,'unlock');
+      G.pendingEncounter='Knight_earned';
+    }
   }
-  S.journey=null;localStorage.removeItem('yonder_journey');
+
+  // Loot drop
+  const shouldDrop={job:false,bounty:Math.random()<.25,quest:Math.random()<.55,adventure:true}[j.type];
+  if(shouldDrop||j.mission._isHolyRelic){
+    const source=j.mission.source||'the road';
+    const loot=generateLootItem(j.type,source,j.mission.guaranteedItem||null);
+    G.pendingLoot.push(loot);
+  }
+
+  // Adventure check
+  if(j.type==='adventure'&&!isFirstAdventureDone()){
+    setFirstAdventureDone();
+    // Sigil ring guaranteed on first adventure
+    G.pendingLoot=[generateLootItem('adventure',j.mission.source,'sigil_ring')];
+    addChronicle(`${G.c.name} completed their first adventure and found the Dawnhearth Sigil Ring.`,'milestone');
+  }
+
+  // Holy relic completion
+  if(j.mission._isHolyRelic||j.mission.id==='holy_relic'){
+    if(!getUnlocked().includes('Acolyte')){
+      addUnlocked('Acolyte');
+      addChronicle(`The Acolyte path revealed through the Broken Chapel. The broken crown symbol remains.`,'unlock');
+    }
+  }
+
+  checkLevelUp();
+  addJEntry('jd-go','loot',`${G.c.name} returns. +${xpG} xp, +${gG} gp.`);
+  addDiary(`Completed a ${j.type} — ${j.mission.title}. Earned ${xpG} experience and ${gG} gold.`);
+
+  if(j.mission.storyText) addJEntry('jd-gr','disc',j.mission.storyText);
+
+  completeMission(j.type);
+  save();
+  showMissionEnd(false,G.pendingLoot);
 }
 
-function calcDeathChance(base){
-  let def=0,att=0;
-  Object.values(S.equipped).forEach(k=>{if(!k)return;const it=ITEMS_DB[k];if(it){def+=(it.stats.defense||0);att+=(it.stats.attack||0);}});
-  return Math.max(0,base-(def*0.02));
+function showMissionEnd(died,loot){
+  document.getElementById('dev-skip').style.display='none';
+  setTimeout(()=>{
+    const log=document.getElementById('j-log');
+    const end=document.createElement('div');end.className='mission-end';
+    let html='';
+    if(loot&&loot.length>0){
+      html+=`<div class="loot-box"><div class="lb-title">Spoils</div>`;
+      loot.forEach((item,idx)=>{
+        const rc=RARITY_CONFIG[item.rarity]||RARITY_CONFIG.common;
+        const statsStr=Object.entries(item.stats).map(([k,v])=>k==='special'?`✦ ${v}`:`+${v} ${k}`).join(' ');
+        html+=`<div class="lb-item"><span class="lb-icon">${item.icon}</span><div class="lb-info"><span class="lb-name ${rc.cls}">${item.name} <small style="font-size:11px;">[${rc.label}]</small></span><span class="lb-sub">${statsStr} — ${item.source}</span></div><button class="lb-take ${rc.cls}" onclick="takeLoot(${idx})" id="loot-btn-${idx}" style="border-color:${rc.color};color:${rc.color};">Take</button></div>`;
+      });
+      html+=`</div>`;
+    }
+    html+=`<button class="proceed-btn" onclick="proceedToTown(${died})">${died?'Begin Again':'Return to Dawnhearth'}</button>`;
+    end.innerHTML=html;
+    log.appendChild(end);
+    log.scrollTop=log.scrollHeight;
+  },600);
 }
 
-function handleDeath(){
-  const deaths=S.c.deaths+1;
-  S.c={name:genName(),charClass:'Citizen',level:1,xp:0,xpNext:xpForLevel(2),str:ri(6,10),agi:ri(6,10),int:ri(6,10),gold:0,rep:0,deaths};
-  S.equipped={head:null,shoulder:null,body:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:'wooden_sword',offhand:null,pack:null,pack2:null};
-  S.bag=[];
-  addDiary(`A new wanderer arrives: ${S.c.name}. They do not yet know what they are.`,'entry');
-  returnToTown();
+function takeLoot(idx){
+  const item=G.pendingLoot[idx];if(!item||item.taken) return;
+  item.taken=true;
+  G.bag.push(item);
+  const btn=document.getElementById(`loot-btn-${idx}`);
+  if(btn){btn.textContent='Taken';btn.disabled=true;}
+  // Check Ranger unlock (short bow from bounty)
+  if(item.name==='Short Bow'&&!getUnlocked().includes('Ranger')){
+    addUnlocked('Ranger');
+    addChronicle(`${G.c.name} found a Short Bow and walked the Ranger's path.`,'unlock');
+  }
+  addDiary(`Found ${item.name} (${RARITY_CONFIG[item.rarity].label}) from ${item.source}.`);
+  save();
 }
 
-function returnToTown(){showScreen('town');document.getElementById('h-status').textContent='IN TOWN';document.getElementById('depart-btn').disabled=false;render();}
+function proceedToTown(died){
+  G.journey=null;G.journeyEnded=false;
+  document.getElementById('progress-fill').style.width='0%';
+  if(died){
+    const oldName=G.c.name,oldLevel=G.c.level;
+    addChronicle(`${oldName} perished at level ${oldLevel}. Dawnhearth mourns, briefly.`,'death',true);
+    setTimeout(()=>showScreen('create'),300);
+  }else{
+    // Handle pending encounter
+    if(G.pendingEncounter&&G.pendingEncounter!=='Knight_earned'){
+      const cls=G.pendingEncounter;G.pendingEncounter=null;
+      showScreen('town');render();
+      setTimeout(()=>showEncounterModal(cls),400);
+    }else if(G.pendingEncounter==='Knight_earned'){
+      G.pendingEncounter=null;
+      showScreen('town');render();
+      setTimeout(()=>{
+        setModal('Path Revealed',`<p class="mflavour">"You have bled for something. That is the beginning."</p><p style="font-size:14px;color:var(--text);line-height:1.7;">The path of the <strong style="color:var(--parchment)">Knight</strong> is now known to your bloodline. Future wanderers may walk it.</p><p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-top:12px;">✦ KNIGHT UNLOCKED ✦</p>`);
+        document.getElementById('overlay').classList.add('open');
+      },400);
+    }else{
+      showScreen('town');render();
+    }
+  }
+  save();
+}
 
 function checkLevelUp(){
-  while(S.c.xp>=S.c.xpNext){
-    S.c.level++;S.c.xpNext=xpForLevel(S.c.level+1);
-    const st=S.c.charClass==='Knight'?'str':S.c.charClass==='Ranger'?'agi':S.c.charClass==='Acolyte'?'int':['str','agi','int'][ri(0,2)];
-    S.c[st]++;
-    addDiary(`Level ${S.c.level}. The body learns what the mind already knew.`,'discovery');
+  const c=G.c;
+  while(c.xp>=c.xpNext){
+    c.level++;c.xpNext=xpForLevel(c.level+1);
+    const st=c.charClass==='Knight'?'str':c.charClass==='Ranger'?'agi':c.charClass==='Acolyte'?'int':['str','agi','int'][ri(0,2)];
+    c[st]++;
+    if(c.level%5===0) c.con++;
+    addDiary(`Reached level ${c.level}. The body learns what the mind already knew.`);
+    if(c.level%5===0) addChronicle(`${c.name} reached level ${c.level} as a ${c.charClass}.`,'milestone');
   }
 }
 
-// ════════════════════════════════════════════════════════
-// ENCOUNTER MODAL
-// ════════════════════════════════════════════════════════
-function showEncounterModal(cls){
-  const enc=CLASS_ENCOUNTERS[cls];
-  setModal('A Chance Meeting',`
-    <p class="mflavour">"Not every path announces itself. Some wait quietly in the middle of an ordinary errand."</p>
-    <div class="encounter-card">
-      <div class="enc-name">${enc.name}</div>
-      <div class="enc-desc">${enc.desc}</div>
-      <button class="enc-btn" onclick="learnClass('${cls}')">Speak With Them</button>
-    </div>
-  `);
-  document.getElementById('overlay').classList.add('open');
-}
-
-function learnClass(cls){
-  discoverClass(cls);
-  const enc=CLASS_ENCOUNTERS[cls];
-  setModal(`The ${cls} Path Revealed`,`
-    <p class="mflavour">"${enc.flavour}"</p>
-    <p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:16px;">
-      The way of the <strong style="color:var(--parchment)">${cls}</strong> is now known to your bloodline. Future wanderers may walk this path.
-    </p>
-    <p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);">✦ CLASS UNLOCKED: ${cls.toUpperCase()} ✦</p>
-    <p class="coming-soon" style="margin-top:12px;">Class selection at character start coming in v0.4</p>
-  `);
-}
-
-// ════════════════════════════════════════════════════════
-// JOURNEY LOG
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// JOURNEY LOG ENTRY
+// ══════════════════════════════════════════════════════════════
 function addJEntry(dot,cls,text){
-  const log=document.getElementById('journey-log');
+  const log=document.getElementById('j-log');
   const el=document.createElement('div');el.className='j-entry';
   el.innerHTML=`<div class="j-dot ${dot}"></div><div class="j-text ${cls}">${text}</div>`;
   log.appendChild(el);log.scrollTop=log.scrollHeight;
 }
 
-// ════════════════════════════════════════════════════════
-// DIARY
-// ════════════════════════════════════════════════════════
-function getDiary(){return JSON.parse(localStorage.getItem('yonder_diary')||'[]');}
-function addDiary(text,type='entry'){
-  const d=getDiary();
-  const now=new Date();
-  const ds=`${now.toLocaleDateString('en-GB',{day:'2-digit',month:'short'})} · ${now.toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})}`;
-  d.unshift({text,type,date:ds});
-  localStorage.setItem('yonder_diary',JSON.stringify(d.slice(0,150)));
+// ══════════════════════════════════════════════════════════════
+// ENCOUNTER MODAL
+// ══════════════════════════════════════════════════════════════
+function showEncounterModal(cls){
+  const enc=CLASS_ENCOUNTERS[cls];if(!enc) return;
+  setModal('A Chance Meeting',`
+    <p class="mflavour">"Not every path announces itself. Some wait quietly in the middle of an ordinary errand."</p>
+    <div class="enc-card">
+      <div class="enc-npc">${enc.npc}</div>
+      <div class="enc-speech">${enc.speech}</div>
+      <button class="enc-btn" onclick="learnClass('${cls}')">Speak With Them</button>
+    </div>`);
+  document.getElementById('overlay').classList.add('open');
 }
 
-// ════════════════════════════════════════════════════════
-// SHOP
-// ════════════════════════════════════════════════════════
-function buyItem(key){
-  const it=ITEMS_DB[key];
-  if(S.c.gold<it.price)return;
-  S.c.gold-=it.price;S.bag.push(key);render();
-  openModal('shop');
+function learnClass(cls){
+  const cfg=CLASS_CONFIG[cls];
+  setModal(`The ${cls} Path`,`
+    <p class="mflavour">"${cfg.blurb}"</p>
+    <p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:14px;">The way of the <strong style="color:var(--parchment)">${cls}</strong> is now known to your bloodline.</p>
+    <p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);">✦ CLASS UNLOCKED: ${cls.toUpperCase()} ✦</p>
+    <p class="coming-soon" style="margin-top:12px;">Class selection at character creation is already available.</p>`);
+  addUnlocked(cls);
+  addChronicle(`${G.c.name} walked with a ${cls} and learned what that means.`,'unlock');
 }
 
-function equipItem(key,fromBag){
-  const it=ITEMS_DB[key];
-  const slot=it.slot;
-  // Unequip current if any
-  if(S.equipped[slot]&&fromBag!==false) S.bag.push(S.equipped[slot]);
-  S.equipped[slot]=key;
-  if(fromBag){const idx=S.bag.indexOf(key);if(idx>-1)S.bag.splice(idx,1);}
-  openModal('inventory');render();
+// ══════════════════════════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════════════════════════
+function showScreen(s){
+  G.screen=s;
+  document.getElementById('screen-home').classList.toggle('hidden',s!=='home');
+  document.getElementById('screen-create').classList.toggle('hidden',s!=='create');
+  const game=document.getElementById('screen-game');
+  game.style.display=s==='home'||s==='create'?'none':'flex';
+  if(s==='home'){buildHomeScreen();}
+  if(s==='create'){buildCreateScreen();}
+  if(['town','journey','crossroads'].includes(s)){
+    document.getElementById('town-view').style.display=s==='town'?'':'none';
+    document.getElementById('journey-view').classList.toggle('active',s==='journey');
+    document.getElementById('crossroads-view').classList.toggle('active',s==='crossroads');
+  }
 }
 
-function unequipItem(slot){
-  if(!S.equipped[slot])return;
-  if(slot==='weapon'&&S.equipped[slot]==='wooden_sword'){return;}// can't unequip starting weapon if nothing else
-  S.bag.push(S.equipped[slot]);S.equipped[slot]=null;
-  if(slot==='weapon'&&!S.equipped.weapon) S.equipped.weapon='wooden_sword';// fallback
-  openModal('inventory');render();
+function openLockedTown(name,desc){
+  setModal(name,`<p class="mflavour">"${desc}"</p><p class="coming-soon">Travel to ${name} coming in a future update.<br>Complete more of Dawnhearth first.</p>`);
+  document.getElementById('overlay').classList.add('open');
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
+// HOME SCREEN
+// ══════════════════════════════════════════════════════════════
+function buildHomeScreen(){
+  const saved=loadSave();
+  const area=document.getElementById('home-char-area');
+  const btn=document.getElementById('home-btn');
+  if(saved&&saved.c){
+    const c=saved.c;
+    const jt=saved.journey;
+    let journeyHtml='';
+    if(jt){
+      const rem=Math.max(0,jt.endTime-Date.now());
+      const m=Math.floor(rem/60000),s=Math.floor((rem%60000)/1000);
+      journeyHtml=`<div class="hcc-journey">On a ${jt.type} — ${rem>0?String(m)+'m '+String(s)+'s remaining':'returned'}</div>`;
+    }
+    area.innerHTML=`<div class="home-char-card">
+      <div class="hcc-name">${c.name}</div>
+      <div class="hcc-class">${c.charClass} of Dawnhearth</div>
+      <div class="hcc-detail">Level <span>${c.level}</span> &nbsp;·&nbsp; <span>${c.gold} gp</span> &nbsp;·&nbsp; <span>${c.deaths||0} souls lost</span></div>
+      ${journeyHtml}
+    </div>`;
+    btn.textContent='Continue Your Story';
+  }else{
+    area.innerHTML='';
+    btn.textContent='Begin Your Story';
+  }
+}
+
+function homeAction(){
+  const saved=loadSave();
+  if(saved&&saved.c){
+    G.c=saved.c;G.equipped=saved.equipped;G.bag=saved.bag||[];
+    if(saved.journey){
+      G.journey=saved.journey;G.journey.shown=G.journey.shown||[];G.journey.combatDone=[];
+      G.journeyEnded=false;
+      initTownMissions();
+      if(Date.now()>=G.journey.endTime){
+        showScreen('journey');
+        document.getElementById('j-title').textContent='The journey has concluded.';
+        document.getElementById('j-type').textContent=`— ${G.journey.type.toUpperCase()} —`;
+        document.getElementById('progress-fill').style.width='100%';
+        addJEntry('jd-wh','','You were away. The world did not wait.');
+        setTimeout(()=>resolveJourney(),1200);
+      }else{
+        showJourneyScreen(G.journey.mission);
+        addJEntry('jd-wh','','The journey continues. Whether you watch or not.');
+        startTimer();
+      }
+    }else{
+      showScreen('town');render();
+    }
+  }else{
+    showScreen('create');
+  }
+}
+
+// ══════════════════════════════════════════════════════════════
+// CHARACTER CREATION
+// ══════════════════════════════════════════════════════════════
+function buildCreateScreen(){
+  const unlocked=getUnlocked();
+  const grid=document.getElementById('class-grid');
+  const allClasses=['Citizen','Knight','Ranger','Acolyte'];
+  const unknowns=3; // question mark slots
+
+  let html=allClasses.map(cls=>{
+    const cfg=CLASS_CONFIG[cls];
+    const isUnlocked=unlocked.includes(cls);
+    if(isUnlocked){
+      return`<div class="class-card ${cls===G.selectedClass?'selected':''}" onclick="selectClass('${cls}')">
+        <span class="cc-icon">${cfg.icon}</span>
+        <span class="cc-name">${cls}</span>
+        <span class="cc-blurb">${cfg.blurb}</span>
+      </div>`;
+    }else{
+      return`<div class="class-card locked">
+        <span class="cc-lock">🔒</span>
+        <span class="cc-name">${cls}</span>
+        <span class="cc-blurb" style="font-size:10px;">${cfg.unlockCondition}</span>
+      </div>`;
+    }
+  }).join('');
+  // Unknown slots
+  for(let i=0;i<unknowns;i++) html+=`<div class="class-card locked"><span class="cc-lock">?</span><span class="cc-name" style="font-size:9px;">???</span><span class="cc-blurb">Unknown</span></div>`;
+  grid.innerHTML=html;
+
+  // Set selected to Citizen if current selection is locked
+  if(!unlocked.includes(G.selectedClass)) G.selectedClass='Citizen';
+  updateStatPreview();
+}
+
+function selectClass(cls){
+  G.selectedClass=cls;
+  document.querySelectorAll('.class-card').forEach(c=>c.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+  updateStatPreview();
+}
+
+function updateStatPreview(){
+  const cfg=CLASS_CONFIG[G.selectedClass];
+  document.getElementById('prev-str').textContent=cfg.stats.str;
+  document.getElementById('prev-agi').textContent=cfg.stats.agi;
+  document.getElementById('prev-int').textContent=cfg.stats.int;
+  document.getElementById('prev-con').textContent=cfg.stats.con;
+}
+
+function beginGame(){
+  const nameEl=document.getElementById('name-input');
+  const name=nameEl.value.trim()||genName();
+  const cfg=CLASS_CONFIG[G.selectedClass];
+  const deaths=(G.c?.deaths||0)+(loadSave()?.c?.deaths||0);
+  G.c={
+    name,charClass:G.selectedClass,
+    level:cfg.startLevel,
+    xp:xpForLevel(cfg.startLevel),xpNext:xpForLevel(cfg.startLevel+1),
+    str:cfg.stats.str,agi:cfg.stats.agi,int:cfg.stats.int,con:cfg.stats.con,
+    gold:0,rep:0,deaths:deaths,
+    bountiesCompleted:0,
+  };
+  G.equipped={head:null,shoulder:null,body:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:null,offhand:null,pack:null,pack2:null};
+  G.bag=[];
+  // Starting items
+  cfg.startItems.forEach(key=>{
+    const it=ITEMS_DB[key];
+    if(it) G.equipped[it.slot]=key;
+  });
+  incCharacterIndex();
+  initTownMissions();
+  // Restore journal
+  localStorage.removeItem('yonder_diary');
+  addDiary(`${G.c.name} arrives in Dawnhearth. The fires burn as they always have.`);
+  addChronicle(`${G.c.name} begins their journey as a ${G.c.charClass}.`,'milestone');
+  save();
+  showScreen('town');render();
+}
+
+// ══════════════════════════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════════════════════════
+function render(){
+  if(!G.c) return;
+  document.getElementById('h-char').textContent=`${G.c.name} · Lv${G.c.level} ${G.c.charClass}`;
+  document.getElementById('h-gold').textContent=`${G.c.gold} gp`;
+}
+
+// ══════════════════════════════════════════════════════════════
 // MODAL SYSTEM
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function openModal(key,data){
-  const builders={character,inventory,diary,map,tavern,shop,academy,noticeboard,locked_town};
-  if(builders[key]) builders[key](data);
+  const b={character,inventory,diary,chronicle,map,tavern,shop,academy,noticeboard,graveyard,bank,church};
+  if(b[key]) b[key](data);
   document.getElementById('overlay').classList.add('open');
 }
 function setModal(title,html){document.getElementById('m-title').textContent=title;document.getElementById('m-body').innerHTML=html;}
@@ -928,226 +1566,400 @@ function closeModal(){document.getElementById('overlay').classList.remove('open'
 function overlayClick(e){if(e.target===document.getElementById('overlay'))closeModal();}
 
 function character(){
-  const c=S.c;const xpPct=Math.min(100,(c.xp/c.xpNext)*100);
+  if(!G.c) return;
+  const c=G.c;const xpPct=Math.min(100,(c.xp/c.xpNext)*100);
+  const perks=getPerks();
+  const perkHtml=perks.map(p=>`<div class="perk-row"><div class="perk-dot ${p.dot}"></div><div><span class="perk-name">${p.name}</span><span class="perk-desc">${p.desc}</span></div></div>`).join('');
   setModal('The Wanderer',`
-    <div class="cs-name">${c.name}</div>
-    <div class="cs-class">${c.charClass} of Dawnhearth</div>
-    <div class="xp-wrap">
-      <div class="xp-labels"><span>Level ${c.level}</span><span>${c.xp} / ${c.xpNext} xp</span></div>
-      <div class="xp-bar"><div class="xp-fill" style="width:${xpPct}%"></div></div>
+    <div class="cs-name">${c.name}</div><div class="cs-class">${c.charClass} of Dawnhearth</div>
+    <div class="xpw"><div class="xpl"><span>Level ${c.level}</span><span>${c.xp} / ${c.xpNext} xp</span></div><div class="xpb"><div class="xpf" style="width:${xpPct}%"></div></div></div>
+    <div class="sg">
+      <div class="sc"><span class="sc-l c-str">STR</span><span class="sc-v c-str">${c.str}</span></div>
+      <div class="sc"><span class="sc-l c-agi">AGI</span><span class="sc-v c-agi">${c.agi}</span></div>
+      <div class="sc"><span class="sc-l c-int">INT</span><span class="sc-v c-int">${c.int}</span></div>
+      <div class="sc"><span class="sc-l c-con">CON</span><span class="sc-v c-con">${c.con}</span></div>
     </div>
-    <div class="stat-grid">
-      <div class="stat-card"><span class="sc-label c-str">STR</span><span class="sc-val c-str">${c.str}</span></div>
-      <div class="stat-card"><span class="sc-label c-agi">AGI</span><span class="sc-val c-agi">${c.agi}</span></div>
-      <div class="stat-card"><span class="sc-label c-int">INT</span><span class="sc-val c-int">${c.int}</span></div>
-    </div>
-    <div class="cs-divider"></div>
-    <div class="small-stat"><span class="ss-label">GOLD</span><span class="ss-val g">${c.gold} gp</span></div>
-    <div class="small-stat"><span class="ss-label">REPUTATION</span><span class="ss-val">${c.rep} / 100</span></div>
-    <div class="small-stat"><span class="ss-label">SOULS LOST</span><span class="ss-val r">${c.deaths}</span></div>
-    <div class="small-stat"><span class="ss-label">CLASSES KNOWN</span><span class="ss-val">${getDiscovered().length===0?'None yet':getDiscovered().join(', ')}</span></div>
-    <div class="cs-divider"></div>
-    <p style="font-style:italic;font-size:13px;color:var(--text-dim);line-height:1.6;">${c.charClass==='Citizen'?'"Unblooded. Unnamed in any record that matters. The world has not yet decided what to make of you."':'"The fires of Dawnhearth have marked them now."'}</p>
+    <div class="cdiv"></div>
+    <div class="ss"><span class="ssl">GOLD</span><span class="ssv g">${c.gold} gp</span></div>
+    <div class="ss"><span class="ssl">REPUTATION</span><span class="ssv">${c.rep} / 100</span></div>
+    <div class="ss"><span class="ssl">SOULS LOST</span><span class="ssv r">${c.deaths}</span></div>
+    <div class="ss"><span class="ssl">HP</span><span class="ssv">${10+(c.level*2)+(c.con*2)}</span></div>
+    <div class="cdiv"></div>
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:8px;text-transform:uppercase;">Perks</div>
+    ${perkHtml}
   `);
 }
 
+function getPerks(){
+  const perks=[];
+  const c=G.c;if(!c) return perks;
+  const cfg=CLASS_CONFIG[c.charClass];
+  if(cfg) perks.push(...cfg.perks);
+  perks.push({name:'',desc:'',dot:'',divider:true}); // divider
+  // Item boons from equipped
+  Object.entries(G.equipped).forEach(([slot,key])=>{
+    if(!key) return;
+    const it=ITEMS_DB[key];
+    if(it&&it.stats.special){
+      const boons={rope:'Reduces cave mission time',heal:'Can heal in the field',shield:'Provides physical cover'};
+      if(boons[it.stats.special]) perks.push({name:it.name,desc:boons[it.stats.special],dot:'pd-item'});
+    }
+    if(it&&it.combat&&it.combat.type==='shield') perks.push({name:it.name,desc:'Physical cover — reduces incoming damage.',dot:'pd-item'});
+  });
+  return perks.filter(p=>!p.divider||perks.indexOf(p)>0);
+}
+
 function inventory(){
-  const EQUIP_SLOTS=[
+  // Equipped slots
+  const slots=[
     {key:'weapon',icon:'⚔',label:'Weapon'},{key:'offhand',icon:'🗡',label:'Off Hand'},
     {key:'head',icon:'⛑',label:'Head'},{key:'shoulder',icon:'🪬',label:'Shoulders'},
-    {key:'body',icon:'🛡',label:'Body'},{key:'gloves',icon:'🧤',label:'Gloves'},
+    {key:'body',icon:'🥋',label:'Body'},{key:'gloves',icon:'🧤',label:'Gloves'},
     {key:'boots',icon:'👢',label:'Boots'},{key:'amulet',icon:'📿',label:'Amulet'},
     {key:'ring1',icon:'💍',label:'Ring'},{key:'ring2',icon:'💍',label:'Ring'},
     {key:'pack',icon:'🎒',label:'Pack'},{key:'pack2',icon:'🎒',label:'Pack'},
   ];
-  const slotsHtml=EQUIP_SLOTS.map(s=>{
-    const eqKey=S.equipped[s.key];const it=eqKey?ITEMS_DB[eqKey]:null;
-    const filled=it?'filled':'';
-    const statsStr=it?Object.entries(it.stats).map(([k,v])=>k==='special'?`✦ ${v}`:`+${v} ${k}`).join(' '):'';
-    return `<div class="inv-slot ${filled}" onclick="${it&&eqKey!=='wooden_sword'?`unequipItem('${s.key}')`:``}">
-      <span class="is-icon">${s.icon}</span>
-      <div class="is-info">
-        <span class="is-label">${s.label}</span>
-        <span class="is-item">${it?`${it.name}<br><small style="color:var(--gold);font-size:10px;">${statsStr}</small>`:'— Empty —'}</span>
+  const eqHtml=slots.map(s=>{
+    const k=G.equipped[s.key];const it=k?ITEMS_DB[k]:null;
+    const st=it?Object.entries(it.stats).map(([a,b2])=>a==='special'?`✦ ${b2}`:`+${b2} ${a}`).join(' '):'';
+    const rc=it?RARITY_CONFIG[it.rarity]:null;
+    return`<div class="es ${it?'filled':''}">
+      <span class="es-icon">${s.icon}</span>
+      <div class="es-info">
+        <span class="es-label">${s.label}</span>
+        <span class="es-item ${rc?rc.cls:''}">${it?`${it.name}${st?` · ${st}`:''}`:'— Empty —'}</span>
       </div>
     </div>`;
   }).join('');
-
-  const bagHtml=S.bag.length===0
-    ?'<p style="color:var(--text-dim);font-style:italic;font-size:13px;padding:8px 0;">Your bag is empty. Visit the shop.</p>'
-    :S.bag.map((k,i)=>{const it=ITEMS_DB[k];if(!it)return'';
-      return `<div class="bag-item" onclick="equipItem('${k}',true)">
-        <span style="font-size:16px;">${it.icon}</span>
-        <span class="bi-name">${it.name}</span>
-        <span class="bi-action">Equip →</span>
-      </div>`;}).join('');
-
+  // Bag items as grid
+  const bagHtml=G.bag.length===0
+    ?`<p style="color:var(--text-dim);font-style:italic;font-size:13px;padding:8px 0;">Nothing carried.</p>`
+    :`<div class="inv-grid-wrap">${G.bag.map((item,idx)=>{
+        const rc=RARITY_CONFIG[item.rarity]||RARITY_CONFIG.common;
+        const st=Object.entries(item.stats||{}).map(([a,b2])=>a==='special'?`✦ ${b2}`:`+${b2} ${a}`).join(' ');
+        return`<div class="inv-cell filled" onclick="bagItemAction(${idx})">
+          <span>${item.icon||'✦'}</span>
+          <div class="inv-tooltip">
+            <span class="it-name ${rc.cls}">${item.name}</span>
+            <span class="it-stat">${st}</span>
+            <span class="it-rar" style="color:${rc.color}">${rc.label}</span>
+            <span class="it-desc">${item.desc||''}</span>
+          </div>
+        </div>`;
+      }).join('')}
+      ${Array(Math.max(0,12-G.bag.length)).fill(`<div class="inv-cell"></div>`).join('')}
+    </div>`;
   setModal('Loadout',`
-    <div class="inv-section"><div class="inv-section-title">Equipped</div><div class="inv-grid">${slotsHtml}</div></div>
-    <div class="inv-section"><div class="inv-section-title">In Bag</div>${bagHtml}</div>
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Equipped</div>
+    <div class="equip-slots">${eqHtml}</div>
+    <div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin:14px 0 8px;">Bag</div>
+    ${bagHtml}
+    <p style="font-size:11px;color:var(--text-dim);font-style:italic;margin-top:8px;">Click a bag item to equip. Click an equipped slot to unequip.</p>
   `);
+}
+
+function bagItemAction(idx){
+  const item=G.bag[idx];if(!item) return;
+  if(item.isDBItem&&item.key&&ITEMS_DB[item.key]){
+    const it=ITEMS_DB[item.key];
+    const slot=it.slot;
+    if(G.equipped[slot]) G.bag.push({...ITEMS_DB[G.equipped[slot]],key:G.equipped[slot],isDBItem:true,source:'equipped',icon:ITEMS_DB[G.equipped[slot]].icon,rarity:ITEMS_DB[G.equipped[slot]].rarity});
+    G.equipped[slot]=item.key;
+    G.bag.splice(idx,1);
+  }else{
+    // Loot item — try to equip by guessing slot
+    const s2=guessSlot(item);
+    if(s2){if(G.equipped[s2]) G.bag.push(G.equipped[s2]);G.equipped[s2]=null;/* just store ref */}
+    // For now just equip as pack
+    if(!s2){if(G.equipped.pack) G.bag.push(G.equipped.pack);G.equipped.pack=item;G.bag.splice(idx,1);}
+    else{G.equipped[s2]=item;G.bag.splice(idx,1);}
+  }
+  save();inventory();
+}
+
+function guessSlot(item){
+  const n=item.name||'';
+  if(/sword|dagger|axe|blade|bow|sabre|club|hatchet|staff|wand|knife/i.test(n)) return 'weapon';
+  if(/shield|buckler|aegis/i.test(n)) return 'offhand';
+  if(/helm|cap|hood|crown|circlet/i.test(n)) return 'head';
+  if(/vest|armour|robe|tunic|coif/i.test(n)) return 'body';
+  if(/boot|sandal/i.test(n)) return 'boots';
+  if(/gauntlet|glove/i.test(n)) return 'gloves';
+  if(/ring|band/i.test(n)) return 'ring1';
+  if(/amulet|necklace|pendant/i.test(n)) return 'amulet';
+  if(/cloak|mantle/i.test(n)) return 'shoulder';
+  return 'pack';
 }
 
 function diary(){
   const entries=getDiary();
   const html=entries.length===0
-    ?`<p style="text-align:center;color:var(--text-dim);font-style:italic;padding:28px 0;font-size:14px;">"The pages are bare. Set out. Come back. Or don't."</p>`
-    :entries.map(e=>`<div class="d-entry ${e.type}"><span class="d-date">${e.date}</span><div class="d-text">${e.text}</div></div>`).join('');
-  setModal('The Chronicle',`<p class="mflavour">"All that is learned passes into these pages. All who read them carry the dead forward."</p>${html}`);
+    ?`<p style="text-align:center;color:var(--text-dim);font-style:italic;padding:24px 0;">"Nothing written yet. Go out. Come back. Or don't."</p>`
+    :entries.map(e=>`<div class="log-entry"><div class="le-header"><span class="le-date">${e.date}</span></div><div class="le-text diary-text">${e.text}</div></div>`).join('');
+  setModal("Today's Diary",`<p class="mflavour">"${G.c?.name||'Someone'} writes in the margins of their days."</p>${html}`);
+}
+
+function chronicle(){
+  const entries=getChronicle();
+  const html=entries.length===0
+    ?`<p style="text-align:center;color:var(--text-dim);font-style:italic;padding:24px 0;">"The chronicle is unwritten. No hero has yet made their mark."</p>`
+    :entries.map(e=>`<div class="log-entry ${e.type}"><div class="le-header"><span class="le-date">${e.date}</span>${e.grave?`<span class="le-grave" onclick="openModal('graveyard');closeModal();">⚰</span>`:''}</div><div class="le-text">${e.text}</div></div>`).join('');
+  setModal('The Chronicle',`<p class="mflavour">"All who walked these roads are written here. Some in ink. Some in silence."</p>${html}`);
 }
 
 function map(){
   setModal('The Known World',`
-    <p class="mflavour">"The map runs out faster than the road does. Everything beyond the edge is rumour and optimism."</p>
-    <div class="map-wrap"><div class="map-inner">
-      <div class="map-grid"></div>
-      <div class="map-fog2"></div><div class="map-fog"></div>
-      <div class="map-dot"><div class="dot-inner"></div><div class="map-town-label">DAWNHEARTH</div></div>
-      <div class="map-unknown" style="top:22%;left:12%;transform:rotate(-6deg);">Millhaven?</div>
-      <div class="map-unknown" style="top:65%;right:15%;transform:rotate(4deg);">Grimhollow?</div>
-      <div class="map-unknown" style="top:35%;right:20%;transform:rotate(-2deg);">The Ashwood</div>
-      <div class="map-unknown" style="top:75%;left:20%;transform:rotate(6deg);">The Ridge</div>
-    </div></div>
-    <p style="text-align:center;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-top:10px;font-style:italic;">Venture further. The fog retreats as the world is walked.</p>
+    <p class="mflavour">"The map runs out faster than the road does."</p>
+    <div style="position:relative;width:100%;padding-bottom:55%;background:#040302;border:1px solid var(--ash);overflow:hidden;margin-bottom:10px;">
+      <div style="position:absolute;inset:0;">
+        <div style="position:absolute;inset:0;background-image:linear-gradient(rgba(40,30,15,.07) 1px,transparent 1px),linear-gradient(90deg,rgba(40,30,15,.07) 1px,transparent 1px);background-size:28px 28px;"></div>
+        <div style="position:absolute;inset:0;background:radial-gradient(ellipse 280px 200px at 50% 52%,transparent 30%,rgba(3,2,1,.96) 68%);"></div>
+        <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);">
+          <div style="width:8px;height:8px;border-radius:50%;background:var(--gold);box-shadow:0 0 10px rgba(201,150,58,.7);position:relative;z-index:1;animation:mapPulse 2.5s ease-in-out infinite;"></div>
+          <div style="position:absolute;top:-14px;left:50%;transform:translateX(-50%);font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--parchment);white-space:nowrap;">DAWNHEARTH</div>
+        </div>
+        <div style="position:absolute;top:20%;left:12%;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:rgba(90,79,61,.18);transform:rotate(-5deg);">Millhaven?</div>
+        <div style="position:absolute;top:65%;right:14%;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:rgba(90,79,61,.18);transform:rotate(4deg);">Grimhollow?</div>
+        <div style="position:absolute;top:35%;right:22%;font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:rgba(90,79,61,.15);transform:rotate(-2deg);">The Ashwood</div>
+      </div>
+    </div>
+    <p style="text-align:center;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);font-style:italic;">The fog retreats as the world is walked.</p>
   `);
 }
 
 function tavern(){
-  const enemy=ENEMIES[ri(0,19)];
-  const enemy2=ENEMIES[ri(5,30)];
+  const e1=ENEMIES[ri(0,14)],e2=ENEMIES[ri(5,19)];
+  const tm=getTownMissions();
+  const activeQuest=tm&&!tm.holy_relic_done?'the Broken Chapel':'the roads beyond the gate';
   setModal('The Ashen Flagon',`
-    <p class="mflavour">"The Flagon never closes. The regulars never leave. Some say a few of them have been sitting in the same corner since before the town was founded."</p>
-    <div class="rumour">"Took a bounty out past Coldgrave. Came face to face with a <strong>${enemy.name}</strong>. ${enemy.desc} Barely made it back. Worth every scar."</div>
-    <div class="rumour">"Bring rope on cave work. Don't ask me how I know. Just bring the rope."</div>
-    <div class="rumour">"There's a <strong>${enemy2.name}</strong> spotted east of the millroad. ${enemy2.desc} Someone will get paid to deal with it. Might as well be you."</div>
-    <div class="rumour">"Every hero starts in a town like this. The trick is staying a hero long enough for anyone to remember the name."</div>
+    <p class="mflavour">"The Flagon never closes. The regulars never leave. Some of them have been in that corner since before the town was a town."</p>
+    <div class="rumour" style="border-left:2px solid var(--ember-dim);padding-left:14px;margin-bottom:12px;font-style:italic;font-size:14px;color:var(--bone);line-height:1.7;">"Had a run-in with a <strong>${e1.name}</strong> past the mill last week. ${e1.desc} Came back with coin and a new respect for the thing."</div>
+    <div class="rumour" style="border-left:2px solid var(--ember-dim);padding-left:14px;margin-bottom:12px;font-style:italic;font-size:14px;color:var(--bone);line-height:1.7;">"Bring rope on cave work. Don't ask me why. Just bring the rope."</div>
+    <div class="rumour" style="border-left:2px solid var(--ember-dim);padding-left:14px;margin-bottom:12px;font-style:italic;font-size:14px;color:var(--bone);line-height:1.7;">"Word is there's trouble at ${activeQuest}. The kind that wants resolving by someone with a weapon."</div>
+    <div class="rumour" style="border-left:2px solid var(--ember-dim);padding-left:14px;font-style:italic;font-size:14px;color:var(--bone);line-height:1.7;">"Someone left a broken crown symbol at the east gate. Nobody knows what it means. Nobody from here, anyway."</div>
   `);
 }
 
 function shop(){
-  const rows=SHOP_STOCK.map(key=>{
+  const stock=['chipped_sword','short_bow','rusty_shield','leather_cap','leather_vest','cloth_robe','worn_boots','rope','healing_potion'];
+  const rows=stock.map(key=>{
     const it=ITEMS_DB[key];
-    const owned=S.bag.includes(key)||Object.values(S.equipped).includes(key);
-    const canAfford=S.c.gold>=it.price;
-    const statsStr=Object.entries(it.stats).map(([k,v])=>k==='special'?`✦ ${v}`:`+${v} ${k}`).join(' ');
-    return `<div class="shop-item">
+    const owned=G.bag.some(b=>b.key===key)||Object.values(G.equipped).includes(key);
+    const canAfford=G.c.gold>=it.price;
+    const st=Object.entries(it.stats).map(([a,b2])=>a==='special'?`✦ ${b2}`:`+${b2} ${a}`).join(' ');
+    const rc=RARITY_CONFIG[it.rarity];
+    return`<div class="shop-item">
       <span class="si-icon">${it.icon}</span>
-      <div class="si-info">
-        <span class="si-name">${it.name}</span>
-        <div class="si-desc">${it.desc}</div>
-        <span class="si-stats">${statsStr}</span>
-      </div>
-      <span class="si-price">${it.price} gp</span>
-      <button class="buy-btn ${owned?'owned':''}" ${owned?'disabled':''} ${!canAfford&&!owned?'disabled':''} onclick="buyItem('${key}')">
-        ${owned?'Owned':!canAfford?'Poor':'Buy'}
+      <div class="si-info"><span class="si-name ${rc.cls}">${it.name}</span><div class="si-desc">${it.desc}</div><span class="si-stats">${st}</span></div>
+      <span class="si-price">${it.price}gp</span>
+      <button class="${owned?'buy-btn owned':'buy-btn'}" ${owned||!canAfford?'disabled':''} onclick="buyItem('${key}')">
+        ${owned?'Owned':!canAfford?'Need gold':'Buy'}
       </button>
     </div>`;
   }).join('');
   setModal("Morrow's Sundries",`
-    <p class="mflavour">"Old Morrow asks no questions. He only asks for coin."</p>
-    <p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--text-dim);margin-bottom:12px;">YOUR GOLD: <span style="color:var(--gold)">${S.c.gold} gp</span></p>
-    <div class="shop-grid">${rows}</div>
-  `);
+    <p class="mflavour">"Old Morrow asks no questions. Only coin."</p>
+    <p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);margin-bottom:12px;">YOUR GOLD: <span style="color:var(--gold)">${G.c.gold} gp</span></p>
+    ${rows}`);
+}
+
+function buyItem(key){
+  const it=ITEMS_DB[key];if(!it||G.c.gold<it.price)return;
+  G.c.gold-=it.price;
+  G.bag.push({key,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats,desc:it.desc,isDBItem:true,source:`bought from Morrow's Sundries`});
+  save();shop();render();
+  addDiary(`Bought ${it.name} from Morrow's for ${it.price} gold.`);
 }
 
 function academy(){
-  const disc=getDiscovered();
+  const disc=getUnlocked();
   setModal('The Ember Sanctum',`
-    <p class="mflavour">"The Sanctum has trained warriors and scholars for three hundred years. It will train three hundred more. Whether you survive is your own concern."</p>
-    ${S.c.charClass==='Citizen'?
-      `<p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:12px;">A grizzled Knight at the entrance eyes you carefully. He does not speak to the unproven.</p>
-       <p style="font-style:italic;font-size:14px;color:var(--bone);border-left:2px solid var(--ember-dim);padding-left:12px;">"Come back when you've bled for something. Then we'll talk about what you want to become."</p>
-       <p class="coming-soon">Earn your class through encounter. They are out there.</p>`:
-      `<p class="coming-soon">Stat training and advancement coming in v0.4.</p>`}
-    ${disc.length>0?`<div style="margin-top:14px;"><p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Known Paths:</p>${disc.map(c=>`<p style="font-size:13px;color:#90c0a0;padding:3px 0;">❋ ${c}</p>`).join('')}</div>`:''}
+    <p class="mflavour">"The Sanctum has trained warriors and scholars for three hundred years. Whether you survive the training is your own concern."</p>
+    ${G.c.charClass==='Citizen'?
+      `<p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:12px;">A scarred Knight at the entrance watches you without speaking. Men like him don't waste words on the unproven.</p>
+       <p style="font-style:italic;font-size:14px;color:var(--bone);border-left:2px solid var(--ember-dim);padding-left:12px;">"Come back when you've bled for something. Then we'll talk."</p>
+       <p class="coming-soon" style="margin-top:14px;">Class paths are earned through deeds.</p>`
+      :`<p class="coming-soon">Stat training coming in v0.3.2.</p>`}
+    ${disc.filter(c=>c!=='Citizen').length>0?`<div style="margin-top:14px;"><p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Known Paths of this Bloodline:</p>${disc.filter(c=>c!=='Citizen').map(c=>`<p style="font-size:13px;color:#70b080;padding:3px 0;">❋ ${c}</p>`).join('')}</div>`:''}
   `);
 }
 
 function noticeboard(){
-  const bountyEnemy=ENEMIES[ri(0,Math.min(S.c.level+5,30))];
-  setModal('Notice Board',`
-    <p class="mflavour">"Parchment upon parchment. Some dated years ago. Some dated tomorrow."</p>
-    <div style="background:var(--stone);border:1px solid var(--ash);padding:14px;margin-bottom:10px;">
-      <p style="font-family:'Cinzel',serif;font-size:11px;color:var(--ember);letter-spacing:1px;margin-bottom:6px;">⚠ BOUNTY POSTED</p>
-      <p style="font-size:14px;color:var(--parchment);margin-bottom:6px;">Wanted: One ${bountyEnemy.name}</p>
-      <p style="font-size:13px;color:var(--text-dim);font-style:italic;margin-bottom:8px;">"${bountyEnemy.desc}"</p>
-      <p style="font-size:12px;color:var(--gold);">Reward: ${ri(14,40)} gp on proof of death</p>
+  const missions=getActiveMissions();
+  const tm=getTownMissions();
+  const blocked=tm&&!tm.holy_relic_done;
+  let html=`<p class="mflavour">"Parchment upon parchment. Some dated years ago. Some dated tomorrow."</p>`;
+  if(blocked){
+    html+=`<p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--ember);margin-bottom:14px;text-align:center;">⚠ THE TOWN GATE REMAINS CLOSED — COMPLETE THE CHAPEL FIRST</p>`;
+  }
+  if(missions.length===0){
+    html+=`<p class="coming-soon">All current missions complete. The board will be restocked.</p>`;
+  }
+  const typeColor={job:'r0',bounty:'r1',quest:'r2',adventure:'r3'};
+  const typeRisk={job:'Safe',bounty:'Risky',quest:'Dangerous',adventure:'Deadly'};
+  const typeDur={job:'~1 min',bounty:'~3 min',quest:'~8 min',adventure:'~20 min'};
+  missions.forEach(m=>{
+    const onJourney=!!G.journey;
+    const hintsHtml=m.hints&&m.hints.length?`<div class="mc-hints">${m.hints.map(h=>`<div class="mc-hint">${h}</div>`).join('')}</div>`:'';
+    html+=`<div class="mc-tier">
+      <div class="mission-card">
+        <div class="mc-title">${m.title} <span class="mc-type ${m.type}">${m.type}</span></div>
+        <div class="mc-desc">${m.desc}</div>
+        ${hintsHtml}
+        <div class="mc-footer">
+          <span class="mc-reward">${typeDur[m.type]} · ${typeRisk[m.type]}</span>
+          ${onJourney?`<span class="mc-locked">Already on a mission</span>`:`<button class="mc-depart" onclick="startMission(${JSON.stringify(m).replace(/'/g,"&#39;")});closeModal();">Set Forth</button>`}
+        </div>
+      </div>
+    </div><br>`;
+  });
+  setModal('Notice Board',html);
+}
+
+function graveyard(){
+  const dead=getGraveyard();
+  const html=dead.length===0
+    ?`<p class="coming-soon">"The ground is empty. That won't last."</p>`
+    :dead.map(d=>`<div class="grave-card">
+        <div>
+          <span class="gc-name">${d.name}</span>
+          <span class="gc-class">${d.charClass}</span>
+          <span class="gc-epitaph">${d.cause}</span>
+        </div>
+        <div class="gc-level">Lv ${d.level}<br><small>${d.date}</small></div>
+      </div>`).join('');
+  setModal('The Remembrance Ground',`<p class="mflavour">"They came to Dawnhearth with something to prove. They proved it."</p>${html}`);
+}
+
+function bank(){
+  const items=getBank();
+  const charIdx=getCharacterIndex();
+  function bankVoice(item){
+    const ago=charIdx-item.charIdx;
+    if(ago===0) return`I found this ${item.source}.`;
+    if(ago<=2) return`${item.depositor} found this ${item.source}.`;
+    if(ago<=6) return`It is said ${item.depositor} recovered this ${item.source}.`;
+    return`Legend has it this once belonged to ${item.depositor}, found ${item.source}.`;
+  }
+  const bankHtml=items.length===0
+    ?`<p class="coming-soon">"The vault is empty. Only Enchanted quality and above may be stored here."</p>`
+    :items.map((item,idx)=>{
+        const rc=RARITY_CONFIG[item.rarity];
+        const st=Object.entries(item.stats||{}).map(([a,b2])=>a==='special'?`✦ ${b2}`:`+${b2} ${a}`).join(' ');
+        return`<div class="bank-item ${item.rarity}">
+          <span class="bi-name ${rc.cls}">${item.name} [${rc.label}]</span>
+          <span class="bi-prov">${bankVoice(item)}</span>
+          <span class="bi-stats">${st}</span>
+          <div class="bi-actions"><button class="bi-btn" onclick="withdrawFromBank(${idx})">Withdraw</button></div>
+        </div>`;
+      }).join('');
+  // Current bag items that can be banked
+  const bankableInBag=G.bag.filter(item=>RARITY_CONFIG[item.rarity]?.bankable);
+  const depositHtml=bankableInBag.length>0
+    ?`<div style="margin-top:16px;"><div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:3px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Items Available to Deposit</div>`+
+      bankableInBag.map((item,idx)=>{
+        const bagIdx=G.bag.indexOf(item);
+        const rc=RARITY_CONFIG[item.rarity];
+        return`<div class="bank-item ${item.rarity}">
+          <span class="bi-name ${rc.cls}">${item.name} [${rc.label}]</span>
+          <div class="bi-actions"><button class="bi-btn" onclick="depositToBank(${bagIdx})">Deposit</button></div>
+        </div>`;
+      }).join('')+`</div>`:
+    `<p style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:12px;">No Enchanted or higher quality items in your bag.</p>`;
+  setModal('The Iron Vault',`<p class="mflavour">"What is stored here outlasts those who stored it. That is the point."</p>${bankHtml}${depositHtml}`);
+}
+
+function depositToBank(bagIdx){
+  const item=G.bag[bagIdx];if(!item) return;
+  const b=getBank();
+  b.push({...item,depositor:G.c.name,charIdx:getCharacterIndex(),depositorDead:false});
+  saveBank(b);G.bag.splice(bagIdx,1);save();
+  addDiary(`Deposited ${item.name} in the Iron Vault for safekeeping.`);
+  bank();
+}
+
+function withdrawFromBank(bankIdx){
+  const b=getBank();const item=b[bankIdx];if(!item) return;
+  b.splice(bankIdx,1);saveBank(b);
+  G.bag.push(item);save();
+  addDiary(`Withdrew ${item.name} from the Iron Vault.`);
+  bank();
+}
+
+function church(){
+  const isAcolyte=G.c.charClass==='Acolyte';
+  const healCost=isAcolyte?5:15;const blessCost=isAcolyte?8:20;
+  setModal('The Ember Church',`
+    <p class="mflavour">"The flame asks nothing. The donation box is a suggestion. Most heed it."</p>
+    <div class="church-option" onclick="churchHeal(${healCost})">
+      <div class="co-info"><span class="co-name">Healing Prayer</span><span class="co-desc">Restore HP before your next mission. The flame remembers the worthy.</span></div>
+      <span class="co-price">${healCost} gp${isAcolyte?' (blessed)':''}</span>
     </div>
-    <p class="coming-soon">Dynamic job board coming in v0.4.</p>
+    <div class="church-option" onclick="churchBless(${blessCost})">
+      <div class="co-info"><span class="co-name">Ember Blessing</span><span class="co-desc">A temporary boon on your next mission. +5% chance of survival.</span></div>
+      <span class="co-price">${blessCost} gp${isAcolyte?' (blessed)':''}</span>
+    </div>
+    <p style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:8px;">${isAcolyte?'The Acolyte\'s path: the church blesses those who serve the flame.':'The church serves all who enter. Acolytes receive a discount.'}</p>
   `);
 }
 
-function locked_town(data){
-  setModal(data.name,`<p class="mflavour">${data.quote}</p><p class="coming-soon">Travel to ${data.name} coming in a future update.</p>`);
+function churchHeal(cost){
+  if(G.c.gold<cost){closeModal();return;}
+  G.c.gold-=cost;G.c.churchHealed=true;save();render();
+  addDiary(`Paid ${cost}gp for a healing prayer at the Ember Church.`);
+  church();
+}
+function churchBless(cost){
+  if(G.c.gold<cost){closeModal();return;}
+  G.c.gold-=cost;G.c.blessed=true;save();render();
+  addDiary(`Received the Ember Blessing before setting out.`);
+  church();
 }
 
-// ════════════════════════════════════════════════════════
-// MOON EASTER EGG
-// ════════════════════════════════════════════════════════
-function openMoon(){document.getElementById('moon-overlay').classList.add('open');}
+// ══════════════════════════════════════════════════════════════
+// MOON
+// ══════════════════════════════════════════════════════════════
+function openMoon(){
+  document.getElementById('moon-quote').textContent=MOON_QUOTES[ri(0,MOON_QUOTES.length-1)];
+  document.getElementById('moon-overlay').classList.add('open');
+}
 function closeMoon(){document.getElementById('moon-overlay').classList.remove('open');}
 
-// ════════════════════════════════════════════════════════
-// DEV SKIP
-// ════════════════════════════════════════════════════════
-function devSkip(){if(!S.journey)return;S.journey.endTime=Date.now()+500;}
-
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 // HELPERS
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 function ri(a,b){return Math.floor(Math.random()*(b-a+1))+a;}
-function randEnemy(lv){const pool=ENEMIES.filter(e=>Math.abs(e.lv-lv)<=8);return(pool[ri(0,pool.length-1)]||ENEMIES[0]).name;}
-function randLoot(){const tier=Math.min(99,Math.floor(S.c.level*1.2));return LOOT_TABLE[ri(Math.max(0,tier-15),tier)]||LOOT_TABLE[0];}
-
-const FN=['Edric','Maren','Aldric','Solin','Brynn','Kaera','Torvin','Lyss','Davin','Vex','Corrin','Ashel','Rue','Brennan','Ivara','Dusk','Cael','Thorne','Mirra','Oswin'];
-const SN=['Vane','Coldwater','Ashford','the Grey','Thornwood','Fell','of No House','Briar','Morne','Coalborn','Undset','Pale','Wren','Duskmore'];
+function randEnemy(lv){const pool=ENEMIES.filter(e=>Math.abs(e.lv-lv)<=6);return(pool.length?pool[ri(0,pool.length-1)]:ENEMIES[0]).name;}
+const FN=['Edric','Maren','Aldric','Solin','Brynn','Kaera','Torvin','Lyss','Davin','Vex','Corrin','Ashel','Rue','Brennan','Ivara','Dusk','Cael','Thorne','Mirra','Oswin','Lira','Brenneth'];
+const SN=['Vane','Coldwater','Ashford','the Grey','Thornwood','Fell','of No House','Briar','Morne','Coalborn','Undset','Pale','Wren','Duskmore','Ashborne'];
 function genName(){return FN[ri(0,FN.length-1)]+' '+SN[ri(0,SN.length-1)];}
 
+function devSkip(){if(!G.journey)return;G.journey.endTime=Date.now()+800;}
+
+// ══════════════════════════════════════════════════════════════
+// STARS
+// ══════════════════════════════════════════════════════════════
 function makeStars(){
-  const sky=document.getElementById('town-sky');
+  const sky=document.getElementById('town-sky');if(!sky)return;
   for(let i=0;i<110;i++){
     const s=document.createElement('div');s.className='star';
-    const sz=Math.random()<0.08?2:Math.random()<0.25?1.5:1;
-    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*82}%;left:${Math.random()*100}%;opacity:${0.08+Math.random()*0.45};`;
-    if(Math.random()<0.12)s.style.animation=`tw ${2+Math.random()*4}s ease-in-out ${Math.random()*4}s infinite alternate`;
+    const sz=Math.random()<.08?2:Math.random()<.25?1.5:1;
+    s.style.cssText=`width:${sz}px;height:${sz}px;top:${Math.random()*83}%;left:${Math.random()*100}%;opacity:${.07+Math.random()*.44};`;
+    if(Math.random()<.12) s.style.animation=`tw ${2+Math.random()*4}s ease-in-out ${Math.random()*4}s infinite alternate`;
     sky.appendChild(s);
   }
-  const st=document.createElement('style');st.textContent='@keyframes tw{from{opacity:.05}to{opacity:.6}}';document.head.appendChild(st);
+  const st=document.createElement('style');st.textContent='@keyframes tw{from{opacity:.04}to{opacity:.55}} @keyframes mapPulse{0%,100%{transform:scale(1);opacity:.5;}50%{transform:scale(1.4);opacity:1;}}';
+  document.head.appendChild(st);
 }
 
-// ════════════════════════════════════════════════════════
+// ══════════════════════════════════════════════════════════════
 // INIT
-// ════════════════════════════════════════════════════════
-function init(){
-  S.c.name=genName();
-  S.c.xpNext=xpForLevel(2);
-  makeStars();render();
-  addDiary(`${S.c.name} arrives in Dawnhearth. The fires burn as they always have.`,'entry');
-
-  const saved=localStorage.getItem('yonder_journey');
-  if(saved){
-    const j=JSON.parse(saved);j.cfg=ACTS[j.type];j.shown=j.shown||[];j.encounterDone=j.encounterDone||false;
-    S.journey=j;
-    if(Date.now()>=j.endTime){
-      showScreen('journey');
-      document.getElementById('j-title').textContent='The journey has concluded.';
-      document.getElementById('j-type').textContent=`— ${j.cfg.label.toUpperCase()} —`;
-      addJEntry('wh','','You were away. The world did not wait.');
-      setTimeout(()=>resolveJourney(),1200);
-    } else {
-      showScreen('journey');
-      document.getElementById('j-title').textContent='Still out there...';
-      document.getElementById('j-type').textContent=`— ${j.cfg.label.toUpperCase()} —`;
-      document.getElementById('h-status').textContent=`ON ${j.cfg.label.toUpperCase()}`;
-      document.getElementById('depart-btn').disabled=true;
-      document.getElementById('dev-skip').style.display='block';
-      addJEntry('wh','','The journey continues. Whether you watch or not.');
-      startTimer();
-    }
-  }
-}
-
-init();
+// ══════════════════════════════════════════════════════════════
+window.addEventListener('DOMContentLoaded',()=>{
+  makeStars();
+  showScreen('home');
+  buildHomeScreen();
+});
 </script>
 </body>
 </html>
