@@ -448,11 +448,28 @@
       const dot = document.getElementById('lbxd-dot');
       const txt = document.getElementById('lbxd-text');
       try {
-        const url = 'https://api.allorigins.win/get?url=' +
-          encodeURIComponent('https://letterboxd.com/maltysnack/rss/');
-        const res  = await fetch(url, { signal: AbortSignal.timeout(8000) });
-        const json = await res.json();
-        const xml  = new DOMParser().parseFromString(json.contents, 'text/xml');
+        const rssUrl = 'https://letterboxd.com/maltysnack/rss/';
+        const proxies = [
+          `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
+          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
+        ];
+        let xmlText = null;
+        for (const proxy of proxies) {
+          try {
+            const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
+            if (!res.ok) continue;
+            const ct = res.headers.get('content-type') || '';
+            if (ct.includes('application/json')) {
+              const json = await res.json();
+              xmlText = json.contents;
+            } else {
+              xmlText = await res.text();
+            }
+            if (xmlText) break;
+          } catch(e) { continue; }
+        }
+        if (!xmlText) throw new Error('all proxies failed');
+        const xml  = new DOMParser().parseFromString(xmlText, 'text/xml');
         let matched = 0;
         xml.querySelectorAll('item').forEach(item => {
           const raw = item.querySelector('title')?.textContent || '';
