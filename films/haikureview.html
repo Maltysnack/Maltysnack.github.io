@@ -297,135 +297,53 @@
 
   <script src="/sidebar.js"></script>
   <script>
-    const films = [
-      { date:"2026-02-25", title:"Wuthering Heights",                   year:2026, uri:"https://boxd.it/OdIa" },
-      { date:"2026-02-22", title:"Now You See Me",                       year:2013, uri:"https://boxd.it/2Bsu" },
-      { date:"2026-02-19", title:"The Roses",                            year:2025, uri:"https://boxd.it/MjnI" },
-      { date:"2026-02-10", title:"Scarlet",                              year:2025, uri:"https://boxd.it/S6iW" },
-      { date:"2026-02-08", title:"Marty Supreme",                        year:2025, uri:"https://boxd.it/Off0" },
-      { date:"2026-02-07", title:"Mortdecai",                            year:2015, uri:"https://boxd.it/6ioc" },
-      { date:"2026-02-03", title:"Die My Love",                          year:2025, uri:"https://boxd.it/D5cI" },
-      { date:"2026-02-01", title:"Ideal Home",                           year:2018, uri:"https://boxd.it/e0Ei" },
-      { date:"2026-01-21", title:"Zootopia",                             year:2016, uri:"https://boxd.it/84xS" },
-      { date:"2026-01-18", title:"Soul",                                 year:2020, uri:"https://boxd.it/ioLA" },
-      { date:"2026-01-17", title:"Avatar",                               year:2009, uri:"https://boxd.it/1Efm", papyrus:true },
-      { date:"2026-01-10", title:"Avatar: Fire and Ash",                 year:2025, uri:"https://boxd.it/2W7s", papyrus:true },
-      { date:"2026-01-09", title:"St. Vincent",                          year:2014, uri:"https://boxd.it/73bE" },
-      { date:"2026-01-02", title:"Wake Up Dead Man",                     year:2025, uri:"https://boxd.it/uAKS" },
-      { date:"2025-12-25", title:"National Lampoon's Christmas Vacation", year:1989, uri:"https://boxd.it/22wQ" },
-      { date:"2025-12-06", title:"Sherpa",                               year:2015, uri:"https://boxd.it/bnK8" },
-      { date:"2025-11-17", title:"Bugonia",                              year:2025, uri:"https://boxd.it/qeWY" },
-      { date:"2025-11-15", title:"Fool's Gold",                          year:2008, uri:"https://boxd.it/1ZXE" },
-      { date:"2025-10-24", title:"The Woman in Cabin 10",                year:2025, uri:"https://boxd.it/NfTM" },
-      { date:"2025-10-22", title:"Grimsby",                              year:2016, uri:"https://boxd.it/7ZkO" },
-      { date:"2025-10-21", title:"Love Lies Bleeding",                   year:2024, uri:"https://boxd.it/zN4q" },
-      { date:"2025-10-20", title:"The Princess Bride",                   year:1987, uri:"https://boxd.it/26EY" },
-      { date:"2025-10-09", title:"I Want to Be Neenja! The Movie",       year:2024, uri:"https://boxd.it/G2Fy" },
-      { date:"2025-09-19", title:"KPop Demon Hunters",                   year:2025, uri:"https://boxd.it/ufwK" },
-      { date:"2025-09-07", title:"The Thursday Murder Club",             year:2025, uri:"https://boxd.it/rXju" },
-      { date:"2025-09-07", title:"Caught Stealing",                      year:2025, uri:"https://boxd.it/LnyS" },
-      { date:"2025-08-19", title:"Rat Race",                             year:2001, uri:"https://boxd.it/1XAo" },
-      { date:"2025-07-22", title:"Kneecap",                              year:2024, uri:"https://boxd.it/ILxI" },
-      { date:"2025-07-01", title:"F1",                                   year:2025, uri:"https://boxd.it/yjVM" },
-      { date:"2025-06-24", title:"Deep Cover",                           year:2025, uri:"https://boxd.it/L6ec" },
-      { date:"2025-05-16", title:"Layer Cake",                           year:2004, uri:"https://boxd.it/23LC" },
-      { date:"2025-05-16", title:"Juno",                                 year:2007, uri:"https://boxd.it/210a" },
-      { date:"2025-05-10", title:"The Gorge",                            year:2025, uri:"https://boxd.it/zRqK" },
-      { date:"2025-05-10", title:"Thunderbolts*",                        year:2025, uri:"https://boxd.it/BfbQ" },
-      { date:"2025-05-04", title:"The Cloverfield Paradox",              year:2018, uri:"https://boxd.it/doVA" },
-      { date:"2025-04-30", title:"The Man from Earth",                   year:2007, uri:"https://boxd.it/1Ql2" },
-      { date:"2025-04-30", title:"Batman Begins",                        year:2005, uri:"https://boxd.it/2aIg" },
-      { date:"2025-03-06", title:"The Grand Budapest Hotel",             year:2014, uri:"https://boxd.it/3ZqO" },
-      { date:"2025-01-28", title:"Paddington 2",                         year:2017, uri:"https://boxd.it/bCF8" },
-      { date:"2025-01-28", title:"Paddington",                           year:2014, uri:"https://boxd.it/3RKw" },
-      { date:"2025-01-28", title:"The Dead Don't Die",                   year:2019, uri:"https://boxd.it/juZg" },
-      { date:"2025-01-28", title:"Nightcrawler",                         year:2014, uri:"https://boxd.it/780m" },
-      { date:"2025-01-28", title:"The Brutalist",                        year:2024, uri:"https://boxd.it/k4BO" },
-      { date:"2025-01-07", title:"The Room Next Door",                   year:2024, uri:"https://boxd.it/Fb4k" },
-      { date:"2025-01-07", title:"Carry-On",                             year:2024, uri:"https://boxd.it/C0B2" },
-      { date:"2025-01-07", title:"2 Guns",                               year:2013, uri:"https://boxd.it/4oAk" },
-      { date:"2025-01-06", title:"A Real Pain",                          year:2024, uri:"https://boxd.it/CjNG" },
-      { date:"2024-12-25", title:"Wicked",                               year:2024, uri:"https://boxd.it/e8ME" },
-      { date:"2024-12-04", title:"Heretic",                              year:2024, uri:"https://boxd.it/H1lY" },
-      { date:"2024-12-03", title:"American Fiction",                     year:2023, uri:"https://boxd.it/DYHm" },
-      { date:"2024-11-05", title:"Special Correspondents",               year:2016, uri:"https://boxd.it/bYUY" },
-      { date:"2024-10-27", title:"Smile 2",                              year:2024, uri:"https://boxd.it/FDA4" },
-      { date:"2024-09-18", title:"Dead Poets Society",                   year:1989, uri:"https://boxd.it/2aSg" },
-      { date:"2024-09-17", title:"American Psycho",                      year:2000, uri:"https://boxd.it/28Vs" },
-      { date:"2024-09-17", title:"Léon: The Professional",               year:1994, uri:"https://boxd.it/2b8S" },
-      { date:"2024-08-15", title:"Million Dollar Baby",                  year:2004, uri:"https://boxd.it/2bdI" },
-      { date:"2024-08-13", title:"Leave the World Behind",               year:2023, uri:"https://boxd.it/re0i" },
-      { date:"2024-08-13", title:"Ad Astra",                             year:2019, uri:"https://boxd.it/ePzI" },
-      { date:"2024-08-13", title:"The Iron Claw",                        year:2023, uri:"https://boxd.it/w5Pm" },
-      { date:"2024-08-02", title:"MaXXXine",                             year:2024, uri:"https://boxd.it/CIM4" },
-      { date:"2024-07-21", title:"Longlegs",                             year:2024, uri:"https://boxd.it/KzLM" },
-      { date:"2024-07-20", title:"Red Eye",                              year:2005, uri:"https://boxd.it/1TNy" },
-      { date:"2024-07-20", title:"Hundreds of Beavers",                  year:2022, uri:"https://boxd.it/CyUM" },
-      { date:"2024-07-20", title:"A Quiet Place: Day One",               year:2024, uri:"https://boxd.it/sDAi" },
-      { date:"2024-06-14", title:"The Sweet East",                       year:2023, uri:"https://boxd.it/CcHw" },
-      { date:"2024-06-14", title:"The Devil All the Time",               year:2020, uri:"https://boxd.it/i2tY" },
-      { date:"2024-06-14", title:"Furiosa: A Mad Max Saga",              year:2024, uri:"https://boxd.it/tABk" },
-      { date:"2024-05-08", title:"Kingdom of the Planet of the Apes",    year:2024, uri:"https://boxd.it/ohEE" },
-      { date:"2024-04-11", title:"Monkey Man",                           year:2024, uri:"https://boxd.it/kvsO" },
-      { date:"2024-04-03", title:"Taxi Driver",                          year:1976, uri:"https://boxd.it/2b8y" },
-      { date:"2024-04-03", title:"Fantastic Mr. Fox",                    year:2009, uri:"https://boxd.it/1WyQ" },
-      { date:"2024-04-03", title:"Troll",                                year:2022, uri:"https://boxd.it/rDsQ" },
-      { date:"2024-04-03", title:"Midsommar",                            year:2019, uri:"https://boxd.it/jhxe" },
-      { date:"2024-03-31", title:"Renfield",                             year:2023, uri:"https://boxd.it/o8vy" },
-      { date:"2024-03-31", title:"Bones and All",                        year:2022, uri:"https://boxd.it/tLd4" },
-      { date:"2024-03-31", title:"Perfect Days",                         year:2023, uri:"https://boxd.it/ATh8" },
-      { date:"2024-03-21", title:"Dune",                                 year:2021, uri:"https://boxd.it/fA7G" },
-      { date:"2024-03-16", title:"The Monuments Men",                    year:2014, uri:"https://boxd.it/4OxQ" },
-      { date:"2024-03-10", title:"The Dry",                              year:2020, uri:"https://boxd.it/kOXG" },
-    ];
-
-    document.getElementById('total-count').textContent = films.length;
+    const LBXD_USER = 'maltysnack';
     let revealed = 0;
-
-    const HAIKU = ["Lorem ipsum now", "dolor sit amet flowing", "consectetur end"];
-    const posterMap = {};
 
     function fmtDate(d) {
       return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { month:'short', year:'numeric' });
     }
 
-    function build() {
-      const scroll = document.getElementById('film-scroll');
-      films.forEach((f, i) => {
-        const row = document.createElement('div');
-        row.className = 'film-row';
-        row.dataset.index = i;
-        if (f.papyrus) row.dataset.papyrus = 'true';
+    function buildRow(film, i) {
+      const row = document.createElement('div');
+      row.className = 'film-row';
+      row.dataset.index = i;
+      if (/avatar/i.test(film.title)) row.dataset.papyrus = 'true';
 
-        row.innerHTML = `
-          <div class="film-bg">
-            <img id="poster-${i}" src="" alt="" />
-          </div>
-          <div class="film-vignette"></div>
-          <div class="film-content">
-            <div class="film-left">
-              <div class="film-num">#${String(i+1).padStart(2,'0')}</div>
-              <div class="film-haiku">
-                <span class="film-haiku-line">${HAIKU[0]}</span>
-                <span class="film-haiku-line">${HAIKU[1]}</span>
-                <span class="film-haiku-line">${HAIKU[2]}</span>
-              </div>
-            </div>
-            <div class="film-right">
-              <div class="film-title-reveal">
-                <div class="film-title-text">${f.title}</div>
-                <div class="film-title-year">${f.year}</div>
-                <a class="film-title-lbxd" href="${f.uri}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ letterboxd</a>
-              </div>
-              <div class="film-reveal-prompt">click to reveal</div>
-            </div>
-          </div>
-          <div class="film-date-badge">${fmtDate(f.date)}</div>
-        `;
+      const haikuHtml = film.lines.length
+        ? film.lines.map(l => `<span class="film-haiku-line">${l}</span>`).join('')
+        : `<span class="film-haiku-line" style="opacity:0.35;font-style:italic;">no review yet</span>`;
 
-        row.addEventListener('click', () => toggle(i));
-        scroll.appendChild(row);
-      });
+      row.innerHTML = `
+        <div class="film-bg">
+          <img id="poster-${i}" src="" alt="" />
+        </div>
+        <div class="film-vignette"></div>
+        <div class="film-content">
+          <div class="film-left">
+            <div class="film-num">#${String(i+1).padStart(2,'0')}</div>
+            <div class="film-haiku">${haikuHtml}</div>
+          </div>
+          <div class="film-right">
+            <div class="film-title-reveal">
+              <div class="film-title-text">${film.title}</div>
+              <div class="film-title-year">${film.year}</div>
+              <a class="film-title-lbxd" href="${film.uri}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ letterboxd</a>
+            </div>
+            <div class="film-reveal-prompt">click to reveal</div>
+          </div>
+        </div>
+        <div class="film-date-badge">${fmtDate(film.date)}</div>
+      `;
+
+      if (film.poster) {
+        const img = row.querySelector(`#poster-${i}`);
+        img.src = film.poster;
+        img.onload = () => img.classList.add('loaded');
+      }
+
+      row.addEventListener('click', () => toggle(i));
+      return row;
     }
 
     function toggle(i) {
@@ -443,59 +361,32 @@
       document.getElementById('reveal-count').textContent = revealed;
     }
 
-    // Letterboxd RSS → poster images via CORS proxy
-    async function fetchPosters() {
-      const dot = document.getElementById('lbxd-dot');
-      const txt = document.getElementById('lbxd-text');
+    async function loadFilms() {
+      const dot    = document.getElementById('lbxd-dot');
+      const txt    = document.getElementById('lbxd-text');
+      const scroll = document.getElementById('film-scroll');
+
+      let films;
       try {
-        const rssUrl = 'https://letterboxd.com/maltysnack/rss/';
-        const proxies = [
-          `https://api.allorigins.win/get?url=${encodeURIComponent(rssUrl)}`,
-          `https://corsproxy.io/?${encodeURIComponent(rssUrl)}`,
-        ];
-        let xmlText = null;
-        for (const proxy of proxies) {
-          try {
-            const res = await fetch(proxy, { signal: AbortSignal.timeout(8000) });
-            if (!res.ok) continue;
-            const ct = res.headers.get('content-type') || '';
-            if (ct.includes('application/json')) {
-              const json = await res.json();
-              xmlText = json.contents;
-            } else {
-              xmlText = await res.text();
-            }
-            if (xmlText) break;
-          } catch(e) { continue; }
-        }
-        if (!xmlText) throw new Error('all proxies failed');
-        const xml  = new DOMParser().parseFromString(xmlText, 'text/xml');
-        let matched = 0;
-        xml.querySelectorAll('item').forEach(item => {
-          const raw = item.querySelector('title')?.textContent || '';
-          // Letterboxd RSS title: "Film Name, 2024 - ★★★"
-          const title = raw.replace(/,\s*\d{4}.*$/, '').trim();
-          const desc = item.querySelector('description')?.textContent || '';
-          const m = desc.match(/<img[^>]+src="([^"]+)"/i);
-          if (m && title) { posterMap[title] = m[1]; matched++; }
-        });
-        // Eagerly load all matched posters into the background
-        films.forEach((f, idx) => {
-          if (posterMap[f.title]) {
-            const img = document.getElementById(`poster-${idx}`);
-            if (img) { img.src = posterMap[f.title]; img.onload = () => img.classList.add('loaded'); }
-          }
-        });
-        dot.style.background = '#00c030';
-        txt.innerHTML = `connected — ${matched} posters ready · <a href="https://letterboxd.com/maltysnack" target="_blank" style="color:inherit;text-decoration:underline;">letterboxd</a>`;
+        const res = await fetch('/films.json');
+        films = await res.json();
       } catch(e) {
         dot.style.background = '#c0392b';
-        txt.innerHTML = `letterboxd offline · posters will load from cache · <a href="https://letterboxd.com/maltysnack" target="_blank" style="color:inherit;text-decoration:underline;">profile</a>`;
+        txt.textContent = 'could not load film data';
+        return;
       }
+
+      document.getElementById('total-count').textContent = films.length;
+      // films.json stores haiku as an array; map to `lines` for buildRow
+      films.forEach((film, i) => {
+        scroll.appendChild(buildRow({ ...film, lines: film.haiku || [] }, i));
+      });
+
+      dot.style.background = '#00c030';
+      txt.innerHTML = `${films.length} entries · <a href="https://letterboxd.com/${LBXD_USER}" target="_blank" style="color:inherit;text-decoration:underline;">letterboxd</a>`;
     }
 
-    build();
-    fetchPosters();
+    loadFilms();
   </script>
 </body>
 </html>
