@@ -439,12 +439,6 @@
         row.classList.add('revealed');
         prompt.textContent = 'click to hide';
         revealed++;
-        // Load poster if we have one from Letterboxd RSS
-        const img = document.getElementById(`poster-${i}`);
-        if (posterMap[films[i].title] && !img.src) {
-          img.src = posterMap[films[i].title];
-          img.onload = () => img.classList.add('loaded');
-        }
       }
       document.getElementById('reveal-count').textContent = revealed;
     }
@@ -467,6 +461,13 @@
           const desc = item.querySelector('description')?.textContent || '';
           const m = desc.match(/<img[^>]+src="([^"]+)"/i);
           if (m && title) { posterMap[title] = m[1]; matched++; }
+        });
+        // Eagerly load all matched posters into the background
+        films.forEach((f, idx) => {
+          if (posterMap[f.title]) {
+            const img = document.getElementById(`poster-${idx}`);
+            if (img) { img.src = posterMap[f.title]; img.onload = () => img.classList.add('loaded'); }
+          }
         });
         dot.style.background = '#00c030';
         txt.innerHTML = `connected — ${matched} posters ready · <a href="https://letterboxd.com/maltysnack" target="_blank" style="color:inherit;text-decoration:underline;">letterboxd</a>`;
