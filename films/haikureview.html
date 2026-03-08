@@ -85,8 +85,8 @@
     .film-row {
       position: relative;
       width: 100%;
-      height: 70vh;
-      min-height: 320px;
+      height: 44vh;
+      min-height: 200px;
       overflow: hidden;
       cursor: pointer;
       border-top: 1px solid var(--border);
@@ -113,7 +113,7 @@
       filter: brightness(0.45) saturate(0.8);
     }
 
-    .film-bg img.loaded { opacity: 1; }
+    .film-row.revealed .film-bg img.loaded { opacity: 1; }
 
     /* Dark vignette overlay */
     .film-vignette {
@@ -134,8 +134,8 @@
       inset: 0;
       display: flex;
       align-items: center;
-      padding: 0 64px;
-      gap: 80px;
+      padding: 0 36px;
+      gap: 40px;
     }
 
     /* Left: number + haiku */
@@ -157,8 +157,8 @@
     .film-haiku {
       font-family: var(--font-body);
       font-style: italic;
-      font-size: 1.15rem;
-      line-height: 2;
+      font-size: 0.95rem;
+      line-height: 1.9;
       color: rgba(255,255,255,0.92);
       white-space: pre-line;
     }
@@ -190,7 +190,7 @@
 
     .film-title-text {
       font-family: var(--font-display);
-      font-size: 1.8rem;
+      font-size: 1.4rem;
       font-weight: 600;
       color: #fff;
       line-height: 1.2;
@@ -261,7 +261,7 @@
       .film-content { padding: 0 24px; gap: 24px; }
       .film-haiku { font-size: 1rem; }
       .film-title-text { font-size: 1.3rem; }
-      .film-row { height: 60vh; }
+      .film-row { height: 44vh; }
     }
   </style>
 </head>
@@ -307,7 +307,9 @@
     function buildRow(film, i) {
       const row = document.createElement('div');
       row.className = 'film-row';
+      row.id = `film-${i}`;
       row.dataset.index = i;
+      row.dataset.poster = film.poster || '';
       if (/avatar/i.test(film.title)) row.dataset.papyrus = 'true';
 
       const haikuHtml = film.lines.length
@@ -316,7 +318,7 @@
 
       row.innerHTML = `
         <div class="film-bg">
-          <img id="poster-${i}" src="" alt="" />
+          <img src="" alt="" />
         </div>
         <div class="film-vignette"></div>
         <div class="film-content">
@@ -329,18 +331,13 @@
               <div class="film-title-text">${film.title}</div>
               <div class="film-title-year">${film.year}</div>
               <a class="film-title-lbxd" href="${film.uri}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ letterboxd</a>
+              <a class="film-title-lbxd" href="/films/SPOILERALERT.html#film-${i}" onclick="event.stopPropagation()">↗ SPOILERALERT</a>
             </div>
             <div class="film-reveal-prompt">click to reveal</div>
           </div>
         </div>
         <div class="film-date-badge">${fmtDate(film.date)}</div>
       `;
-
-      if (film.poster) {
-        const img = row.querySelector(`#poster-${i}`);
-        img.src = film.poster;
-        img.onload = () => img.classList.add('loaded');
-      }
 
       row.addEventListener('click', () => toggle(i));
       return row;
@@ -357,6 +354,12 @@
         row.classList.add('revealed');
         prompt.textContent = 'click to hide';
         revealed++;
+        // Load poster on first reveal
+        const img = row.querySelector('.film-bg img');
+        if (row.dataset.poster && !img.getAttribute('src')) {
+          img.src = row.dataset.poster;
+          img.onload = () => img.classList.add('loaded');
+        }
       }
       document.getElementById('reveal-count').textContent = revealed;
     }
