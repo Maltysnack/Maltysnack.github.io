@@ -421,7 +421,7 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
 
         entry.innerHTML = `
           <div class="review-poster">
-            <div class="review-poster-placeholder">${film.title}</div>
+            <img class="review-poster-img" id="sa-poster-${i}" src="" alt="${film.title} poster" />
           </div>
           <div class="review-body">
             <div class="review-meta">
@@ -441,7 +441,32 @@ Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed 
       });
     }
 
+    async function fetchPosters() {
+      try {
+        const url = 'https://api.allorigins.win/get?url=' +
+          encodeURIComponent('https://letterboxd.com/maltysnack/rss/');
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        const json = await res.json();
+        const xml = new DOMParser().parseFromString(json.contents, 'text/xml');
+        xml.querySelectorAll('item').forEach(item => {
+          const raw = item.querySelector('title')?.textContent || '';
+          const title = raw.replace(/,\s*\d{4}.*$/, '').trim();
+          const desc = item.querySelector('description')?.textContent || '';
+          const m = desc.match(/<img[^>]+src="([^"]+)"/i);
+          if (m && title) {
+            films.forEach((f, i) => {
+              if (f.title === title) {
+                const img = document.getElementById(`sa-poster-${i}`);
+                if (img) { img.src = m[1]; }
+              }
+            });
+          }
+        });
+      } catch(e) { /* silently fail — placeholder gradient remains */ }
+    }
+
     buildReviews();
+    fetchPosters();
   </script>
 </body>
 </html>
