@@ -64,7 +64,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      margin-bottom: 28px;
+      margin-bottom: 16px;
     }
 
     .lbxd-dot {
@@ -74,32 +74,35 @@
     }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
-    /* ── FILM SCROLL ── */
+    .score-bar {
+      padding: 0 48px 18px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .score-bar strong { color: var(--text); font-family: var(--font-display); }
+
+    /* ── FILM GRID (Instagram-style portrait tiles) ── */
     .film-scroll {
-      display: flex;
-      flex-direction: column;
-      gap: 0;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 3px;
+      padding: 0 48px 80px;
     }
 
-    /* Each row is full width, fixed height */
+    /* Each tile: portrait phone aspect ratio */
     .film-row {
       position: relative;
-      width: 100%;
-      height: 44vh;
-      min-height: 200px;
+      aspect-ratio: 9 / 14;
       overflow: hidden;
       cursor: pointer;
-      border-top: 1px solid var(--border);
+      background: #1a1211;
     }
 
-    .film-row:last-child { border-bottom: 1px solid var(--border); }
-
-    /* Background: dark gradient default, poster when loaded */
+    /* Background poster */
     .film-bg {
       position: absolute;
       inset: 0;
       background: linear-gradient(135deg, #1a1211 0%, #2a1a14 60%, #161412 100%);
-      transition: opacity 0.6s ease;
     }
 
     .film-bg img {
@@ -115,71 +118,105 @@
 
     .film-row.revealed .film-bg img.loaded { opacity: 1; }
 
-    /* Dark vignette overlay */
+    /* Vignette overlay */
     .film-vignette {
       position: absolute;
       inset: 0;
       background: linear-gradient(
-        to right,
-        rgba(0,0,0,0.75) 0%,
-        rgba(0,0,0,0.2) 50%,
-        rgba(0,0,0,0.55) 100%
+        to top,
+        rgba(0,0,0,0.65) 0%,
+        rgba(0,0,0,0.05) 45%,
+        rgba(0,0,0,0.3) 100%
       );
       pointer-events: none;
     }
 
-    /* Content overlaid on image */
-    .film-content {
+    /* Film number — top-left */
+    .film-num {
+      position: absolute;
+      top: 12px;
+      left: 14px;
+      font-family: var(--font-display);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.28);
+      z-index: 1;
+    }
+
+    /* Date badge — top-right */
+    .film-date-badge {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      font-size: 0.58rem;
+      color: rgba(255,255,255,0.18);
+      font-family: var(--font-display);
+      letter-spacing: 0.04em;
+      z-index: 1;
+    }
+
+    /* Haiku — vertically centered in tile */
+    .film-haiku-wrap {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
-      padding: 0 36px;
-      gap: 40px;
-    }
-
-    /* Left: number + haiku */
-    .film-left {
-      flex: 0 0 auto;
-      max-width: 320px;
-    }
-
-    .film-num {
-      font-family: var(--font-display);
-      font-size: 0.65rem;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.3);
-      margin-bottom: 18px;
+      justify-content: center;
+      padding: 48px 18px;
+      z-index: 1;
     }
 
     .film-haiku {
       font-family: var(--font-body);
       font-style: italic;
-      font-size: 0.95rem;
-      line-height: 1.9;
-      color: rgba(255,255,255,0.92);
-      white-space: pre-line;
+      font-size: 0.82rem;
+      line-height: 2;
+      color: rgba(255,255,255,0.9);
+      text-align: center;
     }
 
     .film-haiku-line { display: block; }
 
-    /* Right: reveal area */
-    .film-right {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      gap: 12px;
+    /* Avatar papyrus easter egg */
+    .film-row[data-papyrus="true"] .film-title-text {
+      font-family: Papyrus, fantasy;
     }
 
-    /* Hidden title — shown on reveal */
+    /* Reveal prompt — bottom center, fades when revealed */
+    .film-reveal-prompt {
+      position: absolute;
+      bottom: 12px;
+      left: 0;
+      right: 0;
+      text-align: center;
+      font-size: 0.58rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.22);
+      transition: color 0.2s, opacity 0.3s;
+      z-index: 3;
+    }
+
+    .film-row:hover .film-reveal-prompt { color: rgba(255,255,255,0.5); }
+    .film-row.revealed .film-reveal-prompt { opacity: 0; pointer-events: none; }
+
+    /* Title reveal — slides up from bottom on click */
     .film-title-reveal {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      padding: 48px 14px 30px;
+      background: linear-gradient(to top, rgba(0,0,0,0.94) 0%, transparent 100%);
       opacity: 0;
-      transform: translateY(8px);
+      transform: translateY(6px);
       transition: opacity 0.4s ease, transform 0.4s ease;
       pointer-events: none;
+      z-index: 2;
     }
 
     .film-row.revealed .film-title-reveal {
@@ -190,62 +227,32 @@
 
     .film-title-text {
       font-family: var(--font-display);
-      font-size: 1.4rem;
+      font-size: 0.92rem;
       font-weight: 600;
       color: #fff;
-      line-height: 1.2;
-      margin-bottom: 4px;
-    }
-
-    /* Avatar papyrus easter egg */
-    .film-row[data-papyrus="true"] .film-title-text {
-      font-family: Papyrus, fantasy;
+      line-height: 1.25;
+      margin-bottom: 2px;
     }
 
     .film-title-year {
-      font-size: 0.82rem;
-      color: rgba(255,255,255,0.45);
+      font-size: 0.7rem;
+      color: rgba(255,255,255,0.42);
+      margin-bottom: 7px;
+    }
+
+    .film-title-links {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
     }
 
     .film-title-lbxd {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.45);
+      font-size: 0.67rem;
+      color: rgba(255,255,255,0.38);
       text-decoration: underline;
       text-underline-offset: 3px;
     }
-    .film-title-lbxd:hover { color: rgba(255,255,255,0.8); }
-
-    /* Reveal prompt — hidden after reveal */
-    .film-reveal-prompt {
-      font-size: 0.72rem;
-      font-family: var(--font-display);
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.28);
-      transition: color 0.2s, opacity 0.3s;
-    }
-
-    .film-row:hover .film-reveal-prompt { color: rgba(255,255,255,0.55); }
-    .film-row.revealed .film-reveal-prompt { opacity: 0.4; }
-
-    .film-date-badge {
-      position: absolute;
-      bottom: 18px;
-      right: 24px;
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.22);
-      font-family: var(--font-display);
-      letter-spacing: 0.05em;
-    }
-
-    /* Score bar */
-    .score-bar {
-      padding: 0 48px 8px;
-      font-size: 0.78rem;
-      color: var(--text-muted);
-    }
-    .score-bar strong { color: var(--text); font-family: var(--font-display); }
+    .film-title-lbxd:hover { color: rgba(255,255,255,0.75); }
 
     /* Override main padding */
     .main {
@@ -254,14 +261,19 @@
       flex: 1;
     }
 
+    @media (max-width: 900px) {
+      .film-scroll { grid-template-columns: repeat(2, 1fr); }
+    }
+
     @media (max-width: 700px) {
       .haiku-page-header { padding: 28px 20px 0; }
       .lbxd-status { padding: 0 20px; }
-      .score-bar { padding: 0 20px 8px; }
-      .film-content { padding: 0 24px; gap: 24px; }
-      .film-haiku { font-size: 1rem; }
-      .film-title-text { font-size: 1.3rem; }
-      .film-row { height: 44vh; }
+      .score-bar { padding: 0 20px 18px; }
+      .film-scroll { padding: 0 20px 48px; }
+    }
+
+    @media (max-width: 480px) {
+      .film-scroll { grid-template-columns: repeat(2, 1fr); padding: 0 0 48px; gap: 2px; }
     }
   </style>
 </head>
@@ -314,29 +326,25 @@
 
       const haikuHtml = film.lines.length
         ? film.lines.map(l => `<span class="film-haiku-line">${l}</span>`).join('')
-        : `<span class="film-haiku-line" style="opacity:0.35;font-style:italic;">no review yet</span>`;
+        : `<span class="film-haiku-line" style="opacity:0.28;font-style:italic;">no review yet</span>`;
 
       row.innerHTML = `
-        <div class="film-bg">
-          <img src="" alt="" />
-        </div>
+        <div class="film-bg"><img src="" alt="" /></div>
         <div class="film-vignette"></div>
-        <div class="film-content">
-          <div class="film-left">
-            <div class="film-num">#${String(i+1).padStart(2,'0')}</div>
-            <div class="film-haiku">${haikuHtml}</div>
-          </div>
-          <div class="film-right">
-            <div class="film-title-reveal">
-              <div class="film-title-text">${film.title}</div>
-              <div class="film-title-year">${film.year}</div>
-              <a class="film-title-lbxd" href="${film.uri}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ letterboxd</a>
-              <a class="film-title-lbxd" href="/films/SPOILERALERT.html#film-${i}" onclick="event.stopPropagation()">↗ SPOILERALERT</a>
-            </div>
-            <div class="film-reveal-prompt">click to reveal</div>
+        <div class="film-num">#${String(i+1).padStart(2,'0')}</div>
+        <div class="film-date-badge">${fmtDate(film.date)}</div>
+        <div class="film-haiku-wrap">
+          <div class="film-haiku">${haikuHtml}</div>
+        </div>
+        <div class="film-reveal-prompt">click to reveal</div>
+        <div class="film-title-reveal">
+          <div class="film-title-text">${film.title}</div>
+          <div class="film-title-year">${film.year}</div>
+          <div class="film-title-links">
+            <a class="film-title-lbxd" href="${film.uri}" target="_blank" rel="noopener" onclick="event.stopPropagation()">↗ letterboxd</a>
+            <a class="film-title-lbxd" href="/films/SPOILERALERT.html#film-${i}" onclick="event.stopPropagation()">↗ SPOILERALERT</a>
           </div>
         </div>
-        <div class="film-date-badge">${fmtDate(film.date)}</div>
       `;
 
       row.addEventListener('click', () => toggle(i));
@@ -354,7 +362,6 @@
         row.classList.add('revealed');
         prompt.textContent = 'click to hide';
         revealed++;
-        // Load poster on first reveal
         const img = row.querySelector('.film-bg img');
         if (row.dataset.poster && !img.getAttribute('src')) {
           img.src = row.dataset.poster;
@@ -363,6 +370,94 @@
       }
       document.getElementById('reveal-count').textContent = revealed;
     }
+
+    // ── RSS helpers (browser-side) ──────────────────────────────────────
+
+    function rssTag(xml, tag) {
+      const re = new RegExp(`<${tag}[^>]*>(?:<!\\[CDATA\\[([\\s\\S]*?)\\]\\]>|([\\s\\S]*?))<\\/${tag}>`, 'i');
+      const m = re.exec(xml);
+      return m ? (m[1] !== undefined ? m[1] : (m[2] || '')).trim() : '';
+    }
+
+    function rssPoster(desc) {
+      const m = /<img[^>]+src="([^"]+)"/i.exec(desc);
+      return m ? m[1] : '';
+    }
+
+    function rssHaiku(desc) {
+      const text = desc
+        .replace(/<p[^>]*>\s*<img[^>]*>\s*<\/p>/gi, '')
+        .replace(/<p[^>]*>[★½\s]*<\/p>/gi, '')
+        .replace(/<\/p>/gi, '\n').replace(/<p[^>]*>/gi, '')
+        .replace(/<br\s*\/?>/gi, '\n').replace(/<[^>]+>/g, '')
+        .replace(/&amp;/g, '&').replace(/&lt;/g, '<').replace(/&gt;/g, '>').trim();
+      return text.split('\n').map(l => l.trim()).filter(Boolean);
+    }
+
+    async function mergeWithRSS(films) {
+      const rssUrl = `https://letterboxd.com/${LBXD_USER}/rss/`;
+      const proxies = [
+        url => `https://api.allorigins.win/get?url=${encodeURIComponent(url)}`,
+        url => `https://corsproxy.io/?${encodeURIComponent(url)}`
+      ];
+
+      let xmlText = null;
+      for (const makeUrl of proxies) {
+        try {
+          const ctrl  = new AbortController();
+          const timer = setTimeout(() => ctrl.abort(), 7000);
+          const res   = await fetch(makeUrl(rssUrl), { signal: ctrl.signal });
+          clearTimeout(timer);
+          if (!res.ok) continue;
+          const raw = await res.text();
+          let data;
+          try { data = JSON.parse(raw); xmlText = data.contents; }
+          catch(e) { xmlText = raw; }
+          if (xmlText && xmlText.includes('<item>')) break;
+        } catch(e) { continue; }
+      }
+
+      if (!xmlText) return films;
+
+      // Build lookup: "title_lower|year" → array index
+      const filmMap = new Map();
+      films.forEach((f, i) => filmMap.set(`${f.title.toLowerCase()}|${f.year}`, i));
+
+      // Clone films array so we can patch it
+      films = films.map(f => ({ ...f }));
+
+      const itemRe  = /<item>([\s\S]*?)<\/item>/g;
+      const newItems = [];
+      let m;
+
+      while ((m = itemRe.exec(xmlText)) !== null) {
+        const raw   = m[1];
+        const title = rssTag(raw, 'letterboxd:filmTitle') ||
+                      rssTag(raw, 'title').replace(/,\s*\d{4}.*$/, '').trim();
+        const year  = parseInt(rssTag(raw, 'letterboxd:filmYear')) || 0;
+        const desc  = rssTag(raw, 'description');
+        const poster = rssPoster(desc);
+        const key   = `${title.toLowerCase()}|${year}`;
+
+        if (filmMap.has(key)) {
+          // Patch poster URL onto existing entry if currently empty
+          const idx = filmMap.get(key);
+          if (poster && !films[idx].poster) films[idx].poster = poster;
+        } else {
+          // New entry not yet in films.json
+          const date = rssTag(raw, 'letterboxd:watchedDate');
+          const uriM = /<link>([^<]+)<\/link>/i.exec(raw);
+          const uri  = uriM ? uriM[1].trim() : rssTag(raw, 'guid');
+          const haiku = rssHaiku(desc);
+          newItems.push({ title, year, date, uri, poster, haiku, review: '' });
+        }
+      }
+
+      // newItems is in RSS order (newest-first), prepend to keep newest-first overall
+      return newItems.length > 0 ? [...newItems, ...films] : films;
+    }
+
+    // ───────────────────────────────────────────────────────────────────
 
     async function loadFilms() {
       const dot    = document.getElementById('lbxd-dot');
@@ -379,14 +474,22 @@
         return;
       }
 
+      // Merge with live RSS: patches poster URLs + picks up new diary entries
+      try { films = await mergeWithRSS(films); } catch(e) { /* silent fail */ }
+
       document.getElementById('total-count').textContent = films.length;
-      // films.json stores haiku as an array; map to `lines` for buildRow
       films.forEach((film, i) => {
         scroll.appendChild(buildRow({ ...film, lines: film.haiku || [] }, i));
       });
 
       dot.style.background = '#00c030';
       txt.innerHTML = `${films.length} entries · <a href="https://letterboxd.com/${LBXD_USER}" target="_blank" style="color:inherit;text-decoration:underline;">letterboxd</a>`;
+
+      // Scroll to anchor if navigated here from another page
+      if (location.hash) {
+        const el = document.querySelector(location.hash);
+        if (el) setTimeout(() => el.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+      }
     }
 
     loadFilms();
