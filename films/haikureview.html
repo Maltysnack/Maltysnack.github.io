@@ -20,7 +20,7 @@
       justify-content: space-between;
       gap: 24px;
       flex-wrap: wrap;
-      margin-bottom: 32px;
+      margin-bottom: 28px;
     }
 
     .haiku-page-title {
@@ -70,18 +70,18 @@
     .lbxd-dot {
       width: 7px; height: 7px; border-radius: 50%;
       background: #ccc; display: inline-block;
-      animation: pulse 2s infinite;
+      animation: lbxd-pulse 2s infinite;
     }
-    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+    @keyframes lbxd-pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
 
     .score-bar {
-      padding: 0 48px 18px;
+      padding: 0 48px 16px;
       font-size: 0.78rem;
       color: var(--text-muted);
     }
     .score-bar strong { color: var(--text); font-family: var(--font-display); }
 
-    /* ── FILM GRID (Instagram-style portrait tiles) ── */
+    /* ── FILM GRID ── */
     .film-scroll {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -89,21 +89,35 @@
       padding: 0 48px 80px;
     }
 
-    /* Each tile: portrait phone aspect ratio */
+    /* Each tile: portrait ratio, slightly less extreme than before */
     .film-row {
       position: relative;
-      aspect-ratio: 9 / 14;
+      aspect-ratio: 2 / 3;
       overflow: hidden;
       cursor: pointer;
       background: #1a1211;
+      transition: transform 0.22s ease, box-shadow 0.22s ease;
     }
 
-    /* Background poster */
+    .film-row:hover {
+      transform: scale(1.025);
+      box-shadow: 0 10px 32px rgba(160, 30, 20, 0.45);
+      z-index: 2;
+    }
+
+    .film-row.revealed {
+      box-shadow: 0 14px 42px rgba(190, 50, 20, 0.5);
+      z-index: 1;
+    }
+
+    /* Warm dark backgrounds — varied per tile position when no poster */
     .film-bg {
       position: absolute;
       inset: 0;
-      background: linear-gradient(135deg, #1a1211 0%, #2a1a14 60%, #161412 100%);
     }
+    .film-row:nth-child(3n+1) .film-bg { background: linear-gradient(150deg, #1e1210 0%, #2e1a12 55%, #160e0a 100%); }
+    .film-row:nth-child(3n+2) .film-bg { background: linear-gradient(150deg, #11131a 0%, #1c1624 55%, #0e0d14 100%); }
+    .film-row:nth-child(3n+3) .film-bg { background: linear-gradient(150deg, #101810 0%, #172014 55%, #0d130c 100%); }
 
     .film-bg img {
       width: 100%;
@@ -112,8 +126,8 @@
       object-position: center top;
       display: block;
       opacity: 0;
-      transition: opacity 0.8s ease;
-      filter: brightness(0.45) saturate(0.8);
+      transition: opacity 0.9s ease;
+      filter: brightness(0.4) saturate(0.75);
     }
 
     .film-row.revealed .film-bg img.loaded { opacity: 1; }
@@ -124,57 +138,46 @@
       inset: 0;
       background: linear-gradient(
         to top,
-        rgba(0,0,0,0.65) 0%,
-        rgba(0,0,0,0.05) 45%,
-        rgba(0,0,0,0.3) 100%
+        rgba(0,0,0,0.78) 0%,
+        rgba(0,0,0,0.06) 45%,
+        rgba(0,0,0,0.38) 100%
       );
       pointer-events: none;
     }
 
-    /* Film number — top-left */
+    /* Film number — top-left, warm amber */
     .film-num {
       position: absolute;
-      top: 12px;
-      left: 14px;
+      top: 11px;
+      left: 13px;
       font-family: var(--font-display);
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       font-weight: 600;
-      letter-spacing: 0.15em;
+      letter-spacing: 0.16em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.28);
+      color: rgba(210, 130, 50, 0.5);
       z-index: 1;
     }
 
-    /* Date badge — top-right */
-    .film-date-badge {
-      position: absolute;
-      top: 12px;
-      right: 12px;
-      font-size: 0.58rem;
-      color: rgba(255,255,255,0.18);
-      font-family: var(--font-display);
-      letter-spacing: 0.04em;
-      z-index: 1;
-    }
-
-    /* Haiku — vertically centered in tile */
+    /* Review text — vertically centered in tile */
     .film-haiku-wrap {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px 18px;
+      padding: 42px 16px;
       z-index: 1;
     }
 
     .film-haiku {
       font-family: var(--font-body);
       font-style: italic;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       line-height: 2;
-      color: rgba(255,255,255,0.9);
+      color: rgba(255, 248, 238, 0.88);
       text-align: center;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.95);
     }
 
     .film-haiku-line { display: block; }
@@ -184,36 +187,46 @@
       font-family: Papyrus, fantasy;
     }
 
-    /* Reveal prompt — bottom center, fades when revealed */
+    /* Reveal prompt — pulses gently, fades on reveal */
+    @keyframes pulse-prompt { 0%,100%{opacity:0.2} 50%{opacity:0.5} }
+
     .film-reveal-prompt {
       position: absolute;
-      bottom: 12px;
+      bottom: 11px;
       left: 0;
       right: 0;
       text-align: center;
-      font-size: 0.58rem;
+      font-size: 0.56rem;
       font-family: var(--font-display);
       font-weight: 600;
-      letter-spacing: 0.12em;
+      letter-spacing: 0.14em;
       text-transform: uppercase;
       color: rgba(255,255,255,0.22);
+      animation: pulse-prompt 2.6s ease-in-out infinite;
       transition: color 0.2s, opacity 0.3s;
       z-index: 3;
     }
 
-    .film-row:hover .film-reveal-prompt { color: rgba(255,255,255,0.5); }
-    .film-row.revealed .film-reveal-prompt { opacity: 0; pointer-events: none; }
+    .film-row:hover .film-reveal-prompt {
+      animation: none;
+      color: rgba(255, 210, 140, 0.72);
+    }
+    .film-row.revealed .film-reveal-prompt {
+      opacity: 0;
+      pointer-events: none;
+      animation: none;
+    }
 
-    /* Title reveal — slides up from bottom on click */
+    /* Title + links — slide up from bottom on click */
     .film-title-reveal {
       position: absolute;
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 48px 14px 30px;
-      background: linear-gradient(to top, rgba(0,0,0,0.94) 0%, transparent 100%);
+      padding: 54px 13px 22px;
+      background: linear-gradient(to top, rgba(0,0,0,0.97) 0%, rgba(18,6,4,0.72) 65%, transparent 100%);
       opacity: 0;
-      transform: translateY(6px);
+      transform: translateY(7px);
       transition: opacity 0.4s ease, transform 0.4s ease;
       pointer-events: none;
       z-index: 2;
@@ -227,7 +240,7 @@
 
     .film-title-text {
       font-family: var(--font-display);
-      font-size: 0.92rem;
+      font-size: 0.88rem;
       font-weight: 600;
       color: #fff;
       line-height: 1.25;
@@ -235,9 +248,9 @@
     }
 
     .film-title-year {
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.42);
-      margin-bottom: 7px;
+      font-size: 0.66rem;
+      color: rgba(255,255,255,0.38);
+      margin-bottom: 9px;
     }
 
     .film-title-links {
@@ -247,12 +260,13 @@
     }
 
     .film-title-lbxd {
-      font-size: 0.67rem;
-      color: rgba(255,255,255,0.38);
+      font-size: 0.64rem;
+      color: rgba(210, 160, 90, 0.55);
       text-decoration: underline;
       text-underline-offset: 3px;
+      transition: color 0.15s;
     }
-    .film-title-lbxd:hover { color: rgba(255,255,255,0.75); }
+    .film-title-lbxd:hover { color: rgba(240, 200, 130, 0.9); }
 
     /* Override main padding */
     .main {
@@ -268,7 +282,7 @@
     @media (max-width: 700px) {
       .haiku-page-header { padding: 28px 20px 0; }
       .lbxd-status { padding: 0 20px; }
-      .score-bar { padding: 0 20px 18px; }
+      .score-bar { padding: 0 20px 16px; }
       .film-scroll { padding: 0 20px 48px; }
     }
 
@@ -312,10 +326,6 @@
     const LBXD_USER = 'maltysnack';
     let revealed = 0;
 
-    function fmtDate(d) {
-      return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { month:'short', year:'numeric' });
-    }
-
     function buildRow(film, i) {
       const row = document.createElement('div');
       row.className = 'film-row';
@@ -332,7 +342,6 @@
         <div class="film-bg"><img src="" alt="" /></div>
         <div class="film-vignette"></div>
         <div class="film-num">#${String(i+1).padStart(2,'0')}</div>
-        <div class="film-date-badge">${fmtDate(film.date)}</div>
         <div class="film-haiku-wrap">
           <div class="film-haiku">${haikuHtml}</div>
         </div>
@@ -476,6 +485,9 @@
 
       // Merge with live RSS: patches poster URLs + picks up new diary entries
       try { films = await mergeWithRSS(films); } catch(e) { /* silent fail */ }
+
+      // Sort newest-first by watched date (fixes ordering when RSS adds new entries)
+      films.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
       document.getElementById('total-count').textContent = films.length;
       films.forEach((film, i) => {
