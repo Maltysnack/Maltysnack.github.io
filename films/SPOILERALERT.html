@@ -11,7 +11,7 @@
   <style>
     /* ── SPOILERALERT SPECIFIC ── */
 
-    /* Dramatic header band */
+    /* Dramatic warning band */
     .spoiler-banner {
       background: var(--red);
       color: #fff;
@@ -41,9 +41,7 @@
       transition: color 0.15s;
     }
 
-    .spoiler-banner a:hover {
-      color: #fff;
-    }
+    .spoiler-banner a:hover { color: #fff; }
 
     .sa-page-title {
       font-family: var(--font-display);
@@ -55,9 +53,7 @@
       margin-bottom: 6px;
     }
 
-    .sa-page-title span {
-      color: var(--red);
-    }
+    .sa-page-title span { color: var(--red); }
 
     .sa-subtitle {
       font-size: 0.9rem;
@@ -68,21 +64,25 @@
 
     /* ── REVIEW ENTRY ── */
     .review-entry {
-      padding: 36px 0;
+      padding: 32px 0;
       border-bottom: 1px solid var(--border);
       display: grid;
       grid-template-columns: 120px 1fr;
       gap: 24px;
+      transition: background 0.2s ease;
     }
 
-    .review-entry:first-of-type {
-      border-top: 1px solid var(--border);
+    .review-entry:first-of-type { border-top: 1px solid var(--border); }
+
+    .review-entry:hover {
+      background: rgba(180, 30, 20, 0.03);
+      margin: 0 -16px;
+      padding-left: 16px;
+      padding-right: 16px;
     }
 
     /* Poster thumbnail */
-    .review-poster {
-      position: relative;
-    }
+    .review-poster { position: relative; }
 
     .review-poster-img {
       width: 120px;
@@ -91,20 +91,26 @@
       border-radius: 3px;
       display: block;
       background: linear-gradient(160deg, #2a1f1a, #1a1211);
+      transition: filter 0.25s ease;
     }
 
-    .review-poster-placeholder {
-      width: 120px;
-      aspect-ratio: 2/3;
-      border-radius: 3px;
-      background: linear-gradient(160deg, #2a1a1a 0%, #1a0f0f 100%);
-      display: flex;
-      align-items: flex-end;
-      padding: 8px;
+    .review-entry:hover .review-poster-img {
+      filter: brightness(1.08) saturate(1.1);
+    }
+
+    /* Entry number badge on poster */
+    .review-poster-num {
+      position: absolute;
+      bottom: 6px;
+      left: 6px;
       font-family: var(--font-display);
-      font-size: 0.7rem;
-      color: rgba(255,255,255,0.3);
-      line-height: 1.3;
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: rgba(255,255,255,0.55);
+      background: rgba(0,0,0,0.55);
+      padding: 1px 5px;
+      border-radius: 2px;
     }
 
     /* Papyrus for Avatar entries */
@@ -114,8 +120,6 @@
     }
 
     /* Review body */
-    .review-body {}
-
     .review-meta {
       display: flex;
       align-items: center;
@@ -137,11 +141,6 @@
       border-radius: 2px;
     }
 
-    .review-date {
-      font-size: 0.75rem;
-      color: var(--text-muted);
-    }
-
     .review-lbxd {
       font-size: 0.75rem;
       color: var(--text-muted);
@@ -152,11 +151,10 @@
       color: var(--text-muted);
       text-decoration: underline;
       text-underline-offset: 2px;
+      transition: color 0.15s;
     }
 
-    .review-lbxd a:hover {
-      color: var(--accent);
-    }
+    .review-lbxd a:hover { color: var(--accent); }
 
     .review-title {
       font-family: var(--font-display);
@@ -194,8 +192,14 @@
       line-height: 1.8;
     }
 
-    .review-body-text p + p {
-      margin-top: 12px;
+    .review-body-text p + p { margin-top: 12px; }
+
+    .review-placeholder {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      opacity: 0.45;
+      font-style: italic;
+      line-height: 1.75;
     }
 
     /* Back to haiku link */
@@ -212,6 +216,7 @@
       padding: 8px 14px;
       border: 1px solid var(--border);
       border-radius: 3px;
+      transition: color 0.15s, border-color 0.15s;
     }
 
     .haiku-back-link:hover {
@@ -224,13 +229,13 @@
         grid-template-columns: 80px 1fr;
         gap: 16px;
       }
-      .review-poster-img,
-      .review-poster-placeholder {
-        width: 80px;
+      .review-entry:hover {
+        margin: 0 -8px;
+        padding-left: 8px;
+        padding-right: 8px;
       }
-      .sa-page-title {
-        font-size: 2rem;
-      }
+      .review-poster-img { width: 80px; }
+      .sa-page-title { font-size: 2rem; }
     }
   </style>
 </head>
@@ -317,10 +322,7 @@
 
   <script>
     const LBXD_USER = 'maltysnack';
-
-    function formatDate(d) {
-      return new Date(d + 'T00:00:00').toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
-    }
+    const LOREM = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris.';
 
     function buildEntry(film, i) {
       const entry = document.createElement('article');
@@ -328,23 +330,23 @@
       entry.id = `film-${i}`;
       if (/avatar/i.test(film.title)) entry.dataset.papyrus = 'true';
 
-      const haiku  = (film.haiku || []);
+      const haiku = (film.haiku || []);
       const haikuHtml = haiku.length
         ? haiku.map(l => `<em>${l}</em>`).join('<br>')
-        : '<em style="opacity:0.4;">haiku coming soon</em>';
+        : '<em style="opacity:0.4;">review coming soon</em>';
 
       const reviewHtml = film.review
         ? film.review.split('\n\n').map(p => `<p>${p}</p>`).join('')
-        : '<p style="opacity:0.4;font-style:italic;">full review coming soon</p>';
+        : `<p class="review-placeholder">${LOREM}</p>`;
 
       entry.innerHTML = `
         <div class="review-poster">
           <img class="review-poster-img" src="${film.poster || ''}" alt="${film.title} poster" />
+          <span class="review-poster-num">#${String(i+1).padStart(2,'0')}</span>
         </div>
         <div class="review-body">
           <div class="review-meta">
             <span class="review-tag">SPOILERALERT</span>
-            <span class="review-date">${formatDate(film.date)}</span>
             <span class="review-lbxd"><a href="${film.uri}" target="_blank" rel="noopener">↗ letterboxd</a></span>
             <span class="review-lbxd"><a href="/films/haikureview.html#film-${i}">↗ haikureview</a></span>
           </div>
@@ -455,6 +457,9 @@
 
       // Merge with live RSS: patches poster URLs + picks up new diary entries
       try { films = await mergeWithRSS(films); } catch(e) { /* silent fail */ }
+
+      // Sort newest-first by watched date
+      films.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
       films.forEach((film, i) => list.appendChild(buildEntry(film, i)));
 
