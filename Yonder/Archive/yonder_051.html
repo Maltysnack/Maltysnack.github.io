@@ -1175,7 +1175,6 @@ const MISSION_POOL={
     {id:'q4',type:'quest',title:'The Missing Apprentice',desc:"My apprentice went into the Ashwood three days ago to collect samples. Research takes a day. Three days is something else. Please bring her back.",hints:['The wood gets strange past the second stream.','Bring something bright.','The wood past the second stream closes in. The canopy is low and the undergrowth is thick.'],conditions:['cramped'],enemyName:'Goblin Scout',enemyLevel:6,source:'the Ashwood near Dawnhearth',return_text:"She's home. Shaken but home. She won't tell me what happened past the second stream. I've stopped asking."},
   ],
   adventure:[
-    {id:'a_north',type:'adventure',title:'The Road North',desc:"The guild has a standing contract for any member willing to make the run north through the Thornwood to Millriver. The road was clear last season. It is not clear now.",hints:['The road markers run as far as the first ridge. After that you read the land.','Something has moved into the Thornwood between here and Millriver. The contract does not say what.'],enemyName:'Thornwood Stalker',enemyLevel:10,source:'the road north through the Thornwood',return_text:"You came through the Thornwood and the Thornwood let you. Millriver is ahead — the road between is passable again, at least for now.",arrivesTown:'millriver'},
     {id:'a1',type:'adventure',title:'The Deep Ashwood',desc:"Beyond the known paths of the Ashwood there is something the maps do not show. I have spoken to hunters who pushed past the second ridge. They did not say much.",hints:['The trees get older out there. Older than seems right.','Things that live deep do not like visitors.'],enemyName:'Forest Wraith',enemyLevel:12,source:'the Deep Ashwood near Dawnhearth',return_text:"You came back from the deep wood. Not many do. Whatever you found out there — keep it to yourself for now. The town isn't ready for it."},
     {id:'a2',type:'adventure',title:'The Forgotten Keep',desc:"Before Dawnhearth there was a fortress on the high ridge. History says it fell in a siege. The ruins suggest the siege never quite ended. I am offering a substantial sum for confirmation.",hints:['Ruins that old do not stay empty.','Old armour will not protect you against old things.'],enemyName:'Orc Scout',enemyLevel:16,source:'the Forgotten Keep in the high ridge',return_text:"The siege never ended. That's what you're telling me. I'll write it down. Somewhere it can be found later."},
     {id:'a3',type:'adventure',title:'The Black Mere',desc:"There is a lake three days east where the water is black at any depth. Fishermen gave up on it two generations ago. I want to know why.",hints:['The cold there is not just cold.','What lives beneath does not breathe air.'],enemyName:'Marsh Toad',enemyLevel:13,source:'the Black Mere east of Dawnhearth',return_text:"The water is black at any depth. Now we know why. Don't tell the fishermen. Let them believe it was just bad luck."},
@@ -1267,7 +1266,7 @@ const CLASS_CONFIG={
       {name:"Hunter's Eye",desc:'Crit chance +8% while a bow is equipped.',dot:'pd-class'},
     ]},
   Acolyte:{icon:'✨',stats:{str:6,agi:8,int:12,con:10},startLevel:5,blurb:'Faith is a weapon. Patience is its edge.',
-    startItems:['cracked_staff','cloth_robe','healing_potion','blessed_amulet'],
+    startItems:['cloth_robe','healing_potion','blessed_amulet'],
     unlockCondition:'Complete the Broken Chapel quest',
     perks:[
       {name:'Lay on Hands',desc:'Heals 15% of max HP between combat rounds.',dot:'pd-class'},
@@ -1516,15 +1515,14 @@ function xpForLevel(l){let t=0;for(let i=1;i<l;i++)t+=Math.floor(i+300*Math.pow(
 function buildPlayerStats(){
   const c=G.c;
   const wk=G.equipped.weapon||'wooden_sword';
-  // Support both string key (ITEMS_DB lookup) and full object (legacy non-DB loot)
-  const w=typeof wk==='string'?ITEMS_DB[wk]:wk;
+  const w=ITEMS_DB[wk];
   const wc=w&&w.combat?w.combat:{dmgMin:2,dmgMax:5,speed:2.0,crit:.04,dmgType:'physical',wtype:'sword_1h'};
 
-  // Sum all equipped item stats — handle both string keys and stored objects
+  // Sum all equipped item stats
   let totalArmour=0,bonusStr=0,bonusAgi=0,bonusInt=0,bonusCon=0;
   Object.values(G.equipped).forEach(k=>{
     if(!k) return;
-    const it=typeof k==='string'?ITEMS_DB[k]:k;if(!it) return;
+    const it=ITEMS_DB[k];if(!it) return;
     const s=it.stats||{};
     if(s.armour) totalArmour+=s.armour;
     if(s.str)    bonusStr+=s.str;
@@ -1578,8 +1576,7 @@ function buildPlayerStats(){
   const physWtypes=['sword_1h','sword_2h','dagger','axe','axe_2h'];
   if(c.charClass==='Knight'){
     if(physWtypes.includes(wc.wtype)){dmgMin=Math.floor(dmgMin*1.05);dmgMax=Math.floor(dmgMax*1.05);}
-    const ohk=G.equipped.offhand;
-    const oh=ohk?(typeof ohk==='string'?ITEMS_DB[ohk]:ohk):null;
+    const oh=G.equipped.offhand?ITEMS_DB[G.equipped.offhand]:null;
     if(oh&&oh.combat&&oh.combat.wtype==='shield') totalArmour+=3;
   }
   if(c.charClass==='Ranger'){
@@ -1638,11 +1635,6 @@ function buildPlayerStats(){
   if(c.charClass==='Shadowblade'){
     const bladeFluury=tr.blade_flurry||0;
     if(bladeFluury>0&&wc.wtype==='dagger'){const m=1+(bladeFluury*0.07);dmgMin=Math.floor(dmgMin*m);dmgMax=Math.floor(dmgMax*m);}
-    // Dual dagger bonus: both weapon and offhand are daggers
-    const _ohkSB=G.equipped.offhand;const _ohSB=_ohkSB?(typeof _ohkSB==='string'?ITEMS_DB[_ohkSB]:_ohkSB):null;
-    if(wc.wtype==='dagger'&&_ohSB&&_ohSB.combat&&_ohSB.combat.wtype==='dagger'){
-      dmgMin=Math.floor(dmgMin*1.15);dmgMax=Math.floor(dmgMax*1.15);speed=Math.max(.6,speed-0.1);
-    }
     // vanish / poison_edge applied in simulateCombat
   }
   if(c.charClass==='Plague Doctor'){
@@ -1672,23 +1664,7 @@ function buildPlayerStats(){
   }
 
   const tr2=G.training||{};
-  const _pk=G.equipped.pack;const _pkIt=_pk?(typeof _pk==='string'?ITEMS_DB[_pk]:_pk):null;
-  const hasTinctureBelt=!!(_pkIt&&_pkIt.special&&_pkIt.special.type==='tincture');
-  // Pale bow mythic: flat +20% crit
-  if(w&&w.perk==='crit_plus_20') crit=Math.min(.5,crit+0.20);
-  // Biscuit: heirloom sheep — check pack slots and bag
-  const hasBiscuit=G.equipped.pack==='biscuit'||G.equipped.pack2==='biscuit'||
-    (G.bag||[]).some(item=>typeof item==='string'?item==='biscuit':item.key==='biscuit');
-  const hasCrookOfAges=typeof wk==='string'?wk==='crook_of_ages':!!(wk&&wk.key==='crook_of_ages');
-  const biscuitFocusedRanks=c.charClass==='Shepherd'?(tr2.biscuit_focused||0):0;
-  // Plague Doctor Miasma: plague_mask equipped
-  const _hk=G.equipped.head;const _hIt=_hk?(typeof _hk==='string'?ITEMS_DB[_hk]:_hk):null;
-  const hasMiasma=c.charClass==='Plague Doctor'&&!!(_hIt&&_hIt.special&&_hIt.special.type==='miasma');
-  // Last Stand: the_undying_vest equipped
-  const _bk=G.equipped.body;const _bIt=_bk?(typeof _bk==='string'?ITEMS_DB[_bk]:_bk):null;
-  const hasLastStand=!!(_bIt&&_bIt.perk==='last_stand');
-  // Ashwalker: heal on kill
-  const healOnKill=!!(w&&w.perk==='heal_on_kill');
+  const hasTinctureBelt=!!(G.equipped.pack&&ITEMS_DB[G.equipped.pack]&&ITEMS_DB[G.equipped.pack].special&&ITEMS_DB[G.equipped.pack].special.type==='tincture');
   return{
     name:c.name,charClass:c.charClass,
     hp:c.hp,maxHp:c.maxHp||maxHp,
@@ -1711,9 +1687,6 @@ function buildPlayerStats(){
     toxicBladeRanks:c.charClass==='Plague Doctor'?(tr2.toxic_blade||0):0,
     fieldExtractionRanks:c.charClass==='Plague Doctor'?(tr2.field_extraction||0):0,
     hasTinctureBelt:c.charClass==='Plague Doctor'&&hasTinctureBelt,
-    hasMiasma,
-    hasBiscuit,hasCrookOfAges,biscuitFocusedRanks,
-    hasLastStand,healOnKill,
   };
 }
 
@@ -1740,7 +1713,6 @@ function simulateCombat(player,enemy){
   let poisonTurns=0; // active poison on enemy (remaining turns)
   let poisonDmg=0;
   let hexActive=false;
-  let lastStandUsed=false;
   while(pH>0&&eH>0&&loops<300){
     loops++;
     // Druid: enemy speed debuff
@@ -1759,12 +1731,6 @@ function simulateCombat(player,enemy){
         pH=Math.min(player.maxHp,pH+h);
         rallyLeft--;
         events.push({a:'rally',h,pH,eH});
-      }
-      // Ashwalker: heal on kill
-      if(eH<=0&&player.healOnKill){
-        const h=Math.floor(player.maxHp*0.08);
-        pH=Math.min(player.maxHp,pH+h);
-        events.push({a:'ashwalker',h,pH,eH});
       }
       // Shadowblade: poison edge on hit
       if(player.poisonEdgeRanks>0&&eH>0){
@@ -1789,12 +1755,6 @@ function simulateCombat(player,enemy){
       }
     }else{
       eT=0;pT+=eN;
-      // Plague Doctor: Miasma — enemy takes 2 flat dmg at start of each enemy turn
-      if(player.hasMiasma&&eH>0){
-        eH=Math.max(0,eH-2);
-        events.push({a:'miasma',d:2,pH,eH});
-        if(eH<=0) break;
-      }
       let d=ri(enemy.dmgMin,enemy.dmgMax);
       const cr=Math.random()<enemy.crit;if(cr)d=Math.floor(d*1.5);
       // Warlock: curse mark — hex reduces enemy damage
@@ -1804,23 +1764,9 @@ function simulateCombat(player,enemy){
         events.push({a:'vanish',pH,eH});
         continue;
       }
-      // Biscuit: chance to halve incoming damage
-      if(player.hasBiscuit&&d>0){
-        let biscuitChance=0.10+(player.biscuitFocusedRanks||0)*0.08;
-        if(player.hasCrookOfAges) biscuitChance*=2;
-        if(Math.random()<biscuitChance){
-          d=Math.ceil(d/2);
-          events.push({a:'biscuit',pH,eH});
-        }
-      }
       d=Math.max(1,Math.floor(d*(1-player.armour)));
       pH=Math.max(0,pH-d);
       events.push({a:'e',d,cr,pH,eH});
-      // Last Stand: survive once if HP hits 0
-      if(pH<=0&&!lastStandUsed&&player.hasLastStand){
-        lastStandUsed=true;pH=1;
-        events.push({a:'laststand',pH,eH});
-      }
       // Warlock: activate curse mark on being hit
       if(player.curseMarkRanks>0&&!hexActive&&Math.random()<player.curseMarkRanks*0.08){
         hexActive=true;
@@ -1955,30 +1901,6 @@ function renderCombat(sim){
         const pf=document.getElementById('cb-php');const pv=document.getElementById('cb-phv');
         if(pf) pf.style.width=Math.max(0,(pCurH/pMaxH)*100)+'%';
         if(pv) pv.textContent=`${pCurH}/${pMaxH}`;
-      }else if(ev.a==='miasma'){
-        eCurH=ev.eH;
-        line.className='combat-line ehit';
-        line.textContent=`The air is wrong here — ${sim.enemy.name} chokes for ${ev.d} damage`;
-        const ef=document.getElementById('cb-ehp');const ev2=document.getElementById('cb-ehv');
-        if(ef) ef.style.width=Math.max(0,(eCurH/eMaxH)*100)+'%';
-        if(ev2) ev2.textContent=`${eCurH}/${eMaxH}`;
-      }else if(ev.a==='biscuit'){
-        line.className='combat-line heal';
-        line.textContent=`Biscuit steps in front of it. Damage halved.`;
-      }else if(ev.a==='laststand'){
-        pCurH=1;
-        line.className='combat-line crit';
-        line.textContent=`${sim.player.name} should have fallen. The vest holds.`;
-        const pf=document.getElementById('cb-php');const pv=document.getElementById('cb-phv');
-        if(pf) pf.style.width='2px';
-        if(pv) pv.textContent=`1/${pMaxH}`;
-      }else if(ev.a==='ashwalker'){
-        pCurH=ev.pH;
-        line.className='combat-line heal';
-        line.textContent=`Ashwalker draws ${ev.h}hp from the kill`;
-        const pf=document.getElementById('cb-php');const pv=document.getElementById('cb-phv');
-        if(pf) pf.style.width=Math.max(0,(pCurH/pMaxH)*100)+'%';
-        if(pv) pv.textContent=`${pCurH}/${pMaxH}`;
       }
       wrap.appendChild(line);
       log.scrollTop=log.scrollHeight;
@@ -2020,19 +1942,18 @@ function rollRarity(missionType){
 function generateLootItem(missionType,source,guaranteed){
   if(guaranteed){
     const it=ITEMS_DB[guaranteed];
-    if(!it) return null;
-    return{key:guaranteed,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats||{},combat:it.combat,special:it.special,slot:it.slot,source,desc:it.desc,isDBItem:true};
+    return{key:guaranteed,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats,source,desc:it.desc,isDBItem:true};
   }
   const rarity=rollRarity(missionType);
-  const pool=getShopPool();
-  // Pick an item of the rolled rarity; fall back to any pool item if none match
-  let candidates=pool.filter(p=>p.rarity===rarity);
-  if(!candidates.length) candidates=pool;
-  if(!candidates.length) return null;
-  const chosen=candidates[ri(0,candidates.length-1)];
-  const it=ITEMS_DB[chosen.key];
-  if(!it) return null;
-  return{key:chosen.key,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats||{},combat:it.combat,special:it.special,slot:it.slot,source,desc:it.desc,isDBItem:true};
+  const names=LOOT_NAMES[rarity];
+  const name=names[ri(0,names.length-1)];
+  const rc=RARITY_CONFIG[rarity];
+  // Generate a simple stat based on rarity
+  const statMag={worn:1,common:2,crafted:ri(3,4),enchanted:ri(3,5),legendary:ri(5,8),mythic:ri(8,15)};
+  const statKeys=['attack','defense','str','agi','int','con'];
+  const stat=statKeys[ri(0,statKeys.length-1)];
+  const mag=statMag[rarity];
+  return{key:`loot_${Date.now()}`,name,rarity,icon:iconForName(name),stats:{[stat]:mag},source,desc:`A ${rc.label.toLowerCase()} find.`,isDBItem:false};
 }
 
 function iconForName(n){
@@ -2074,7 +1995,7 @@ function initTownMissions(){
       citizen_bounty:{...gen(CITIZEN_TUTORIAL_POOL.bounty),_expires:now+BOARD_EXPIRY_MS.bounty},
       bounty:{...gen(pool.bounty),_expires:now+BOARD_EXPIRY_MS.bounty},
       quest:relicDone?{...gen(pool.quest),_expires:now+BOARD_EXPIRY_MS.quest}:null,
-      adventure:{...(pool.adventure.find(a=>a.arrivesTown)||gen(pool.adventure)),_expires:now+BOARD_EXPIRY_MS.adventure},
+      adventure:{...gen(pool.adventure),_expires:now+BOARD_EXPIRY_MS.adventure},
     };
   }else{
     missions={
@@ -2570,19 +2491,16 @@ function proceedToTown(died){
     if(G.pendingEncounter&&G.pendingEncounter!=='Knight_earned'){
       const cls=G.pendingEncounter;G.pendingEncounter=null;
       showScreen('town');render();
-      document.getElementById('h-status').textContent='IN TOWN';
       setTimeout(()=>showEncounterModal(cls),400);
     }else if(G.pendingEncounter==='Knight_earned'){
       G.pendingEncounter=null;
       showScreen('town');render();
-      document.getElementById('h-status').textContent='IN TOWN';
       setTimeout(()=>{
         setModal('Path Revealed',`<p class="mflavour">"You have bled for something. That is the beginning."</p><p style="font-size:14px;color:var(--text);line-height:1.7;">The path of the <strong style="color:var(--parchment)">Knight</strong> is now known to your bloodline. Future wanderers may walk it.</p><p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-top:12px;">✦ KNIGHT UNLOCKED ✦</p>`);
         document.getElementById('overlay').classList.add('open');
       },400);
     }else{
       showScreen('town');render();
-      document.getElementById('h-status').textContent='IN TOWN';
     }
   }
   save();
@@ -2693,15 +2611,7 @@ function chooseStat(stat){
   if(!G.pendingLevelUps||G.pendingLevelUps<1) return;
   G.c[stat]++;
   G.pendingLevelUps--;
-  // Recompute HP with new stat (buildPlayerStats has side effects on c.maxHp/c.hp)
-  buildPlayerStats();
   save();
-  // Update header HP bar immediately
-  const maxHp=G.c.maxHp;const curHp=G.c.hp;
-  const pct=Math.max(0,Math.min(100,(curHp/maxHp)*100));
-  const fill=document.getElementById('h-hp-fill');const val=document.getElementById('h-hp-val');
-  if(fill) fill.style.width=pct+'%';
-  if(val) val.textContent=`${curHp}/${maxHp}`;
   // Re-render mission end to update level up UI
   const box=document.querySelector('.lvlup-box');
   if(box){
@@ -3186,7 +3096,6 @@ function homeAction(){
         startTimer();
       }
     }else{
-      initTownMissions(); // ensure board is populated on Continue (save migration fix)
       showScreen('town');render();
       if(G.tavernActivity){
         if(Date.now()>=G.tavernActivity.endTime) resolveTavern();
@@ -3361,8 +3270,8 @@ function openModal(key,data){
 function setModal(title,html){document.getElementById('m-title').textContent=title;document.getElementById('m-body').innerHTML=html;}
 function closeModal(){document.getElementById('overlay').classList.remove('open');}
 function overlayClick(e){
-  // Block closing modal if any tavern activity is running (works across all towns)
-  if(G.tavernActivity) return;
+  // Block closing modal if tavern activity is running
+  if(G.tavernActivity&&document.getElementById('m-title')?.textContent==='The Ashen Flagon') return;
   if(e.target===document.getElementById('overlay'))closeModal();
 }
 
@@ -3628,14 +3537,11 @@ function buyTraining(perkId){
   G.training[perkId]=(rank+1);
   addDiary(`Trained ${p.name} rank ${rank+1} at the ${cls==='Knight'?'Sanctum':cls==='Acolyte'?'Chantry':'Ranger Post'} for ${cost}gp.`);
   save();
-  // Refresh whichever modal is open (handles all towns)
+  // Refresh whichever modal is open
   const title=document.getElementById('m-title')?.textContent;
-  const academyTitles=['The Ember Sanctum','The Old Mill Training Hall','The Pit','The Sanctum of Forms'];
-  const churchTitles=['The Chantry','House of the Flame','The Ember Church',"The Riverman's Chapel",'The Blighted Shrine','The Royal Chapel'];
-  const gateTitles=['The Ranger Post','The East Gate','The East Gate · Ranger Post'];
-  if(academyTitles.includes(title)) academy();
-  else if(churchTitles.includes(title)) church();
-  else if(gateTitles.includes(title)) gateModal();
+  if(title==='The Ember Sanctum') academy();
+  else if(title==='The Chantry'||title==='House of the Flame') church();
+  else if(title==='The Ranger Post'||title==='The East Gate') gateModal();
 }
 
 function buildBuffsHTML(forCombat){
@@ -4044,7 +3950,7 @@ function academy(){
   } else if(cls==='Citizen'&&!knightUnlocked){
     body+=`<p style="font-size:14px;color:var(--text);line-height:1.7;margin-bottom:12px;">A scarred Knight at the entrance watches you without speaking. Men like him don't waste words on the unproven.</p>
     <p style="font-style:italic;font-size:14px;color:var(--bone);border-left:2px solid var(--ember-dim);padding-left:12px;">"Come back when you've bled for something. Then we'll talk."</p>`;
-  } else if(cls==='Knight'||['Shaman','Druid','Shepherd','Warlock','Shadowblade','Plague Doctor'].includes(cls)){
+  } else if(cls==='Knight'){
     body+=buildTrainingHTML();
   } else {
     body+=`<p style="font-size:13px;color:var(--text-dim);font-style:italic;">The training hall acknowledges your path.</p>`;
@@ -4059,8 +3965,7 @@ function academy(){
 
 function noticeboard(){
   tickBoardExpiry();
-  // Adventures are gate-only — never shown on the noticeboard
-  const missions=getActiveMissions().filter(m=>m.type!=='adventure');
+  const missions=getActiveMissions();
   const tm=getTownMissions();
   const kinLine=getKinLine('noticeboard');
   let html=`<p class="mflavour">"Parchment upon parchment. Some dated years ago. Some dated tomorrow."</p>`;
