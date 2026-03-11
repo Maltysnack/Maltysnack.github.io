@@ -1,81 +1,812 @@
 [
-  { "date": "2026-02-25", "title": "Wuthering Heights",                    "year": 2026, "uri": "https://boxd.it/OdIa", "poster": "", "haiku": [], "review": "IT WAS BORING" },
-  { "date": "2026-02-22", "title": "Now You See Me",                        "year": 2013, "uri": "https://boxd.it/2Bsu", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-19", "title": "The Roses",                             "year": 2025, "uri": "https://boxd.it/MjnI", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-10", "title": "Scarlet",                               "year": 2025, "uri": "https://boxd.it/S6iW", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-08", "title": "Marty Supreme",                         "year": 2025, "uri": "https://boxd.it/Off0", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-07", "title": "Mortdecai",                             "year": 2015, "uri": "https://boxd.it/6ioc", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-03", "title": "Die My Love",                           "year": 2025, "uri": "https://boxd.it/D5cI", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-02-01", "title": "Ideal Home",                            "year": 2018, "uri": "https://boxd.it/e0Ei", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-21", "title": "Zootopia",                              "year": 2016, "uri": "https://boxd.it/84xS", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-18", "title": "Soul",                                  "year": 2020, "uri": "https://boxd.it/ioLA", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-17", "title": "Avatar",                                "year": 2009, "uri": "https://boxd.it/1Efm", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-10", "title": "Avatar: Fire and Ash",                  "year": 2025, "uri": "https://boxd.it/2W7s", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-09", "title": "St. Vincent",                           "year": 2014, "uri": "https://boxd.it/73bE", "poster": "", "haiku": [], "review": "" },
-  { "date": "2026-01-02", "title": "Wake Up Dead Man",                      "year": 2025, "uri": "https://boxd.it/uAKS", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-12-25", "title": "National Lampoon's Christmas Vacation", "year": 1989, "uri": "https://boxd.it/22wQ", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-12-06", "title": "Sherpa",                                "year": 2015, "uri": "https://boxd.it/bnK8", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-11-17", "title": "Bugonia",                               "year": 2025, "uri": "https://boxd.it/qeWY", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-11-15", "title": "Fool's Gold",                           "year": 2008, "uri": "https://boxd.it/1ZXE", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-10-24", "title": "The Woman in Cabin 10",                 "year": 2025, "uri": "https://boxd.it/NfTM", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-10-22", "title": "Grimsby",                               "year": 2016, "uri": "https://boxd.it/7ZkO", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-10-21", "title": "Love Lies Bleeding",                    "year": 2024, "uri": "https://boxd.it/zN4q", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-10-20", "title": "The Princess Bride",                    "year": 1987, "uri": "https://boxd.it/26EY", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-10-09", "title": "I Want to Be Neenja! The Movie",        "year": 2024, "uri": "https://boxd.it/G2Fy", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-09-19", "title": "KPop Demon Hunters",                    "year": 2025, "uri": "https://boxd.it/ufwK", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-09-07", "title": "The Thursday Murder Club",              "year": 2025, "uri": "https://boxd.it/rXju", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-09-07", "title": "Caught Stealing",                       "year": 2025, "uri": "https://boxd.it/LnyS", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-08-19", "title": "Rat Race",                              "year": 2001, "uri": "https://boxd.it/1XAo", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-07-22", "title": "Kneecap",                               "year": 2024, "uri": "https://boxd.it/ILxI", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-07-01", "title": "F1",                                    "year": 2025, "uri": "https://boxd.it/yjVM", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-06-24", "title": "Deep Cover",                            "year": 2025, "uri": "https://boxd.it/L6ec", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-05-16", "title": "Layer Cake",                            "year": 2004, "uri": "https://boxd.it/23LC", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-05-16", "title": "Juno",                                  "year": 2007, "uri": "https://boxd.it/210a", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-05-10", "title": "The Gorge",                             "year": 2025, "uri": "https://boxd.it/zRqK", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-05-10", "title": "Thunderbolts*",                         "year": 2025, "uri": "https://boxd.it/BfbQ", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-05-04", "title": "The Cloverfield Paradox",               "year": 2018, "uri": "https://boxd.it/doVA", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-04-30", "title": "The Man from Earth",                    "year": 2007, "uri": "https://boxd.it/1Ql2", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-04-30", "title": "Batman Begins",                         "year": 2005, "uri": "https://boxd.it/2aIg", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-03-06", "title": "The Grand Budapest Hotel",              "year": 2014, "uri": "https://boxd.it/3ZqO", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-28", "title": "Paddington 2",                          "year": 2017, "uri": "https://boxd.it/bCF8", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-28", "title": "Paddington",                            "year": 2014, "uri": "https://boxd.it/3RKw", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-28", "title": "The Dead Don't Die",                    "year": 2019, "uri": "https://boxd.it/juZg", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-28", "title": "Nightcrawler",                          "year": 2014, "uri": "https://boxd.it/780m", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-28", "title": "The Brutalist",                         "year": 2024, "uri": "https://boxd.it/k4BO", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-07", "title": "The Room Next Door",                    "year": 2024, "uri": "https://boxd.it/Fb4k", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-07", "title": "Carry-On",                              "year": 2024, "uri": "https://boxd.it/C0B2", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-07", "title": "2 Guns",                                "year": 2013, "uri": "https://boxd.it/4oAk", "poster": "", "haiku": [], "review": "" },
-  { "date": "2025-01-06", "title": "A Real Pain",                           "year": 2024, "uri": "https://boxd.it/CjNG", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-12-25", "title": "Wicked",                                "year": 2024, "uri": "https://boxd.it/e8ME", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-12-04", "title": "Heretic",                               "year": 2024, "uri": "https://boxd.it/H1lY", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-12-03", "title": "American Fiction",                      "year": 2023, "uri": "https://boxd.it/DYHm", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-11-05", "title": "Special Correspondents",                "year": 2016, "uri": "https://boxd.it/bYUY", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-10-27", "title": "Smile 2",                               "year": 2024, "uri": "https://boxd.it/FDA4", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-09-18", "title": "Dead Poets Society",                    "year": 1989, "uri": "https://boxd.it/2aSg", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-09-17", "title": "American Psycho",                       "year": 2000, "uri": "https://boxd.it/28Vs", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-09-17", "title": "Léon: The Professional",                "year": 1994, "uri": "https://boxd.it/2b8S", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-08-15", "title": "Million Dollar Baby",                   "year": 2004, "uri": "https://boxd.it/2bdI", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-08-13", "title": "Leave the World Behind",                "year": 2023, "uri": "https://boxd.it/re0i", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-08-13", "title": "Ad Astra",                              "year": 2019, "uri": "https://boxd.it/ePzI", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-08-13", "title": "The Iron Claw",                         "year": 2023, "uri": "https://boxd.it/w5Pm", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-08-02", "title": "MaXXXine",                              "year": 2024, "uri": "https://boxd.it/CIM4", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-07-21", "title": "Longlegs",                              "year": 2024, "uri": "https://boxd.it/KzLM", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-07-20", "title": "Red Eye",                               "year": 2005, "uri": "https://boxd.it/1TNy", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-07-20", "title": "Hundreds of Beavers",                   "year": 2022, "uri": "https://boxd.it/CyUM", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-07-20", "title": "A Quiet Place: Day One",                "year": 2024, "uri": "https://boxd.it/sDAi", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-06-14", "title": "The Sweet East",                        "year": 2023, "uri": "https://boxd.it/CcHw", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-06-14", "title": "The Devil All the Time",                "year": 2020, "uri": "https://boxd.it/i2tY", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-06-14", "title": "Furiosa: A Mad Max Saga",               "year": 2024, "uri": "https://boxd.it/tABk", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-05-08", "title": "Kingdom of the Planet of the Apes",     "year": 2024, "uri": "https://boxd.it/ohEE", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-04-11", "title": "Monkey Man",                            "year": 2024, "uri": "https://boxd.it/kvsO", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-04-03", "title": "Taxi Driver",                           "year": 1976, "uri": "https://boxd.it/2b8y", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-04-03", "title": "Fantastic Mr. Fox",                     "year": 2009, "uri": "https://boxd.it/1WyQ", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-04-03", "title": "Troll",                                 "year": 2022, "uri": "https://boxd.it/rDsQ", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-04-03", "title": "Midsommar",                             "year": 2019, "uri": "https://boxd.it/jhxe", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-31", "title": "Renfield",                              "year": 2023, "uri": "https://boxd.it/o8vy", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-31", "title": "Bones and All",                         "year": 2022, "uri": "https://boxd.it/tLd4", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-31", "title": "Perfect Days",                          "year": 2023, "uri": "https://boxd.it/ATh8", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-21", "title": "Dune",                                  "year": 2021, "uri": "https://boxd.it/fA7G", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-16", "title": "The Monuments Men",                     "year": 2014, "uri": "https://boxd.it/4OxQ", "poster": "", "haiku": [], "review": "" },
-  { "date": "2024-03-10", "title": "The Dry",                               "year": 2020, "uri": "https://boxd.it/kOXG", "poster": "", "haiku": [], "review": "" }
+  {
+    "title": "Mission: Impossible II",
+    "year": 2000,
+    "date": "2026-03-06",
+    "uri": "https://letterboxd.com/maltysnack/film/mission-impossible-ii/",
+    "poster": "https://a.ltrbxd.com/resized/sm/upload/67/p1/1d/1m/MnK1Kn8cFcORYT8pIIexPUwLfW-0-600-0-900-crop.jpg?v=9f1c48e1b3",
+    "haiku": [
+      "Watched on Friday March 6, 2026."
+    ],
+    "review": ""
+  },
+  {
+    "title": "Mission: Impossible",
+    "year": 1996,
+    "date": "2026-02-27",
+    "uri": "https://letterboxd.com/maltysnack/film/mission-impossible/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/5/1/2/0/6/51206-mission-impossible-0-600-0-900-crop.jpg?v=7b7690e145",
+    "haiku": [
+      "Watched on Friday February 27, 2026."
+    ],
+    "review": ""
+  },
+  {
+    "title": "National Lampoon&#039;s Christmas Vacation",
+    "year": 1989,
+    "date": "2025-12-25",
+    "uri": "https://letterboxd.com/maltysnack/film/national-lampoons-christmas-vacation/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/4/8/6/3/8/48638-national-lampoon-s-christmas-vacation-0-600-0-900-crop.jpg?v=e91c94d094",
+    "haiku": [
+      "Watched on Thursday December 25, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "Fool&#039;s Gold",
+    "year": 2008,
+    "date": "2025-11-15",
+    "uri": "https://letterboxd.com/maltysnack/film/fools-gold-2008/",
+    "poster": "https://a.ltrbxd.com/resized/sm/upload/eg/sm/v9/6w/a7tdONvVEUVaQINVLEJ6QwuFOFz-0-600-0-900-crop.jpg?v=64017f4892",
+    "haiku": [
+      "Watched on Saturday November 15, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "The Phoenician Scheme",
+    "year": 2025,
+    "date": "2025-06-20",
+    "uri": "https://letterboxd.com/maltysnack/film/the-phoenician-scheme/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/1/0/2/5/0/4/7/1025047-the-phoenician-scheme-0-600-0-900-crop.jpg?v=606059b69f",
+    "haiku": [
+      "Watched on Friday June 20, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "Dangerous Animals",
+    "year": 2025,
+    "date": "2025-06-14",
+    "uri": "https://letterboxd.com/maltysnack/film/dangerous-animals/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/1/1/6/9/2/8/4/1169284-dangerous-animals-0-600-0-900-crop.jpg?v=9d567f6a39",
+    "haiku": [
+      "Watched on Saturday June 14, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "Guns Akimbo",
+    "year": 2019,
+    "date": "2025-05-27",
+    "uri": "https://letterboxd.com/maltysnack/film/guns-akimbo/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/3/8/9/2/7/0/389270-guns-akimbo-0-600-0-900-crop.jpg?v=f81e9c08e9",
+    "haiku": [
+      "Watched on Tuesday May 27, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "Final Destination Bloodlines",
+    "year": 2025,
+    "date": "2025-05-19",
+    "uri": "https://letterboxd.com/maltysnack/film/final-destination-bloodlines/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/5/0/2/6/2/2/502622-final-destination-bloodlines-0-600-0-900-crop.jpg?v=3c04d3a110",
+    "haiku": [
+      "Watched on Monday May 19, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "title": "The Dead Don&#039;t Die",
+    "year": 2019,
+    "date": "2025-01-13",
+    "uri": "https://letterboxd.com/maltysnack/film/the-dead-dont-die-2019/",
+    "poster": "https://a.ltrbxd.com/resized/film-poster/4/6/4/7/3/5/464735-the-dead-don-t-die-0-600-0-900-crop.jpg?v=d01422458c",
+    "haiku": [
+      "Watched on Monday January 13, 2025."
+    ],
+    "review": ""
+  },
+  {
+    "date": "2026-02-25",
+    "title": "Wuthering Heights",
+    "year": 2026,
+    "uri": "https://boxd.it/OdIa",
+    "poster": "",
+    "haiku": [],
+    "review": "IT WAS BORING"
+  },
+  {
+    "date": "2026-02-22",
+    "title": "Now You See Me",
+    "year": 2013,
+    "uri": "https://boxd.it/2Bsu",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-19",
+    "title": "The Roses",
+    "year": 2025,
+    "uri": "https://boxd.it/MjnI",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-10",
+    "title": "Scarlet",
+    "year": 2025,
+    "uri": "https://boxd.it/S6iW",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-08",
+    "title": "Marty Supreme",
+    "year": 2025,
+    "uri": "https://boxd.it/Off0",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-07",
+    "title": "Mortdecai",
+    "year": 2015,
+    "uri": "https://boxd.it/6ioc",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-03",
+    "title": "Die My Love",
+    "year": 2025,
+    "uri": "https://boxd.it/D5cI",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-02-01",
+    "title": "Ideal Home",
+    "year": 2018,
+    "uri": "https://boxd.it/e0Ei",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-21",
+    "title": "Zootopia",
+    "year": 2016,
+    "uri": "https://boxd.it/84xS",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-18",
+    "title": "Soul",
+    "year": 2020,
+    "uri": "https://boxd.it/ioLA",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-17",
+    "title": "Avatar",
+    "year": 2009,
+    "uri": "https://boxd.it/1Efm",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-10",
+    "title": "Avatar: Fire and Ash",
+    "year": 2025,
+    "uri": "https://boxd.it/2W7s",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-09",
+    "title": "St. Vincent",
+    "year": 2014,
+    "uri": "https://boxd.it/73bE",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2026-01-02",
+    "title": "Wake Up Dead Man",
+    "year": 2025,
+    "uri": "https://boxd.it/uAKS",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-12-25",
+    "title": "National Lampoon's Christmas Vacation",
+    "year": 1989,
+    "uri": "https://boxd.it/22wQ",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-12-06",
+    "title": "Sherpa",
+    "year": 2015,
+    "uri": "https://boxd.it/bnK8",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-11-17",
+    "title": "Bugonia",
+    "year": 2025,
+    "uri": "https://boxd.it/qeWY",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-11-15",
+    "title": "Fool's Gold",
+    "year": 2008,
+    "uri": "https://boxd.it/1ZXE",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-10-24",
+    "title": "The Woman in Cabin 10",
+    "year": 2025,
+    "uri": "https://boxd.it/NfTM",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-10-22",
+    "title": "Grimsby",
+    "year": 2016,
+    "uri": "https://boxd.it/7ZkO",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-10-21",
+    "title": "Love Lies Bleeding",
+    "year": 2024,
+    "uri": "https://boxd.it/zN4q",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-10-20",
+    "title": "The Princess Bride",
+    "year": 1987,
+    "uri": "https://boxd.it/26EY",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-10-09",
+    "title": "I Want to Be Neenja! The Movie",
+    "year": 2024,
+    "uri": "https://boxd.it/G2Fy",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-09-19",
+    "title": "KPop Demon Hunters",
+    "year": 2025,
+    "uri": "https://boxd.it/ufwK",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-09-07",
+    "title": "The Thursday Murder Club",
+    "year": 2025,
+    "uri": "https://boxd.it/rXju",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-09-07",
+    "title": "Caught Stealing",
+    "year": 2025,
+    "uri": "https://boxd.it/LnyS",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-08-19",
+    "title": "Rat Race",
+    "year": 2001,
+    "uri": "https://boxd.it/1XAo",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-07-22",
+    "title": "Kneecap",
+    "year": 2024,
+    "uri": "https://boxd.it/ILxI",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-07-01",
+    "title": "F1",
+    "year": 2025,
+    "uri": "https://boxd.it/yjVM",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-06-24",
+    "title": "Deep Cover",
+    "year": 2025,
+    "uri": "https://boxd.it/L6ec",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-05-16",
+    "title": "Layer Cake",
+    "year": 2004,
+    "uri": "https://boxd.it/23LC",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-05-16",
+    "title": "Juno",
+    "year": 2007,
+    "uri": "https://boxd.it/210a",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-05-10",
+    "title": "The Gorge",
+    "year": 2025,
+    "uri": "https://boxd.it/zRqK",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-05-10",
+    "title": "Thunderbolts*",
+    "year": 2025,
+    "uri": "https://boxd.it/BfbQ",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-05-04",
+    "title": "The Cloverfield Paradox",
+    "year": 2018,
+    "uri": "https://boxd.it/doVA",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-04-30",
+    "title": "The Man from Earth",
+    "year": 2007,
+    "uri": "https://boxd.it/1Ql2",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-04-30",
+    "title": "Batman Begins",
+    "year": 2005,
+    "uri": "https://boxd.it/2aIg",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-03-06",
+    "title": "The Grand Budapest Hotel",
+    "year": 2014,
+    "uri": "https://boxd.it/3ZqO",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-28",
+    "title": "Paddington 2",
+    "year": 2017,
+    "uri": "https://boxd.it/bCF8",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-28",
+    "title": "Paddington",
+    "year": 2014,
+    "uri": "https://boxd.it/3RKw",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-28",
+    "title": "The Dead Don't Die",
+    "year": 2019,
+    "uri": "https://boxd.it/juZg",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-28",
+    "title": "Nightcrawler",
+    "year": 2014,
+    "uri": "https://boxd.it/780m",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-28",
+    "title": "The Brutalist",
+    "year": 2024,
+    "uri": "https://boxd.it/k4BO",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-07",
+    "title": "The Room Next Door",
+    "year": 2024,
+    "uri": "https://boxd.it/Fb4k",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-07",
+    "title": "Carry-On",
+    "year": 2024,
+    "uri": "https://boxd.it/C0B2",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-07",
+    "title": "2 Guns",
+    "year": 2013,
+    "uri": "https://boxd.it/4oAk",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2025-01-06",
+    "title": "A Real Pain",
+    "year": 2024,
+    "uri": "https://boxd.it/CjNG",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-12-25",
+    "title": "Wicked",
+    "year": 2024,
+    "uri": "https://boxd.it/e8ME",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-12-04",
+    "title": "Heretic",
+    "year": 2024,
+    "uri": "https://boxd.it/H1lY",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-12-03",
+    "title": "American Fiction",
+    "year": 2023,
+    "uri": "https://boxd.it/DYHm",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-11-05",
+    "title": "Special Correspondents",
+    "year": 2016,
+    "uri": "https://boxd.it/bYUY",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-10-27",
+    "title": "Smile 2",
+    "year": 2024,
+    "uri": "https://boxd.it/FDA4",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-09-18",
+    "title": "Dead Poets Society",
+    "year": 1989,
+    "uri": "https://boxd.it/2aSg",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-09-17",
+    "title": "American Psycho",
+    "year": 2000,
+    "uri": "https://boxd.it/28Vs",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-09-17",
+    "title": "Léon: The Professional",
+    "year": 1994,
+    "uri": "https://boxd.it/2b8S",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-08-15",
+    "title": "Million Dollar Baby",
+    "year": 2004,
+    "uri": "https://boxd.it/2bdI",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-08-13",
+    "title": "Leave the World Behind",
+    "year": 2023,
+    "uri": "https://boxd.it/re0i",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-08-13",
+    "title": "Ad Astra",
+    "year": 2019,
+    "uri": "https://boxd.it/ePzI",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-08-13",
+    "title": "The Iron Claw",
+    "year": 2023,
+    "uri": "https://boxd.it/w5Pm",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-08-02",
+    "title": "MaXXXine",
+    "year": 2024,
+    "uri": "https://boxd.it/CIM4",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-07-21",
+    "title": "Longlegs",
+    "year": 2024,
+    "uri": "https://boxd.it/KzLM",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-07-20",
+    "title": "Red Eye",
+    "year": 2005,
+    "uri": "https://boxd.it/1TNy",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-07-20",
+    "title": "Hundreds of Beavers",
+    "year": 2022,
+    "uri": "https://boxd.it/CyUM",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-07-20",
+    "title": "A Quiet Place: Day One",
+    "year": 2024,
+    "uri": "https://boxd.it/sDAi",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-06-14",
+    "title": "The Sweet East",
+    "year": 2023,
+    "uri": "https://boxd.it/CcHw",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-06-14",
+    "title": "The Devil All the Time",
+    "year": 2020,
+    "uri": "https://boxd.it/i2tY",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-06-14",
+    "title": "Furiosa: A Mad Max Saga",
+    "year": 2024,
+    "uri": "https://boxd.it/tABk",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-05-08",
+    "title": "Kingdom of the Planet of the Apes",
+    "year": 2024,
+    "uri": "https://boxd.it/ohEE",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-04-11",
+    "title": "Monkey Man",
+    "year": 2024,
+    "uri": "https://boxd.it/kvsO",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-04-03",
+    "title": "Taxi Driver",
+    "year": 1976,
+    "uri": "https://boxd.it/2b8y",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-04-03",
+    "title": "Fantastic Mr. Fox",
+    "year": 2009,
+    "uri": "https://boxd.it/1WyQ",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-04-03",
+    "title": "Troll",
+    "year": 2022,
+    "uri": "https://boxd.it/rDsQ",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-04-03",
+    "title": "Midsommar",
+    "year": 2019,
+    "uri": "https://boxd.it/jhxe",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-31",
+    "title": "Renfield",
+    "year": 2023,
+    "uri": "https://boxd.it/o8vy",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-31",
+    "title": "Bones and All",
+    "year": 2022,
+    "uri": "https://boxd.it/tLd4",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-31",
+    "title": "Perfect Days",
+    "year": 2023,
+    "uri": "https://boxd.it/ATh8",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-21",
+    "title": "Dune",
+    "year": 2021,
+    "uri": "https://boxd.it/fA7G",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-16",
+    "title": "The Monuments Men",
+    "year": 2014,
+    "uri": "https://boxd.it/4OxQ",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  },
+  {
+    "date": "2024-03-10",
+    "title": "The Dry",
+    "year": 2020,
+    "uri": "https://boxd.it/kOXG",
+    "poster": "",
+    "haiku": [],
+    "review": ""
+  }
 ]
