@@ -1,4 +1,4 @@
-# Yonder 0.5.1 — Bug Report & Fix Context
+# Yonder 0.5.2 — Bug Report & Fix Context
 ## For use in Claude Code continuation session
 
 ---
@@ -8,6 +8,42 @@ Single-file browser idle RPG (`yonder_051.html`). Four towns: Dawnhearth → Mil
 
 **Previous build:** `yonder_038.html` (clean base)
 **Current build:** `yonder_051.html` (all layers applied, bugs below)
+
+---
+
+## New Bugs (session 2026-03-12)
+
+### N1. Homepage Requires Scrolling to Reach "Begin Journey"
+**Symptom:** Player must scroll down on the start/character-creation screen to see and click the Begin Journey button. This should never happen — the whole screen should fit above the fold.
+**Fix:** Reduce padding, font sizes, or spacing on the home screen elements until the button is always visible without scrolling. Check on ~750px viewport height (phone in landscape or small laptop).
+
+### N2. Stat Tooltips Not Working on Hover (Character Creation)
+**Symptom:** Hovering stat names (STR, AGI, INT etc.) in character creation does nothing. They should show a tooltip explaining what the stat does.
+**Cause:** Either the tooltip elements aren't rendering, the CSS hover state is broken, or the JS tooltip trigger isn't attached to the right elements.
+**Fix:** Verify `.stat-tooltip` or equivalent elements exist and are visible on hover. Check z-index and position. Confirm JS event listeners are attached after the character creation screen renders.
+
+### N3. Shop UI Still Broken — Character Panel Missing
+**Symptom:** Shop modal is still a mess. The agreed design was character stats/equipment panel visible alongside shop items. This was not resolved in the last build.
+**Fix:** Shop modal must render a two-column (or stacked) layout: left = character loadout/stats (current HP, class, equipped gear, stat block), right = shop item list. Replicate the pattern from the stat screen. Make sure the character panel updates when an item is equipped or sold.
+
+### N4. Bounties Too Hard for New Players — Need Citizen Intro Bounties
+**Symptom:** First bounty in Dawnhearth is level 5 enemy — brutal and unbeatable for a fresh character. Citizens especially need very simple intro bounties to learn the system.
+**Fix:** Add a short list of 3–4 level 1–2 intro bounties at the Dawnhearth noticeboard gated to the opening state (before any bounties are completed). Very low enemy level (1–2), small reward, clear flavour text explaining bounties. These should be the first things a Citizen sees.
+
+### N5. Day/Night Visual Inverted
+**Symptom:** The sun icon appears at the top of the screen, but the background shows dark sky with stars and a large moon — it looks like night. The visual and the indicator are contradicting each other.
+**Cause:** Either the time-of-day check is inverted (day check returning night hours) or the wrong background/icon is being rendered.
+**Fix:** Audit `isDaytime()` or equivalent. Confirm sun shows with light sky background; moon shows with dark/stars. They must match. Double-check the hour ranges.
+
+### N6. Bows Don't Drop / Ranger Can't Be Unlocked
+**Symptom:** Player has never seen a bow item. Can't unlock the Ranger class.
+**Cause:** Bows may be missing from the shop pool, loot tables, or not correctly implemented in ITEMS_DB (see old bug 13 — bow says +2 armour). Ranger unlock condition may require an item or action that never occurs.
+**Fix:** Add bows to Dawnhearth shop pool and/or ensure they drop from appropriate missions. Fix bow ITEMS_DB entry (remove armour:2). Audit Ranger unlock condition — if it requires a bow, the bow must be obtainable first. Add a clear unlock hint in the game (e.g. class discovery text).
+
+### N7. Can't Beat the Adventure Quest Even at Level 7 with Gear
+**Symptom:** Adventure is still unbeatable even when geared at level 7. Combat outcome feels wrong.
+**Cause:** Likely gear still not contributing to combat stats (old bug 2), adventure enemy level too high, or both. Also possible combat formula is giving enemy too much advantage.
+**Fix:** This is the same root as old bug 2 (gear not contributing) plus old adventure balance issue. Priority: fix gear contribution first. Then adjust adventure enemy level down or give player a better base combat result at level 7+.
 
 ---
 
@@ -98,6 +134,21 @@ Single-file browser idle RPG (`yonder_051.html`). Four towns: Dawnhearth → Mil
 ### 17. Rumours Have No Interesting Outcome
 **Cause:** Drink/rumour event logs flavour text and gives XP. No branching, no item discovery, no class hints. Stub never implemented.
 **Fix (design):** Add a small outcome table — chance of item find, class hint text, chronicle entry, small gold find, or debuff (hangover).
+
+---
+
+## Next Build Features (Queued)
+
+### Level-Up Stat Boost (per class)
+Each class automatically gains +1 to their associated stat on level-up, in addition to the player's +1 stat of choice and +4 HP. Citizens get +4 HP only (no class stat bonus).
+
+Class → auto stat:
+- Knight → STR
+- Ranger → AGI
+- Acolyte → INT
+- (define the rest to match class identity when implementing)
+
+**So a full level-up gives:** +4 HP + class stat (+1) + player choice (+1) = net +4 HP and +2 stats total, except Citizen who gets +4 HP + player choice (+1 stat) only.
 
 ---
 
