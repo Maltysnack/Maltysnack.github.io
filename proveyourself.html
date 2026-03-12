@@ -9,124 +9,322 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
   <style>
-    .quiz-block {
-      background: #fff;
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-      max-width: 620px;
-      margin-top: 36px;
+
+    /* ── QUIZ SHELL ─────────────────────── */
+    .quiz-shell {
+      max-width: 660px;
+      margin-top: 8px;
     }
 
-    .quiz-header {
-      padding: 24px 28px 20px;
-      border-bottom: 1px solid var(--border);
+    .quiz-meta-row {
       display: flex;
-      align-items: flex-start;
-      justify-content: space-between;
-      gap: 16px;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 32px;
     }
 
-    .quiz-title {
-      font-family: var(--font-display);
-      font-size: 1.1rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 4px;
+    .quiz-week-tag {
+      font-size: 0.68rem;
+      font-family: var(--font-body);
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      padding: 2px 8px;
+      border-radius: 2px;
+      background: var(--tag-quiz);
+      color: #307040;
     }
 
-    .quiz-meta {
+    .quiz-theme-tag {
       font-size: 0.78rem;
-      color: var(--text-muted);
+      color: var(--text-dim);
     }
 
-    .quiz-progress {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      white-space: nowrap;
+    /* ── QUIZ CARD ──────────────────────── */
+    .quiz-card {
+      background: #18171a;
+      border: 1px solid #2e2c31;
+      border-radius: 6px;
+      overflow: hidden;
+      color: #e8e6e3;
+    }
+
+    /* ── START SCREEN ───────────────────── */
+    .start-screen {
+      padding: 52px 40px 48px;
+      text-align: center;
+      display: none;
+    }
+
+    .start-screen.visible {
+      display: block;
+    }
+
+    .start-title {
       font-family: var(--font-display);
-      font-weight: 600;
+      font-size: 2.6rem;
+      font-weight: 400;
+      color: #f0ede8;
+      line-height: 1.1;
+      margin-bottom: 12px;
     }
 
+    .start-subtitle {
+      font-size: 0.92rem;
+      color: #7a7876;
+      letter-spacing: 0.02em;
+      margin-bottom: 32px;
+    }
+
+    .start-meta {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 40px;
+      font-size: 0.82rem;
+      color: #5e5c5a;
+    }
+
+    .start-meta-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .start-meta-value {
+      font-family: var(--font-display);
+      font-size: 1.15rem;
+      font-weight: 600;
+      color: #c8b96e;
+    }
+
+    .start-meta-label {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #5e5c5a;
+    }
+
+    .start-meta-sep {
+      width: 1px;
+      height: 32px;
+      background: #2e2c31;
+    }
+
+    .start-btn {
+      font-family: var(--font-display);
+      font-size: 0.9rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #18171a;
+      background: #c8b96e;
+      border: none;
+      padding: 14px 36px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.1s;
+    }
+
+    .start-btn:hover {
+      background: #d4c67c;
+      transform: translateY(-1px);
+    }
+
+    .start-btn:active {
+      transform: translateY(0);
+    }
+
+    /* ── CATEGORY BANNER ────────────────── */
+    .category-banner {
+      padding: 48px 40px;
+      text-align: center;
+      display: none;
+      background: linear-gradient(135deg, #1e1c20 0%, #18171a 100%);
+    }
+
+    .category-banner.visible {
+      display: block;
+    }
+
+    .banner-icon {
+      font-size: 3.2rem;
+      line-height: 1;
+      margin-bottom: 16px;
+    }
+
+    .banner-round {
+      font-size: 0.7rem;
+      text-transform: uppercase;
+      letter-spacing: 0.14em;
+      color: #5e5c5a;
+      margin-bottom: 8px;
+    }
+
+    .banner-name {
+      font-family: var(--font-display);
+      font-size: 2rem;
+      font-weight: 600;
+      color: #f0ede8;
+      line-height: 1.1;
+    }
+
+    .banner-continue-btn {
+      margin-top: 32px;
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #c8b96e;
+      background: none;
+      border: 1px solid #c8b96e;
+      padding: 10px 24px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s, color 0.15s;
+    }
+
+    .banner-continue-btn:hover {
+      background: #c8b96e;
+      color: #18171a;
+    }
+
+    /* ── PROGRESS BAR ───────────────────── */
     .quiz-progress-bar-wrap {
-      height: 3px;
-      background: var(--border);
+      height: 2px;
+      background: #2e2c31;
     }
 
     .quiz-progress-bar {
       height: 100%;
-      background: var(--accent);
-      transition: width 0.3s ease;
+      background: #c8b96e;
+      transition: width 0.4s ease;
       width: 0%;
     }
 
+    /* ── QUESTION HEADER ────────────────── */
+    .question-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 28px 16px;
+      border-bottom: 1px solid #2e2c31;
+    }
+
+    .question-category {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.8rem;
+      color: #5e5c5a;
+      letter-spacing: 0.02em;
+    }
+
+    .question-category-icon {
+      font-size: 1rem;
+    }
+
+    .question-category-name {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #5e5c5a;
+    }
+
+    .question-count {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #c8b96e;
+    }
+
+    /* ── QUESTION BODY ──────────────────── */
     .quiz-body {
-      padding: 28px 28px 24px;
+      padding: 28px 28px 8px;
     }
 
     .question-text {
       font-family: var(--font-display);
-      font-size: 1.1rem;
+      font-size: 1.18rem;
       font-weight: 600;
-      color: var(--text);
-      line-height: 1.45;
-      margin-bottom: 22px;
+      color: #f0ede8;
+      line-height: 1.5;
+      margin-bottom: 24px;
     }
 
     .options {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 9px;
     }
 
     .option-btn {
       text-align: left;
-      padding: 12px 18px;
-      border: 1px solid var(--border);
-      border-radius: 3px;
-      background: var(--bg);
+      padding: 13px 18px;
+      border: 1px solid #2e2c31;
+      border-radius: 4px;
+      background: #1e1c20;
       font-family: var(--font-body);
       font-size: 0.92rem;
-      color: var(--text);
+      color: #c4c1be;
       cursor: pointer;
-      transition: border-color 0.15s, background 0.15s;
-      line-height: 1.4;
+      transition: border-color 0.15s, background 0.15s, color 0.15s;
+      line-height: 1.45;
     }
 
     .option-btn:hover:not(:disabled) {
-      border-color: var(--accent);
-      background: #fff;
+      border-color: #c8b96e;
+      color: #f0ede8;
+      background: #232025;
     }
 
     .option-btn.correct {
-      border-color: #2a7a3e;
-      background: #eaf5ec;
-      color: #2a7a3e;
+      border-color: #3a8a50;
+      background: #1a2e20;
+      color: #6dbe84;
     }
 
     .option-btn.wrong {
-      border-color: var(--red-border);
-      background: var(--red-pale);
-      color: var(--red);
+      border-color: #8a3030;
+      background: #2a1818;
+      color: #c06060;
     }
 
-    .option-btn:disabled { cursor: default; }
+    .option-btn.reveal {
+      border-color: #3a8a50;
+      background: #1a2e20;
+      color: #6dbe84;
+    }
 
+    .option-btn:disabled {
+      cursor: default;
+    }
+
+    /* ── FEEDBACK ───────────────────────── */
     .feedback {
-      margin-top: 18px;
-      font-size: 0.88rem;
-      line-height: 1.65;
-      min-height: 48px;
-      color: var(--text-muted);
+      margin: 20px 0 4px;
+      font-size: 0.87rem;
+      line-height: 1.7;
+      color: #7a7876;
       font-style: italic;
+      min-height: 0;
+      border-left: 2px solid #2e2c31;
+      padding-left: 14px;
+      opacity: 0;
+      transition: opacity 0.3s ease;
     }
 
+    .feedback.visible {
+      opacity: 1;
+    }
+
+    /* ── QUIZ FOOTER ────────────────────── */
     .quiz-footer {
-      padding: 16px 28px 24px;
+      padding: 20px 28px 28px;
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      gap: 12px;
+      justify-content: flex-end;
     }
 
     .next-btn {
@@ -134,71 +332,194 @@
       font-size: 0.82rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      color: #fff;
-      background: var(--accent);
+      color: #18171a;
+      background: #c8b96e;
       border: none;
-      padding: 9px 22px;
+      padding: 10px 24px;
       border-radius: 3px;
       cursor: pointer;
       transition: background 0.15s;
       display: none;
     }
 
-    .next-btn:hover { background: var(--accent-hover); }
-    .next-btn.visible { display: inline-block; }
+    .next-btn:hover {
+      background: #d4c67c;
+    }
 
-    /* Results screen */
-    .results {
-      padding: 40px 28px;
+    .next-btn.visible {
+      display: inline-block;
+    }
+
+    /* ── RESULTS SCREEN ─────────────────── */
+    .results-screen {
+      padding: 48px 40px 52px;
       text-align: center;
       display: none;
     }
 
-    .results.visible { display: block; }
+    .results-screen.visible {
+      display: block;
+    }
 
     .results-score {
       font-family: var(--font-display);
-      font-size: 3.5rem;
+      font-size: 4.5rem;
       font-weight: 600;
-      color: var(--text);
+      color: #c8b96e;
       line-height: 1;
-      margin-bottom: 8px;
+      margin-bottom: 6px;
     }
 
-    .results-label {
-      font-size: 0.88rem;
-      color: var(--text-muted);
-      margin-bottom: 24px;
+    .results-score.score-great  { color: #6dbe84; }
+    .results-score.score-good   { color: #c8b96e; }
+    .results-score.score-mid    { color: #c8a050; }
+    .results-score.score-low    { color: #c06060; }
+
+    .results-denom {
+      font-size: 0.85rem;
+      color: #5e5c5a;
+      margin-bottom: 12px;
+      letter-spacing: 0.04em;
     }
 
-    .results-msg {
-      font-size: 0.95rem;
-      color: var(--text);
-      line-height: 1.7;
+    .results-comment {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: 1.05rem;
+      color: #8a8885;
+      max-width: 420px;
+      margin: 0 auto 36px;
+      line-height: 1.65;
+    }
+
+    /* ── CATEGORY BREAKDOWN ─────────────── */
+    .breakdown {
+      margin: 0 auto 36px;
       max-width: 380px;
-      margin: 0 auto 28px;
+      text-align: left;
+      border: 1px solid #2e2c31;
+      border-radius: 4px;
+      overflow: hidden;
     }
 
+    .breakdown-heading {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #5e5c5a;
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid #2e2c31;
+    }
+
+    .breakdown-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 10px 16px;
+      border-bottom: 1px solid #2e2c31;
+      font-size: 0.87rem;
+    }
+
+    .breakdown-row:last-child {
+      border-bottom: none;
+    }
+
+    .breakdown-cat {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #c4c1be;
+    }
+
+    .breakdown-cat-icon {
+      font-size: 1rem;
+    }
+
+    .breakdown-ticks {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+    }
+
+    .breakdown-tick {
+      font-size: 0.9rem;
+    }
+
+    .breakdown-tick.hit  { color: #6dbe84; }
+    .breakdown-tick.miss { color: #5e5c5a; }
+
+    .breakdown-fraction {
+      font-family: var(--font-display);
+      font-size: 0.88rem;
+      font-weight: 600;
+      color: #5e5c5a;
+      margin-left: 8px;
+    }
+
+    /* ── RETRY BUTTON ───────────────────── */
     .retry-btn {
       font-family: var(--font-display);
       font-size: 0.82rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      color: var(--accent);
+      color: #c8b96e;
       background: none;
-      border: 1px solid var(--accent);
-      padding: 9px 22px;
+      border: 1px solid #c8b96e;
+      padding: 10px 26px;
       border-radius: 3px;
       cursor: pointer;
+      transition: background 0.15s, color 0.15s;
     }
 
-    .retry-btn:hover { background: var(--accent); color: #fff; }
+    .retry-btn:hover {
+      background: #c8b96e;
+      color: #18171a;
+    }
 
-    /* Score colouring */
-    .results-score.s5 { color: #2a7a3e; }
-    .results-score.s4 { color: var(--accent); }
-    .results-score.s3 { color: #b56a00; }
-    .results-score.s2 { color: var(--red-muted); }
+    /* ── SCREEN VISIBILITY ──────────────── */
+    .quiz-question-screen {
+      display: none;
+    }
+
+    .quiz-question-screen.visible {
+      display: block;
+    }
+
+    /* ── RESPONSIVE ─────────────────────── */
+    @media (max-width: 700px) {
+      .start-screen {
+        padding: 40px 24px 36px;
+      }
+
+      .start-title {
+        font-size: 2rem;
+      }
+
+      .quiz-body {
+        padding: 20px 20px 4px;
+      }
+
+      .question-header {
+        padding: 16px 20px 14px;
+      }
+
+      .quiz-footer {
+        padding: 14px 20px 24px;
+      }
+
+      .results-screen {
+        padding: 36px 24px 40px;
+      }
+
+      .results-score {
+        font-size: 3.5rem;
+      }
+
+      .category-banner {
+        padding: 40px 24px;
+      }
+    }
+
   </style>
 </head>
 <body>
@@ -218,164 +539,391 @@
     <div class="divider"></div>
 
     <section class="feed">
-      <h2 class="feed-heading">Current — Week 7</h2>
+      <h2 class="feed-heading" id="feed-heading">Current — Week 8</h2>
 
-      <div class="quiz-block">
-        <div class="quiz-header">
-          <div>
-            <div class="quiz-title">The Roman Empire</div>
-            <div class="quiz-meta">5 questions · no time limit · no cheating</div>
-          </div>
-          <div class="quiz-progress" id="progress-text">1 / 5</div>
-        </div>
-        <div class="quiz-progress-bar-wrap">
-          <div class="quiz-progress-bar" id="progress-bar"></div>
-        </div>
+      <div class="quiz-shell">
 
-        <!-- Question screen -->
-        <div id="quiz-question-screen">
-          <div class="quiz-body">
-            <div class="question-text" id="q-text"></div>
-            <div class="options" id="q-options"></div>
-            <div class="feedback" id="q-feedback"></div>
-          </div>
-          <div class="quiz-footer">
-            <span></span>
-            <button class="next-btn" id="next-btn">Next →</button>
-          </div>
-        </div>
+        <div class="quiz-card" id="quiz-card">
 
-        <!-- Results screen -->
-        <div class="results" id="results-screen">
-          <div class="results-score" id="r-score"></div>
-          <div class="results-label">out of 5</div>
-          <div class="results-msg" id="r-msg"></div>
-          <button class="retry-btn" onclick="startQuiz()">Try again</button>
-        </div>
-      </div>
+          <!-- Start screen -->
+          <div id="start-screen" class="start-screen visible">
+            <div class="start-title">proveyourself.</div>
+            <div class="start-subtitle">20 questions. 5 rounds. No cheating.</div>
+            <div class="start-meta">
+              <div class="start-meta-item">
+                <span class="start-meta-value" id="meta-week">Week 8</span>
+                <span class="start-meta-label">Week</span>
+              </div>
+              <div class="start-meta-sep"></div>
+              <div class="start-meta-item">
+                <span class="start-meta-value">20</span>
+                <span class="start-meta-label">Questions</span>
+              </div>
+              <div class="start-meta-sep"></div>
+              <div class="start-meta-item">
+                <span class="start-meta-value">5</span>
+                <span class="start-meta-label">Rounds</span>
+              </div>
+              <div class="start-meta-sep"></div>
+              <div class="start-meta-item">
+                <span class="start-meta-value" id="meta-theme">General</span>
+                <span class="start-meta-label">Theme</span>
+              </div>
+            </div>
+            <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
+          </div>
+
+          <!-- Category banner (between rounds) -->
+          <div id="category-banner" class="category-banner">
+            <div class="banner-icon" id="banner-icon">🏛️</div>
+            <div class="banner-round" id="banner-round">Round 1</div>
+            <div class="banner-name" id="banner-name">Politics</div>
+            <button class="banner-continue-btn" onclick="hideBanner()">Begin →</button>
+          </div>
+
+          <!-- Progress bar -->
+          <div class="quiz-progress-bar-wrap" id="progress-bar-wrap" style="display:none">
+            <div class="quiz-progress-bar" id="progress-bar"></div>
+          </div>
+
+          <!-- Question screen -->
+          <div id="quiz-question-screen" class="quiz-question-screen">
+            <div class="question-header">
+              <div class="question-category">
+                <span class="question-category-icon" id="q-cat-icon"></span>
+                <span class="question-category-name" id="q-cat-name"></span>
+              </div>
+              <div class="question-count" id="q-count"></div>
+            </div>
+            <div class="quiz-body">
+              <div class="question-text" id="q-text"></div>
+              <div class="options" id="q-options"></div>
+              <div class="feedback" id="q-feedback"></div>
+            </div>
+            <div class="quiz-footer">
+              <button class="next-btn" id="next-btn">Next →</button>
+            </div>
+          </div>
+
+          <!-- Results screen -->
+          <div id="results-screen" class="results-screen">
+            <div class="results-score" id="r-score"></div>
+            <div class="results-denom">out of 20</div>
+            <div class="results-comment" id="r-comment"></div>
+            <div class="breakdown" id="r-breakdown">
+              <div class="breakdown-heading">Round by round</div>
+            </div>
+            <button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+          </div>
+
+        </div><!-- .quiz-card -->
+
+      </div><!-- .quiz-shell -->
 
     </section>
 
   </main>
 
   <script src="/sidebar.js"></script>
+  <script src="/quiz-data.js"></script>
   <script>
-    const questions = [
-      {
-        q: "In what year, according to tradition, was the city of Rome founded?",
-        opts: ["753 BC", "509 BC", "264 BC", "44 BC"],
-        ans: 0,
-        feedback: "753 BC is the traditional founding date, attributed to Romulus — though historians treat this more as mythology than firm history."
-      },
-      {
-        q: "Julius Caesar was assassinated on the Ides of March. What date is that?",
-        opts: ["March 7", "March 15", "March 21", "March 31"],
-        ans: 1,
-        feedback: "The Ides of March is March 15th, 44 BC. Caesar was stabbed 23 times by a group of senators including Brutus and Cassius."
-      },
-      {
-        q: "Which Roman emperor declared Christianity the official religion of the empire?",
-        opts: ["Constantine I", "Nero", "Theodosius I", "Hadrian"],
-        ans: 2,
-        feedback: "Theodosius I made Nicene Christianity the state religion in 380 AD via the Edict of Thessalonica. Constantine gets credit for legalising it, but Theodosius made it mandatory."
-      },
-      {
-        q: "The Colosseum in Rome could hold approximately how many spectators?",
-        opts: ["10,000", "30,000", "50,000", "80,000"],
-        ans: 2,
-        feedback: "Around 50,000 — though some estimates go as high as 80,000. It was completed in 80 AD under Emperor Titus and remains the largest amphitheatre ever built."
-      },
-      {
-        q: "Which of these was NOT one of the five 'Good Emperors' of the Nerva–Antonine dynasty?",
-        opts: ["Marcus Aurelius", "Trajan", "Commodus", "Hadrian"],
-        ans: 2,
-        feedback: "Commodus — the one Joaquin Phoenix played in Gladiator — was definitely not a 'good' emperor. He was narcissistic, erratic, and eventually strangled in his bath. The five good emperors were Nerva, Trajan, Hadrian, Antoninus Pius, and Marcus Aurelius."
-      }
-    ];
 
-    let current = 0;
+    // ── STATE ───────────────────────────────
+    let flatQuestions = [];   // all 20 questions in order
+    let catBoundaries = [];   // [{catIdx, startQ, endQ, name, icon}]
+    let currentQ = 0;
     let score = 0;
     let answered = false;
+    let catScores = [];       // [{correct, total}] per category
 
+    // ── INIT ────────────────────────────────
+    (function init() {
+      const data = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA : null;
+      if (!data) return;
+
+      document.getElementById("feed-heading").textContent = "Current — " + data.week;
+      document.getElementById("meta-week").textContent = data.week;
+      document.getElementById("meta-theme").textContent = data.theme;
+
+      // Build flat question list and category boundaries
+      flatQuestions = [];
+      catBoundaries = [];
+      let qIdx = 0;
+      data.categories.forEach(function(cat, ci) {
+        catBoundaries.push({
+          catIdx: ci,
+          startQ: qIdx,
+          endQ: qIdx + cat.questions.length - 1,
+          name: cat.name,
+          icon: cat.icon
+        });
+        cat.questions.forEach(function(q) {
+          flatQuestions.push({
+            q: q.q,
+            opts: q.opts,
+            ans: q.ans,
+            feedback: q.feedback,
+            catIdx: ci,
+            catName: cat.name,
+            catIcon: cat.icon
+          });
+          qIdx++;
+        });
+        catScores.push({ correct: 0, total: cat.questions.length });
+      });
+    })();
+
+    // ── START ───────────────────────────────
     function startQuiz() {
-      current = 0;
+      currentQ = 0;
       score = 0;
       answered = false;
-      document.getElementById('results-screen').classList.remove('visible');
-      document.getElementById('quiz-question-screen').style.display = '';
-      showQuestion();
-    }
+      catScores = (typeof QUIZ_DATA !== "undefined")
+        ? QUIZ_DATA.categories.map(function(c) { return { correct: 0, total: c.questions.length }; })
+        : [];
 
-    function showQuestion() {
-      answered = false;
-      const q = questions[current];
-      document.getElementById('q-text').textContent = q.q;
-      document.getElementById('q-feedback').textContent = '';
-      document.getElementById('next-btn').classList.remove('visible');
+      hide("start-screen");
+      hide("results-screen");
+      show("progress-bar-wrap");
 
-      const pct = (current / questions.length) * 100;
-      document.getElementById('progress-bar').style.width = pct + '%';
-      document.getElementById('progress-text').textContent = `${current + 1} / ${questions.length}`;
-
-      const opts = document.getElementById('q-options');
-      opts.innerHTML = '';
-      q.opts.forEach((o, i) => {
-        const btn = document.createElement('button');
-        btn.className = 'option-btn';
-        btn.textContent = o;
-        btn.onclick = () => answer(i);
-        opts.appendChild(btn);
+      showCategoryBanner(0, function() {
+        showQuestion();
       });
     }
 
+    function resetQuiz() {
+      hide("results-screen");
+      hide("quiz-question-screen");
+      hide("progress-bar-wrap");
+      hide("category-banner");
+      show("start-screen");
+    }
+
+    // ── CATEGORY BANNER ─────────────────────
+    var bannerCallback = null;
+
+    function showCategoryBanner(catIdx, callback) {
+      const cat = catBoundaries[catIdx];
+      bannerCallback = callback;
+      document.getElementById("banner-icon").textContent = cat.icon;
+      document.getElementById("banner-round").textContent = "Round " + (catIdx + 1) + " of " + catBoundaries.length;
+      document.getElementById("banner-name").textContent = cat.name;
+      hide("quiz-question-screen");
+      show("category-banner");
+    }
+
+    function hideBanner() {
+      hide("category-banner");
+      if (bannerCallback) {
+        var cb = bannerCallback;
+        bannerCallback = null;
+        cb();
+      }
+    }
+
+    // ── SHOW QUESTION ───────────────────────
+    function showQuestion() {
+      answered = false;
+      const q = flatQuestions[currentQ];
+      const total = flatQuestions.length;
+
+      // Progress bar
+      var pct = (currentQ / total) * 100;
+      document.getElementById("progress-bar").style.width = pct + "%";
+
+      // Category header
+      document.getElementById("q-cat-icon").textContent = q.catIcon;
+      document.getElementById("q-cat-name").textContent = q.catName;
+
+      // Question count within category
+      var cat = catBoundaries[q.catIdx];
+      var qInCat = (currentQ - cat.startQ) + 1;
+      var totalInCat = cat.endQ - cat.startQ + 1;
+      document.getElementById("q-count").textContent = "Q" + qInCat + " of " + totalInCat;
+
+      // Question text
+      document.getElementById("q-text").textContent = q.q;
+
+      // Clear feedback
+      var fb = document.getElementById("q-feedback");
+      fb.textContent = "";
+      fb.classList.remove("visible");
+
+      // Next button
+      document.getElementById("next-btn").classList.remove("visible");
+      document.getElementById("next-btn").textContent = "Next \u2192";
+
+      // Build options
+      var opts = document.getElementById("q-options");
+      opts.innerHTML = "";
+      q.opts.forEach(function(opt, i) {
+        var btn = document.createElement("button");
+        btn.className = "option-btn";
+        btn.textContent = opt;
+        btn.onclick = function() { answer(i); };
+        opts.appendChild(btn);
+      });
+
+      show("quiz-question-screen");
+    }
+
+    // ── ANSWER ──────────────────────────────
     function answer(i) {
       if (answered) return;
       answered = true;
-      const q = questions[current];
-      const btns = document.querySelectorAll('.option-btn');
-      btns.forEach((b, idx) => {
+
+      var q = flatQuestions[currentQ];
+      var btns = document.querySelectorAll(".option-btn");
+
+      btns.forEach(function(b, idx) {
         b.disabled = true;
-        if (idx === q.ans) b.classList.add('correct');
-        else if (idx === i) b.classList.add('wrong');
+        if (idx === q.ans) {
+          b.classList.add("correct");
+        } else if (idx === i && i !== q.ans) {
+          b.classList.add("wrong");
+        }
       });
-      if (i === q.ans) score++;
-      document.getElementById('q-feedback').textContent = q.feedback;
-      document.getElementById('next-btn').classList.add('visible');
-      document.getElementById('next-btn').textContent =
-        current === questions.length - 1 ? 'See results' : 'Next →';
+
+      if (i === q.ans) {
+        score++;
+        catScores[q.catIdx].correct++;
+      }
+
+      var fb = document.getElementById("q-feedback");
+      fb.textContent = q.feedback;
+      setTimeout(function() { fb.classList.add("visible"); }, 40);
+
+      var isLast = currentQ === flatQuestions.length - 1;
+      var nextBtn = document.getElementById("next-btn");
+      nextBtn.textContent = isLast ? "See results" : "Next \u2192";
+      nextBtn.classList.add("visible");
     }
 
-    document.getElementById('next-btn').addEventListener('click', () => {
-      current++;
-      if (current >= questions.length) {
+    // ── NEXT ────────────────────────────────
+    document.getElementById("next-btn").addEventListener("click", function() {
+      currentQ++;
+
+      if (currentQ >= flatQuestions.length) {
         showResults();
+        return;
+      }
+
+      // Check if we just crossed into a new category
+      var prevQ = flatQuestions[currentQ - 1];
+      var nowQ = flatQuestions[currentQ];
+
+      if (nowQ.catIdx !== prevQ.catIdx) {
+        // Show category banner for new round
+        hide("quiz-question-screen");
+        showCategoryBanner(nowQ.catIdx, function() {
+          showQuestion();
+        });
       } else {
         showQuestion();
       }
     });
 
+    // ── RESULTS ─────────────────────────────
     function showResults() {
-      document.getElementById('quiz-question-screen').style.display = 'none';
-      const rs = document.getElementById('results-screen');
-      rs.classList.add('visible');
-      document.getElementById('progress-bar').style.width = '100%';
-      document.getElementById('progress-text').textContent = 'done';
+      hide("quiz-question-screen");
+      document.getElementById("progress-bar").style.width = "100%";
 
-      const s = document.getElementById('r-score');
-      s.textContent = `${score}/5`;
-      s.className = 'results-score s' + score;
+      var rs = document.getElementById("results-screen");
+      rs.classList.add("visible");
 
-      const msgs = [
-        "Et tu, Google? You really didn't know any of these.",
-        "The senate is not impressed. Two more and you'd have a majority.",
-        "Middle of the road. Hadrian would've expected better from a border wall enthusiast.",
-        "Solid. You've clearly thought about the Roman Empire at least once this week.",
-        "All five. You are Marcus Aurelius. Go touch grass."
+      // Score display
+      var el = document.getElementById("r-score");
+      el.textContent = score + " / 20";
+      el.className = "results-score";
+
+      if (score >= 17)      el.classList.add("score-great");
+      else if (score >= 13) el.classList.add("score-good");
+      else if (score >= 9)  el.classList.add("score-mid");
+      else                  el.classList.add("score-low");
+
+      // Witty comment
+      var comments = [
+        "0\u20134: Honestly impressive in its own way. You answered 20 questions and got most of them wrong. That takes commitment.",
+        "5\u20138: Not great. Not terrible. You\u2019re the kind of person who \u2018knew that one\u2019 but couldn\u2019t quite place it.",
+        "9\u201312: A solid middle ground. You know things. Just not enough of them. Average, in the best possible sense.",
+        "13\u201316: Good work. You\u2019ve clearly been paying attention, possibly against your will. Your pub quiz team would be pleased.",
+        "17\u201320: Outstanding. You either know an alarming amount about the world, or you\u2019ve been revising. Either way, respect."
       ];
-      document.getElementById('r-msg').textContent = msgs[score] || msgs[0];
+
+      var band = score <= 4 ? 0 : score <= 8 ? 1 : score <= 12 ? 2 : score <= 16 ? 3 : 4;
+      document.getElementById("r-comment").textContent = comments[band];
+
+      // Category breakdown
+      var breakdown = document.getElementById("r-breakdown");
+      // Clear old rows (keep heading)
+      while (breakdown.children.length > 1) {
+        breakdown.removeChild(breakdown.lastChild);
+      }
+
+      var cats = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA.categories : [];
+      cats.forEach(function(cat, ci) {
+        var cs = catScores[ci];
+        var row = document.createElement("div");
+        row.className = "breakdown-row";
+
+        var catDiv = document.createElement("div");
+        catDiv.className = "breakdown-cat";
+        catDiv.innerHTML = '<span class="breakdown-cat-icon">' + cat.icon + '</span>' + cat.name;
+
+        var ticksDiv = document.createElement("div");
+        ticksDiv.style.display = "flex";
+        ticksDiv.style.alignItems = "center";
+        ticksDiv.style.gap = "4px";
+
+        var ticksInner = document.createElement("div");
+        ticksInner.className = "breakdown-ticks";
+        for (var t = 0; t < cs.total; t++) {
+          var tick = document.createElement("span");
+          tick.className = "breakdown-tick " + (t < cs.correct ? "hit" : "miss");
+          tick.textContent = t < cs.correct ? "\u2713" : "\u2717";
+          ticksInner.appendChild(tick);
+        }
+
+        var frac = document.createElement("span");
+        frac.className = "breakdown-fraction";
+        frac.textContent = cs.correct + "/" + cs.total;
+
+        ticksDiv.appendChild(ticksInner);
+        ticksDiv.appendChild(frac);
+
+        row.appendChild(catDiv);
+        row.appendChild(ticksDiv);
+        breakdown.appendChild(row);
+      });
     }
 
-    startQuiz();
+    // ── HELPERS ─────────────────────────────
+    function show(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.classList.contains("start-screen") ||
+          el.classList.contains("category-banner") ||
+          el.classList.contains("results-screen") ||
+          el.classList.contains("quiz-question-screen")) {
+        el.classList.add("visible");
+      } else {
+        el.style.display = "";
+      }
+    }
+
+    function hide(id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      if (el.classList.contains("start-screen") ||
+          el.classList.contains("category-banner") ||
+          el.classList.contains("results-screen") ||
+          el.classList.contains("quiz-question-screen")) {
+        el.classList.remove("visible");
+      } else {
+        el.style.display = "none";
+      }
+    }
+
   </script>
 </body>
 </html>
