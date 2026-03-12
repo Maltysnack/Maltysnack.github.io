@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>BusyBoy — maltysnack</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ── Override main padding for full-height app ── */
+    body {
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    .main {
+      padding: 0;
+      max-width: none;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      height: 100vh;
+    }
+
+    /* ── Page header ── */
+    .bb-header {
+      padding: 20px 32px 16px 36px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      background: var(--bg);
+    }
+
+    .bb-header-row {
+      display: flex;
+      align-items: baseline;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .bb-title {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.01em;
+    }
+
+    .bb-subtitle {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* ── Today banner ── */
+    .bb-today-banner {
+      background: #fef3e2;
+      border-bottom: 1px solid #e8c88a;
+      padding: 9px 36px;
+      font-size: 0.84rem;
+      color: #7a4a00;
+      font-family: var(--font-body);
+      display: none;
+      flex-shrink: 0;
+    }
+
+    .bb-today-banner.bb-show { display: block; }
+
+    /* ── App body: two columns ── */
+    .bb-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+      min-height: 0;
+    }
+
+    /* ── Left: chat ── */
+    .bb-chat {
+      width: 45%;
+      min-width: 300px;
+      display: flex;
+      flex-direction: column;
+      border-right: 1px solid var(--border);
+      background: #fff;
+    }
+
+    .bb-chat-history {
+      flex: 1;
+      overflow-y: auto;
+      padding: 20px 18px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .bb-msg {
+      display: flex;
+      flex-direction: column;
+      max-width: 82%;
+    }
+
+    .bb-msg-user {
+      align-self: flex-end;
+      align-items: flex-end;
+    }
+
+    .bb-msg-bot {
+      align-self: flex-start;
+      align-items: flex-start;
+    }
+
+    .bb-bubble {
+      padding: 9px 13px;
+      border-radius: 14px;
+      font-size: 0.87rem;
+      line-height: 1.55;
+      font-family: var(--font-body);
+      font-weight: 300;
+    }
+
+    .bb-bubble-user {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-bottom-right-radius: 4px;
+      color: var(--text);
+    }
+
+    .bb-bubble-bot {
+      background: #fef9f0;
+      border: 1px solid #e8d8b0;
+      border-bottom-left-radius: 4px;
+      color: var(--text);
+    }
+
+    .bb-bubble b {
+      font-weight: 600;
+    }
+
+    .bb-msg-sender {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 4px;
+    }
+
+    /* ── Input bar ── */
+    .bb-input-bar {
+      padding: 14px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+      background: #fff;
+      flex-shrink: 0;
+    }
+
+    .bb-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 9px 16px;
+      font-family: var(--font-body);
+      font-size: 0.87rem;
+      font-weight: 300;
+      color: var(--text);
+      background: #fafaf9;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .bb-input:focus {
+      border-color: #c8862a;
+    }
+
+    .bb-send {
+      background: #1a1412;
+      color: #fff;
+      border: none;
+      border-radius: 20px;
+      padding: 9px 18px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      cursor: pointer;
+      transition: background 0.15s;
+      flex-shrink: 0;
+    }
+
+    .bb-send:hover { background: #444; }
+
+    /* ── Right: events ── */
+    .bb-events {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    .bb-events-header {
+      padding: 16px 24px 12px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .bb-events-title {
+      font-family: var(--font-display);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    .bb-event-count {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 600;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .bb-events-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 14px 20px 20px;
+    }
+
+    .bb-empty {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+      font-size: 0.88rem;
+      line-height: 1.8;
+      font-style: italic;
+    }
+
+    /* ── Event cards ── */
+    .bb-day-group {
+      margin-bottom: 20px;
+    }
+
+    .bb-day-label {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 8px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .bb-day-label.bb-today-label {
+      color: #b56a00;
+      border-bottom-color: #e8c88a;
+    }
+
+    .bb-event-card {
+      background: #fff;
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--border);
+      border-radius: 0 8px 8px 0;
+      padding: 10px 14px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      transition: box-shadow 0.15s;
+    }
+
+    .bb-event-card:hover {
+      box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+    }
+
+    .bb-event-card.bb-today-event {
+      border-left-color: #c8862a;
+    }
+
+    .bb-event-body {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .bb-event-name {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 400;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+
+    .bb-event-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      font-family: var(--font-display);
+    }
+
+    .bb-event-time {
+      font-weight: 600;
+      color: #b56a00;
+    }
+
+    .bb-event-loc {
+      font-style: italic;
+    }
+
+    .bb-event-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.85rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+
+    .bb-event-del:hover { color: #c03030; }
+
+    /* ── Mobile ── */
+    @media (max-width: 700px) {
+      body { overflow: auto; height: auto; }
+
+      .main {
+        height: auto;
+        overflow: visible;
+      }
+
+      .bb-body {
+        flex-direction: column-reverse;
+        overflow: visible;
+        min-height: 0;
+      }
+
+      .bb-chat {
+        width: 100%;
+        border-right: none;
+        border-top: 1px solid var(--border);
+        min-height: 420px;
+      }
+
+      .bb-events {
+        min-height: 320px;
+        overflow: visible;
+      }
+
+      .bb-events-list {
+        max-height: 360px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <!-- Header -->
+    <div class="bb-header">
+      <div class="bb-header-row">
+        <span class="bb-title">BusyBoy 📅</span>
+        <span class="bb-subtitle">Tell me what's coming up. I'll remember it.</span>
+      </div>
+    </div>
+
+    <!-- Today banner -->
+    <div class="bb-today-banner" id="bbTodayBanner"></div>
+
+    <!-- App body -->
+    <div class="bb-body">
+
+      <!-- LEFT: Chat -->
+      <div class="bb-chat">
+        <div class="bb-chat-history" id="bbChatHistory"></div>
+        <div class="bb-input-bar">
+          <input class="bb-input" id="bbInput" type="text" placeholder="e.g. Dinner with Sam on Friday at 7pm at The Builders Arms" autocomplete="off" />
+          <button class="bb-send" id="bbSend">Send</button>
+        </div>
+      </div>
+
+      <!-- RIGHT: Events -->
+      <div class="bb-events">
+        <div class="bb-events-header">
+          <span class="bb-events-title">Upcoming Events</span>
+          <span class="bb-event-count" id="bbEventCount">0 events</span>
+        </div>
+        <div class="bb-events-list" id="bbEventsList"></div>
+      </div>
+
+    </div>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+  <script>
+  // ══════════════════════════════════════════
+  // BUSYBOY — Calendar chat
+  // ══════════════════════════════════════════
+
+  // ── State ──
+  let bbEvents = JSON.parse(localStorage.getItem('busyboy_events') || '[]');
+
+  function bbSave() {
+    localStorage.setItem('busyboy_events', JSON.stringify(bbEvents));
+  }
+
+  // ══════════════════════════════════════════
+  // NATURAL LANGUAGE PARSER
+  // ══════════════════════════════════════════
+
+  const WEEKDAYS = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  const MONTHS   = {
+    jan:1, january:1, feb:2, february:2, mar:3, march:3, apr:4, april:4,
+    may:5, jun:6, june:6, jul:7, july:7, aug:8, august:8,
+    sep:9, september:9, oct:10, october:10, nov:11, november:11, dec:12, december:12
+  };
+
+  function bbToday() {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
+  }
+
+  function bbTodayStr() {
+    return bbToday().toISOString().slice(0,10);
+  }
+
+  function bbNextWeekday(dayIndex) {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    const cur = d.getDay();
+    let diff = dayIndex - cur;
+    if (diff <= 0) diff += 7;
+    d.setDate(d.getDate() + diff);
+    return d;
+  }
+
+  function bbParseEvent(raw) {
+    let text  = raw.toLowerCase();
+    let date  = null;
+    let time  = null;
+    let location = null;
+
+    // ── Extract time first (before location parsing messes things up) ──
+
+    // "at noon" / "at midnight"
+    let timeMatch = text.match(/\bat\s+noon\b/);
+    if (timeMatch) {
+      time = '12:00 PM';
+      text = text.replace(timeMatch[0], '');
+    }
+    timeMatch = text.match(/\bat\s+midnight\b/);
+    if (timeMatch) {
+      time = '12:00 AM';
+      text = text.replace(timeMatch[0], '');
+    }
+
+    // "at 7:30pm" / "at 7pm" / "at 19:00"
+    if (!time) {
+      timeMatch = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+      if (timeMatch) {
+        let h = parseInt(timeMatch[1], 10);
+        const m = parseInt(timeMatch[2] || '0', 10);
+        const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
+        if (ampm === 'pm' && h < 12) h += 12;
+        if (ampm === 'am' && h === 12) h = 0;
+        if (!ampm && h < 7) h += 12; // ambiguous small numbers assumed PM
+        const suffix = h >= 12 ? 'PM' : 'AM';
+        const h12    = h % 12 === 0 ? 12 : h % 12;
+        time = h12 + (m ? ':' + String(m).padStart(2,'0') : ':00') + ' ' + suffix;
+        text = text.replace(timeMatch[0], '');
+      }
+    }
+
+    // ── Extract date ──
+
+    // "today"
+    if (/\btoday\b/.test(text)) {
+      date = bbToday();
+      text = text.replace(/\btoday\b/, '');
+    }
+
+    // "tomorrow"
+    if (!date && /\btomorrow\b/.test(text)) {
+      const d = bbToday();
+      d.setDate(d.getDate() + 1);
+      date = d;
+      text = text.replace(/\btomorrow\b/, '');
+    }
+
+    // "in 3 days" / "in a week" / "in 2 weeks"
+    if (!date) {
+      let m = text.match(/\bin\s+(\d+)\s+(day|days|week|weeks)\b/);
+      if (!m) m = text.match(/\bin\s+(a)\s+(week)\b/);
+      if (m) {
+        const n   = m[1] === 'a' ? 1 : parseInt(m[1], 10);
+        const unit = m[2].startsWith('week') ? 7 : 1;
+        const d   = bbToday();
+        d.setDate(d.getDate() + n * unit);
+        date = d;
+        text = text.replace(m[0], '');
+      }
+    }
+
+    // "next monday" etc.
+    if (!date) {
+      const m = text.match(/\bnext\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
+      if (m) {
+        date = bbNextWeekday(WEEKDAYS.indexOf(m[1].toLowerCase()));
+        text = text.replace(m[0], '');
+      }
+    }
+
+    // "on friday" / "this friday"
+    if (!date) {
+      const m = text.match(/\b(?:on\s+|this\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
+      if (m) {
+        date = bbNextWeekday(WEEKDAYS.indexOf(m[1].toLowerCase()));
+        text = text.replace(m[0], '');
+      }
+    }
+
+    // "on the 24th" / "on the 3rd"
+    if (!date) {
+      const m = text.match(/\bon\s+the\s+(\d{1,2})(?:st|nd|rd|th)?\b/i);
+      if (m) {
+        const day = parseInt(m[1], 10);
+        const d   = bbToday();
+        d.setDate(day);
+        if (d < bbToday()) d.setMonth(d.getMonth() + 1);
+        date = d;
+        text = text.replace(m[0], '');
+      }
+    }
+
+    // "march 24" / "on march 24th" / "24th march"
+    if (!date) {
+      let m = text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})(?:st|nd|rd|th)?\b/i);
+      if (!m) m = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i);
+      if (m) {
+        // figure out which group is month name vs. day number
+        const isMonthFirst = isNaN(parseInt(m[1], 10));
+        const monthStr = isMonthFirst ? m[1].toLowerCase() : m[2].toLowerCase();
+        const dayNum   = isMonthFirst ? parseInt(m[2], 10) : parseInt(m[1], 10);
+        const monthNum = MONTHS[monthStr];
+        if (monthNum) {
+          const d = new Date();
+          d.setHours(0,0,0,0);
+          d.setMonth(monthNum - 1, dayNum);
+          if (d < bbToday()) d.setFullYear(d.getFullYear() + 1);
+          date = d;
+          text = text.replace(m[0], '');
+        }
+      }
+    }
+
+    if (!date) return null; // couldn't parse a date
+
+    // ── Extract location ──
+    // Patterns: "at [location]" but only if NOT already matched as time
+    // "in [location]" — heuristic: "in" followed by a capitalised word
+    const locPatterns = [
+      /\bat\s+(the\s+[\w\s'&-]+?)(?:\s*$|\s*,|\s*\.|\s+on\b|\s+at\b)/i,
+      /\bin\s+(the\s+[\w\s'&-]+?)(?:\s*$|\s*,|\s*\.|\s+on\b|\s+at\b)/i,
+      /\bat\s+([A-Z][\w\s'&-]{2,})(?:\s*$|\s*,|\s*\.)/,
+      /\bin\s+([A-Z][\w\s'&-]{2,})(?:\s*$|\s*,|\s*\.)/,
+    ];
+
+    const originalRaw = raw; // use original casing for location extraction
+    for (const pat of locPatterns) {
+      const m = originalRaw.match(pat);
+      if (m) {
+        const candidate = m[1].trim();
+        // Sanity check: not a weekday, not a time word, at least 2 chars
+        const lower = candidate.toLowerCase();
+        const skipWords = new Set(['home','work','school','there','here']);
+        if (!WEEKDAYS.includes(lower) && !skipWords.has(lower) && candidate.length > 1) {
+          location = candidate;
+          // Remove from text
+          text = text.replace(pat, ' ');
+          break;
+        }
+      }
+    }
+
+    // ── Clean up event name ──
+    text = text
+      .replace(/\bon\b/gi, '')
+      .replace(/\bthe\b/gi, '')
+      .replace(/\bi'?m\b/gi, '')
+      .replace(/\bi\s+am\b/gi, '')
+      .replace(/\bgoing\s+to\b/gi, '')
+      .replace(/\bhave\s+a\b/gi, '')
+      .replace(/\ba\b/g, '')
+      .replace(/\ban\b/g, '')
+      .replace(/,/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+
+    // Capitalise first letter
+    const name = text.charAt(0).toUpperCase() + text.slice(1) || 'Event';
+
+    return {
+      id:       'bb' + Date.now() + Math.random().toString(36).slice(2,6),
+      name:     name || 'Event',
+      date:     date.toISOString().slice(0,10),
+      time:     time || null,
+      location: location || null,
+      raw,
+    };
+  }
+
+  // ══════════════════════════════════════════
+  // RESPONSES
+  // ══════════════════════════════════════════
+
+  const DAY_EMOJIS = ['🎵','🎉','🌟','✨','🍕','🎸','☕','🏄','🎬','🌿','🧩','🎲','🚀','🎯'];
+
+  function bbFriendlyDate(isoDate) {
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  function bbBotResponse(ev) {
+    const dateStr = bbFriendlyDate(ev.date);
+    const timeStr = ev.time ? ` at ${ev.time}` : '';
+    const locStr  = ev.location ? ` at ${ev.location}` : '';
+    const emoji   = DAY_EMOJIS[Math.floor(Math.random() * DAY_EMOJIS.length)];
+    const isToday = ev.date === bbTodayStr();
+
+    const openers = [
+      "Got it!",
+      "Done!",
+      "Noted!",
+      "Added!",
+      "Locked in!",
+    ];
+    const opener = openers[Math.floor(Math.random() * openers.length)];
+
+    let msg = `${opener} I've added <b>${ev.name}${locStr}</b> on ${dateStr}${timeStr}.`;
+    if (isToday) msg += " That's today — don't forget!";
+    msg += ` ${emoji}`;
+    return msg;
+  }
+
+  const FAIL_MESSAGES = [
+    "I couldn't work out the date for that. Try something like \"drinks on Friday at 7pm\" or \"meeting March 24 at 9am\".",
+    "Hmm, I'm not sure when that is. Can you add a date? Like \"lunch tomorrow\" or \"concert next Saturday\".",
+    "No date found! Try \"dinner with mum tomorrow at 8pm\" — I need at least a day to save it.",
+  ];
+
+  // ══════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════
+
+  function bbRenderEvents() {
+    const list  = document.getElementById('bbEventsList');
+    const count = document.getElementById('bbEventCount');
+    const today = bbTodayStr();
+
+    // Sort by date + time
+    const sorted = [...bbEvents].sort((a, b) => {
+      const da = a.date + (a.time || '');
+      const db = b.date + (b.time || '');
+      return da < db ? -1 : da > db ? 1 : 0;
+    });
+
+    count.textContent = sorted.length + (sorted.length === 1 ? ' event' : ' events');
+
+    if (sorted.length === 0) {
+      list.innerHTML = '<div class="bb-empty">Nothing planned yet.<br>Tell me what\'s coming up 👆</div>';
+      return;
+    }
+
+    // Group by date
+    const groups = {};
+    sorted.forEach(ev => {
+      if (!groups[ev.date]) groups[ev.date] = [];
+      groups[ev.date].push(ev);
+    });
+
+    list.innerHTML = Object.entries(groups).map(([date, evs]) => {
+      const isToday = date === today;
+      const labelStr = isToday ? 'Today — ' + bbFriendlyDate(date) : bbFriendlyDate(date);
+
+      const cards = evs.map(ev => `
+        <div class="bb-event-card${isToday ? ' bb-today-event' : ''}">
+          <div class="bb-event-body">
+            <div class="bb-event-name">${bbEsc(ev.name)}</div>
+            <div class="bb-event-meta">
+              ${ev.time     ? `<span class="bb-event-time">${bbEsc(ev.time)}</span>` : ''}
+              ${ev.location ? `<span class="bb-event-loc">📍 ${bbEsc(ev.location)}</span>` : ''}
+            </div>
+          </div>
+          <button class="bb-event-del" onclick="bbDeleteEvent('${ev.id}')" title="Delete">✕</button>
+        </div>
+      `).join('');
+
+      return `
+        <div class="bb-day-group">
+          <div class="bb-day-label${isToday ? ' bb-today-label' : ''}">${bbEsc(labelStr)}</div>
+          ${cards}
+        </div>
+      `;
+    }).join('');
+  }
+
+  function bbRenderTodayBanner() {
+    const today     = bbTodayStr();
+    const todayEvs  = bbEvents.filter(e => e.date === today);
+    const banner    = document.getElementById('bbTodayBanner');
+
+    if (todayEvs.length === 0) {
+      banner.classList.remove('bb-show');
+      return;
+    }
+
+    const summary = todayEvs
+      .sort((a,b) => (a.time||'') < (b.time||'') ? -1 : 1)
+      .map(e => e.name + (e.time ? ' at ' + e.time : ''))
+      .join(', ');
+
+    banner.textContent = `📅 You have ${todayEvs.length} event${todayEvs.length > 1 ? 's' : ''} today: ${summary}`;
+    banner.classList.add('bb-show');
+  }
+
+  // ══════════════════════════════════════════
+  // CHAT
+  // ══════════════════════════════════════════
+
+  function bbAddMsg(text, isUser) {
+    const history = document.getElementById('bbChatHistory');
+    const div = document.createElement('div');
+    div.className = 'bb-msg ' + (isUser ? 'bb-msg-user' : 'bb-msg-bot');
+
+    const sender = document.createElement('div');
+    sender.className = 'bb-msg-sender';
+    sender.textContent = isUser ? 'You' : 'BusyBoy 📅';
+
+    const bubble = document.createElement('div');
+    bubble.className = 'bb-bubble ' + (isUser ? 'bb-bubble-user' : 'bb-bubble-bot');
+    bubble.innerHTML = text;
+
+    div.appendChild(sender);
+    div.appendChild(bubble);
+    history.appendChild(div);
+    history.scrollTop = history.scrollHeight;
+  }
+
+  function bbSend() {
+    const input = document.getElementById('bbInput');
+    const raw   = input.value.trim();
+    if (!raw) return;
+
+    input.value = '';
+    bbAddMsg(bbEsc(raw), true);
+
+    // Small delay for "typing" feel
+    setTimeout(() => {
+      const ev = bbParseEvent(raw);
+
+      if (!ev) {
+        const fail = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
+        bbAddMsg(fail, false);
+        return;
+      }
+
+      bbEvents.push(ev);
+      bbSave();
+      bbRenderEvents();
+      bbRenderTodayBanner();
+      bbAddMsg(bbBotResponse(ev), false);
+    }, 380);
+  }
+
+  function bbDeleteEvent(id) {
+    bbEvents = bbEvents.filter(e => e.id !== id);
+    bbSave();
+    bbRenderEvents();
+    bbRenderTodayBanner();
+  }
+
+  function bbEsc(str) {
+    return String(str)
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  // ══════════════════════════════════════════
+  // EVENT LISTENERS
+  // ══════════════════════════════════════════
+
+  document.getElementById('bbSend').addEventListener('click', bbSend);
+  document.getElementById('bbInput').addEventListener('keydown', e => {
+    if (e.key === 'Enter') bbSend();
+  });
+
+  // ══════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════
+
+  // Welcome message
+  bbAddMsg("Hey! I'm <b>BusyBoy</b>. Tell me about your upcoming events in plain English and I'll keep track of them for you. Try something like <i>\"Dinner with mum tomorrow at 7pm\"</i> or <i>\"Meeting next Monday at 9am at the office\"</i>.", false);
+
+  bbRenderEvents();
+  bbRenderTodayBanner();
+  </script>
+</body>
+</html>

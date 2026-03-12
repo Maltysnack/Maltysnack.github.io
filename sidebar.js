@@ -68,6 +68,7 @@
           <ul>
             <li><a href="/red-rebels.html" class="nav-rebels" ${active('/red-rebels.html')}>Red Rebels</a></li>
             <li><a href="/proveyourself.html" ${active('/proveyourself.html')}>proveyourself</a></li>
+            <li><a href="/busyboy.html" ${active('/busyboy.html')}>BusyBoy</a></li>
             <li><a href="/shop.html" ${active('/shop.html')}>Shop</a></li>
           </ul>
         </div>
