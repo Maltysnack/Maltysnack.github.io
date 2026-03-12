@@ -124,6 +124,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 .bld-label{position:absolute;bottom:-24px;left:50%;transform:translateX(-50%) translateY(4px);font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--parchment);white-space:nowrap;opacity:0;transition:all .2s;pointer-events:none;text-shadow:0 1px 4px #000;}
 .bld-roof{width:0;height:0;border-left-style:solid;border-left-color:transparent;border-right-style:solid;border-right-color:transparent;border-bottom-style:solid;border-bottom-color:#100d09;}
 .bld-body{background:#100d09;border:1px solid #1e1810;position:relative;}
+.bld-body::after{content:'';position:absolute;bottom:-6px;left:50%;transform:translateX(-50%);width:85%;height:8px;background:radial-gradient(ellipse at 50% 0%,rgba(0,0,0,0.55) 0%,transparent 100%);border-radius:50%;pointer-events:none;}
 .bld-win{position:absolute;background:rgba(210,155,55,.1);border:1px solid rgba(210,155,55,.2);}
 .bld-win.lit{background:rgba(210,155,55,.18);border-color:rgba(210,155,55,.35);box-shadow:0 0 8px rgba(210,155,55,.12) inset;}
 .bld-door{position:absolute;bottom:0;left:50%;transform:translateX(-50%);background:#070503;border:1px solid #1a1208;border-bottom:none;}
@@ -308,6 +309,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 .shop-item:hover{border-color:var(--bone);}
 .shop-layout{display:grid;grid-template-columns:1fr 220px;gap:10px;align-items:start;}
 @media(max-width:460px){.shop-layout{grid-template-columns:1fr;}}
+.shop-wide .modal{width:min(820px,96vw);}
 .shop-col-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px;}
 .shop-gold-bar{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);padding:5px 10px;border:1px solid var(--ash);background:var(--stone);margin-bottom:8px;text-align:center;}
 .eq-compare{background:var(--stone);border:1px solid var(--border);border-left:2px solid var(--ash);padding:5px 7px;margin-bottom:3px;font-size:11px;min-height:64px;display:flex;flex-direction:column;justify-content:center;}
@@ -801,7 +803,7 @@ body[data-town="farradin"] .mission-card[data-type="quest"]{
 <div id="g-stat-tip" style="position:fixed;z-index:300;background:var(--deep);border:1px solid var(--ash);padding:7px 10px;font-size:11px;color:var(--text-dim);font-style:italic;display:none;pointer-events:none;max-width:220px;"></div>
 
 <script>
-const GAME_VERSION='0.52';
+const GAME_VERSION='0.53';
 // ══════════════════════════════════════════════════════════════
 // TIME SCALE — change DAY_MINUTES to rescale everything
 // ══════════════════════════════════════════════════════════════
@@ -964,6 +966,17 @@ const ITEMS_DB={
   rivermans_boots:        {name:"Riverman's Boots",       slot:'boots', price:22,rarity:'common', icon:'👢',stats:{agi:1,str:1},desc:'Good grip on wet stone.'},
   scaled_river_vest:      {name:'Scaled River Vest',      slot:'body',  price:60,rarity:'crafted',icon:'🥋',stats:{armour:7},desc:'Scales from the deep water. They don\'t come off.'},
   millhaven_trading_cloak:{name:'Millhaven Trading Cloak',slot:'shoulder',price:55,rarity:'crafted',icon:'🥋',stats:{armour:4,int:2},desc:'Good cut. Made for someone who needed to look like they knew what they were doing.'},
+  // ── PANTS ITEMS ───────────────────────────────────────────────
+  torn_cloth_leggings:  {name:'Torn Cloth Leggings',   slot:'pants',price:4,  rarity:'worn',    icon:'👖',stats:{armour:1},                    desc:'More holes than cloth. The holes have opinions.'},
+  rough_hide_leggings:  {name:'Rough Hide Leggings',   slot:'pants',price:6,  rarity:'worn',    icon:'👖',stats:{armour:1,agi:1},               desc:'Stiff. Loud when you walk. The prey hears you first.'},
+  leather_leggings:     {name:'Leather Leggings',      slot:'pants',price:20, rarity:'common',  icon:'👖',stats:{armour:2},                    desc:'Tanned and stitched. They have done this before.'},
+  studded_leggings:     {name:'Studded Leggings',      slot:'pants',price:26, rarity:'common',  icon:'👖',stats:{armour:2,con:1},              desc:'Iron studs along the thigh. More useful than decorative.'},
+  riveted_chain_legs:   {name:'Riveted Chain Legs',    slot:'pants',price:55, rarity:'crafted', icon:'👖',stats:{armour:4,str:1},              desc:'Heavy rings riveted at every joint. Slow but solid.'},
+  shadow_wrap_legs:     {name:'Shadow Wrap Legs',      slot:'pants',price:50, rarity:'crafted', icon:'👖',stats:{armour:3,agi:2},              desc:'Wrapped in something that absorbs sound. The ground barely hears you.'},
+  greaves_of_fleeting:  {name:'Greaves of Fleeting',  slot:'pants',price:0,  rarity:'enchanted',icon:'👖',stats:{armour:5,agi:2},              desc:'Faster with each step. The enchantment was meant to last longer.'},
+  leggings_of_undying:  {name:'Leggings of the Undying',slot:'pants',price:0,rarity:'legendary',icon:'👖',stats:{armour:8,con:3},              desc:'Worn by someone who did not die. The legs remember why.'},
+  // ── SIGNET OF DAWNHEARTH ──────────────────────────────────────
+  signet_of_dawnhearth: {name:'Signet of Dawnhearth', slot:'ring1',price:0,  rarity:'rare',    icon:'💍',stats:{str:1,agi:1,int:1,con:1},heirloom:true, desc:'An iron ring stamped with a burning tower. The flame on it has never gone cold. Goes to the vault if the bearer falls.'},
   waterproofed_gauntlets: {name:'Waterproofed Gauntlets', slot:'gloves',price:50,rarity:'crafted',icon:'🧤',stats:{armour:2,str:2},desc:'The seams are sealed with river tar.'},
   current_blessed_boots:  {name:'Current-Blessed Boots',  slot:'boots', price:48,rarity:'crafted',icon:'👢',stats:{agi:2,con:1},desc:'The blessing is in the making, not the words.'},
   river_stone_ring:       {name:'River Stone Ring',       slot:'ring1', price:30,rarity:'common', icon:'💍',stats:{con:2},desc:'Smooth. From the bed of something deep.'},
@@ -1037,11 +1050,14 @@ const SHOP_POOL=[
   {key:'battered_wand',rarity:'worn'},{key:'frayed_tome',rarity:'worn'},{key:'dented_buckler',rarity:'worn'},
   {key:'patched_cloak',rarity:'worn'},{key:'cracked_helm',rarity:'worn'},{key:'worn_gloves',rarity:'worn'},
   {key:'iron_pauldrons',rarity:'worn'},{key:'brewers_tonic',rarity:'worn'},{key:'quickfoot_draught',rarity:'worn'},
+  {key:'torn_cloth_leggings',rarity:'worn'},{key:'rough_hide_leggings',rarity:'worn'},
   {key:'iron_greatsword',rarity:'common'},{key:'apprentice_staff',rarity:'common'},{key:'militia_wand',rarity:'common'},
   {key:'soldiers_shield',rarity:'common'},{key:'arcane_buckler',rarity:'common'},{key:'chainmail_coif',rarity:'common'},
   {key:'boiled_leather',rarity:'common'},{key:'iron_boots',rarity:'common'},
   {key:'sharpshot_elixir',rarity:'common'},{key:'haste_flask',rarity:'common'},
+  {key:'leather_leggings',rarity:'common'},{key:'studded_leggings',rarity:'common'},
   {key:'soldiers_greatsword',rarity:'crafted'},{key:'ember_tome',rarity:'crafted'},
+  {key:'riveted_chain_legs',rarity:'crafted'},{key:'shadow_wrap_legs',rarity:'crafted'},
 ];
 
 const SHOP_POOL_MILLRIVER=[
@@ -1158,6 +1174,9 @@ const CITIZEN_TUTORIAL_POOL={
     {id:'cb1',type:'bounty',title:'Frogs at the River',desc:"Something is wrong with the frogs down by the south bend. They have gotten large and they are coming up onto the road at night. I need them moved on. Yes, I am serious.",hints:['They are just frogs. Probably.'],enemyName:'Cave Frog',enemyLevel:2,source:'the river south of Dawnhearth'},
     {id:'cb2',type:'bounty',title:'Rats in the Cellar',desc:"The baker has rats in her cellar. Not small ones. She cannot store flour down there anymore. She wants them gone before the weekend market.",hints:['Bring a light down there.'],conditions:['dark','cramped'],enemyName:'Giant Rat',enemyLevel:1,source:'the baker\'s cellar in Dawnhearth'},
     {id:'cb3',type:'bounty',title:'The Crow Problem',desc:"A flock of crows has taken over the grain store roof. They are loud, they are messy, and they are bold enough to come inside now. Clear them out.",hints:['Do not let them get above you.'],enemyName:'Rabid Crow',enemyLevel:3,source:'the grain store in Dawnhearth'},
+    {id:'cb4',type:'bounty',title:'Something in the Barn',desc:"Something got into my barn two nights ago and it did not leave. The horses are not happy about it. I am not happy about it. Sort it out.",hints:['It came in from the east. Through the wall, near as I can tell.'],enemyName:'Vampire Bat',enemyLevel:4,source:'a farm east of Dawnhearth'},
+    {id:'cb5',type:'bounty',title:'The Road After Dark',desc:"Three people have been turned back on the south road after nightfall. Something waits at the bend near the old marker stone. I need it moved on.",hints:['It only moves at night.','Bring a torch if you have one.'],conditions:['dark'],enemyName:'Rotting Zombie',enemyLevel:5,source:'the south road near Dawnhearth'},
+    {id:'cb6',type:'bounty',title:'The Graveyard Wall',desc:"Something has been climbing over the eastern graveyard wall at night. I do not want to know how it gets back in. I want it stopped.",hints:['The wall stones are old. Whatever climbs it does not need handholds.'],conditions:['dark'],enemyName:'Grave Skeleton',enemyLevel:6,source:'the eastern graveyard in Dawnhearth'},
   ],
 };
 
@@ -1171,7 +1190,7 @@ const HOLY_RELIC={
   hints:['The chapel stones run cold even in summer.','Whatever moves in there does not bleed like the living do.','The nave has collapsed in places. The gaps are narrow.'],
   conditions:['dark','cramped'],
   enemyName:'Grave Skeleton',enemyLevel:7,
-  guaranteedItem:'blessed_amulet',
+  guaranteedItem:'signet_of_dawnhearth',
   storyText:'Among the scattered papers you find a symbol burned into the stone floor: a circle with a broken crown. Someone knew this relic was here. Someone wanted it moved — or they\'re still east of here, in the dark past the ridge.',
   return_text:'The light came back to that place. Brother Aldous told me himself, before he left — he didn\'t say where he was going. The relic is somewhere else now. The broken crown — I\'ve seen that symbol once before, on a road marker east of here. Thought nothing of it at the time. I\'m thinking about it now.',
   unlocks:'Acolyte',source:'the Broken Chapel near Dawnhearth',
@@ -1283,7 +1302,7 @@ const CLASS_CONFIG={
     unlockCondition:'Complete a bounty at level 3+',
     perks:[
       {name:'Oath of Steel',desc:'Sword and axe damage +5%.',dot:'pd-class'},
-      {name:'Shield Wall',desc:'Damage reduction +10% while a shield is equipped.',dot:'pd-class'},
+      {name:'Shield Wall',desc:'Shield equipped: 10% chance to block incoming hits entirely.',dot:'pd-class'},
     ]},
   Ranger:{icon:'🏹',stats:{str:8,agi:12,int:7,con:9},startLevel:3,blurb:'The road knows her. She knows the road.',
     startItems:['short_bow','leather_cap','worn_boots'],
@@ -1452,7 +1471,7 @@ const MOON_QUOTES={
 // ══════════════════════════════════════════════════════════════
 const G={
   c:null,
-  equipped:{head:null,shoulder:null,body:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:'wooden_sword',offhand:null,pack:null,pack2:null},
+  equipped:{head:null,shoulder:null,body:null,pants:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:'wooden_sword',offhand:null,pack:null,pack2:null},
   bag:[],
   journey:null,
   tavernActivity:null,
@@ -1532,6 +1551,66 @@ function getVaultHeirlooms(){return JSON.parse(localStorage.getItem('yonder_vaul
 function saveVaultHeirlooms(v){localStorage.setItem('yonder_vault_heirlooms',JSON.stringify(v));}
 
 // ══════════════════════════════════════════════════════════════
+// BLOODLINE TALENTS — persistent cross-character bonuses
+// Earned by dying. Spent on permanent minor bonuses.
+// ══════════════════════════════════════════════════════════════
+const BLOODLINE_TALENTS=[
+  {id:'iron_resolve',name:'Iron Resolve',desc:'Start each character with +2 Constitution.',icon:'❤',cost:1,stat:'con',amount:2},
+  {id:'wanderers_coin',name:"Wanderer's Coin",desc:'Start each character with +25 gold.',icon:'🪙',cost:1,type:'gold',amount:25},
+  {id:'war_memory',name:'War Memory',desc:'Start each character with +2 Strength.',icon:'⚔',cost:1,stat:'str',amount:2},
+  {id:'swift_blood',name:'Swift Blood',desc:'Start each character with +2 Agility.',icon:'🏹',cost:1,stat:'agi',amount:2},
+  {id:'old_knowledge',name:'Old Knowledge',desc:'Start each character with +2 Intelligence.',icon:'📖',cost:1,stat:'int',amount:2},
+  {id:'deep_pockets',name:'Deep Pockets',desc:'Bag holds 4 extra item slots.',icon:'🎒',cost:2,type:'bag',amount:4},
+  {id:'ember_touched',name:'Ember-Touched',desc:'Start with +50 XP and a head start on levelling.',icon:'🔥',cost:2,type:'xp',amount:50},
+];
+function getBloodlineData(){return JSON.parse(localStorage.getItem('yonder_bloodline')||'{"points":0,"talents":[]}');}
+function saveBloodlineData(d){localStorage.setItem('yonder_bloodline',JSON.stringify(d));}
+function getBloodlineTalents(){return getBloodlineData().talents||[];}
+function hasBloodlineTalent(id){return getBloodlineTalents().includes(id);}
+function getBloodlinePoints(){return getBloodlineData().points||0;}
+function addBloodlinePoint(){const d=getBloodlineData();d.points=(d.points||0)+1;saveBloodlineData(d);}
+function buyBloodlineTalent(id){
+  const t=BLOODLINE_TALENTS.find(x=>x.id===id);if(!t) return;
+  const d=getBloodlineData();
+  if(d.points<t.cost) return;
+  if((d.talents||[]).includes(id)) return;
+  d.points-=t.cost;
+  d.talents=d.talents||[];
+  d.talents.push(id);
+  saveBloodlineData(d);
+  buildHomeScreen();
+}
+function applyBloodlineBonuses(c){
+  const talents=getBloodlineTalents();
+  BLOODLINE_TALENTS.forEach(t=>{
+    if(!talents.includes(t.id)) return;
+    if(t.stat) c[t.stat]=(c[t.stat]||0)+t.amount;
+    if(t.type==='gold') c.gold=(c.gold||0)+t.amount;
+    if(t.type==='xp') c.xp=(c.xp||0)+t.amount;
+  });
+}
+function buildBloodlineHTML(){
+  const d=getBloodlineData();
+  const pts=d.points||0;
+  const owned=d.talents||[];
+  const html=BLOODLINE_TALENTS.map(t=>{
+    const have=owned.includes(t.id);
+    const canBuy=!have&&pts>=t.cost;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--ash);">
+      <span style="font-size:18px;">${t.icon}</span>
+      <div style="flex:1;">
+        <div style="font-family:'Cinzel',serif;font-size:11px;color:${have?'var(--gold)':'var(--parchment)'};">${t.name}${have?' ✦':''}</div>
+        <div style="font-size:11px;color:var(--text-dim);">${t.desc}</div>
+      </div>
+      ${have?`<span style="font-size:10px;color:var(--gold);">Active</span>`:`<button class="${canBuy?'mc-depart':'buy-btn owned'}" style="font-size:10px;padding:4px 10px;" ${canBuy?`onclick="buyBloodlineTalent('${t.id}')"`:''} ${canBuy?'':'disabled'}>${t.cost} pt${t.cost>1?'s':''}</button>`}
+    </div>`;
+  }).join('');
+  return`<div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px;">Bloodline Talents — ${pts} point${pts!==1?'s':''} available</div>
+    <p style="font-size:11px;color:var(--text-dim);font-style:italic;margin-bottom:12px;">Earned through death. Carried forward by every wanderer who follows.</p>
+    ${pts===0&&owned.length===0?'<p style="font-size:12px;color:var(--text-dim);font-style:italic;">No talents yet. A death earns a point.</p>':html}`;
+}
+
+// ══════════════════════════════════════════════════════════════
 // XP
 // ══════════════════════════════════════════════════════════════
 function xpForLevel(l){let t=0;for(let i=1;i<l;i++)t+=Math.floor(i+300*Math.pow(2,i/7));return Math.floor(t/4);}
@@ -1603,11 +1682,12 @@ function buildPlayerStats(){
 
   // Class perks
   const physWtypes=['sword_1h','sword_2h','dagger','axe','axe_2h'];
+  let knightBlockChance=0;
   if(c.charClass==='Knight'){
     if(physWtypes.includes(wc.wtype)){dmgMin=Math.floor(dmgMin*1.05);dmgMax=Math.floor(dmgMax*1.05);}
     const ohk=G.equipped.offhand;
     const oh=ohk?(typeof ohk==='string'?ITEMS_DB[ohk]:ohk):null;
-    if(oh&&oh.combat&&oh.combat.wtype==='shield') totalArmour+=3;
+    if(oh&&oh.combat&&oh.combat.wtype==='shield') knightBlockChance=0.10;
   }
   if(c.charClass==='Ranger'){
     speed=Math.max(.8,speed-(effAgi*.005));
@@ -1717,7 +1797,7 @@ function buildPlayerStats(){
   // Ashwalker: heal on kill
   const healOnKill=!!(w&&w.perk==='heal_on_kill');
   return{
-    name:c.name,charClass:c.charClass,
+    name:c.name,charClass:c.charClass,knightBlockChance,
     hp:c.hp,maxHp:c.maxHp||maxHp,
     dmgMin,dmgMax,speed:Math.max(.6,speed),
     crit:Math.min(.5,crit),
@@ -1879,6 +1959,11 @@ function simulateCombat(player,enemy){
         events.push({a:'vanish',pH,eH});
         continue;
       }
+      // Knight: block chance — 10% chance to completely negate incoming physical damage
+      if((player.knightBlockChance||0)>0&&Math.random()<player.knightBlockChance){
+        events.push({a:'block',pH,eH});
+        continue;
+      }
       // Biscuit: chance to halve incoming damage
       if(player.hasBiscuit&&d>0){
         let biscuitChance=0.10+(player.biscuitFocusedRanks||0)*0.08;
@@ -2023,6 +2108,9 @@ function renderCombat(sim){
       }else if(ev.a==='vanish'){
         line.className='combat-line heal';
         line.textContent=`${sim.player.name} vanishes — the blow finds nothing`;
+      }else if(ev.a==='block'){
+        line.className='combat-line note';
+        line.textContent=`${sim.player.name} raises the shield — the blow is turned aside.`;
       }else if(ev.a==='tincture'){
         pCurH=ev.pH;
         line.className='combat-line heal';
@@ -2481,6 +2569,8 @@ function endJourneyDead(enemy){
   if(isFirst) addJEntry('jd-wh','','The first time is the one that counts. The ones after are just practice.');
   addChronicle(`${G.c.name} (${G.c.charClass}, Lv${G.c.level}) fell to a ${enemy}. They never returned.`,'death',true);
   addToGraveyard(G.c,G.c.level,`Slain by a ${enemy}`);
+  addBloodlinePoint();
+  addJEntry('jd-gr','disc',`A bloodline point earned. Death is not without its lessons.`);
   showMissionEnd(true,null);
 }
 
@@ -2525,6 +2615,7 @@ function resolveJourney(){
       addUnlocked('Acolyte');
       addChronicle(`The Acolyte path revealed through the Broken Chapel. The broken crown symbol remains.`,'unlock');
       setMilestone('first_class_unlock');
+      G.pendingEncounter='Acolyte_earned';
     }
   }
 
@@ -2659,7 +2750,7 @@ function proceedToTown(died){
       return;
     }
     // Handle pending encounter
-    if(G.pendingEncounter&&G.pendingEncounter!=='Knight_earned'){
+    if(G.pendingEncounter&&G.pendingEncounter!=='Knight_earned'&&G.pendingEncounter!=='Acolyte_earned'){
       const cls=G.pendingEncounter;G.pendingEncounter=null;
       showScreen('town');render();
       document.getElementById('h-status').textContent='IN TOWN';
@@ -2670,6 +2761,14 @@ function proceedToTown(died){
       document.getElementById('h-status').textContent='IN TOWN';
       setTimeout(()=>{
         setModal('Path Revealed',`<p class="mflavour">"You have bled for something. That is the beginning."</p><p style="font-size:14px;color:var(--text);line-height:1.7;">The path of the <strong style="color:var(--parchment)">Knight</strong> is now known to your bloodline. Future wanderers may walk it.</p><p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-top:12px;">✦ KNIGHT UNLOCKED ✦</p>`);
+        document.getElementById('overlay').classList.add('open');
+      },400);
+    }else if(G.pendingEncounter==='Acolyte_earned'){
+      G.pendingEncounter=null;
+      showScreen('town');render();
+      document.getElementById('h-status').textContent='IN TOWN';
+      setTimeout(()=>{
+        setModal("The Flame Speaks",`<p class="mflavour">"The chapel east of the mill is quiet now. What you found there — the broken crown, the cold stone — the Church of the Ember has been watching for that sign for a long time."</p><p style="font-size:14px;color:var(--text);line-height:1.7;">The way of the <strong style="color:var(--parchment)">Acolyte</strong> is now known to your bloodline. Future wanderers may follow the flame.</p><p style="font-size:13px;color:var(--text-dim);font-style:italic;margin-top:8px;">Visit the <strong>Ember Church</strong> to walk the Acolyte path.</p><p style="font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);margin-top:12px;">✦ ACOLYTE UNLOCKED ✦</p>`);
         document.getElementById('overlay').classList.add('open');
       },400);
     }else{
@@ -2898,6 +2997,7 @@ function gateModal(){
     const eHp=m.enemyName&&m.enemyLevel?8+m.enemyLevel*4:0;
     const threatLine=m.enemyName?`<div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:1px;color:var(--text-dim);margin:6px 0;">⚔ ${m.enemyName} · Lv ${m.enemyLevel} · ${eHp} HP</div>`:'';
     const onJourney=!!G.journey||!!G.tavernActivity;
+    MC[m.id]=m;
     adventureHtml=`<div style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:10px;">Active Contract</div>
       <div class="mission-card" style="margin-bottom:14px;">
         <div class="mc-title">${m.title} <span class="mc-type adventure">adventure</span></div>
@@ -3362,7 +3462,8 @@ function beginGame(){
     debuffs:[],
     hp:null,maxHp:null,
   };
-  G.equipped={head:null,shoulder:null,body:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:null,offhand:null,pack:null,pack2:null};
+  applyBloodlineBonuses(G.c);
+  G.equipped={head:null,shoulder:null,body:null,pants:null,gloves:null,boots:null,amulet:null,ring1:null,ring2:null,weapon:null,offhand:null,pack:null,pack2:null};
   G.bag=[];
   G.lastCombatSim=null;
   G.potionBuffs=[];
@@ -3441,14 +3542,20 @@ function render(){
     else if(pct>30) fill.style.background='linear-gradient(90deg,#8a6020,#c09030)';
     else fill.style.background='linear-gradient(90deg,#7a1515,#c03030)';
   }
-  // Time-of-day cycle (cosmetic, based on real clock)
+  // Time-of-day cycle — based on game time (one cycle = DAY_MINUTES real minutes)
   const ht=document.getElementById('h-time');
   if(ht){
-    const hr=new Date().getHours();
-    if(hr>=5&&hr<8){ht.textContent='🌅';ht.title='Dawn';}
-    else if(hr>=8&&hr<17){ht.textContent='☀️';ht.title='Day';}
-    else if(hr>=17&&hr<20){ht.textContent='🌇';ht.title='Dusk';}
-    else{ht.textContent='🌙';ht.title='Night';}
+    const cycleMs=DAY_MINUTES*60*1000;
+    const phase=(Date.now()%cycleMs)/cycleMs; // 0..1
+    let icon,title,brightness;
+    if(phase<0.08){icon='🌅';title='Dawn';brightness=0.85;}
+    else if(phase<0.55){icon='☀️';title='Day';brightness=1.0;}
+    else if(phase<0.65){icon='🌇';title='Dusk';brightness=0.80;}
+    else{icon='🌙';title='Night';brightness=0.72;}
+    if(ht.textContent!==icon){ht.textContent=icon;ht.title=title;}
+    // Apply subtle brightness to the town screen
+    const ts=document.getElementById('town-view');
+    if(ts) ts.style.filter=`brightness(${brightness})`;
   }
 }
 
@@ -3464,7 +3571,7 @@ function openModal(key,data){
   document.getElementById('overlay').classList.add('open');
 }
 function setModal(title,html){document.getElementById('m-title').textContent=title;document.getElementById('m-body').innerHTML=html;}
-function closeModal(){document.getElementById('overlay').classList.remove('open');}
+function closeModal(){const ov=document.getElementById('overlay');ov.classList.remove('open');ov.classList.remove('shop-wide');}
 function overlayClick(e){
   // Block closing modal if any tavern activity is running (works across all towns)
   if(G.tavernActivity) return;
@@ -3515,11 +3622,13 @@ function buildLoadoutHTML(){
 
   // Equipped gear panel
   const eqSlots=[
-    {key:'weapon',icon:'⚔',label:'Weapon'},{key:'offhand',icon:'🛡',label:'Off Hand'},
-    {key:'head',icon:'⛑',label:'Head'},{key:'body',icon:'🥋',label:'Body'},
-    {key:'shoulder',icon:'🪬',label:'Shoulders'},{key:'gloves',icon:'🧤',label:'Gloves'},
-    {key:'boots',icon:'👢',label:'Boots'},{key:'amulet',icon:'📿',label:'Amulet'},
-    {key:'ring1',icon:'💍',label:'Ring'},{key:'pack',icon:'🎒',label:'Pack'},{key:'pack2',icon:'🎒',label:'Pack 2'},
+    {key:'head',icon:'⛑',label:'Head'},{key:'shoulder',icon:'🪬',label:'Shoulders'},
+    {key:'body',icon:'🥋',label:'Body'},{key:'pants',icon:'👖',label:'Pants'},
+    {key:'gloves',icon:'🧤',label:'Gloves'},{key:'boots',icon:'👢',label:'Boots'},
+    {key:'amulet',icon:'📿',label:'Amulet'},{key:'ring1',icon:'💍',label:'Ring'},
+    {key:'ring2',icon:'💍',label:'Ring 2'},{key:'pack',icon:'🎒',label:'Pack'},
+    {key:'pack2',icon:'🎒',label:'Pack 2'},{key:'weapon',icon:'⚔',label:'Weapon'},
+    {key:'offhand',icon:'🛡',label:'Off Hand'},
   ];
   const eqHtml=eqSlots.map(s=>{
     const k=G.equipped[s.key];const it=k?ITEMS_DB[k]:null;
@@ -3557,7 +3666,7 @@ function buildLoadoutHTML(){
           </div>
         </div>`;
       }).join('')}
-      ${Array(Math.max(0,10-G.bag.length)).fill(`<div class="inv-cell"></div>`).join('')}
+      ${Array(Math.max(0,24-G.bag.length)).fill(`<div class="inv-cell"></div>`).join('')}
     </div>`;
 
   return`<div class="lo-layout">
@@ -3572,10 +3681,15 @@ function buildLoadoutHTML(){
       </div>
       <div class="cdiv"></div>
       <div class="lo-stat-list">
-        <div class="lo-stat sc-tip"><span class="lo-sl c-str">Strength</span><span class="lo-sv c-str">${c.str}</span><div class="sc-hover-tip">${STAT_TIPS.str}</div></div>
-        <div class="lo-stat sc-tip"><span class="lo-sl c-agi">Agility</span><span class="lo-sv c-agi">${c.agi}</span><div class="sc-hover-tip">${STAT_TIPS.agi}</div></div>
-        <div class="lo-stat sc-tip"><span class="lo-sl c-int">Intelligence</span><span class="lo-sv c-int">${c.int}</span><div class="sc-hover-tip">${STAT_TIPS.int}</div></div>
-        <div class="lo-stat sc-tip"><span class="lo-sl c-con">Constitution</span><span class="lo-sv c-con">${c.con}</span><div class="sc-hover-tip">${STAT_TIPS.con}</div></div>
+        ${(()=>{
+        let bStr=0,bAgi=0,bInt=0,bCon=0;
+        Object.values(G.equipped).forEach(k=>{if(!k)return;const it=typeof k==='string'?ITEMS_DB[k]:k;if(!it)return;const s=it.stats||{};if(s.str)bStr+=s.str;if(s.agi)bAgi+=s.agi;if(s.int)bInt+=s.int;if(s.con)bCon+=s.con;});
+        const fmt=(base,bonus)=>bonus>0?`${base+bonus} <span style="font-size:9px;color:#70b080">(+${bonus})</span>`:(base+bonus).toString();
+        return`<div class="lo-stat sc-tip"><span class="lo-sl c-str">Strength</span><span class="lo-sv c-str">${fmt(c.str,bStr)}</span><div class="sc-hover-tip">${STAT_TIPS.str}</div></div>
+        <div class="lo-stat sc-tip"><span class="lo-sl c-agi">Agility</span><span class="lo-sv c-agi">${fmt(c.agi,bAgi)}</span><div class="sc-hover-tip">${STAT_TIPS.agi}</div></div>
+        <div class="lo-stat sc-tip"><span class="lo-sl c-int">Intelligence</span><span class="lo-sv c-int">${fmt(c.int,bInt)}</span><div class="sc-hover-tip">${STAT_TIPS.int}</div></div>
+        <div class="lo-stat sc-tip"><span class="lo-sl c-con">Constitution</span><span class="lo-sv c-con">${fmt(c.con,bCon)}</span><div class="sc-hover-tip">${STAT_TIPS.con}</div></div>`;
+      })()}
       </div>
       <div class="cdiv"></div>
       <div class="ss"><span class="ssl">${dmgLabel}</span><span class="ssv" style="color:${dmgCol}">${ps.dmgMin}–${ps.dmgMax}</span></div>
@@ -3744,6 +3858,7 @@ function buyTraining(perkId){
   if(academyTitles.includes(title)) academy();
   else if(churchTitles.includes(title)) church();
   else if(gateTitles.includes(title)) gateModal();
+  render();
 }
 
 function buildBuffsHTML(forCombat){
@@ -3784,6 +3899,7 @@ function guessSlot(item){
   if(/shield|buckler|aegis/i.test(n)) return 'offhand';
   if(/helm|cap|hood|crown|circlet/i.test(n)) return 'head';
   if(/vest|armour|robe|tunic|coif/i.test(n)) return 'body';
+  if(/leggings|greaves|leg |legs|trouser|pants/i.test(n)) return 'pants';
   if(/boot|sandal/i.test(n)) return 'boots';
   if(/gauntlet|glove/i.test(n)) return 'gloves';
   if(/ring|band/i.test(n)) return 'ring1';
@@ -3959,32 +4075,32 @@ function tickTavern(){
 function getRumourHint(town){
   const hints={
     dawnhearth:[
-      "A tinker who passed through last week spoke of a settlement further north — Millriver, they called it. Said the road there was long but passable.",
-      "Someone at the end of the bar was wearing a grey hood and watching the door. Left without saying a word. Nobody asked.",
-      "Word is the church has been taking on volunteers — acolytes, they call them. Easy work at first, then it isn't.",
-      "A shepherd was in last night, going on about wolves near the high pasture. Said the Watch used to handle it. Used to.",
-      "Merchant came through from the north. Said the road is clear but cold. Said there's good coin in Millriver for anyone willing to earn it.",
+      "A tinker mentioned Millriver to the north. Said the road through the Thornwood is the only way — and something has moved in there recently. The guild still posts contracts for anyone willing to make the run.",
+      "The church has been taking on acolytes. Easy work at first, or so they say. If you complete the Broken Chapel contract, Brother Aldous will sponsor you. Worth knowing.",
+      "A hunter was complaining about wolves near the mill. Said they circle at night and the Watch won't go out anymore. The bounty board should have something on it if you're looking for coin.",
+      "Word from someone who made the adventure run east — the Forgotten Keep on the high ridge is still occupied. Whatever's in there doesn't sleep. Bring armour, not speed.",
+      "Merchant said the chapel east of town has gone dark. Monks gone. He kept moving. Said the broken crown symbol on the road marker was new — wasn't there a month ago. The church is paying for someone to look into it.",
     ],
     millriver:[
-      "The ferryman hasn't taken passengers in weeks. Something about the crossing being wrong. He won't say what.",
-      "Heard someone in the corner mention Grimhollow — then go quiet when they noticed me listening. Place has a reputation.",
-      "A plague doctor came through in the spring and never left. Sets up near the south gate sometimes. Best to give them space.",
-      "The bridge north has been holding but nobody's maintaining it. Council keeps saying they'll send someone.",
-      "Three travellers left for Grimhollow last month. Two came back. The third sent a letter. Nobody opened it.",
+      "The ferryman hasn't crossed the deep channel in weeks. Something overturned two boats. He says it comes up from underneath. Cold water thing. There's a contract on the board if you want it — pay is good because nobody else will.",
+      "Road to Grimhollow is open but nobody's been happy coming back from it. If you're going north, you'll want armour and something warm. The cold up there isn't just weather.",
+      "Someone mentioned the old shrines upriver. Said the fishing above the third bend stopped overnight. Not declined — stopped. The shrine-keepers aren't talking, which usually means they know what happened.",
+      "Three travellers left for Grimhollow last month. Two came back. The third sent a letter. I know the postmaster. He said the letter was just a list of names he didn't recognise.",
+      "There's a brigand on the bridge road north of here. Not asking for toll — taking it. The guild wants resolution fast before the trade routes get rerouted and everyone loses money.",
     ],
     grimhollow:[
-      "The bounty board changes every few days. Someone's keeping it stocked. Not the guard — they're stretched thin.",
-      "There's a warlock in the hills. Been there for years. Locals leave offerings. Nobody goes to ask why.",
-      "The plague spread slower here than elsewhere. The doctor knows why. Hasn't shared it publicly.",
-      "Farradin's traders stopped coming through last season. No explanation. Road's still open, as far as anyone knows.",
-      "An old man by the fire said there's something buried under the eastern district. Said it every night until he stopped showing up.",
+      "Farradin's traders stopped coming through. Road is open but they say something watches it from the tree line past the second valley. The king's road contract has good pay for anyone who can confirm the route is clear.",
+      "The shrine east of here is the old kind — older than the town. The elder says it remembers things. If you're having trouble with dark encounters, lighting a tallow candle before you leave town is what the locals do.",
+      "A warlock in the eastern hills has been there for thirty years. Locals leave offerings. He doesn't come down. But rumour is he pays in enchanted goods for certain materials brought from the deep wood missions.",
+      "The plague doctor at the south gate says the miasma in the Ashwood is concentrated near the northern trail. If you take a dark mission in there, expect heavy resistance. He sells something for that, but he's not chatty about it.",
+      "Something is buried under the eastern district — pre-dates the town. The elder knows what it is. She won't say, but she reinforced the church foundations twice last year. The quest board has been... specific lately.",
     ],
     farradin:[
-      "The crown hasn't been seen publicly in years. Some say it's locked away. Others say it never was.",
-      "A scholar passed through looking for artefacts — old things, cursed things. Paid well. Kept quiet about what they found.",
-      "Everyone who comes here from the south road looks different when they leave. Not worse. Just different.",
-      "There's a vault in the merchant quarter no one's owned in living memory. Still locked. Still lit inside at night.",
-      "Heard someone say the world has an ending. Not like death — like a door. Said it like it was obvious.",
+      "The crown hasn't been seen publicly in years. The castle guard still reports to someone, but the orders come through a chamberlain who nobody has met. The final quest contract pays more than anything south of here.",
+      "A scholar came through looking for the Signet of Dawnhearth — small iron ring, older than the town. Said it was connected to something that ends here. If you found it in the vault, hold onto it.",
+      "Everyone who arrives from the south road looks like they've just remembered something important. The road does that. By the time you reach Farradin, you know things you didn't know you were learning.",
+      "There's a vault in the merchant quarter that's been locked since before the current owner was born. Still lit at night from inside. The treasury contracts here pay better than anywhere else for a reason.",
+      "Heard someone say the world ends here — not death-ends, door-ends. Like there's a threshold somewhere in the castle that opens somewhere else. The final quest might be worth doing just to see if that's true.",
     ],
   };
   const pool=hints[town]||hints.dawnhearth;
@@ -4020,9 +4136,10 @@ function resolveTavern(){
   }else if(roll<0.25){
     // World-voice rumour
     const hint=getRumourHint(town);
+    const rXp=ri(12,22);G.c.xp=(G.c.xp||0)+rXp;
     headline='A Rumour';
-    detail=hint;
-    diaryText=`Heard something at the bar worth remembering.`;
+    detail=hint+` (+${rXp} XP — you filed it away.)`;
+    diaryText=`Heard something at the bar worth remembering. +${rXp} XP.`;
   }else if(roll<0.40){
     // Speed buff
     if(!G.potionBuffs) G.potionBuffs=[];
@@ -4133,7 +4250,7 @@ function shop(){
     </div>`;
   }).join('');
 
-  const eqSlots=[{k:'weapon',l:'Weapon'},{k:'offhand',l:'Off Hand'},{k:'head',l:'Head'},{k:'body',l:'Body'},{k:'boots',l:'Boots'},{k:'amulet',l:'Amulet'},{k:'ring1',l:'Ring'},{k:'pack',l:'Pack'},{k:'pack2',l:'Pack 2'}];
+  const eqSlots=[{k:'head',l:'Head'},{k:'shoulder',l:'Shoulders'},{k:'body',l:'Body'},{k:'pants',l:'Pants'},{k:'gloves',l:'Gloves'},{k:'boots',l:'Boots'},{k:'amulet',l:'Amulet'},{k:'ring1',l:'Ring'},{k:'ring2',l:'Ring 2'},{k:'pack',l:'Pack'},{k:'pack2',l:'Pack 2'},{k:'weapon',l:'Weapon'},{k:'offhand',l:'Off Hand'}];
   const eqHtml=eqSlots.map(s=>{
     const k=G.equipped[s.k];const it=k?ITEMS_DB[k]:null;
     const st=it?itemStatStr(it):'';
@@ -4147,6 +4264,7 @@ function shop(){
 
   const kinLine=getKinLine('shop');
   const shopTitle=getTownBuildingTitle('shop');
+  document.getElementById('overlay').classList.add('shop-wide');
   setModal(shopTitle,`
     <div class="shop-gold-bar">GOLD: ${G.c.gold} gp</div>
     ${kinLine?`<p style="font-size:12px;color:var(--bone);font-style:italic;border-left:2px solid var(--ash);padding-left:10px;margin-bottom:10px;">${kinLine}</p>`:''}
@@ -4353,7 +4471,10 @@ function bank(){
     `<p style="font-size:12px;color:var(--text-dim);font-style:italic;margin-top:12px;">Nothing in your bag is worth the ledger entry.</p>`;
   setModal(getTownBuildingTitle('bank'),`
     <p style="font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);text-align:center;border-bottom:1px solid var(--border);padding-bottom:10px;margin-bottom:14px;font-style:italic;">"What is stored here outlasts those who stored it."</p>
-    ${heirloomHtml}${bankHtml}${depositHtml}`);
+    ${heirloomHtml}${bankHtml}${depositHtml}
+    <p style="font-size:11px;color:var(--text-dim);font-style:italic;margin-top:12px;">Heirloom items survive the bearer's death and appear here for future wanderers.</p>
+    <div style="margin-top:16px;border-top:1px solid var(--ash);padding-top:16px;">${buildBloodlineHTML()}</div>
+  `);
 }
 
 function depositToBank(bagIdx){
@@ -4860,7 +4981,6 @@ window.addEventListener('DOMContentLoaded',()=>{
     const el=e.target.closest('.sc-tip');
     const tip=document.getElementById('g-stat-tip');
     if(!el||!tip){if(tip) tip.style.display='none';return;}
-    // data-tip takes priority, else look for inner .sc-hover-tip
     const text=el.dataset.tip||(el.querySelector('.sc-hover-tip')||{}).textContent||'';
     if(!text){tip.style.display='none';return;}
     tip.textContent=text;
