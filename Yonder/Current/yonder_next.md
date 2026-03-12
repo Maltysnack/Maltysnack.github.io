@@ -1,6 +1,6 @@
 # Yonder — Next Session Notes
 # Current build: yonder_051.html (public as projects/yonder.html)
-# Last updated: 2026-03-12
+# Last updated: 2026-03-13
 
 ---
 
@@ -16,6 +16,30 @@
 - Bug 16: Tavern lock uses G.tavernActivity flag, works across all towns
 - Academy: expansion class training now accessible
 - buyTraining: modal refreshes for all town buildings
+
+## NEW FEATURES ADDED (2026-03-13)
+
+- GAME_VERSION='0.52' constant at script top; home screen shows 'v0.52' in grey corner (bumped opacity to 0.6, size to 10px)
+- Shop eq-compare tiles: min-height:64px + rarity border-left accent (CSS + wired in shop() eqHtml)
+- buyItem(): auto-equips to empty slot on purchase; pack→pack2 overflow; diary message notes "equipped"
+- bagItemAction(): pack→pack2 overflow when equipping from bag
+- getRumourHint(town): pool of 5 flavour hints per town (dawnhearth/millriver/grimhollow/farradin)
+- resolveTavern() drink overhaul: 8 outcomes — small find, rumour, speed buff (3 charges), lucky hand, card game, scuffle, hangover debuff, quiet night+XP; fixed hardcoded 'The Ashen Flagon'
+- Sleep now also clears potionBuff debuffs (hangover clears on rest)
+- buildBuffsHTML(): respects b.label and b.debuff for custom labels and negative pills
+- buildPlayerStats(): hangover potionBuff applies -1 Agility for 3 combats
+- Stat tooltips: Agility now says "crit + damage with bows and daggers" (was "attack speed + crit")
+- Mobile: portrait overlay forces landscape rotation prompt (640px breakpoint)
+- AUDIO: 6 new building sounds — playShopBell, playChant, playTavern, playVault, playPaper, playAcademy
+- AUDIO: openModal() routes building-specific SFX instead of always playDoor()
+- AUDIO: startTownAmbience(town) — per-town profiles (drone freq/wind/crackle varies by town)
+- AUDIO: Grimhollow gets distant howl loop (_startHowl), Millriver gets river-like wind, Farradin gets higher drone
+- Pack 2 slot: now visible in loadout and shop equip panels
+- Potions only activate on combat missions (bounty/quest/adventure), not jobs
+- applyMissionConditions(): cold (-5 HP if no body armour), dark (bow damage/crit halved), cramped (2H damage -25%), climbing (rope +5 HP / no rope -3-8 dmg)
+- conditions added to 15+ missions across all 4 towns (dark, cold, cramped, climbing)
+- renderCombat(): displays condition notes as italic combat log events (penalty=red, bonus=green)
+- Day/night cycle indicator in HUD header (🌅/☀️/🌇/🌙 based on real time)
 
 ## NEW FEATURES ADDED (2026-03-12)
 
@@ -59,9 +83,13 @@ Loadout may show raw armour not computed reduction %. Tied to stats display, not
 - Plague Doctor 4-bounties check: after each Grimhollow bounty, check if all 4 done → trigger NPC encounter
 
 ### Polish
-- Rumours (Bug 17): drink outcome currently just XP. Add small outcome table: item find, class hint, chronicle entry, small gold find, hangover debuff
+- ~~Rumours (Bug 17)~~ DONE: 8-outcome tavern drink table with rumour hints, buffs, debuffs
 - Heirlooms auto-vault on death: biscuit and sigil_ring should survive death via saveVaultHeirlooms()
 - Ending screen: cursed_crown equip should show confirm dialog before triggering showEnding()
+
+### Design feature ideas (logged, not yet implemented)
+- Weather system: random weather per town (rain, fog, clear, storm) affecting town screen visuals and adding condition modifiers to missions
+- Character portrait/silhouette: class-based ASCII/emoji silhouette on loadout screen that changes with equipped gear
 
 ### Mechanics not yet implemented
 - crit_plus_20 (pale_bow): already in buildPlayerStats ✓
