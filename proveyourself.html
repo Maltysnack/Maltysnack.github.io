@@ -136,6 +136,73 @@
       transform: translateY(0);
     }
 
+    /* ── START SCREEN TOGGLES ───────────── */
+    .start-toggles {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 24px;
+      margin-bottom: 28px;
+      flex-wrap: wrap;
+    }
+
+    .toggle-label {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.84rem;
+      color: #7a7876;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle-label span {
+      font-size: 0.82rem;
+    }
+
+    .toggle-switch {
+      position: relative;
+      width: 36px;
+      height: 20px;
+      flex-shrink: 0;
+    }
+
+    .toggle-switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .toggle-slider {
+      position: absolute;
+      inset: 0;
+      background: #2e2c31;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .toggle-slider::before {
+      content: "";
+      position: absolute;
+      width: 14px;
+      height: 14px;
+      left: 3px;
+      top: 3px;
+      background: #5e5c5a;
+      border-radius: 50%;
+      transition: transform 0.2s, background 0.2s;
+    }
+
+    .toggle-switch input:checked + .toggle-slider {
+      background: #3a5a3a;
+    }
+
+    .toggle-switch input:checked + .toggle-slider::before {
+      transform: translateX(16px);
+      background: #6dbe84;
+    }
+
     /* ── CATEGORY BANNER ────────────────── */
     .category-banner {
       padding: 48px 40px;
@@ -168,38 +235,48 @@
       font-weight: 600;
       color: #f0ede8;
       line-height: 1.1;
+      margin-bottom: 32px;
+    }
+
+    /* R2-Bad-2: Begin button — larger, centered, pulse animation */
+    @keyframes pulse {
+      0%   { box-shadow: 0 0 0 0 rgba(200,185,110,0.45); }
+      70%  { box-shadow: 0 0 0 10px rgba(200,185,110,0); }
+      100% { box-shadow: 0 0 0 0 rgba(200,185,110,0); }
     }
 
     .banner-continue-btn {
-      margin-top: 32px;
       font-family: var(--font-display);
-      font-size: 0.82rem;
+      font-size: 1rem;
       font-weight: 600;
       letter-spacing: 0.04em;
-      color: #c8b96e;
-      background: none;
-      border: 1px solid #c8b96e;
-      padding: 10px 24px;
-      border-radius: 3px;
+      color: #18171a;
+      background: #c8b96e;
+      border: none;
+      padding: 14px 32px;
+      border-radius: 4px;
       cursor: pointer;
-      transition: background 0.15s, color 0.15s;
+      transition: background 0.15s, transform 0.1s;
+      animation: pulse 2s infinite;
     }
 
     .banner-continue-btn:hover {
-      background: #c8b96e;
-      color: #18171a;
+      background: #d4c67c;
+      transform: translateY(-1px);
+      animation: none;
+      box-shadow: none;
     }
 
     /* ── PROGRESS BAR ───────────────────── */
     .quiz-progress-bar-wrap {
-      height: 2px;
+      height: 3px;
       background: #2e2c31;
     }
 
     .quiz-progress-bar {
       height: 100%;
       background: #c8b96e;
-      transition: width 0.4s ease;
+      transition: width 0.4s ease, background-color 0.4s ease;
       width: 0%;
     }
 
@@ -210,6 +287,14 @@
       justify-content: space-between;
       padding: 20px 28px 16px;
       border-bottom: 1px solid #2e2c31;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .question-header-left {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
     }
 
     .question-category {
@@ -237,6 +322,69 @@
       font-size: 0.78rem;
       font-weight: 600;
       color: #c8b96e;
+    }
+
+    /* R1-Bad-3: Progress dots */
+    .question-dots {
+      display: flex;
+      gap: 5px;
+      align-items: center;
+    }
+
+    .q-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      border: 1px solid #5e5c5a;
+      background: transparent;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .q-dot.done {
+      background: #5e5c5a;
+      border-color: #5e5c5a;
+    }
+
+    .q-dot.current {
+      background: #c8b96e;
+      border-color: #c8b96e;
+    }
+
+    /* Easy Mode badge */
+    .easy-mode-badge {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: #6dbe84;
+      border: 1px solid #3a5a3a;
+      border-radius: 2px;
+      padding: 1px 6px;
+      display: none;
+    }
+
+    .easy-mode-badge.visible {
+      display: inline-block;
+    }
+
+    /* Timed mode timer bar */
+    .timer-bar-wrap {
+      height: 4px;
+      background: #2e2c31;
+      margin: 0 28px;
+      border-radius: 2px;
+      overflow: hidden;
+      display: none;
+    }
+
+    .timer-bar-wrap.visible {
+      display: block;
+    }
+
+    .timer-bar {
+      height: 100%;
+      width: 100%;
+      background: #6dbe84;
+      transition: background 0.5s;
     }
 
     /* ── QUESTION BODY ──────────────────── */
@@ -297,11 +445,34 @@
       color: #6dbe84;
     }
 
+    /* R2-Good-2: pulse scale on correct answer reveal */
+    @keyframes revealPulse {
+      0%   { transform: scale(1); }
+      40%  { transform: scale(1.025); }
+      100% { transform: scale(1); }
+    }
+
+    .option-btn.correct.pulse-reveal {
+      animation: revealPulse 0.4s ease;
+    }
+
     .option-btn:disabled {
       cursor: default;
     }
 
     /* ── FEEDBACK ───────────────────────── */
+    /* R2-Good-2: slide-in animation */
+    @keyframes slideInLeft {
+      from {
+        opacity: 0;
+        transform: translateX(-18px);
+      }
+      to {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
     .feedback {
       margin: 20px 0 4px;
       font-size: 0.87rem;
@@ -312,11 +483,20 @@
       border-left: 2px solid #2e2c31;
       padding-left: 14px;
       opacity: 0;
-      transition: opacity 0.3s ease;
     }
 
     .feedback.visible {
       opacity: 1;
+      animation: slideInLeft 0.3s ease forwards;
+    }
+
+    .feedback-explanation {
+      display: block;
+      margin-top: 8px;
+      font-size: 0.8rem;
+      color: #5e5c5a;
+      font-style: italic;
+      line-height: 1.6;
     }
 
     /* ── QUIZ FOOTER ────────────────────── */
@@ -361,6 +541,69 @@
       display: block;
     }
 
+    /* R2-Bad-1: Perfect score confetti */
+    .perfect-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 9999;
+      overflow: hidden;
+    }
+
+    .perfect-overlay.visible {
+      display: block;
+    }
+
+    @keyframes confettiFall {
+      0%   { transform: translateY(-20px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(720deg); opacity: 0.3; }
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 8px;
+      height: 10px;
+      border-radius: 2px;
+      animation: confettiFall linear infinite;
+    }
+
+    .perfect-banner {
+      display: none;
+      background: linear-gradient(135deg, #2a2200, #1a1600);
+      border: 1px solid #c8b96e;
+      border-radius: 6px;
+      padding: 18px 28px;
+      margin-bottom: 28px;
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #c8b96e;
+      letter-spacing: 0.04em;
+    }
+
+    .perfect-banner.visible {
+      display: block;
+    }
+
+    /* R2-Bad-1: Consolation for 0-3 */
+    .consolation-banner {
+      display: none;
+      background: #1e1c20;
+      border: 1px solid #3a3038;
+      border-radius: 6px;
+      padding: 14px 20px;
+      margin-bottom: 20px;
+      font-size: 0.9rem;
+      color: #7a7876;
+      font-style: italic;
+    }
+
+    .consolation-banner.visible {
+      display: block;
+    }
+
     .results-score {
       font-family: var(--font-display);
       font-size: 4.5rem;
@@ -394,7 +637,7 @@
 
     /* ── CATEGORY BREAKDOWN ─────────────── */
     .breakdown {
-      margin: 0 auto 36px;
+      margin: 0 auto 20px;
       max-width: 380px;
       text-align: left;
       border: 1px solid #2e2c31;
@@ -422,6 +665,23 @@
 
     .breakdown-row:last-child {
       border-bottom: none;
+    }
+
+    /* R1-Bad-2: color-coded row tints */
+    .breakdown-row.tier-perfect {
+      background: rgba(109, 190, 132, 0.08);
+    }
+
+    .breakdown-row.tier-good {
+      background: rgba(200, 185, 110, 0.08);
+    }
+
+    .breakdown-row.tier-mid {
+      background: rgba(200, 130, 60, 0.08);
+    }
+
+    .breakdown-row.tier-low {
+      background: rgba(192, 96, 96, 0.08);
     }
 
     .breakdown-cat {
@@ -456,6 +716,68 @@
       margin-left: 8px;
     }
 
+    /* R2-Good-1: Perfect round callouts */
+    .perfect-rounds {
+      margin: 0 auto 20px;
+      max-width: 380px;
+    }
+
+    .perfect-round-callout {
+      background: linear-gradient(135deg, #1e1a00, #18171a);
+      border: 1px solid #a8922e;
+      border-radius: 4px;
+      padding: 10px 16px;
+      font-size: 0.88rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: #c8b96e;
+      margin-bottom: 8px;
+      text-align: left;
+    }
+
+    .flawless-callout {
+      background: linear-gradient(135deg, #1e1500, #18171a);
+      border: 1px solid #c8b96e;
+      border-radius: 4px;
+      padding: 12px 20px;
+      font-size: 1rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: #c8b96e;
+      letter-spacing: 0.04em;
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    /* ── RESULTS ACTIONS ROW ─────────────── */
+    .results-actions {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      margin-bottom: 32px;
+      flex-wrap: wrap;
+    }
+
+    /* R1-Good-3: Share button */
+    .share-btn {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: #18171a;
+      background: #c8b96e;
+      border: none;
+      padding: 10px 22px;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: background 0.15s;
+    }
+
+    .share-btn:hover {
+      background: #d4c67c;
+    }
+
     /* ── RETRY BUTTON ───────────────────── */
     .retry-btn {
       font-family: var(--font-display);
@@ -474,6 +796,170 @@
     .retry-btn:hover {
       background: #c8b96e;
       color: #18171a;
+    }
+
+    /* ── COLLAPSIBLE SECTIONS ────────────── */
+    .collapsible-section {
+      margin: 0 auto 20px;
+      max-width: 380px;
+      text-align: left;
+      border: 1px solid #2e2c31;
+      border-radius: 4px;
+      overflow: hidden;
+    }
+
+    .collapsible-toggle {
+      width: 100%;
+      text-align: left;
+      padding: 12px 16px;
+      background: none;
+      border: none;
+      border-bottom: 1px solid transparent;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #5e5c5a;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      transition: color 0.15s, border-color 0.15s;
+    }
+
+    .collapsible-toggle:hover {
+      color: #c4c1be;
+    }
+
+    .collapsible-toggle.open {
+      border-bottom-color: #2e2c31;
+    }
+
+    .collapsible-toggle .toggle-arrow {
+      transition: transform 0.2s;
+      font-style: normal;
+    }
+
+    .collapsible-toggle.open .toggle-arrow {
+      transform: rotate(90deg);
+    }
+
+    .collapsible-body {
+      display: none;
+    }
+
+    .collapsible-body.open {
+      display: block;
+    }
+
+    /* R1-Good-1: Mistakes list */
+    .mistake-item {
+      padding: 14px 16px;
+      border-bottom: 1px solid #2e2c31;
+      font-size: 0.84rem;
+      line-height: 1.6;
+    }
+
+    .mistake-item:last-child {
+      border-bottom: none;
+    }
+
+    .mistake-q {
+      color: #c4c1be;
+      margin-bottom: 6px;
+      font-weight: 500;
+    }
+
+    .mistake-wrong {
+      color: #c06060;
+      font-size: 0.82rem;
+    }
+
+    .mistake-wrong::before {
+      content: "✗ Your answer: ";
+      color: #7a7876;
+    }
+
+    .mistake-correct {
+      color: #6dbe84;
+      font-size: 0.82rem;
+    }
+
+    .mistake-correct::before {
+      content: "✓ Correct: ";
+      color: #7a7876;
+    }
+
+    /* R1-Bad-1: Previous results */
+    .history-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid #2e2c31;
+      font-size: 0.84rem;
+      color: #7a7876;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-week {
+      color: #c4c1be;
+    }
+
+    .history-score {
+      font-family: var(--font-display);
+      font-weight: 600;
+      color: #c8b96e;
+    }
+
+    /* R2-Future-3: Mini bar chart */
+    .barchart-section {
+      margin: 0 auto 20px;
+      max-width: 380px;
+    }
+
+    .barchart-heading {
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: #5e5c5a;
+      margin-bottom: 12px;
+      text-align: left;
+    }
+
+    .barchart-bars {
+      display: flex;
+      align-items: flex-end;
+      gap: 6px;
+      height: 60px;
+    }
+
+    .barchart-col {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .barchart-bar {
+      width: 100%;
+      background: #c8b96e;
+      border-radius: 2px 2px 0 0;
+      min-height: 2px;
+      transition: height 0.4s ease;
+    }
+
+    .barchart-label {
+      font-size: 0.58rem;
+      color: #5e5c5a;
+      text-align: center;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      max-width: 100%;
     }
 
     /* ── SCREEN VISIBILITY ──────────────── */
@@ -524,6 +1010,9 @@
 </head>
 <body>
 
+  <!-- R2-Bad-1: Confetti overlay for perfect score -->
+  <div class="perfect-overlay" id="perfect-overlay"></div>
+
   <aside class="sidebar"></aside>
 
   <main class="main">
@@ -570,6 +1059,25 @@
                 <span class="start-meta-label">Theme</span>
               </div>
             </div>
+
+            <!-- R2-Good-3 + R2-Future-2: Mode toggles -->
+            <div class="start-toggles">
+              <label class="toggle-label">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle-easy" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span>Easy Mode <small style="color:#5e5c5a">(3 options)</small></span>
+              </label>
+              <label class="toggle-label">
+                <label class="toggle-switch">
+                  <input type="checkbox" id="toggle-timed" />
+                  <span class="toggle-slider"></span>
+                </label>
+                <span>⏱ Timed Mode <small style="color:#5e5c5a">(20s)</small></span>
+              </label>
+            </div>
+
             <button class="start-btn" onclick="startQuiz()">Start Quiz</button>
           </div>
 
@@ -578,7 +1086,7 @@
             <div class="banner-icon" id="banner-icon">🏛️</div>
             <div class="banner-round" id="banner-round">Round 1</div>
             <div class="banner-name" id="banner-name">Politics</div>
-            <button class="banner-continue-btn" onclick="hideBanner()">Begin →</button>
+            <button class="banner-continue-btn" id="banner-continue-btn" onclick="hideBanner()">Begin 4 Questions →</button>
           </div>
 
           <!-- Progress bar -->
@@ -589,12 +1097,23 @@
           <!-- Question screen -->
           <div id="quiz-question-screen" class="quiz-question-screen">
             <div class="question-header">
-              <div class="question-category">
-                <span class="question-category-icon" id="q-cat-icon"></span>
-                <span class="question-category-name" id="q-cat-name"></span>
+              <div class="question-header-left">
+                <div class="question-category">
+                  <span class="question-category-icon" id="q-cat-icon"></span>
+                  <span class="question-category-name" id="q-cat-name"></span>
+                  <span class="easy-mode-badge" id="easy-badge">Easy Mode</span>
+                </div>
+                <div class="question-count" id="q-count"></div>
+                <!-- R1-Bad-3: progress dots -->
+                <div class="question-dots" id="q-dots"></div>
               </div>
-              <div class="question-count" id="q-count"></div>
             </div>
+
+            <!-- R2-Future-2: Timer bar -->
+            <div class="timer-bar-wrap" id="timer-bar-wrap">
+              <div class="timer-bar" id="timer-bar"></div>
+            </div>
+
             <div class="quiz-body">
               <div class="question-text" id="q-text"></div>
               <div class="options" id="q-options"></div>
@@ -607,13 +1126,56 @@
 
           <!-- Results screen -->
           <div id="results-screen" class="results-screen">
+
+            <!-- R2-Bad-1: Perfect score banner -->
+            <div class="perfect-banner" id="perfect-banner"></div>
+
+            <!-- R2-Bad-1: Consolation banner (0-3) -->
+            <div class="consolation-banner" id="consolation-banner"></div>
+
             <div class="results-score" id="r-score"></div>
             <div class="results-denom">out of 20</div>
             <div class="results-comment" id="r-comment"></div>
+
+            <!-- R2-Good-1: Perfect round callouts -->
+            <div class="perfect-rounds" id="perfect-rounds"></div>
+
             <div class="breakdown" id="r-breakdown">
               <div class="breakdown-heading">Round by round</div>
             </div>
-            <button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+
+            <!-- R1-Good-3: Share button + R retry -->
+            <div class="results-actions">
+              <button class="share-btn" id="share-btn" onclick="shareResult()">📋 Share Result</button>
+              <button class="retry-btn" onclick="resetQuiz()">Try Again</button>
+            </div>
+
+            <!-- R1-Good-1: Review mistakes -->
+            <div class="collapsible-section" id="mistakes-section" style="display:none">
+              <button class="collapsible-toggle" id="mistakes-toggle" onclick="toggleCollapsible('mistakes')">
+                <span id="mistakes-toggle-label">▸ Show mistakes (0)</span>
+                <span class="toggle-arrow">›</span>
+              </button>
+              <div class="collapsible-body" id="mistakes-body"></div>
+            </div>
+
+            <!-- R1-Bad-1: Previous results -->
+            <div class="collapsible-section" id="history-section" style="display:none">
+              <button class="collapsible-toggle" id="history-toggle" onclick="toggleCollapsible('history')">
+                <span>Previous Results</span>
+                <span class="toggle-arrow">›</span>
+              </button>
+              <div class="collapsible-body" id="history-body"></div>
+            </div>
+
+            <!-- R2-Future-3: Past quizzes bar chart -->
+            <div id="barchart-section" style="display:none">
+              <div class="barchart-section">
+                <div class="barchart-heading">Past Quizzes</div>
+                <div class="barchart-bars" id="barchart-bars"></div>
+              </div>
+            </div>
+
           </div>
 
         </div><!-- .quiz-card -->
@@ -630,32 +1192,60 @@
 
     // ── STATE ───────────────────────────────
     let flatQuestions = [];   // all 20 questions in order
-    let catBoundaries = [];   // [{catIdx, startQ, endQ, name, icon}]
+    let catBoundaries = [];   // [{catIdx, startQ, endQ, name, icon, color}]
     let currentQ = 0;
     let score = 0;
     let answered = false;
     let catScores = [];       // [{correct, total}] per category
+    let wrongAnswers = [];    // [{qText, playerOpt, correctOpt}]
+
+    // Mode flags
+    let easyMode = false;
+    let timedMode = false;
+
+    // Timed mode internals
+    let timerInterval = null;
+    let timerStart = null;
+    const TIMER_DURATION = 20000; // 20 seconds
+
+    // Category accent colours for the progress bar (R2-Future-1)
+    const CAT_COLORS = ["#7a7ade", "#6db87a", "#d4a047", "#6bbccc", "#c8b96e"];
+
+    // ── WEEK NUMBER CALCULATION (R1-Good-2) ─
+    function calcWeekNumber(weekDate) {
+      var start = new Date(weekDate + "T00:00:00Z");
+      var now = new Date();
+      var daysDiff = Math.floor((now - start) / 86400000);
+      // Week 1 = week of the weekDate itself
+      return Math.max(1, Math.ceil((daysDiff + 1) / 7));
+    }
 
     // ── INIT ────────────────────────────────
     (function init() {
-      const data = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA : null;
+      var data = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA : null;
       if (!data) return;
 
-      document.getElementById("feed-heading").textContent = "Current — " + data.week;
-      document.getElementById("meta-week").textContent = data.week;
-      document.getElementById("meta-theme").textContent = data.theme;
+      // R1-Good-2: derive week number from weekDate
+      var weekNum = data.weekDate ? calcWeekNumber(data.weekDate) : (data.week || "?");
+      var weekLabel = "Week " + weekNum;
+
+      document.getElementById("feed-heading").textContent = "Current — " + weekLabel;
+      document.getElementById("meta-week").textContent = weekLabel;
+      document.getElementById("meta-theme").textContent = data.theme || "";
 
       // Build flat question list and category boundaries
       flatQuestions = [];
       catBoundaries = [];
-      let qIdx = 0;
+      catScores = [];
+      var qIdx = 0;
       data.categories.forEach(function(cat, ci) {
         catBoundaries.push({
           catIdx: ci,
           startQ: qIdx,
           endQ: qIdx + cat.questions.length - 1,
           name: cat.name,
-          icon: cat.icon
+          icon: cat.icon,
+          color: CAT_COLORS[ci % CAT_COLORS.length]
         });
         cat.questions.forEach(function(q) {
           flatQuestions.push({
@@ -663,6 +1253,7 @@
             opts: q.opts,
             ans: q.ans,
             feedback: q.feedback,
+            explanation: q.explanation || "",
             catIdx: ci,
             catName: cat.name,
             catIcon: cat.icon
@@ -678,6 +1269,10 @@
       currentQ = 0;
       score = 0;
       answered = false;
+      wrongAnswers = [];
+      easyMode = document.getElementById("toggle-easy").checked;
+      timedMode = document.getElementById("toggle-timed").checked;
+
       catScores = (typeof QUIZ_DATA !== "undefined")
         ? QUIZ_DATA.categories.map(function(c) { return { correct: 0, total: c.questions.length }; })
         : [];
@@ -692,22 +1287,30 @@
     }
 
     function resetQuiz() {
+      clearTimedMode();
       hide("results-screen");
       hide("quiz-question-screen");
       hide("progress-bar-wrap");
       hide("category-banner");
       show("start-screen");
+      // Remove confetti
+      var overlay = document.getElementById("perfect-overlay");
+      overlay.classList.remove("visible");
+      overlay.innerHTML = "";
     }
 
     // ── CATEGORY BANNER ─────────────────────
     var bannerCallback = null;
 
     function showCategoryBanner(catIdx, callback) {
-      const cat = catBoundaries[catIdx];
+      var cat = catBoundaries[catIdx];
       bannerCallback = callback;
       document.getElementById("banner-icon").textContent = cat.icon;
       document.getElementById("banner-round").textContent = "Round " + (catIdx + 1) + " of " + catBoundaries.length;
       document.getElementById("banner-name").textContent = cat.name;
+      // R2-Bad-2: show question count
+      var qCount = cat.endQ - cat.startQ + 1;
+      document.getElementById("banner-continue-btn").textContent = "Begin " + qCount + " Questions \u2192";
       hide("quiz-question-screen");
       show("category-banner");
     }
@@ -724,22 +1327,43 @@
     // ── SHOW QUESTION ───────────────────────
     function showQuestion() {
       answered = false;
-      const q = flatQuestions[currentQ];
-      const total = flatQuestions.length;
+      var q = flatQuestions[currentQ];
+      var total = flatQuestions.length;
+      var cat = catBoundaries[q.catIdx];
 
-      // Progress bar
+      // R2-Future-1: progress bar with category color + smooth transition
       var pct = (currentQ / total) * 100;
-      document.getElementById("progress-bar").style.width = pct + "%";
+      var bar = document.getElementById("progress-bar");
+      bar.style.width = pct + "%";
+      bar.style.backgroundColor = cat.color;
 
       // Category header
       document.getElementById("q-cat-icon").textContent = q.catIcon;
       document.getElementById("q-cat-name").textContent = q.catName;
 
+      // Easy mode badge
+      var badge = document.getElementById("easy-badge");
+      if (easyMode) {
+        badge.classList.add("visible");
+      } else {
+        badge.classList.remove("visible");
+      }
+
       // Question count within category
-      var cat = catBoundaries[q.catIdx];
       var qInCat = (currentQ - cat.startQ) + 1;
       var totalInCat = cat.endQ - cat.startQ + 1;
       document.getElementById("q-count").textContent = "Q" + qInCat + " of " + totalInCat;
+
+      // R1-Bad-3: progress dots
+      var dotsEl = document.getElementById("q-dots");
+      dotsEl.innerHTML = "";
+      for (var d = 0; d < totalInCat; d++) {
+        var dot = document.createElement("span");
+        dot.className = "q-dot";
+        if (d < qInCat - 1) dot.classList.add("done");
+        else if (d === qInCat - 1) dot.classList.add("current");
+        dotsEl.appendChild(dot);
+      }
 
       // Question text
       document.getElementById("q-text").textContent = q.q;
@@ -753,44 +1377,142 @@
       document.getElementById("next-btn").classList.remove("visible");
       document.getElementById("next-btn").textContent = "Next \u2192";
 
-      // Build options
+      // Build options — R2-Good-3: easy mode trims to 3 options
       var opts = document.getElementById("q-options");
       opts.innerHTML = "";
-      q.opts.forEach(function(opt, i) {
+      var displayOpts = q.opts.slice();
+      var displayAns = q.ans;
+
+      if (easyMode && displayOpts.length > 3) {
+        // Remove one non-correct option (last one that isn't the answer)
+        var removeIdx = -1;
+        for (var ri = displayOpts.length - 1; ri >= 0; ri--) {
+          if (ri !== q.ans) { removeIdx = ri; break; }
+        }
+        if (removeIdx !== -1) {
+          displayOpts.splice(removeIdx, 1);
+          // Adjust answer index if needed
+          if (q.ans > removeIdx) displayAns = q.ans - 1;
+        }
+      }
+
+      displayOpts.forEach(function(opt, i) {
         var btn = document.createElement("button");
         btn.className = "option-btn";
         btn.textContent = opt;
-        btn.onclick = function() { answer(i); };
+        btn.dataset.displayIdx = i;
+        // Map back to original answer index
+        btn.onclick = (function(btn, di) {
+          return function() { answer(di, displayAns, displayOpts, q); };
+        })(btn, i);
         opts.appendChild(btn);
       });
 
+      // Store correct display index on options container for timed auto-submit
+      opts.dataset.displayAns = displayAns;
+      opts.dataset.currentOpts = JSON.stringify(displayOpts);
+
       show("quiz-question-screen");
+
+      // R2-Future-2: Timed mode
+      if (timedMode) {
+        startTimer(displayAns, displayOpts, q);
+      } else {
+        var wrap = document.getElementById("timer-bar-wrap");
+        wrap.classList.remove("visible");
+      }
+    }
+
+    // ── TIMED MODE ──────────────────────────
+    function startTimer(displayAns, displayOpts, q) {
+      clearTimedMode();
+      var wrap = document.getElementById("timer-bar-wrap");
+      var bar = document.getElementById("timer-bar");
+      wrap.classList.add("visible");
+      bar.style.width = "100%";
+      bar.style.background = "#6dbe84";
+      bar.style.transition = "none";
+
+      // Force reflow
+      bar.offsetWidth;
+      bar.style.transition = "width " + (TIMER_DURATION / 1000) + "s linear";
+      bar.style.width = "0%";
+
+      timerStart = Date.now();
+
+      timerInterval = setInterval(function() {
+        var elapsed = Date.now() - timerStart;
+        var remaining = TIMER_DURATION - elapsed;
+        var pct = (remaining / TIMER_DURATION) * 100;
+
+        if (remaining <= 5000) {
+          bar.style.background = "#c06060";
+        } else if (remaining <= 10000) {
+          bar.style.background = "#c8a050";
+        }
+
+        if (elapsed >= TIMER_DURATION) {
+          clearTimedMode();
+          // Auto-submit wrong (pass -1 as selected index so no option matches answer)
+          answer(-1, displayAns, displayOpts, q);
+        }
+      }, 200);
+    }
+
+    function clearTimedMode() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
     }
 
     // ── ANSWER ──────────────────────────────
-    function answer(i) {
+    function answer(selectedDisplayIdx, displayAns, displayOpts, q) {
       if (answered) return;
       answered = true;
+      clearTimedMode();
 
-      var q = flatQuestions[currentQ];
       var btns = document.querySelectorAll(".option-btn");
+      var isCorrect = (selectedDisplayIdx === displayAns);
 
       btns.forEach(function(b, idx) {
         b.disabled = true;
-        if (idx === q.ans) {
+        if (idx === displayAns) {
           b.classList.add("correct");
-        } else if (idx === i && i !== q.ans) {
+          // R2-Good-2: pulse animation on correct answer
+          setTimeout(function() { b.classList.add("pulse-reveal"); }, 20);
+        } else if (idx === selectedDisplayIdx && !isCorrect) {
           b.classList.add("wrong");
         }
       });
 
-      if (i === q.ans) {
+      if (isCorrect) {
         score++;
         catScores[q.catIdx].correct++;
+      } else {
+        // R1-Good-1: track wrong answers
+        var playerOpt = (selectedDisplayIdx >= 0 && displayOpts[selectedDisplayIdx])
+          ? displayOpts[selectedDisplayIdx]
+          : "(Time ran out)";
+        wrongAnswers.push({
+          qText: q.q,
+          playerOpt: playerOpt,
+          correctOpt: displayOpts[displayAns]
+        });
       }
 
+      // R2-Good-2: feedback slides in
       var fb = document.getElementById("q-feedback");
-      fb.textContent = q.feedback;
+      // Show feedback text + explanation
+      fb.innerHTML = "";
+      var feedbackText = document.createTextNode(q.feedback);
+      fb.appendChild(feedbackText);
+      if (q.explanation) {
+        var expEl = document.createElement("span");
+        expEl.className = "feedback-explanation";
+        expEl.textContent = q.explanation;
+        fb.appendChild(expEl);
+      }
       setTimeout(function() { fb.classList.add("visible"); }, 40);
 
       var isLast = currentQ === flatQuestions.length - 1;
@@ -813,7 +1535,6 @@
       var nowQ = flatQuestions[currentQ];
 
       if (nowQ.catIdx !== prevQ.catIdx) {
-        // Show category banner for new round
         hide("quiz-question-screen");
         showCategoryBanner(nowQ.catIdx, function() {
           showQuestion();
@@ -826,7 +1547,12 @@
     // ── RESULTS ─────────────────────────────
     function showResults() {
       hide("quiz-question-screen");
-      document.getElementById("progress-bar").style.width = "100%";
+      var bar = document.getElementById("progress-bar");
+      bar.style.width = "100%";
+      bar.style.backgroundColor = "#c8b96e";
+
+      // R1-Bad-1: save to localStorage
+      saveHistory();
 
       var rs = document.getElementById("results-screen");
       rs.classList.add("visible");
@@ -841,6 +1567,21 @@
       else if (score >= 9)  el.classList.add("score-mid");
       else                  el.classList.add("score-low");
 
+      // R2-Bad-1: Perfect score (20/20) celebration
+      var perfectBanner = document.getElementById("perfect-banner");
+      var consolationBanner = document.getElementById("consolation-banner");
+      perfectBanner.classList.remove("visible");
+      consolationBanner.classList.remove("visible");
+
+      if (score === 20) {
+        perfectBanner.textContent = "👑 PERFECT SCORE";
+        perfectBanner.classList.add("visible");
+        triggerConfetti();
+      } else if (score <= 3) {
+        consolationBanner.textContent = "Have you tried watching the news? 📰 Don't worry — there's always next week.";
+        consolationBanner.classList.add("visible");
+      }
+
       // Witty comment
       var comments = [
         "0\u20134: Honestly impressive in its own way. You answered 20 questions and got most of them wrong. That takes commitment.",
@@ -853,9 +1594,50 @@
       var band = score <= 4 ? 0 : score <= 8 ? 1 : score <= 12 ? 2 : score <= 16 ? 3 : 4;
       document.getElementById("r-comment").textContent = comments[band];
 
+      // R2-Good-1: perfect round callouts
+      renderPerfectRounds();
+
       // Category breakdown
+      renderBreakdown();
+
+      // R1-Good-1: Mistakes section
+      renderMistakes();
+
+      // R1-Bad-1: History section
+      renderHistory();
+
+      // R2-Future-3: Bar chart
+      renderBarChart();
+    }
+
+    // ── PERFECT ROUND CALLOUTS (R2-Good-1) ──
+    function renderPerfectRounds() {
+      var container = document.getElementById("perfect-rounds");
+      container.innerHTML = "";
+      var cats = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA.categories : [];
+      var perfectCats = [];
+      catScores.forEach(function(cs, ci) {
+        if (cs.correct === cs.total) perfectCats.push(cats[ci]);
+      });
+
+      if (perfectCats.length === cats.length && cats.length > 0) {
+        var flawless = document.createElement("div");
+        flawless.className = "flawless-callout";
+        flawless.textContent = "👑 Flawless Victory — All Rounds Perfect!";
+        container.appendChild(flawless);
+      } else {
+        perfectCats.forEach(function(cat) {
+          var callout = document.createElement("div");
+          callout.className = "perfect-round-callout";
+          callout.textContent = "⚔️ Perfect Round — " + cat.name + "!";
+          container.appendChild(callout);
+        });
+      }
+    }
+
+    // ── BREAKDOWN TABLE ──────────────────────
+    function renderBreakdown() {
       var breakdown = document.getElementById("r-breakdown");
-      // Clear old rows (keep heading)
       while (breakdown.children.length > 1) {
         breakdown.removeChild(breakdown.lastChild);
       }
@@ -866,9 +1648,22 @@
         var row = document.createElement("div");
         row.className = "breakdown-row";
 
+        // R1-Bad-2: color tint by score
+        if (cs.correct === cs.total) {
+          row.classList.add("tier-perfect");
+        } else if (cs.correct === cs.total - 1) {
+          row.classList.add("tier-good");
+        } else if (cs.correct === cs.total - 2) {
+          row.classList.add("tier-mid");
+        } else {
+          row.classList.add("tier-low");
+        }
+
         var catDiv = document.createElement("div");
         catDiv.className = "breakdown-cat";
-        catDiv.innerHTML = '<span class="breakdown-cat-icon">' + cat.icon + '</span>' + cat.name;
+        // R1-Bad-2: sparkle for 4/4
+        var sparkle = (cs.correct === cs.total) ? " ✨" : "";
+        catDiv.innerHTML = "<span class=\"breakdown-cat-icon\">" + cat.icon + "</span>" + cat.name + sparkle;
 
         var ticksDiv = document.createElement("div");
         ticksDiv.style.display = "flex";
@@ -895,6 +1690,255 @@
         row.appendChild(ticksDiv);
         breakdown.appendChild(row);
       });
+    }
+
+    // ── MISTAKES (R1-Good-1) ─────────────────
+    function renderMistakes() {
+      var section = document.getElementById("mistakes-section");
+      var body = document.getElementById("mistakes-body");
+      var toggleLabel = document.getElementById("mistakes-toggle-label");
+
+      body.innerHTML = "";
+
+      if (wrongAnswers.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "";
+      toggleLabel.textContent = "\u25b8 Show mistakes (" + wrongAnswers.length + ")";
+
+      wrongAnswers.forEach(function(wa) {
+        var item = document.createElement("div");
+        item.className = "mistake-item";
+
+        var qDiv = document.createElement("div");
+        qDiv.className = "mistake-q";
+        qDiv.textContent = wa.qText;
+
+        var wrongDiv = document.createElement("div");
+        wrongDiv.className = "mistake-wrong";
+        wrongDiv.textContent = wa.playerOpt;
+
+        var correctDiv = document.createElement("div");
+        correctDiv.className = "mistake-correct";
+        correctDiv.textContent = wa.correctOpt;
+
+        item.appendChild(qDiv);
+        item.appendChild(wrongDiv);
+        item.appendChild(correctDiv);
+        body.appendChild(item);
+      });
+    }
+
+    // ── HISTORY (R1-Bad-1) ───────────────────
+    var PY_HISTORY_KEY = "py_history";
+
+    function saveHistory() {
+      var data = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA : null;
+      var weekDate = (data && data.weekDate) ? data.weekDate : "unknown";
+
+      var entry = {
+        weekDate: weekDate,
+        score: score,
+        total: flatQuestions.length,
+        categories: catScores.map(function(cs, ci) {
+          var cats = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA.categories : [];
+          return {
+            name: cats[ci] ? cats[ci].name : "",
+            icon: cats[ci] ? cats[ci].icon : "",
+            correct: cs.correct,
+            total: cs.total
+          };
+        }),
+        timestamp: Date.now()
+      };
+
+      var history = loadHistoryRaw();
+      history.push(entry);
+      try {
+        localStorage.setItem(PY_HISTORY_KEY, JSON.stringify(history));
+      } catch(e) {}
+    }
+
+    function loadHistoryRaw() {
+      try {
+        var raw = localStorage.getItem(PY_HISTORY_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch(e) {}
+      return [];
+    }
+
+    function renderHistory() {
+      var history = loadHistoryRaw();
+      var section = document.getElementById("history-section");
+      var body = document.getElementById("history-body");
+      body.innerHTML = "";
+
+      // Exclude the most recent entry (current session just saved)
+      var past = history.slice(0, -1).slice(-5).reverse();
+
+      if (past.length === 0) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "";
+
+      past.forEach(function(entry) {
+        var item = document.createElement("div");
+        item.className = "history-item";
+
+        // Calculate week number from weekDate
+        var weekLabel = "Week ?";
+        if (entry.weekDate && entry.weekDate !== "unknown") {
+          var wn = calcWeekNumber(entry.weekDate);
+          weekLabel = "Week " + wn;
+        }
+
+        var weekSpan = document.createElement("span");
+        weekSpan.className = "history-week";
+        weekSpan.textContent = weekLabel;
+
+        var scoreSpan = document.createElement("span");
+        scoreSpan.className = "history-score";
+        scoreSpan.textContent = entry.score + "/" + entry.total;
+
+        item.appendChild(weekSpan);
+        item.appendChild(scoreSpan);
+        body.appendChild(item);
+      });
+    }
+
+    // ── BAR CHART (R2-Future-3) ──────────────
+    function renderBarChart() {
+      var history = loadHistoryRaw();
+      var section = document.getElementById("barchart-section");
+      var barsEl = document.getElementById("barchart-bars");
+      barsEl.innerHTML = "";
+
+      // Last 8 entries (including current)
+      var recent = history.slice(-8);
+
+      if (recent.length < 2) {
+        section.style.display = "none";
+        return;
+      }
+
+      section.style.display = "";
+
+      recent.forEach(function(entry) {
+        var pct = (entry.score / entry.total) * 100;
+
+        var col = document.createElement("div");
+        col.className = "barchart-col";
+
+        var bar = document.createElement("div");
+        bar.className = "barchart-bar";
+        bar.style.height = Math.max(2, Math.round(pct * 0.54)) + "px"; // max ~54px for 60px container minus label
+        bar.title = entry.score + "/" + entry.total;
+
+        var label = document.createElement("div");
+        label.className = "barchart-label";
+        var wl = "?";
+        if (entry.weekDate && entry.weekDate !== "unknown") {
+          wl = "W" + calcWeekNumber(entry.weekDate);
+        }
+        label.textContent = wl;
+
+        col.appendChild(bar);
+        col.appendChild(label);
+        barsEl.appendChild(col);
+      });
+    }
+
+    // ── SHARE (R1-Good-3) ────────────────────
+    function shareResult() {
+      var data = (typeof QUIZ_DATA !== "undefined") ? QUIZ_DATA : null;
+      var weekNum = (data && data.weekDate) ? calcWeekNumber(data.weekDate) : "?";
+      var lines = ["Prove Yourself \u2014 Week " + weekNum];
+      lines.push("Score: " + score + "/20 \uD83C\uDFAF");
+
+      var cats = data ? data.categories : [];
+      cats.forEach(function(cat, ci) {
+        var cs = catScores[ci];
+        lines.push(cat.icon + " " + cat.name + ": " + cs.correct + "/" + cs.total);
+      });
+
+      var text = lines.join("\n");
+
+      var btn = document.getElementById("share-btn");
+
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(function() {
+          btn.textContent = "Copied! \uD83C\uDF89";
+          setTimeout(function() { btn.textContent = "\uD83D\uDCCB Share Result"; }, 2000);
+        }).catch(function() {
+          fallbackCopy(text, btn);
+        });
+      } else {
+        fallbackCopy(text, btn);
+      }
+    }
+
+    function fallbackCopy(text, btn) {
+      var ta = document.createElement("textarea");
+      ta.value = text;
+      ta.style.position = "fixed";
+      ta.style.opacity = "0";
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+      try {
+        document.execCommand("copy");
+        btn.textContent = "Copied! \uD83C\uDF89";
+        setTimeout(function() { btn.textContent = "\uD83D\uDCCB Share Result"; }, 2000);
+      } catch(e) {
+        btn.textContent = "Copy failed";
+        setTimeout(function() { btn.textContent = "\uD83D\uDCCB Share Result"; }, 2000);
+      }
+      document.body.removeChild(ta);
+    }
+
+    // ── CONFETTI (R2-Bad-1) ──────────────────
+    function triggerConfetti() {
+      var overlay = document.getElementById("perfect-overlay");
+      overlay.innerHTML = "";
+      overlay.classList.add("visible");
+
+      var colors = ["#c8b96e", "#6dbe84", "#7a7ade", "#d4a047", "#c06060", "#6bbccc"];
+      for (var i = 0; i < 40; i++) {
+        var piece = document.createElement("div");
+        piece.className = "confetti-piece";
+        piece.style.left = Math.random() * 100 + "vw";
+        piece.style.background = colors[Math.floor(Math.random() * colors.length)];
+        piece.style.animationDuration = (2 + Math.random() * 3) + "s";
+        piece.style.animationDelay = (Math.random() * 2) + "s";
+        piece.style.width = (6 + Math.random() * 6) + "px";
+        piece.style.height = (8 + Math.random() * 8) + "px";
+        piece.style.opacity = 0.8 + Math.random() * 0.2;
+        overlay.appendChild(piece);
+      }
+
+      // Remove after 6 seconds
+      setTimeout(function() {
+        overlay.classList.remove("visible");
+        overlay.innerHTML = "";
+      }, 6000);
+    }
+
+    // ── COLLAPSIBLE TOGGLE ───────────────────
+    function toggleCollapsible(which) {
+      var toggle = document.getElementById(which + "-toggle");
+      var body = document.getElementById(which + "-body");
+      var isOpen = body.classList.contains("open");
+      if (isOpen) {
+        body.classList.remove("open");
+        toggle.classList.remove("open");
+      } else {
+        body.classList.add("open");
+        toggle.classList.add("open");
+      }
     }
 
     // ── HELPERS ─────────────────────────────

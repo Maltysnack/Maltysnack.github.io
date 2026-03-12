@@ -1108,6 +1108,377 @@
 
     .sq-ach-badge.sq-locked .sq-ach-name { color: var(--color-text-muted); }
 
+    /* ─── R1-Good-2: Section tints ─── */
+    .sq-section-sacred  { background: rgba(200,168,75,0.04);  border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
+    .sq-section-daily   { background: rgba(90,154,74,0.04);   border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
+    .sq-section-weekly  { background: rgba(106,74,170,0.04);  border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
+
+    /* ─── R1-Future-2: Featured Quest ─── */
+    .sq-featured-section {
+      border: 1px solid var(--color-gold-dim);
+      border-radius: var(--radius-md);
+      background: rgba(200,168,75,0.06);
+      padding: 8px 8px 4px;
+      margin-bottom: var(--space-md);
+    }
+    .sq-featured-head {
+      font-family: var(--font-heading);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* ─── R1-Bad-3 / R2-Bad-3: Hall section headers ─── */
+    .sq-hall-section-head {
+      font-family: var(--font-heading);
+      font-size: 0.58rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--color-gold-dim);
+      margin: var(--space-md) 0 var(--space-sm);
+      padding-bottom: var(--space-xs);
+      border-bottom: 1px solid var(--color-border);
+    }
+
+    /* ─── R1-Bad-3: Notification toggle placeholder ─── */
+    .sq-notif-row {
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 10px var(--space-md);
+      margin-bottom: var(--space-sm);
+      opacity: 0.55;
+    }
+    .sq-notif-label {
+      flex: 1;
+      font-family: var(--font-body);
+      font-size: 0.88rem;
+      color: var(--color-text-muted);
+    }
+    .sq-notif-label small {
+      display: block;
+      font-size: 0.72rem;
+      color: var(--color-text-faint);
+      font-style: italic;
+      margin-top: 2px;
+    }
+    .sq-notif-toggle {
+      width: 36px;
+      height: 20px;
+      background: var(--color-border);
+      border-radius: var(--radius-pill);
+      position: relative;
+      cursor: not-allowed;
+      flex-shrink: 0;
+    }
+    .sq-notif-toggle::after {
+      content: '';
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      width: 16px;
+      height: 16px;
+      background: var(--color-text-faint);
+      border-radius: 50%;
+    }
+
+    /* ─── R1-Bad-1: Backup/Restore ─── */
+    .sq-backup-row {
+      display: flex;
+      gap: var(--space-sm);
+      margin-bottom: var(--space-sm);
+    }
+    .sq-backup-row .sq-btn {
+      flex: 1;
+      font-size: 0.6rem;
+      padding: 8px 6px;
+      text-align: center;
+    }
+    .sq-backup-desc {
+      font-family: var(--font-body);
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--color-text-faint);
+      margin-bottom: var(--space-sm);
+    }
+
+    /* ─── R1-Future-1: Share button ─── */
+    .sq-share-btn {
+      width: 100%;
+      padding: 9px;
+      font-size: 0.65rem;
+      background: none;
+      color: var(--color-gold);
+      border: 1px solid var(--color-gold-dim);
+      border-radius: var(--radius-md);
+      font-family: var(--font-heading);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      cursor: pointer;
+      transition: background 0.15s;
+      margin-bottom: var(--space-sm);
+    }
+    .sq-share-btn:hover { background: rgba(200,168,75,0.08); }
+
+    /* ─── R2-Good-1: Level-up pre-flash ─── */
+    .sq-levelup-flash {
+      position: absolute;
+      top: 52px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-6px);
+      background: var(--color-xp-bg);
+      border: 1px solid var(--color-gold);
+      color: var(--color-gold-bright);
+      font-family: var(--font-heading);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      padding: 5px 18px;
+      border-radius: var(--radius-pill);
+      pointer-events: none;
+      opacity: 0;
+      z-index: 210;
+      white-space: nowrap;
+      transition: opacity 0.2s, transform 0.25s;
+    }
+    .sq-levelup-flash.sq-flash-show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ─── R2-Good-2: Recent emojis row ─── */
+    .sq-emoji-recent-row {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 3px;
+      padding: 4px 0 6px;
+      border-bottom: 1px solid var(--color-border);
+      margin-bottom: 6px;
+    }
+    .sq-emoji-recent-label {
+      font-family: var(--font-ui);
+      font-size: 0.55rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--color-text-faint);
+      margin-bottom: 4px;
+    }
+
+    /* ─── R2-Good-3: Section complete empty state ─── */
+    .sq-section-complete {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--color-text-muted);
+      padding: 10px 8px;
+      text-align: center;
+    }
+    .sq-section-complete::before {
+      content: '✓ ';
+      color: var(--color-success);
+    }
+
+    /* ─── R2-Bad-2: Add Quest parchment form ─── */
+    .sq-add-form-parchment {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-gold-dim);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      box-shadow: inset 0 1px 8px rgba(0,0,0,0.3);
+    }
+    .sq-add-form-deco {
+      font-family: var(--font-heading);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: var(--color-gold-dim);
+      text-align: center;
+      margin-bottom: var(--space-md);
+      padding-bottom: var(--space-sm);
+      border-bottom: 1px solid var(--color-border);
+    }
+    .sq-btn-full-gold {
+      width: 100%;
+      padding: 12px;
+      font-size: 0.72rem;
+      border-radius: var(--radius-md);
+      margin-top: var(--space-sm);
+      border: 2px solid var(--color-gold) !important;
+    }
+
+    /* ─── R2-Future-1: Quick Complete mode ─── */
+    .sq-quick-mode .sq-tabbar { display: none; }
+    .sq-quick-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px var(--space-md);
+      background: var(--color-surface);
+      border-bottom: 1px solid var(--color-border);
+      flex-shrink: 0;
+    }
+    .sq-quick-bar-title {
+      font-family: var(--font-heading);
+      font-size: 0.7rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--color-gold);
+      text-transform: uppercase;
+    }
+    .sq-quick-back {
+      background: none;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text-muted);
+      font-family: var(--font-ui);
+      font-size: 0.65rem;
+      padding: 3px 10px;
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+    .sq-quick-back:hover { border-color: var(--color-gold-dim); color: var(--color-gold); }
+    .sq-quick-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: 0 var(--space-md);
+      margin-bottom: 6px;
+      height: 60px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-sm);
+      cursor: pointer;
+      font-family: var(--font-body);
+      font-size: 1rem;
+      color: var(--color-text);
+      transition: border-color 0.15s, background 0.15s;
+    }
+    .sq-quick-card:hover { border-color: var(--color-gold-dim); background: var(--color-surface-hover); }
+    .sq-quick-card.sq-done {
+      background: var(--color-success-bg);
+      border-color: var(--color-success);
+      opacity: 0.65;
+    }
+
+    /* ─── R2-Future-2: Sync Code modal ─── */
+    .sq-modal-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(10,6,2,0.92);
+      z-index: 400;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: var(--space-lg);
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .sq-modal-overlay.sq-show { opacity: 1; pointer-events: all; }
+    .sq-modal-box {
+      background: var(--color-surface-raised);
+      border: 1px solid var(--color-gold-dim);
+      border-radius: var(--radius-lg);
+      padding: var(--space-md);
+      width: 100%;
+      max-width: 360px;
+    }
+    .sq-modal-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-gold);
+      margin-bottom: var(--space-sm);
+      text-align: center;
+    }
+    .sq-modal-code {
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: var(--color-text-muted);
+      word-break: break-all;
+      max-height: 120px;
+      overflow-y: auto;
+      user-select: all;
+      cursor: text;
+      margin-bottom: var(--space-sm);
+    }
+    .sq-modal-textarea {
+      width: 100%;
+      background: var(--color-bg);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-sm);
+      font-family: monospace;
+      font-size: 0.65rem;
+      color: var(--color-text);
+      resize: vertical;
+      min-height: 80px;
+      box-sizing: border-box;
+      margin-bottom: var(--space-sm);
+    }
+    .sq-modal-desc {
+      font-family: var(--font-body);
+      font-size: 0.8rem;
+      font-style: italic;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-sm);
+      text-align: center;
+    }
+    .sq-modal-btns {
+      display: flex;
+      gap: var(--space-sm);
+    }
+    .sq-modal-btns .sq-btn { flex: 1; font-size: 0.6rem; }
+
+    /* ─── R2-Future-3: Fellowship stub ─── */
+    .sq-fellowship-card {
+      position: relative;
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-md);
+      padding: var(--space-md);
+      opacity: 0.45;
+      overflow: hidden;
+    }
+    .sq-fellowship-title {
+      font-family: var(--font-heading);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--color-text-muted);
+      margin-bottom: var(--space-xs);
+    }
+    .sq-fellowship-desc {
+      font-family: var(--font-body);
+      font-size: 0.82rem;
+      font-style: italic;
+      color: var(--color-text-faint);
+      line-height: 1.5;
+    }
+    .sq-fellowship-lock {
+      position: absolute;
+      top: var(--space-sm);
+      right: var(--space-sm);
+      font-size: 1.1rem;
+      opacity: 0.4;
+    }
+
     /* ─── Mobile responsive ─── */
     @media (max-width: 700px) {
       .main {
@@ -1162,6 +1533,21 @@
         <div class="sq-toast" id="sqXpToast" aria-live="polite"></div>
         <!-- Message toast -->
         <div class="sq-msg-toast" id="sqMsgToast" aria-live="polite"></div>
+        <!-- Level-up pre-flash (R2-Good-1) -->
+        <div class="sq-levelup-flash" id="sqLvlFlash" aria-live="polite"></div>
+        <!-- Sync Code modal (R2-Future-2) -->
+        <div class="sq-modal-overlay" id="sqSyncModal">
+          <div class="sq-modal-box">
+            <div class="sq-modal-title" id="sqSyncModalTitle">Sync Code</div>
+            <div class="sq-modal-desc" id="sqSyncModalDesc"></div>
+            <div class="sq-modal-code" id="sqSyncCodeBlock" style="display:none"></div>
+            <textarea class="sq-modal-textarea" id="sqSyncImportArea" placeholder="Paste your sync code here..." style="display:none"></textarea>
+            <div class="sq-modal-btns">
+              <button class="sq-btn" id="sqSyncActionBtn" onclick="sqSyncAction()">Copy</button>
+              <button class="sq-btn sq-btn-ghost" onclick="sqCloseSyncModal()">Close</button>
+            </div>
+          </div>
+        </div>
 
         <!-- Status bar -->
         <div class="sq-statusbar">
@@ -1174,29 +1560,48 @@
 
           <!-- ── TAB 1: QUEST BOARD ── -->
           <div class="sq-tab-panel sq-active" id="sqPanelQuests">
-            <div class="sq-day-label" id="sqDayLabel"></div>
-
-            <!-- Section: The Sacred Rites (defaults) -->
-            <div class="sq-section-head" data-icon="quest-default">
-              ✦ The Sacred Rites
+            <!-- Quick Complete bar (hidden until quick mode) -->
+            <div class="sq-quick-bar" id="sqQuickBar" style="display:none">
+              <span class="sq-quick-bar-title">⚡ Quick Complete</span>
+              <button class="sq-quick-back" onclick="sqExitQuickMode()">← Back</button>
             </div>
-            <div id="sqDefaultList"></div>
 
-            <div class="sq-ornament">◆ ─── ◆</div>
+            <div id="sqQuickList" style="display:none; padding:8px;"></div>
 
-            <!-- Section: Daily Quests -->
-            <div class="sq-section-head" data-icon="quest-daily">
-              ☀ Daily Quests
+            <div id="sqNormalBoard">
+              <div class="sq-day-label" id="sqDayLabel"></div>
+
+              <!-- Featured monthly quest (R1-Future-2) -->
+              <div class="sq-featured-section" id="sqFeaturedSection"></div>
+
+              <!-- Section: The Sacred Rites (defaults) -->
+              <div class="sq-section-sacred">
+                <div class="sq-section-head" data-icon="quest-default">
+                  ⭐ The Sacred Rites
+                </div>
+                <div id="sqDefaultList"></div>
+              </div>
+
+              <div class="sq-ornament">◆ ─── ◆</div>
+
+              <!-- Section: Daily Quests -->
+              <div class="sq-section-daily">
+                <div class="sq-section-head" data-icon="quest-daily">
+                  ☀️ Daily Quests
+                </div>
+                <div id="sqDailyList"></div>
+              </div>
+
+              <div class="sq-ornament">◆ ─── ◆</div>
+
+              <!-- Section: Weekly Quests -->
+              <div class="sq-section-weekly">
+                <div class="sq-section-head" data-icon="quest-weekly">
+                  🌙 Weekly Quests
+                </div>
+                <div id="sqWeeklyList"></div>
+              </div>
             </div>
-            <div id="sqDailyList"></div>
-
-            <div class="sq-ornament">◆ ─── ◆</div>
-
-            <!-- Section: Weekly Quests -->
-            <div class="sq-section-head" data-icon="quest-weekly">
-              ☽ Weekly Quests
-            </div>
-            <div id="sqWeeklyList"></div>
           </div>
 
           <!-- ── TAB 2: BOUNTY BOARD ── -->
@@ -1226,50 +1631,57 @@
 
           <!-- ── TAB 3: ADD QUEST ── -->
           <div class="sq-tab-panel" id="sqPanelAdd">
-            <div class="sq-add-header">Add a Quest</div>
+            <div class="sq-add-form-parchment">
+              <div class="sq-add-form-deco">◆ ─── Post a New Quest ─── ◆</div>
 
-            <!-- Daily / Weekly toggle -->
-            <div class="sq-type-toggle" role="group" aria-label="Quest type">
-              <button class="sq-type-btn sq-active" id="sqTypeDaily"
-                      onclick="sqSetType('daily')">Daily</button>
-              <button class="sq-type-btn" id="sqTypeWeekly"
-                      onclick="sqSetType('weekly')">Weekly</button>
-            </div>
-
-            <!-- Quest name -->
-            <div class="sq-form-group">
-              <label class="sq-form-label" for="sqAddName">Quest Name</label>
-              <input type="text" class="sq-input" id="sqAddName"
-                     placeholder="Name your quest..." maxlength="60"
-                     style="width:100%; box-sizing:border-box;" />
-            </div>
-
-            <!-- Emoji picker -->
-            <div class="sq-form-group">
-              <label class="sq-form-label">Choose an Emblem</label>
-              <div class="sq-emoji-grid" id="sqEmojiGrid" role="group" aria-label="Emoji picker"></div>
-              <div class="sq-emoji-custom-row">
-                <input type="text" class="sq-input" id="sqCustomEmoji"
-                       placeholder="✦" maxlength="2" aria-label="Custom emoji" />
-                <span>or enter your own</span>
+              <!-- Daily / Weekly toggle -->
+              <div class="sq-type-toggle" role="group" aria-label="Quest type">
+                <button class="sq-type-btn sq-active" id="sqTypeDaily"
+                        onclick="sqSetType('daily')">Daily</button>
+                <button class="sq-type-btn" id="sqTypeWeekly"
+                        onclick="sqSetType('weekly')">Weekly</button>
               </div>
-            </div>
 
-            <!-- XP slider -->
-            <div class="sq-form-group">
-              <label class="sq-form-label" for="sqAddXp">XP Reward</label>
-              <div class="sq-slider-row">
-                <input type="range" class="sq-slider" id="sqAddXp"
-                       min="10" max="100" step="5" value="30"
-                       oninput="document.getElementById('sqXpDisplay').textContent = this.value + ' XP'"
-                       aria-label="XP reward slider" />
-                <span class="sq-xp-display" id="sqXpDisplay">30 XP</span>
+              <!-- Quest name -->
+              <div class="sq-form-group">
+                <label class="sq-form-label" for="sqAddName">Quest Name</label>
+                <input type="text" class="sq-input" id="sqAddName"
+                       placeholder="Name your quest..." maxlength="60"
+                       style="width:100%; box-sizing:border-box;" />
               </div>
-            </div>
 
-            <button class="sq-btn sq-btn-full" onclick="sqSaveQuest()">
-              Post to Board
-            </button>
+              <!-- Emoji picker -->
+              <div class="sq-form-group">
+                <label class="sq-form-label">Choose an Emblem</label>
+                <!-- Recently used row (R2-Good-2) -->
+                <div id="sqRecentEmojiSection" style="display:none">
+                  <div class="sq-emoji-recent-label">Recently Used</div>
+                  <div class="sq-emoji-recent-row" id="sqRecentEmojiRow"></div>
+                </div>
+                <div class="sq-emoji-grid" id="sqEmojiGrid" role="group" aria-label="Emoji picker"></div>
+                <div class="sq-emoji-custom-row">
+                  <input type="text" class="sq-input" id="sqCustomEmoji"
+                         placeholder="✦" maxlength="2" aria-label="Custom emoji" />
+                  <span>or enter your own</span>
+                </div>
+              </div>
+
+              <!-- XP slider -->
+              <div class="sq-form-group">
+                <label class="sq-form-label" for="sqAddXp">XP Reward</label>
+                <div class="sq-slider-row">
+                  <input type="range" class="sq-slider" id="sqAddXp"
+                         min="10" max="100" step="5" value="30"
+                         oninput="document.getElementById('sqXpDisplay').textContent = this.value + ' XP'"
+                         aria-label="XP reward slider" />
+                  <span class="sq-xp-display" id="sqXpDisplay">30 XP</span>
+                </div>
+              </div>
+
+              <button class="sq-btn sq-btn-full sq-btn-full-gold" onclick="sqSaveQuest()">
+                Post to Board
+              </button>
+            </div>
           </div>
 
           <!-- ── TAB 4: ADVENTURER'S HALL ── -->
@@ -1297,6 +1709,9 @@
                 <span class="sq-logo-text">SideQuest</span>
               </div>
 
+              <!-- R2-Bad-3: Section 1 — The Adventurer -->
+              <div class="sq-hall-section-head">The Adventurer</div>
+
               <!-- Profile hero -->
               <div class="sq-profile-hero">
                 <div class="sq-avatar-wrap" data-designer="illustration">
@@ -1304,19 +1719,62 @@
                   <span class="sq-level-badge" id="sqLevelBadge">Lv 1</span>
                 </div>
                 <div class="sq-level-title" id="sqLevelTitle">Peasant</div>
-                <div class="sq-xp-bar-label" id="sqXpBarLabel">0 / 500 XP</div>
+                <div class="sq-xp-bar-label" id="sqXpBarLabel">0 / 300 XP</div>
                 <div class="sq-xp-bar-track">
                   <div class="sq-xp-bar-fill" id="sqXpBarFill" style="width:0%"></div>
                 </div>
               </div>
 
+              <!-- R2-Bad-3: Section 2 — Deeds Done -->
+              <div class="sq-hall-section-head">Deeds Done</div>
               <!-- Stats grid -->
               <div class="sq-stats-grid" id="sqStatsGrid"></div>
 
+              <!-- R1-Future-1: Share Progress button -->
+              <button class="sq-share-btn" onclick="sqShareProgress()">📋 Share Progress</button>
+
+              <!-- R2-Future-1: Quick Complete link -->
+              <button class="sq-share-btn" onclick="sqEnterQuickMode()" style="margin-bottom:var(--space-md);">⚡ Quick Complete</button>
+
+              <!-- R2-Bad-3: Section 3 — Honours -->
+              <div class="sq-hall-section-head">Honours</div>
               <!-- Achievements -->
-              <div class="sq-achievements-section">
-                <div class="sq-ach-label">Deeds &amp; Honours</div>
+              <div class="sq-achievements-section" style="margin-top:0">
                 <div class="sq-ach-grid" id="sqAchGrid"></div>
+              </div>
+
+              <!-- R2-Future-3: Fellowship stub -->
+              <div class="sq-hall-section-head">Fellowship</div>
+              <div class="sq-fellowship-card">
+                <span class="sq-fellowship-lock">🔒</span>
+                <div class="sq-fellowship-title">🛡️ Fellowship — Coming Soon</div>
+                <div class="sq-fellowship-desc">Invite friends to your fellowship. See their quests. Hold each other to account. Social accountability is the most powerful habit tool known to adventurers.</div>
+              </div>
+
+              <!-- R2-Bad-3: Section 4 — Logistics -->
+              <div class="sq-hall-section-head">Logistics</div>
+
+              <!-- R1-Bad-3: Notifications placeholder -->
+              <div class="sq-notif-row">
+                <div class="sq-notif-label">
+                  Push Notifications — Coming Soon
+                  <small>Daily quest reminders and achievement alerts. Enable when the feature launches.</small>
+                </div>
+                <div class="sq-notif-toggle" title="Coming soon" aria-disabled="true"></div>
+              </div>
+
+              <!-- R1-Bad-1: Backup & Restore -->
+              <div class="sq-backup-desc">Export your data to protect against browser storage wipes. Import to restore.</div>
+              <div class="sq-backup-row">
+                <button class="sq-btn" onclick="sqExportData()">⬇ Export Data</button>
+                <button class="sq-btn sq-btn-ghost" onclick="sqImportData()">⬆ Import Data</button>
+              </div>
+              <input type="file" id="sqImportFile" accept=".json" style="display:none" onchange="sqHandleImport(this)" />
+
+              <!-- R2-Future-2: Sync Code -->
+              <div class="sq-backup-row" style="margin-top:4px">
+                <button class="sq-btn" style="flex:1;font-size:0.6rem;padding:8px 6px;" onclick="sqOpenSyncGenerate()">🔗 Generate Sync Code</button>
+                <button class="sq-btn sq-btn-ghost" style="flex:1;font-size:0.6rem;padding:8px 6px;" onclick="sqOpenSyncImport()">📥 Use Sync Code</button>
               </div>
 
             </div><!-- /.sq-hall-inner -->
@@ -1369,7 +1827,49 @@
   // CONSTANTS & CONFIG
   // ─────────────────────────────────────────
 
-  const SQ_XP_PER_LEVEL = 500;
+  // R1-Bad-2: Progressive XP scaling
+  // getLevelXP(level) returns XP needed for that level (1-indexed)
+  function getLevelXP(level) {
+    if (level <= 5)  return 300;
+    if (level <= 10) return 500;
+    if (level <= 15) return 750;
+    return 1000;
+  }
+
+  // Total XP required to reach a given level number (1-indexed)
+  function sqXpForLevel(lvNum) {
+    let total = 0;
+    for (let i = 1; i < lvNum; i++) total += getLevelXP(i);
+    return total;
+  }
+
+  // R1-Good-1: Completion message pool
+  const COMPLETE_MSGS = [
+    "Quest complete, adventurer!",
+    "Well done, brave soul!",
+    "Another deed for the chronicle.",
+    "The realm grows safer by your hand.",
+    "Honour and XP, both well earned.",
+    "Your name is spoken with respect.",
+    "The quest board notes your success.",
+    "A small victory. They add up."
+  ];
+
+  // R1-Future-2: Featured monthly quests
+  const FEATURED_QUESTS = [
+    { month: 0,  name: "Brave the Winter",    emoji: "❄️",  xp: 50, desc: "Go outside in the cold. Do it anyway." },
+    { month: 1,  name: "The Lover's Vigil",   emoji: "💌",  xp: 35, desc: "Do something kind for someone today." },
+    { month: 2,  name: "The First Thaw",      emoji: "🌱",  xp: 40, desc: "Start something you have been putting off." },
+    { month: 3,  name: "April's Fool",        emoji: "🃏",  xp: 30, desc: "Make someone laugh today." },
+    { month: 4,  name: "The May Campaign",    emoji: "🌸",  xp: 45, desc: "Spend an hour outdoors doing nothing." },
+    { month: 5,  name: "Midsummer Rite",      emoji: "☀️",  xp: 50, desc: "Wake before sunrise. Face the day." },
+    { month: 6,  name: "The Long Road",       emoji: "🏕️", xp: 45, desc: "Walk somewhere you haven't been before." },
+    { month: 7,  name: "The Harvest Fast",    emoji: "🌾",  xp: 40, desc: "Skip a snack. Drink water instead." },
+    { month: 8,  name: "Autumn's Call",       emoji: "🍂",  xp: 35, desc: "Tidy one area of your home completely." },
+    { month: 9,  name: "The Dark Approaches", emoji: "🎃",  xp: 40, desc: "Face something you have been avoiding." },
+    { month: 10, name: "The Memory Rite",     emoji: "🕯️", xp: 35, desc: "Call or message someone you miss." },
+    { month: 11, name: "Midwinter's Rest",    emoji: "🎄",  xp: 50, desc: "Rest completely for one hour. No screens." },
+  ];
 
   const LEVEL_NAMES = [
     'Peasant',      // 1
@@ -1471,9 +1971,19 @@
   // Toast timers
   let xpToastTimer  = null;
   let msgToastTimer = null;
+  let flashTimer    = null;
 
   // Pending level-up number (to show splash once)
   let pendingLevelUp = null;
+
+  // R2-Good-2: Recently used emojis
+  let sqRecentEmojis = [];
+
+  // R2-Future-1: Quick Complete mode
+  let sqQuickMode = false;
+
+  // R2-Future-2: Sync modal state ('generate' or 'import')
+  let sqSyncModalMode = 'generate';
 
   // ─────────────────────────────────────────
   // DATE HELPERS
@@ -1513,6 +2023,7 @@
     sqCompletions  = JSON.parse(localStorage.getItem('sq_completions') || '{}');
     sqAchievements = JSON.parse(localStorage.getItem('sq_achievements') || '[]');
     sqLastReset    = localStorage.getItem('sq_last_reset') || '';
+    sqRecentEmojis = JSON.parse(localStorage.getItem('sq_recent_emojis') || '[]');
 
     const savedStats = JSON.parse(localStorage.getItem('sq_stats') || 'null');
     if (savedStats) {
@@ -1521,13 +2032,14 @@
   }
 
   function sqSave() {
-    localStorage.setItem('sq_xp',           String(sqXp));
+    localStorage.setItem('sq_xp',            String(sqXp));
     localStorage.setItem('sq_quests',        JSON.stringify(sqQuests));
     localStorage.setItem('sq_missions',      JSON.stringify(sqMissions));
     localStorage.setItem('sq_completions',   JSON.stringify(sqCompletions));
     localStorage.setItem('sq_achievements',  JSON.stringify(sqAchievements));
     localStorage.setItem('sq_stats',         JSON.stringify(sqStats));
     localStorage.setItem('sq_last_reset',    sqLastReset);
+    localStorage.setItem('sq_recent_emojis', JSON.stringify(sqRecentEmojis));
   }
 
   // ─────────────────────────────────────────

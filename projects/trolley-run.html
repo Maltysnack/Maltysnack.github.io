@@ -181,7 +181,8 @@
       <kbd>A</kbd>/<kbd>D</kbd> steer &nbsp;
       <kbd>J</kbd> jam/unjam wheel &nbsp;
       <kbd>R</kbd> restart &nbsp;
-      <kbd>Esc</kbd> menu
+      <kbd>Esc</kbd> pause &nbsp;
+      <kbd>1</kbd>/<kbd>2</kbd>/<kbd>3</kbd> start level
       &nbsp;&nbsp;|&nbsp;&nbsp;
       <strong>Mobile:</strong> tilt to steer &amp; push, virtual d-pad shown on screen
     </div>
@@ -202,8 +203,6 @@ const TW = 44;   // trolley width
 const TL = 76;   // trolley length
 
 // Wheel mount positions in local (trolley-relative) space.
-// Local axes: +X = right, +Y = toward handle (rear of trolley).
-// Trolley front (bumper) is at local -Y, handle (where you push) at +Y.
 const WHEEL_MOUNTS = [
   { lx: -(TW/2 - 6), ly: -(TL/2 - 9), label: "FL" },
   { lx:  (TW/2 - 6), ly: -(TL/2 - 9), label: "FR" },
@@ -212,28 +211,92 @@ const WHEEL_MOUNTS = [
 ];
 
 // ── Physics constants ─────────────────────────────────────────
-const LATERAL_FRICTION   = 380;   // force opposing sideways wheel slip
-const ROLLING_RESISTANCE = 22;    // force opposing along-axle rolling
-const JAMMED_FRICTION    = 620;   // jammed wheel: friction in all directions
-const PUSH_FORCE         = 320;   // W key
-const BRAKE_EXTRA        = 280;   // S key additional deceleration
-const STEER_TORQUE       = 90;    // A/D handle lean torque
-const LINEAR_DAMP        = 0.65;  // fractional damping per second (multiplied as decay)
-const ANGULAR_DAMP       = 3.0;   // angular damping coefficient
-const CASTOR_RATE        = 3.5;   // caster alignment rate (rad/s per rad diff)
-const JAM_DURATION       = 8.0;   // seconds before auto-unjam
+const LATERAL_FRICTION   = 380;
+const ROLLING_RESISTANCE = 22;
+const JAMMED_FRICTION    = 620;
+const PUSH_FORCE         = 320;
+const BRAKE_EXTRA        = 280;
+const STEER_TORQUE       = 90;
+const LINEAR_DAMP        = 0.65;
+const ANGULAR_DAMP       = 3.0;
+const CASTOR_RATE        = 3.5;
+const JAM_DURATION       = 8.0;
 const MASS               = 1.0;
 const INERTIA            = 0.55;
 const MAX_SPEED          = 480;
 const MAX_ANGV           = 9;
 
+// ── Medal definitions ─────────────────────────────────────────
+const MEDALS = [
+  { gold: 45, silver: 75, bronze: 120 },   // Level 1
+  { gold: 55, silver: 90, bronze: 140 },   // Level 2
+  { gold: 60, silver: 100, bronze: 160 },  // Level 3
+];
+
+function getMedal(lvlIdx, time) {
+  if (time === null || lvlIdx >= MEDALS.length) return null;
+  const m = MEDALS[lvlIdx];
+  if (time <= m.gold)   return 'gold';
+  if (time <= m.silver) return 'silver';
+  if (time <= m.bronze) return 'bronze';
+  return null;
+}
+
+function medalEmoji(medal) {
+  if (medal === 'gold')   return '\uD83E\uDD47';
+  if (medal === 'silver') return '\uD83E\uDD48';
+  if (medal === 'bronze') return '\uD83E\uDD49';
+  return '';
+}
+
+// ── Persistent storage ────────────────────────────────────────
+let bestTimes    = JSON.parse(localStorage.getItem('trolBest')    || '[null,null,null]');
+let bestMedals   = JSON.parse(localStorage.getItem('trolMedals')  || '[null,null,null]');
+let attempts     = JSON.parse(localStorage.getItem('trolAttempts') || '[0,0,0]');
+let challengeBest = JSON.parse(localStorage.getItem('trolChallengeBest') || '[null,null,null]');
+let ghostLogs    = JSON.parse(localStorage.getItem('trolGhosts')  || '[null,null,null]');
+
+// Pad arrays if needed (in case of version upgrades)
+while (bestTimes.length  < 3) bestTimes.push(null);
+while (bestMedals.length < 3) bestMedals.push(null);
+while (attempts.length   < 3) attempts.push(0);
+while (challengeBest.length < 3) challengeBest.push(null);
+while (ghostLogs.length  < 3) ghostLogs.push(null);
+
+// ── URL challenge params ──────────────────────────────────────
+let urlChallenge = null;
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const lvl = params.get('challenge');
+  const tgt = params.get('target');
+  if (lvl !== null && tgt !== null) {
+    urlChallenge = { levelIdx: parseInt(lvl, 10), targetTime: parseInt(tgt, 10) / 10 };
+    history.replaceState(null, '', window.location.pathname);
+  }
+})();
+
 // ── State ─────────────────────────────────────────────────────
-let gameState   = 'menu';   // 'menu' | 'playing' | 'complete'
-let currentLvl  = 0;
-let levelData   = null;
-let raceTime    = 0;
+let gameState    = 'menu';   // 'menu' | 'playing' | 'paused' | 'complete'
+let currentLvl   = 0;
+let levelData    = null;
+let raceTime     = 0;
 let completeTime = 0;
-let bestTimes   = JSON.parse(localStorage.getItem('trolBest') || '[null,null]');
+let challengeMode = false;
+
+// Run stats
+let runJams      = 0;
+let runDist      = 0;
+let runMaxSpeed  = 0;
+
+// Ghost replay
+let replayLog    = [];
+let replayFrame  = 0;
+let ghostLog     = null;
+let ghostIdx     = 0;
+let saveGhost    = false;
+
+// Skid trails
+let trails = [];
 
 // Trolley rigid body
 let T = {};
@@ -242,11 +305,11 @@ function resetTrolley(x, y, angle) {
   T = {
     x, y, angle,
     vx: 0, vy: 0, av: 0,
-    px: x, py: y, pa: angle,  // previous-frame position for crossing detection
+    px: x, py: y, pa: angle,
     wheels: WHEEL_MOUNTS.map(() => ({
-      ca: angle,    // castor angle (world space)
+      ca: angle,
       jammed: false,
-      jt: 0,        // jam timer
+      jt: 0,
     })),
   };
 }
@@ -255,9 +318,31 @@ function resetTrolley(x, y, angle) {
 const K = {};
 window.addEventListener('keydown', e => {
   K[e.key] = true;
-  if (e.key === 'j' || e.key === 'J') { if (gameState === 'playing') toggleJam(); }
-  if (e.key === 'r' || e.key === 'R') { if (gameState === 'playing' || gameState === 'complete') startLevel(currentLvl); }
-  if (e.key === 'Escape') { if (gameState === 'playing') gameState = 'menu'; }
+
+  if (e.key === 'j' || e.key === 'J') {
+    if (gameState === 'playing') triggerJam();
+  }
+  if (e.key === 'r' || e.key === 'R') {
+    if (gameState === 'playing' || gameState === 'complete' || gameState === 'paused') {
+      startLevel(currentLvl, challengeMode);
+    }
+  }
+  if (e.key === 'Escape') {
+    if (gameState === 'playing') {
+      gameState = 'paused';
+    } else if (gameState === 'paused') {
+      gameState = 'playing';
+    }
+  }
+  if (e.key === 'm' || e.key === 'M') {
+    if (gameState === 'paused') gameState = 'menu';
+  }
+  if (gameState === 'menu') {
+    if (e.key === '1') startLevel(0, false);
+    if (e.key === '2') startLevel(1, false);
+    if (e.key === '3') startLevel(2, false);
+    if (e.key === 'p' || e.key === 'P') { /* P hint only — no action from menu */ }
+  }
   if (['w','a','s','d','W','A','S','D',' '].includes(e.key)) e.preventDefault();
 });
 window.addEventListener('keyup', e => { K[e.key] = false; });
@@ -282,7 +367,7 @@ function startMotion() {
 }
 
 // Virtual d-pad (touch)
-const VB = { up: false, down: false, left: false, right: false };
+const VB = { up: false, down: false, left: false, right: false, jam: false };
 let mouseX = 0, mouseY = 0;
 
 canvas.addEventListener('mousemove', e => {
@@ -293,22 +378,32 @@ canvas.addEventListener('mousemove', e => {
 
 canvas.addEventListener('touchstart',  handleTouchEv, { passive: false });
 canvas.addEventListener('touchmove',   handleTouchEv, { passive: false });
-canvas.addEventListener('touchend',    e => { e.preventDefault(); VB.up=VB.down=VB.left=VB.right=false; }, { passive: false });
-canvas.addEventListener('touchcancel', e => { e.preventDefault(); VB.up=VB.down=VB.left=VB.right=false; }, { passive: false });
+canvas.addEventListener('touchend',    e => {
+  e.preventDefault();
+  const hadJam = VB.jam;
+  VB.up = VB.down = VB.left = VB.right = VB.jam = false;
+  if (hadJam && gameState === 'playing') triggerJam();
+}, { passive: false });
+canvas.addEventListener('touchcancel', e => {
+  e.preventDefault();
+  VB.up = VB.down = VB.left = VB.right = VB.jam = false;
+}, { passive: false });
 
 function handleTouchEv(e) {
   e.preventDefault();
-  VB.up=VB.down=VB.left=VB.right=false;
+  VB.up = VB.down = VB.left = VB.right = VB.jam = false;
   const r = canvas.getBoundingClientRect();
   const sx = W / r.width, sy = H / r.height;
   for (let i = 0; i < e.touches.length; i++) {
     const tx = (e.touches[i].clientX - r.left) * sx;
     const ty = (e.touches[i].clientY - r.top)  * sy;
     if (ty > H * 0.65) {
-      if      (tx < W * 0.25) VB.left  = true;
-      else if (tx < W * 0.50) VB.right = true;
-      else if (tx < W * 0.75) VB.up    = true;
-      else                     VB.down  = true;
+      const relX = tx / W;
+      if      (relX < 0.22) VB.left  = true;
+      else if (relX < 0.44) VB.right = true;
+      else if (relX < 0.66) VB.up    = true;
+      else if (relX < 0.88) VB.down  = true;
+      else                   VB.jam   = true;
     }
   }
 }
@@ -319,20 +414,44 @@ function handleClick(e) {
   const r  = canvas.getBoundingClientRect();
   const cx = (e.clientX - r.left) * (W / r.width);
   const cy = (e.clientY - r.top)  * (H / r.height);
+
   if (gameState === 'menu') {
-    if (inRect(cx, cy, W/2-160, 264, 320, 52)) startLevel(0);
-    if (inRect(cx, cy, W/2-160, 344, 320, 52)) startLevel(1);
+    // Level 1 main button
+    if (inRect(cx, cy, W/2-165, 244, 280, 52)) startLevel(0, false);
+    // Level 1 challenge button
+    if (inRect(cx, cy, W/2+125, 244, 90, 52)) startLevel(0, true);
+
+    // Level 2 main button
+    if (inRect(cx, cy, W/2-165, 334, 280, 52)) startLevel(1, false);
+    // Level 2 challenge button
+    if (inRect(cx, cy, W/2+125, 334, 90, 52)) startLevel(1, true);
+
+    // Level 3 main button
+    if (inRect(cx, cy, W/2-165, 424, 280, 52)) startLevel(2, false);
+    // Level 3 challenge button
+    if (inRect(cx, cy, W/2+125, 424, 90, 52)) startLevel(2, true);
   }
+
   if (gameState === 'complete') {
-    if (inRect(cx, cy, W/2-145, 388, 132, 42)) startLevel(currentLvl);
-    if (inRect(cx, cy, W/2+13,  388, 132, 42)) gameState = 'menu';
+    if (inRect(cx, cy, W/2-155, 400, 132, 42)) startLevel(currentLvl, challengeMode);
+    if (inRect(cx, cy, W/2+23,  400, 132, 42)) gameState = 'menu';
+    // Friend challenge button
+    if (inRect(cx, cy, W/2-80, 452, 160, 32)) copyFriendChallenge();
+    // R key pill click
+    if (inRect(cx, cy, W/2-40, 4, 80, 22) && gameState === 'playing') startLevel(currentLvl, challengeMode);
+  }
+
+  if (gameState === 'playing') {
+    // R key pill click in HUD
+    if (inRect(cx, cy, W/2-40, 4, 80, 22)) startLevel(currentLvl, challengeMode);
   }
 }
 
 function inRect(px, py, x, y, w, h) { return px>=x && px<=x+w && py>=y && py<=y+h; }
 
 // ── Jam ───────────────────────────────────────────────────────
-function toggleJam() {
+function triggerJam() {
+  runJams++;
   const free = T.wheels.filter(w => !w.jammed);
   if (free.length > 0) {
     const w = free[Math.floor(Math.random() * free.length)];
@@ -356,7 +475,6 @@ function dotV(ax, ay, bx, by) { return ax*bx + ay*by; }
 
 // ── Physics update ────────────────────────────────────────────
 function updateTrolley(dt) {
-  // Read inputs
   const pushing  = K['w'] || K['W'] || VB.up   || mobThrottle > 0.12;
   const braking  = K['s'] || K['S'] || VB.down  || mobThrottle < -0.12;
   const steerL   = K['a'] || K['A'] || VB.left;
@@ -367,8 +485,6 @@ function updateTrolley(dt) {
   steer += (motionOn ? mobSteer : 0);
   steer = Math.max(-1, Math.min(1, steer));
 
-  // Trolley facing (local -Y in world space = direction trolley "looks")
-  // angle=0 → trolley faces toward canvas-top (-Y world)
   const fwdX = -Math.sin(T.angle);
   const fwdY = -Math.cos(T.angle);
 
@@ -379,10 +495,7 @@ function updateTrolley(dt) {
     const m = WHEEL_MOUNTS[i];
     const w = T.wheels[i];
 
-    // World position of wheel
     const wp = lwToWorld(m.lx, m.ly, T.x, T.y, T.angle);
-
-    // Velocity at wheel contact (v_cm + omega x r)
     const rx = wp.x - T.x, ry = wp.y - T.y;
     const vwx = T.vx + (-ry) * T.av;
     const vwy = T.vy + ( rx) * T.av;
@@ -390,35 +503,36 @@ function updateTrolley(dt) {
     let fx = 0, fy = 0;
 
     if (w.jammed) {
-      // Full friction in all directions
       const spd = Math.sqrt(vwx*vwx + vwy*vwy);
       if (spd > 0.01) {
         fx = -(vwx / spd) * JAMMED_FRICTION;
         fy = -(vwy / spd) * JAMMED_FRICTION;
       }
+      // Jammed wheels always produce skid trails
+      trails.push({ x: wp.x, y: wp.y, age: 0, alpha: 0.5 });
     } else {
-      // Roll direction (unit vector along castor angle, facing "downhill" of wheel)
       const rollX = -Math.sin(w.ca);
       const rollY = -Math.cos(w.ca);
-      // Lateral direction (perpendicular)
       const latX  = -rollY;
       const latY  =  rollX;
 
-      // Project wheel velocity onto roll/lateral
       const vRoll = dotV(vwx, vwy, rollX, rollY);
       const vLat  = dotV(vwx, vwy, latX,  latY);
 
-      // Lateral friction (main source of constraint)
+      // R1-Good-1: skid trail when lateralSpeed > 15
+      const lateralSpeed = Math.abs(vLat);
+      if (lateralSpeed > 15) {
+        trails.push({ x: wp.x, y: wp.y, age: 0, alpha: 0.4 });
+      }
+
       const latF = -LATERAL_FRICTION * vLat;
       fx += latF * latX;
       fy += latF * latY;
 
-      // Rolling resistance
       const rollF = -ROLLING_RESISTANCE * vRoll;
       fx += rollF * rollX;
       fy += rollF * rollY;
 
-      // Update castor angle: passively align toward velocity
       const spd = Math.sqrt(vwx*vwx + vwy*vwy);
       if (spd > 6) {
         const targetCA = Math.atan2(-vwx, -vwy);
@@ -429,17 +543,15 @@ function updateTrolley(dt) {
 
     Fx  += fx;
     Fy  += fy;
-    Tor += rx * fy - ry * fx;   // 2D cross: r × F
+    Tor += rx * fy - ry * fx;
   }
 
-  // ── Push force (applied through handle at rear) ───────────
+  // ── Push force ────────────────────────────────────────────
   if (pushing) {
-    // Apply at handle position (rear of trolley, +Y local)
     const handleWP = lwToWorld(0, TL * 0.44, T.x, T.y, T.angle);
     const hrx = handleWP.x - T.x, hry = handleWP.y - T.y;
     Fx  += fwdX * PUSH_FORCE;
     Fy  += fwdY * PUSH_FORCE;
-    // Tiny torque from off-centre handle (makes it feel like pushing from behind)
     Tor += (hrx * fwdY - hry * fwdX) * PUSH_FORCE * 0.04;
   }
 
@@ -452,38 +564,36 @@ function updateTrolley(dt) {
     }
   }
 
-  // ── Steering torque ───────────────────────────────────────
   Tor += steer * STEER_TORQUE;
 
-  // ── Integrate ──────────────────────────────────────────────
   T.vx += (Fx / MASS) * dt;
   T.vy += (Fy / MASS) * dt;
   T.av += (Tor / INERTIA) * dt;
 
-  // Damping
   const ld = Math.pow(LINEAR_DAMP, dt);
   T.vx *= ld; T.vy *= ld;
   T.av -= T.av * ANGULAR_DAMP * dt;
 
-  // Clamp
   const spd2 = Math.sqrt(T.vx*T.vx + T.vy*T.vy);
   if (spd2 > MAX_SPEED) { T.vx *= MAX_SPEED/spd2; T.vy *= MAX_SPEED/spd2; }
   if (Math.abs(T.av) > MAX_ANGV) T.av = Math.sign(T.av) * MAX_ANGV;
 
-  // Save previous pos before moving (for line-crossing detection)
+  // Run stats
+  runDist += spd2 * dt;
+  if (spd2 > runMaxSpeed) runMaxSpeed = spd2;
+
   T.px = T.x; T.py = T.y; T.pa = T.angle;
 
   T.x += T.vx * dt;
   T.y += T.vy * dt;
   T.angle += T.av * dt;
 
-  // Jam timers
   T.wheels.forEach(w => {
     if (w.jammed) { w.jt -= dt; if (w.jt <= 0) { w.jammed = false; w.jt = 0; } }
   });
 }
 
-// ── Trolley corners in world space ────────────────────────────
+// ── Trolley corners ───────────────────────────────────────────
 function trolleyCorners() {
   const hw = TW/2, hl = TL/2;
   return [
@@ -495,7 +605,6 @@ function trolleyCorners() {
 }
 
 // ── Wall collision ────────────────────────────────────────────
-// Each corner is treated as a point that must stay RADIUS away from each wall segment.
 function resolveWalls(walls) {
   const CORNER_R = 4;
   const corners = trolleyCorners();
@@ -506,7 +615,6 @@ function resolveWalls(walls) {
     if (wlen2 < 0.001) continue;
 
     for (const corner of corners) {
-      // Project corner onto wall segment
       let t = ((corner.x - wall.x1) * wdx + (corner.y - wall.y1) * wdy) / wlen2;
       t = Math.max(0, Math.min(1, t));
       const cx = wall.x1 + t * wdx;
@@ -519,7 +627,6 @@ function resolveWalls(walls) {
         const nx = ndx / dist, ny = ndy / dist;
         T.x += nx * overlap;
         T.y += ny * overlap;
-        // Kill velocity into wall
         const vDot = T.vx * nx + T.vy * ny;
         if (vDot < 0) {
           T.vx -= vDot * nx * 1.3;
@@ -530,7 +637,7 @@ function resolveWalls(walls) {
     }
   }
 
-  // Canvas boundary
+  // Canvas boundary (for non-camera levels)
   const pad = 10;
   if (T.x < pad)   { T.x = pad;   if (T.vx < 0) T.vx *= -0.35; }
   if (T.x > W-pad) { T.x = W-pad; if (T.vx > 0) T.vx *= -0.35; }
@@ -538,7 +645,7 @@ function resolveWalls(walls) {
   if (T.y > H-pad) { T.y = H-pad; if (T.vy > 0) T.vy *= -0.35; }
 }
 
-// ── Obstacle collision (simple AABB) ─────────────────────────
+// ── Obstacle collision ────────────────────────────────────────
 function resolveObstacles(obs) {
   for (const o of obs) {
     const ox = o.x, oy = o.y;
@@ -554,7 +661,6 @@ function resolveObstacles(obs) {
 
 // ── Checkpoint / finish line crossing ─────────────────────────
 function lineCrossed(x1, y1, x2, y2, nowX, nowY, prevX, prevY) {
-  // Normal of the line segment
   const ldx = x2 - x1, ldy = y2 - y1;
   const llen = Math.sqrt(ldx*ldx + ldy*ldy);
   if (llen < 0.001) return false;
@@ -562,7 +668,6 @@ function lineCrossed(x1, y1, x2, y2, nowX, nowY, prevX, prevY) {
   const dNow  = (nowX  - x1)*nx + (nowY  - y1)*ny;
   const dPrev = (prevX - x1)*nx + (prevY - y1)*ny;
   if (Math.sign(dNow) === Math.sign(dPrev)) return false;
-  // Check along-segment parameter
   const t = ((nowX - x1)*ldx + (nowY - y1)*ldy) / (llen*llen);
   return t >= -0.05 && t <= 1.05;
 }
@@ -585,11 +690,6 @@ function tickFinish(fin) {
 // ═════════════════════════════════════════════════════════════
 //  LEVEL DATA
 // ═════════════════════════════════════════════════════════════
-// Coordinate system: (0,0) top-left, X right, Y down.
-// Trolley angle: 0 = facing up (toward canvas top, i.e. -Y direction).
-// To face RIGHT: angle = +Math.PI/2   (or π/2)
-// To face DOWN:  angle = Math.PI      (or π)
-// To face LEFT:  angle = -Math.PI/2
 
 const LEVELS = [
   {
@@ -597,29 +697,23 @@ const LEVELS = [
     name: "Supermarket",
     floorBg:    "#dedad0",
     floorLine:  "rgba(0,0,0,0.06)",
-    // Start: bottom-left area, facing right
+    personality: "You're late for the checkout. The trolley has other ideas.",
     startPos: { x: 100, y: 530, angle: Math.PI/2 },
 
     walls: [
-      // Outer boundary
       { x1:  40, y1:  40, x2: 760, y2:  40 },
       { x1:  40, y1: 560, x2: 760, y2: 560 },
       { x1:  40, y1:  40, x2:  40, y2: 560 },
       { x1: 760, y1:  40, x2: 760, y2: 560 },
 
-      // === Row 1 aisle walls (creates horizontal corridors) ===
-      // Wall from left edge, gap at x=490..560
       { x1:  40, y1: 155, x2: 490, y2: 155 },
       { x1: 560, y1: 155, x2: 760, y2: 155 },
 
-      // === Row 2 aisle walls (gap at x=100..170)
       { x1: 170, y1: 295, x2: 760, y2: 295 },
 
-      // === Row 3 aisle walls (gap at x=550..640)
       { x1:  40, y1: 425, x2: 550, y2: 425 },
       { x1: 640, y1: 425, x2: 760, y2: 425 },
 
-      // Vertical shelving dividers inside aisles
       { x1: 200, y1:  40, x2: 200, y2: 155 },
       { x1: 420, y1:  40, x2: 420, y2: 155 },
       { x1: 620, y1:  40, x2: 620, y2: 155 },
@@ -636,22 +730,18 @@ const LEVELS = [
     ],
 
     checkpoints: [
-      // CP1: cross the first aisle gap (right side of canvas, row 1)
       { x1: 560, y1:  40, x2: 560, y2: 155, crossed: false },
-      // CP2: cross row 2 somewhere in the middle section
       { x1: 170, y1: 295, x2: 170, y2: 425, crossed: false },
-      // CP3: cross row 3 gap (right side)
       { x1: 550, y1: 425, x2: 640, y2: 425, crossed: false },
     ],
 
-    // Finish line: right side of level, after CP3
     finish: { x1: 700, y1: 425, x2: 760, y2: 510 },
 
     obstacles: [
-      { x: 300, y:  90, w: 28, h: 20, label: "🛒" },
-      { x: 680, y: 220, w: 26, h: 36, label: "📦" },
-      { x: 100, y: 360, w: 30, h: 20, label: "🧺" },
-      { x: 320, y: 480, w: 36, h: 22, label: "📦" },
+      { x: 300, y:  90, w: 28, h: 20, label: "\uD83D\uDED2" },
+      { x: 680, y: 220, w: 26, h: 36, label: "\uD83D\uDCE6" },
+      { x: 100, y: 360, w: 30, h: 20, label: "\uD83E\uDDBA" },
+      { x: 320, y: 480, w: 36, h: 22, label: "\uD83D\uDCE6" },
     ],
   },
 
@@ -660,17 +750,15 @@ const LEVELS = [
     name: "Car Park",
     floorBg:    "#7a7870",
     floorLine:  "rgba(255,255,255,0.06)",
-    // Start: left edge, middle height, facing right
+    personality: "The car park is empty. The trolley is not cooperative.",
     startPos: { x: 80, y: 300, angle: Math.PI/2 },
 
     walls: [
-      // Outer boundary
       { x1:  40, y1:  40, x2: 760, y2:  40 },
       { x1:  40, y1: 560, x2: 760, y2: 560 },
       { x1:  40, y1:  40, x2:  40, y2: 560 },
       { x1: 760, y1:  40, x2: 760, y2: 560 },
 
-      // Top parking rows (bays pointing upward from horizontal lane)
       { x1: 140, y1:  40, x2: 140, y2: 130 },
       { x1: 240, y1:  40, x2: 240, y2: 130 },
       { x1: 340, y1:  40, x2: 340, y2: 130 },
@@ -709,28 +797,88 @@ const LEVELS = [
       { x1: 640, y1: 470, x2: 640, y2: 560 },
     ],
 
-    // The car park has 4 driving lanes at y=155, y=300, y=445:
-    // The trolley must traverse all 3 lanes (entry from left side).
-    // Lanes are between the horizontal walls. To fit through,
-    // player must navigate tight lanes.
-    // We use vertical checkpoint lines at specific x positions.
     checkpoints: [
-      // Must go right through lane 1 (y=130 to y=180), hit right wall area
       { x1: 700, y1: 130, x2: 700, y2: 180, crossed: false },
-      // Must go right through lane 2 (y=270 to y=330)
       { x1: 700, y1: 270, x2: 700, y2: 330, crossed: false },
-      // Must go right through lane 3 (y=420 to y=470)
       { x1: 700, y1: 420, x2: 700, y2: 470, crossed: false },
     ],
 
     finish: { x1: 720, y1: 420, x2: 760, y2: 470 },
     obstacles: [],
   },
+
+  {
+    // ── Level 3: Furniture Store ─────────────────────────────
+    name: "Furniture Store",
+    floorBg:    "#e8e0d0",
+    floorLine:  "rgba(0,0,0,0.05)",
+    personality: "Follow the arrows. Ignore the meatballs. Find the exit.",
+    startPos: { x: 100, y: 100, angle: 0 },
+
+    walls: [
+      // Outer boundary
+      { x1:  40, y1:  40, x2: 760, y2:  40 },
+      { x1:  40, y1: 560, x2: 760, y2: 560 },
+      { x1:  40, y1:  40, x2:  40, y2: 560 },
+      { x1: 760, y1:  40, x2: 760, y2: 560 },
+
+      // === S-curve corridor walls ===
+      // Segment 1: top horizontal corridor going right (y=40..140, x=40..380)
+      { x1:  40, y1: 140, x2: 380, y2: 140 },
+
+      // Turn 1: top-right corner box
+      { x1: 380, y1:  40, x2: 380, y2: 240 },
+      { x1: 280, y1: 240, x2: 760, y2: 240 },
+
+      // Segment 2: second horizontal corridor going left (y=240..340, x=280..760)
+      { x1: 280, y1: 340, x2: 760, y2: 340 },
+      { x1: 280, y1: 240, x2: 280, y2: 340 },
+
+      // Turn 2: bottom-left corner box
+      { x1:  40, y1: 340, x2: 180, y2: 340 },
+      { x1: 180, y1: 340, x2: 180, y2: 460 },
+      { x1:  40, y1: 460, x2: 660, y2: 460 },
+
+      // Segment 3: bottom horizontal corridor going right (y=460..560, x=40..660)
+      { x1: 660, y1: 460, x2: 660, y2: 560 },
+    ],
+
+    checkpoints: [
+      // CP1: entering the right turn zone
+      { x1: 340, y1:  40, x2: 340, y2: 140, crossed: false },
+      // CP2: mid corridor going left
+      { x1: 500, y1: 240, x2: 500, y2: 340, crossed: false },
+      // CP3: entering the bottom left turn
+      { x1:  40, y1: 400, x2: 180, y2: 400, crossed: false },
+      // CP4: final straight
+      { x1: 400, y1: 460, x2: 400, y2: 560, crossed: false },
+    ],
+
+    finish: { x1: 660, y1: 460, x2: 760, y2: 520 },
+
+    obstacles: [
+      { x: 160, y:  90, w: 40, h: 24, label: "\uD83D\uDCE6" },
+      { x: 320, y: 190, w: 36, h: 28, label: "\uD83D\uDECB\uFE0F" },
+      { x: 480, y: 290, w: 38, h: 26, label: "\uD83D\uDCE6" },
+      { x: 600, y: 290, w: 36, h: 28, label: "\uD83E\uDE91" },
+      { x: 100, y: 390, w: 40, h: 24, label: "\uD83D\uDCE6" },
+      { x: 520, y: 510, w: 38, h: 22, label: "\uD83D\uDECB\uFE0F" },
+    ],
+  },
 ];
 
 // ═════════════════════════════════════════════════════════════
 //  DRAWING
 // ═════════════════════════════════════════════════════════════
+
+// R2-Bad-2: Camera
+let camera = { x: 0, y: 0 };
+
+function updateCamera() {
+  // Simple follow with no damping for now; clamped to canvas
+  camera.x = 0;
+  camera.y = 0;
+}
 
 function drawGrid(bgColor, lineColor) {
   ctx.fillStyle = bgColor;
@@ -743,7 +891,6 @@ function drawGrid(bgColor, lineColor) {
 }
 
 function drawSupermarketFloor() {
-  // Aisle zones (slightly lighter strips)
   const zones = [
     { y1:  40, y2: 155, label: "DAIRY & DRINKS",  x: 60 },
     { y1: 155, y2: 295, label: "TINNED GOODS",    x: 60 },
@@ -762,7 +909,6 @@ function drawSupermarketFloor() {
 }
 
 function drawCarParkFloor() {
-  // Parking bay slots (decorative)
   ctx.strokeStyle = 'rgba(255,255,255,0.2)';
   ctx.lineWidth = 1.5;
   ctx.setLineDash([4,5]);
@@ -779,7 +925,6 @@ function drawCarParkFloor() {
   }
   ctx.setLineDash([]);
 
-  // P markers
   ctx.fillStyle = 'rgba(220,230,220,0.18)';
   ctx.font = 'bold 20px monospace';
   ctx.textAlign = 'center';
@@ -788,6 +933,50 @@ function drawCarParkFloor() {
     for (let x = 90; x < W; x += 100) {
       ctx.fillText('P', x, my);
     }
+  }
+}
+
+function drawFurnitureFloor() {
+  // Warm beige zones with department labels
+  const zones = [
+    { x1: 40,  y1:  40, x2: 380, y2: 140, label: "LIVING ROOM", col: 'rgba(210,195,170,0.4)' },
+    { x1: 380, y1:  40, x2: 760, y2: 240, label: "BEDROOM",     col: 'rgba(190,180,160,0.35)' },
+    { x1: 280, y1: 240, x2: 760, y2: 340, label: "KITCHEN",     col: 'rgba(210,195,170,0.4)' },
+    { x1:  40, y1: 340, x2: 280, y2: 560, label: "STORAGE",     col: 'rgba(190,180,160,0.35)' },
+    { x1: 280, y1: 460, x2: 760, y2: 560, label: "EXIT & CAFE", col: 'rgba(210,195,170,0.4)' },
+  ];
+  for (const z of zones) {
+    ctx.fillStyle = z.col;
+    ctx.fillRect(z.x1, z.y1, z.x2 - z.x1, z.y2 - z.y1);
+    ctx.fillStyle = 'rgba(80,70,50,0.22)';
+    ctx.font = '9px monospace';
+    ctx.textAlign = 'left';
+    ctx.fillText(z.label, z.x1 + 8, z.y1 + 14);
+  }
+
+  // Directional arrows on floor
+  ctx.fillStyle = 'rgba(120,100,70,0.18)';
+  ctx.font = '18px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.fillText('\u27A1', 200,  90);
+  ctx.fillText('\u2B07', 430, 140);
+  ctx.fillText('\u2B05', 520, 290);
+  ctx.fillText('\u2B07', 130, 380);
+  ctx.fillText('\u27A1', 350, 510);
+}
+
+// R1-Good-1: Draw skid trails
+function drawTrails(dt) {
+  // Age and cull trails
+  for (let i = trails.length - 1; i >= 0; i--) {
+    trails[i].age += dt;
+    if (trails[i].age > 0.5) trails.splice(i, 1);
+  }
+  // Draw remaining trails
+  for (const tr of trails) {
+    const a = tr.alpha * (1 - tr.age / 0.5);
+    ctx.fillStyle = `rgba(30,20,10,${a.toFixed(3)})`;
+    ctx.fillRect(tr.x - 2, tr.y - 2, 4, 4);
   }
 }
 
@@ -802,7 +991,6 @@ function drawWalls(walls) {
     ctx.lineTo(w.x2, w.y2);
     ctx.stroke();
   }
-  // Add a highlight edge
   ctx.strokeStyle = 'rgba(255,250,240,0.15)';
   ctx.lineWidth = 1.5;
   for (const w of walls) {
@@ -863,7 +1051,7 @@ function drawFinish(fin, ready) {
 function drawStartLine(sp) {
   ctx.save();
   ctx.translate(sp.x, sp.y);
-  ctx.rotate(sp.angle);   // rotate so the line is perpendicular to facing direction
+  ctx.rotate(sp.angle);
   const sw = 54;
   const segments = 6;
   const segW = sw / segments;
@@ -910,16 +1098,13 @@ function drawTrolley() {
   ctx.translate(T.x, T.y);
   ctx.rotate(T.angle);
 
-  // Body gradient
   const g = ctx.createLinearGradient(-TW/2, -TL/2, TW/2, TL/2);
   g.addColorStop(0,   '#cdd1d6');
   g.addColorStop(0.5, '#e6eaee');
   g.addColorStop(1,   '#b4b8bc');
 
-  // Main basket
   drawRRect(-TW/2+1, -TL/2+1, TW-2, TL-14, 4, g, '#7a8088', 1.5);
 
-  // Wire basket grid
   ctx.strokeStyle = 'rgba(90,100,110,0.35)';
   ctx.lineWidth = 0.6;
   for (let gx = -TW/2+8; gx < TW/2-4; gx += 10) {
@@ -929,25 +1114,21 @@ function drawTrolley() {
     ctx.beginPath(); ctx.moveTo(-TW/2+4, gy); ctx.lineTo(TW/2-4, gy); ctx.stroke();
   }
 
-  // Front bumper
   ctx.fillStyle = '#9098a0';
   ctx.fillRect(-TW/2+2, -TL/2-2, TW-4, 5);
   ctx.strokeStyle = '#6a7078';
   ctx.lineWidth = 0.8;
   ctx.strokeRect(-TW/2+2, -TL/2-2, TW-4, 5);
 
-  // Handle bar (at rear, local +Y)
   ctx.fillStyle = '#4a3c2c';
   ctx.fillRect(-TW/2+4, TL/2-12, TW-8, 9);
   ctx.strokeStyle = '#2a1c0c';
   ctx.lineWidth = 1;
   ctx.strokeRect(-TW/2+4, TL/2-12, TW-8, 9);
 
-  // Handle grip highlight
   ctx.fillStyle = 'rgba(255,255,255,0.15)';
   ctx.fillRect(-TW/2+6, TL/2-11, TW-12, 3);
 
-  // Wheels
   for (let i = 0; i < 4; i++) {
     const m = WHEEL_MOUNTS[i];
     const w = T.wheels[i];
@@ -964,14 +1145,12 @@ function drawTrolley() {
     ctx.lineWidth   = 0.8;
     ctx.strokeRect(-4, -7, 8, 14);
 
-    // Tyre tread highlight
     ctx.strokeStyle = w.jammed ? 'rgba(255,160,160,0.4)' : 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 1;
     ctx.beginPath(); ctx.moveTo(-2, -5); ctx.lineTo(-2, 5); ctx.stroke();
     ctx.beginPath(); ctx.moveTo(2, -5);  ctx.lineTo(2, 5);  ctx.stroke();
 
     if (w.jammed) {
-      // Red X
       ctx.strokeStyle = '#fff';
       ctx.lineWidth = 1.5;
       ctx.beginPath();
@@ -985,12 +1164,32 @@ function drawTrolley() {
   ctx.restore();
 }
 
+// R1-Future-1: Draw ghost trolley
+function drawGhost(pos) {
+  if (!pos) return;
+  ctx.save();
+  ctx.globalAlpha = 0.22;
+  ctx.translate(pos.x, pos.y);
+  ctx.rotate(pos.angle);
+  ctx.strokeStyle = '#88aaff';
+  ctx.lineWidth = 2;
+  ctx.strokeRect(-TW/2, -TL/2, TW, TL);
+  ctx.restore();
+}
+
 // ── HUD ───────────────────────────────────────────────────────
 function formatTime(t) {
   const ms   = Math.floor(t * 10) % 10;
   const secs = Math.floor(t) % 60;
   const mins = Math.floor(t / 60);
   return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}.${ms}`;
+}
+
+function formatTimeChip(lvlIdx, time) {
+  if (time === null) return null;
+  const medal = getMedal(lvlIdx, time);
+  const em = medal ? (medalEmoji(medal) + ' ') : '';
+  return em + formatTime(time);
 }
 
 function drawHUD(lvName, cps, elapsed) {
@@ -1019,45 +1218,91 @@ function drawHUD(lvName, cps, elapsed) {
     ctx.fillText(w.jammed ? 'JAM' : ' OK', bx+18, 29);
   }
 
+  // R2-Bad-3: R key restart pill in HUD top-center
+  const pillW = 80, pillH = 22, pillX = W/2 - pillW/2, pillY = 4;
+  const rHov = inRect(mouseX, mouseY, pillX, pillY, pillW, pillH);
+  ctx.fillStyle = rHov ? 'rgba(80,80,80,0.9)' : 'rgba(30,30,30,0.75)';
+  ctx.beginPath();
+  ctx.roundRect(pillX, pillY, pillW, pillH, 11);
+  ctx.fill();
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.lineWidth = 1;
+  ctx.stroke();
+  ctx.fillStyle = '#cccccc';
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('R: Restart', W/2, pillY + 15);
+
+  // R2-Good-2: Speedometer bar
+  const spd = Math.sqrt(T.vx*T.vx + T.vy*T.vy);
+  const MAX_SPD_DISPLAY = 300;
+  const spdRatio = Math.min(1, spd / MAX_SPD_DISPLAY);
+  const barX = 8, barY = H - 54, barW = 160, barH = 10;
+  ctx.fillStyle = 'rgba(0,0,0,0.5)';
+  ctx.fillRect(barX, barY, barW, barH);
+  // Color: green -> amber -> red
+  const r2 = Math.floor(Math.min(255, spdRatio * 2 * 255));
+  const g2 = Math.floor(Math.min(255, (1 - Math.max(0, spdRatio - 0.5) * 2) * 255));
+  ctx.fillStyle = `rgb(${r2},${g2},0)`;
+  ctx.fillRect(barX, barY, barW * spdRatio, barH);
+  ctx.strokeStyle = 'rgba(255,255,255,0.2)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(barX, barY, barW, barH);
+  ctx.fillStyle = '#aaa';
+  ctx.font = '8px monospace';
+  ctx.textAlign = 'left';
+  ctx.fillText(`${Math.round(spd)} px/s`, barX + barW + 4, barY + 9);
+
   // Bottom bar
   ctx.fillStyle = 'rgba(0,0,0,0.5)';
   ctx.fillRect(0, H-30, W, 30);
   ctx.fillStyle = '#ccc';
   ctx.font = '10px monospace';
   ctx.textAlign = 'left';
-  ctx.fillText(`Level: ${lvName}`, 12, H-11);
+  const runNum = attempts[currentLvl];
+  ctx.fillText(`${lvName}  |  Run ${runNum}${challengeMode ? '  \u26A1 CHALLENGE' : ''}`, 12, H-11);
   ctx.textAlign = 'center';
-  ctx.fillText('W push  S brake  A/D steer  J jam  R restart  Esc menu', W/2, H-11);
+  ctx.fillText('W push  S brake  A/D steer  J jam  Esc pause', W/2, H-11);
   const done = cps.filter(c => c.crossed).length;
   ctx.textAlign = 'right';
   ctx.fillStyle = done === cps.length ? '#ffdd00' : '#999';
   ctx.fillText(`CP ${done}/${cps.length}`, W-12, H-11);
-
-  // Speed indicator (subtle)
-  const spd = Math.sqrt(T.vx*T.vx + T.vy*T.vy);
-  ctx.fillStyle = 'rgba(255,255,255,0.25)';
-  ctx.font = '8px monospace';
-  ctx.textAlign = 'left';
-  ctx.fillText(`${Math.round(spd)} px/s`, 12, H-32);
 }
 
-// Virtual d-pad (mobile)
+// R1-Bad-3: Virtual d-pad with JAM button
 function drawDPad() {
   if (!/Mobi|Android|iPhone|iPad/.test(navigator.userAgent)) return;
-  const bw = W/4, bh = H * 0.14, by = H * 0.83;
-  const glyphs = ['◀', '▶', '▲', '▼'];
+  const bh = H * 0.14, by = H * 0.83;
+  // 4 movement buttons (each 22% width) + 1 JAM button (12% width)
+  const moveW = W * 0.22;
+  const jamW  = W * 0.12;
+  const glyphs = ['\u25C0', '\u25B6', '\u25B2', '\u25BC'];
   const states = [VB.left, VB.right, VB.up, VB.down];
+
   ctx.save();
   ctx.globalAlpha = 0.32;
+
   for (let i = 0; i < 4; i++) {
+    const bx = i * moveW;
     ctx.fillStyle = states[i] ? '#ffffff' : '#666666';
-    ctx.fillRect(i * bw + 1, by, bw - 2, bh);
+    ctx.fillRect(bx + 1, by, moveW - 2, bh);
     ctx.fillStyle = states[i] ? '#000' : '#ccc';
     ctx.font = `${bh*0.45}px sans-serif`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    ctx.fillText(glyphs[i], i * bw + bw/2, by + bh/2);
+    ctx.fillText(glyphs[i], bx + moveW/2, by + bh/2);
   }
+
+  // JAM button on right — red to match jam indicator
+  const jamX = 4 * moveW;
+  ctx.fillStyle = VB.jam ? '#ff6666' : '#aa2222';
+  ctx.fillRect(jamX + 1, by, jamW - 2, bh);
+  ctx.fillStyle = '#fff';
+  ctx.font = `${bh*0.35}px monospace`;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('JAM', jamX + jamW/2, by + bh/2);
+
   ctx.textBaseline = 'alphabetic';
   ctx.restore();
 }
@@ -1066,9 +1311,19 @@ function drawDPad() {
 function drawMenu() {
   drawGrid('#12121e', 'rgba(255,255,255,0.03)');
 
-  // Scan-line vibe
   ctx.fillStyle = 'rgba(0,0,0,0.25)';
   for (let y = 0; y < H; y += 4) { ctx.fillRect(0, y, W, 1); }
+
+  // URL challenge banner
+  if (urlChallenge !== null) {
+    ctx.fillStyle = 'rgba(255,200,0,0.12)';
+    ctx.fillRect(W/2-255, 40, 510, 28);
+    ctx.fillStyle = '#ffdd44';
+    ctx.font = 'bold 12px monospace';
+    ctx.textAlign = 'center';
+    const cLvl = urlChallenge.levelIdx + 1;
+    ctx.fillText(`\uD83C\uDFC6 CHALLENGE: Beat ${formatTime(urlChallenge.targetTime)} on Level ${cLvl}`, W/2, 59);
+  }
 
   // Title
   ctx.fillStyle = 'rgba(255,255,255,0.06)';
@@ -1083,16 +1338,17 @@ function drawMenu() {
   ctx.fillText('TROLLEY RUN', W/2, 136);
   ctx.fillStyle = '#7a7a8a';
   ctx.font = '13px monospace';
-  ctx.fillText('caster wheel physics  ·  controlled chaos', W/2, 162);
+  ctx.fillText('caster wheel physics  \u00B7  controlled chaos', W/2, 162);
 
   // Level buttons
   const lvls = [
-    { label: 'Level 1 — Supermarket', sub: 'Tight aisles. Slow & precise.', y: 274, idx: 0 },
-    { label: 'Level 2 — Car Park',    sub: 'Open lanes. Keep your speed.', y: 354, idx: 1 },
+    { label: 'Level 1 \u2014 Supermarket',   sub: 'Tight aisles. Slow & precise.', personality: LEVELS[0].personality, y: 274, idx: 0 },
+    { label: 'Level 2 \u2014 Car Park',       sub: 'Open lanes. Keep your speed.', personality: LEVELS[1].personality, y: 364, idx: 1 },
+    { label: 'Level 3 \u2014 Furniture Store',sub: 'Winding maze. Mind the arrows.',personality: LEVELS[2].personality, y: 454, idx: 2 },
   ];
 
   for (const lv of lvls) {
-    const bx = W/2-165, by2 = lv.y-30, bw = 330, bh = 54;
+    const bx = W/2-165, by2 = lv.y-30, bw = 280, bh = 60;
     const hov = inRect(mouseX, mouseY, bx, by2, bw, bh);
     ctx.fillStyle = hov ? '#2a2a50' : '#1a1a3a';
     ctx.fillRect(bx, by2, bw, bh);
@@ -1103,38 +1359,113 @@ function drawMenu() {
     ctx.fillStyle = '#e8e4dc';
     ctx.font = 'bold 15px monospace';
     ctx.textAlign = 'center';
-    ctx.fillText(lv.label, W/2, lv.y - 4);
+    ctx.fillText(lv.label, W/2 - 25, lv.y - 8);
 
     ctx.fillStyle = '#606080';
     ctx.font = '10px monospace';
-    ctx.fillText(lv.sub, W/2, lv.y + 13);
+    ctx.fillText(lv.sub, W/2 - 25, lv.y + 8);
 
+    // R1-Good-2: personality text
+    ctx.fillStyle = '#4a4a62';
+    ctx.font = 'italic 9px sans-serif';
+    ctx.fillText(lv.personality, W/2 - 25, lv.y + 23);
+
+    // Best time chip — R2-Future-2
     const best = bestTimes[lv.idx];
-    if (best !== null) {
-      ctx.fillStyle = '#ccaa00';
+    const chip = formatTimeChip(lv.idx, best);
+    if (chip !== null) {
+      ctx.fillStyle = '#aa8800';
       ctx.font = '10px monospace';
-      ctx.fillText(`Best: ${formatTime(best)}`, W/2, lv.y + 27);
+      ctx.fillText(chip, W/2 - 25, lv.y + 38);
+    } else {
+      ctx.fillStyle = '#444460';
+      ctx.font = '9px monospace';
+      ctx.fillText('No record yet', W/2 - 25, lv.y + 38);
+    }
+
+    // Medal display next to button
+    const medal = bestMedals[lv.idx];
+    if (medal) {
+      ctx.font = '18px sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(medalEmoji(medal), bx + bw + 8, lv.y + 4);
+    }
+
+    // R2-Good-3: Challenge button
+    const chX = W/2 + 125, chY = lv.y - 30, chW = 90, chH = 60;
+    const chHov = inRect(mouseX, mouseY, chX, chY, chW, chH);
+    ctx.fillStyle = chHov ? '#3a1a1a' : '#280a0a';
+    ctx.fillRect(chX, chY, chW, chH);
+    ctx.strokeStyle = chHov ? '#cc4444' : '#882222';
+    ctx.lineWidth = 1.5;
+    ctx.strokeRect(chX, chY, chW, chH);
+    ctx.fillStyle = '#dd6666';
+    ctx.font = 'bold 10px monospace';
+    ctx.textAlign = 'center';
+    ctx.fillText('\u26A1 Challenge', chX + chW/2, lv.y - 8);
+    const cBest = challengeBest[lv.idx];
+    if (cBest !== null) {
+      ctx.fillStyle = '#885555';
+      ctx.font = '8px monospace';
+      ctx.fillText(formatTime(cBest), chX + chW/2, lv.y + 8);
     }
   }
 
   // Controls box
   ctx.fillStyle = 'rgba(255,255,255,0.04)';
-  ctx.fillRect(W/2-255, 435, 510, 120);
+  ctx.fillRect(W/2-255, 510, 510, 75);
   ctx.strokeStyle = 'rgba(255,255,255,0.07)';
   ctx.lineWidth = 1;
-  ctx.strokeRect(W/2-255, 435, 510, 120);
+  ctx.strokeRect(W/2-255, 510, 510, 75);
 
   const lines = [
-    'WASD  —  push / brake / steer the trolley',
-    'J  —  jam or unjam a random wheel (8s auto-unjam)',
-    'R  —  restart current level   |   Esc  —  back to menu',
+    'WASD  \u2014  push / brake / steer the trolley',
+    'J  \u2014  jam a random wheel (8s auto-unjam)   |   Esc  \u2014  pause',
     'Navigate all checkpoints in order, then cross the finish',
+    'Press 1, 2 or 3 to start a level  \u00B7  P to pause',
   ];
   ctx.font = '11px monospace';
   lines.forEach((ln, i) => {
-    ctx.fillStyle = i === 3 ? '#556655' : '#5a5a7a';
-    ctx.fillText(ln, W/2, 458 + i * 22);
+    ctx.fillStyle = i === 3 ? '#4a6a4a' : (i === 2 ? '#556655' : '#5a5a7a');
+    ctx.fillText(ln, W/2, 530 + i * 16);
   });
+}
+
+// ── Pause screen ──────────────────────────────────────────────
+function drawPaused() {
+  // Draw frozen level background
+  const ld = levelData;
+  drawGrid(ld.floorBg, ld.floorLine);
+  if (currentLvl === 0) drawSupermarketFloor();
+  if (currentLvl === 1) drawCarParkFloor();
+  if (currentLvl === 2) drawFurnitureFloor();
+  drawStartLine(LEVELS[currentLvl].startPos);
+  drawObstacles(ld.obstacles);
+  drawCheckpoints(ld.checkpoints);
+  drawFinish(ld.finish, allCPDone(ld.checkpoints));
+  drawWalls(ld.walls);
+  drawTrolley();
+
+  // Overlay
+  ctx.fillStyle = 'rgba(0,0,0,0.55)';
+  ctx.fillRect(0, 0, W, H);
+
+  ctx.fillStyle = 'rgba(10,10,30,0.9)';
+  ctx.strokeStyle = '#6060aa';
+  ctx.lineWidth = 2;
+  const bx = W/2 - 180, by = H/2 - 70, bw = 360, bh = 140;
+  ctx.fillRect(bx, by, bw, bh);
+  ctx.strokeRect(bx, by, bw, bh);
+
+  ctx.fillStyle = '#e0e0f0';
+  ctx.font = 'bold 36px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillText('PAUSED', W/2, H/2 - 10);
+
+  ctx.fillStyle = '#8080a0';
+  ctx.font = '13px monospace';
+  ctx.fillText('Press Esc to Resume  \u00B7  M for Menu', W/2, H/2 + 28);
+  ctx.fillText('R to Restart', W/2, H/2 + 50);
 }
 
 // ── Complete screen ───────────────────────────────────────────
@@ -1142,58 +1473,117 @@ function drawComplete(elapsed) {
   const lvl = levelData;
   drawGrid(lvl.floorBg, lvl.floorLine);
   ctx.fillStyle = 'rgba(0,0,0,0.72)';
-  ctx.fillRect(W/2-250, 130, 500, 310);
+  ctx.fillRect(W/2-260, 100, 520, 380);
   ctx.strokeStyle = '#ffdd00';
   ctx.lineWidth = 2;
-  ctx.strokeRect(W/2-250, 130, 500, 310);
+  ctx.strokeRect(W/2-260, 100, 520, 380);
 
   ctx.fillStyle = '#ffdd00';
   ctx.font = 'bold 34px monospace';
   ctx.textAlign = 'center';
-  ctx.fillText('LEVEL COMPLETE!', W/2, 195);
+  ctx.fillText('LEVEL COMPLETE!', W/2, 160);
+
+  // Challenge cleared banner
+  if (challengeMode) {
+    ctx.fillStyle = '#ff4444';
+    ctx.font = 'bold 14px monospace';
+    ctx.fillText('\u26A1 CHALLENGE CLEARED \u26A1', W/2, 185);
+  }
+
+  // Run attempt number
+  ctx.fillStyle = '#5a5a7a';
+  ctx.font = '11px monospace';
+  ctx.fillText(`Run ${attempts[currentLvl]} of Level ${currentLvl + 1}`, W/2, 205);
 
   ctx.fillStyle = '#e0dcd4';
   ctx.font = '18px monospace';
-  ctx.fillText(`Your time:  ${formatTime(elapsed)}`, W/2, 248);
+  ctx.fillText(`Your time:  ${formatTime(elapsed)}`, W/2, 238);
+
+  // Medal
+  const thisMedal = getMedal(currentLvl, elapsed);
+  if (thisMedal) {
+    ctx.font = '28px sans-serif';
+    ctx.fillText(medalEmoji(thisMedal), W/2, 270);
+  }
 
   const best = bestTimes[currentLvl];
   if (best !== null) {
     const isNew = elapsed < best;
     ctx.fillStyle = isNew ? '#44ff99' : '#666680';
-    ctx.fillText(`Best:  ${formatTime(best)}${isNew ? '  ← NEW BEST' : ''}`, W/2, 284);
+    ctx.font = '14px monospace';
+    ctx.fillText(`Best:  ${formatTime(best)}${isNew ? '  \u2190 NEW BEST' : ''}`, W/2, 298);
   } else {
     ctx.fillStyle = '#44ff99';
-    ctx.fillText('First run! Well done.', W/2, 284);
+    ctx.font = '14px monospace';
+    ctx.fillText('First run! Well done.', W/2, 298);
   }
 
-  // Jam count (flavour)
-  ctx.fillStyle = '#4a4a6a';
-  ctx.font = '12px monospace';
-  ctx.fillText('Jammed wheels: keep practising', W/2, 320);
+  // R2-Future-3: Run summary stats
+  ctx.fillStyle = '#3a3a5a';
+  ctx.fillRect(W/2-180, 308, 360, 54);
+  ctx.strokeStyle = 'rgba(255,255,255,0.08)';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(W/2-180, 308, 360, 54);
+  ctx.font = '10px monospace';
+  ctx.textAlign = 'center';
+  ctx.fillStyle = '#6868a0';
+  ctx.fillText(
+    `Jams: ${runJams}   Dist: ~${Math.round(runDist / 60)}m   Max speed: ${Math.round(runMaxSpeed)} px/s`,
+    W/2, 325
+  );
+  ctx.fillStyle = '#505070';
+  ctx.fillText('(distance is approximate)', W/2, 341);
+  ctx.fillStyle = '#5a5a7a';
+  ctx.fillText(`Level: ${levelData.name}`, W/2, 355);
 
   // Buttons
-  const r1h = inRect(mouseX, mouseY, W/2-145, 370, 132, 42);
+  const r1h = inRect(mouseX, mouseY, W/2-155, 370, 132, 42);
   ctx.fillStyle = r1h ? '#2a6a2a' : '#1a4a1a';
-  ctx.fillRect(W/2-145, 370, 132, 42);
+  ctx.fillRect(W/2-155, 370, 132, 42);
   ctx.fillStyle = '#e0e0e0';
   ctx.font = 'bold 13px monospace';
-  ctx.fillText('RETRY', W/2-79, 397);
+  ctx.fillText('RETRY', W/2 - 89, 397);
 
-  const r2h = inRect(mouseX, mouseY, W/2+13, 370, 132, 42);
+  const r2h = inRect(mouseX, mouseY, W/2+23, 370, 132, 42);
   ctx.fillStyle = r2h ? '#2a2a6a' : '#1a1a4a';
-  ctx.fillRect(W/2+13, 370, 132, 42);
+  ctx.fillRect(W/2+23, 370, 132, 42);
   ctx.fillStyle = '#e0e0e0';
-  ctx.fillText('MENU', W/2+79, 397);
+  ctx.fillText('MENU', W/2 + 89, 397);
 
   ctx.strokeStyle = 'rgba(255,255,255,0.15)';
   ctx.lineWidth = 1;
-  ctx.strokeRect(W/2-145, 370, 132, 42);
-  ctx.strokeRect(W/2+13,  370, 132, 42);
+  ctx.strokeRect(W/2-155, 370, 132, 42);
+  ctx.strokeRect(W/2+23,  370, 132, 42);
+
+  // R2-Future-1: Friend challenge button
+  const fcHov = inRect(mouseX, mouseY, W/2-80, 422, 160, 28);
+  ctx.fillStyle = fcHov ? '#2a2222' : '#1a1414';
+  ctx.fillRect(W/2-80, 422, 160, 28);
+  ctx.strokeStyle = '#664444';
+  ctx.lineWidth = 1;
+  ctx.strokeRect(W/2-80, 422, 160, 28);
+  ctx.fillStyle = '#cc8888';
+  ctx.font = '11px monospace';
+  ctx.fillText('\uD83D\uDCCB Challenge a Friend', W/2, 441);
+}
+
+// R2-Future-1: Copy friend challenge URL
+function copyFriendChallenge() {
+  const best = bestTimes[currentLvl];
+  if (best === null) return;
+  const url = `${window.location.origin}${window.location.pathname}?challenge=${currentLvl}&target=${Math.floor(best * 10)}`;
+  navigator.clipboard.writeText(url).catch(() => {});
 }
 
 // ── Level start ───────────────────────────────────────────────
-function startLevel(idx) {
-  currentLvl = idx;
+function startLevel(idx, isChallenge) {
+  currentLvl   = idx;
+  challengeMode = !!isChallenge;
+
+  // R1-Future-2: increment attempt counter
+  attempts[idx]++;
+  localStorage.setItem('trolAttempts', JSON.stringify(attempts));
+
   const src = LEVELS[idx];
   levelData = {
     name:        src.name,
@@ -1207,21 +1597,56 @@ function startLevel(idx) {
   const sp = src.startPos;
   resetTrolley(sp.x, sp.y, sp.angle);
   raceTime = 0;
+
+  // Reset run stats
+  runJams     = 0;
+  runDist     = 0;
+  runMaxSpeed = 0;
+
+  // Reset trails
+  trails = [];
+
+  // Challenge mode: pre-jam 2 random wheels
+  if (isChallenge) {
+    const indices = [0,1,2,3];
+    for (let j = 0; j < 2; j++) {
+      const pick = Math.floor(Math.random() * indices.length);
+      const wi = indices.splice(pick, 1)[0];
+      T.wheels[wi].jammed = true;
+      T.wheels[wi].jt = JAM_DURATION;
+    }
+    runJams += 2;
+  }
+
+  // R1-Future-1: set up ghost log for this level
+  const storedGhost = ghostLogs[idx];
+  ghostLog = storedGhost ? storedGhost : null;
+  ghostIdx = 0;
+  replayLog = [];
+  replayFrame = 0;
+  saveGhost = true;
+
   gameState = 'playing';
 }
 
 // ── Game loop ─────────────────────────────────────────────────
 let prevTS = null;
+let frameCount = 0;
 
 function loop(ts) {
   if (!prevTS) prevTS = ts;
   const dt = Math.min((ts - prevTS) / 1000, 0.05);
   prevTS = ts;
+  frameCount++;
 
   ctx.clearRect(0, 0, W, H);
 
   if (gameState === 'menu') {
     drawMenu();
+
+  } else if (gameState === 'paused') {
+    drawPaused();
+
   } else if (gameState === 'playing') {
     const ld = levelData;
 
@@ -1229,12 +1654,22 @@ function loop(ts) {
     drawGrid(ld.floorBg, ld.floorLine);
     if (currentLvl === 0) drawSupermarketFloor();
     if (currentLvl === 1) drawCarParkFloor();
+    if (currentLvl === 2) drawFurnitureFloor();
+
+    // R1-Good-1: draw trails (age them with dt)
+    drawTrails(dt);
 
     drawStartLine(LEVELS[currentLvl].startPos);
     drawObstacles(ld.obstacles);
     drawCheckpoints(ld.checkpoints);
     drawFinish(ld.finish, allCPDone(ld.checkpoints));
     drawWalls(ld.walls);
+
+    // R1-Future-1: draw ghost
+    if (ghostLog && ghostLog.length > 0) {
+      const gpos = ghostLog[Math.min(ghostIdx, ghostLog.length - 1)];
+      drawGhost(gpos);
+    }
 
     // Physics
     updateTrolley(dt);
@@ -1245,18 +1680,56 @@ function loop(ts) {
 
     tickCheckpoints(ld.checkpoints);
 
+    // R1-Future-1: record replay every 3rd frame
+    replayFrame++;
+    if (replayFrame % 3 === 0) {
+      replayLog.push({ x: T.x, y: T.y, angle: T.angle });
+    }
+    // Advance ghost index every 3rd frame
+    if (ghostLog && ghostIdx < ghostLog.length - 1 && frameCount % 3 === 0) {
+      ghostIdx++;
+    }
+
     if (allCPDone(ld.checkpoints) && tickFinish(ld.finish)) {
       completeTime = raceTime;
-      if (bestTimes[currentLvl] === null || raceTime < bestTimes[currentLvl]) {
-        bestTimes[currentLvl] = raceTime;
-        localStorage.setItem('trolBest', JSON.stringify(bestTimes));
+
+      // Update best times
+      const prevBest = bestTimes[currentLvl];
+      const isNewBest = (prevBest === null || raceTime < prevBest);
+
+      if (!challengeMode) {
+        if (isNewBest) {
+          bestTimes[currentLvl] = raceTime;
+          localStorage.setItem('trolBest', JSON.stringify(bestTimes));
+
+          // Save medal
+          const medal = getMedal(currentLvl, raceTime);
+          bestMedals[currentLvl] = medal;
+          localStorage.setItem('trolMedals', JSON.stringify(bestMedals));
+
+          // R1-Future-1: save ghost only if new best
+          if (saveGhost && replayLog.length > 0) {
+            ghostLogs[currentLvl] = replayLog;
+            try {
+              localStorage.setItem('trolGhosts', JSON.stringify(ghostLogs));
+            } catch(e) { /* storage quota */ }
+          }
+        }
+      } else {
+        // Challenge mode: separate best
+        if (challengeBest[currentLvl] === null || raceTime < challengeBest[currentLvl]) {
+          challengeBest[currentLvl] = raceTime;
+          localStorage.setItem('trolChallengeBest', JSON.stringify(challengeBest));
+        }
       }
+
       gameState = 'complete';
     }
 
     drawTrolley();
     drawHUD(ld.name, ld.checkpoints, raceTime);
     drawDPad();
+
   } else if (gameState === 'complete') {
     drawComplete(completeTime);
   }

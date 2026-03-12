@@ -69,6 +69,15 @@
 
     .bb-today-banner.bb-show { display: block; }
 
+    .bb-banner-event-link {
+      cursor: pointer;
+      text-decoration: underline dotted;
+      text-underline-offset: 2px;
+      color: #7a4a00;
+      transition: color 0.15s;
+    }
+    .bb-banner-event-link:hover { color: #c8862a; }
+
     /* ── App body: two columns ── */
     .bb-body {
       display: flex;
@@ -149,6 +158,26 @@
       margin-bottom: 4px;
     }
 
+    /* ── Chat history divider ── */
+    .bb-chat-divider {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin: 6px 0;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .bb-chat-divider::before,
+    .bb-chat-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
     /* ── Input bar ── */
     .bb-input-bar {
       padding: 14px 16px;
@@ -204,12 +233,13 @@
     }
 
     .bb-events-header {
-      padding: 16px 24px 12px;
+      padding: 12px 24px 10px;
       border-bottom: 1px solid var(--border);
       flex-shrink: 0;
       display: flex;
       align-items: center;
-      justify-content: space-between;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .bb-events-title {
@@ -219,6 +249,7 @@
       letter-spacing: 0.1em;
       text-transform: uppercase;
       color: var(--text-dim);
+      flex: 1;
     }
 
     .bb-event-count {
@@ -230,6 +261,60 @@
       padding: 2px 8px;
       border-radius: 10px;
     }
+
+    /* Header action buttons */
+    .bb-header-btn {
+      background: none;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+    }
+    .bb-header-btn:hover {
+      border-color: #c8862a;
+      color: #b56a00;
+    }
+    .bb-header-btn.bb-btn-active {
+      background: #fef3e2;
+      border-color: #e8c88a;
+      color: #b56a00;
+    }
+
+    /* Confirm inline UI */
+    .bb-inline-confirm {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 6px 0 2px;
+      font-family: var(--font-body);
+    }
+    .bb-inline-confirm button {
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 3px 10px;
+      font-size: 0.72rem;
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-weight: 600;
+      transition: all 0.15s;
+      background: none;
+    }
+    .bb-inline-confirm .bb-confirm-yes {
+      border-color: #c03030;
+      color: #c03030;
+    }
+    .bb-inline-confirm .bb-confirm-yes:hover { background: #fff0f0; }
+    .bb-inline-confirm .bb-confirm-no { color: var(--text-dim); }
+    .bb-inline-confirm .bb-confirm-no:hover { background: #f5f5f5; }
 
     .bb-events-list {
       flex: 1;
@@ -244,6 +329,80 @@
       font-size: 0.88rem;
       line-height: 1.8;
       font-style: italic;
+    }
+
+    /* ── Next Up panel ── */
+    .bb-next-up {
+      border-left: 3px solid #c8862a;
+      background: #fffbf4;
+      padding: 10px 14px;
+      margin: 14px 20px 4px;
+      border-radius: 0 8px 8px 0;
+      display: none;
+    }
+    .bb-next-up.bb-show { display: block; }
+    .bb-next-up-label {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #b56a00;
+      margin-bottom: 5px;
+    }
+    .bb-next-up-content {
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--text);
+    }
+
+    /* ── Month dividers ── */
+    .bb-month-divider {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 18px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bb-month-divider::before,
+    .bb-month-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light, #e8e8e4);
+    }
+
+    /* ── Past events divider ── */
+    .bb-past-divider {
+      text-align: center;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 18px 0 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      opacity: 0.6;
+    }
+    .bb-past-divider::before,
+    .bb-past-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border-light, #e8e8e4);
+    }
+
+    .bb-past-event-card {
+      opacity: 0.5;
     }
 
     /* ── Event cards ── */
@@ -277,16 +436,40 @@
       margin-bottom: 7px;
       display: flex;
       align-items: flex-start;
-      gap: 10px;
+      gap: 8px;
       transition: box-shadow 0.15s;
+      position: relative;
     }
 
     .bb-event-card:hover {
       box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
 
+    .bb-event-card:hover .bb-event-reorder {
+      opacity: 1;
+    }
+
     .bb-event-card.bb-today-event {
       border-left-color: #c8862a;
+    }
+
+    /* ── Highlight animation (R1-Good-3) ── */
+    @keyframes bb-highlight-flash {
+      0%   { border-color: #c8862a; box-shadow: 0 0 0 2px #e8c88a; }
+      50%  { border-color: #f0a030; box-shadow: 0 0 0 4px #fce8b0; }
+      100% { border-color: var(--border); box-shadow: none; }
+    }
+    .bb-event-card.highlight {
+      animation: bb-highlight-flash 1.5s ease forwards;
+    }
+
+    /* ── Category dot ── */
+    .bb-cat-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      flex-shrink: 0;
+      margin-top: 5px;
     }
 
     .bb-event-body {
@@ -300,6 +483,14 @@
       font-weight: 400;
       color: var(--text);
       margin-bottom: 3px;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .bb-recurring-icon {
+      font-size: 0.72rem;
+      opacity: 0.7;
     }
 
     .bb-event-meta {
@@ -334,6 +525,29 @@
     }
 
     .bb-event-del:hover { color: #c03030; }
+
+    /* ── Reorder arrows ── */
+    .bb-event-reorder {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      opacity: 0;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+    }
+    .bb-reorder-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      padding: 1px 3px;
+      border-radius: 3px;
+      line-height: 1;
+      transition: all 0.15s;
+    }
+    .bb-reorder-btn:hover { color: #c8862a; background: #fef3e2; }
+    .bb-reorder-btn:disabled { opacity: 0.2; cursor: default; }
 
     /* ── Mobile ── */
     @media (max-width: 700px) {
@@ -402,7 +616,15 @@
         <div class="bb-events-header">
           <span class="bb-events-title">Upcoming Events</span>
           <span class="bb-event-count" id="bbEventCount">0 events</span>
+          <button class="bb-header-btn" id="bbTogglePast">Show Past</button>
+          <button class="bb-header-btn" id="bbExportIcs">Export</button>
+          <button class="bb-header-btn" id="bbClearPast">🗑 Clear Past</button>
         </div>
+        <div class="bb-next-up" id="bbNextUp">
+          <div class="bb-next-up-label">Next Up</div>
+          <div class="bb-next-up-content" id="bbNextUpContent"></div>
+        </div>
+        <div id="bbClearConfirm" style="padding:0 20px; display:none;"></div>
         <div class="bb-events-list" id="bbEventsList"></div>
       </div>
 
@@ -418,9 +640,26 @@
 
   // ── State ──
   let bbEvents = JSON.parse(localStorage.getItem('busyboy_events') || '[]');
+  let bbShowPast = false;
 
   function bbSave() {
     localStorage.setItem('busyboy_events', JSON.stringify(bbEvents));
+  }
+
+  // ── Category colors ──
+  const CAT_COLORS = {
+    work:     '#4a7acc',
+    social:   '#cc7a4a',
+    health:   '#4acc7a',
+    personal: '#7a4acc',
+  };
+
+  function bbDetectCategory(text) {
+    const t = text.toLowerCase();
+    if (/\b(meeting|call|standup|stand-up|interview|presentation|conference|workshop|deadline|sprint|sync|1:1|one-on-one)\b/.test(t)) return 'work';
+    if (/\b(dinner|drinks|party|lunch|catch up|catch-up|brunch|bbq|birthday|celebration|wedding|drinks|pub|bar|restaurant|gig|concert|show)\b/.test(t)) return 'social';
+    if (/\b(dentist|doctor|gp|physio|physiothe|gym|yoga|pilates|run|running|appointment|checkup|check-up|hospital|clinic|massage|therapy)\b/.test(t)) return 'health';
+    return 'personal';
   }
 
   // ══════════════════════════════════════════
@@ -454,44 +693,11 @@
     return d;
   }
 
-  function bbParseEvent(raw) {
-    let text  = raw.toLowerCase();
-    let date  = null;
-    let time  = null;
-    let location = null;
-
-    // ── Extract time first (before location parsing messes things up) ──
-
-    // "at noon" / "at midnight"
-    let timeMatch = text.match(/\bat\s+noon\b/);
-    if (timeMatch) {
-      time = '12:00 PM';
-      text = text.replace(timeMatch[0], '');
-    }
-    timeMatch = text.match(/\bat\s+midnight\b/);
-    if (timeMatch) {
-      time = '12:00 AM';
-      text = text.replace(timeMatch[0], '');
-    }
-
-    // "at 7:30pm" / "at 7pm" / "at 19:00"
-    if (!time) {
-      timeMatch = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
-      if (timeMatch) {
-        let h = parseInt(timeMatch[1], 10);
-        const m = parseInt(timeMatch[2] || '0', 10);
-        const ampm = timeMatch[3] ? timeMatch[3].toLowerCase() : null;
-        if (ampm === 'pm' && h < 12) h += 12;
-        if (ampm === 'am' && h === 12) h = 0;
-        if (!ampm && h < 7) h += 12; // ambiguous small numbers assumed PM
-        const suffix = h >= 12 ? 'PM' : 'AM';
-        const h12    = h % 12 === 0 ? 12 : h % 12;
-        time = h12 + (m ? ':' + String(m).padStart(2,'0') : ':00') + ' ' + suffix;
-        text = text.replace(timeMatch[0], '');
-      }
-    }
-
-    // ── Extract date ──
+  // Returns a parsed date object or null, and removes matched text from working string
+  // Returns {date, text} or null-date
+  function bbParseDate(raw) {
+    let text = raw.toLowerCase();
+    let date = null;
 
     // "today"
     if (/\btoday\b/.test(text)) {
@@ -507,14 +713,42 @@
       text = text.replace(/\btomorrow\b/, '');
     }
 
+    // "this weekend" / "on the weekend"
+    if (!date && /\b(this\s+weekend|on\s+the\s+weekend)\b/.test(text)) {
+      date = bbNextWeekday(6); // Saturday
+      text = text.replace(/\b(this\s+weekend|on\s+the\s+weekend)\b/, '');
+    }
+
+    // "end of week"
+    if (!date && /\bend\s+of\s+(the\s+)?week\b/.test(text)) {
+      date = bbNextWeekday(5); // Friday
+      text = text.replace(/\bend\s+of\s+(the\s+)?week\b/, '');
+    }
+
+    // "next month"
+    if (!date && /\bnext\s+month\b/.test(text)) {
+      const d = bbToday();
+      d.setMonth(d.getMonth() + 1, 1);
+      date = d;
+      text = text.replace(/\bnext\s+month\b/, '');
+    }
+
+    // "in a fortnight"
+    if (!date && /\bin\s+a\s+fortnight\b/.test(text)) {
+      const d = bbToday();
+      d.setDate(d.getDate() + 14);
+      date = d;
+      text = text.replace(/\bin\s+a\s+fortnight\b/, '');
+    }
+
     // "in 3 days" / "in a week" / "in 2 weeks"
     if (!date) {
       let m = text.match(/\bin\s+(\d+)\s+(day|days|week|weeks)\b/);
       if (!m) m = text.match(/\bin\s+(a)\s+(week)\b/);
       if (m) {
-        const n   = m[1] === 'a' ? 1 : parseInt(m[1], 10);
+        const n    = m[1] === 'a' ? 1 : parseInt(m[1], 10);
         const unit = m[2].startsWith('week') ? 7 : 1;
-        const d   = bbToday();
+        const d    = bbToday();
         d.setDate(d.getDate() + n * unit);
         date = d;
         text = text.replace(m[0], '');
@@ -530,7 +764,7 @@
       }
     }
 
-    // "on friday" / "this friday"
+    // "on friday" / "this friday" / bare weekday
     if (!date) {
       const m = text.match(/\b(?:on\s+|this\s+)?(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i);
       if (m) {
@@ -557,7 +791,6 @@
       let m = text.match(/\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{1,2})(?:st|nd|rd|th)?\b/i);
       if (!m) m = text.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b/i);
       if (m) {
-        // figure out which group is month name vs. day number
         const isMonthFirst = isNaN(parseInt(m[1], 10));
         const monthStr = isMonthFirst ? m[1].toLowerCase() : m[2].toLowerCase();
         const dayNum   = isMonthFirst ? parseInt(m[2], 10) : parseInt(m[1], 10);
@@ -573,11 +806,76 @@
       }
     }
 
-    if (!date) return null; // couldn't parse a date
+    return { date, text };
+  }
+
+  function bbParseTime(text) {
+    let time = null;
+
+    // "at noon" / "at midnight"
+    let m = text.match(/\bat\s+noon\b/);
+    if (m) { time = '12:00 PM'; text = text.replace(m[0], ''); }
+    if (!time) {
+      m = text.match(/\bat\s+midnight\b/);
+      if (m) { time = '12:00 AM'; text = text.replace(m[0], ''); }
+    }
+
+    // Time-of-day words (standalone, not preceded by "at")
+    if (!time) {
+      m = text.match(/\bmorning\b/);
+      if (m) { time = '9:00 AM'; text = text.replace(m[0], ''); }
+    }
+    if (!time) {
+      m = text.match(/\blunchtime\b/);
+      if (m) { time = '12:30 PM'; text = text.replace(m[0], ''); }
+    }
+    if (!time) {
+      m = text.match(/\bafternoon\b/);
+      if (m) { time = '2:00 PM'; text = text.replace(m[0], ''); }
+    }
+    if (!time) {
+      m = text.match(/\bevening\b/);
+      if (m) { time = '7:00 PM'; text = text.replace(m[0], ''); }
+    }
+
+    // "at 7:30pm" / "at 7pm" / "at 19:00"
+    if (!time) {
+      m = text.match(/\bat\s+(\d{1,2})(?::(\d{2}))?\s*(am|pm)?\b/i);
+      if (m) {
+        let h = parseInt(m[1], 10);
+        const mins = parseInt(m[2] || '0', 10);
+        const ampm = m[3] ? m[3].toLowerCase() : null;
+        if (ampm === 'pm' && h < 12) h += 12;
+        if (ampm === 'am' && h === 12) h = 0;
+        if (!ampm && h < 7) h += 12;
+        const suffix = h >= 12 ? 'PM' : 'AM';
+        const h12    = h % 12 === 0 ? 12 : h % 12;
+        time = h12 + (mins ? ':' + String(mins).padStart(2,'0') : ':00') + ' ' + suffix;
+        text = text.replace(m[0], '');
+      }
+    }
+
+    return { time, text };
+  }
+
+  function bbParseEvent(raw) {
+    let text = raw.toLowerCase();
+
+    // ── Extract time ──
+    const timeResult = bbParseTime(text);
+    const time       = timeResult.time;
+    text             = timeResult.text;
+
+    // ── Extract date ──
+    const dateResult = bbParseDate(text);
+    const date       = dateResult.date;
+    text             = dateResult.text;
+
+    // Return null only when no date — caller checks partial parse separately
+    if (!date) return null;
 
     // ── Extract location ──
-    // Patterns: "at [location]" but only if NOT already matched as time
-    // "in [location]" — heuristic: "in" followed by a capitalised word
+    let location = null;
     const locPatterns = [
       /\bat\s+(the\s+[\w\s'&-]+?)(?:\s*$|\s*,|\s*\.|\s+on\b|\s+at\b)/i,
       /\bin\s+(the\s+[\w\s'&-]+?)(?:\s*$|\s*,|\s*\.|\s+on\b|\s+at\b)/i,
@@ -585,17 +883,15 @@
       /\bin\s+([A-Z][\w\s'&-]{2,})(?:\s*$|\s*,|\s*\.)/,
     ];
 
-    const originalRaw = raw; // use original casing for location extraction
+    const originalRaw = raw;
     for (const pat of locPatterns) {
       const m = originalRaw.match(pat);
       if (m) {
         const candidate = m[1].trim();
-        // Sanity check: not a weekday, not a time word, at least 2 chars
         const lower = candidate.toLowerCase();
         const skipWords = new Set(['home','work','school','there','here']);
         if (!WEEKDAYS.includes(lower) && !skipWords.has(lower) && candidate.length > 1) {
           location = candidate;
-          // Remove from text
           text = text.replace(pat, ' ');
           break;
         }
@@ -616,8 +912,8 @@
       .replace(/\s{2,}/g, ' ')
       .trim();
 
-    // Capitalise first letter
     const name = text.charAt(0).toUpperCase() + text.slice(1) || 'Event';
+    const category = bbDetectCategory(raw);
 
     return {
       id:       'bb' + Date.now() + Math.random().toString(36).slice(2,6),
@@ -625,8 +921,133 @@
       date:     date.toISOString().slice(0,10),
       time:     time || null,
       location: location || null,
+      category,
+      sortOrder: Date.now(),
       raw,
     };
+  }
+
+  // Check what a failed parse DID understand
+  function bbPartialParse(raw) {
+    const text = raw.toLowerCase();
+
+    // Check for date
+    const dateResult = bbParseDate(text);
+    const hasDate = !!dateResult.date;
+
+    // Check for something that looks like a name (non-trivial remaining text after stripping filler)
+    const timeResult = bbParseTime(dateResult.text);
+    let remainder = timeResult.text;
+    remainder = remainder
+      .replace(/\bon\b/gi, '')
+      .replace(/\bthe\b/gi, '')
+      .replace(/\bi'?m\b/gi, '')
+      .replace(/\bi\s+am\b/gi, '')
+      .replace(/\bgoing\s+to\b/gi, '')
+      .replace(/\bhave\s+a\b/gi, '')
+      .replace(/\ba\b/g, '')
+      .replace(/\ban\b/g, '')
+      .replace(/,/g, '')
+      .replace(/\s{2,}/g, ' ')
+      .trim();
+    const hasName = remainder.length >= 2;
+
+    let name = null;
+    if (hasName) {
+      name = remainder.charAt(0).toUpperCase() + remainder.slice(1);
+    }
+
+    return { hasDate, hasName, name };
+  }
+
+  // ── Recurring event generation ──
+  function bbGenerateRecurring(raw, baseEvent) {
+    const text = raw.toLowerCase();
+    const m = text.match(/\bevery\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday)\b/i)
+           || text.match(/\b(weekly|every\s+week)\b/);
+
+    if (!m) return null;
+
+    let dayIndex;
+    if (m[1] && WEEKDAYS.includes(m[1].toLowerCase())) {
+      dayIndex = WEEKDAYS.indexOf(m[1].toLowerCase());
+    } else {
+      // "weekly" — use the base event's day
+      dayIndex = new Date(baseEvent.date + 'T12:00:00').getDay();
+    }
+
+    const events = [];
+    for (let i = 0; i < 4; i++) {
+      const d = new Date(baseEvent.date + 'T12:00:00');
+      d.setDate(d.getDate() + i * 7);
+      events.push({
+        ...baseEvent,
+        id:        'bb' + Date.now() + Math.random().toString(36).slice(2,6) + i,
+        date:      d.toISOString().slice(0,10),
+        sortOrder: Date.now() + i,
+        recurring: true,
+      });
+    }
+    return events;
+  }
+
+  // ══════════════════════════════════════════
+  // QUERY PARSER ("what's on friday?")
+  // ══════════════════════════════════════════
+
+  function bbParseQuery(raw) {
+    const text = raw.toLowerCase().trim();
+
+    // "how many events" / "what's coming up" / "my schedule"
+    if (/\b(how many events|what'?s coming up|my schedule|whats coming)\b/.test(text)) {
+      return { type: 'summary' };
+    }
+
+    // "what's on [day]" / "what have I got [day]" / "show [day]" / "show me [day]"
+    const queryPatterns = [
+      /what'?s?\s+on\s+((?:this\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|today|tomorrow))/i,
+      /what\s+(?:have\s+i\s+got|do\s+i\s+have)\s+((?:this\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|today|tomorrow))/i,
+      /show\s+(?:me\s+)?((?:this\s+)?(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday|weekend|today|tomorrow))/i,
+    ];
+    for (const pat of queryPatterns) {
+      const m = raw.match(pat);
+      if (m) {
+        const dayRaw = m[1].trim().toLowerCase();
+        // Parse the day phrase to a date string
+        const dateResult = bbParseDate(dayRaw);
+        if (dateResult.date) {
+          return { type: 'query', date: dateResult.date.toISOString().slice(0,10), dayLabel: dayRaw };
+        }
+      }
+    }
+
+    // "change / move / edit / update / reschedule [event] to [day]"
+    const editPatterns = [
+      /^(change|move|update|reschedule|edit)\s+(.+?)\s+to\s+(.+)$/i,
+    ];
+    for (const pat of editPatterns) {
+      const m = raw.match(pat);
+      if (m) {
+        return { type: 'edit', eventName: m[2].trim(), newDateRaw: m[3].trim() };
+      }
+    }
+
+    // "clear friday" / "remove everything on thursday"
+    const clearDayPatterns = [
+      /^(?:clear|remove\s+(?:everything\s+on|all\s+events\s+on|all\s+on))\s+(monday|tuesday|wednesday|thursday|friday|saturday|sunday|today|tomorrow)\b/i,
+    ];
+    for (const pat of clearDayPatterns) {
+      const m = raw.match(pat);
+      if (m) {
+        const dayRaw = m[1].toLowerCase();
+        const dateResult = bbParseDate(dayRaw);
+        if (dateResult.date) {
+          return { type: 'clearDay', date: dateResult.date.toISOString().slice(0,10), dayLabel: m[1] };
+        }
+      }
+    }
+
+    return null;
   }
 
   // ══════════════════════════════════════════
@@ -640,6 +1061,11 @@
     return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
   }
 
+  function bbFriendlyDateShort(isoDate) {
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'short' });
+  }
+
   function bbBotResponse(ev) {
     const dateStr = bbFriendlyDate(ev.date);
     const timeStr = ev.time ? ` at ${ev.time}` : '';
@@ -647,107 +1073,286 @@
     const emoji   = DAY_EMOJIS[Math.floor(Math.random() * DAY_EMOJIS.length)];
     const isToday = ev.date === bbTodayStr();
 
-    const openers = [
-      "Got it!",
-      "Done!",
-      "Noted!",
-      "Added!",
-      "Locked in!",
-    ];
-    const opener = openers[Math.floor(Math.random() * openers.length)];
-
-    let msg = `${opener} I've added <b>${ev.name}${locStr}</b> on ${dateStr}${timeStr}.`;
+    let msg = `Got it! <b>${bbEsc(ev.name)}${bbEsc(locStr)}</b> on ${bbEsc(dateStr)}${bbEsc(timeStr)}.`;
     if (isToday) msg += " That's today — don't forget!";
     msg += ` ${emoji}`;
     return msg;
   }
 
-  const FAIL_MESSAGES = [
-    "I couldn't work out the date for that. Try something like \"drinks on Friday at 7pm\" or \"meeting March 24 at 9am\".",
-    "Hmm, I'm not sure when that is. Can you add a date? Like \"lunch tomorrow\" or \"concert next Saturday\".",
-    "No date found! Try \"dinner with mum tomorrow at 8pm\" — I need at least a day to save it.",
-  ];
+  // ── Specific failure messages (R1-Good-2) ──
+  function bbFailMessage(raw) {
+    const { hasDate, hasName, name } = bbPartialParse(raw);
+
+    if (hasName && !hasDate) {
+      return `I got <b>${bbEsc(name)}</b> but couldn't find a date. When is it? Try adding something like 'on Friday' or 'March 24th'.`;
+    }
+    if (hasDate && !hasName) {
+      return `I found a date but what's the event? Try something like <i>'Dentist on Friday at 2pm'</i>.`;
+    }
+    return `I couldn't work that out. Try: <i>'Concert Friday 8pm at the Forum'</i>`;
+  }
 
   // ══════════════════════════════════════════
   // RENDER
   // ══════════════════════════════════════════
+
+  function bbMonthLabel(isoDate) {
+    const d = new Date(isoDate + 'T12:00:00');
+    return d.toLocaleDateString('en-AU', { month: 'long', year: 'numeric' });
+  }
+
+  function bbIsPast(isoDate) {
+    return isoDate < bbTodayStr();
+  }
+
+  function bbRenderNextUp() {
+    const today   = bbTodayStr();
+    const nextUp  = document.getElementById('bbNextUp');
+    const content = document.getElementById('bbNextUpContent');
+
+    const future = bbEvents
+      .filter(e => e.date >= today)
+      .sort((a, b) => {
+        const da = a.date + (a.time || '');
+        const db = b.date + (b.time || '');
+        return da < db ? -1 : da > db ? 1 : 0;
+      });
+
+    if (future.length === 0) {
+      nextUp.classList.remove('bb-show');
+      return;
+    }
+
+    const ev   = future[0];
+    const emoji = DAY_EMOJIS[Math.abs(ev.name.charCodeAt(0) % DAY_EMOJIS.length)];
+    const parts = [
+      `${emoji} <b>${bbEsc(ev.name)}</b>`,
+      `· ${bbEsc(bbFriendlyDateShort(ev.date))}`,
+    ];
+    if (ev.time) parts.push(`· ${bbEsc(ev.time)}`);
+    if (ev.location) parts.push(`· ${bbEsc(ev.location)}`);
+
+    content.innerHTML = parts.join(' ');
+    nextUp.classList.add('bb-show');
+  }
 
   function bbRenderEvents() {
     const list  = document.getElementById('bbEventsList');
     const count = document.getElementById('bbEventCount');
     const today = bbTodayStr();
 
-    // Sort by date + time
+    // Sort by date + sortOrder
     const sorted = [...bbEvents].sort((a, b) => {
-      const da = a.date + (a.time || '');
-      const db = b.date + (b.time || '');
-      return da < db ? -1 : da > db ? 1 : 0;
+      if (a.date !== b.date) return a.date < b.date ? -1 : 1;
+      const so = (a.sortOrder || 0) - (b.sortOrder || 0);
+      if (so !== 0) return so;
+      return (a.time || '') < (b.time || '') ? -1 : 1;
     });
 
     count.textContent = sorted.length + (sorted.length === 1 ? ' event' : ' events');
 
     if (sorted.length === 0) {
       list.innerHTML = '<div class="bb-empty">Nothing planned yet.<br>Tell me what\'s coming up 👆</div>';
+      bbRenderNextUp();
       return;
     }
 
-    // Group by date
-    const groups = {};
-    sorted.forEach(ev => {
-      if (!groups[ev.date]) groups[ev.date] = [];
-      groups[ev.date].push(ev);
+    // Separate future/today and past
+    const future = sorted.filter(e => e.date >= today);
+    const past   = sorted.filter(e => e.date < today);
+
+    let html = '';
+    let lastMonth = null;
+
+    // Render future events with month dividers
+    const futureGroups = {};
+    future.forEach(ev => {
+      if (!futureGroups[ev.date]) futureGroups[ev.date] = [];
+      futureGroups[ev.date].push(ev);
     });
 
-    list.innerHTML = Object.entries(groups).map(([date, evs]) => {
+    Object.entries(futureGroups).forEach(([date, evs]) => {
+      const monthLabel = bbMonthLabel(date);
+      if (monthLabel !== lastMonth) {
+        if (lastMonth !== null) {
+          html += `<div class="bb-month-divider">${bbEsc(monthLabel)}</div>`;
+        }
+        lastMonth = monthLabel;
+      }
+
       const isToday = date === today;
       const labelStr = isToday ? 'Today — ' + bbFriendlyDate(date) : bbFriendlyDate(date);
 
-      const cards = evs.map(ev => `
-        <div class="bb-event-card${isToday ? ' bb-today-event' : ''}">
-          <div class="bb-event-body">
-            <div class="bb-event-name">${bbEsc(ev.name)}</div>
-            <div class="bb-event-meta">
-              ${ev.time     ? `<span class="bb-event-time">${bbEsc(ev.time)}</span>` : ''}
-              ${ev.location ? `<span class="bb-event-loc">📍 ${bbEsc(ev.location)}</span>` : ''}
-            </div>
-          </div>
-          <button class="bb-event-del" onclick="bbDeleteEvent('${ev.id}')" title="Delete">✕</button>
-        </div>
-      `).join('');
+      // Get same-day event IDs for reorder arrows
+      const dayIds = evs.map(e => e.id);
 
-      return `
-        <div class="bb-day-group">
+      const cards = evs.map((ev, idx) => bbRenderCard(ev, isToday, dayIds, idx)).join('');
+      html += `
+        <div class="bb-day-group" data-date="${date}">
           <div class="bb-day-label${isToday ? ' bb-today-label' : ''}">${bbEsc(labelStr)}</div>
           ${cards}
         </div>
       `;
-    }).join('');
+    });
+
+    // Render past events if toggled
+    if (bbShowPast && past.length > 0) {
+      html += `<div class="bb-past-divider">Past Events</div>`;
+      const pastGroups = {};
+      past.forEach(ev => {
+        if (!pastGroups[ev.date]) pastGroups[ev.date] = [];
+        pastGroups[ev.date].push(ev);
+      });
+
+      Object.entries(pastGroups).reverse().forEach(([date, evs]) => {
+        const labelStr = bbFriendlyDate(date);
+        const dayIds = evs.map(e => e.id);
+        const cards = evs.map((ev, idx) => bbRenderCard(ev, false, dayIds, idx, true)).join('');
+        html += `
+          <div class="bb-day-group bb-past-event-card" data-date="${date}">
+            <div class="bb-day-label">${bbEsc(labelStr)}</div>
+            ${cards}
+          </div>
+        `;
+      });
+    }
+
+    if (!html) {
+      list.innerHTML = '<div class="bb-empty">Nothing planned yet.<br>Tell me what\'s coming up 👆</div>';
+    } else {
+      list.innerHTML = html;
+    }
+
+    bbRenderNextUp();
+  }
+
+  function bbRenderCard(ev, isToday, dayIds, idx, isPast) {
+    const catColor = CAT_COLORS[ev.category] || CAT_COLORS.personal;
+    const isFirst = idx === 0;
+    const isLast  = idx === dayIds.length - 1;
+    const pastClass = isPast ? ' bb-past-event-card' : '';
+
+    return `
+      <div class="bb-event-card${isToday ? ' bb-today-event' : ''}${pastClass}" id="card-${ev.id}">
+        <span class="bb-cat-dot" style="background:${catColor}" title="${ev.category || 'personal'}"></span>
+        <div class="bb-event-body">
+          <div class="bb-event-name">
+            ${bbEsc(ev.name)}
+            ${ev.recurring ? '<span class="bb-recurring-icon" title="Recurring">🔁</span>' : ''}
+          </div>
+          <div class="bb-event-meta">
+            ${ev.time     ? `<span class="bb-event-time">${bbEsc(ev.time)}</span>` : ''}
+            ${ev.location ? `<span class="bb-event-loc">📍 ${bbEsc(ev.location)}</span>` : ''}
+          </div>
+        </div>
+        <div class="bb-event-reorder">
+          <button class="bb-reorder-btn" onclick="bbReorder('${ev.id}','${dayIds.join(',')}','up')" ${isFirst ? 'disabled' : ''} title="Move up">▲</button>
+          <button class="bb-reorder-btn" onclick="bbReorder('${ev.id}','${dayIds.join(',')}','down')" ${isLast ? 'disabled' : ''} title="Move down">▼</button>
+        </div>
+        <button class="bb-event-del" onclick="bbDeleteEvent('${ev.id}')" title="Delete">✕</button>
+      </div>
+    `;
   }
 
   function bbRenderTodayBanner() {
-    const today     = bbTodayStr();
-    const todayEvs  = bbEvents.filter(e => e.date === today);
-    const banner    = document.getElementById('bbTodayBanner');
+    const today    = bbTodayStr();
+    const todayEvs = bbEvents.filter(e => e.date === today)
+      .sort((a,b) => (a.time||'') < (b.time||'') ? -1 : 1);
+    const banner   = document.getElementById('bbTodayBanner');
 
     if (todayEvs.length === 0) {
       banner.classList.remove('bb-show');
       return;
     }
 
-    const summary = todayEvs
-      .sort((a,b) => (a.time||'') < (b.time||'') ? -1 : 1)
-      .map(e => e.name + (e.time ? ' at ' + e.time : ''))
-      .join(', ');
+    const prefix = `📅 You have ${todayEvs.length} event${todayEvs.length > 1 ? 's' : ''} today: `;
+    const links = todayEvs.map(e => {
+      const label = e.name + (e.time ? ' at ' + e.time : '');
+      return `<span class="bb-banner-event-link" onclick="bbScrollToEvent('${e.id}')">${bbEsc(label)}</span>`;
+    }).join(', ');
 
-    banner.textContent = `📅 You have ${todayEvs.length} event${todayEvs.length > 1 ? 's' : ''} today: ${summary}`;
+    banner.innerHTML = prefix + links;
     banner.classList.add('bb-show');
+  }
+
+  function bbScrollToEvent(id) {
+    const card = document.getElementById('card-' + id);
+    if (!card) return;
+    card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    card.classList.remove('highlight');
+    // Force reflow so animation restarts
+    void card.offsetWidth;
+    card.classList.add('highlight');
+    setTimeout(() => card.classList.remove('highlight'), 1600);
+  }
+
+  // ── Reorder same-day events ──
+  function bbReorder(evId, idsStr, direction) {
+    const ids  = idsStr.split(',');
+    const idx  = ids.indexOf(evId);
+    if (idx === -1) return;
+
+    const swapIdx = direction === 'up' ? idx - 1 : idx + 1;
+    if (swapIdx < 0 || swapIdx >= ids.length) return;
+
+    // Swap sortOrder values
+    const evA = bbEvents.find(e => e.id === ids[idx]);
+    const evB = bbEvents.find(e => e.id === ids[swapIdx]);
+    if (!evA || !evB) return;
+
+    const tmp = evA.sortOrder;
+    evA.sortOrder = evB.sortOrder;
+    evB.sortOrder = tmp;
+
+    // If same sortOrder, nudge
+    if (evA.sortOrder === evB.sortOrder) {
+      evA.sortOrder += direction === 'up' ? -1 : 1;
+    }
+
+    bbSave();
+    bbRenderEvents();
+    bbRenderTodayBanner();
   }
 
   // ══════════════════════════════════════════
   // CHAT
   // ══════════════════════════════════════════
 
-  function bbAddMsg(text, isUser) {
+  // ── Chat history persistence (R1-Bad-3) ──
+  function bbLoadChatHistory() {
+    return JSON.parse(localStorage.getItem('bb_chat_history') || '[]');
+  }
+
+  function bbSaveChatHistory(role, text) {
+    const history = bbLoadChatHistory();
+    history.push({ role, text, ts: Date.now() });
+    const trimmed = history.slice(-20);
+    localStorage.setItem('bb_chat_history', JSON.stringify(trimmed));
+  }
+
+  function bbRestoreChatHistory() {
+    const history = bbLoadChatHistory();
+    if (history.length === 0) return;
+
+    // Add divider
+    const historyEl = document.getElementById('bbChatHistory');
+    const divider = document.createElement('div');
+    divider.className = 'bb-chat-divider';
+    divider.textContent = '─── Earlier ───';
+    historyEl.appendChild(divider);
+
+    history.forEach(msg => {
+      bbAddMsgRaw(msg.text, msg.role === 'user', false);
+    });
+
+    // Add another divider before new messages
+    const divider2 = document.createElement('div');
+    divider2.className = 'bb-chat-divider';
+    divider2.textContent = '─── Now ───';
+    historyEl.appendChild(divider2);
+  }
+
+  function bbAddMsgRaw(text, isUser, save) {
     const history = document.getElementById('bbChatHistory');
     const div = document.createElement('div');
     div.className = 'bb-msg ' + (isUser ? 'bb-msg-user' : 'bb-msg-bot');
@@ -764,7 +1369,18 @@
     div.appendChild(bubble);
     history.appendChild(div);
     history.scrollTop = history.scrollHeight;
+
+    if (save) {
+      bbSaveChatHistory(isUser ? 'user' : 'bot', text);
+    }
   }
+
+  function bbAddMsg(text, isUser) {
+    bbAddMsgRaw(text, isUser, true);
+  }
+
+  // ── Pending confirmation state ──
+  let bbPendingConfirm = null;
 
   function bbSend() {
     const input = document.getElementById('bbInput');
@@ -774,22 +1390,193 @@
     input.value = '';
     bbAddMsg(bbEsc(raw), true);
 
-    // Small delay for "typing" feel
+    // Handle pending yes/no confirmations
+    if (bbPendingConfirm) {
+      const lower = raw.toLowerCase();
+      if (/^(yes|y|yep|yeah|sure|ok|okay|confirm|go ahead|do it)$/.test(lower)) {
+        const action = bbPendingConfirm;
+        bbPendingConfirm = null;
+        action.yes();
+        return;
+      }
+      if (/^(no|n|nope|cancel|nah|stop)$/.test(lower)) {
+        bbPendingConfirm = null;
+        setTimeout(() => bbAddMsg("OK, cancelled.", false), 300);
+        return;
+      }
+    }
+
     setTimeout(() => {
+      // Try special queries first
+      const query = bbParseQuery(raw);
+
+      if (query) {
+        if (query.type === 'query') {
+          bbHandleQuery(query);
+          return;
+        }
+        if (query.type === 'edit') {
+          bbHandleEdit(query, raw);
+          return;
+        }
+        if (query.type === 'clearDay') {
+          bbHandleClearDay(query);
+          return;
+        }
+        if (query.type === 'summary') {
+          bbHandleSummary();
+          return;
+        }
+      }
+
+      // Check for recurring event patterns
+      const isRecurring = /\b(every\s+(?:monday|tuesday|wednesday|thursday|friday|saturday|sunday)|weekly|every\s+week)\b/i.test(raw);
+
+      // Try to parse as event
       const ev = bbParseEvent(raw);
 
       if (!ev) {
-        const fail = FAIL_MESSAGES[Math.floor(Math.random() * FAIL_MESSAGES.length)];
-        bbAddMsg(fail, false);
+        bbAddMsg(bbFailMessage(raw), false);
         return;
       }
 
-      bbEvents.push(ev);
-      bbSave();
-      bbRenderEvents();
-      bbRenderTodayBanner();
-      bbAddMsg(bbBotResponse(ev), false);
+      // Smart confirmation before adding (R2-Bad-2): show confirmation then add after delay
+      const dateStr = bbFriendlyDate(ev.date);
+      const timeStr = ev.time ? ` at <b>${bbEsc(ev.time)}</b>` : '';
+      const locStr  = ev.location ? ` at ${bbEsc(ev.location)}` : '';
+      bbAddMsg(`Got it! <b>${bbEsc(ev.name)}</b> on <b>${bbEsc(dateStr)}</b>${timeStr}${locStr}. Adding now... 📅`, false);
+
+      setTimeout(() => {
+        // Handle recurring events
+        if (isRecurring) {
+          const series = bbGenerateRecurring(raw, ev);
+          if (series) {
+            series.forEach(e => bbEvents.push(e));
+            bbSave();
+            bbRenderEvents();
+            bbRenderTodayBanner();
+            bbAddMsg(`Done! Created ${series.length} recurring events. 🔁`, false);
+            return;
+          }
+        }
+
+        bbEvents.push(ev);
+        bbSave();
+        bbRenderEvents();
+        bbRenderTodayBanner();
+      }, 400);
     }, 380);
+  }
+
+  function bbHandleQuery(query) {
+    const dateStr = bbFriendlyDate(query.date);
+    const matched = bbEvents.filter(e => e.date === query.date)
+      .sort((a,b) => (a.time||'') < (b.time||'') ? -1 : 1);
+
+    if (matched.length === 0) {
+      bbAddMsg(`Nothing on ${bbEsc(dateStr)}. Want to add something?`, false);
+      return;
+    }
+
+    const list = matched.map(e => {
+      let s = `<b>${bbEsc(e.name)}</b>`;
+      if (e.time) s += ` at ${bbEsc(e.time)}`;
+      return s;
+    }).join(', ');
+
+    bbAddMsg(`You have ${matched.length} thing${matched.length > 1 ? 's' : ''} on ${bbEsc(dateStr)}: ${list}.`, false);
+  }
+
+  function bbHandleEdit(query, raw) {
+    const nameLower = query.eventName.toLowerCase();
+
+    // Try to find a matching event
+    const match = bbEvents.find(e => e.name.toLowerCase().includes(nameLower));
+    if (!match) {
+      const list = bbEvents.slice(0,5).map(e => `<b>${bbEsc(e.name)}</b>`).join(', ');
+      bbAddMsg(`I couldn't find "${bbEsc(query.eventName)}" in your events. Here's what I have: ${list}${bbEvents.length > 5 ? '…' : ''}.`, false);
+      return;
+    }
+
+    // Parse new date from remainder
+    const dateResult = bbParseDate(query.newDateRaw.toLowerCase());
+    if (!dateResult.date) {
+      bbAddMsg(`I found <b>${bbEsc(match.name)}</b> but couldn't understand the new date. Try something like "move ${bbEsc(match.name)} to next Friday".`, false);
+      return;
+    }
+
+    const newDateStr = dateResult.date.toISOString().slice(0,10);
+
+    // Also parse time if present
+    const timeResult = bbParseTime(query.newDateRaw.toLowerCase());
+
+    match.date = newDateStr;
+    if (timeResult.time) match.time = timeResult.time;
+    bbSave();
+    bbRenderEvents();
+    bbRenderTodayBanner();
+
+    const friendlyNew = bbFriendlyDate(newDateStr);
+    const timeStr = match.time ? ` at ${match.time}` : '';
+    bbAddMsg(`Updated <b>${bbEsc(match.name)}</b> to ${bbEsc(friendlyNew)}${bbEsc(timeStr)}. ✅`, false);
+  }
+
+  function bbHandleClearDay(query) {
+    const matched = bbEvents.filter(e => e.date === query.date);
+    if (matched.length === 0) {
+      bbAddMsg(`No events on ${bbEsc(query.dayLabel)}. Nothing to clear.`, false);
+      return;
+    }
+
+    const dateStr = bbFriendlyDate(query.date);
+    bbAddMsg(`Remove ${matched.length} event${matched.length > 1 ? 's' : ''} on ${bbEsc(dateStr)}? Reply <b>yes</b> or <b>no</b>.`, false);
+
+    bbPendingConfirm = {
+      yes: () => {
+        const ids = new Set(matched.map(e => e.id));
+        bbEvents = bbEvents.filter(e => !ids.has(e.id));
+        bbSave();
+        bbRenderEvents();
+        bbRenderTodayBanner();
+        bbAddMsg(`Removed ${matched.length} event${matched.length > 1 ? 's' : ''} from ${bbEsc(dateStr)}.`, false);
+      }
+    };
+  }
+
+  function bbHandleSummary() {
+    const today    = bbTodayStr();
+    const now      = new Date();
+    const future   = bbEvents.filter(e => e.date >= today).sort((a,b) => a.date < b.date ? -1 : 1);
+
+    if (future.length === 0) {
+      bbAddMsg("You have no upcoming events. Want to add something?", false);
+      return;
+    }
+
+    // This week
+    const weekEnd = new Date(now);
+    weekEnd.setDate(weekEnd.getDate() + (6 - weekEnd.getDay()));
+    weekEnd.setHours(23,59,59,999);
+    const weekEndStr = weekEnd.toISOString().slice(0,10);
+
+    // Next week
+    const nextWeekStart = new Date(weekEnd);
+    nextWeekStart.setDate(nextWeekStart.getDate() + 1);
+    const nextWeekEnd = new Date(nextWeekStart);
+    nextWeekEnd.setDate(nextWeekEnd.getDate() + 6);
+    const nextWeekStartStr = nextWeekStart.toISOString().slice(0,10);
+    const nextWeekEndStr   = nextWeekEnd.toISOString().slice(0,10);
+
+    const thisWeekCount = future.filter(e => e.date <= weekEndStr).length;
+    const nextWeekCount = future.filter(e => e.date >= nextWeekStartStr && e.date <= nextWeekEndStr).length;
+    const next = future[0];
+
+    bbAddMsg(
+      `You have <b>${future.length}</b> event${future.length > 1 ? 's' : ''} coming up. ` +
+      `Next is <b>${bbEsc(next.name)}</b> on ${bbEsc(bbFriendlyDateShort(next.date))}. ` +
+      `This week: <b>${thisWeekCount}</b>. Next week: <b>${nextWeekCount}</b>.`,
+      false
+    );
   }
 
   function bbDeleteEvent(id) {
@@ -808,6 +1595,100 @@
   }
 
   // ══════════════════════════════════════════
+  // EXPORT .ICS (R1-Bad-2)
+  // ══════════════════════════════════════════
+
+  function bbExportIcs() {
+    if (bbEvents.length === 0) {
+      bbAddMsg("No events to export yet.", false);
+      return;
+    }
+
+    function icsDate(isoDate, time) {
+      const d = new Date(isoDate + 'T12:00:00');
+      if (time) {
+        // Parse time string "7:30 PM"
+        const m = time.match(/(\d+)(?::(\d+))?\s*(AM|PM)/i);
+        if (m) {
+          let h = parseInt(m[1], 10);
+          const mins = parseInt(m[2] || '0', 10);
+          const ampm = m[3].toUpperCase();
+          if (ampm === 'PM' && h < 12) h += 12;
+          if (ampm === 'AM' && h === 12) h = 0;
+          d.setHours(h, mins, 0, 0);
+          // Return local time format
+          const pad = n => String(n).padStart(2,'0');
+          const yr  = d.getFullYear();
+          const mo  = pad(d.getMonth()+1);
+          const dy  = pad(d.getDate());
+          const hr  = pad(d.getHours());
+          const mn  = pad(d.getMinutes());
+          return `${yr}${mo}${dy}T${hr}${mn}00`;
+        }
+      }
+      // All-day
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}${pad(d.getMonth()+1)}${pad(d.getDate())}`;
+    }
+
+    const vevents = bbEvents.map(ev => {
+      const dtstart = icsDate(ev.date, ev.time);
+      const loc = ev.location ? `LOCATION:${ev.location}\r\n` : '';
+      return `BEGIN:VEVENT\r\nDTSTART:${dtstart}\r\nSUMMARY:${ev.name}\r\n${loc}END:VEVENT`;
+    }).join('\r\n');
+
+    const ics = `BEGIN:VCALENDAR\r\nVERSION:2.0\r\nPRODID:-//BusyBoy//EN\r\n${vevents}\r\nEND:VCALENDAR`;
+    const blob = new Blob([ics], { type: 'text/calendar' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href     = url;
+    a.download = 'busyboy-calendar.ics';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  // ══════════════════════════════════════════
+  // CLEAR PAST EVENTS (R1-Future-2)
+  // ══════════════════════════════════════════
+
+  function bbClearPast() {
+    const today = bbTodayStr();
+    const past  = bbEvents.filter(e => e.date < today);
+
+    if (past.length === 0) {
+      bbAddMsg("No past events to remove.", false);
+      return;
+    }
+
+    const confirmDiv = document.getElementById('bbClearConfirm');
+    confirmDiv.style.display = 'block';
+    confirmDiv.innerHTML = `
+      <div class="bb-inline-confirm">
+        <span>Remove ${past.length} past event${past.length > 1 ? 's' : ''}?</span>
+        <button class="bb-confirm-yes" onclick="bbConfirmClearPast()">Yes</button>
+        <button class="bb-confirm-no" onclick="bbCancelClearPast()">No</button>
+      </div>
+    `;
+  }
+
+  function bbConfirmClearPast() {
+    const today = bbTodayStr();
+    const removed = bbEvents.filter(e => e.date < today).length;
+    bbEvents = bbEvents.filter(e => e.date >= today);
+    bbSave();
+    bbRenderEvents();
+    bbRenderTodayBanner();
+    document.getElementById('bbClearConfirm').style.display = 'none';
+    bbAddMsg(`Removed ${removed} past event${removed > 1 ? 's' : ''}. ✅`, false);
+  }
+
+  function bbCancelClearPast() {
+    document.getElementById('bbClearConfirm').style.display = 'none';
+  }
+
+  // ══════════════════════════════════════════
   // EVENT LISTENERS
   // ══════════════════════════════════════════
 
@@ -816,12 +1697,28 @@
     if (e.key === 'Enter') bbSend();
   });
 
+  document.getElementById('bbExportIcs').addEventListener('click', bbExportIcs);
+  document.getElementById('bbClearPast').addEventListener('click', bbClearPast);
+
+  document.getElementById('bbTogglePast').addEventListener('click', function() {
+    bbShowPast = !bbShowPast;
+    this.classList.toggle('bb-btn-active', bbShowPast);
+    this.textContent = bbShowPast ? 'Hide Past' : 'Show Past';
+    bbRenderEvents();
+  });
+
   // ══════════════════════════════════════════
   // INIT
   // ══════════════════════════════════════════
 
-  // Welcome message
-  bbAddMsg("Hey! I'm <b>BusyBoy</b>. Tell me about your upcoming events in plain English and I'll keep track of them for you. Try something like <i>\"Dinner with mum tomorrow at 7pm\"</i> or <i>\"Meeting next Monday at 9am at the office\"</i>.", false);
+  // Restore previous chat messages
+  bbRestoreChatHistory();
+
+  // Welcome message (only show if no prior history)
+  const existingHistory = bbLoadChatHistory();
+  if (existingHistory.length === 0) {
+    bbAddMsg("Hey! I'm <b>BusyBoy</b>. Tell me about your upcoming events in plain English and I'll keep track of them for you. Try something like <i>\"Dinner with mum tomorrow at 7pm\"</i> or <i>\"Meeting next Monday at 9am at the office\"</i>. You can also ask <i>\"what's on Friday?\"</i> or <i>\"move dentist to next Tuesday\"</i>.", false);
+  }
 
   bbRenderEvents();
   bbRenderTodayBanner();
