@@ -9,6 +9,8 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
   <style>
+    html { scroll-behavior: smooth; }
+
     .project-tag {
       display: inline-block;
       font-size: 0.68rem;
@@ -29,50 +31,6 @@
       margin-top: 6px;
       font-style: italic;
     }
-
-    .devlog-entry {
-      padding: 28px 0;
-      border-bottom: 1px solid var(--border);
-    }
-
-    .devlog-entry:first-of-type {
-      border-top: 1px solid var(--border);
-      margin-top: 32px;
-    }
-
-    .devlog-num {
-      font-size: 0.7rem;
-      font-family: var(--font-display);
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--text-muted);
-      margin-bottom: 6px;
-    }
-
-    .devlog-title {
-      font-family: var(--font-display);
-      font-size: 1.2rem;
-      font-weight: 600;
-      color: var(--text);
-      margin-bottom: 6px;
-    }
-
-    .devlog-date {
-      font-size: 0.78rem;
-      color: var(--text-muted);
-      margin-bottom: 14px;
-    }
-
-    .devlog-body {
-      font-size: 0.92rem;
-      color: var(--text-muted);
-      line-height: 1.8;
-      max-width: 580px;
-    }
-
-    .devlog-body p { margin-bottom: 12px; }
-    .devlog-body p:last-child { margin-bottom: 0; }
 
     .status-bar {
       display: flex;
@@ -96,6 +54,138 @@
 
     .status-val { color: var(--text); }
 
+    /* ── IN-PAGE NAV ──────────────────── */
+    .inpage-nav {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 0 9px;
+      margin: 0 -48px 36px -56px;
+      padding-left: 56px;
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .inpage-nav a {
+      font-size: 0.75rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 12px;
+      text-decoration: none;
+      transition: color 0.15s, background 0.15s, border-color 0.15s;
+    }
+
+    .inpage-nav a:hover {
+      color: var(--text);
+      background: var(--border);
+      border-color: var(--border);
+      opacity: 1;
+    }
+
+    /* ── HOOK / PULL QUOTE ────────────── */
+    .hook-block {
+      background: #18171a;
+      border-radius: 4px;
+      padding: 28px 32px;
+      max-width: 580px;
+      margin: 0 0 36px;
+    }
+
+    .hook-block p {
+      font-family: var(--font-display);
+      font-size: 1.08rem;
+      font-weight: 400;
+      font-style: italic;
+      color: #e8e4de;
+      line-height: 1.75;
+    }
+
+    /* ── BOARD DIAGRAM ────────────────── */
+    .board-section {
+      margin: 0 0 36px;
+    }
+
+    .board-section-label {
+      font-family: var(--font-display);
+      font-size: 0.8rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+
+    .board-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 48px);
+      gap: 5px;
+      width: fit-content;
+    }
+
+    .board-cell {
+      width: 48px;
+      height: 48px;
+      background: #1c1b1e;
+      border: 1px solid #383540;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.62rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: #555;
+      cursor: default;
+    }
+
+    .board-cell.corner {
+      background: #2a1f08;
+      border-color: #c8850040;
+      color: #c88500;
+    }
+
+    .board-cell.center {
+      background: #2a0808;
+      border-color: #c8303040;
+      color: #c83030;
+    }
+
+    .board-legend {
+      display: flex;
+      gap: 20px;
+      margin-top: 12px;
+      flex-wrap: wrap;
+    }
+
+    .legend-item {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+    }
+
+    .legend-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+
+    .legend-dot.corner { background: #c88500; opacity: 0.7; }
+    .legend-dot.center { background: #c83030; opacity: 0.7; }
+    .legend-dot.empty  { background: #383540; opacity: 0.9; }
+
+    /* ── HOW TO PLAY STEPS ────────────── */
     .rules-block {
       background: #fff;
       border: 1px solid var(--border);
@@ -115,26 +205,609 @@
       margin-bottom: 14px;
     }
 
-    .rules-block ul {
-      list-style: none;
+    .step-list {
       display: flex;
       flex-direction: column;
-      gap: 9px;
+      gap: 16px;
     }
 
-    .rules-block li {
-      font-size: 0.88rem;
+    .step-row {
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+    }
+
+    .step-num {
+      font-family: var(--font-display);
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #c88500;
+      line-height: 1;
+      min-width: 26px;
+      text-align: right;
+      padding-top: 1px;
+    }
+
+    .step-body {
+      flex: 1;
+    }
+
+    .step-title {
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: var(--font-display);
       color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .step-desc {
+      font-size: 0.84rem;
+      color: var(--text-muted);
       line-height: 1.6;
-      padding-left: 16px;
+    }
+
+    /* ── JACK CALLOUT ─────────────────── */
+    .jack-callout {
+      background: #0f0f12;
+      border: 2px solid #333;
+      border-radius: 4px;
+      padding: 22px 26px;
+      max-width: 480px;
+      margin: 28px 0;
+    }
+
+    .jack-callout .jack-header {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      color: #f0d060;
+      margin-bottom: 10px;
+    }
+
+    .jack-callout p {
+      font-size: 0.87rem;
+      color: #b8b0a8;
+      line-height: 1.7;
+      margin-bottom: 6px;
+    }
+
+    .jack-callout p:last-child { margin-bottom: 0; }
+
+    /* ── FACTIONS GRID ────────────────── */
+    .factions-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      max-width: 580px;
+      margin: 24px 0 36px;
+    }
+
+    .faction-card {
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 18px 20px;
+      background: #fff;
+    }
+
+    .faction-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 3px;
+    }
+
+    .faction-tagline {
+      font-size: 0.78rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      line-height: 1.5;
+    }
+
+    .faction-lore {
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+    }
+
+    .faction-unity  .faction-name { color: #4a7acc; }
+    .faction-terra  .faction-name { color: #5a8a4a; }
+    .faction-prime  .faction-name { color: #cc7a4a; }
+    .faction-nova   .faction-name { color: #9a4acc; }
+
+    .faction-unity  { border-top: 3px solid #4a7acc; }
+    .faction-terra  { border-top: 3px solid #5a8a4a; }
+    .faction-prime  { border-top: 3px solid #cc7a4a; }
+    .faction-nova   { border-top: 3px solid #9a4acc; }
+
+    /* ── CARD GALLERY ─────────────────── */
+    .card-gallery {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin: 24px 0 36px;
+      max-width: 600px;
+    }
+
+    .game-card {
+      width: 112px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border);
+      padding: 12px 10px 10px;
+      background: #fff;
+      position: relative;
+      cursor: default;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .game-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.12);
+    }
+
+    .game-card.highlighted {
+      box-shadow: 0 0 0 3px #c88500, 0 6px 18px rgba(200,133,0,0.3);
+      transform: translateY(-2px);
+    }
+
+    .card-faction {
+      font-size: 0.6rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+
+    .card-name {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.25;
+    }
+
+    .card-stats {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      margin-bottom: 4px;
+      font-family: monospace;
+    }
+
+    .card-effect {
+      font-size: 0.68rem;
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.4;
+    }
+
+    .card-share {
+      display: block;
+      font-size: 0.6rem;
+      color: var(--text-dim);
+      text-align: right;
+      margin-top: 6px;
+      cursor: pointer;
+      text-decoration: underline;
+      text-underline-offset: 2px;
+      transition: color 0.15s;
+    }
+
+    .card-share:hover { color: var(--text-muted); }
+
+    .faction-unity .card-faction { color: #4a7acc; }
+    .faction-terra .card-faction { color: #5a8a4a; }
+    .faction-prime .card-faction { color: #cc7a4a; }
+    .faction-nova  .card-faction { color: #9a4acc; }
+
+    .game-card.faction-unity { border-top: 3px solid #4a7acc; }
+    .game-card.faction-terra { border-top: 3px solid #5a8a4a; }
+    .game-card.faction-prime { border-top: 3px solid #cc7a4a; }
+    .game-card.faction-nova  { border-top: 3px solid #9a4acc; }
+
+    .game-card.faction-jack {
+      background: #0f0f12;
+      border: 1.5px solid #555;
+    }
+
+    .game-card.faction-jack .card-name  { color: #f0d060; }
+    .game-card.faction-jack .card-stats { color: #a09080; }
+    .game-card.faction-jack .card-effect { color: #888; }
+    .game-card.faction-jack .card-share  { color: #666; }
+
+    .wild-badge {
+      display: inline-block;
+      font-size: 0.58rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: #f0d060;
+      border: 1px solid #f0d06040;
+      border-radius: 2px;
+      padding: 1px 5px;
+      margin-bottom: 6px;
+    }
+
+    /* ── COMBAT DEMO ──────────────────── */
+    .demo-section {
+      background: #1c1b1e;
+      border-radius: 6px;
+      padding: 28px;
+      max-width: 580px;
+      margin: 24px 0 36px;
+    }
+
+    .demo-label {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #888;
+      margin-bottom: 18px;
+    }
+
+    .demo-board {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .demo-lane {
+      display: flex;
+      flex-direction: column;
+      gap: 5px;
+      align-items: center;
+      width: 90px;
+    }
+
+    .demo-lane-label {
+      font-size: 0.6rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: #555;
+      margin-bottom: 3px;
+    }
+
+    .demo-cell {
+      width: 90px;
+      height: 54px;
+      border-radius: 4px;
+      border: 1px dashed #383540;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.72rem;
+      color: #444;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
       position: relative;
     }
 
-    .rules-block li::before {
-      content: '—';
-      position: absolute;
-      left: 0;
+    .demo-cell.has-card {
+      border-style: solid;
+      color: #e8e4de;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .demo-cell.droppable {
+      border-color: #c88500;
+      background: #2a1f0830;
+    }
+
+    .demo-cell-name { font-size: 0.68rem; font-weight: 600; }
+    .demo-cell-stats { font-size: 0.6rem; color: #888; font-family: monospace; }
+
+    .demo-zone-p1 .demo-cell.has-card { border-color: #4a7acc60; background: #4a7acc12; }
+    .demo-zone-p2 .demo-cell.has-card { border-color: #c8303060; background: #c8303012; }
+    .demo-zone-contested .demo-cell { border-color: #38354060; }
+    .demo-zone-contested .demo-cell.has-card { border-color: #66604060; background: #66604012; color: #e8e4de; }
+
+    .demo-hand {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .demo-hand-card {
+      width: 76px;
+      height: 54px;
+      border-radius: 4px;
+      border: 1.5px solid #4a7acc60;
+      background: #4a7acc12;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 2px;
+      font-size: 0.68rem;
+      color: #c8c0b8;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    }
+
+    .demo-hand-card .dc-name { font-weight: 600; font-size: 0.7rem; }
+    .demo-hand-card .dc-stats { font-size: 0.6rem; color: #888; font-family: monospace; }
+
+    .demo-hand-card.selected {
+      border-color: #c88500;
+      background: #2a1f0840;
+      transform: translateY(-2px);
+    }
+
+    .demo-hand-card.used {
+      opacity: 0.3;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .demo-result {
+      font-size: 0.82rem;
+      color: #a09080;
+      line-height: 1.65;
+      min-height: 24px;
+      margin-bottom: 14px;
+    }
+
+    .demo-result .win   { color: #60c060; font-weight: 600; }
+    .demo-result .lose  { color: #c05050; font-weight: 600; }
+    .demo-result .draw  { color: #c88500; font-weight: 600; }
+
+    .demo-btn {
+      font-size: 0.78rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      color: #c8c0b8;
+      background: #2a2830;
+      border: 1px solid #444;
+      border-radius: 3px;
+      padding: 7px 18px;
+      cursor: pointer;
+      transition: background 0.15s, border-color 0.15s;
+    }
+
+    .demo-btn:hover {
+      background: #33303a;
+      border-color: #666;
+    }
+
+    .demo-turn-info {
+      font-size: 0.75rem;
+      color: #666;
+      margin-bottom: 12px;
+    }
+
+    /* ── DEVLOG (styled) ──────────────── */
+    .devlog-entry {
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .devlog-entry:first-of-type {
+      border-top: 1px solid var(--border);
+      margin-top: 8px;
+    }
+
+    .devlog-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .devlog-version {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      color: var(--text);
+    }
+
+    .devlog-date-pill {
+      font-size: 0.72rem;
       color: var(--text-muted);
+    }
+
+    .devlog-tag-pill {
+      font-size: 0.62rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 2px 9px;
+      border-radius: 20px;
+      background: #fef3e2;
+      color: #b56a00;
+    }
+
+    .devlog-title {
+      font-family: var(--font-display);
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 14px;
+    }
+
+    .devlog-body {
+      font-size: 0.92rem;
+      color: var(--text-muted);
+      line-height: 1.8;
+      max-width: 580px;
+    }
+
+    .devlog-body p { margin-bottom: 12px; }
+    .devlog-body p:last-child { margin-bottom: 0; }
+
+    /* ── NEXT UP BOX ──────────────────── */
+    .next-up-box {
+      border-left: 3px solid #3a9a7a;
+      background: #f2fbf8;
+      border-radius: 0 4px 4px 0;
+      padding: 14px 18px;
+      max-width: 480px;
+      margin: 28px 0 0;
+    }
+
+    .nu-label {
+      display: block;
+      font-size: 0.68rem;
+      font-family: var(--font-display);
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: #3a9a7a;
+      margin-bottom: 6px;
+    }
+
+    .next-up-box p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      line-height: 1.65;
+      margin: 0;
+    }
+
+    /* ── ROADMAP TABLE ────────────────── */
+    .roadmap-table {
+      width: 100%;
+      max-width: 580px;
+      border-collapse: collapse;
+      margin: 20px 0 36px;
+      font-size: 0.87rem;
+    }
+
+    .roadmap-table th {
+      font-family: var(--font-display);
+      font-size: 0.68rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: left;
+      padding: 6px 12px 10px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .roadmap-table td {
+      padding: 9px 12px 9px 0;
+      border-bottom: 1px solid var(--border-light);
+      color: var(--text-muted);
+      vertical-align: middle;
+    }
+
+    .roadmap-table td:first-child {
+      font-family: monospace;
+      font-size: 0.8rem;
+      color: var(--text);
+      white-space: nowrap;
+    }
+
+    .roadmap-table td:last-child {
+      white-space: nowrap;
+    }
+
+    .status-done     { color: #3a9a3a; }
+    .status-progress { color: #c88500; }
+    .status-planned  { color: var(--text-dim); }
+
+    /* ── CHANGELOG ────────────────────── */
+    .changelog-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-width: 580px;
+      margin: 16px 0 36px;
+    }
+
+    .changelog-list li {
+      display: flex;
+      gap: 14px;
+      align-items: baseline;
+      font-size: 0.84rem;
+      line-height: 1.5;
+    }
+
+    .cl-ver {
+      font-family: monospace;
+      font-size: 0.78rem;
+      color: var(--text);
+      min-width: 56px;
+      flex-shrink: 0;
+    }
+
+    .cl-date {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      min-width: 96px;
+      flex-shrink: 0;
+    }
+
+    .cl-desc {
+      color: var(--text-muted);
+    }
+
+    /* ── SECTION HEADINGS ─────────────── */
+    .section-heading {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin: 40px 0 4px;
+    }
+
+    .section-heading:first-child { margin-top: 0; }
+
+    .section-sub {
+      font-size: 0.87rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+
+    /* ── TOAST ────────────────────────── */
+    .copy-toast {
+      position: fixed;
+      bottom: 24px;
+      right: 24px;
+      background: #18171a;
+      color: #e8e4de;
+      font-size: 0.8rem;
+      padding: 8px 16px;
+      border-radius: 4px;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s ease;
+      z-index: 9999;
+    }
+
+    .copy-toast.visible { opacity: 1; }
+
+    @media (max-width: 700px) {
+      .inpage-nav {
+        margin: 0 -20px 28px;
+        padding-left: 20px;
+      }
+
+      .factions-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .card-gallery {
+        gap: 10px;
+      }
+
+      .demo-board {
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
     }
   </style>
 </head>
@@ -169,70 +842,615 @@
 
     <div class="divider"></div>
 
-    <p class="page-subtitle" style="max-width: 580px; font-size: 0.98rem;">
+    <!-- IN-PAGE NAV -->
+    <nav class="inpage-nav" aria-label="Page sections">
+      <a href="#why">Why Mothership</a>
+      <a href="#rules">Rules</a>
+      <a href="#how-to-play">How to Play</a>
+      <a href="#factions">Factions</a>
+      <a href="#cards">Card Gallery</a>
+      <a href="#demo">Try it</a>
+      <a href="#devlog">Devlog</a>
+      <a href="#roadmap">Roadmap</a>
+    </nav>
+
+    <!-- WHY MOTHERSHIP -->
+    <section id="why">
+      <div class="hook-block">
+        <p>Most card games ask you to build the perfect deck. Mothership asks you to defend what you have and destroy what they have, lane by lane, card by card. Four factions. One board. No deck-building required.</p>
+      </div>
+    </section>
+
+    <p class="page-subtitle" style="max-width: 580px; font-size: 0.98rem; margin-bottom: 32px;">
       Mothership is a two-player strategic card game with a roguelike structure.
       Each player builds an army of cards around their mothership — defence on the left,
       attack on the right. To win, you destroy the opponent's mothership. But to reach it,
       you must dismantle everything in front of it first.
     </p>
 
-    <div class="rules-block">
-      <h3>How it plays</h3>
-      <ul>
-        <li>Each player places their mothership card at the centre of their field</li>
-        <li>Cards are connected by overlapping into corner slots: same number connects in the upper corner, same suit or colour in the lower corner</li>
-        <li>Only cards with nothing on top of them can attack or be attacked — you build in layers</li>
-        <li>To attack: select your attacker and a target, then both players flip the top card of their deck — highest combined total wins that fight</li>
-        <li>You must destroy all defence cards before you can attack the mothership</li>
-        <li>Factions: Human Unity, Human Terra, Alien Prime, Alien Nova — each with distinct card art colours</li>
-        <li>The Jack card is wild — can connect to anything</li>
+    <!-- RULES / BOARD DIAGRAM -->
+    <section id="rules">
+      <h2 class="section-heading">The Board</h2>
+      <p class="section-sub">A 5×5 grid. Four corner slots score points. The centre is the Mothership.</p>
+
+      <div class="board-section">
+        <div class="board-grid" role="img" aria-label="5x5 Mothership board diagram">
+          <!-- Row 1 -->
+          <div class="board-cell corner" title="Corner slots score points. Capture and hold to win.">C</div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell corner" title="Corner slots score points. Capture and hold to win.">C</div>
+          <!-- Row 2 -->
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <!-- Row 3 -->
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell center" title="The Mothership. Protect yours. Destroy theirs.">M</div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <!-- Row 4 -->
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <!-- Row 5 -->
+          <div class="board-cell corner" title="Corner slots score points. Capture and hold to win.">C</div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell"></div>
+          <div class="board-cell corner" title="Corner slots score points. Capture and hold to win.">C</div>
+        </div>
+        <div class="board-legend">
+          <div class="legend-item"><div class="legend-dot corner"></div> Corner — scores points</div>
+          <div class="legend-item"><div class="legend-dot center"></div> Mothership — protect or destroy</div>
+          <div class="legend-item"><div class="legend-dot empty"></div> Open slot</div>
+        </div>
+      </div>
+
+      <!-- JACK CALLOUT -->
+      <div class="jack-callout">
+        <div class="jack-header">🃏 THE WILD JACK</div>
+        <p>The Jack card belongs to no faction and serves all of them.</p>
+        <p>Play it in any lane. It adapts to the strongest adjacent card's faction type.</p>
+        <p>Every deck has one. No one expects how it's used.</p>
+      </div>
+    </section>
+
+    <!-- HOW TO PLAY -->
+    <section id="how-to-play">
+      <div class="rules-block">
+        <h3>How to Play</h3>
+        <div class="step-list">
+          <div class="step-row">
+            <div class="step-num">1</div>
+            <div class="step-body">
+              <div class="step-title">🃏 Deal the cards</div>
+              <div class="step-desc">Each player draws 7 cards from their faction deck and places their Mothership at the centre slot.</div>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">2</div>
+            <div class="step-body">
+              <div class="step-title">⚔️ Place and attack</div>
+              <div class="step-desc">On your turn, place a card in any empty lane. Cards connect via corner slots — same number upper corner, same suit lower corner.</div>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">3</div>
+            <div class="step-body">
+              <div class="step-title">🏰 Control the corners</div>
+              <div class="step-desc">Only cards with nothing on top can attack or be attacked. Build in layers to protect your key pieces.</div>
+            </div>
+          </div>
+          <div class="step-row">
+            <div class="step-num">4</div>
+            <div class="step-body">
+              <div class="step-title">🎯 Destroy the Mothership</div>
+              <div class="step-desc">Both players flip the top card of their deck — highest combined total wins the fight. Destroy all defence cards, then strike the Mothership to win.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- FACTIONS -->
+    <section id="factions">
+      <h2 class="section-heading">Factions</h2>
+      <p class="section-sub">Four factions. Each with a distinct worldview and card art palette.</p>
+
+      <div class="factions-grid">
+        <div class="faction-card faction-unity">
+          <div class="faction-name">Human Unity</div>
+          <div class="faction-tagline">"Control the board. Control the future."</div>
+          <div class="faction-lore">The Unity council believes civilisation survives only through coordination — every card placed in service of a larger grid. They do not fight alone; they fight as a formation, and their strength compounds with every connected position.</div>
+        </div>
+        <div class="faction-card faction-terra">
+          <div class="faction-name">Human Terra</div>
+          <div class="faction-tagline">"The earth remembers. So do we."</div>
+          <div class="faction-lore">Terra's soldiers fight for reclaimed ground, each lane representing soil that was lost and must be won back. Their cards are slower to place but deeply rooted — dislodging a Terra position costs more than it should.</div>
+        </div>
+        <div class="faction-card faction-prime">
+          <div class="faction-name">Alien Prime</div>
+          <div class="faction-tagline">"Logic is the only weapon worth carrying."</div>
+          <div class="faction-lore">Prime calculates every placement like a proof — no card is placed without a determined outcome. They regard the corner slots as variables to be solved, and the Mothership as an equation that ends the game.</div>
+        </div>
+        <div class="faction-card faction-nova">
+          <div class="faction-name">Alien Nova</div>
+          <div class="faction-tagline">"Change is not a threat. It is a strategy."</div>
+          <div class="faction-lore">Nova shifts and mutates mid-game, cards that were defensive becoming offensive as conditions evolve. Their decks feel unstable to opponents precisely because they are — and that instability is the plan.</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CARD GALLERY -->
+    <section id="cards">
+      <h2 class="section-heading">Card Gallery</h2>
+      <p class="section-sub">Sample cards from each faction. Click "Share" to copy a link to any card.</p>
+
+      <div class="card-gallery" id="cardGallery">
+
+        <div class="game-card faction-unity" id="card-unity-infantry" data-card="unity-Infantry">
+          <div class="card-faction">Unity</div>
+          <div class="card-name">Infantry</div>
+          <div class="card-stats">ATK 3 · DEF 4</div>
+          <div class="card-effect">None</div>
+          <span class="card-share" onclick="shareCard('unity-Infantry')">Share</span>
+        </div>
+
+        <div class="game-card faction-unity" id="card-unity-marshal" data-card="unity-Marshal">
+          <div class="card-faction">Unity</div>
+          <div class="card-name">Marshal</div>
+          <div class="card-stats">ATK 5 · DEF 3</div>
+          <div class="card-effect">Adjacent cards gain +1 DEF</div>
+          <span class="card-share" onclick="shareCard('unity-Marshal')">Share</span>
+        </div>
+
+        <div class="game-card faction-terra" id="card-terra-ironroot" data-card="terra-Ironroot">
+          <div class="card-faction">Terra</div>
+          <div class="card-name">Ironroot</div>
+          <div class="card-stats">ATK 2 · DEF 6</div>
+          <div class="card-effect">Cannot be moved once placed</div>
+          <span class="card-share" onclick="shareCard('terra-Ironroot')">Share</span>
+        </div>
+
+        <div class="game-card faction-terra" id="card-terra-warden" data-card="terra-Warden">
+          <div class="card-faction">Terra</div>
+          <div class="card-name">Warden</div>
+          <div class="card-stats">ATK 4 · DEF 4</div>
+          <div class="card-effect">Corner slots: +2 DEF bonus</div>
+          <span class="card-share" onclick="shareCard('terra-Warden')">Share</span>
+        </div>
+
+        <div class="game-card faction-prime" id="card-prime-analyst" data-card="prime-Analyst">
+          <div class="card-faction">Prime</div>
+          <div class="card-name">Analyst</div>
+          <div class="card-stats">ATK 4 · DEF 2</div>
+          <div class="card-effect">Reveal opponent's top card before combat</div>
+          <span class="card-share" onclick="shareCard('prime-Analyst')">Share</span>
+        </div>
+
+        <div class="game-card faction-prime" id="card-prime-vanguard" data-card="prime-Vanguard">
+          <div class="card-faction">Prime</div>
+          <div class="card-name">Vanguard</div>
+          <div class="card-stats">ATK 6 · DEF 2</div>
+          <div class="card-effect">First strike — attacks before opponent</div>
+          <span class="card-share" onclick="shareCard('prime-Vanguard')">Share</span>
+        </div>
+
+        <div class="game-card faction-nova" id="card-nova-shifter" data-card="nova-Shifter">
+          <div class="card-faction">Nova</div>
+          <div class="card-name">Shifter</div>
+          <div class="card-stats">ATK 3 · DEF 3</div>
+          <div class="card-effect">Swap ATK/DEF at start of your turn</div>
+          <span class="card-share" onclick="shareCard('nova-Shifter')">Share</span>
+        </div>
+
+        <div class="game-card faction-nova" id="card-nova-herald" data-card="nova-Herald">
+          <div class="card-faction">Nova</div>
+          <div class="card-name">Herald</div>
+          <div class="card-stats">ATK 2 · DEF 5</div>
+          <div class="card-effect">On death: draw two cards</div>
+          <span class="card-share" onclick="shareCard('nova-Herald')">Share</span>
+        </div>
+
+        <div class="game-card faction-jack" id="card-wild-jack" data-card="wild-Jack">
+          <div class="wild-badge">Wild</div>
+          <div class="card-name">Jack</div>
+          <div class="card-stats">ATK — · DEF —</div>
+          <div class="card-effect">Adapts to adjacent faction. Connects to any slot regardless of suit or number.</div>
+          <span class="card-share" onclick="shareCard('wild-Jack')">Share</span>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- BROWSER DEMO -->
+    <section id="demo">
+      <h2 class="section-heading">Try the Mechanic</h2>
+      <p class="section-sub">Select a card from your hand, then click a lane to place it. When both sides have placed, lanes resolve automatically.</p>
+
+      <div class="demo-section">
+        <div class="demo-label">Try it — single-round lane combat</div>
+        <div id="demoTurnInfo" class="demo-turn-info">Your turn. Select a card then click a lane.</div>
+
+        <div class="demo-board" id="demoBoard">
+          <!-- Lanes rendered by JS -->
+        </div>
+
+        <div class="demo-label" style="margin-bottom: 10px;">Your hand</div>
+        <div class="demo-hand" id="demoHand"></div>
+
+        <div class="demo-result" id="demoResult"></div>
+        <button class="demo-btn" onclick="initDemo()">Deal new cards</button>
+      </div>
+    </section>
+
+    <!-- DEVLOG -->
+    <section id="devlog">
+      <h2 class="section-heading">Devlog</h2>
+
+      <div class="devlog-entry">
+        <div class="devlog-header">
+          <span class="devlog-version">Devlog #2</span>
+          <span class="devlog-date-pill">12 Mar 2026</span>
+          <span class="devlog-tag-pill">Combat System</span>
+        </div>
+        <h2 class="devlog-title">Combat is working, factions are in</h2>
+        <div class="devlog-body">
+          <p>
+            The core battle system is now functional. Cards snap into corner slots correctly,
+            the layer system works (only exposed cards are interactive), and the combat resolution
+            — flip top of deck, compare totals, winner stands — plays out with a brief animated state.
+          </p>
+          <p>
+            Four factions are implemented: Human Unity (blue/navy), Human Terra (blue/teal),
+            Alien Prime (grey/purple) and Alien Nova (grey/red). The Jack card is wild and
+            connects into any slot regardless of number or suit. A full standard 52-card deck
+            is in use with shuffle and deal working cleanly.
+          </p>
+          <p>
+            Next: a proper turn structure (currently free-placement), a basic opponent AI,
+            and the roguelike run layer — encounter chains, card rewards, and meta progression.
+            The bones are solid. Time to put walls around them.
+          </p>
+        </div>
+      </div>
+
+      <div class="devlog-entry">
+        <div class="devlog-header">
+          <span class="devlog-version">Devlog #1</span>
+          <span class="devlog-date-pill">10 Feb 2025</span>
+          <span class="devlog-tag-pill">Foundation</span>
+        </div>
+        <h2 class="devlog-title">Core loop is alive</h2>
+        <div class="devlog-body">
+          <p>
+            Got the core battle loop working and the roguelike structure drafted.
+            Cards can be placed, corner slots snap correctly, and the mothership
+            placement is fixed at centre field. The card renderer is handling
+            dynamic colour fills via LÖVE2D's built-in draw calls — less elegant
+            than I wanted but it works.
+          </p>
+          <p>
+            Next milestone: the full first encounter chain, then a basic meta-progression layer.
+          </p>
+        </div>
+      </div>
+
+      <div class="next-up-box">
+        <span class="nu-label">Next milestone</span>
+        <p>Playable single-round browser prototype using the core combat system.</p>
+      </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section id="roadmap">
+      <h2 class="section-heading" style="margin-top: 48px;">Roadmap</h2>
+      <table class="roadmap-table">
+        <thead>
+          <tr>
+            <th>Version</th>
+            <th>Milestone</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>v0.1</td>
+            <td>Core rules defined + board diagram</td>
+            <td class="status-done">✅ Done</td>
+          </tr>
+          <tr>
+            <td>v0.2</td>
+            <td>Full faction decks balanced</td>
+            <td class="status-progress">🔄 In progress</td>
+          </tr>
+          <tr>
+            <td>v0.3</td>
+            <td>Browser prototype (1v1 local)</td>
+            <td class="status-planned">📋 Planned</td>
+          </tr>
+          <tr>
+            <td>v0.4</td>
+            <td>AI opponent</td>
+            <td class="status-planned">📋 Planned</td>
+          </tr>
+          <tr>
+            <td>v0.5</td>
+            <td>Online multiplayer</td>
+            <td class="status-planned">📋 Planned</td>
+          </tr>
+          <tr>
+            <td>v1.0</td>
+            <td>Full release</td>
+            <td class="status-planned">📋 Future</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- CHANGELOG -->
+      <h2 class="section-heading">Changelog</h2>
+      <ul class="changelog-list">
+        <li>
+          <span class="cl-ver">v0.1.2</span>
+          <span class="cl-date">12 Mar 2026</span>
+          <span class="cl-desc">Added faction lore, card gallery, browser demo, roadmap, visual board diagram</span>
+        </li>
+        <li>
+          <span class="cl-ver">v0.1.1</span>
+          <span class="cl-date">20 Feb 2026</span>
+          <span class="cl-desc">Rules updated with how-to-play steps and Jack callout</span>
+        </li>
+        <li>
+          <span class="cl-ver">v0.1.0</span>
+          <span class="cl-date">10 Feb 2025</span>
+          <span class="cl-desc">First devlog, core system defined, LÖVE2D prototype begun</span>
+        </li>
       </ul>
-    </div>
-
-    <div class="devlog-entry">
-      <div class="devlog-num">Devlog #2</div>
-      <h2 class="devlog-title">Combat is working, factions are in</h2>
-      <div class="devlog-date">12 Mar 2026</div>
-      <div class="devlog-body">
-        <p>
-          The core battle system is now functional. Cards snap into corner slots correctly,
-          the layer system works (only exposed cards are interactive), and the combat resolution
-          — flip top of deck, compare totals, winner stands — plays out with a brief animated state.
-        </p>
-        <p>
-          Four factions are implemented: Human Unity (blue/navy), Human Terra (blue/teal),
-          Alien Prime (grey/purple) and Alien Nova (grey/red). The Jack card is wild and
-          connects into any slot regardless of number or suit. A full standard 52-card deck
-          is in use with shuffle and deal working cleanly.
-        </p>
-        <p>
-          Next: a proper turn structure (currently free-placement), a basic opponent AI,
-          and the roguelike run layer — encounter chains, card rewards, and meta progression.
-          The bones are solid. Time to put walls around them.
-        </p>
-      </div>
-    </div>
-
-    <div class="devlog-entry">
-      <div class="devlog-num">Devlog #1</div>
-      <h2 class="devlog-title">Core loop is alive</h2>
-      <div class="devlog-date">10 Feb 2025</div>
-      <div class="devlog-body">
-        <p>
-          Got the core battle loop working and the roguelike structure drafted.
-          Cards can be placed, corner slots snap correctly, and the mothership
-          placement is fixed at centre field. The card renderer is handling
-          dynamic colour fills via LÖVE2D's built-in draw calls — less elegant
-          than I wanted but it works.
-        </p>
-        <p>
-          Next milestone: the full first encounter chain, then a basic meta-progression layer.
-        </p>
-      </div>
-    </div>
+    </section>
 
   </main>
 
+  <div class="copy-toast" id="copyToast">Link copied to clipboard</div>
+
   <script src="/sidebar.js"></script>
+  <script>
+    /* ── CARD SHARE ─────────────────────── */
+    function shareCard(cardId) {
+      var url = window.location.href.split('#')[0] + '#card=' + cardId;
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(url).then(showToast);
+      } else {
+        var ta = document.createElement('textarea');
+        ta.value = url;
+        ta.style.position = 'fixed';
+        ta.style.opacity = '0';
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand('copy');
+        document.body.removeChild(ta);
+        showToast();
+      }
+    }
+
+    function showToast() {
+      var t = document.getElementById('copyToast');
+      t.classList.add('visible');
+      setTimeout(function() { t.classList.remove('visible'); }, 2200);
+    }
+
+    /* Handle #card= on load */
+    (function() {
+      var hash = window.location.hash;
+      var m = hash.match(/^#card=(.+)$/);
+      if (!m) return;
+      var cardId = m[1];
+      var el = document.getElementById('card-' + cardId.replace(/([A-Z])/g, function(c) { return c; }).toLowerCase().replace(/-/g, '-'));
+      if (!el) {
+        /* fallback: search by data-card attribute */
+        el = document.querySelector('[data-card="' + cardId + '"]');
+      }
+      if (el) {
+        setTimeout(function() {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('highlighted');
+        }, 300);
+      }
+    })();
+
+    /* ── COMBAT DEMO ────────────────────── */
+    var DEMO_CARDS = [
+      { name: 'Infantry',  atk: 3, def: 4, faction: 'Unity',  color: '#4a7acc' },
+      { name: 'Marshal',   atk: 5, def: 3, faction: 'Unity',  color: '#4a7acc' },
+      { name: 'Ironroot',  atk: 2, def: 6, faction: 'Terra',  color: '#5a8a4a' },
+      { name: 'Vanguard',  atk: 6, def: 2, faction: 'Prime',  color: '#cc7a4a' },
+      { name: 'Shifter',   atk: 3, def: 3, faction: 'Nova',   color: '#9a4acc' },
+      { name: 'Herald',    atk: 2, def: 5, faction: 'Nova',   color: '#9a4acc' },
+      { name: 'Warden',    atk: 4, def: 4, faction: 'Terra',  color: '#5a8a4a' },
+      { name: 'Analyst',   atk: 4, def: 2, faction: 'Prime',  color: '#cc7a4a' }
+    ];
+
+    var NUM_LANES = 5;
+    var demoState = {};
+
+    function shuffle(arr) {
+      var a = arr.slice();
+      for (var i = a.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = a[i]; a[i] = a[j]; a[j] = tmp;
+      }
+      return a;
+    }
+
+    function initDemo() {
+      var deck = shuffle(DEMO_CARDS);
+      demoState = {
+        playerHand: deck.slice(0, 4),
+        aiHand: shuffle(DEMO_CARDS).slice(0, 4),
+        playerLanes: new Array(NUM_LANES).fill(null),
+        aiLanes: new Array(NUM_LANES).fill(null),
+        selected: null,
+        playerPlaced: 0,
+        aiPlaced: 0,
+        resolved: false,
+        maxPlace: 3
+      };
+      renderDemo();
+      document.getElementById('demoResult').innerHTML = '';
+      document.getElementById('demoTurnInfo').textContent = 'Your turn. Select a card then click a lane.';
+    }
+
+    function renderDemo() {
+      var board = document.getElementById('demoBoard');
+      board.innerHTML = '';
+
+      for (var i = 0; i < NUM_LANES; i++) {
+        var lane = document.createElement('div');
+        lane.className = 'demo-lane';
+        lane.innerHTML = '<div class="demo-lane-label">Lane ' + (i + 1) + '</div>';
+
+        /* AI row */
+        var aiCell = document.createElement('div');
+        var aiCard = demoState.aiLanes[i];
+        if (aiCard) {
+          aiCell.className = 'demo-cell has-card demo-zone-p2';
+          aiCell.style.borderColor = aiCard.color + '60';
+          aiCell.style.background = aiCard.color + '12';
+          aiCell.innerHTML = '<div class="demo-cell-name" style="color:' + aiCard.color + '">' + aiCard.name + '</div><div class="demo-cell-stats">A' + aiCard.atk + ' D' + aiCard.def + '</div>';
+        } else {
+          aiCell.className = 'demo-cell demo-zone-p2';
+          aiCell.style.borderColor = '#c8303040';
+          aiCell.innerHTML = '<span style="color:#c8303050;font-size:0.6rem;">opp</span>';
+        }
+        lane.appendChild(aiCell);
+
+        /* Player row */
+        var idx = i;
+        var pCell = document.createElement('div');
+        var pCard = demoState.playerLanes[i];
+        if (pCard) {
+          pCell.className = 'demo-cell has-card demo-zone-p1';
+          pCell.style.borderColor = pCard.color + '60';
+          pCell.style.background = pCard.color + '12';
+          pCell.innerHTML = '<div class="demo-cell-name" style="color:' + pCard.color + '">' + pCard.name + '</div><div class="demo-cell-stats">A' + pCard.atk + ' D' + pCard.def + '</div>';
+        } else if (demoState.selected !== null && !demoState.resolved) {
+          pCell.className = 'demo-cell droppable demo-zone-p1';
+          pCell.innerHTML = '<span style="color:#c8850070;">place</span>';
+          pCell.onclick = (function(laneIdx) { return function() { placeCard(laneIdx); }; })(idx);
+        } else {
+          pCell.className = 'demo-cell demo-zone-p1';
+          pCell.style.borderColor = '#4a7acc30';
+          pCell.innerHTML = '<span style="color:#4a7acc40;font-size:0.6rem;">you</span>';
+        }
+        lane.appendChild(pCell);
+
+        board.appendChild(lane);
+      }
+
+      /* Hand */
+      var handEl = document.getElementById('demoHand');
+      handEl.innerHTML = '';
+      demoState.playerHand.forEach(function(card, ci) {
+        var cardEl = document.createElement('div');
+        var isSelected = demoState.selected === ci;
+        var isUsed = demoState.playerLanes.indexOf(card) !== -1;
+        cardEl.className = 'demo-hand-card' + (isSelected ? ' selected' : '') + (isUsed ? ' used' : '');
+        cardEl.style.borderColor = card.color + (isSelected ? 'cc' : '50');
+        cardEl.style.background = card.color + (isSelected ? '22' : '10');
+        cardEl.innerHTML = '<span class="dc-name" style="color:' + card.color + '">' + card.name + '</span><span class="dc-stats">A' + card.atk + ' D' + card.def + '</span><span style="font-size:0.6rem;color:#666;">' + card.faction + '</span>';
+        if (!isUsed && !demoState.resolved) {
+          cardEl.onclick = (function(cardIdx) { return function() { selectCard(cardIdx); }; })(ci);
+        }
+        handEl.appendChild(cardEl);
+      });
+    }
+
+    function selectCard(idx) {
+      demoState.selected = (demoState.selected === idx) ? null : idx;
+      renderDemo();
+    }
+
+    function placeCard(laneIdx) {
+      if (demoState.selected === null) return;
+      if (demoState.playerLanes[laneIdx]) return;
+
+      demoState.playerLanes[laneIdx] = demoState.playerHand[demoState.selected];
+      demoState.playerPlaced++;
+      demoState.selected = null;
+
+      /* AI auto-places */
+      aiPlace();
+
+      var placed = demoState.playerLanes.filter(Boolean).length;
+      if (placed >= demoState.maxPlace || demoState.playerPlaced >= demoState.playerHand.length) {
+        resolveDemo();
+      } else {
+        document.getElementById('demoTurnInfo').textContent = 'Place ' + (demoState.maxPlace - placed) + ' more card' + (demoState.maxPlace - placed === 1 ? '' : 's') + ' to resolve.';
+        renderDemo();
+      }
+    }
+
+    function aiPlace() {
+      var emptyLanes = [];
+      for (var i = 0; i < NUM_LANES; i++) {
+        if (!demoState.aiLanes[i]) emptyLanes.push(i);
+      }
+      if (emptyLanes.length === 0) return;
+
+      var unused = demoState.aiHand.filter(function(c) { return demoState.aiLanes.indexOf(c) === -1; });
+      if (unused.length === 0) return;
+
+      var lane = emptyLanes[Math.floor(Math.random() * emptyLanes.length)];
+      var card = unused[Math.floor(Math.random() * unused.length)];
+      demoState.aiLanes[lane] = card;
+      demoState.aiPlaced++;
+    }
+
+    function resolveDemo() {
+      demoState.resolved = true;
+      renderDemo();
+
+      var results = [];
+      var playerWins = 0;
+      var aiWins = 0;
+
+      for (var i = 0; i < NUM_LANES; i++) {
+        var p = demoState.playerLanes[i];
+        var a = demoState.aiLanes[i];
+        if (!p && !a) continue;
+        if (p && !a) { results.push('Lane ' + (i + 1) + ': <span class="win">You win</span> (uncontested)'); playerWins++; continue; }
+        if (!p && a) { results.push('Lane ' + (i + 1) + ': <span class="lose">Opponent wins</span> (uncontested)'); aiWins++; continue; }
+
+        var pScore = p.atk + p.def;
+        var aScore = a.atk + a.def;
+        if (pScore > aScore) {
+          results.push('Lane ' + (i + 1) + ': <span class="win">You win</span> (' + p.name + ' ' + pScore + ' vs ' + a.name + ' ' + aScore + ')');
+          playerWins++;
+        } else if (aScore > pScore) {
+          results.push('Lane ' + (i + 1) + ': <span class="lose">Opponent wins</span> (' + a.name + ' ' + aScore + ' vs ' + p.name + ' ' + pScore + ')');
+          aiWins++;
+        } else {
+          results.push('Lane ' + (i + 1) + ': <span class="draw">Draw</span> (' + pScore + ' vs ' + aScore + ')');
+        }
+      }
+
+      var overall;
+      if (playerWins > aiWins) overall = '<span class="win">You win the round ' + playerWins + '–' + aiWins + '.</span>';
+      else if (aiWins > playerWins) overall = '<span class="lose">Opponent wins the round ' + aiWins + '–' + playerWins + '.</span>';
+      else overall = '<span class="draw">Round drawn ' + playerWins + '–' + aiWins + '.</span>';
+
+      document.getElementById('demoResult').innerHTML = results.join('<br>') + '<br><strong>' + overall + '</strong>';
+      document.getElementById('demoTurnInfo').textContent = 'Round complete. Deal new cards to play again.';
+    }
+
+    /* Init on load */
+    initDemo();
+  </script>
 </body>
 </html>
