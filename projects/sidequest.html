@@ -8,7 +8,23 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap" rel="stylesheet" />
+  <!-- PWA -->
+  <link rel="manifest" href="/manifest-sidequest.json" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="SideQuest" />
+  <meta name="theme-color" content="#1a1412" />
+
   <style>
+    /* ── Page wrapper override for this page ── */
+    .main {
+      padding: 40px 32px 80px 48px;
+    }
+
+    .sq-page-header {
+      margin-bottom: 28px;
+    }
+
     .project-tag {
       display: inline-block;
       font-size: 0.68rem;
@@ -20,215 +36,1201 @@
       background: #fef3e2;
       padding: 3px 10px;
       border-radius: 3px;
-      margin-bottom: 16px;
+      margin-bottom: 12px;
     }
 
-    .app-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 0.75rem;
-      color: var(--text-muted);
-      background: #fff;
-      border: 1px solid var(--border);
-      padding: 4px 12px;
-      border-radius: 20px;
-      margin-top: 6px;
-      font-family: var(--font-display);
-      font-weight: 600;
-      letter-spacing: 0.04em;
-    }
-
-    .status-bar {
+    /* ── App shell ── */
+    .sq-shell {
       display: flex;
-      gap: 20px;
-      flex-wrap: wrap;
-      margin: 24px 0 32px;
+      align-items: flex-start;
+      gap: 0;
     }
 
-    .status-item {
-      font-size: 0.8rem;
-    }
-
-    .status-label {
-      font-family: var(--font-display);
-      font-weight: 600;
-      color: var(--text-muted);
-      text-transform: uppercase;
-      font-size: 0.68rem;
-      letter-spacing: 0.08em;
-      display: block;
-      margin-bottom: 2px;
-    }
-
-    .status-val {
-      color: var(--text);
-    }
-
-    /* Feature grid */
-    .feature-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
-      gap: 16px;
-      margin-top: 36px;
-    }
-
-    .feature-card {
+    .sq-phone {
+      width: 420px;
+      max-width: 100%;
       background: #fff;
       border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 20px 18px;
+      border-radius: 20px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      height: 680px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
+      position: relative;
     }
 
-    .feature-icon {
-      font-size: 1.7rem;
+    /* Phone status bar */
+    .sq-statusbar {
+      background: #fafaf9;
+      border-bottom: 1px solid var(--border);
+      padding: 10px 20px 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-shrink: 0;
+    }
+
+    .sq-statusbar-title {
+      font-family: var(--font-display);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    .sq-statusbar-xp {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    /* ── Tab content area ── */
+    .sq-content {
+      flex: 1;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .sq-tab-panel {
+      display: none;
+      padding: 20px 16px;
+      animation: sq-fadein 0.18s ease;
+    }
+
+    .sq-tab-panel.sq-active {
+      display: block;
+    }
+
+    @keyframes sq-fadein {
+      from { opacity: 0; transform: translateY(4px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ── Tab bar ── */
+    .sq-tabbar {
+      flex-shrink: 0;
+      background: #fff;
+      border-top: 1px solid var(--border);
+      display: flex;
+      padding: 6px 0 10px;
+    }
+
+    .sq-tab-btn {
+      flex: 1;
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 3px;
+      padding: 4px 0;
+      transition: opacity 0.15s;
+    }
+
+    .sq-tab-btn:hover { opacity: 0.7; }
+
+    .sq-tab-btn .sq-tab-icon {
+      font-size: 1.25rem;
+      line-height: 1;
+    }
+
+    .sq-tab-btn .sq-tab-label {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color 0.15s;
+    }
+
+    .sq-tab-btn.sq-tab-active .sq-tab-label {
+      color: #b56a00;
+    }
+
+    .sq-tab-btn.sq-tab-active .sq-tab-icon {
+      filter: saturate(1.3);
+    }
+
+    /* ── Quest cards ── */
+    .sq-section-label {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
       margin-bottom: 10px;
     }
 
-    .feature-title {
-      font-family: var(--font-display);
-      font-size: 0.95rem;
-      font-weight: 600;
+    .sq-quest-card {
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px 14px;
+      margin-bottom: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: all 0.2s ease;
+      user-select: none;
+    }
+
+    .sq-quest-card.sq-done {
+      background: #f0faf4;
+      border-color: #b8e0c8;
+      opacity: 0.75;
+    }
+
+    .sq-quest-emoji {
+      font-size: 1.4rem;
+      line-height: 1;
+      flex-shrink: 0;
+      width: 32px;
+      text-align: center;
+    }
+
+    .sq-quest-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .sq-quest-name {
+      font-family: var(--font-body);
+      font-size: 0.9rem;
+      font-weight: 400;
       color: var(--text);
-      margin-bottom: 6px;
+      line-height: 1.3;
+      transition: all 0.2s;
     }
 
-    .feature-desc {
-      font-size: 0.83rem;
+    .sq-done .sq-quest-name {
+      text-decoration: line-through;
       color: var(--text-muted);
-      line-height: 1.65;
     }
 
-    .coming-soon {
-      display: inline-block;
-      font-size: 0.65rem;
+    .sq-quest-xp {
       font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 1px 6px;
+      border-radius: 8px;
+      margin-top: 3px;
+      display: inline-block;
+    }
+
+    .sq-done .sq-quest-xp {
+      background: #d4edda;
+      color: #2d6a4f;
+    }
+
+    .sq-quest-check {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      border: 2px solid var(--border);
+      background: #fff;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+      font-size: 0.85rem;
+      color: transparent;
+    }
+
+    .sq-done .sq-quest-check {
+      background: #2d9e5e;
+      border-color: #2d9e5e;
+      color: #fff;
+    }
+
+    .sq-quest-delete {
+      display: none;
+      background: none;
+      border: none;
+      cursor: pointer;
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+    }
+
+    .sq-quest-delete:hover {
+      color: #c03030;
+      background: #faf0f0;
+    }
+
+    .sq-quest-card.sq-custom:hover .sq-quest-delete {
+      display: block;
+    }
+
+    /* ── XP Toast ── */
+    .sq-toast {
+      position: absolute;
+      top: 14px;
+      left: 50%;
+      transform: translateX(-50%) translateY(-8px);
+      background: #2d9e5e;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      padding: 5px 14px;
+      border-radius: 20px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+      z-index: 100;
+      white-space: nowrap;
+    }
+
+    .sq-toast.sq-toast-show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* ── Missions tab ── */
+    .sq-mission-input-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+    }
+
+    .sq-input {
+      flex: 1;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px 12px;
+      font-family: var(--font-body);
+      font-size: 0.85rem;
+      color: var(--text);
+      background: #fafaf9;
+      outline: none;
+      transition: border-color 0.15s;
+    }
+
+    .sq-input:focus {
+      border-color: #c8862a;
+    }
+
+    .sq-input-xp {
+      width: 64px;
+      flex: none;
+    }
+
+    .sq-btn {
+      background: #1a1412;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 14px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+
+    .sq-btn:hover { background: #444; }
+
+    .sq-btn-sm {
+      padding: 5px 10px;
+      font-size: 0.68rem;
+    }
+
+    .sq-btn-danger {
+      background: none;
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+    }
+
+    .sq-btn-danger:hover {
+      background: #faf0f0;
+      color: #c03030;
+      border-color: #e0c0c0;
+    }
+
+    .sq-mission-card {
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 11px 14px;
+      margin-bottom: 7px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sq-mission-card.sq-done {
+      background: #f0faf4;
+      border-color: #b8e0c8;
+      opacity: 0.7;
+    }
+
+    .sq-mission-name {
+      flex: 1;
+      font-size: 0.87rem;
+      color: var(--text);
+      transition: all 0.2s;
+    }
+
+    .sq-done .sq-mission-name {
+      text-decoration: line-through;
+      color: var(--text-muted);
+    }
+
+    .sq-mission-xp {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 600;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 1px 6px;
+      border-radius: 8px;
+      flex-shrink: 0;
+    }
+
+    .sq-mission-del {
+      background: none;
+      border: none;
+      cursor: pointer;
+      color: var(--text-dim);
+      font-size: 0.9rem;
+      padding: 2px 4px;
+      border-radius: 4px;
+      transition: all 0.15s;
+      flex-shrink: 0;
+    }
+
+    .sq-mission-del:hover { color: #c03030; }
+
+    .sq-completed-header {
+      font-family: var(--font-display);
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.09em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 16px 0 8px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── Add tab ── */
+    .sq-form-group {
+      margin-bottom: 16px;
+    }
+
+    .sq-form-label {
+      display: block;
+      font-family: var(--font-display);
+      font-size: 0.68rem;
       font-weight: 600;
       letter-spacing: 0.08em;
       text-transform: uppercase;
       color: var(--text-muted);
-      background: var(--sidebar-bg);
+      margin-bottom: 6px;
+    }
+
+    .sq-emoji-grid {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 4px;
+      background: #fafaf9;
       border: 1px solid var(--border);
-      padding: 2px 8px;
+      border-radius: 8px;
+      padding: 8px;
+    }
+
+    .sq-emoji-btn {
+      background: none;
+      border: 1px solid transparent;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 4px;
+      text-align: center;
+      transition: all 0.12s;
+      line-height: 1;
+    }
+
+    .sq-emoji-btn:hover { background: #fef3e2; }
+    .sq-emoji-btn.sq-selected { background: #fef3e2; border-color: #c8862a; }
+
+    .sq-emoji-custom {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .sq-emoji-custom .sq-input {
+      width: 56px;
+      flex: none;
+      text-align: center;
+      font-size: 1.1rem;
+      padding: 6px;
+    }
+
+    .sq-xp-slider-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .sq-slider {
+      flex: 1;
+      accent-color: #c8862a;
+    }
+
+    .sq-xp-display {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #b56a00;
+      background: #fef3e2;
+      padding: 2px 10px;
       border-radius: 10px;
-      margin-top: 36px;
+      min-width: 54px;
+      text-align: center;
+    }
+
+    .sq-freq-row {
+      display: flex;
+      gap: 8px;
+    }
+
+    .sq-freq-btn {
+      flex: 1;
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 8px;
+      font-family: var(--font-display);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .sq-freq-btn.sq-selected {
+      background: #1a1412;
+      color: #fff;
+      border-color: #1a1412;
+    }
+
+    /* ── Profile tab ── */
+    .sq-profile-hero {
+      text-align: center;
+      padding: 16px 0 20px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 18px;
+    }
+
+    .sq-avatar-wrap {
+      position: relative;
+      display: inline-block;
+      margin-bottom: 10px;
+    }
+
+    .sq-avatar-emoji {
+      font-size: 3.2rem;
+      line-height: 1;
+    }
+
+    .sq-level-badge {
+      position: absolute;
+      bottom: -4px;
+      right: -8px;
+      background: #1a1412;
+      color: #fff;
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      padding: 2px 6px;
+      border-radius: 8px;
+    }
+
+    .sq-level-name {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 2px;
+    }
+
+    .sq-xp-bar-label {
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      letter-spacing: 0.06em;
+    }
+
+    .sq-xp-bar-track {
+      background: #f0ede8;
+      border-radius: 6px;
+      height: 8px;
+      overflow: hidden;
+      margin: 0 24px;
+    }
+
+    .sq-xp-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #c8862a, #e8a038);
+      border-radius: 6px;
+      transition: width 0.4s ease;
+    }
+
+    .sq-stats-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    .sq-stat-card {
+      background: #fafaf9;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      text-align: center;
+    }
+
+    .sq-stat-val {
+      font-family: var(--font-display);
+      font-size: 1.4rem;
+      font-weight: 600;
+      color: var(--text);
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .sq-stat-label {
+      font-family: var(--font-display);
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+    .sq-achievements {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .sq-badge {
+      background: #fef3e2;
+      border: 1px solid #e8c88a;
+      border-radius: 12px;
+      padding: 3px 10px;
+      font-family: var(--font-display);
+      font-size: 0.65rem;
+      font-weight: 600;
+      color: #8a5a00;
+    }
+
+    .sq-empty {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.83rem;
+      padding: 32px 16px;
+      font-style: italic;
+    }
+
+    .sq-empty-icon {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    /* ── Mobile responsive ── */
+    @media (max-width: 700px) {
+      .main {
+        padding: 24px 16px 40px;
+      }
+
+      .sq-phone {
+        width: 100%;
+        border-radius: 14px;
+        height: 75vh;
+        min-height: 500px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar">
-    <div class="sidebar-top">
-      <a href="../index.html" class="logo-link">
-        <img src="https://github.com/maltysnack.png" alt="maltysnack avatar" class="avatar" />
-        <span class="site-name">maltysnack</span>
-      </a>
-      <p class="site-tagline">films · games · words</p>
-    </div>
-    <nav class="nav">
-      <div class="nav-section">
-        <span class="nav-label">Films</span>
-        <ul>
-          <li><a href="../films/haikureview.html">haikureview</a></li>
-          <li><a href="../films/SPOILERALERT.html">SPOILERALERT</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">Projects</span>
-        <ul>
-          <li><a href="mothership.html">Mothership</a></li>
-          <li><a href="trolley-run.html">Trolley Run</a></li>
-          <li><a href="saltysnacks.html">Saltysnacks</a></li>
-          <li><a href="sidequest.html" style="color: var(--text);">SideQuest</a></li>
-        </ul>
-      </div>
-      <div class="nav-section">
-        <span class="nav-label">README</span>
-        <ul>
-          <li><a href="../writings/poems.html">Poems</a></li>
-          <li><a href="../writings/thoughts.html">Thoughts</a></li>
-        </ul>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="../red-rebels.html" class="nav-label nav-label--link nav-label--rebels">Red Rebels</a>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="../quiz.html" class="nav-label nav-label--link">Quiz</a>
-      </div>
-      <div class="nav-section nav-section--single">
-        <a href="../shop.html" class="nav-label nav-label--link">Shop</a>
-      </div>
-    </nav>
-    <footer class="sidebar-footer">
-      <a href="https://github.com/maltysnack" target="_blank" rel="noopener" title="GitHub">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.418 2.865 8.166 6.839 9.489.5.092.682-.217.682-.482 0-.237-.009-.868-.014-1.703-2.782.604-3.369-1.342-3.369-1.342-.454-1.154-1.11-1.462-1.11-1.462-.907-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.912.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0112 6.836a9.59 9.59 0 012.504.337c1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.744 0 .267.18.578.688.48C19.138 20.163 22 16.418 22 12c0-5.523-4.477-10-10-10z"/></svg>
-      </a>
-      <a href="https://twitch.tv/maltysnack" target="_blank" rel="noopener" title="Twitch" class="twitch-link">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714z"/></svg>
-      </a>
-      <a href="https://youtube.com/@Maltysnack" target="_blank" rel="noopener" title="YouTube" class="youtube-link">
-        <svg class="icon" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/></svg>
-      </a>
-    </footer>
-  </aside>
+  <aside class="sidebar"></aside>
 
   <main class="main">
 
-    <span class="project-tag">Project — iPhone App</span>
-    <h1 class="page-title">SideQuest</h1>
-    <div>
-      <span class="app-pill">📱 iPhone · iOS</span>
+    <div class="sq-page-header">
+      <span class="project-tag">Project — PWA</span>
+      <h1 class="page-title" style="margin-bottom: 4px;">SideQuest</h1>
+      <p style="font-size: 0.82rem; color: var(--text-muted); margin-bottom: 0; font-style: italic;">A daily habit tracker that actually feels fun. Install via your browser's "Add to Home Screen".</p>
     </div>
 
-    <div class="status-bar" style="margin-top: 24px;">
-      <div class="status-item">
-        <span class="status-label">Status</span>
-        <span class="status-val">In design</span>
-      </div>
-      <div class="status-item">
-        <span class="status-label">Platform</span>
-        <span class="status-val">iOS</span>
+    <!-- App shell -->
+    <div class="sq-shell">
+      <div class="sq-phone" id="sqApp">
+
+        <!-- Status bar -->
+        <div class="sq-statusbar">
+          <span class="sq-statusbar-title">SideQuest ⚔️</span>
+          <span class="sq-statusbar-xp" id="sqTopXp">0 XP</span>
+        </div>
+
+        <!-- XP toast -->
+        <div class="sq-toast" id="sqToast"></div>
+
+        <!-- Content -->
+        <div class="sq-content">
+
+          <!-- QUESTS TAB -->
+          <div class="sq-tab-panel sq-active" id="sqPanelQuests">
+            <div class="sq-section-label" id="sqQuestDate">Today's Quests</div>
+            <div id="sqQuestList"></div>
+          </div>
+
+          <!-- MISSIONS TAB -->
+          <div class="sq-tab-panel" id="sqPanelMissions">
+            <div class="sq-section-label">Add a Mission</div>
+            <div class="sq-mission-input-row">
+              <input type="text" class="sq-input" id="sqMissionInput" placeholder="What needs doing?" maxlength="80" />
+              <input type="number" class="sq-input sq-input-xp" id="sqMissionXp" value="50" min="1" max="500" />
+              <button class="sq-btn" onclick="sqAddMission()">Add</button>
+            </div>
+            <div id="sqMissionList"></div>
+          </div>
+
+          <!-- ADD TAB -->
+          <div class="sq-tab-panel" id="sqPanelAdd">
+            <div class="sq-section-label">New Recurring Quest</div>
+
+            <div class="sq-form-group">
+              <label class="sq-form-label">Pick an Emoji</label>
+              <div class="sq-emoji-grid" id="sqEmojiGrid"></div>
+              <div class="sq-emoji-custom">
+                <input type="text" class="sq-input" id="sqCustomEmoji" placeholder="or type one" maxlength="2" />
+                <span style="font-size: 0.75rem; color: var(--text-muted);">custom emoji</span>
+              </div>
+            </div>
+
+            <div class="sq-form-group">
+              <label class="sq-form-label">Quest Name</label>
+              <input type="text" class="sq-input" id="sqAddName" placeholder="e.g. Meditate 10 mins" maxlength="60" />
+            </div>
+
+            <div class="sq-form-group">
+              <label class="sq-form-label">XP Reward</label>
+              <div class="sq-xp-slider-row">
+                <input type="range" class="sq-slider" id="sqAddXp" min="10" max="100" step="10" value="30" oninput="document.getElementById('sqXpDisplay').textContent = this.value + ' XP'" />
+                <span class="sq-xp-display" id="sqXpDisplay">30 XP</span>
+              </div>
+            </div>
+
+            <div class="sq-form-group">
+              <label class="sq-form-label">Frequency</label>
+              <div class="sq-freq-row">
+                <button class="sq-freq-btn sq-selected" id="sqFreqDaily" onclick="sqSetFreq('daily')">Daily</button>
+                <button class="sq-freq-btn" id="sqFreqWeekly" onclick="sqSetFreq('weekly')">Weekly</button>
+              </div>
+            </div>
+
+            <button class="sq-btn" style="width: 100%; padding: 11px;" onclick="sqSaveQuest()">Save Quest</button>
+          </div>
+
+          <!-- PROFILE TAB -->
+          <div class="sq-tab-panel" id="sqPanelProfile">
+            <div class="sq-profile-hero">
+              <div class="sq-avatar-wrap">
+                <div class="sq-avatar-emoji" id="sqAvatarEmoji">🧙</div>
+                <div class="sq-level-badge" id="sqLevelBadge">Lv 1</div>
+              </div>
+              <div class="sq-level-name" id="sqLevelName">Apprentice</div>
+              <div class="sq-xp-bar-label" id="sqXpBarLabel">0 / 500 XP</div>
+              <div class="sq-xp-bar-track">
+                <div class="sq-xp-bar-fill" id="sqXpBarFill" style="width: 0%;"></div>
+              </div>
+            </div>
+
+            <div class="sq-stats-grid" id="sqStatsGrid"></div>
+
+            <div class="sq-section-label" style="margin-bottom: 10px;">Achievements</div>
+            <div class="sq-achievements" id="sqAchievements">
+              <div class="sq-empty" style="padding: 8px 0; text-align: left; font-style: normal; font-size: 0.8rem; color: var(--text-muted);">Complete quests to unlock achievements.</div>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- Tab bar -->
+        <nav class="sq-tabbar">
+          <button class="sq-tab-btn sq-tab-active" data-tab="Quests" onclick="sqSwitchTab('Quests', this)">
+            <span class="sq-tab-icon">⚔️</span>
+            <span class="sq-tab-label">Quests</span>
+          </button>
+          <button class="sq-tab-btn" data-tab="Missions" onclick="sqSwitchTab('Missions', this)">
+            <span class="sq-tab-icon">✅</span>
+            <span class="sq-tab-label">Missions</span>
+          </button>
+          <button class="sq-tab-btn" data-tab="Add" onclick="sqSwitchTab('Add', this)">
+            <span class="sq-tab-icon">➕</span>
+            <span class="sq-tab-label">Add</span>
+          </button>
+          <button class="sq-tab-btn" data-tab="Profile" onclick="sqSwitchTab('Profile', this)">
+            <span class="sq-tab-icon">⭐</span>
+            <span class="sq-tab-label">Profile</span>
+          </button>
+        </nav>
+
       </div>
     </div>
-
-    <div class="divider"></div>
-
-    <p class="page-subtitle" style="max-width: 560px; font-size: 0.98rem;">
-      SideQuest is a lightweight daily habit and goal tracker, built around the idea that 
-      small wins matter. Set daily or weekly sidequests — drink more water, go outside, 
-      stretch for five minutes — and get gentle nudges when you haven't ticked them off. 
-      Complete a quest and earn XP. Nothing punishing, nothing streaks-or-die. 
-      Just quiet, encouraging progress. There's also a Missions area that works like 
-      a clean todo list for slightly bigger tasks that don't fit the daily rhythm.
-      The whole thing should feel like a cosy game that happens to make your actual life a bit better.
-    </p>
-
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="feature-icon">⚔️</div>
-        <div class="feature-title">Sidequests</div>
-        <p class="feature-desc">Daily and weekly micro-goals you set yourself. Exercise, water, sunlight, whatever your thing is. Repeatable, lightweight, trackable.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">✅</div>
-        <div class="feature-title">Missions</div>
-        <p class="feature-desc">A clean todo-list area for bigger, one-off tasks. Separate from your daily habits but part of the same system.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">⭐</div>
-        <div class="feature-title">XP + Progress</div>
-        <p class="feature-desc">Finish a quest and earn XP. Nothing intense. Just a small satisfying thing that says: you did the thing.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">🔔</div>
-        <div class="feature-title">Gentle reminders</div>
-        <p class="feature-desc">Cute, non-aggressive nudges when you haven't done a quest yet. No guilt. Just a little hey.</p>
-      </div>
-    </div>
-
-    <span class="coming-soon">App Store · Coming eventually</span>
 
   </main>
 
+  <script src="/sidebar.js"></script>
+  <script>
+  // ══════════════════════════════════════════
+  // SIDEQUEST — Data & State
+  // ══════════════════════════════════════════
+
+  const SQ_XP_PER_LEVEL = 500;
+
+  const LEVEL_NAMES = [
+    'Apprentice', 'Journeyman', 'Scout', 'Adventurer', 'Ranger',
+    'Hero', 'Champion', 'Legend', 'Mythic', 'Mythic II',
+    'Mythic III', 'Mythic IV', 'Mythic V', 'Mythic VI', 'Mythic VII',
+    'Mythic VIII', 'Mythic IX', 'Mythic X', 'Mythic XI', 'Mythic XII'
+  ];
+
+  const AVATAR_BY_LEVEL = [
+    '🧙','🧙','🗡️','🗡️','🏹','🏹','⚔️','⚔️','🌟','🌟',
+    '💫','💫','✨','✨','🔥','🔥','👑','👑','🌠','🌠'
+  ];
+
+  const DEFAULT_QUESTS = [
+    { id: 'dq1', emoji: '🛌', name: 'Sleep 8 hours',    xp: 30, freq: 'daily', isDefault: true },
+    { id: 'dq2', emoji: '💧', name: 'Drink 2L water',   xp: 25, freq: 'daily', isDefault: true },
+    { id: 'dq3', emoji: '🏃', name: 'Exercise 30 mins', xp: 40, freq: 'daily', isDefault: true },
+    { id: 'dq4', emoji: '🌤️', name: 'Go outside',       xp: 20, freq: 'daily', isDefault: true },
+    { id: 'dq5', emoji: '📖', name: 'Read 20 mins',     xp: 25, freq: 'daily', isDefault: true },
+  ];
+
+  const EMOJI_GRID = [
+    '🏃','💧','📖','🛌','🌤️','🧘','🍎','🎨',
+    '🎵','🎮','✍️','🏋️','🚴','🧹','🌿','🍵',
+    '🧠','💤','🐕','🌙','⭐','🔥','💪','🎯',
+    '🧘','🏊','🎸','📝','🌅','🌙','🍳','🥗',
+  ];
+
+  const ACHIEVEMENTS_DEF = [
+    { id: 'first_quest',   label: 'First Quest',      check: s => s.totalQuests >= 1 },
+    { id: 'quest_10',      label: '10 Quests Done',   check: s => s.totalQuests >= 10 },
+    { id: 'quest_50',      label: '50 Quests Done',   check: s => s.totalQuests >= 50 },
+    { id: 'streak_3',      label: '3-Day Streak',     check: s => s.streak >= 3 },
+    { id: 'streak_7',      label: '7-Day Streak',     check: s => s.streak >= 7 },
+    { id: 'streak_30',     label: '30-Day Streak',    check: s => s.streak >= 30 },
+    { id: 'level_5',       label: 'Level 5',          check: (s, xp) => Math.floor(xp / SQ_XP_PER_LEVEL) + 1 >= 5 },
+    { id: 'level_10',      label: 'Level 10',         check: (s, xp) => Math.floor(xp / SQ_XP_PER_LEVEL) + 1 >= 10 },
+    { id: 'mission_first', label: 'First Mission',    check: s => s.totalMissions >= 1 },
+    { id: 'mission_10',    label: '10 Missions Done', check: s => s.totalMissions >= 10 },
+    { id: 'all_daily',     label: 'Full Day',         check: s => s.maxDailyComplete >= 5 },
+  ];
+
+  // ── Load state ──
+  function sqToday() {
+    return new Date().toISOString().slice(0, 10);
+  }
+
+  function sqLoad() {
+    const lastDate  = localStorage.getItem('sq_last_date') || '';
+    const today     = sqToday();
+    const isNewDay  = lastDate !== today;
+
+    let quests = JSON.parse(localStorage.getItem('sq_quests') || 'null');
+    if (!quests) {
+      quests = DEFAULT_QUESTS.map(q => ({ ...q, done: false }));
+    } else {
+      // Ensure defaults always present
+      DEFAULT_QUESTS.forEach(dq => {
+        if (!quests.find(q => q.id === dq.id)) {
+          quests.unshift({ ...dq, done: false });
+        }
+      });
+    }
+
+    if (isNewDay) {
+      // Reset daily quests, keep weekly unless it's a new week
+      const dow = new Date().getDay();
+      quests = quests.map(q => {
+        if (q.freq === 'daily') return { ...q, done: false };
+        if (q.freq === 'weekly' && dow === 1) return { ...q, done: false }; // reset on Monday
+        return q;
+      });
+      localStorage.setItem('sq_last_date', today);
+    }
+
+    const missions = JSON.parse(localStorage.getItem('sq_missions') || '[]');
+    const xp       = parseInt(localStorage.getItem('sq_xp') || '0', 10);
+    const stats    = JSON.parse(localStorage.getItem('sq_stats') || '{"totalQuests":0,"totalMissions":0,"daysActive":0,"streak":0,"lastActiveDate":"","maxDailyComplete":0}');
+
+    if (isNewDay && stats.lastActiveDate) {
+      // Check streak continuity
+      const lastActive = new Date(stats.lastActiveDate);
+      const todayDate  = new Date(today);
+      const diffDays   = Math.round((todayDate - lastActive) / 86400000);
+      if (diffDays > 1) stats.streak = 0;
+      stats.daysActive++;
+      stats.lastActiveDate = today;
+    } else if (!stats.lastActiveDate) {
+      stats.lastActiveDate = today;
+      stats.daysActive = 1;
+    }
+
+    return { quests, missions, xp, stats };
+  }
+
+  function sqSave(quests, missions, xp, stats) {
+    localStorage.setItem('sq_quests',   JSON.stringify(quests));
+    localStorage.setItem('sq_missions', JSON.stringify(missions));
+    localStorage.setItem('sq_xp',       String(xp));
+    localStorage.setItem('sq_stats',    JSON.stringify(stats));
+  }
+
+  // ── Global state ──
+  let { quests, missions, xp, stats } = sqLoad();
+  let addFreq = 'daily';
+  let addEmoji = '⭐';
+  let selectedEmojiBtn = null;
+
+  // ══════════════════════════════════════════
+  // RENDER
+  // ══════════════════════════════════════════
+
+  function sqRenderAll() {
+    sqRenderQuests();
+    sqRenderMissions();
+    sqRenderProfile();
+    sqRenderTopXp();
+  }
+
+  function sqRenderTopXp() {
+    document.getElementById('sqTopXp').textContent = xp + ' XP';
+  }
+
+  // ── Quests ──
+  function sqRenderQuests() {
+    const list = document.getElementById('sqQuestList');
+    const today = sqToday();
+    const d = new Date();
+    const dayName = d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' });
+    document.getElementById('sqQuestDate').textContent = dayName;
+
+    if (quests.length === 0) {
+      list.innerHTML = '<div class="sq-empty"><div class="sq-empty-icon">⚔️</div>No quests yet. Add one in the Add tab!</div>';
+      return;
+    }
+
+    list.innerHTML = quests.map(q => `
+      <div class="sq-quest-card${q.done ? ' sq-done' : ''}${q.isDefault ? '' : ' sq-custom'}" id="sqq-${q.id}">
+        <div class="sq-quest-emoji">${q.emoji}</div>
+        <div class="sq-quest-info">
+          <div class="sq-quest-name">${sqEsc(q.name)}</div>
+          <span class="sq-quest-xp">${q.done ? '✓' : '+'} ${q.xp} XP${q.freq === 'weekly' ? ' · weekly' : ''}</span>
+        </div>
+        <div class="sq-quest-check" onclick="sqToggleQuest('${q.id}')">${q.done ? '✓' : ''}</div>
+        ${!q.isDefault ? `<button class="sq-quest-delete" onclick="sqDeleteQuest('${q.id}')" title="Delete">✕</button>` : ''}
+      </div>
+    `).join('');
+  }
+
+  // ── Missions ──
+  function sqRenderMissions() {
+    const list = document.getElementById('sqMissionList');
+    const active    = missions.filter(m => !m.done);
+    const completed = missions.filter(m => m.done);
+
+    let html = '';
+
+    if (active.length === 0 && completed.length === 0) {
+      html = '<div class="sq-empty"><div class="sq-empty-icon">✅</div>No missions yet. Add one above.</div>';
+    } else {
+      html += active.map(m => sqMissionCard(m)).join('');
+    }
+
+    if (completed.length > 0) {
+      html += `<div class="sq-completed-header">
+        <span>Completed (${completed.length})</span>
+        <button class="sq-btn sq-btn-sm sq-btn-danger" onclick="sqClearCompleted()">Clear</button>
+      </div>`;
+      html += completed.map(m => sqMissionCard(m)).join('');
+    }
+
+    list.innerHTML = html;
+  }
+
+  function sqMissionCard(m) {
+    return `
+      <div class="sq-mission-card${m.done ? ' sq-done' : ''}">
+        <div class="sq-quest-check" onclick="sqToggleMission('${m.id}')" style="flex-shrink:0;">${m.done ? '✓' : ''}</div>
+        <div class="sq-mission-name">${sqEsc(m.name)}</div>
+        <span class="sq-mission-xp">+${m.xp} XP</span>
+        <button class="sq-mission-del" onclick="sqDeleteMission('${m.id}')" title="Delete">✕</button>
+      </div>
+    `;
+  }
+
+  // ── Profile ──
+  function sqRenderProfile() {
+    const level = Math.min(Math.floor(xp / SQ_XP_PER_LEVEL), LEVEL_NAMES.length - 1);
+    const lvNum  = level + 1;
+    const lvName = LEVEL_NAMES[level];
+    const lvXp   = xp - (level * SQ_XP_PER_LEVEL);
+    const pct    = Math.min((lvXp / SQ_XP_PER_LEVEL) * 100, 100);
+    const avatar = AVATAR_BY_LEVEL[Math.min(level, AVATAR_BY_LEVEL.length - 1)];
+
+    document.getElementById('sqAvatarEmoji').textContent = avatar;
+    document.getElementById('sqLevelBadge').textContent = 'Lv ' + lvNum;
+    document.getElementById('sqLevelName').textContent   = lvName;
+    document.getElementById('sqXpBarLabel').textContent  = lvXp + ' / ' + SQ_XP_PER_LEVEL + ' XP';
+    document.getElementById('sqXpBarFill').style.width   = pct + '%';
+
+    const dailyDone = quests.filter(q => q.freq === 'daily' && q.done).length;
+
+    document.getElementById('sqStatsGrid').innerHTML = `
+      <div class="sq-stat-card">
+        <div class="sq-stat-val">${dailyDone}</div>
+        <div class="sq-stat-label">Quests Today</div>
+      </div>
+      <div class="sq-stat-card">
+        <div class="sq-stat-val">${stats.totalQuests}</div>
+        <div class="sq-stat-label">Total Quests</div>
+      </div>
+      <div class="sq-stat-card">
+        <div class="sq-stat-val">${stats.streak}</div>
+        <div class="sq-stat-label">Day Streak</div>
+      </div>
+      <div class="sq-stat-card">
+        <div class="sq-stat-val">${stats.daysActive}</div>
+        <div class="sq-stat-label">Days Active</div>
+      </div>
+    `;
+
+    // Achievements
+    const earned = ACHIEVEMENTS_DEF.filter(a => a.check(stats, xp));
+    const achEl  = document.getElementById('sqAchievements');
+    if (earned.length === 0) {
+      achEl.innerHTML = '<div style="font-size: 0.8rem; color: var(--text-muted);">Complete quests to unlock achievements.</div>';
+    } else {
+      achEl.innerHTML = earned.map(a => `<span class="sq-badge">🏅 ${a.label}</span>`).join('');
+    }
+  }
+
+  // ══════════════════════════════════════════
+  // ACTIONS
+  // ══════════════════════════════════════════
+
+  function sqToggleQuest(id) {
+    const q = quests.find(q => q.id === id);
+    if (!q) return;
+
+    if (!q.done) {
+      q.done = true;
+      xp += q.xp;
+      stats.totalQuests++;
+      const dailyDone = quests.filter(q2 => q2.freq === 'daily' && q2.done).length;
+      if (dailyDone > stats.maxDailyComplete) stats.maxDailyComplete = dailyDone;
+
+      // Streak: mark today active
+      const today = sqToday();
+      if (stats.lastActiveDate !== today) {
+        stats.lastActiveDate = today;
+        stats.daysActive++;
+      }
+      if (stats.streak === 0 || stats.lastActiveDate === today) {
+        // keep streak going — it gets updated on new day
+      }
+      stats.streak = Math.max(stats.streak, 1);
+
+      sqShowToast('+' + q.xp + ' XP');
+    } else {
+      q.done = false;
+      xp = Math.max(0, xp - q.xp);
+      stats.totalQuests = Math.max(0, stats.totalQuests - 1);
+    }
+
+    sqSave(quests, missions, xp, stats);
+    sqRenderAll();
+  }
+
+  function sqDeleteQuest(id) {
+    quests = quests.filter(q => q.id !== id);
+    sqSave(quests, missions, xp, stats);
+    sqRenderQuests();
+  }
+
+  function sqAddMission() {
+    const input = document.getElementById('sqMissionInput');
+    const xpIn  = document.getElementById('sqMissionXp');
+    const name  = input.value.trim();
+    if (!name) return;
+    const mxp = parseInt(xpIn.value, 10) || 50;
+    missions.push({ id: 'ms' + Date.now(), name, xp: mxp, done: false });
+    input.value = '';
+    xpIn.value  = 50;
+    sqSave(quests, missions, xp, stats);
+    sqRenderMissions();
+  }
+
+  function sqToggleMission(id) {
+    const m = missions.find(m => m.id === id);
+    if (!m) return;
+
+    if (!m.done) {
+      m.done = true;
+      xp += m.xp;
+      stats.totalMissions++;
+      sqShowToast('+' + m.xp + ' XP');
+    } else {
+      m.done = false;
+      xp = Math.max(0, xp - m.xp);
+      stats.totalMissions = Math.max(0, stats.totalMissions - 1);
+    }
+
+    sqSave(quests, missions, xp, stats);
+    sqRenderAll();
+  }
+
+  function sqDeleteMission(id) {
+    missions = missions.filter(m => m.id !== id);
+    sqSave(quests, missions, xp, stats);
+    sqRenderMissions();
+  }
+
+  function sqClearCompleted() {
+    missions = missions.filter(m => !m.done);
+    sqSave(quests, missions, xp, stats);
+    sqRenderMissions();
+  }
+
+  // ── Add quest ──
+  function sqSetFreq(f) {
+    addFreq = f;
+    document.getElementById('sqFreqDaily').classList.toggle('sq-selected', f === 'daily');
+    document.getElementById('sqFreqWeekly').classList.toggle('sq-selected', f === 'weekly');
+  }
+
+  function sqSaveQuest() {
+    const nameEl  = document.getElementById('sqAddName');
+    const xpEl    = document.getElementById('sqAddXp');
+    const customE = document.getElementById('sqCustomEmoji').value.trim();
+    const name    = nameEl.value.trim();
+    if (!name) { nameEl.focus(); return; }
+
+    const emoji = customE || addEmoji;
+    const qxp   = parseInt(xpEl.value, 10) || 30;
+
+    quests.push({
+      id:        'cq' + Date.now(),
+      emoji,
+      name,
+      xp:        qxp,
+      freq:      addFreq,
+      isDefault: false,
+      done:      false,
+    });
+
+    sqSave(quests, missions, xp, stats);
+    sqRenderQuests();
+
+    // Reset form
+    nameEl.value = '';
+    document.getElementById('sqCustomEmoji').value = '';
+    xpEl.value = 30;
+    document.getElementById('sqXpDisplay').textContent = '30 XP';
+    sqSetFreq('daily');
+    if (selectedEmojiBtn) { selectedEmojiBtn.classList.remove('sq-selected'); selectedEmojiBtn = null; }
+    addEmoji = '⭐';
+
+    sqSwitchTab('Quests', document.querySelector('[data-tab="Quests"]'));
+  }
+
+  // ── Tab switching ──
+  function sqSwitchTab(name, btn) {
+    document.querySelectorAll('.sq-tab-panel').forEach(p => p.classList.remove('sq-active'));
+    document.querySelectorAll('.sq-tab-btn').forEach(b => b.classList.remove('sq-tab-active'));
+
+    document.getElementById('sqPanel' + name).classList.add('sq-active');
+    btn.classList.add('sq-tab-active');
+
+    if (name === 'Profile') sqRenderProfile();
+  }
+
+  // ── Toast ──
+  let sqToastTimer = null;
+  function sqShowToast(msg) {
+    const el = document.getElementById('sqToast');
+    el.textContent = msg;
+    el.classList.add('sq-toast-show');
+    clearTimeout(sqToastTimer);
+    sqToastTimer = setTimeout(() => el.classList.remove('sq-toast-show'), 1800);
+  }
+
+  // ── Emoji grid ──
+  function sqBuildEmojiGrid() {
+    const grid = document.getElementById('sqEmojiGrid');
+    grid.innerHTML = EMOJI_GRID.map(e =>
+      `<button class="sq-emoji-btn" onclick="sqPickEmoji('${e}', this)">${e}</button>`
+    ).join('');
+  }
+
+  function sqPickEmoji(e, btn) {
+    addEmoji = e;
+    if (selectedEmojiBtn) selectedEmojiBtn.classList.remove('sq-selected');
+    btn.classList.add('sq-selected');
+    selectedEmojiBtn = btn;
+    document.getElementById('sqCustomEmoji').value = '';
+  }
+
+  // ── Enter key for mission input ──
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && document.activeElement.id === 'sqMissionInput') sqAddMission();
+  });
+
+  // ── Escape helper ──
+  function sqEsc(str) {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  // ══════════════════════════════════════════
+  // INIT
+  // ══════════════════════════════════════════
+  sqBuildEmojiGrid();
+  sqRenderAll();
+  </script>
 </body>
 </html>
