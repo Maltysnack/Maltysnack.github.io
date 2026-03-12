@@ -37,6 +37,7 @@ body{background:var(--black);color:var(--text);font-family:'Crimson Text',Georgi
 .big-btn:hover::before{left:100%;}
 .big-btn:hover{border-color:var(--gold);color:var(--gold);box-shadow:0 0 20px rgba(201,150,58,.15);}
 .home-footer{position:absolute;bottom:20px;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.home-version{position:absolute;bottom:8px;right:14px;font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--text-dim);opacity:.6;}
 
 /* CHAR CREATE */
 #screen-create{background:radial-gradient(ellipse at 50% 20%,rgba(30,20,8,.7) 0%,var(--black) 65%);overflow-y:auto;}
@@ -72,6 +73,7 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 .h-sep{width:1px;height:18px;background:var(--ash);}
 .town-label{font-family:'Cinzel',serif;font-size:10px;letter-spacing:3px;color:var(--bone);}
 .h-status{flex:1;text-align:center;font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;color:var(--text-dim);}
+.h-time{font-size:10px;opacity:.7;margin:0 4px;cursor:default;}
 .h-char{font-family:'Cinzel',serif;font-size:11px;color:var(--text);letter-spacing:1px;}
 .h-gold{color:var(--gold);font-size:11px;font-family:'Cinzel',serif;letter-spacing:1px;}
 .h-hp-wrap{display:flex;align-items:center;gap:5px;flex-shrink:0;}
@@ -308,7 +310,13 @@ header::after{content:'';position:absolute;bottom:0;left:0;right:0;height:1px;ba
 @media(max-width:460px){.shop-layout{grid-template-columns:1fr;}}
 .shop-col-label{font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:5px;}
 .shop-gold-bar{font-family:'Cinzel',serif;font-size:10px;letter-spacing:2px;color:var(--gold);padding:5px 10px;border:1px solid var(--ash);background:var(--stone);margin-bottom:8px;text-align:center;}
-.eq-compare{background:var(--stone);border:1px solid var(--border);padding:5px 7px;margin-bottom:3px;font-size:11px;}
+.eq-compare{background:var(--stone);border:1px solid var(--border);border-left:2px solid var(--ash);padding:5px 7px;margin-bottom:3px;font-size:11px;min-height:64px;display:flex;flex-direction:column;justify-content:center;}
+.eq-compare.rarity-worn{border-left-color:var(--worn);}
+.eq-compare.rarity-common{border-left-color:var(--common);}
+.eq-compare.rarity-crafted{border-left-color:var(--crafted);}
+.eq-compare.rarity-enchanted{border-left-color:var(--enchanted);}
+.eq-compare.rarity-legendary{border-left-color:var(--legendary);}
+.eq-compare.rarity-mythic{border-left-color:var(--mythic);}
 .eq-compare-slot{font-family:'Cinzel',serif;font-size:8px;letter-spacing:1px;color:var(--text-dim);display:block;margin-bottom:2px;text-transform:uppercase;}
 .eq-compare-name{color:var(--parchment);font-size:11px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 .eq-compare-stat{color:var(--gold);font-size:10px;display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
@@ -513,9 +521,24 @@ body[data-town="farradin"] .mission-card[data-type="quest"]{
 .coming-soon{text-align:center;color:var(--text-dim);font-style:italic;padding:20px 0;font-size:13px;}
 .small-btn{background:none;border:1px solid var(--ash);color:var(--text-dim);font-family:'Cinzel',serif;font-size:9px;letter-spacing:2px;padding:6px 14px;cursor:pointer;transition:all .2s;text-transform:uppercase;}
 .small-btn:hover{border-color:var(--parchment);color:var(--parchment);}
+
+/* MOBILE LANDSCAPE LOCK */
+#rotate-overlay{display:none;position:fixed;inset:0;z-index:99999;background:var(--black);flex-direction:column;align-items:center;justify-content:center;gap:14px;color:var(--text-dim);font-family:'Cinzel',serif;text-align:center;padding:20px;}
+#rotate-overlay .rotate-icon{font-size:48px;animation:rotateHint 2s ease-in-out infinite;}
+#rotate-overlay .rotate-msg{font-size:12px;letter-spacing:3px;text-transform:uppercase;}
+@keyframes rotateHint{0%,100%{transform:rotate(0deg);}50%{transform:rotate(90deg);}}
+@media(max-width:640px) and (orientation:portrait){
+  #rotate-overlay{display:flex;}
+}
 </style>
 </head>
 <body>
+
+<!-- LANDSCAPE LOCK OVERLAY (mobile portrait) -->
+<div id="rotate-overlay">
+  <div class="rotate-icon">📱</div>
+  <div class="rotate-msg">Rotate your device to play</div>
+</div>
 
 <!-- ══════════════════ HOMESCREEN ══════════════════ -->
 <div class="fullscreen" id="screen-home">
@@ -525,6 +548,7 @@ body[data-town="farradin"] .mission-card[data-type="quest"]{
   <button class="big-btn" id="home-btn" onclick="homeAction()">Begin Your Story</button>
   <button onclick="resetAll()" style="background:none;border:none;color:var(--text-dim);font-family:'Cinzel',serif;font-size:8px;letter-spacing:2px;cursor:pointer;margin-top:18px;opacity:.4;text-transform:uppercase;">Reset All Data</button>
   <div class="home-footer">Dawnhearth burns. It always burns.</div>
+  <div class="home-version" id="home-version-label"></div>
 </div>
 
 <!-- ══════════════════ CHAR CREATE ══════════════════ -->
@@ -565,6 +589,7 @@ body[data-town="farradin"] .mission-card[data-type="quest"]{
   <div class="h-sep"></div>
   <div class="town-label" id="h-town">DAWNHEARTH</div>
   <div class="h-status" id="h-status">IN TOWN</div>
+  <span class="h-time" id="h-time" title="Time of day"></span>
   <div class="h-char" id="h-char">Lv1</div>
   <div class="h-hp-wrap" id="h-hp-wrap">
     <div class="h-hp-bar"><div class="h-hp-fill" id="h-hp-fill" style="width:100%"></div></div>
@@ -776,6 +801,7 @@ body[data-town="farradin"] .mission-card[data-type="quest"]{
 <div id="g-stat-tip" style="position:fixed;z-index:300;background:var(--deep);border:1px solid var(--ash);padding:7px 10px;font-size:11px;color:var(--text-dim);font-style:italic;display:none;pointer-events:none;max-width:220px;"></div>
 
 <script>
+const GAME_VERSION='0.52';
 // ══════════════════════════════════════════════════════════════
 // TIME SCALE — change DAY_MINUTES to rescale everything
 // ══════════════════════════════════════════════════════════════
@@ -1130,7 +1156,7 @@ const CITIZEN_TUTORIAL_POOL={
   ],
   bounty:[
     {id:'cb1',type:'bounty',title:'Frogs at the River',desc:"Something is wrong with the frogs down by the south bend. They have gotten large and they are coming up onto the road at night. I need them moved on. Yes, I am serious.",hints:['They are just frogs. Probably.'],enemyName:'Cave Frog',enemyLevel:2,source:'the river south of Dawnhearth'},
-    {id:'cb2',type:'bounty',title:'Rats in the Cellar',desc:"The baker has rats in her cellar. Not small ones. She cannot store flour down there anymore. She wants them gone before the weekend market.",hints:['Bring a light down there.'],enemyName:'Giant Rat',enemyLevel:1,source:'the baker\'s cellar in Dawnhearth'},
+    {id:'cb2',type:'bounty',title:'Rats in the Cellar',desc:"The baker has rats in her cellar. Not small ones. She cannot store flour down there anymore. She wants them gone before the weekend market.",hints:['Bring a light down there.'],conditions:['dark','cramped'],enemyName:'Giant Rat',enemyLevel:1,source:'the baker\'s cellar in Dawnhearth'},
     {id:'cb3',type:'bounty',title:'The Crow Problem',desc:"A flock of crows has taken over the grain store roof. They are loud, they are messy, and they are bold enough to come inside now. Clear them out.",hints:['Do not let them get above you.'],enemyName:'Rabid Crow',enemyLevel:3,source:'the grain store in Dawnhearth'},
   ],
 };
@@ -1170,15 +1196,15 @@ const MISSION_POOL={
   ],
   quest:[
     {id:'q1',type:'quest',title:'The Drowning Mine',desc:"The Ashvale mine has been flooded two seasons now. Something moved in when the workers moved out. I need the equipment inside recovered. I am not going myself.",hints:['It will be wet. Then deeper wet.','The dark down there is very thick.','The shafts are low. Watch your head and your backswing.'],conditions:['dark','cramped'],enemyName:'Grave Skeleton',enemyLevel:7,source:'the Ashvale mine near Dawnhearth',return_text:"The equipment made it back. More importantly, you did. The mine stays closed. Some places aren't worth reopening."},
-    {id:'q2',type:'quest',title:'The Warden\'s Letter',desc:"This letter must reach the warden at Coldkeep. The road is considered safe. I need someone willing to stake their life on that assessment.",hints:['The ridge pass runs cold at night.'],enemyName:'Bandit Cutpurse',enemyLevel:8,source:'the road to Coldkeep near Dawnhearth',return_text:"The warden has it. He sent a reply — I won't share the contents, but you earned whatever comes of it."},
-    {id:'q3',type:'quest',title:'The Hollow Man',desc:"Something walks the market after closing. It looks right. It sounds right. If you look at it directly the details stop working. The guard refuses to investigate.",hints:['Whatever it is, it is not warm.','It does not like light.'],enemyName:'Timber Wolf',enemyLevel:8,source:'the market district after dark',return_text:"People are sleeping again. I don't know what you did out there and I won't ask. But the market has been normal since."},
+    {id:'q2',type:'quest',title:'The Warden\'s Letter',desc:"This letter must reach the warden at Coldkeep. The road is considered safe. I need someone willing to stake their life on that assessment.",hints:['The ridge pass runs cold at night.'],conditions:['cold'],enemyName:'Bandit Cutpurse',enemyLevel:8,source:'the road to Coldkeep near Dawnhearth',return_text:"The warden has it. He sent a reply — I won't share the contents, but you earned whatever comes of it."},
+    {id:'q3',type:'quest',title:'The Hollow Man',desc:"Something walks the market after closing. It looks right. It sounds right. If you look at it directly the details stop working. The guard refuses to investigate.",hints:['Whatever it is, it is not warm.','It does not like light.'],conditions:['dark'],enemyName:'Timber Wolf',enemyLevel:8,source:'the market district after dark',return_text:"People are sleeping again. I don't know what you did out there and I won't ask. But the market has been normal since."},
     {id:'q4',type:'quest',title:'The Missing Apprentice',desc:"My apprentice went into the Ashwood three days ago to collect samples. Research takes a day. Three days is something else. Please bring her back.",hints:['The wood gets strange past the second stream.','Bring something bright.','The wood past the second stream closes in. The canopy is low and the undergrowth is thick.'],conditions:['cramped'],enemyName:'Goblin Scout',enemyLevel:6,source:'the Ashwood near Dawnhearth',return_text:"She's home. Shaken but home. She won't tell me what happened past the second stream. I've stopped asking."},
   ],
   adventure:[
     {id:'a_north',type:'adventure',title:'The Road North',desc:"The guild has a standing contract for any member willing to make the run north through the Thornwood to Millriver. The road was clear last season. It is not clear now.",hints:['The road markers run as far as the first ridge. After that you read the land.','Something has moved into the Thornwood between here and Millriver. The contract does not say what.'],enemyName:'Thornwood Stalker',enemyLevel:10,source:'the road north through the Thornwood',return_text:"You came through the Thornwood and the Thornwood let you. Millriver is ahead — the road between is passable again, at least for now.",arrivesTown:'millriver'},
     {id:'a1',type:'adventure',title:'The Deep Ashwood',desc:"Beyond the known paths of the Ashwood there is something the maps do not show. I have spoken to hunters who pushed past the second ridge. They did not say much.",hints:['The trees get older out there. Older than seems right.','Things that live deep do not like visitors.'],enemyName:'Forest Wraith',enemyLevel:12,source:'the Deep Ashwood near Dawnhearth',return_text:"You came back from the deep wood. Not many do. Whatever you found out there — keep it to yourself for now. The town isn't ready for it."},
-    {id:'a2',type:'adventure',title:'The Forgotten Keep',desc:"Before Dawnhearth there was a fortress on the high ridge. History says it fell in a siege. The ruins suggest the siege never quite ended. I am offering a substantial sum for confirmation.",hints:['Ruins that old do not stay empty.','Old armour will not protect you against old things.'],enemyName:'Orc Scout',enemyLevel:16,source:'the Forgotten Keep in the high ridge',return_text:"The siege never ended. That's what you're telling me. I'll write it down. Somewhere it can be found later."},
-    {id:'a3',type:'adventure',title:'The Black Mere',desc:"There is a lake three days east where the water is black at any depth. Fishermen gave up on it two generations ago. I want to know why.",hints:['The cold there is not just cold.','What lives beneath does not breathe air.'],enemyName:'Marsh Toad',enemyLevel:13,source:'the Black Mere east of Dawnhearth',return_text:"The water is black at any depth. Now we know why. Don't tell the fishermen. Let them believe it was just bad luck."},
+    {id:'a2',type:'adventure',title:'The Forgotten Keep',desc:"Before Dawnhearth there was a fortress on the high ridge. History says it fell in a siege. The ruins suggest the siege never quite ended. I am offering a substantial sum for confirmation.",hints:['Ruins that old do not stay empty.','Old armour will not protect you against old things.','The stairwell to the rampart is a long climb.'],conditions:['climbing','cramped'],enemyName:'Orc Scout',enemyLevel:16,source:'the Forgotten Keep in the high ridge',return_text:"The siege never ended. That's what you're telling me. I'll write it down. Somewhere it can be found later."},
+    {id:'a3',type:'adventure',title:'The Black Mere',desc:"There is a lake three days east where the water is black at any depth. Fishermen gave up on it two generations ago. I want to know why.",hints:['The cold there is not just cold.','What lives beneath does not breathe air.'],conditions:['cold'],enemyName:'Marsh Toad',enemyLevel:13,source:'the Black Mere east of Dawnhearth',return_text:"The water is black at any depth. Now we know why. Don't tell the fishermen. Let them believe it was just bad luck."},
   ],
 };
 
@@ -1193,7 +1219,7 @@ const MISSIONS_MILLRIVER={
     {id:'mr_b1',type:'bounty',title:'River Wolves',desc:"Marshwolves have been picking off the fishing traps along the north bank. Three traps gone, one fisher with a bad arm. I need the pack thinned.",hints:['They hunt in the shallows. They know the footing.'],enemyName:'Marshwolf',enemyLevel:10,source:'the north bank marshes near Millriver',return_text:"The traps came back. One more than expected — the wolf had been carrying one. We don't ask how."},
     {id:'mr_b2',type:'bounty',title:'The Toll Man',desc:"Someone is stopping traders on the bridge road north of town. Not asking for toll. Taking it. The guild wants it resolved before they reroute.",hints:[],enemyName:'Road Brigand',enemyLevel:11,source:'the bridge road north of Millriver',return_text:"The traders came through clean this morning. The bridge is open again."},
     {id:'mr_b3',type:'bounty',title:'Dock Rats',desc:"The dockside warehouse has been getting hit. Not by vermin. By people. They are bold and they are not stopping. I need them off the dock.",hints:[],enemyName:'Dock Thug',enemyLevel:12,source:'the dockside warehouse in Millriver',return_text:"Quiet since. The warehouse is locked properly now. That helped."},
-    {id:'mr_b4',type:'bounty',title:"The Ferryman's Problem",desc:"Something in the deep channel has been overturning the smaller crossing boats. Three incidents. The ferryman says it is old water. I want it handled before more people go in.",hints:['The deep channel runs cold even in summer.','It does not breathe.'],enemyName:'Bog Wraith',enemyLevel:13,source:'the deep channel near Millriver',return_text:"The crossings have been clean since. The ferryman didn't thank you. He doesn't do that. But he was at the dock when you came back."},
+    {id:'mr_b4',type:'bounty',title:"The Ferryman's Problem",desc:"Something in the deep channel has been overturning the smaller crossing boats. Three incidents. The ferryman says it is old water. I want it handled before more people go in.",hints:['The deep channel runs cold even in summer.','It does not breathe.'],conditions:['cold'],enemyName:'Bog Wraith',enemyLevel:13,source:'the deep channel near Millriver',return_text:"The crossings have been clean since. The ferryman didn't thank you. He doesn't do that. But he was at the dock when you came back."},
   ],
   quest:{id:'mr_q1',type:'quest',title:'Something in the Water',desc:"The fishing upriver has collapsed. Not declined. Collapsed. A week ago there were fish. Now there is nothing. The fishermen will not go above the third bend. Something happened up there and I want to know what.",hints:['The third bend is where the old shrines are.','Whatever drove out the fish is still there.','The river above the third bend runs quiet in a specific way.'],enemyName:'River Merfolk',enemyLevel:14,source:'the upper river north of Millriver',
     return_text:"The fishermen went out this morning. Nobody asked what you found up there.",
@@ -1212,15 +1238,15 @@ const MISSIONS_GRIMHOLLOW={
     {id:'gh_j4',type:'job',title:'Message from Millriver',desc:"Sealed letter to the elder. She already knows what it says. She always does. Deliver it anyway.",hints:[],enemyName:null,source:'courier work in Grimhollow',return_text:"She took it. Didn't open it while you were there. Said it didn't need opening."},
   ],
   bounty:[
-    {id:'gh_b1',type:'bounty',title:'The Canopy Crawler',desc:"Something large has been moving through the upper canopy north of the road. Three people saw it. None of them agree on what it looks like. I need it gone.",hints:['Look up before looking around.'],enemyName:'Canopy Crawler',enemyLevel:18,source:'the northern treeline near Grimhollow',return_text:"Nobody has seen it since. The canopy is quiet. That is how it should be."},
+    {id:'gh_b1',type:'bounty',title:'The Canopy Crawler',desc:"Something large has been moving through the upper canopy north of the road. Three people saw it. None of them agree on what it looks like. I need it gone.",hints:['Look up before looking around.','The canopy is thick. A long weapon will catch on the branches.'],conditions:['climbing','cramped'],enemyName:'Canopy Crawler',enemyLevel:18,source:'the northern treeline near Grimhollow',return_text:"Nobody has seen it since. The canopy is quiet. That is how it should be."},
     {id:'gh_b2',type:'bounty',title:'Rot Hounds',desc:"A pack has been circling the south perimeter at night. They are not wolves. They are not dogs. They are something that used to be one of those. I want them dealt with.",hints:['They travel in groups. The pack will come when one is threatened.'],enemyName:'Rot Hound',enemyLevel:19,source:'the south perimeter of Grimhollow',return_text:"Quiet since dawn. The perimeter patrols didn't see anything."},
-    {id:'gh_b3',type:'bounty',title:'The Hollow Man',desc:"Something has been standing in the clearing east of the old shrine. At night. Not moving. People walking past at distance report feeling watched. From multiple directions. At the same time.",hints:['It stands perfectly still. That is part of the problem.'],enemyName:'Hollow Revenant',enemyLevel:20,source:'the clearing east of Grimhollow',return_text:"The clearing is empty. Whatever was standing there isn't standing there anymore.",unlocks_class:'Shadowblade'},
+    {id:'gh_b3',type:'bounty',title:'The Hollow Man',desc:"Something has been standing in the clearing east of the old shrine. At night. Not moving. People walking past at distance report feeling watched. From multiple directions. At the same time.",hints:['It stands perfectly still. That is part of the problem.'],conditions:['dark'],enemyName:'Hollow Revenant',enemyLevel:20,source:'the clearing east of Grimhollow',return_text:"The clearing is empty. Whatever was standing there isn't standing there anymore.",unlocks_class:'Shadowblade'},
     {id:'gh_b4',type:'bounty',title:"Farradin's Shadow",desc:"Something from the Farradin road has been ranging south into the forest edge. Looks like a traveller from a distance. On approach the details fail. I need it cleared from the road.",hints:['The Farradin road is not safe at the best of times.'],enemyName:'Cursed Traveller',enemyLevel:21,source:'the Farradin road near Grimhollow',return_text:"The road is clear. At least that section. The rest is someone else's problem.",unlocks_class:'Warlock',cursed_bone_chance:0.6},
   ],
   quest:{id:'gh_q1',type:'quest',title:'The Lost Emissary',desc:"An emissary from Farradin came through three months ago. Had letters for the elder. Never arrived. The road was open. Something on it wasn't friendly. I need those letters found and whoever — whatever — is carrying them now dealt with.",hints:['The emissary was not alone on the road.','Whatever stopped them did not stop at one.'],enemyName:'Undead Emissary',enemyLevel:22,extraEnemies:[{name:'Farradin Guard',level:20},{name:'Farradin Guard',level:20}],source:'the Farradin road north of Grimhollow',
     return_text:"You don't tell the elder what the letters said. She doesn't ask.",
     unlocks_adventure:true},
-  adventure:{id:'gh_a1',type:'adventure',title:'Into the Dark Road',desc:"The road to Farradin runs north through old forest and older dark. The guild contracts this route twice a year. Nobody has taken it in eighteen months.",hints:['The road is marked. Follow the marks.','The dark between the marks is not nothing.'],enemyName:'Dark Road Shade',enemyLevel:23,source:'the dark road north of Grimhollow',
+  adventure:{id:'gh_a1',type:'adventure',title:'Into the Dark Road',desc:"The road to Farradin runs north through old forest and older dark. The guild contracts this route twice a year. Nobody has taken it in eighteen months.",hints:['The road is marked. Follow the marks.','The dark between the marks is not nothing.'],conditions:['dark','cold'],enemyName:'Dark Road Shade',enemyLevel:23,source:'the dark road north of Grimhollow',
     return_text:"The road to Farradin is open. You have made it open.",
     arrivesTown:'farradin'},
 };
@@ -1234,12 +1260,12 @@ const MISSIONS_FARRADIN={
     {id:'far_j4',type:'job',title:'Lamp Oil',desc:"The Cathedral colonnade runs on oil. Thirty-seven lanterns. It takes longer than it should. There is something about the Cathedral that slows things.",hints:[],enemyName:null,source:'lamp work at the Cathedral',return_text:"All thirty-seven. The colonnade was lit before the bell. First time in weeks."},
   ],
   bounty:[
-    {id:'far_b1',type:'bounty',title:'The Market After Dark',desc:"The east market has been impassable after sunset. A guardsman sent to investigate did not report back. I am paying well because this will not be simple.",hints:['The market is enclosed. The dark has nowhere to go.'],enemyName:'Cursed Royal Guard',enemyLevel:26,source:'the east market in Farradin',return_text:"The market is open again. The traders came back this morning without being asked."},
+    {id:'far_b1',type:'bounty',title:'The Market After Dark',desc:"The east market has been impassable after sunset. A guardsman sent to investigate did not report back. I am paying well because this will not be simple.",hints:['The market is enclosed. The dark has nowhere to go.'],conditions:['dark','cramped'],enemyName:'Cursed Royal Guard',enemyLevel:26,source:'the east market in Farradin',return_text:"The market is open again. The traders came back this morning without being asked."},
     {id:'far_b2',type:'bounty',title:'The East Quarter',desc:"The east residential quarter has been emptying for a month. People leaving without explanation. We sent a scout. She came back without her notes.",hints:['The scout said the walls were wrong.'],enemyName:'Palace Wraith',enemyLevel:27,source:'the east quarter of Farradin',return_text:"People are moving back. It's been quiet since."},
     {id:'far_b3',type:'bounty',title:"The Courier Who Didn't Arrive",desc:"A courier from Grimhollow was due in the city two weeks ago. The message was marked urgent. Whatever has the message now, I need it retrieved.",hints:['Couriers from Grimhollow travel light and move fast. Something very wrong stopped this one.'],enemyName:'Turned Royal Messenger',enemyLevel:28,source:'the courier road in Farradin',return_text:"The message was recovered. It was addressed to the castle. I've sent it up. No response yet."},
     {id:'far_b4',type:'bounty',title:'Old Debts',desc:"The old warehouse district has something in it. The harbour guild has been paying to have it ignored for three years. They have stopped paying. Deal with it.",hints:['It has been there a long time. It has gotten comfortable.'],enemyName:'Warehouse Shade',enemyLevel:27,source:'the warehouse district in Farradin',return_text:"The warehouse district is clear. The guild sent a representative who said nothing and left immediately. That means handled."},
   ],
-  finalQuest:{id:'far_fq',type:'quest',title:'The Crown and the Curse',desc:"The castle is open. The king is in the throne room. The court is not. Whatever the king has become, he has been waiting. The castle gate is unguarded. This is a choice they have made for you.",hints:['He knows you are coming.','He has been waiting a long time.','Do not stop.'],enemyName:'The Cursed King',enemyLevel:30,source:'the throne room in Farradin Castle',
+  finalQuest:{id:'far_fq',type:'quest',title:'The Crown and the Curse',desc:"The castle is open. The king is in the throne room. The court is not. Whatever the king has become, he has been waiting. The castle gate is unguarded. This is a choice they have made for you.",hints:['He knows you are coming.','He has been waiting a long time.','Do not stop.'],conditions:['dark','climbing'],enemyName:'The Cursed King',enemyLevel:30,source:'the throne room in Farradin Castle',
     return_text:"The castle is quiet.",isFinalQuest:true,guaranteedItem:'cursed_crown'},
   get quest(){return[this.finalQuest];},
   adventure:[],
@@ -1544,10 +1570,11 @@ function buildPlayerStats(){
   let potionStrBonus=0,potionAgiBonus=0,potionCritBonus=0,potionSpeedBonus=0;
   (G.potionBuffs||[]).forEach(b=>{
     if(b.charges>0){
-      if(b.type==='str')   potionStrBonus+=b.value;
-      if(b.type==='agi')   potionAgiBonus+=b.value;
-      if(b.type==='crit')  potionCritBonus+=b.value;
-      if(b.type==='speed') potionSpeedBonus+=b.value;
+      if(b.type==='str')      potionStrBonus+=b.value;
+      if(b.type==='agi')      potionAgiBonus+=b.value;
+      if(b.type==='crit')     potionCritBonus+=b.value;
+      if(b.type==='speed')    potionSpeedBonus+=b.value;
+      if(b.type==='hangover') potionAgiBonus-=1;
     }
   });
 
@@ -1728,6 +1755,54 @@ function buildEnemyStats(name,level){
     armour:Math.min(.35,level*.004),
     resistance:0,
   };
+}
+
+function applyMissionConditions(pStats,mission){
+  const conds=mission.conditions||[];
+  if(!conds.length) return [];
+  const notes=[];
+  conds.forEach(c=>{
+    if(c==='cold'){
+      if(!G.equipped.body){
+        pStats.hp=Math.max(1,pStats.hp-5);
+        notes.push({penalty:true,msg:'The temperature drops and bites through your bare skin. You take 5 damage.'});
+      }else{
+        notes.push({penalty:false,msg:'The temperature drops but your armour keeps you warm.'});
+      }
+    }
+    if(c==='dark'){
+      const wk=G.equipped.weapon;const w=wk?ITEMS_DB[wk]:null;
+      if(w&&w.combat&&w.combat.wtype==='bow'){
+        pStats.crit=Math.max(0,pStats.crit*0.5);
+        pStats.dmgMax=Math.floor(pStats.dmgMax*0.8);
+        notes.push({penalty:true,msg:'The darkness makes it hard to aim. Bow accuracy and damage reduced.'});
+      }else{
+        notes.push({penalty:false,msg:'It is dark, but your weapon does not need line of sight.'});
+      }
+    }
+    if(c==='cramped'||c==='confined'){
+      const wk=G.equipped.weapon;const w=wk?ITEMS_DB[wk]:null;
+      if(w&&w.twoHanded){
+        pStats.dmgMin=Math.floor(pStats.dmgMin*0.75);
+        pStats.dmgMax=Math.floor(pStats.dmgMax*0.75);
+        notes.push({penalty:true,msg:'The space is too tight for a two-handed weapon. Damage reduced.'});
+      }else{
+        notes.push({penalty:false,msg:'The confined space does not hinder your weapon.'});
+      }
+    }
+    if(c==='climbing'){
+      const hasRope=G.equipped.pack==='rope'||G.equipped.pack2==='rope';
+      if(hasRope){
+        pStats.hp=Math.min(pStats.maxHp||pStats.hp,pStats.hp+5);
+        notes.push({penalty:false,msg:'Your rope makes the climb easier. You arrive in better shape. (+5 HP)'});
+      }else{
+        const dmg=ri(3,8);
+        pStats.hp=Math.max(1,pStats.hp-dmg);
+        notes.push({penalty:true,msg:`The climb is difficult without rope. You take ${dmg} damage from the ascent.`});
+      }
+    }
+  });
+  return notes;
 }
 
 function simulateCombat(player,enemy){
@@ -1979,6 +2054,10 @@ function renderCombat(sim){
         const pf=document.getElementById('cb-php');const pv=document.getElementById('cb-phv');
         if(pf) pf.style.width=Math.max(0,(pCurH/pMaxH)*100)+'%';
         if(pv) pv.textContent=`${pCurH}/${pMaxH}`;
+      }else if(ev.type==='condition'){
+        line.className=`combat-line ${ev.who==='env_penalty'?'ehit':'heal'}`;
+        line.style.fontStyle='italic';
+        line.textContent=ev.text;
       }
       wrap.appendChild(line);
       log.scrollTop=log.scrollHeight;
@@ -2247,18 +2326,21 @@ function startMission(missionData){
   };
   G.journeyEnded=false;
   G.pendingLoot=[];
-  // Activate buff potions from pack slots
-  G.potionBuffs=[];
-  ['pack','pack2'].forEach(slot=>{
-    const k=G.equipped[slot];
-    if(!k) return;
-    const it=ITEMS_DB[k];
-    if(it&&it.potion){
-      G.potionBuffs.push({type:it.potion.type,value:it.potion.value,charges:it.potion.combats});
-      G.equipped[slot]=null; // consumed
-      addDiary(`${it.name} activated. ${it.potion.combats} sips remain.`,'note');
-    }
-  });
+  // Activate buff potions from pack slots (only on combat missions, not jobs)
+  const hasCombat=missionData.type!=='job';
+  if(hasCombat){
+    G.potionBuffs=(G.potionBuffs||[]).filter(b=>b.debuff); // keep debuffs, clear old combat buffs
+    ['pack','pack2'].forEach(slot=>{
+      const k=G.equipped[slot];
+      if(!k) return;
+      const it=ITEMS_DB[k];
+      if(it&&it.potion){
+        G.potionBuffs.push({type:it.potion.type,value:it.potion.value,charges:it.potion.combats});
+        G.equipped[slot]=null; // consumed
+        addDiary(`${it.name} activated. ${it.potion.combats} sips remain.`,'note');
+      }
+    });
+  }
   save();
   showJourneyScreen(missionData);
   document.getElementById('dev-skip').style.display='block';
@@ -2299,8 +2381,18 @@ function tickJourney(){
         const eN=miss.enemyName||randEnemy(G.c.level);
         const eLv=miss.enemyLevel||Math.max(1,G.c.level+ri(-2,3));
         const pStats=buildPlayerStats();
+        // Apply mission condition modifiers (cold, dark, cramped, climbing)
+        const condNotes=applyMissionConditions(pStats,miss);
+        condNotes.forEach(n=>{
+          addDiary(n.msg,n.penalty?'warning':'note');
+        });
         const eStats=buildEnemyStats(eN,eLv);
         const sim=simulateCombat(pStats,eStats);
+        // Prepend condition notes to combat events
+        if(condNotes.length){
+          const condEvents=condNotes.map(n=>({who:n.penalty?'env_penalty':'env_bonus',type:'condition',text:n.msg}));
+          sim.events.unshift(...condEvents);
+        }
         G.journey.combatDone.push({sim,index:i});
         G.lastCombatSim=sim; // store for replay
         // Consume healing potion if used
@@ -2767,7 +2859,7 @@ function showScreen(s){
     // Ambience switch
     AUDIO.init();
     if(s==='journey') AUDIO.startJourneyAmbience();
-    else if(s==='town'||s==='crossroads') AUDIO.startTownAmbience();
+    else if(s==='town'||s==='crossroads') AUDIO.startTownAmbience(G.currentTown);
   }
 }
 
@@ -3116,6 +3208,8 @@ function getKinLine(building){
 // HOME SCREEN
 // ══════════════════════════════════════════════════════════════
 function buildHomeScreen(){
+  const vl=document.getElementById('home-version-label');
+  if(vl) vl.textContent='v'+GAME_VERSION;
   const saved=loadSave();
   const area=document.getElementById('home-char-area');
   const btn=document.getElementById('home-btn');
@@ -3347,13 +3441,24 @@ function render(){
     else if(pct>30) fill.style.background='linear-gradient(90deg,#8a6020,#c09030)';
     else fill.style.background='linear-gradient(90deg,#7a1515,#c03030)';
   }
+  // Time-of-day cycle (cosmetic, based on real clock)
+  const ht=document.getElementById('h-time');
+  if(ht){
+    const hr=new Date().getHours();
+    if(hr>=5&&hr<8){ht.textContent='🌅';ht.title='Dawn';}
+    else if(hr>=8&&hr<17){ht.textContent='☀️';ht.title='Day';}
+    else if(hr>=17&&hr<20){ht.textContent='🌇';ht.title='Dusk';}
+    else{ht.textContent='🌙';ht.title='Night';}
+  }
 }
 
 // ══════════════════════════════════════════════════════════════
 // MODAL SYSTEM
 // ══════════════════════════════════════════════════════════════
 function openModal(key,data){
-  AUDIO.init();AUDIO.playDoor();
+  AUDIO.init();
+  const sfx={shop:'playShopBell',church:'playChant',tavern:'playTavern',bank:'playVault',noticeboard:'playPaper',academy:'playAcademy'};
+  if(sfx[key]&&AUDIO[sfx[key]]) AUDIO[sfx[key]](); else AUDIO.playDoor();
   const b={loadout,character:loadout,inventory:loadout,diary,chronicle,map,tavern,shop,academy,noticeboard,graveyard,bank,church,gate:gateModal};
   if(b[key]) b[key](data);
   document.getElementById('overlay').classList.add('open');
@@ -3383,8 +3488,8 @@ function buildLoadoutHTML(){
   const perkHtml=perks.map(p=>`<div class="perk-row"><div class="perk-dot ${p.dot}"></div><div><span class="perk-name">${p.name}</span><span class="perk-desc">${p.desc}</span></div></div>`).join('');
 
   const STAT_TIPS={
-    str:'Increases physical damage with swords, daggers and axes.',
-    agi:'Increases attack speed and critical strike chance.',
+    str:'Increases physical damage with swords, axes and clubs.',
+    agi:'Increases critical strike chance and damage with bows and daggers.',
     int:'Increases magical damage with staves, wands and tomes.',
     con:'Increases maximum health by 2 per point.',
   };
@@ -3414,7 +3519,7 @@ function buildLoadoutHTML(){
     {key:'head',icon:'⛑',label:'Head'},{key:'body',icon:'🥋',label:'Body'},
     {key:'shoulder',icon:'🪬',label:'Shoulders'},{key:'gloves',icon:'🧤',label:'Gloves'},
     {key:'boots',icon:'👢',label:'Boots'},{key:'amulet',icon:'📿',label:'Amulet'},
-    {key:'ring1',icon:'💍',label:'Ring'},{key:'pack',icon:'🎒',label:'Pack'},
+    {key:'ring1',icon:'💍',label:'Ring'},{key:'pack',icon:'🎒',label:'Pack'},{key:'pack2',icon:'🎒',label:'Pack 2'},
   ];
   const eqHtml=eqSlots.map(s=>{
     const k=G.equipped[s.key];const it=k?ITEMS_DB[k]:null;
@@ -3539,11 +3644,14 @@ function bagItemAction(idx){
       const wpn=G.equipped.weapon?ITEMS_DB[G.equipped.weapon]:null;
       if(wpn&&wpn.twoHanded) return; // 2H weapon blocks offhand
     }
-    if(G.equipped[slot]){
-      const prev=ITEMS_DB[G.equipped[slot]];
-      if(prev) G.bag.push({...prev,key:G.equipped[slot],isDBItem:true,source:'equipped',icon:prev.icon,rarity:prev.rarity});
+    // Pack overflow: if pack is full, try pack2
+    let targetSlot=slot;
+    if(slot==='pack'&&G.equipped.pack&&!G.equipped.pack2) targetSlot='pack2';
+    if(G.equipped[targetSlot]){
+      const prev=ITEMS_DB[G.equipped[targetSlot]];
+      if(prev) G.bag.push({...prev,key:G.equipped[targetSlot],isDBItem:true,source:'equipped',icon:prev.icon,rarity:prev.rarity});
     }
-    G.equipped[slot]=item.key;
+    G.equipped[targetSlot]=item.key;
     G.bag.splice(idx,1);
   } else {
     // Non-DB loot item — guess slot and equip by storing full object
@@ -3644,7 +3752,8 @@ function buildBuffsHTML(forCombat){
   (G.potionBuffs||[]).forEach(b=>{
     if(b.charges<=0) return;
     const labels={str:"Brewer's Tonic",agi:'Quickfoot Draught',crit:'Sharpshot Elixir',speed:'Haste Flask'};
-    pills.push({label:`${labels[b.type]||b.type} · ${b.charges} left`,pos:true});
+    const lbl=b.label||(labels[b.type]||b.type);
+    pills.push({label:`${lbl} · ${b.charges} left`,pos:!b.debuff});
   });
   // Church blessing
   if(G.c&&G.c.blessed){
@@ -3847,61 +3956,123 @@ function tickTavern(){
   }
 }
 
+function getRumourHint(town){
+  const hints={
+    dawnhearth:[
+      "A tinker who passed through last week spoke of a settlement further north — Millriver, they called it. Said the road there was long but passable.",
+      "Someone at the end of the bar was wearing a grey hood and watching the door. Left without saying a word. Nobody asked.",
+      "Word is the church has been taking on volunteers — acolytes, they call them. Easy work at first, then it isn't.",
+      "A shepherd was in last night, going on about wolves near the high pasture. Said the Watch used to handle it. Used to.",
+      "Merchant came through from the north. Said the road is clear but cold. Said there's good coin in Millriver for anyone willing to earn it.",
+    ],
+    millriver:[
+      "The ferryman hasn't taken passengers in weeks. Something about the crossing being wrong. He won't say what.",
+      "Heard someone in the corner mention Grimhollow — then go quiet when they noticed me listening. Place has a reputation.",
+      "A plague doctor came through in the spring and never left. Sets up near the south gate sometimes. Best to give them space.",
+      "The bridge north has been holding but nobody's maintaining it. Council keeps saying they'll send someone.",
+      "Three travellers left for Grimhollow last month. Two came back. The third sent a letter. Nobody opened it.",
+    ],
+    grimhollow:[
+      "The bounty board changes every few days. Someone's keeping it stocked. Not the guard — they're stretched thin.",
+      "There's a warlock in the hills. Been there for years. Locals leave offerings. Nobody goes to ask why.",
+      "The plague spread slower here than elsewhere. The doctor knows why. Hasn't shared it publicly.",
+      "Farradin's traders stopped coming through last season. No explanation. Road's still open, as far as anyone knows.",
+      "An old man by the fire said there's something buried under the eastern district. Said it every night until he stopped showing up.",
+    ],
+    farradin:[
+      "The crown hasn't been seen publicly in years. Some say it's locked away. Others say it never was.",
+      "A scholar passed through looking for artefacts — old things, cursed things. Paid well. Kept quiet about what they found.",
+      "Everyone who comes here from the south road looks different when they leave. Not worse. Just different.",
+      "There's a vault in the merchant quarter no one's owned in living memory. Still locked. Still lit inside at night.",
+      "Heard someone say the world has an ending. Not like death — like a door. Said it like it was obvious.",
+    ],
+  };
+  const pool=hints[town]||hints.dawnhearth;
+  return pool[Math.floor(Math.random()*pool.length)];
+}
+
 function resolveTavern(){
   const type=G.tavernActivity.type;
   G.tavernActivity=null;
+  const tavernName=getTownBuildingTitle('tavern');
+  const town=G.currentTown||'dawnhearth';
   if(type==='sleep'){
     const maxHp=G.c.maxHp||10+(G.c.level*2)+(G.c.con*2);
     G.c.hp=maxHp;G.c.maxHp=maxHp;
-    G.c.debuffs=[];  // full rest clears all debuffs
-    addDiary(`Woke up at the Flagon. The pain from before was gone. All of it.`);
+    G.c.debuffs=[];
+    G.potionBuffs=(G.potionBuffs||[]).filter(b=>!b.debuff);
+    addDiary(`Slept at ${tavernName}. Woke up rested. The ache was gone.`);
     document.getElementById('h-status').textContent='IN TOWN';
     const mx=document.querySelector('.m-x');
     if(mx) mx.style.display='';
     save();render();
     return;
-  }else{
-    // Drink outcomes
-    const roll=Math.random();
-    let headline='', detail='', diaryText='';
-    if(roll<0.35){
-      G.c.drinkBuff='speed';
-      headline='A Hunter\'s Knowledge';
-      detail='An old hunter held court at the bar for an hour. You listened. Something about the roads stuck. You\'ll be quicker out there for it.';
-      diaryText='Sat next to an old hunter at the bar. He talked about the roads for an hour. Might have learned something.';
-    }else if(roll<0.55){
-      const lost=ri(2,8);G.c.gold=Math.max(0,G.c.gold-lost);
-      headline='Card Game';
-      detail=`Got talked into a hand of cards by someone who knew more about cards than you did. Lost ${lost} gold. Lesson learned. Probably.`;
-      diaryText=`Got talked into a card game. Lost ${lost} gold. Lesson learned. Probably.`;
-    }else if(roll<0.75){
-      const won=ri(3,12);G.c.gold+=won;
-      headline='Lucky Hand';
-      detail=`Won ${won} gold on a bet. The loser took it remarkably well. You decided not to ask why.`;
-      diaryText=`Won ${won} gold on a bet. The loser took it well. Better than expected.`;
-    }else if(roll<0.90){
-      const dmg=ri(4,12);
-      G.c.hp=Math.max(1,(G.c.hp||G.c.maxHp)-dmg);
-      headline='A Scuffle by the Door';
-      detail=`Someone bumped you. You bumped back. It escalated faster than either of you expected. You took ${dmg} damage, walked away, and didn't look back.`;
-      diaryText=`Got into a scuffle near the door. Walked away with ${dmg} points of something to remember it by.`;
-    }else{
-      headline='A Quiet Night';
-      detail='Drank quietly. Nobody bothered you. The fire was warm. The cup was refilled once without asking. You called it a good night.';
-      diaryText='Drank quietly. Nobody bothered me. The fire was warm. Called it a good night.';
-    }
-    addDiary(diaryText);
-    // Show result on screen
-    document.getElementById('h-status').textContent='IN TOWN';
-    save();render();
-    setModal('The Ashen Flagon',`
-      <p style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;">${headline}</p>
-      <p style="font-size:14px;color:var(--bone);line-height:1.8;font-style:italic;margin-bottom:20px;">${detail}</p>
-      <button class="mc-depart" onclick="closeModal()">Close</button>
-    `);
-    document.getElementById('overlay').classList.add('open');
-    return;
   }
+  // Drink outcomes
+  const roll=Math.random();
+  let headline='', detail='', diaryText='';
+  if(roll<0.10){
+    // Small find
+    const found=ri(4,12);G.c.gold+=found;
+    headline='Something Between the Cushions';
+    detail=`You found ${found} gold tucked behind the bar stool. Probably not yours. You pocketed it.`;
+    diaryText=`Found ${found} gold at the bar. Kept it.`;
+  }else if(roll<0.25){
+    // World-voice rumour
+    const hint=getRumourHint(town);
+    headline='A Rumour';
+    detail=hint;
+    diaryText=`Heard something at the bar worth remembering.`;
+  }else if(roll<0.40){
+    // Speed buff
+    if(!G.potionBuffs) G.potionBuffs=[];
+    G.potionBuffs.push({type:'speed',value:0.2,charges:3,label:"Hunter's Tip"});
+    headline="A Hunter's Knowledge";
+    detail="An old hunter held court at the bar for an hour. You listened. Something about the roads stuck. You'll move faster out there for it. (3 combats)";
+    diaryText="Sat next to an old hunter. He talked about the roads. Might have learned something.";
+  }else if(roll<0.55){
+    // Lucky hand
+    const won=ri(8,20);G.c.gold+=won;
+    headline='Lucky Hand';
+    detail=`Won ${won} gold on a bet. The loser took it remarkably well. You decided not to ask why.`;
+    diaryText=`Won ${won} gold at cards. The loser was too calm about it.`;
+  }else if(roll<0.65){
+    // Card game — lose gold
+    const lost=ri(5,15);G.c.gold=Math.max(0,G.c.gold-lost);
+    headline='Card Game';
+    detail=`Someone at the table knew more about cards than you did. Lost ${lost} gold. The lesson cost less than expected.`;
+    diaryText=`Lost ${lost} gold at a card game. Lesson learned. Probably.`;
+  }else if(roll<0.76){
+    // Scuffle
+    const dmg=ri(4,12);
+    G.c.hp=Math.max(1,(G.c.hp||G.c.maxHp)-dmg);
+    headline='A Scuffle by the Door';
+    detail=`Someone bumped you. You bumped back. It escalated faster than either of you planned. Took ${dmg} damage. Walked away without looking back.`;
+    diaryText=`Got into a scuffle near the door. ${dmg} points of something to remember.`;
+  }else if(roll<0.88){
+    // Hangover
+    if(!G.potionBuffs) G.potionBuffs=[];
+    G.potionBuffs.push({type:'hangover',debuff:true,label:'Hangover',charges:3});
+    buildPlayerStats();
+    headline='One Too Many';
+    detail="You had one more than you needed. The room tilted. Someone helped you to a chair. You woke up there. The morning is unkind. (-1 Agility, 3 combats)";
+    diaryText="Drank one too many. Woke up in a chair near the fire. Head is wrong.";
+  }else{
+    // Quiet night
+    const xp=ri(5,15);G.c.xp=(G.c.xp||0)+xp;
+    headline='A Quiet Night';
+    detail=`Drank quietly. Nobody bothered you. The fire was warm. The cup was refilled once without asking. You left a little sharper than when you arrived. (+${xp} XP)`;
+    diaryText=`Drank quietly. The fire was warm. Called it a good night.`;
+  }
+  addDiary(diaryText);
+  document.getElementById('h-status').textContent='IN TOWN';
+  save();render();
+  setModal(tavernName,`
+    <p style="font-family:'Cinzel',serif;font-size:12px;letter-spacing:2px;color:var(--gold);text-transform:uppercase;margin-bottom:12px;">${headline}</p>
+    <p style="font-size:14px;color:var(--bone);line-height:1.8;font-style:italic;margin-bottom:20px;">${detail}</p>
+    <button class="mc-depart" onclick="closeModal()">Close</button>
+  `);
+  document.getElementById('overlay').classList.add('open');
 }
 
 function shop(){
@@ -3962,12 +4133,12 @@ function shop(){
     </div>`;
   }).join('');
 
-  const eqSlots=[{k:'weapon',l:'Weapon'},{k:'offhand',l:'Off Hand'},{k:'head',l:'Head'},{k:'body',l:'Body'},{k:'boots',l:'Boots'},{k:'amulet',l:'Amulet'},{k:'ring1',l:'Ring'},{k:'pack',l:'Pack'}];
+  const eqSlots=[{k:'weapon',l:'Weapon'},{k:'offhand',l:'Off Hand'},{k:'head',l:'Head'},{k:'body',l:'Body'},{k:'boots',l:'Boots'},{k:'amulet',l:'Amulet'},{k:'ring1',l:'Ring'},{k:'pack',l:'Pack'},{k:'pack2',l:'Pack 2'}];
   const eqHtml=eqSlots.map(s=>{
     const k=G.equipped[s.k];const it=k?ITEMS_DB[k]:null;
     const st=it?itemStatStr(it):'';
     const rc=it?RARITY_CONFIG[it.rarity]:null;
-    return`<div class="eq-compare">
+    return`<div class="eq-compare${it?` rarity-${it.rarity}`:''}">
       <span class="eq-compare-slot">${s.l}</span>
       <span class="eq-compare-name ${rc?rc.cls:''}">${it?it.name:'Empty'}</span>
       ${st?`<span class="eq-compare-stat">${st}</span>`:''}
@@ -3989,9 +4160,19 @@ function buyItem(key){
   const it=ITEMS_DB[key];if(!it||G.c.gold<it.price)return;
   G.c.gold-=it.price;
   const shopName=getTownBuildingTitle('shop');
-  G.bag.push({key,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats,desc:it.desc,isDBItem:true,source:`bought from ${shopName}`});
+  let slot=it.slot;
+  // Pack items: try pack first, overflow to pack2
+  if(slot==='pack'&&G.equipped.pack&&!G.equipped.pack2) slot='pack2';
+  const autoEquip=slot&&!G.equipped[slot];
+  if(autoEquip){
+    G.equipped[slot]=key;
+    buildPlayerStats();
+    addDiary(`Bought and equipped ${it.name} from ${shopName} for ${it.price} gold.`,'purchase');
+  }else{
+    G.bag.push({key,name:it.name,rarity:it.rarity,icon:it.icon,stats:it.stats,desc:it.desc,isDBItem:true,source:`bought from ${shopName}`});
+    addDiary(`Bought ${it.name} from ${shopName} for ${it.price} gold.`,'purchase');
+  }
   save();shop();render();
-  addDiary(`Bought ${it.name} from ${shopName} for ${it.price} gold.`,'purchase');
 }
 
 function classChange(cls){
@@ -4333,28 +4514,40 @@ const AUDIO={
     }catch(e){this.ctx=null;}
   },
 
-  startTownAmbience(){
+  startTownAmbience(town){
     if(!this.ctx||!this.enabled.ambience) return;
     this._stopNodes();
-    const master=this.ctx.createGain();master.gain.value=0.35;master.connect(this.ctx.destination);
+    const t=town||G.currentTown||'dawnhearth';
+    // Per-town tuning: {drone freq, drone vol, wind freq, wind Q, wind vol, crackle, master vol}
+    const profiles={
+      dawnhearth: {df:65, dv:0.28, wf:380, wq:0.4, wv:0.035, crackle:true,  mv:0.35},
+      millriver:  {df:55, dv:0.22, wf:300, wq:0.6, wv:0.05,  crackle:false, mv:0.32},
+      grimhollow: {df:42, dv:0.30, wf:200, wq:0.3, wv:0.04,  crackle:false, mv:0.30},
+      farradin:   {df:72, dv:0.24, wf:450, wq:0.5, wv:0.025, crackle:true,  mv:0.33},
+    };
+    const p=profiles[t]||profiles.dawnhearth;
+    const master=this.ctx.createGain();master.gain.value=p.mv;master.connect(this.ctx.destination);
     this.nodes.master=master;
     // Low drone
-    const drone=this.ctx.createOscillator();drone.type='sine';drone.frequency.value=65;
+    const drone=this.ctx.createOscillator();drone.type='sine';drone.frequency.value=p.df;
     const dg=this.ctx.createGain();dg.gain.value=0;
     drone.connect(dg);dg.connect(master);drone.start();
-    dg.gain.linearRampToValueAtTime(0.28,this.ctx.currentTime+4);
+    dg.gain.linearRampToValueAtTime(p.dv,this.ctx.currentTime+4);
     // Drone LFO
     const lfo=this.ctx.createOscillator();lfo.type='sine';lfo.frequency.value=0.04;
     const lg=this.ctx.createGain();lg.gain.value=0.06;
     lfo.connect(lg);lg.connect(dg.gain);lfo.start();
-    // Wind
+    // Wind / water (Millriver gets higher gain for river sound)
     const wn=this._makeNoise(2);
-    const wf=this.ctx.createBiquadFilter();wf.type='bandpass';wf.frequency.value=380;wf.Q.value=0.4;
-    const wg=this.ctx.createGain();wg.gain.value=0.035;
+    const wf=this.ctx.createBiquadFilter();wf.type='bandpass';wf.frequency.value=p.wf;wf.Q.value=p.wq;
+    const wg=this.ctx.createGain();wg.gain.value=p.wv;
     wn.connect(wf);wf.connect(wg);wg.connect(master);wn.start();
     this.nodes.drone=drone;this.nodes.lfo=lfo;this.nodes.wind=wn;
-    // Fire crackle loop
-    this._crackleActive=true;this._crackle(master);
+    // Grimhollow: distant howl (periodic low sweep)
+    if(t==='grimhollow') this._startHowl(master);
+    // Crackle (hearth towns only)
+    this._crackleActive=p.crackle;
+    if(p.crackle) this._crackle(master);
   },
 
   startJourneyAmbience(){
@@ -4394,8 +4587,32 @@ const AUDIO={
     setTimeout(()=>this._crackle(dest),80+Math.random()*380);
   },
 
+  _howlActive:false,
+  _startHowl(dest){
+    this._howlActive=true;
+    const doHowl=()=>{
+      if(!this._howlActive||!this.ctx) return;
+      try{
+        const t=this.ctx.currentTime;
+        const g=this.ctx.createGain();g.gain.value=0;
+        g.gain.linearRampToValueAtTime(0.025,t+1.5);
+        g.gain.linearRampToValueAtTime(0.015,t+3.0);
+        g.gain.exponentialRampToValueAtTime(0.001,t+4.5);
+        g.connect(dest);
+        const o=this.ctx.createOscillator();o.type='sine';
+        o.frequency.setValueAtTime(180,t);
+        o.frequency.linearRampToValueAtTime(240,t+1.5);
+        o.frequency.linearRampToValueAtTime(160,t+4.0);
+        const f=this.ctx.createBiquadFilter();f.type='lowpass';f.frequency.value=300;
+        o.connect(f);f.connect(g);o.start(t);o.stop(t+4.5);
+      }catch(e){}
+      setTimeout(()=>doHowl(),8000+Math.random()*15000);
+    };
+    setTimeout(()=>doHowl(),3000+Math.random()*5000);
+  },
+
   _stopNodes(){
-    this._crackleActive=false;
+    this._crackleActive=false;this._howlActive=false;
     ['drone','lfo','wind'].forEach(k=>{try{if(this.nodes[k])this.nodes[k].stop();}catch(e){}});
     try{if(this.nodes.master)this.nodes.master.disconnect();}catch(e){}
     this.nodes={};
@@ -4444,9 +4661,92 @@ const AUDIO={
     s.connect(f);f.connect(g);s.start();
   },
 
+  playShopBell(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Small shop door bell — bright double ting
+    [0,0.12].forEach((delay,i)=>{
+      const g=this.ctx.createGain();g.gain.value=i===0?0.1:0.07;
+      g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+delay+0.6);g.connect(this.ctx.destination);
+      const o=this.ctx.createOscillator();o.type='sine';o.frequency.value=i===0?1200:1500;
+      o.connect(g);o.start(this.ctx.currentTime+delay);o.stop(this.ctx.currentTime+delay+0.6);
+    });
+  },
+
+  playChant(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Low church chant — layered sine drones fading in and out
+    const t=this.ctx.currentTime;
+    [130,196,260].forEach((freq,i)=>{
+      const g=this.ctx.createGain();g.gain.value=0;
+      g.gain.linearRampToValueAtTime(0.06-i*0.015,t+0.8);
+      g.gain.linearRampToValueAtTime(0.04-i*0.01,t+2.0);
+      g.gain.exponentialRampToValueAtTime(0.001,t+3.0);
+      g.connect(this.ctx.destination);
+      const o=this.ctx.createOscillator();o.type='sine';o.frequency.value=freq;
+      o.connect(g);o.start(t+i*0.15);o.stop(t+3.0);
+    });
+  },
+
+  playTavern(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Glass clink — two short bright taps
+    const t=this.ctx.currentTime;
+    [0,0.08].forEach((delay,i)=>{
+      const sz=Math.floor(this.ctx.sampleRate*0.04);
+      const buf=this.ctx.createBuffer(1,sz,this.ctx.sampleRate);
+      const d=buf.getChannelData(0);for(let j=0;j<sz;j++) d[j]=(Math.random()*2-1)*(1-j/sz);
+      const s=this.ctx.createBufferSource();s.buffer=buf;
+      const f=this.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=3800+i*600;f.Q.value=3;
+      const g=this.ctx.createGain();g.gain.value=i===0?0.12:0.08;
+      g.gain.exponentialRampToValueAtTime(0.001,t+delay+0.15);
+      s.connect(f);f.connect(g);g.connect(this.ctx.destination);s.start(t+delay);
+    });
+  },
+
+  playVault(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Heavy vault — deep thud + metallic ring
+    const t=this.ctx.currentTime;
+    const g1=this.ctx.createGain();g1.gain.value=0.2;
+    g1.gain.exponentialRampToValueAtTime(0.001,t+0.4);g1.connect(this.ctx.destination);
+    const o1=this.ctx.createOscillator();o1.type='triangle';o1.frequency.value=80;
+    o1.connect(g1);o1.start(t);o1.stop(t+0.4);
+    const g2=this.ctx.createGain();g2.gain.value=0.06;
+    g2.gain.exponentialRampToValueAtTime(0.001,t+0.8);g2.connect(this.ctx.destination);
+    const o2=this.ctx.createOscillator();o2.type='sine';o2.frequency.value=440;
+    o2.connect(g2);o2.start(t+0.05);o2.stop(t+0.8);
+  },
+
+  playPaper(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Paper rustle — filtered noise burst
+    const sz=Math.floor(this.ctx.sampleRate*0.12);
+    const buf=this.ctx.createBuffer(1,sz,this.ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<sz;i++) d[i]=(Math.random()*2-1)*Math.min(1,4*i/sz)*(1-i/sz);
+    const s=this.ctx.createBufferSource();s.buffer=buf;
+    const f=this.ctx.createBiquadFilter();f.type='highpass';f.frequency.value=2000;
+    const g=this.ctx.createGain();g.gain.value=0.1;
+    g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+0.15);
+    s.connect(f);f.connect(g);g.connect(this.ctx.destination);s.start();
+  },
+
+  playAcademy(){
+    if(!this.ctx||!this.enabled.ambience) return;
+    // Sword training whoosh — downward swept noise
+    const sz=Math.floor(this.ctx.sampleRate*0.2);
+    const buf=this.ctx.createBuffer(1,sz,this.ctx.sampleRate);
+    const d=buf.getChannelData(0);for(let i=0;i<sz;i++) d[i]=(Math.random()*2-1)*Math.sin(Math.PI*i/sz);
+    const s=this.ctx.createBufferSource();s.buffer=buf;
+    const f=this.ctx.createBiquadFilter();f.type='bandpass';f.frequency.value=1600;f.Q.value=1.5;
+    f.frequency.exponentialRampToValueAtTime(400,this.ctx.currentTime+0.2);
+    const g=this.ctx.createGain();g.gain.value=0.08;
+    g.gain.exponentialRampToValueAtTime(0.001,this.ctx.currentTime+0.22);
+    s.connect(f);f.connect(g);g.connect(this.ctx.destination);s.start();
+  },
+
   toggleAmbience(){
     this.enabled.ambience=!this.enabled.ambience;this.savePrefs();
-    if(this.enabled.ambience){G.screen==='journey'?this.startJourneyAmbience():this.startTownAmbience();}
+    if(this.enabled.ambience){G.screen==='journey'?this.startJourneyAmbience():this.startTownAmbience(G.currentTown);}
     else this._stopNodes();
     renderAudioMenu();
   },
