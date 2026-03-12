@@ -67,7 +67,7 @@
       padding: 32px 0;
       border-bottom: 1px solid var(--border);
       display: grid;
-      grid-template-columns: 120px 1fr;
+      grid-template-columns: 180px 1fr;
       gap: 24px;
       transition: background 0.2s ease;
     }
@@ -85,7 +85,7 @@
     .review-poster { position: relative; }
 
     .review-poster-img {
-      width: 120px;
+      width: 180px;
       aspect-ratio: 2/3;
       object-fit: cover;
       border-radius: 3px;
@@ -226,7 +226,7 @@
 
     @media (max-width: 700px) {
       .review-entry {
-        grid-template-columns: 80px 1fr;
+        grid-template-columns: 120px 1fr;
         gap: 16px;
       }
       .review-entry:hover {
@@ -234,7 +234,7 @@
         padding-left: 8px;
         padding-right: 8px;
       }
-      .review-poster-img { width: 80px; }
+      .review-poster-img { width: 120px; }
       .sa-page-title { font-size: 2rem; }
     }
   </style>
@@ -301,7 +301,7 @@
     <div class="spoiler-banner">
       <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 1 0 10 10A10 10 0 0 0 12 2zm0 15a1 1 0 1 1 1-1 1 1 0 0 1-1 1zm1-4h-2V7h2z"/></svg>
       This page contains spoilers. You have been warned.
-      <a href="haikureview.html">← back to haikureview</a>
+      <a href="haikureview.html" title="Back to haikureview">✍</a>
     </div>
 
     <h1 class="sa-page-title">SPOILER<span>ALERT</span></h1>
@@ -316,7 +316,7 @@
       <!-- Reviews injected by JS -->
     </div>
 
-    <a href="haikureview.html" class="haiku-back-link">← back to haikureview</a>
+    <a href="haikureview.html" class="haiku-back-link" title="Back to haikureview">✍ haikureview</a>
 
   </main>
 
@@ -330,7 +330,7 @@
       entry.id = `film-${i}`;
       if (/avatar/i.test(film.title)) entry.dataset.papyrus = 'true';
 
-      const haiku = (film.haiku || []);
+      const haiku = (film.haiku || []).filter(l => !/^Watched on /i.test(l));
       const haikuHtml = haiku.length
         ? haiku.map(l => `<em>${l}</em>`).join('<br>')
         : '<em style="opacity:0.4;">review coming soon</em>';
@@ -347,8 +347,8 @@
         <div class="review-body">
           <div class="review-meta">
             <span class="review-tag">SPOILERALERT</span>
-            <span class="review-lbxd"><a href="${film.uri}" target="_blank" rel="noopener">↗ letterboxd</a></span>
-            <span class="review-lbxd"><a href="/films/haikureview.html#film-${i}">↗ haikureview</a></span>
+            <span class="review-lbxd"><a href="${film.uri}" target="_blank" rel="noopener" title="View on Letterboxd"><svg width="14" height="14" viewBox="0 0 500 500" fill="currentColor" style="vertical-align:middle;"><circle cx="250" cy="250" r="250"/><ellipse cx="180" cy="250" rx="90" ry="130" fill="none" stroke="#fff" stroke-width="30"/><ellipse cx="320" cy="250" rx="90" ry="130" fill="none" stroke="#fff" stroke-width="30"/></svg></a></span>
+            <span class="review-lbxd"><a href="/films/haikureview.html#film-${i}" title="View haiku">✍</a></span>
           </div>
           <h2 class="review-title">${film.title}</h2>
           <div class="review-year">${film.year}</div>
