@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>SideQuest — maltysnack</title>
-  <link rel="stylesheet" href="../style.css" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>SideQuest</title>
 
-  <!-- DESIGNER: fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet">
@@ -16,18 +14,16 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <meta name="apple-mobile-web-app-title" content="SideQuest">
-  <meta name="theme-color" content="#130e07">
+  <meta name="theme-color" content="#0a0604">
 
   <style>
-    /* ===== DESIGN TOKENS ===== */
     :root {
-      /* DESIGNER: Brand Colors — replace these to retheme */
-      --color-bg:             #130e07;
-      --color-surface:        #1e160a;
-      --color-surface-raised: #2a1e0d;
-      --color-surface-hover:  #332512;
-      --color-border:         #4a3418;
-      --color-border-light:   #5a4420;
+      --color-bg:             #0a0604;
+      --color-surface:        #1a1008;
+      --color-surface-raised: #241608;
+      --color-surface-hover:  #2e1c0c;
+      --color-border:         #3a2810;
+      --color-border-light:   #4a3418;
       --color-gold:           #c8a84b;
       --color-gold-bright:    #f0cc6e;
       --color-gold-dim:       #7a6428;
@@ -35,2654 +31,1099 @@
       --color-text-muted:     #8a7a58;
       --color-text-faint:     #4a3c28;
       --color-success:        #4a8a3a;
-      --color-success-bg:     #1a2e14;
+      --color-success-bg:     #0e1e0a;
       --color-danger:         #8a2e20;
       --color-xp:             #6a4aaa;
-      --color-xp-bg:          #1e1230;
-
-      /* DESIGNER: Typography */
+      --color-xp-bg:          #120c20;
       --font-heading: 'Cinzel', 'Palatino Linotype', serif;
       --font-body:    'Crimson Text', Georgia, serif;
       --font-ui:      system-ui, -apple-system, sans-serif;
-
-      /* Spacing */
-      --space-xs: 4px;
-      --space-sm: 8px;
-      --space-md: 16px;
-      --space-lg: 24px;
-      --space-xl: 40px;
-
-      /* Shape */
-      --radius-sm:   4px;
-      --radius-md:   8px;
-      --radius-lg:   16px;
-      --radius-pill: 100px;
+      --space-xs: 4px; --space-sm: 8px; --space-md: 16px;
+      --space-lg: 24px; --space-xl: 40px;
+      --radius-sm: 4px; --radius-md: 8px; --radius-lg: 16px; --radius-pill: 100px;
     }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; background: var(--color-bg); color: var(--color-text); }
 
-    /* ─── Page layout ─── */
-    .main {
-      padding: 40px 32px 80px 48px;
-    }
+    /* ── SITE WRAPPER (browser/desktop only) ── */
+    #sqSiteWrap { background: #0d0d10; }
+    .sq-site-main { padding: 40px 32px 80px 48px; }
+    .sq-page-title { font-family: var(--font-heading); font-size: 1.6rem; font-weight: 700; color: var(--color-gold); letter-spacing: 0.06em; }
+    .sq-page-sub { font-family: var(--font-body); font-size: 0.95rem; font-style: italic; color: var(--color-text-muted); margin-top: 4px; margin-bottom: 24px; }
+    .sq-desktop-shell { display: flex; align-items: flex-start; }
 
-    .sq-page-header {
-      margin-bottom: 28px;
-    }
+    /* ── STANDALONE MODE ── */
+    body.sq-standalone #sqSiteWrap { display: none !important; }
+    body.sq-standalone #sqApp { position: fixed; inset: 0; width: 100vw; height: 100vh; border-radius: 0; border: none; box-shadow: none; }
 
-    .project-tag {
-      display: inline-block;
-      font-size: 0.68rem;
-      font-family: var(--font-heading);
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-gold);
-      background: rgba(200,168,75,0.1);
-      border: 1px solid var(--color-gold-dim);
-      padding: 3px 10px;
-      border-radius: var(--radius-sm);
-      margin-bottom: 12px;
-    }
-
-    /* ─── App shell ─── */
-    .sq-shell {
-      display: flex;
-      align-items: flex-start;
-    }
-
-    /* Phone container — desktop view */
-    .sq-phone {
-      width: 420px;
-      max-width: 100%;
+    /* ── APP SHELL ── */
+    #sqApp {
+      width: 390px; height: 780px;
       background: var(--color-bg);
+      border-radius: 36px;
       border: 1px solid var(--color-border);
-      border-radius: 32px;
+      box-shadow: 0 32px 80px rgba(0,0,0,0.8);
       overflow: hidden;
       display: flex;
       flex-direction: column;
-      min-height: 680px;
-      box-shadow: 0 32px 80px rgba(0,0,0,0.7);
       position: relative;
     }
 
-    /* ─── Top status bar ─── */
+    /* ── HOME SCREEN ── */
+    #sqHome {
+      position: absolute; inset: 0; z-index: 100;
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      overflow: hidden;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #sqHome.sq-exit { opacity: 0; transform: scale(1.05); pointer-events: none; }
+
+    .sq-sky { position: absolute; inset: 0; z-index: 0; transition: background 2s ease; }
+    .sq-stars { position: absolute; inset: 0; z-index: 1; pointer-events: none; opacity: 0; transition: opacity 1.5s ease; }
+    .sq-stars.sq-visible { opacity: 1; }
+    .sq-star {
+      position: absolute; background: #fff; border-radius: 50%;
+      animation: sqTwinkle var(--dur, 3s) ease-in-out infinite alternate;
+    }
+    @keyframes sqTwinkle { from { opacity: 0.2; } to { opacity: 1; } }
+
+    .sq-castle { position: absolute; bottom: 26%; left: 50%; transform: translateX(-25%); z-index: 2; width: 200px; }
+    .sq-hills-mid { position: absolute; bottom: 20%; left: 0; right: 0; height: 20%; z-index: 3; background: #0c0902; clip-path: ellipse(65% 85% at 28% 100%); }
+    .sq-hills-front { position: absolute; bottom: 10%; left: 0; right: 0; height: 18%; z-index: 4; background: #070501; clip-path: ellipse(58% 95% at 72% 100%); }
+    .sq-ground { position: absolute; bottom: 0; left: 0; right: 0; height: 12%; z-index: 5; background: linear-gradient(#050402, #020200); }
+
+    .sq-home-content {
+      position: relative; z-index: 10;
+      display: flex; flex-direction: column; align-items: center;
+      margin-top: -50px;
+    }
+    .sq-quest-count-label {
+      font-family: var(--font-heading); font-size: 0.68rem; font-weight: 600;
+      letter-spacing: 0.18em; text-transform: uppercase;
+      color: var(--color-gold); text-shadow: 0 0 12px rgba(200,168,75,0.6);
+      margin-bottom: 10px; min-height: 1em;
+    }
+    .sq-exclaim-wrap {
+      width: 86px; height: 86px; border-radius: 50%;
+      background: radial-gradient(circle at 40% 35%, #f5d060, #c8a030, #8a6010);
+      box-shadow: 0 0 0 4px rgba(200,168,75,0.3), 0 0 30px rgba(200,168,75,0.5), 0 0 60px rgba(200,168,75,0.25);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; user-select: none;
+      animation: sqPulse 2.4s ease-in-out infinite;
+      transition: transform 0.15s;
+    }
+    .sq-exclaim-wrap:active { transform: scale(0.93); }
+    @keyframes sqPulse {
+      0%,100% { box-shadow: 0 0 0 4px rgba(200,168,75,0.3), 0 0 30px rgba(200,168,75,0.5), 0 0 60px rgba(200,168,75,0.25); }
+      50%      { box-shadow: 0 0 0 8px rgba(200,168,75,0.15), 0 0 44px rgba(200,168,75,0.7), 0 0 80px rgba(200,168,75,0.35); }
+    }
+    .sq-exclaim-glyph { font-family: var(--font-heading); font-size: 3.2rem; font-weight: 700; color: #0a0400; line-height: 1; margin-top: 4px; }
+    .sq-home-brand { font-family: var(--font-heading); font-size: 1.1rem; font-weight: 600; letter-spacing: 0.22em; text-transform: uppercase; color: var(--color-gold); text-shadow: 0 0 20px rgba(200,168,75,0.4); margin-top: 16px; }
+    .sq-home-tagline { font-family: var(--font-body); font-size: 0.78rem; font-style: italic; color: var(--color-text-muted); margin-top: 4px; }
+    .sq-home-buffs { display: flex; gap: 6px; margin-top: 14px; flex-wrap: wrap; justify-content: center; }
+    .sq-buff-pill { font-family: var(--font-ui); font-size: 0.54rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 2px 8px; border-radius: var(--radius-pill); border: 1px solid; }
+    .sq-buff-sleep { color: #9b8fff; border-color: rgba(155,143,255,0.4); background: rgba(155,143,255,0.08); }
+    .sq-buff-water { color: #6bcfff; border-color: rgba(107,207,255,0.4); background: rgba(107,207,255,0.08); }
+
+    /* ── QUEST LOG ── */
+    #sqLog {
+      display: flex; flex-direction: column; flex: 1; overflow: hidden;
+      opacity: 0; transform: translateY(12px);
+      transition: opacity 0.35s ease, transform 0.35s ease;
+      pointer-events: none;
+    }
+    #sqLog.sq-visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+
+    /* ── STATUS BAR ── */
     .sq-statusbar {
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
-      padding: 10px 18px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-shrink: 0;
+      background: var(--color-surface); border-bottom: 1px solid var(--color-border);
+      padding: 10px 16px; display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+      padding-top: calc(10px + env(safe-area-inset-top, 0px));
     }
+    .sq-home-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; padding: 2px 4px; opacity: 0.6; transition: opacity 0.15s; flex-shrink: 0; }
+    .sq-home-btn:hover { opacity: 1; }
+    .sq-statusbar-title { font-family: var(--font-heading); font-size: 0.74rem; font-weight: 600; letter-spacing: 0.08em; color: var(--color-gold); flex: 1; }
+    .sq-statusbar-xp { font-family: var(--font-ui); font-size: 0.68rem; font-weight: 700; color: var(--color-text); background: var(--color-xp-bg); border: 1px solid var(--color-xp); padding: 2px 9px; border-radius: var(--radius-pill); }
+    .sq-bar-buff { font-size: 0.9rem; }
 
-    .sq-statusbar-title {
-      font-family: var(--font-heading);
-      font-size: 0.78rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--color-gold);
-    }
-
-    .sq-statusbar-xp {
-      font-family: var(--font-ui);
-      font-size: 0.7rem;
-      font-weight: 600;
-      color: var(--color-text);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      padding: 2px 9px;
-      border-radius: var(--radius-pill);
-      letter-spacing: 0.04em;
-    }
-
-    /* ─── Scrollable content area ─── */
-    .sq-content {
-      flex: 1;
-      overflow-y: auto;
-      position: relative;
-      scrollbar-width: thin;
-      scrollbar-color: var(--color-border) transparent;
-    }
-
+    /* ── CONTENT AREA ── */
+    .sq-content { flex: 1; overflow-y: auto; position: relative; scrollbar-width: thin; scrollbar-color: var(--color-border) transparent; }
     .sq-content::-webkit-scrollbar { width: 4px; }
-    .sq-content::-webkit-scrollbar-track { background: transparent; }
     .sq-content::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 2px; }
 
-    /* ─── Tab panels ─── */
-    .sq-tab-panel {
-      display: none;
-      padding: 18px 16px 24px;
-      animation: sqFadeIn 0.18s ease;
-    }
-
+    /* ── TAB PANELS ── */
+    .sq-tab-panel { display: none; padding: 16px 16px 20px; animation: sqFadeIn 0.18s ease; }
     .sq-tab-panel.sq-active { display: block; }
+    @keyframes sqFadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
 
-    @keyframes sqFadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-
-    /* ─── Bottom tab bar ─── */
+    /* ── TAB BAR ── */
     .sq-tabbar {
-      flex-shrink: 0;
-      background: var(--color-surface);
-      border-top: 1px solid var(--color-border);
-      display: flex;
-      padding: 6px 0 10px;
+      flex-shrink: 0; background: var(--color-surface); border-top: 1px solid var(--color-border);
+      display: flex; padding: 6px 0;
+      padding-bottom: calc(8px + env(safe-area-inset-bottom, 0px));
     }
+    .sq-tab-btn { flex: 1; background: none; border: none; cursor: pointer; display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 4px 0; }
+    .sq-tab-icon { font-size: 1.15rem; line-height: 1; }
+    .sq-tab-label { font-family: var(--font-ui); font-size: 0.54rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); transition: color 0.15s; }
+    .sq-tab-btn.sq-tab-active .sq-tab-label { color: var(--color-gold); }
 
-    .sq-tab-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      cursor: pointer;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 3px;
-      padding: 4px 0;
-      transition: opacity 0.15s;
-      position: relative;
+    /* ── TOASTS ── */
+    .sq-toast, .sq-msg-toast {
+      position: absolute; top: calc(54px + env(safe-area-inset-top, 0px));
+      left: 50%; transform: translateX(-50%) translateY(-8px);
+      pointer-events: none; opacity: 0; transition: opacity 0.2s, transform 0.25s;
+      z-index: 200; white-space: nowrap; border-radius: var(--radius-pill); padding: 5px 14px;
+      font-family: var(--font-ui); font-size: 0.74rem; font-weight: 700; letter-spacing: 0.06em;
     }
+    .sq-toast { background: var(--color-xp-bg); border: 1px solid var(--color-xp); color: var(--color-gold-bright); }
+    .sq-msg-toast { background: var(--color-surface-raised); border: 1px solid var(--color-gold-dim); color: var(--color-gold); font-family: var(--font-body); font-size: 0.78rem; font-weight: 400; font-style: italic; }
+    .sq-toast.sq-show, .sq-msg-toast.sq-show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
-    .sq-tab-btn .sq-tab-icon {
-      font-size: 1.2rem;
-      line-height: 1;
-    }
+    /* ── LEVEL-UP OVERLAY ── */
+    .sq-lvlup { position: absolute; inset: 0; background: rgba(5,3,1,0.96); z-index: 500; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: var(--space-xl); cursor: pointer; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
+    .sq-lvlup.sq-show { opacity: 1; pointer-events: all; }
+    .sq-lvlup::before { content: '+ + + + +'; position: absolute; top: 18%; left: 50%; transform: translateX(-50%); font-size: 1rem; color: var(--color-gold-dim); letter-spacing: 0.5em; animation: sqSparkle 2s ease-in-out infinite alternate; }
+    .sq-lvlup::after  { content: '+ + + + +'; position: absolute; bottom: 20%; left: 50%; transform: translateX(-50%); font-size: 1rem; color: var(--color-gold-dim); letter-spacing: 0.5em; animation: sqSparkle 2s ease-in-out infinite alternate-reverse; }
+    @keyframes sqSparkle { 0% { opacity: 0.3; letter-spacing: 0.4em; } 100% { opacity: 0.8; letter-spacing: 0.6em; } }
+    .sq-lvlup-tag { font-family: var(--font-ui); font-size: 0.6rem; font-weight: 700; letter-spacing: 0.2em; text-transform: uppercase; color: var(--color-gold); background: var(--color-xp-bg); border: 1px solid var(--color-xp); padding: 3px 12px; border-radius: var(--radius-pill); margin-bottom: var(--space-md); }
+    .sq-lvlup-avatar { font-size: 3.5rem; margin-bottom: var(--space-md); animation: sqBounce 0.6s ease; }
+    .sq-lvlup-num { font-family: var(--font-heading); font-size: 5rem; font-weight: 700; color: var(--color-gold-bright); line-height: 1; margin-bottom: var(--space-sm); text-shadow: 0 0 30px rgba(240,204,110,0.4); }
+    .sq-lvlup-title { font-family: var(--font-heading); font-size: 1.4rem; font-weight: 600; color: var(--color-text); margin-bottom: var(--space-sm); }
+    .sq-lvlup-sub { font-family: var(--font-body); font-size: 0.9rem; font-style: italic; color: var(--color-text-muted); margin-bottom: var(--space-lg); }
+    .sq-lvlup-hint { font-family: var(--font-ui); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-text-faint); }
+    @keyframes sqBounce { 0% { transform: scale(0.5); } 65% { transform: scale(1.15); } 100% { transform: scale(1); } }
 
-    .sq-tab-btn .sq-tab-label {
-      font-family: var(--font-ui);
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      transition: color 0.15s;
-    }
-
-    .sq-tab-btn.sq-tab-active .sq-tab-label {
-      color: var(--color-gold);
-    }
-
-    /* Active tab indicator dot */
-    .sq-tab-btn.sq-tab-active::after {
-      content: '';
-      position: absolute;
-      bottom: -3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      background: var(--color-gold);
-      border-radius: 50%;
-    }
-
-    /* ─── Section headers (Quest Board) ─── */
-    .sq-section-head {
-      font-family: var(--font-heading);
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-gold-dim);
-      margin-bottom: var(--space-sm);
-      margin-top: var(--space-md);
-      padding-bottom: var(--space-xs);
-      border-bottom: 1px solid var(--color-border);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
+    /* ── SECTION HEADERS ── */
+    .sq-section-head { font-family: var(--font-heading); font-size: 0.58rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-gold-dim); margin-bottom: var(--space-sm); margin-top: var(--space-md); padding-bottom: var(--space-xs); border-bottom: 1px solid var(--color-border); display: flex; align-items: center; gap: 6px; }
     .sq-section-head:first-child { margin-top: 0; }
+    .sq-day-label { font-family: var(--font-heading); font-size: 0.56rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); text-align: center; margin-bottom: var(--space-md); }
 
-    /* Ornamental divider between sections */
-    .sq-ornament {
-      text-align: center;
-      color: var(--color-text-faint);
-      font-size: 0.6rem;
-      letter-spacing: 0.2em;
-      margin: var(--space-md) 0 var(--space-sm);
-      user-select: none;
-    }
-
-    /* ─── Quest cards ─── */
-    .sq-quest-card {
-      /* Parchment texture via subtle grain */
-      background: var(--color-surface);
-      background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(255,255,255,0.012) 3px,
-        rgba(255,255,255,0.012) 4px
-      );
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 11px 13px;
-      margin-bottom: 7px;
-      display: flex;
-      align-items: center;
-      gap: 11px;
-      transition: border-color 0.2s, background 0.2s;
-      user-select: none;
-      cursor: pointer;
-    }
-
-    .sq-quest-card:hover {
-      border-color: var(--color-border-light);
-      background: var(--color-surface-hover);
-    }
-
-    .sq-quest-card.sq-done {
-      background: var(--color-success-bg);
-      border-color: var(--color-success);
-      border-left: 3px solid var(--color-success);
-      opacity: 0.72;
-    }
-
-    .sq-quest-card.sq-done:hover { opacity: 0.85; }
-
-    .sq-quest-emoji {
-      font-size: 1.3rem;
-      line-height: 1;
-      flex-shrink: 0;
-      width: 30px;
-      text-align: center;
-    }
-
-    .sq-quest-info {
-      flex: 1;
-      min-width: 0;
-    }
-
-    .sq-quest-name {
-      font-family: var(--font-body);
-      font-size: 0.92rem;
-      font-weight: 400;
-      color: var(--color-text);
-      line-height: 1.3;
-      transition: color 0.2s, text-decoration 0.2s;
-    }
-
-    .sq-done .sq-quest-name {
-      text-decoration: line-through;
-      color: var(--color-text-muted);
-    }
-
-    .sq-quest-meta {
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      margin-top: 3px;
-    }
-
-    .sq-quest-xp {
-      font-family: var(--font-ui);
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--color-text);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      padding: 1px 6px;
-      border-radius: var(--radius-pill);
-    }
-
-    .sq-done .sq-quest-xp {
-      background: var(--color-success-bg);
-      border-color: var(--color-success);
-      color: var(--color-success);
-    }
-
-    .sq-freq-tag {
-      font-family: var(--font-ui);
-      font-size: 0.55rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: var(--color-text-faint);
-    }
-
-    /* Checkbox circle */
-    .sq-quest-check {
-      width: 26px;
-      height: 26px;
-      border-radius: 50%;
-      border: 2px solid var(--color-border-light);
-      background: var(--color-surface-raised);
-      cursor: pointer;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s ease;
-      font-size: 0.75rem;
-      color: transparent;
-    }
-
-    .sq-done .sq-quest-check {
-      background: var(--color-success);
-      border-color: var(--color-success);
-      color: #fff;
-    }
-
-    /* Delete button (custom quests only, revealed on hover) */
-    .sq-quest-delete {
-      display: none;
-      background: none;
-      border: none;
-      cursor: pointer;
-      font-size: 0.72rem;
-      color: var(--color-text-faint);
-      padding: 3px 5px;
-      border-radius: var(--radius-sm);
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-
-    .sq-quest-delete:hover {
-      color: var(--color-danger);
-      background: rgba(138,46,32,0.15);
-    }
-
+    /* ── QUEST CARDS ── */
+    .sq-quest-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 11px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color 0.2s, background 0.2s; user-select: none; }
+    .sq-quest-card:active { border-color: var(--color-border-light); background: var(--color-surface-hover); }
+    .sq-quest-card.sq-done { background: var(--color-success-bg); border-color: var(--color-success); border-left: 3px solid var(--color-success); opacity: 0.7; }
+    .sq-quest-emoji { font-size: 1.3rem; line-height: 1; flex-shrink: 0; width: 28px; text-align: center; }
+    .sq-quest-info { flex: 1; min-width: 0; }
+    .sq-quest-name { font-family: var(--font-body); font-size: 0.92rem; color: var(--color-text); line-height: 1.3; }
+    .sq-done .sq-quest-name { text-decoration: line-through; color: var(--color-text-muted); }
+    .sq-quest-meta { display: flex; align-items: center; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
+    .sq-quest-xp { font-family: var(--font-ui); font-size: 0.58rem; font-weight: 700; color: var(--color-text); background: var(--color-xp-bg); border: 1px solid var(--color-xp); padding: 1px 6px; border-radius: var(--radius-pill); }
+    .sq-done .sq-quest-xp { background: var(--color-success-bg); border-color: var(--color-success); color: var(--color-success); }
+    .sq-freq-tag { font-family: var(--font-ui); font-size: 0.52rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-faint); }
+    .sq-buff-tag { font-family: var(--font-ui); font-size: 0.5rem; font-weight: 700; letter-spacing: 0.04em; padding: 1px 5px; border-radius: var(--radius-pill); border: 1px solid; }
+    .sq-buff-tag-sleep { color: #9b8fff; border-color: rgba(155,143,255,0.5); background: rgba(155,143,255,0.08); }
+    .sq-buff-tag-water { color: #6bcfff; border-color: rgba(107,207,255,0.5); background: rgba(107,207,255,0.08); }
+    .sq-quest-check { width: 26px; height: 26px; border-radius: 50%; border: 2px solid var(--color-border-light); background: var(--color-surface-raised); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; font-size: 0.72rem; color: transparent; }
+    .sq-done .sq-quest-check { background: var(--color-success); border-color: var(--color-success); color: #fff; }
+    .sq-quest-delete { display: none; background: none; border: none; cursor: pointer; font-size: 0.7rem; color: var(--color-text-faint); padding: 3px 5px; border-radius: var(--radius-sm); transition: color 0.15s; flex-shrink: 0; }
+    .sq-quest-delete:hover { color: var(--color-danger); }
     .sq-quest-card.sq-custom:hover .sq-quest-delete { display: block; }
+    .sq-empty-state { font-family: var(--font-body); font-size: 0.82rem; font-style: italic; color: var(--color-text-faint); padding: 8px 4px 4px; text-align: center; }
 
-    /* Empty state placeholder */
-    .sq-empty-state {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-style: italic;
-      color: var(--color-text-faint);
-      padding: 10px 4px 4px;
-      text-align: center;
-    }
-
-    /* ─── XP Toast ─── */
-    .sq-toast {
-      position: absolute;
-      top: 52px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-6px);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      color: var(--color-gold-bright);
-      font-family: var(--font-ui);
-      font-size: 0.76rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      padding: 5px 14px;
-      border-radius: var(--radius-pill);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.25s;
-      z-index: 200;
-      white-space: nowrap;
-    }
-
-    .sq-toast.sq-toast-show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* Message toast (for non-XP messages) */
-    .sq-msg-toast {
-      position: absolute;
-      top: 52px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-6px);
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-gold-dim);
-      color: var(--color-gold);
-      font-family: var(--font-body);
-      font-size: 0.78rem;
-      font-style: italic;
-      padding: 5px 14px;
-      border-radius: var(--radius-pill);
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.2s, transform 0.25s;
-      z-index: 200;
-      white-space: nowrap;
-    }
-
-    .sq-msg-toast.sq-toast-show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ─── Level-up splash overlay ─── */
-    .sq-levelup-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(10,6,2,0.95);
-      z-index: 500;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      text-align: center;
-      padding: var(--space-xl);
-      cursor: pointer;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-
-    .sq-levelup-overlay.sq-show {
-      opacity: 1;
-      pointer-events: all;
-    }
-
-    /* Sparkle animation for level-up bg */
-    .sq-levelup-overlay::before {
-      content: '✦ ✧ ✦ ✧ ✦';
-      position: absolute;
-      top: 18%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1rem;
-      color: var(--color-gold-dim);
-      letter-spacing: 0.4em;
-      animation: sqSparkle 2s ease-in-out infinite alternate;
-    }
-
-    .sq-levelup-overlay::after {
-      content: '✦ ✧ ✦ ✧ ✦';
-      position: absolute;
-      bottom: 20%;
-      left: 50%;
-      transform: translateX(-50%);
-      font-size: 1rem;
-      color: var(--color-gold-dim);
-      letter-spacing: 0.4em;
-      animation: sqSparkle 2s ease-in-out infinite alternate-reverse;
-    }
-
-    @keyframes sqSparkle {
-      0%   { opacity: 0.3; letter-spacing: 0.4em; }
-      100% { opacity: 0.8; letter-spacing: 0.6em; }
-    }
-
-    .sq-levelup-tag {
-      font-family: var(--font-ui);
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: var(--color-gold);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      padding: 3px 12px;
-      border-radius: var(--radius-pill);
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-levelup-num {
-      font-family: var(--font-heading);
-      font-size: 5rem;
-      font-weight: 700;
-      color: var(--color-gold-bright);
-      line-height: 1;
-      margin-bottom: var(--space-sm);
-      text-shadow: 0 0 30px rgba(240,204,110,0.4);
-    }
-
-    .sq-levelup-title {
-      font-family: var(--font-heading);
-      font-size: 1.4rem;
-      font-weight: 600;
-      color: var(--color-text);
-      margin-bottom: var(--space-sm);
-    }
-
-    .sq-levelup-avatar {
-      font-size: 3.5rem;
-      margin-bottom: var(--space-md);
-      animation: sqBounce 0.6s ease;
-    }
-
-    .sq-levelup-sub {
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      font-style: italic;
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-lg);
-    }
-
-    .sq-levelup-dismiss {
-      font-family: var(--font-ui);
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: var(--color-text-faint);
-    }
-
-    @keyframes sqBounce {
-      0%   { transform: scale(0.6); }
-      60%  { transform: scale(1.15); }
-      100% { transform: scale(1); }
-    }
-
-    /* ─── QUEST BOARD TAB ─── */
-    .sq-day-label {
-      font-family: var(--font-heading);
-      font-size: 0.58rem;
-      font-weight: 400;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      text-align: center;
-      margin-bottom: var(--space-md);
-    }
-
-    /* ─── BOUNTY BOARD TAB ─── */
-    .sq-bounty-add-row {
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-sm);
-      padding: var(--space-sm) var(--space-sm) var(--space-md);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-bounty-add-row .sq-row {
-      display: flex;
-      gap: var(--space-sm);
-      align-items: center;
-    }
-
-    .sq-input {
-      flex: 1;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 8px 12px;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      color: var(--color-text);
-      background: var(--color-surface-raised);
-      outline: none;
-      transition: border-color 0.15s;
-    }
-
+    /* ── BOUNTY / QUESTS BOARD ── */
+    .sq-bounty-add-row { display: flex; flex-direction: column; gap: var(--space-sm); padding: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); margin-bottom: var(--space-md); }
+    .sq-bounty-row-inner { display: flex; gap: var(--space-sm); align-items: center; }
+    .sq-input { flex: 1; background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 8px 12px; font-family: var(--font-body); font-size: 0.9rem; color: var(--color-text); outline: none; transition: border-color 0.15s; }
     .sq-input::placeholder { color: var(--color-text-faint); font-style: italic; }
     .sq-input:focus { border-color: var(--color-gold-dim); }
-
-    .sq-input-xp {
-      width: 68px;
-      flex: none;
-      text-align: center;
-    }
-
-    /* Primary CTA button */
-    .sq-btn {
-      background: var(--color-gold);
-      color: var(--color-bg);
-      border: none;
-      border-radius: var(--radius-md);
-      padding: 8px 15px;
-      font-family: var(--font-heading);
-      font-size: 0.65rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s, transform 0.1s;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
-
+    .sq-input-xp { width: 64px; flex: none; text-align: center; }
+    .sq-btn { background: var(--color-gold); color: var(--color-bg); border: none; border-radius: var(--radius-md); padding: 8px 14px; font-family: var(--font-heading); font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; cursor: pointer; transition: background 0.15s, transform 0.1s; white-space: nowrap; flex-shrink: 0; }
     .sq-btn:hover { background: var(--color-gold-bright); }
     .sq-btn:active { transform: scale(0.97); }
-
-    .sq-btn-ghost {
-      background: none;
-      color: var(--color-text-muted);
-      border: 1px solid var(--color-border);
-    }
-
-    .sq-btn-ghost:hover {
-      background: var(--color-surface-raised);
-      color: var(--color-danger);
-      border-color: var(--color-danger);
-    }
-
-    .sq-btn-sm {
-      padding: 4px 10px;
-      font-size: 0.6rem;
-    }
-
-    /* Bounty cards */
-    .sq-bounty-card {
-      background: var(--color-surface);
-      background-image: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 3px,
-        rgba(255,255,255,0.012) 3px,
-        rgba(255,255,255,0.012) 4px
-      );
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 10px 13px;
-      margin-bottom: 6px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      cursor: pointer;
-      transition: border-color 0.15s;
-    }
-
-    .sq-bounty-card:hover { border-color: var(--color-border-light); }
-
-    .sq-bounty-card.sq-done {
-      background: var(--color-success-bg);
-      border-color: var(--color-success);
-      border-left: 3px solid var(--color-success);
-      opacity: 0.65;
-    }
-
-    .sq-bounty-name {
-      flex: 1;
-      font-family: var(--font-body);
-      font-size: 0.9rem;
-      color: var(--color-text);
-      transition: all 0.2s;
-    }
-
-    .sq-done .sq-bounty-name {
-      text-decoration: line-through;
-      color: var(--color-text-muted);
-    }
-
-    .sq-bounty-xp {
-      font-family: var(--font-ui);
-      font-size: 0.6rem;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      color: var(--color-text);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      padding: 1px 7px;
-      border-radius: var(--radius-pill);
-      flex-shrink: 0;
-    }
-
-    .sq-done .sq-bounty-xp {
-      background: var(--color-success-bg);
-      border-color: var(--color-success);
-      color: var(--color-success);
-    }
-
-    .sq-bounty-del {
-      background: none;
-      border: none;
-      cursor: pointer;
-      color: var(--color-text-faint);
-      font-size: 0.8rem;
-      padding: 3px 4px;
-      border-radius: var(--radius-sm);
-      transition: all 0.15s;
-      flex-shrink: 0;
-    }
-
+    .sq-btn-ghost { background: none; color: var(--color-text-muted); border: 1px solid var(--color-border); }
+    .sq-btn-ghost:hover { background: var(--color-surface-raised); color: var(--color-danger); border-color: var(--color-danger); }
+    .sq-btn-sm { padding: 4px 10px; font-size: 0.58rem; }
+    .sq-btn-full { width: 100%; padding: 12px; font-size: 0.7rem; }
+    .sq-bounty-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: 6px; display: flex; align-items: center; gap: 10px; cursor: pointer; transition: border-color 0.15s; }
+    .sq-bounty-card:active { border-color: var(--color-border-light); }
+    .sq-bounty-card.sq-done { background: var(--color-success-bg); border-color: var(--color-success); border-left: 3px solid var(--color-success); opacity: 0.65; }
+    .sq-bounty-name { flex: 1; font-family: var(--font-body); font-size: 0.9rem; color: var(--color-text); }
+    .sq-done .sq-bounty-name { text-decoration: line-through; color: var(--color-text-muted); }
+    .sq-bounty-xp { font-family: var(--font-ui); font-size: 0.58rem; font-weight: 700; color: var(--color-text); background: var(--color-xp-bg); border: 1px solid var(--color-xp); padding: 1px 7px; border-radius: var(--radius-pill); flex-shrink: 0; }
+    .sq-done .sq-bounty-xp { background: var(--color-success-bg); border-color: var(--color-success); color: var(--color-success); }
+    .sq-bounty-del { background: none; border: none; cursor: pointer; color: var(--color-text-faint); font-size: 0.8rem; padding: 3px 4px; border-radius: var(--radius-sm); transition: color 0.15s; flex-shrink: 0; }
     .sq-bounty-del:hover { color: var(--color-danger); }
+    .sq-completed-head { font-family: var(--font-heading); font-size: 0.52rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-faint); margin: var(--space-md) 0 var(--space-sm); display: flex; align-items: center; justify-content: space-between; }
+    .sq-board-empty { text-align: center; padding: var(--space-xl) var(--space-md); }
+    .sq-board-empty-icon { font-size: 2.5rem; margin-bottom: var(--space-sm); opacity: 0.3; }
+    .sq-board-empty-text { font-family: var(--font-body); font-size: 0.88rem; font-style: italic; color: var(--color-text-faint); }
 
-    .sq-completed-head {
-      font-family: var(--font-heading);
-      font-size: 0.55rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-faint);
-      margin: var(--space-md) 0 var(--space-sm);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-
-    .sq-board-empty {
-      text-align: center;
-      padding: var(--space-xl) var(--space-md);
-    }
-
-    .sq-board-empty-icon {
-      font-size: 2.5rem;
-      margin-bottom: var(--space-sm);
-      opacity: 0.3;
-    }
-
-    .sq-board-empty-text {
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      font-style: italic;
-      color: var(--color-text-faint);
-    }
-
-    /* ─── ADD QUEST TAB ─── */
-    .sq-add-header {
-      font-family: var(--font-heading);
-      font-size: 0.95rem;
-      font-weight: 600;
-      color: var(--color-gold);
-      text-align: center;
-      letter-spacing: 0.06em;
-      margin-bottom: var(--space-lg);
-      padding-bottom: var(--space-sm);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .sq-form-group {
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-form-label {
-      display: block;
-      font-family: var(--font-heading);
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      margin-bottom: 7px;
-    }
-
-    /* Daily/Weekly pill toggle */
-    .sq-type-toggle {
-      display: flex;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-pill);
-      padding: 3px;
-      gap: 2px;
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-type-btn {
-      flex: 1;
-      background: none;
-      border: none;
-      border-radius: var(--radius-pill);
-      padding: 7px 0;
-      font-family: var(--font-heading);
-      font-size: 0.62rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-      cursor: pointer;
-      transition: all 0.18s;
-    }
-
-    .sq-type-btn.sq-active {
-      background: var(--color-gold);
-      color: var(--color-bg);
-    }
-
-    /* Emoji grid */
-    .sq-emoji-grid {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 3px;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 7px;
-      margin-bottom: 8px;
-    }
-
-    .sq-emoji-btn {
-      background: none;
-      border: 1px solid transparent;
-      border-radius: var(--radius-sm);
-      cursor: pointer;
-      font-size: 1.05rem;
-      padding: 4px 2px;
-      text-align: center;
-      transition: all 0.12s;
-      line-height: 1;
-    }
-
+    /* ── ADD QUEST ── */
+    .sq-add-header { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 600; color: var(--color-gold); text-align: center; letter-spacing: 0.06em; margin-bottom: var(--space-lg); padding-bottom: var(--space-sm); border-bottom: 1px solid var(--color-border); }
+    .sq-form-group { margin-bottom: var(--space-md); }
+    .sq-form-label { display: block; font-family: var(--font-heading); font-size: 0.56rem; font-weight: 600; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 7px; }
+    .sq-type-toggle { display: flex; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-pill); padding: 3px; gap: 2px; margin-bottom: var(--space-md); }
+    .sq-type-btn { flex: 1; background: none; border: none; border-radius: var(--radius-pill); padding: 7px 0; font-family: var(--font-heading); font-size: 0.6rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); cursor: pointer; transition: all 0.18s; }
+    .sq-type-btn.sq-active { background: var(--color-gold); color: var(--color-bg); }
+    .sq-emoji-grid { display: grid; grid-template-columns: repeat(8, 1fr); gap: 3px; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 7px; margin-bottom: 8px; }
+    .sq-emoji-btn { background: none; border: 1px solid transparent; border-radius: var(--radius-sm); cursor: pointer; font-size: 1.05rem; padding: 4px 2px; text-align: center; transition: all 0.12s; line-height: 1; }
     .sq-emoji-btn:hover { background: var(--color-surface-raised); }
+    .sq-emoji-btn.sq-selected { background: var(--color-surface-raised); border-color: var(--color-gold-dim); }
+    .sq-emoji-custom-row { display: flex; align-items: center; gap: var(--space-sm); margin-top: 6px; }
+    .sq-emoji-custom-row .sq-input { width: 54px; flex: none; text-align: center; font-size: 1.1rem; padding: 5px 4px; }
+    .sq-emoji-custom-row span { font-family: var(--font-body); font-size: 0.78rem; font-style: italic; color: var(--color-text-muted); }
+    .sq-slider-row { display: flex; align-items: center; gap: var(--space-sm); }
+    .sq-slider { flex: 1; accent-color: var(--color-gold); cursor: pointer; }
+    .sq-xp-display { font-family: var(--font-ui); font-size: 0.72rem; font-weight: 700; color: var(--color-text); background: var(--color-xp-bg); border: 1px solid var(--color-xp); padding: 2px 10px; border-radius: var(--radius-pill); min-width: 58px; text-align: center; }
 
-    .sq-emoji-btn.sq-selected {
-      background: var(--color-surface-raised);
-      border-color: var(--color-gold-dim);
-    }
-
-    .sq-emoji-custom-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      margin-top: 6px;
-    }
-
-    .sq-emoji-custom-row .sq-input {
-      width: 54px;
-      flex: none;
-      text-align: center;
-      font-size: 1.1rem;
-      padding: 5px 4px;
-    }
-
-    .sq-emoji-custom-row span {
-      font-family: var(--font-body);
-      font-size: 0.78rem;
-      font-style: italic;
-      color: var(--color-text-muted);
-    }
-
-    /* XP slider */
-    .sq-slider-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-    }
-
-    .sq-slider {
-      flex: 1;
-      accent-color: var(--color-gold);
-      cursor: pointer;
-    }
-
-    .sq-xp-display {
-      font-family: var(--font-ui);
-      font-size: 0.72rem;
-      font-weight: 700;
-      color: var(--color-text);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-xp);
-      padding: 2px 10px;
-      border-radius: var(--radius-pill);
-      min-width: 58px;
-      text-align: center;
-    }
-
-    /* Save button full-width */
-    .sq-btn-full {
-      width: 100%;
-      padding: 12px;
-      font-size: 0.72rem;
-      border-radius: var(--radius-md);
-      margin-top: var(--space-sm);
-    }
-
-    /* ─── ADVENTURER'S HALL TAB ─── */
-    .sq-hall-inner {
-      position: relative;
-    }
-
-    /* Faint dragon watermark */
-    .sq-watermark {
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 11rem;
-      opacity: 0.04;
-      pointer-events: none;
-      user-select: none;
-      line-height: 1;
-      z-index: 0;
-    }
-
+    /* ── HALL ── */
+    .sq-hall-inner { position: relative; }
+    .sq-watermark { position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); font-size: 10rem; opacity: 0.03; pointer-events: none; user-select: none; z-index: 0; }
     .sq-hall-inner > * { position: relative; z-index: 1; }
-
-    /* Logo block */
-    .sq-logo {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      margin-bottom: var(--space-sm);
-    }
-
-    .sq-logo-text {
-      font-family: var(--font-heading);
-      font-size: 0.95rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      color: var(--color-gold);
-      text-transform: uppercase;
-      margin-top: var(--space-xs);
-    }
-
-    /* Profile hero area */
-    .sq-profile-hero {
-      text-align: center;
-      padding: var(--space-md) 0 var(--space-lg);
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-avatar-wrap {
-      position: relative;
-      display: inline-block;
-      margin-bottom: var(--space-sm);
-    }
-
-    .sq-avatar-emoji {
-      font-size: 3.4rem;
-      line-height: 1;
-      display: block;
-    }
-
-    .sq-level-badge {
-      position: absolute;
-      bottom: -4px;
-      right: -10px;
-      background: var(--color-gold);
-      color: var(--color-bg);
-      font-family: var(--font-ui);
-      font-size: 0.58rem;
-      font-weight: 700;
-      padding: 2px 7px;
-      border-radius: var(--radius-pill);
-      letter-spacing: 0.04em;
-    }
-
-    .sq-level-title {
-      font-family: var(--font-heading);
-      font-size: 1.05rem;
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      color: var(--color-text);
-      margin-bottom: 3px;
-    }
-
-    .sq-xp-bar-label {
-      font-family: var(--font-ui);
-      font-size: 0.62rem;
-      font-weight: 600;
-      color: var(--color-text-muted);
-      margin-bottom: 7px;
-      letter-spacing: 0.04em;
-    }
-
-    .sq-xp-bar-track {
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-pill);
-      height: 8px;
-      overflow: hidden;
-      margin: 0 var(--space-lg);
-    }
-
-    .sq-xp-bar-fill {
-      height: 100%;
-      background: linear-gradient(90deg, var(--color-xp), #9a7af0);
-      border-radius: var(--radius-pill);
-      transition: width 0.5s ease;
-    }
-
-    /* Stats grid 2×2 */
-    .sq-stats-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-md);
-    }
-
-    .sq-stat-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-sm) var(--space-md);
-      text-align: center;
-    }
-
-    .sq-stat-val {
-      font-family: var(--font-heading);
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--color-gold);
-      line-height: 1;
-      margin-bottom: 4px;
-    }
-
-    .sq-stat-label {
-      font-family: var(--font-ui);
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-muted);
-    }
-
-    /* Achievements section */
-    .sq-achievements-section {
-      margin-top: var(--space-md);
-    }
-
-    .sq-ach-label {
-      font-family: var(--font-heading);
-      font-size: 0.6rem;
-      font-weight: 600;
-      letter-spacing: 0.12em;
-      text-transform: uppercase;
-      color: var(--color-gold-dim);
-      margin-bottom: var(--space-sm);
-      padding-bottom: var(--space-xs);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    .sq-ach-grid {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 5px;
-    }
-
-    /* Unlocked achievement badge */
-    .sq-ach-badge {
-      background: rgba(200,168,75,0.12);
-      border: 1px solid var(--color-gold-dim);
-      border-radius: var(--radius-pill);
-      padding: 4px 10px;
-      display: flex;
-      align-items: center;
-      gap: 5px;
-      cursor: default;
-    }
-
-    .sq-ach-icon {
-      font-size: 0.85rem;
-      line-height: 1;
-    }
-
-    .sq-ach-name {
-      font-family: var(--font-ui);
-      font-size: 0.62rem;
-      font-weight: 600;
-      color: var(--color-gold);
-      letter-spacing: 0.02em;
-    }
-
-    /* Locked achievement badge */
-    .sq-ach-badge.sq-locked {
-      background: none;
-      border-color: var(--color-border);
-      opacity: 0.4;
-    }
-
+    .sq-logo { display: flex; flex-direction: column; align-items: center; margin-bottom: var(--space-sm); }
+    .sq-logo-text { font-family: var(--font-heading); font-size: 0.9rem; font-weight: 600; letter-spacing: 0.12em; color: var(--color-gold); text-transform: uppercase; margin-top: var(--space-xs); }
+    .sq-hall-section-head { font-family: var(--font-heading); font-size: 0.56rem; font-weight: 600; letter-spacing: 0.14em; text-transform: uppercase; color: var(--color-gold-dim); margin: var(--space-md) 0 var(--space-sm); padding-bottom: var(--space-xs); border-bottom: 1px solid var(--color-border); }
+    .sq-profile-hero { text-align: center; padding: var(--space-md) 0 var(--space-lg); border-bottom: 1px solid var(--color-border); margin-bottom: var(--space-md); }
+    .sq-avatar-wrap { position: relative; display: inline-block; margin-bottom: var(--space-sm); }
+    .sq-avatar-emoji { font-size: 3.4rem; line-height: 1; display: block; }
+    .sq-level-badge { position: absolute; bottom: -4px; right: -10px; background: var(--color-gold); color: var(--color-bg); font-family: var(--font-ui); font-size: 0.56rem; font-weight: 700; padding: 2px 7px; border-radius: var(--radius-pill); }
+    .sq-level-title { font-family: var(--font-heading); font-size: 1rem; font-weight: 600; letter-spacing: 0.06em; color: var(--color-text); margin-bottom: 2px; }
+    .sq-class-badge { font-family: var(--font-body); font-size: 0.82rem; font-style: italic; color: var(--color-gold-dim); margin-bottom: 10px; }
+    .sq-xp-bar-label { font-family: var(--font-ui); font-size: 0.6rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: 7px; letter-spacing: 0.04em; }
+    .sq-xp-bar-track { background: var(--color-surface-raised); border: 1px solid var(--color-border); border-radius: var(--radius-pill); height: 8px; overflow: hidden; margin: 0 var(--space-lg); }
+    .sq-xp-bar-fill { height: 100%; background: linear-gradient(90deg, var(--color-xp), #9a7af0); border-radius: var(--radius-pill); transition: width 0.5s ease; }
+    .sq-stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: var(--space-sm); margin-bottom: var(--space-md); }
+    .sq-stat-card { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-sm) var(--space-md); text-align: center; }
+    .sq-stat-val { font-family: var(--font-heading); font-size: 1.5rem; font-weight: 700; color: var(--color-gold); line-height: 1; margin-bottom: 4px; }
+    .sq-stat-label { font-family: var(--font-ui); font-size: 0.55rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--color-text-muted); }
+    .sq-xp-stack { background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px 12px; margin-bottom: var(--space-md); }
+    .sq-xp-stack-title { font-family: var(--font-heading); font-size: 0.54rem; letter-spacing: 0.12em; text-transform: uppercase; color: var(--color-text-muted); margin-bottom: 8px; }
+    .sq-xp-stack-row { display: flex; justify-content: space-between; align-items: center; font-family: var(--font-body); font-size: 0.82rem; color: var(--color-text-muted); padding: 2px 0; }
+    .sq-xp-stack-row.sq-active-buff { color: var(--color-text); }
+    .sq-xp-stack-val { font-family: var(--font-ui); font-size: 0.65rem; font-weight: 700; }
+    .sq-xp-stack-val.sq-on { color: var(--color-gold-bright); }
+    .sq-xp-stack-val.sq-off { color: var(--color-text-faint); }
+    .sq-ach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-sm); margin-bottom: var(--space-md); }
+    .sq-ach-badge { background: var(--color-surface); border: 1px solid var(--color-gold-dim); border-radius: var(--radius-md); padding: 8px 4px; text-align: center; }
+    .sq-ach-icon { font-size: 1.4rem; display: block; margin-bottom: 3px; line-height: 1; }
+    .sq-ach-name { font-family: var(--font-ui); font-size: 0.5rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-gold); }
+    .sq-ach-badge.sq-locked { background: none; border-color: var(--color-border); opacity: 0.35; }
     .sq-ach-badge.sq-locked .sq-ach-name { color: var(--color-text-muted); }
-
-    /* ─── R1-Good-2: Section tints ─── */
-    .sq-section-sacred  { background: rgba(200,168,75,0.04);  border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
-    .sq-section-daily   { background: rgba(90,154,74,0.04);   border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
-    .sq-section-weekly  { background: rgba(106,74,170,0.04);  border-radius: var(--radius-md); padding: 8px 8px 4px; margin-bottom: 4px; }
-
-    /* ─── R1-Future-2: Featured Quest ─── */
-    .sq-featured-section {
-      border: 1px solid var(--color-gold-dim);
-      border-radius: var(--radius-md);
-      background: rgba(200,168,75,0.06);
-      padding: 8px 8px 4px;
-      margin-bottom: var(--space-md);
-    }
-    .sq-featured-head {
-      font-family: var(--font-heading);
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-gold);
-      margin-bottom: var(--space-sm);
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-
-    /* ─── R1-Bad-3 / R2-Bad-3: Hall section headers ─── */
-    .sq-hall-section-head {
-      font-family: var(--font-heading);
-      font-size: 0.58rem;
-      font-weight: 600;
-      letter-spacing: 0.14em;
-      text-transform: uppercase;
-      color: var(--color-gold-dim);
-      margin: var(--space-md) 0 var(--space-sm);
-      padding-bottom: var(--space-xs);
-      border-bottom: 1px solid var(--color-border);
-    }
-
-    /* ─── R1-Bad-3: Notification toggle placeholder ─── */
-    .sq-notif-row {
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 10px var(--space-md);
-      margin-bottom: var(--space-sm);
-      opacity: 0.55;
-    }
-    .sq-notif-label {
-      flex: 1;
-      font-family: var(--font-body);
-      font-size: 0.88rem;
-      color: var(--color-text-muted);
-    }
-    .sq-notif-label small {
-      display: block;
-      font-size: 0.72rem;
-      color: var(--color-text-faint);
-      font-style: italic;
-      margin-top: 2px;
-    }
-    .sq-notif-toggle {
-      width: 36px;
-      height: 20px;
-      background: var(--color-border);
-      border-radius: var(--radius-pill);
-      position: relative;
-      cursor: not-allowed;
-      flex-shrink: 0;
-    }
-    .sq-notif-toggle::after {
-      content: '';
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      width: 16px;
-      height: 16px;
-      background: var(--color-text-faint);
-      border-radius: 50%;
-    }
-
-    /* ─── R1-Bad-1: Backup/Restore ─── */
-    .sq-backup-row {
-      display: flex;
-      gap: var(--space-sm);
-      margin-bottom: var(--space-sm);
-    }
-    .sq-backup-row .sq-btn {
-      flex: 1;
-      font-size: 0.6rem;
-      padding: 8px 6px;
-      text-align: center;
-    }
-    .sq-backup-desc {
-      font-family: var(--font-body);
-      font-size: 0.78rem;
-      font-style: italic;
-      color: var(--color-text-faint);
-      margin-bottom: var(--space-sm);
-    }
-
-    /* ─── R1-Future-1: Share button ─── */
-    .sq-share-btn {
-      width: 100%;
-      padding: 9px;
-      font-size: 0.65rem;
-      background: none;
-      color: var(--color-gold);
-      border: 1px solid var(--color-gold-dim);
-      border-radius: var(--radius-md);
-      font-family: var(--font-heading);
-      font-weight: 600;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      cursor: pointer;
-      transition: background 0.15s;
-      margin-bottom: var(--space-sm);
-    }
-    .sq-share-btn:hover { background: rgba(200,168,75,0.08); }
-
-    /* ─── R2-Good-1: Level-up pre-flash ─── */
-    .sq-levelup-flash {
-      position: absolute;
-      top: 52px;
-      left: 50%;
-      transform: translateX(-50%) translateY(-6px);
-      background: var(--color-xp-bg);
-      border: 1px solid var(--color-gold);
-      color: var(--color-gold-bright);
-      font-family: var(--font-heading);
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.08em;
-      padding: 5px 18px;
-      border-radius: var(--radius-pill);
-      pointer-events: none;
-      opacity: 0;
-      z-index: 210;
-      white-space: nowrap;
-      transition: opacity 0.2s, transform 0.25s;
-    }
-    .sq-levelup-flash.sq-flash-show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
-
-    /* ─── R2-Good-2: Recent emojis row ─── */
-    .sq-emoji-recent-row {
-      display: grid;
-      grid-template-columns: repeat(8, 1fr);
-      gap: 3px;
-      padding: 4px 0 6px;
-      border-bottom: 1px solid var(--color-border);
-      margin-bottom: 6px;
-    }
-    .sq-emoji-recent-label {
-      font-family: var(--font-ui);
-      font-size: 0.55rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-      color: var(--color-text-faint);
-      margin-bottom: 4px;
-    }
-
-    /* ─── R2-Good-3: Section complete empty state ─── */
-    .sq-section-complete {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-style: italic;
-      color: var(--color-text-muted);
-      padding: 10px 8px;
-      text-align: center;
-    }
-    .sq-section-complete::before {
-      content: '✓ ';
-      color: var(--color-success);
-    }
-
-    /* ─── R2-Bad-2: Add Quest parchment form ─── */
-    .sq-add-form-parchment {
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-gold-dim);
-      border-radius: var(--radius-lg);
-      padding: var(--space-md);
-      box-shadow: inset 0 1px 8px rgba(0,0,0,0.3);
-    }
-    .sq-add-form-deco {
-      font-family: var(--font-heading);
-      font-size: 0.68rem;
-      font-weight: 600;
-      letter-spacing: 0.1em;
-      color: var(--color-gold-dim);
-      text-align: center;
-      margin-bottom: var(--space-md);
-      padding-bottom: var(--space-sm);
-      border-bottom: 1px solid var(--color-border);
-    }
-    .sq-btn-full-gold {
-      width: 100%;
-      padding: 12px;
-      font-size: 0.72rem;
-      border-radius: var(--radius-md);
-      margin-top: var(--space-sm);
-      border: 2px solid var(--color-gold) !important;
-    }
-
-    /* ─── R2-Future-1: Quick Complete mode ─── */
-    .sq-quick-mode .sq-tabbar { display: none; }
-    .sq-quick-bar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px var(--space-md);
-      background: var(--color-surface);
-      border-bottom: 1px solid var(--color-border);
-      flex-shrink: 0;
-    }
-    .sq-quick-bar-title {
-      font-family: var(--font-heading);
-      font-size: 0.7rem;
-      font-weight: 600;
-      letter-spacing: 0.08em;
-      color: var(--color-gold);
-      text-transform: uppercase;
-    }
-    .sq-quick-back {
-      background: none;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      color: var(--color-text-muted);
-      font-family: var(--font-ui);
-      font-size: 0.65rem;
-      padding: 3px 10px;
-      cursor: pointer;
-      transition: all 0.15s;
-    }
-    .sq-quick-back:hover { border-color: var(--color-gold-dim); color: var(--color-gold); }
-    .sq-quick-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: 0 var(--space-md);
-      margin-bottom: 6px;
-      height: 60px;
-      display: flex;
-      align-items: center;
-      gap: var(--space-sm);
-      cursor: pointer;
-      font-family: var(--font-body);
-      font-size: 1rem;
-      color: var(--color-text);
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .sq-quick-card:hover { border-color: var(--color-gold-dim); background: var(--color-surface-hover); }
-    .sq-quick-card.sq-done {
-      background: var(--color-success-bg);
-      border-color: var(--color-success);
-      opacity: 0.65;
-    }
-
-    /* ─── R2-Future-2: Sync Code modal ─── */
-    .sq-modal-overlay {
-      position: absolute;
-      inset: 0;
-      background: rgba(10,6,2,0.92);
-      z-index: 400;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      padding: var(--space-lg);
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
+    .sq-fellowship-card { position: relative; background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-md); opacity: 0.4; margin-bottom: var(--space-md); }
+    .sq-fellowship-title { font-family: var(--font-heading); font-size: 0.82rem; font-weight: 600; color: var(--color-text-muted); margin-bottom: var(--space-xs); }
+    .sq-fellowship-desc { font-family: var(--font-body); font-size: 0.8rem; font-style: italic; color: var(--color-text-faint); line-height: 1.5; }
+    .sq-fellowship-lock { position: absolute; top: var(--space-sm); right: var(--space-sm); font-size: 1rem; opacity: 0.4; }
+    .sq-notif-row { display: flex; align-items: center; gap: var(--space-sm); background: var(--color-surface); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: 10px var(--space-md); margin-bottom: var(--space-sm); opacity: 0.45; }
+    .sq-notif-label { flex: 1; font-family: var(--font-body); font-size: 0.85rem; color: var(--color-text-muted); }
+    .sq-notif-label small { display: block; font-size: 0.7rem; color: var(--color-text-faint); font-style: italic; margin-top: 2px; }
+    .sq-notif-toggle { width: 36px; height: 20px; background: var(--color-border); border-radius: var(--radius-pill); position: relative; cursor: not-allowed; flex-shrink: 0; }
+    .sq-notif-toggle::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: var(--color-text-faint); border-radius: 50%; }
+    .sq-backup-row { display: flex; gap: var(--space-sm); margin-bottom: var(--space-sm); }
+    .sq-backup-row .sq-btn { flex: 1; font-size: 0.58rem; padding: 8px 6px; text-align: center; }
+    .sq-backup-desc { font-family: var(--font-body); font-size: 0.76rem; font-style: italic; color: var(--color-text-faint); margin-bottom: var(--space-sm); }
+    .sq-share-btn { width: 100%; padding: 9px; font-size: 0.62rem; font-family: var(--font-heading); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--color-text-muted); background: none; border: 1px solid var(--color-border); border-radius: var(--radius-md); cursor: pointer; transition: all 0.15s; margin-bottom: var(--space-sm); }
+    .sq-share-btn:hover { border-color: var(--color-gold-dim); color: var(--color-gold); }
+    .sq-version { text-align: center; font-family: var(--font-ui); font-size: 0.52rem; color: var(--color-text-faint); letter-spacing: 0.1em; padding: var(--space-md) 0 var(--space-sm); }
+    .sq-modal-overlay { position: absolute; inset: 0; background: rgba(5,3,1,0.9); z-index: 400; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: var(--space-lg); opacity: 0; pointer-events: none; transition: opacity 0.2s; }
     .sq-modal-overlay.sq-show { opacity: 1; pointer-events: all; }
-    .sq-modal-box {
-      background: var(--color-surface-raised);
-      border: 1px solid var(--color-gold-dim);
-      border-radius: var(--radius-lg);
-      padding: var(--space-md);
-      width: 100%;
-      max-width: 360px;
-    }
-    .sq-modal-title {
-      font-family: var(--font-heading);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--color-gold);
-      margin-bottom: var(--space-sm);
-      text-align: center;
-    }
-    .sq-modal-code {
-      background: var(--color-bg);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-sm);
-      font-family: monospace;
-      font-size: 0.65rem;
-      color: var(--color-text-muted);
-      word-break: break-all;
-      max-height: 120px;
-      overflow-y: auto;
-      user-select: all;
-      cursor: text;
-      margin-bottom: var(--space-sm);
-    }
-    .sq-modal-textarea {
-      width: 100%;
-      background: var(--color-bg);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-sm);
-      font-family: monospace;
-      font-size: 0.65rem;
-      color: var(--color-text);
-      resize: vertical;
-      min-height: 80px;
-      box-sizing: border-box;
-      margin-bottom: var(--space-sm);
-    }
-    .sq-modal-desc {
-      font-family: var(--font-body);
-      font-size: 0.8rem;
-      font-style: italic;
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-sm);
-      text-align: center;
-    }
-    .sq-modal-btns {
-      display: flex;
-      gap: var(--space-sm);
-    }
-    .sq-modal-btns .sq-btn { flex: 1; font-size: 0.6rem; }
-
-    /* ─── R2-Future-3: Fellowship stub ─── */
-    .sq-fellowship-card {
-      position: relative;
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-md);
-      padding: var(--space-md);
-      opacity: 0.45;
-      overflow: hidden;
-    }
-    .sq-fellowship-title {
-      font-family: var(--font-heading);
-      font-size: 0.85rem;
-      font-weight: 600;
-      color: var(--color-text-muted);
-      margin-bottom: var(--space-xs);
-    }
-    .sq-fellowship-desc {
-      font-family: var(--font-body);
-      font-size: 0.82rem;
-      font-style: italic;
-      color: var(--color-text-faint);
-      line-height: 1.5;
-    }
-    .sq-fellowship-lock {
-      position: absolute;
-      top: var(--space-sm);
-      right: var(--space-sm);
-      font-size: 1.1rem;
-      opacity: 0.4;
-    }
-
-    /* ─── Mobile responsive ─── */
-    @media (max-width: 700px) {
-      .main {
-        padding: 20px 0 0;
-      }
-
-      .sq-page-header {
-        padding: 0 16px;
-      }
-
-      .sq-shell {
-        justify-content: stretch;
-      }
-
-      .sq-phone {
-        width: 100%;
-        border-radius: 0;
-        min-height: calc(100dvh - 80px);
-        box-shadow: none;
-        border: none;
-      }
-    }
+    .sq-modal-box { background: var(--color-surface-raised); border: 1px solid var(--color-gold-dim); border-radius: var(--radius-lg); padding: var(--space-md); width: 100%; max-width: 340px; }
+    .sq-modal-title { font-family: var(--font-heading); font-size: 0.82rem; font-weight: 600; color: var(--color-gold); margin-bottom: var(--space-sm); text-align: center; }
+    .sq-modal-code { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-sm); font-family: monospace; font-size: 0.62rem; color: var(--color-text-muted); word-break: break-all; max-height: 120px; overflow-y: auto; user-select: all; cursor: text; margin-bottom: var(--space-sm); }
+    .sq-modal-textarea { width: 100%; background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-md); padding: var(--space-sm); font-family: monospace; font-size: 0.62rem; color: var(--color-text); resize: vertical; min-height: 80px; box-sizing: border-box; margin-bottom: var(--space-sm); }
+    .sq-modal-desc { font-family: var(--font-body); font-size: 0.78rem; font-style: italic; color: var(--color-text-muted); margin-bottom: var(--space-sm); text-align: center; }
+    .sq-modal-btns { display: flex; gap: var(--space-sm); }
+    .sq-modal-btns .sq-btn { flex: 1; font-size: 0.58rem; }
   </style>
 </head>
 <body>
 
-  <aside class="sidebar"></aside>
+  <!-- SITE WRAPPER — desktop/browser only -->
+  <div id="sqSiteWrap">
+    <script src="/sidebar.js"></script>
+    <main class="sq-site-main">
+      <div class="sq-page-title">SideQuest</div>
+      <div class="sq-page-sub">Your daily adventure. Add to home screen on iOS for the full app experience.</div>
+      <div class="sq-desktop-shell" id="sqDesktopShell"></div>
+    </main>
+  </div>
 
-  <main class="main">
+  <!-- APP SHELL -->
+  <div id="sqApp">
 
-    <div class="sq-page-header">
-      <span class="project-tag">Project — PWA</span>
-      <h1 class="page-title" style="margin-bottom: 4px;">SideQuest</h1>
-      <p style="font-size:0.82rem; color:var(--text-muted,#888); margin-bottom:0; font-style:italic;">A fantasy habit tracker. Install via "Add to Home Screen."</p>
+    <!-- HOME SCREEN -->
+    <div id="sqHome">
+      <div class="sq-sky" id="sqSky"></div>
+      <div class="sq-stars" id="sqStars"></div>
+      <div class="sq-castle">
+        <svg viewBox="0 0 200 140" xmlns="http://www.w3.org/2000/svg" style="width:100%;display:block;">
+          <g fill="#030200" opacity="0.92">
+            <rect x="70" y="50" width="60" height="90"/>
+            <rect x="68" y="44" width="12" height="10"/>
+            <rect x="84" y="44" width="12" height="10"/>
+            <rect x="100" y="44" width="12" height="10"/>
+            <rect x="116" y="44" width="12" height="10"/>
+            <rect x="88" y="95" width="24" height="45"/>
+            <ellipse cx="100" cy="95" rx="12" ry="8"/>
+            <rect x="40" y="65" width="34" height="75"/>
+            <rect x="38" y="58" width="10" height="10"/>
+            <rect x="52" y="58" width="10" height="10"/>
+            <rect x="66" y="58" width="10" height="10"/>
+            <polygon points="40,65 74,65 57,44"/>
+            <rect x="126" y="65" width="34" height="75"/>
+            <rect x="124" y="58" width="10" height="10"/>
+            <rect x="138" y="58" width="10" height="10"/>
+            <rect x="152" y="58" width="10" height="10"/>
+            <polygon points="126,65 160,65 143,44"/>
+            <line x1="57" y1="44" x2="57" y2="28" stroke="#030200" stroke-width="2"/>
+            <polygon points="57,28 57,36 66,32" fill="#3a1a08"/>
+            <line x1="143" y1="44" x2="143" y2="28" stroke="#030200" stroke-width="2"/>
+            <polygon points="143,28 143,36 152,32" fill="#3a1a08"/>
+            <rect x="10" y="100" width="32" height="40"/>
+            <rect x="158" y="100" width="32" height="40"/>
+          </g>
+        </svg>
+      </div>
+      <div class="sq-hills-mid"></div>
+      <div class="sq-hills-front"></div>
+      <div class="sq-ground"></div>
+      <div class="sq-home-content">
+        <div class="sq-quest-count-label" id="sqHomeCount">&nbsp;</div>
+        <div class="sq-exclaim-wrap" id="sqExclaim" onclick="sqOpenLog()" role="button" aria-label="Open quest log">
+          <span class="sq-exclaim-glyph">!</span>
+        </div>
+        <div class="sq-home-brand">SideQuest</div>
+        <div class="sq-home-tagline">Every legend begins somewhere.</div>
+        <div class="sq-home-buffs" id="sqHomeBuffs"></div>
+      </div>
     </div>
 
-    <!-- ══ APP SHELL ══ -->
-    <div class="sq-shell">
-      <div class="sq-phone" id="sqApp">
+    <!-- QUEST LOG -->
+    <div id="sqLog">
+      <div class="sq-statusbar">
+        <button class="sq-home-btn" onclick="sqGoHome()" aria-label="Home">&#8962;</button>
+        <span class="sq-statusbar-title">SideQuest</span>
+        <span id="sqBarBuffs"></span>
+        <span class="sq-statusbar-xp" id="sqTopXp">0 XP</span>
+      </div>
 
-        <!-- Level-up splash overlay (hidden until triggered) -->
-        <div class="sq-levelup-overlay" id="sqLevelUpOverlay" onclick="sqDismissLevelUp()" aria-live="polite">
-          <div class="sq-levelup-tag">⬆ Level Up</div>
-          <div class="sq-levelup-num" id="sqLvlNum">2</div>
-          <div class="sq-levelup-avatar" id="sqLvlAvatar">🧑‍⚔️</div>
-          <div class="sq-levelup-title" id="sqLvlTitle">Squire</div>
-          <div class="sq-levelup-sub" id="sqLvlSub">You have risen to Squire!</div>
-          <div class="sq-levelup-dismiss">Tap to continue</div>
+      <div class="sq-toast" id="sqXpToast"></div>
+      <div class="sq-msg-toast" id="sqMsgToast"></div>
+
+      <div class="sq-lvlup" id="sqLvlUpOverlay" onclick="sqDismissLevelUp()">
+        <div class="sq-lvlup-tag">Level Up</div>
+        <div class="sq-lvlup-avatar" id="sqLvlAvatar">&#x1F9D1;</div>
+        <div class="sq-lvlup-num" id="sqLvlNum">2</div>
+        <div class="sq-lvlup-title" id="sqLvlTitle">Squire</div>
+        <div class="sq-lvlup-sub" id="sqLvlSub">You have risen!</div>
+        <div class="sq-lvlup-hint">Tap to continue</div>
+      </div>
+
+      <div class="sq-content">
+
+        <!-- DAILIES TAB -->
+        <div id="sqPanelQuests" class="sq-tab-panel sq-active">
+          <div class="sq-day-label" id="sqDayLabel"></div>
+          <div class="sq-section-head">&#127770; Dailies</div>
+          <div id="sqDefaultList"></div>
+          <div class="sq-section-head">&#9876; Your Dailies</div>
+          <div id="sqDailyList"></div>
+          <div class="sq-section-head">&#128336; Weeklies</div>
+          <div id="sqWeeklyList"></div>
         </div>
 
-        <!-- XP toast -->
-        <div class="sq-toast" id="sqXpToast" aria-live="polite"></div>
-        <!-- Message toast -->
-        <div class="sq-msg-toast" id="sqMsgToast" aria-live="polite"></div>
-        <!-- Level-up pre-flash (R2-Good-1) -->
-        <div class="sq-levelup-flash" id="sqLvlFlash" aria-live="polite"></div>
-        <!-- Sync Code modal (R2-Future-2) -->
-        <div class="sq-modal-overlay" id="sqSyncModal">
-          <div class="sq-modal-box">
-            <div class="sq-modal-title" id="sqSyncModalTitle">Sync Code</div>
-            <div class="sq-modal-desc" id="sqSyncModalDesc"></div>
-            <div class="sq-modal-code" id="sqSyncCodeBlock" style="display:none"></div>
-            <textarea class="sq-modal-textarea" id="sqSyncImportArea" placeholder="Paste your sync code here..." style="display:none"></textarea>
-            <div class="sq-modal-btns">
-              <button class="sq-btn" id="sqSyncActionBtn" onclick="sqSyncAction()">Copy</button>
-              <button class="sq-btn sq-btn-ghost" onclick="sqCloseSyncModal()">Close</button>
+        <!-- QUESTS (one-off) TAB -->
+        <div id="sqPanelBounty" class="sq-tab-panel">
+          <div class="sq-section-head">&#128204; Active Quests</div>
+          <div class="sq-bounty-add-row">
+            <div class="sq-bounty-row-inner">
+              <input class="sq-input" id="sqBountyInput" placeholder="Add a quest..." autocomplete="off" />
+              <input class="sq-input sq-input-xp" id="sqBountyXp" type="number" min="1" max="500" value="20" />
+              <button class="sq-btn" onclick="sqAddBounty()">Add</button>
             </div>
+          </div>
+          <div id="sqBountyActive"></div>
+          <div id="sqBountyCompletedSection"></div>
+        </div>
+
+        <!-- ADD TAB -->
+        <div id="sqPanelAdd" class="sq-tab-panel">
+          <div class="sq-add-header">Add a Recurring Quest</div>
+          <div class="sq-type-toggle">
+            <button id="sqTypeDaily"  class="sq-type-btn sq-active" onclick="sqSetType('daily')">Daily</button>
+            <button id="sqTypeWeekly" class="sq-type-btn"           onclick="sqSetType('weekly')">Weekly</button>
+          </div>
+          <div class="sq-form-group">
+            <label class="sq-form-label" for="sqAddName">Quest Name</label>
+            <input class="sq-input" id="sqAddName" placeholder="e.g. Morning run..." autocomplete="off" style="width:100%"/>
+          </div>
+          <div class="sq-form-group">
+            <label class="sq-form-label">Icon</label>
+            <div class="sq-emoji-grid" id="sqEmojiGrid"></div>
+            <div class="sq-emoji-custom-row">
+              <input class="sq-input" id="sqCustomEmoji" placeholder="&#x2728;" maxlength="2" />
+              <span>or type any emoji above</span>
+            </div>
+          </div>
+          <div class="sq-form-group">
+            <label class="sq-form-label">XP Reward</label>
+            <div class="sq-slider-row">
+              <input class="sq-slider" type="range" id="sqAddXp" min="5" max="100" value="30"
+                     oninput="document.getElementById('sqXpDisplay').textContent=this.value+' XP'" />
+              <span class="sq-xp-display" id="sqXpDisplay">30 XP</span>
+            </div>
+          </div>
+          <button class="sq-btn sq-btn-full" onclick="sqSaveQuest()">Post Quest to Board</button>
+        </div>
+
+        <!-- HALL TAB -->
+        <div id="sqPanelHall" class="sq-tab-panel">
+          <div class="sq-hall-inner">
+            <div class="sq-watermark" aria-hidden="true">&#x1F409;</div>
+            <div class="sq-logo">
+              <svg width="44" height="44" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+                <circle cx="30" cy="30" r="28" fill="var(--color-surface-raised)" stroke="var(--color-gold)" stroke-width="2"/>
+                <line x1="18" y1="18" x2="42" y2="42" stroke="var(--color-gold)" stroke-width="2.5" stroke-linecap="round"/>
+                <line x1="42" y1="18" x2="18" y2="42" stroke="var(--color-gold)" stroke-width="2.5" stroke-linecap="round"/>
+                <circle cx="30" cy="30" r="4" fill="var(--color-gold)" opacity="0.8"/>
+              </svg>
+              <span class="sq-logo-text">Adventurer's Hall</span>
+            </div>
+            <div class="sq-hall-section-head">The Adventurer</div>
+            <div class="sq-profile-hero">
+              <div class="sq-avatar-wrap">
+                <span class="sq-avatar-emoji" id="sqAvatarEmoji">&#x1F9D1;</span>
+                <span class="sq-level-badge" id="sqLevelBadge">Lv 1</span>
+              </div>
+              <div class="sq-level-title" id="sqLevelTitle">Peasant</div>
+              <div class="sq-class-badge" id="sqClassBadge">Citizen &mdash; Undeclared. All paths open.</div>
+              <div class="sq-xp-bar-label" id="sqXpBarLabel">0 / 300 XP</div>
+              <div class="sq-xp-bar-track">
+                <div class="sq-xp-bar-fill" id="sqXpBarFill" style="width:0%"></div>
+              </div>
+            </div>
+            <div class="sq-hall-section-head">XP Multipliers</div>
+            <div class="sq-xp-stack" id="sqXpStack"></div>
+            <div class="sq-hall-section-head">Deeds Done</div>
+            <div class="sq-stats-grid" id="sqStatsGrid"></div>
+            <button class="sq-share-btn" onclick="sqShareProgress()">&#x1F4CB; Share Progress</button>
+            <div class="sq-hall-section-head">Honours</div>
+            <div class="sq-ach-grid" id="sqAchGrid"></div>
+            <div class="sq-hall-section-head">Fellowship</div>
+            <div class="sq-fellowship-card">
+              <span class="sq-fellowship-lock">&#x1F512;</span>
+              <div class="sq-fellowship-title">&#x1F6E1; Fellowship &mdash; Coming Soon</div>
+              <div class="sq-fellowship-desc">Invite friends. See their quests. Earn more together.</div>
+            </div>
+            <div class="sq-hall-section-head">Logistics</div>
+            <div class="sq-notif-row">
+              <div class="sq-notif-label">Push Notifications &mdash; Coming Soon<small>Daily quest reminders. Enable when the feature launches.</small></div>
+              <div class="sq-notif-toggle" aria-disabled="true"></div>
+            </div>
+            <div class="sq-backup-desc">Export your data to guard against browser wipes.</div>
+            <div class="sq-backup-row">
+              <button class="sq-btn" onclick="sqExportData()">&#x2B07; Export</button>
+              <button class="sq-btn sq-btn-ghost" onclick="sqImportData()">&#x2B06; Import</button>
+            </div>
+            <input type="file" id="sqImportFile" accept=".json" style="display:none" onchange="sqHandleImport(this)" />
+            <div class="sq-backup-row" style="margin-top:4px">
+              <button class="sq-btn" style="flex:1;font-size:0.58rem;padding:8px 6px" onclick="sqOpenSyncGenerate()">&#x1F517; Generate Sync Code</button>
+              <button class="sq-btn sq-btn-ghost" style="flex:1;font-size:0.58rem;padding:8px 6px" onclick="sqOpenSyncImport()">&#x1F4E5; Use Sync Code</button>
+            </div>
+            <div class="sq-version">SideQuest v0.1</div>
           </div>
         </div>
 
-        <!-- Status bar -->
-        <div class="sq-statusbar">
-          <span class="sq-statusbar-title">⚔ SideQuest</span>
-          <span class="sq-statusbar-xp" id="sqTopXp">0 XP</span>
+      </div><!-- /.sq-content -->
+
+      <nav class="sq-tabbar" aria-label="App navigation">
+        <button class="sq-tab-btn sq-tab-active" data-tab="Quests" onclick="sqTab('Quests',this)" aria-current="page">
+          <span class="sq-tab-icon">&#x2694;&#xFE0F;</span>
+          <span class="sq-tab-label">Dailies</span>
+        </button>
+        <button class="sq-tab-btn" data-tab="Bounty" onclick="sqTab('Bounty',this)">
+          <span class="sq-tab-icon">&#x1F4DC;</span>
+          <span class="sq-tab-label">Quests</span>
+        </button>
+        <button class="sq-tab-btn" data-tab="Add" onclick="sqTab('Add',this)">
+          <span class="sq-tab-icon">&#x271A;</span>
+          <span class="sq-tab-label">Add</span>
+        </button>
+        <button class="sq-tab-btn" data-tab="Hall" onclick="sqTab('Hall',this)">
+          <span class="sq-tab-icon">&#x1F6E1;&#xFE0F;</span>
+          <span class="sq-tab-label">Hall</span>
+        </button>
+      </nav>
+    </div><!-- /#sqLog -->
+
+    <!-- SYNC MODAL -->
+    <div class="sq-modal-overlay" id="sqSyncModal">
+      <div class="sq-modal-box">
+        <div class="sq-modal-title" id="sqSyncTitle">Sync Code</div>
+        <div class="sq-modal-desc" id="sqSyncDesc"></div>
+        <div class="sq-modal-code" id="sqSyncCode" style="display:none"></div>
+        <textarea class="sq-modal-textarea" id="sqSyncInput" style="display:none" placeholder="Paste sync code here..."></textarea>
+        <div class="sq-modal-btns">
+          <button class="sq-btn" id="sqSyncAction" onclick="sqSyncDoAction()">Copy</button>
+          <button class="sq-btn sq-btn-ghost" onclick="sqCloseSyncModal()">Close</button>
         </div>
+      </div>
+    </div>
 
-        <!-- Scrollable content -->
-        <div class="sq-content">
-
-          <!-- ── TAB 1: QUEST BOARD ── -->
-          <div class="sq-tab-panel sq-active" id="sqPanelQuests">
-            <!-- Quick Complete bar (hidden until quick mode) -->
-            <div class="sq-quick-bar" id="sqQuickBar" style="display:none">
-              <span class="sq-quick-bar-title">⚡ Quick Complete</span>
-              <button class="sq-quick-back" onclick="sqExitQuickMode()">← Back</button>
-            </div>
-
-            <div id="sqQuickList" style="display:none; padding:8px;"></div>
-
-            <div id="sqNormalBoard">
-              <div class="sq-day-label" id="sqDayLabel"></div>
-
-              <!-- Featured monthly quest (R1-Future-2) -->
-              <div class="sq-featured-section" id="sqFeaturedSection"></div>
-
-              <!-- Section: The Sacred Rites (defaults) -->
-              <div class="sq-section-sacred">
-                <div class="sq-section-head" data-icon="quest-default">
-                  ⭐ The Sacred Rites
-                </div>
-                <div id="sqDefaultList"></div>
-              </div>
-
-              <div class="sq-ornament">◆ ─── ◆</div>
-
-              <!-- Section: Daily Quests -->
-              <div class="sq-section-daily">
-                <div class="sq-section-head" data-icon="quest-daily">
-                  ☀️ Daily Quests
-                </div>
-                <div id="sqDailyList"></div>
-              </div>
-
-              <div class="sq-ornament">◆ ─── ◆</div>
-
-              <!-- Section: Weekly Quests -->
-              <div class="sq-section-weekly">
-                <div class="sq-section-head" data-icon="quest-weekly">
-                  🌙 Weekly Quests
-                </div>
-                <div id="sqWeeklyList"></div>
-              </div>
-            </div>
-          </div>
-
-          <!-- ── TAB 2: BOUNTY BOARD ── -->
-          <div class="sq-tab-panel" id="sqPanelBounty">
-            <div class="sq-section-head" data-icon="mission">📜 Bounty Board</div>
-
-            <!-- Add bounty form -->
-            <div class="sq-bounty-add-row">
-              <div class="sq-row">
-                <input type="text" class="sq-input" id="sqBountyInput"
-                       placeholder="Name your bounty..." maxlength="80"
-                       aria-label="Bounty name" />
-              </div>
-              <div class="sq-row">
-                <label class="sq-form-label" style="margin:0; white-space:nowrap;">XP:</label>
-                <input type="number" class="sq-input sq-input-xp" id="sqBountyXp"
-                       value="20" min="1" max="500" aria-label="XP reward" />
-                <button class="sq-btn" onclick="sqAddBounty()">Post Bounty</button>
-              </div>
-            </div>
-
-            <div id="sqBountyActive"></div>
-
-            <!-- Completed bounties section -->
-            <div id="sqBountyCompletedSection"></div>
-          </div>
-
-          <!-- ── TAB 3: ADD QUEST ── -->
-          <div class="sq-tab-panel" id="sqPanelAdd">
-            <div class="sq-add-form-parchment">
-              <div class="sq-add-form-deco">◆ ─── Post a New Quest ─── ◆</div>
-
-              <!-- Daily / Weekly toggle -->
-              <div class="sq-type-toggle" role="group" aria-label="Quest type">
-                <button class="sq-type-btn sq-active" id="sqTypeDaily"
-                        onclick="sqSetType('daily')">Daily</button>
-                <button class="sq-type-btn" id="sqTypeWeekly"
-                        onclick="sqSetType('weekly')">Weekly</button>
-              </div>
-
-              <!-- Quest name -->
-              <div class="sq-form-group">
-                <label class="sq-form-label" for="sqAddName">Quest Name</label>
-                <input type="text" class="sq-input" id="sqAddName"
-                       placeholder="Name your quest..." maxlength="60"
-                       style="width:100%; box-sizing:border-box;" />
-              </div>
-
-              <!-- Emoji picker -->
-              <div class="sq-form-group">
-                <label class="sq-form-label">Choose an Emblem</label>
-                <!-- Recently used row (R2-Good-2) -->
-                <div id="sqRecentEmojiSection" style="display:none">
-                  <div class="sq-emoji-recent-label">Recently Used</div>
-                  <div class="sq-emoji-recent-row" id="sqRecentEmojiRow"></div>
-                </div>
-                <div class="sq-emoji-grid" id="sqEmojiGrid" role="group" aria-label="Emoji picker"></div>
-                <div class="sq-emoji-custom-row">
-                  <input type="text" class="sq-input" id="sqCustomEmoji"
-                         placeholder="✦" maxlength="2" aria-label="Custom emoji" />
-                  <span>or enter your own</span>
-                </div>
-              </div>
-
-              <!-- XP slider -->
-              <div class="sq-form-group">
-                <label class="sq-form-label" for="sqAddXp">XP Reward</label>
-                <div class="sq-slider-row">
-                  <input type="range" class="sq-slider" id="sqAddXp"
-                         min="10" max="100" step="5" value="30"
-                         oninput="document.getElementById('sqXpDisplay').textContent = this.value + ' XP'"
-                         aria-label="XP reward slider" />
-                  <span class="sq-xp-display" id="sqXpDisplay">30 XP</span>
-                </div>
-              </div>
-
-              <button class="sq-btn sq-btn-full sq-btn-full-gold" onclick="sqSaveQuest()">
-                Post to Board
-              </button>
-            </div>
-          </div>
-
-          <!-- ── TAB 4: ADVENTURER'S HALL ── -->
-          <div class="sq-tab-panel" id="sqPanelHall">
-            <div class="sq-hall-inner">
-
-              <!-- DESIGNER: Replace this watermark with a proper background asset -->
-              <div class="sq-watermark" data-designer="watermark" aria-hidden="true">🐉</div>
-
-              <!-- DESIGNER: Replace this block with brand asset -->
-              <div class="sq-logo" data-designer="logo">
-                <!-- DESIGNER: Replace this block with brand asset -->
-                <svg viewBox="0 0 60 60" width="52" height="52" aria-hidden="true">
-                  <!-- Shield shape -->
-                  <path d="M30 4 L54 14 L54 34 C54 46 42 54 30 58 C18 54 6 46 6 34 L6 14 Z"
-                        fill="var(--color-surface-raised)" stroke="var(--color-gold)" stroke-width="2"/>
-                  <!-- Crossed swords -->
-                  <line x1="18" y1="18" x2="42" y2="42"
-                        stroke="var(--color-gold)" stroke-width="2.5" stroke-linecap="round"/>
-                  <line x1="42" y1="18" x2="18" y2="42"
-                        stroke="var(--color-gold)" stroke-width="2.5" stroke-linecap="round"/>
-                  <!-- Center gem -->
-                  <circle cx="30" cy="30" r="4" fill="var(--color-gold)" opacity="0.8"/>
-                </svg>
-                <span class="sq-logo-text">SideQuest</span>
-              </div>
-
-              <!-- R2-Bad-3: Section 1 — The Adventurer -->
-              <div class="sq-hall-section-head">The Adventurer</div>
-
-              <!-- Profile hero -->
-              <div class="sq-profile-hero">
-                <div class="sq-avatar-wrap" data-designer="illustration">
-                  <span class="sq-avatar-emoji" id="sqAvatarEmoji">🧑‍🌾</span>
-                  <span class="sq-level-badge" id="sqLevelBadge">Lv 1</span>
-                </div>
-                <div class="sq-level-title" id="sqLevelTitle">Peasant</div>
-                <div class="sq-xp-bar-label" id="sqXpBarLabel">0 / 300 XP</div>
-                <div class="sq-xp-bar-track">
-                  <div class="sq-xp-bar-fill" id="sqXpBarFill" style="width:0%"></div>
-                </div>
-              </div>
-
-              <!-- R2-Bad-3: Section 2 — Deeds Done -->
-              <div class="sq-hall-section-head">Deeds Done</div>
-              <!-- Stats grid -->
-              <div class="sq-stats-grid" id="sqStatsGrid"></div>
-
-              <!-- R1-Future-1: Share Progress button -->
-              <button class="sq-share-btn" onclick="sqShareProgress()">📋 Share Progress</button>
-
-              <!-- R2-Future-1: Quick Complete link -->
-              <button class="sq-share-btn" onclick="sqEnterQuickMode()" style="margin-bottom:var(--space-md);">⚡ Quick Complete</button>
-
-              <!-- R2-Bad-3: Section 3 — Honours -->
-              <div class="sq-hall-section-head">Honours</div>
-              <!-- Achievements -->
-              <div class="sq-achievements-section" style="margin-top:0">
-                <div class="sq-ach-grid" id="sqAchGrid"></div>
-              </div>
-
-              <!-- R2-Future-3: Fellowship stub -->
-              <div class="sq-hall-section-head">Fellowship</div>
-              <div class="sq-fellowship-card">
-                <span class="sq-fellowship-lock">🔒</span>
-                <div class="sq-fellowship-title">🛡️ Fellowship — Coming Soon</div>
-                <div class="sq-fellowship-desc">Invite friends to your fellowship. See their quests. Hold each other to account. Social accountability is the most powerful habit tool known to adventurers.</div>
-              </div>
-
-              <!-- R2-Bad-3: Section 4 — Logistics -->
-              <div class="sq-hall-section-head">Logistics</div>
-
-              <!-- R1-Bad-3: Notifications placeholder -->
-              <div class="sq-notif-row">
-                <div class="sq-notif-label">
-                  Push Notifications — Coming Soon
-                  <small>Daily quest reminders and achievement alerts. Enable when the feature launches.</small>
-                </div>
-                <div class="sq-notif-toggle" title="Coming soon" aria-disabled="true"></div>
-              </div>
-
-              <!-- R1-Bad-1: Backup & Restore -->
-              <div class="sq-backup-desc">Export your data to protect against browser storage wipes. Import to restore.</div>
-              <div class="sq-backup-row">
-                <button class="sq-btn" onclick="sqExportData()">⬇ Export Data</button>
-                <button class="sq-btn sq-btn-ghost" onclick="sqImportData()">⬆ Import Data</button>
-              </div>
-              <input type="file" id="sqImportFile" accept=".json" style="display:none" onchange="sqHandleImport(this)" />
-
-              <!-- R2-Future-2: Sync Code -->
-              <div class="sq-backup-row" style="margin-top:4px">
-                <button class="sq-btn" style="flex:1;font-size:0.6rem;padding:8px 6px;" onclick="sqOpenSyncGenerate()">🔗 Generate Sync Code</button>
-                <button class="sq-btn sq-btn-ghost" style="flex:1;font-size:0.6rem;padding:8px 6px;" onclick="sqOpenSyncImport()">📥 Use Sync Code</button>
-              </div>
-
-            </div><!-- /.sq-hall-inner -->
-          </div>
-
-        </div><!-- /.sq-content -->
-
-        <!-- ── Bottom Tab Bar ── -->
-        <nav class="sq-tabbar" aria-label="App navigation">
-          <button class="sq-tab-btn sq-tab-active" data-tab="Quests"
-                  onclick="sqTab('Quests', this)"
-                  aria-label="Quest Board" aria-current="page">
-            <span class="sq-tab-icon">⚔️</span>
-            <span class="sq-tab-label">Quests</span>
-          </button>
-          <button class="sq-tab-btn" data-tab="Bounty"
-                  onclick="sqTab('Bounty', this)"
-                  aria-label="Bounty Board">
-            <span class="sq-tab-icon">📜</span>
-            <span class="sq-tab-label">Bounties</span>
-          </button>
-          <button class="sq-tab-btn" data-tab="Add"
-                  onclick="sqTab('Add', this)"
-                  aria-label="Add Quest">
-            <span class="sq-tab-icon">✦</span>
-            <span class="sq-tab-label">Add</span>
-          </button>
-          <button class="sq-tab-btn" data-tab="Hall"
-                  onclick="sqTab('Hall', this)"
-                  aria-label="Adventurer's Hall">
-            <span class="sq-tab-icon">🛡️</span>
-            <span class="sq-tab-label">Hall</span>
-          </button>
-        </nav>
-
-      </div><!-- /.sq-phone -->
-    </div><!-- /.sq-shell -->
-
-  </main>
-
-  <script src="/sidebar.js"></script>
+  </div><!-- /#sqApp -->
 
   <script>
-  // ══════════════════════════════════════════════════════════════════
-  // SIDEQUEST — Fantasy PWA Habit Tracker
-  // Single-file vanilla JS. No framework, no build step.
-  // ══════════════════════════════════════════════════════════════════
+  // ══════════════════════════════════════════════════════════
+  // SIDEQUEST v0.1
+  // ══════════════════════════════════════════════════════════
 
-  // ─────────────────────────────────────────
-  // CONSTANTS & CONFIG
-  // ─────────────────────────────────────────
+  const SQ_VERSION      = '0.1';
+  const SQ_XP_PER_LEVEL = 300;
 
-  // R1-Bad-2: Progressive XP scaling
-  // getLevelXP(level) returns XP needed for that level (1-indexed)
-  function getLevelXP(level) {
-    if (level <= 5)  return 300;
-    if (level <= 10) return 500;
-    if (level <= 15) return 750;
-    return 1000;
+  // ── PWA detection ──
+  const SQ_STANDALONE =
+    window.navigator.standalone === true ||
+    window.matchMedia('(display-mode: standalone)').matches;
+
+  if (SQ_STANDALONE) {
+    document.body.classList.add('sq-standalone');
+  } else {
+    const shell = document.getElementById('sqDesktopShell');
+    const app   = document.getElementById('sqApp');
+    if (shell && app) shell.appendChild(app);
   }
 
-  // Total XP required to reach a given level number (1-indexed)
-  function sqXpForLevel(lvNum) {
-    let total = 0;
-    for (let i = 1; i < lvNum; i++) total += getLevelXP(i);
-    return total;
-  }
-
-  // R1-Good-1: Completion message pool
+  // ── Constants ──
   const COMPLETE_MSGS = [
-    "Quest complete, adventurer!",
-    "Well done, brave soul!",
-    "Another deed for the chronicle.",
-    "The realm grows safer by your hand.",
-    "Honour and XP, both well earned.",
-    "Your name is spoken with respect.",
-    "The quest board notes your success.",
-    "A small victory. They add up."
-  ];
-
-  // R1-Future-2: Featured monthly quests
-  const FEATURED_QUESTS = [
-    { month: 0,  name: "Brave the Winter",    emoji: "❄️",  xp: 50, desc: "Go outside in the cold. Do it anyway." },
-    { month: 1,  name: "The Lover's Vigil",   emoji: "💌",  xp: 35, desc: "Do something kind for someone today." },
-    { month: 2,  name: "The First Thaw",      emoji: "🌱",  xp: 40, desc: "Start something you have been putting off." },
-    { month: 3,  name: "April's Fool",        emoji: "🃏",  xp: 30, desc: "Make someone laugh today." },
-    { month: 4,  name: "The May Campaign",    emoji: "🌸",  xp: 45, desc: "Spend an hour outdoors doing nothing." },
-    { month: 5,  name: "Midsummer Rite",      emoji: "☀️",  xp: 50, desc: "Wake before sunrise. Face the day." },
-    { month: 6,  name: "The Long Road",       emoji: "🏕️", xp: 45, desc: "Walk somewhere you haven't been before." },
-    { month: 7,  name: "The Harvest Fast",    emoji: "🌾",  xp: 40, desc: "Skip a snack. Drink water instead." },
-    { month: 8,  name: "Autumn's Call",       emoji: "🍂",  xp: 35, desc: "Tidy one area of your home completely." },
-    { month: 9,  name: "The Dark Approaches", emoji: "🎃",  xp: 40, desc: "Face something you have been avoiding." },
-    { month: 10, name: "The Memory Rite",     emoji: "🕯️", xp: 35, desc: "Call or message someone you miss." },
-    { month: 11, name: "Midwinter's Rest",    emoji: "🎄",  xp: 50, desc: "Rest completely for one hour. No screens." },
+    'Quest complete, adventurer!',
+    'Well done, brave soul!',
+    'Another deed for the chronicle.',
+    'The realm grows safer by your hand.',
+    'Honour and XP, both well earned.',
+    'Your name is spoken with respect.',
+    'The quest board notes your success.',
+    'A small victory. They all add up.'
   ];
 
   const LEVEL_NAMES = [
-    'Peasant',      // 1
-    'Squire',       // 2
-    'Footman',      // 3
-    'Scout',        // 4
-    'Ranger',       // 5
-    'Knight',       // 6
-    'Champion',     // 7
-    'Thane',        // 8
-    'Paladin',      // 9
-    'Warlord',      // 10
-    'Mage',         // 11
-    'Archmage',     // 12
-    'Sorcerer',     // 13
-    'Enchanter',    // 14
-    'Mystic',       // 15
-    'Overlord',     // 16
-    'Dragonfriend', // 17
-    'Legendborn',   // 18
-    'Mythic',       // 19
-    'The Eternal',  // 20
+    'Peasant','Squire','Footman','Scout','Ranger',
+    'Knight','Champion','Thane','Paladin','Warlord',
+    'Mage','Archmage','Sorcerer','Enchanter','Mystic',
+    'Overlord','Dragonfriend','Legendborn','Mythic','The Eternal'
   ];
 
-  // Avatar emoji changes by level tier
   const AVATAR_BY_LEVEL = [
-    '🧑‍🌾', // 1
-    '🧑‍🌾', // 2
-    '🧑‍🌾', // 3
-    '🧑‍⚔️', // 4
-    '🧑‍⚔️', // 5
-    '🧑‍⚔️', // 6
-    '👸',   // 7
-    '👸',   // 8
-    '👸',   // 9
-    '🧙',   // 10
-    '🧙',   // 11
-    '🧙',   // 12
-    '🐉',   // 13
-    '🐉',   // 14
-    '🐉',   // 15
-    '👑',   // 16
-    '👑',   // 17
-    '👑',   // 18
-    '✨',   // 19
-    '✨',   // 20
+    '&#x1F9D1;&#x200D;&#x1F33E;','&#x1F9D1;&#x200D;&#x1F33E;','&#x1F9D1;&#x200D;&#x1F33E;',
+    '&#x1F9D1;&#x200D;&#x2694;&#xFE0F;','&#x1F9D1;&#x200D;&#x2694;&#xFE0F;','&#x1F9D1;&#x200D;&#x2694;&#xFE0F;',
+    '&#x1F478;','&#x1F478;','&#x1F478;',
+    '&#x1F9D9;','&#x1F9D9;','&#x1F9D9;',
+    '&#x1F409;','&#x1F409;','&#x1F409;',
+    '&#x1F451;','&#x1F451;','&#x1F451;',
+    '&#x2728;','&#x2728;'
   ];
 
-  // Default quests — always visible, always reset daily, cannot be removed
   const DEFAULT_QUESTS = [
-    { id: 'default_sleep',    name: 'Rest at the Wayfarers Inn',    xp: 30, emoji: '🛌' },
-    { id: 'default_water',    name: 'Drink from the Sacred Spring', xp: 25, emoji: '💧' },
-    { id: 'default_exercise', name: 'Train at the Barracks',        xp: 40, emoji: '⚔️' },
-    { id: 'default_outside',  name: 'Explore the Kingdom',          xp: 20, emoji: '🌲' },
-    { id: 'default_read',     name: 'Study Ancient Tomes',          xp: 25, emoji: '📜' },
+    { id:'default_sleep',    name:'Rest at the Wayfarers Inn',    xp:30, emoji:'&#x1F6CC;', buff:'sleep' },
+    { id:'default_water',    name:'Drink from the Sacred Spring', xp:25, emoji:'&#x1F4A7;', buff:'water' },
+    { id:'default_exercise', name:'Train at the Barracks',        xp:40, emoji:'&#x2694;&#xFE0F;' },
+    { id:'default_outside',  name:'Explore the Kingdom',          xp:20, emoji:'&#x1F332;' },
+    { id:'default_read',     name:'Study Ancient Tomes',          xp:25, emoji:'&#x1F4DC;' }
   ];
 
-  // Fantasy-appropriate emoji options for the Add Quest picker
   const EMOJI_OPTIONS = [
-    '⚔️','🛡️','🏹','🪄','💫','🔮','🐉','🦅',
-    '🌲','🏔️','🌊','🔥','⚡','❄️','🌙','⭐',
-    '💎','📜','🗡️','🏰','🍖','🧪','🎯','🧙',
+    '\u2694\uFE0F','\u{1F6E1}\uFE0F','\u{1F3F9}','\u{1FA84}','\u{1F4AB}','\u{1F52E}','\u{1F409}','\u{1F985}',
+    '\u{1F332}','\u{1F3D4}\uFE0F','\u{1F30A}','\u{1F525}','\u26A1','\u2744\uFE0F','\u{1F319}','\u2B50',
+    '\u{1F48E}','\u{1F4DC}','\u{1F5E1}\uFE0F','\u{1F3F0}','\u{1F356}','\u{1F9EA}','\u{1F3AF}','\u{1F9D9}'
   ];
 
-  // Achievements definition
   const ACHIEVEMENTS = [
-    { id: 'first_quest',  name: 'First Blood',         desc: 'Complete your first quest',            icon: '⚔️' },
-    { id: 'streak_3',     name: 'Three-Day March',      desc: '3 day streak',                         icon: '🔥' },
-    { id: 'streak_7',     name: 'Week of the Warrior',  desc: '7 day streak',                         icon: '🛡️' },
-    { id: 'streak_30',    name: 'The Long Campaign',    desc: '30 day streak',                        icon: '👑' },
-    { id: 'quest_10',     name: 'Veteran',              desc: '10 quests completed',                  icon: '📜' },
-    { id: 'quest_50',     name: 'Seasoned Adventurer',  desc: '50 quests completed',                  icon: '🌟' },
-    { id: 'quest_100',    name: 'Hundred Deeds',        desc: '100 quests completed',                 icon: '💎' },
-    { id: 'level_5',      name: 'Knighted',             desc: 'Reach level 5',                        icon: '🏅' },
-    { id: 'level_10',     name: 'Lord of the Realm',    desc: 'Reach level 10',                       icon: '🏰' },
-    { id: 'all_daily',    name: 'Perfect Day',          desc: 'Complete all daily quests in one day', icon: '✨' },
-    { id: 'bounty_first', name: 'Bounty Hunter',        desc: 'Complete your first bounty',           icon: '🎯' },
-    { id: 'bounty_10',    name: 'Mercenary',            desc: 'Complete 10 bounties',                 icon: '💰' },
+    { id:'first_quest',  name:'First Blood',        desc:'Complete your first quest',         icon:'\u2694\uFE0F' },
+    { id:'streak_3',     name:'Three-Day March',     desc:'3 day streak',                      icon:'\u{1F525}' },
+    { id:'streak_7',     name:'Week of the Warrior', desc:'7 day streak',                      icon:'\u{1F6E1}\uFE0F' },
+    { id:'streak_30',    name:'The Long Campaign',   desc:'30 day streak',                     icon:'\u{1F451}' },
+    { id:'quest_10',     name:'Veteran',             desc:'10 quests completed',               icon:'\u{1F4DC}' },
+    { id:'quest_50',     name:'Seasoned Adventurer', desc:'50 quests completed',               icon:'\u{1F31F}' },
+    { id:'quest_100',    name:'Hundred Deeds',       desc:'100 quests completed',              icon:'\u{1F48E}' },
+    { id:'level_5',      name:'Knighted',            desc:'Reach level 5',                     icon:'\u{1F3C5}' },
+    { id:'level_10',     name:'Lord of the Realm',   desc:'Reach level 10',                    icon:'\u{1F3F0}' },
+    { id:'all_daily',    name:'Perfect Day',         desc:'Complete all dailies in one day',   icon:'\u2728' },
+    { id:'bounty_first', name:'Bounty Hunter',       desc:'Complete your first quest',         icon:'\u{1F3AF}' },
+    { id:'bounty_10',    name:'Mercenary',           desc:'Complete 10 quests',                icon:'\u{1F4B0}' }
   ];
 
-  // ─────────────────────────────────────────
-  // STATE
-  // ─────────────────────────────────────────
+  // ── State ──
+  let sqXp=0, sqQuests=[], sqMissions=[], sqCompletions={}, sqAchievements=[], sqLastReset='';
+  let sqStats={ totalQuests:0, streak:0, daysActive:0, lastDate:'', totalBounties:0 };
+  let addType='daily', addEmoji='\u2B50', selectedEmojiBtn=null;
+  let xpToastTimer=null, msgToastTimer=null, lvlUpTimer=null;
+  let sqSyncModalMode='generate';
 
-  // Mutable runtime state — all loaded from/saved to localStorage
-  let sqXp          = 0;
-  let sqQuests      = [];   // user-added quests [{id, name, emoji, xp, type, createdAt}]
-  let sqMissions    = [];   // bounties [{id, name, xp, completed, createdAt, completedAt}]
-  let sqStats       = { totalQuests: 0, streak: 0, daysActive: 0, lastDate: '', totalBounties: 0 };
-  let sqCompletions = {};   // { "2025-01-01": ["default_sleep", ...] }
-  let sqAchievements= [];   // array of unlocked IDs
-  let sqLastReset   = '';   // ISO date of last daily reset
-
-  // Form / UI state
-  let addType           = 'daily';
-  let addEmoji          = '⭐';
-  let selectedEmojiBtn  = null;
-
-  // Toast timers
-  let xpToastTimer  = null;
-  let msgToastTimer = null;
-  let flashTimer    = null;
-
-  // Pending level-up number (to show splash once)
-  let pendingLevelUp = null;
-
-  // R2-Good-2: Recently used emojis
-  let sqRecentEmojis = [];
-
-  // R2-Future-1: Quick Complete mode
-  let sqQuickMode = false;
-
-  // R2-Future-2: Sync modal state ('generate' or 'import')
-  let sqSyncModalMode = 'generate';
-
-  // ─────────────────────────────────────────
-  // DATE HELPERS
-  // ─────────────────────────────────────────
-
-  function sqToday() {
-    return new Date().toISOString().slice(0, 10);
-  }
-
-  // Returns "Monday, 12 March"
+  // ── Date helpers ──
+  function sqToday() { return new Date().toISOString().slice(0,10); }
   function sqFriendlyDate() {
-    return new Date().toLocaleDateString('en-GB', {
-      weekday: 'long', day: 'numeric', month: 'long'
-    });
+    return new Date().toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long'});
+  }
+  function sqIsYesterday(d) {
+    const y=new Date(sqToday()); y.setDate(y.getDate()-1);
+    return y.toISOString().slice(0,10)===d;
   }
 
-  // True if `dateStr` is strictly yesterday
-  function sqIsYesterday(dateStr) {
-    const d = new Date(sqToday());
-    d.setDate(d.getDate() - 1);
-    return d.toISOString().slice(0, 10) === dateStr;
-  }
-
-  // True if today is Monday (day 1 in getDay)
-  function sqIsMonday() {
-    return new Date().getDay() === 1;
-  }
-
-  // ─────────────────────────────────────────
-  // PERSISTENCE — Load & Save
-  // ─────────────────────────────────────────
-
+  // ── Persistence ──
   function sqLoad() {
-    sqXp           = parseInt(localStorage.getItem('sq_xp')        || '0', 10);
-    sqQuests       = JSON.parse(localStorage.getItem('sq_quests')   || '[]');
-    sqMissions     = JSON.parse(localStorage.getItem('sq_missions') || '[]');
-    sqCompletions  = JSON.parse(localStorage.getItem('sq_completions') || '{}');
-    sqAchievements = JSON.parse(localStorage.getItem('sq_achievements') || '[]');
-    sqLastReset    = localStorage.getItem('sq_last_reset') || '';
-    sqRecentEmojis = JSON.parse(localStorage.getItem('sq_recent_emojis') || '[]');
-
-    const savedStats = JSON.parse(localStorage.getItem('sq_stats') || 'null');
-    if (savedStats) {
-      sqStats = { totalQuests: 0, streak: 0, daysActive: 0, lastDate: '', totalBounties: 0, ...savedStats };
-    }
+    sqXp           = parseInt(localStorage.getItem('sq_xp')||'0',10);
+    sqQuests       = JSON.parse(localStorage.getItem('sq_quests')||'[]');
+    sqMissions     = JSON.parse(localStorage.getItem('sq_missions')||'[]');
+    sqCompletions  = JSON.parse(localStorage.getItem('sq_completions')||'{}');
+    sqAchievements = JSON.parse(localStorage.getItem('sq_achievements')||'[]');
+    sqLastReset    = localStorage.getItem('sq_last_reset')||'';
+    const s=JSON.parse(localStorage.getItem('sq_stats')||'null');
+    if(s) sqStats={totalQuests:0,streak:0,daysActive:0,lastDate:'',totalBounties:0,...s};
   }
-
   function sqSave() {
-    localStorage.setItem('sq_xp',            String(sqXp));
-    localStorage.setItem('sq_quests',        JSON.stringify(sqQuests));
-    localStorage.setItem('sq_missions',      JSON.stringify(sqMissions));
-    localStorage.setItem('sq_completions',   JSON.stringify(sqCompletions));
-    localStorage.setItem('sq_achievements',  JSON.stringify(sqAchievements));
-    localStorage.setItem('sq_stats',         JSON.stringify(sqStats));
-    localStorage.setItem('sq_last_reset',    sqLastReset);
-    localStorage.setItem('sq_recent_emojis', JSON.stringify(sqRecentEmojis));
+    localStorage.setItem('sq_xp',          String(sqXp));
+    localStorage.setItem('sq_quests',       JSON.stringify(sqQuests));
+    localStorage.setItem('sq_missions',     JSON.stringify(sqMissions));
+    localStorage.setItem('sq_completions',  JSON.stringify(sqCompletions));
+    localStorage.setItem('sq_achievements', JSON.stringify(sqAchievements));
+    localStorage.setItem('sq_stats',        JSON.stringify(sqStats));
+    localStorage.setItem('sq_last_reset',   sqLastReset);
   }
 
-  // ─────────────────────────────────────────
-  // DAILY / WEEKLY RESET LOGIC
-  // ─────────────────────────────────────────
-
+  // ── Daily reset ──
   function sqCheckReset() {
-    const today = sqToday();
-    if (sqLastReset === today) return; // already reset today, nothing to do
-
-    const isFirstEver = !sqLastReset;
-
-    if (!isFirstEver) {
-      // Streak logic: increment if yesterday was active, else reset
-      if (sqIsYesterday(sqLastReset)) {
-        sqStats.streak++;
-      } else {
-        // Missed a day
-        sqStats.streak = 0;
-      }
+    const t=sqToday();
+    if(sqLastReset===t) return;
+    if(sqLastReset) {
+      sqStats.streak = sqIsYesterday(sqLastReset) ? sqStats.streak+1 : 0;
       sqStats.daysActive++;
-    } else {
-      // First ever session
-      sqStats.daysActive = 1;
-      sqStats.streak = 0;
-    }
-
-    sqStats.lastDate = today;
-
-    // Clear today's completions (preserve history for other dates)
-    // For daily quests: clear all "today" entries
-    // For weekly quests: only clear if today is Monday
-    const todayCompletions = sqCompletions[today] || [];
-    const newTodayCompletions = [];
-
-    // Re-derive which quest IDs to keep (weekly quests that completed on
-    // a previous date within this week are NOT in todayCompletions anyway)
-    // We just wipe today's slate clean
-    sqCompletions[today] = newTodayCompletions;
-
-    // If today is Monday, also wipe weekly quest completions from
-    // the current week by removing them from today's completions entirely
-    // (they reset on Monday — we've already cleared today above)
-
-    sqLastReset = today;
-    sqSave();
+    } else { sqStats.daysActive=1; sqStats.streak=0; }
+    sqStats.lastDate=t; sqCompletions[t]=[]; sqLastReset=t; sqSave();
   }
 
-  // ─────────────────────────────────────────
-  // COMPLETION HELPERS
-  // ─────────────────────────────────────────
-
+  // ── Completion helpers ──
   function sqTodayCompletions() {
-    const today = sqToday();
-    if (!sqCompletions[today]) sqCompletions[today] = [];
-    return sqCompletions[today];
+    const t=sqToday(); if(!sqCompletions[t]) sqCompletions[t]=[]; return sqCompletions[t];
   }
-
-  function sqIsDone(questId) {
-    // For weekly quests, check if completed any day this week (Mon–Sun)
-    const quest = sqQuests.find(q => q.id === questId);
-    const isWeekly = quest && quest.type === 'weekly';
-
-    if (isWeekly) {
-      // Find Monday of this week
-      const d = new Date();
-      const dayOfWeek = d.getDay(); // 0=Sun, 1=Mon, ...
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() + mondayOffset);
-      const mondayStr = monday.toISOString().slice(0, 10);
-
-      // Search all completions from monday onward
-      for (const [dateStr, ids] of Object.entries(sqCompletions)) {
-        if (dateStr >= mondayStr && ids.includes(questId)) return true;
-      }
-      return false;
+  function sqIsDone(id) {
+    const q=sqQuests.find(q=>q.id===id);
+    if(q&&q.type==='weekly'){
+      const d=new Date(), dow=d.getDay(), off=dow===0?-6:1-dow, mon=new Date(d);
+      mon.setDate(d.getDate()+off);
+      const ms=mon.toISOString().slice(0,10);
+      return Object.entries(sqCompletions).some(([dt,ids])=>dt>=ms&&ids.includes(id));
     }
-
-    return sqTodayCompletions().includes(questId);
+    return sqTodayCompletions().includes(id);
   }
-
-  function sqMarkDone(questId) {
-    const c = sqTodayCompletions();
-    if (!c.includes(questId)) c.push(questId);
-    sqCompletions[sqToday()] = c;
-  }
-
-  function sqUnmarkDone(questId) {
-    const today = sqToday();
-    sqCompletions[today] = (sqCompletions[today] || []).filter(id => id !== questId);
-
-    // For weekly, also remove from other days this week
-    const quest = sqQuests.find(q => q.id === questId);
-    if (quest && quest.type === 'weekly') {
-      const d = new Date();
-      const dayOfWeek = d.getDay();
-      const mondayOffset = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-      const monday = new Date(d);
-      monday.setDate(d.getDate() + mondayOffset);
-      const mondayStr = monday.toISOString().slice(0, 10);
-      for (const dateStr of Object.keys(sqCompletions)) {
-        if (dateStr >= mondayStr) {
-          sqCompletions[dateStr] = (sqCompletions[dateStr] || []).filter(id => id !== questId);
-        }
-      }
+  function sqMarkDone(id) { const c=sqTodayCompletions(); if(!c.includes(id))c.push(id); sqCompletions[sqToday()]=c; }
+  function sqUnmarkDone(id) {
+    const t=sqToday(); sqCompletions[t]=(sqCompletions[t]||[]).filter(x=>x!==id);
+    const q=sqQuests.find(q=>q.id===id);
+    if(q&&q.type==='weekly'){
+      const d=new Date(),dow=d.getDay(),off=dow===0?-6:1-dow,mon=new Date(d);
+      mon.setDate(d.getDate()+off); const ms=mon.toISOString().slice(0,10);
+      Object.keys(sqCompletions).filter(dt=>dt>=ms).forEach(dt=>{sqCompletions[dt]=(sqCompletions[dt]||[]).filter(x=>x!==id);});
     }
   }
 
-  // ─────────────────────────────────────────
-  // LEVEL HELPERS
-  // ─────────────────────────────────────────
+  // ── XP stack ──
+  function sqSleepActive() { return sqTodayCompletions().includes('default_sleep'); }
+  function sqWaterActive()  { return sqTodayCompletions().includes('default_water'); }
+  function sqGetMult() {
+    let m=1.05; // Citizen always
+    if(sqSleepActive()) m*=1.20;
+    if(sqWaterActive())  m*=1.10;
+    return m;
+  }
+  function sqApplyXp(base) { return Math.round(base*sqGetMult()); }
 
-  function sqLevel(xp) {
-    return Math.min(Math.floor(xp / SQ_XP_PER_LEVEL), LEVEL_NAMES.length - 1);
+  // ── Level helpers ──
+  function sqLevel(xp)     { return Math.min(Math.floor(xp/SQ_XP_PER_LEVEL),LEVEL_NAMES.length-1); }
+  function sqLevelNum(xp)  { return sqLevel(xp)+1; }
+  function sqLevelName(xp) { return LEVEL_NAMES[sqLevel(xp)]; }
+  function sqAvatar(xp)    { return AVATAR_BY_LEVEL[Math.min(sqLevel(xp),AVATAR_BY_LEVEL.length-1)]; }
+
+  // ── Sky time-of-day ──
+  function sqUpdateSky() {
+    const h=new Date().getHours();
+    const sky=document.getElementById('sqSky'), stars=document.getElementById('sqStars');
+    let grad, showStars;
+    if(h>=5&&h<7)        { grad='linear-gradient(to bottom,#1a0a22,#7a2a18,#d4701a)'; showStars=true; }
+    else if(h>=7&&h<18)  { grad='linear-gradient(to bottom,#0a2040,#1a4a7a,#2a6aaa)'; showStars=false; }
+    else if(h>=18&&h<21) { grad='linear-gradient(to bottom,#100810,#5a1a08,#c05010)'; showStars=true; }
+    else                 { grad='linear-gradient(to bottom,#04020a,#080418,#0c0620)'; showStars=true; }
+    sky.style.background=grad;
+    stars.classList.toggle('sq-visible',showStars);
   }
 
-  function sqLevelNum(xp) {
-    return sqLevel(xp) + 1;
+  function sqBuildStars() {
+    const el=document.getElementById('sqStars');
+    let h='';
+    for(let i=0;i<60;i++){
+      const x=(Math.random()*100).toFixed(1),y=(Math.random()*55).toFixed(1);
+      const dur=(2+Math.random()*3).toFixed(1), sz=Math.random()<0.3?3:2;
+      const del=(Math.random()*3).toFixed(1);
+      h+=`<div class="sq-star" style="left:${x}%;top:${y}%;width:${sz}px;height:${sz}px;--dur:${dur}s;animation-delay:${del}s"></div>`;
+    }
+    el.innerHTML=h;
   }
 
-  function sqLevelName(xp) {
-    return LEVEL_NAMES[sqLevel(xp)];
+  // ── Home screen ──
+  function sqRenderHome() {
+    const total=DEFAULT_QUESTS.length+sqQuests.filter(q=>q.type==='daily').length;
+    const done=sqTodayCompletions().filter(id=>{
+      if(DEFAULT_QUESTS.find(q=>q.id===id)) return true;
+      const q=sqQuests.find(q=>q.id===id); return q&&q.type==='daily';
+    }).length;
+    const rem=Math.max(0,total-done);
+    document.getElementById('sqHomeCount').textContent=
+      rem===0?'All quests complete!':rem===1?'1 quest awaits':rem+' quests await';
+    let pills='';
+    if(sqSleepActive()) pills+='<span class="sq-buff-pill sq-buff-sleep">+20% XP Sleep</span>';
+    if(sqWaterActive())  pills+='<span class="sq-buff-pill sq-buff-water">+10% XP Water</span>';
+    document.getElementById('sqHomeBuffs').innerHTML=pills;
+    sqUpdateSky();
   }
 
-  function sqAvatar(xp) {
-    return AVATAR_BY_LEVEL[Math.min(sqLevel(xp), AVATAR_BY_LEVEL.length - 1)];
+  // ── Navigation ──
+  function sqOpenLog() {
+    document.getElementById('sqHome').classList.add('sq-exit');
+    document.getElementById('sqLog').classList.add('sq-visible');
+    setTimeout(()=>{ document.getElementById('sqHome').style.display='none'; },420);
+  }
+  function sqGoHome() {
+    const h=document.getElementById('sqHome'),l=document.getElementById('sqLog');
+    h.style.display=''; h.classList.remove('sq-exit');
+    l.classList.remove('sq-visible');
+    sqRenderHome();
   }
 
-  // ─────────────────────────────────────────
-  // RENDER — Quest Board (tab 1)
-  // ─────────────────────────────────────────
-
+  // ── Render: Dailies ──
   function sqRenderQuests() {
-    document.getElementById('sqDayLabel').textContent = sqFriendlyDate();
-
-    // Defaults section
-    const defaultList = document.getElementById('sqDefaultList');
-    defaultList.innerHTML = DEFAULT_QUESTS.map(q => sqQuestCardHTML(q, false)).join('');
-
-    // User daily quests section
-    const userDailies = sqQuests.filter(q => q.type === 'daily');
-    const dailyList = document.getElementById('sqDailyList');
-    if (userDailies.length === 0) {
-      dailyList.innerHTML = '<div class="sq-empty-state">No quests yet — add one below</div>';
-    } else {
-      dailyList.innerHTML = userDailies.map(q => sqQuestCardHTML(q, true)).join('');
-    }
-
-    // User weekly quests section
-    const userWeeklies = sqQuests.filter(q => q.type === 'weekly');
-    const weeklyList = document.getElementById('sqWeeklyList');
-    if (userWeeklies.length === 0) {
-      weeklyList.innerHTML = '<div class="sq-empty-state">No quests yet — add one below</div>';
-    } else {
-      weeklyList.innerHTML = userWeeklies.map(q => sqQuestCardHTML(q, true)).join('');
-    }
+    document.getElementById('sqDayLabel').textContent=sqFriendlyDate();
+    document.getElementById('sqDefaultList').innerHTML=DEFAULT_QUESTS.map(q=>sqQuestCardHTML(q,false)).join('');
+    const ud=sqQuests.filter(q=>q.type==='daily');
+    document.getElementById('sqDailyList').innerHTML=ud.length
+      ?ud.map(q=>sqQuestCardHTML(q,true)).join('')
+      :'<div class="sq-empty-state">No dailies yet</div>';
+    const uw=sqQuests.filter(q=>q.type==='weekly');
+    document.getElementById('sqWeeklyList').innerHTML=uw.length
+      ?uw.map(q=>sqQuestCardHTML(q,true)).join('')
+      :'<div class="sq-empty-state">No weeklies yet</div>';
   }
 
-  function sqQuestCardHTML(q, isCustom) {
-    const done = sqIsDone(q.id);
-    const doneClass  = done ? ' sq-done' : '';
-    const customClass = isCustom ? ' sq-custom' : '';
-    const checkMark  = done ? '✓' : '';
-    const freqTag    = (q.type === 'weekly')
-      ? '<span class="sq-freq-tag">weekly</span>' : '';
-
-    return `<div class="sq-quest-card${doneClass}${customClass}" id="sqq-${sqEsc(q.id)}"
-                 onclick="sqToggleQuest('${sqEsc(q.id)}')" role="checkbox"
-                 aria-checked="${done}" aria-label="${sqEsc(q.name)}">
+  function sqQuestCardHTML(q,isCustom) {
+    const done=sqIsDone(q.id);
+    const dc=done?' sq-done':'', cc=isCustom?' sq-custom':'';
+    let buffTag='';
+    if(q.buff==='sleep') buffTag='<span class="sq-buff-tag sq-buff-tag-sleep">+20% XP</span>';
+    if(q.buff==='water') buffTag='<span class="sq-buff-tag sq-buff-tag-water">+10% XP</span>';
+    const del=isCustom?`<button class="sq-quest-delete" onclick="event.stopPropagation();sqDeleteQuest('${sqEsc(q.id)}')" title="Remove">&#x2715;</button>`:'';
+    return `<div class="sq-quest-card${dc}${cc}" onclick="sqToggleQuest('${sqEsc(q.id)}')" role="checkbox" aria-checked="${done}">
       <div class="sq-quest-emoji" aria-hidden="true">${q.emoji}</div>
       <div class="sq-quest-info">
         <div class="sq-quest-name">${sqEsc(q.name)}</div>
         <div class="sq-quest-meta">
-          <span class="sq-quest-xp">${done ? '✓' : '+'} ${q.xp} XP</span>
-          ${freqTag}
+          <span class="sq-quest-xp">${done?'&#x2713;':'+'} ${q.xp} XP</span>
+          ${q.type==='weekly'?'<span class="sq-freq-tag">weekly</span>':''}
+          ${buffTag}
         </div>
       </div>
-      <div class="sq-quest-check" aria-hidden="true">${checkMark}</div>
-      ${isCustom ? `<button class="sq-quest-delete" onclick="event.stopPropagation(); sqDeleteQuest('${sqEsc(q.id)}')" title="Remove quest" aria-label="Remove quest">✕</button>` : ''}
+      <div class="sq-quest-check" aria-hidden="true">${done?'&#x2713;':''}</div>
+      ${del}
     </div>`;
   }
 
-  // ─────────────────────────────────────────
-  // RENDER — Bounty Board (tab 2)
-  // ─────────────────────────────────────────
-
+  // ── Render: Quests board ──
   function sqRenderBounty() {
-    const active    = sqMissions.filter(m => !m.completed);
-    const completed = sqMissions.filter(m => m.completed);
-
-    const activeEl = document.getElementById('sqBountyActive');
-    if (active.length === 0 && completed.length === 0) {
-      activeEl.innerHTML = `<div class="sq-board-empty">
-        <div class="sq-board-empty-icon">📜</div>
-        <div class="sq-board-empty-text">The board is clear. No bounties today, adventurer.</div>
-      </div>`;
-    } else if (active.length === 0) {
-      activeEl.innerHTML = '';
-    } else {
-      activeEl.innerHTML = active.map(m => sqBountyCardHTML(m)).join('');
-    }
-
-    const compEl = document.getElementById('sqBountyCompletedSection');
-    if (completed.length > 0) {
-      compEl.innerHTML = `<div class="sq-completed-head">
-          <span>Completed (${completed.length})</span>
-          <button class="sq-btn sq-btn-sm sq-btn-ghost" onclick="sqClearBounties()">Clear Completed</button>
-        </div>` +
-        completed.map(m => sqBountyCardHTML(m)).join('');
-    } else {
-      compEl.innerHTML = '';
-    }
+    const act=sqMissions.filter(m=>!m.completed), comp=sqMissions.filter(m=>m.completed);
+    const ae=document.getElementById('sqBountyActive');
+    ae.innerHTML=act.length?act.map(sqBountyCardHTML).join('')
+      :(comp.length?'':'<div class="sq-board-empty"><div class="sq-board-empty-icon">&#x1F4DC;</div><div class="sq-board-empty-text">The board is bare. No quests today.</div></div>');
+    document.getElementById('sqBountyCompletedSection').innerHTML=comp.length
+      ?`<div class="sq-completed-head"><span>Completed (${comp.length})</span><button class="sq-btn sq-btn-sm sq-btn-ghost" onclick="sqClearBounties()">Clear</button></div>`+comp.map(sqBountyCardHTML).join(''):'';
   }
 
   function sqBountyCardHTML(m) {
-    const doneClass = m.completed ? ' sq-done' : '';
-    const checkMark = m.completed ? '✓' : '';
-    return `<div class="sq-bounty-card${doneClass}"
-                 onclick="sqToggleBounty('${sqEsc(m.id)}')"
-                 role="checkbox" aria-checked="${m.completed}" aria-label="${sqEsc(m.name)}">
-      <div class="sq-quest-check" style="flex-shrink:0" aria-hidden="true">${checkMark}</div>
+    const dc=m.completed?' sq-done':'';
+    return `<div class="sq-bounty-card${dc}" onclick="sqToggleBounty('${sqEsc(m.id)}')" role="checkbox" aria-checked="${m.completed}">
+      <div class="sq-quest-check" style="flex-shrink:0">${m.completed?'&#x2713;':''}</div>
       <div class="sq-bounty-name">${sqEsc(m.name)}</div>
-      <span class="sq-bounty-xp">${m.completed ? '✓' : '+'} ${m.xp} XP</span>
-      <button class="sq-bounty-del" onclick="event.stopPropagation(); sqDeleteBounty('${sqEsc(m.id)}')"
-              title="Delete bounty" aria-label="Delete bounty">✕</button>
+      <span class="sq-bounty-xp">${m.completed?'&#x2713;':'+'} ${m.xp} XP</span>
+      <button class="sq-bounty-del" onclick="event.stopPropagation();sqDeleteBounty('${sqEsc(m.id)}')" title="Delete">&#x2715;</button>
     </div>`;
   }
 
-  // ─────────────────────────────────────────
-  // RENDER — Adventurer's Hall (tab 4)
-  // ─────────────────────────────────────────
-
+  // ── Render: Hall ──
   function sqRenderHall() {
-    const level   = sqLevel(sqXp);
-    const lvNum   = level + 1;
-    const lvName  = LEVEL_NAMES[level];
-    const lvXp    = sqXp - (level * SQ_XP_PER_LEVEL);
-    const pct     = Math.min((lvXp / SQ_XP_PER_LEVEL) * 100, 100).toFixed(1);
-    const avatar  = sqAvatar(sqXp);
+    const lv=sqLevel(sqXp), lvNum=lv+1, lvXp=sqXp-(lv*SQ_XP_PER_LEVEL);
+    const pct=Math.min((lvXp/SQ_XP_PER_LEVEL)*100,100).toFixed(1);
+    document.getElementById('sqAvatarEmoji').innerHTML=sqAvatar(sqXp);
+    document.getElementById('sqLevelBadge').textContent='Lv '+lvNum;
+    document.getElementById('sqLevelTitle').textContent=LEVEL_NAMES[lv];
+    document.getElementById('sqXpBarLabel').textContent=lvXp+' / '+SQ_XP_PER_LEVEL+' XP';
+    document.getElementById('sqXpBarFill').style.width=pct+'%';
 
-    document.getElementById('sqAvatarEmoji').textContent  = avatar;
-    document.getElementById('sqLevelBadge').textContent   = 'Lv ' + lvNum;
-    document.getElementById('sqLevelTitle').textContent   = lvName;
-    document.getElementById('sqXpBarLabel').textContent   = lvXp + ' / ' + SQ_XP_PER_LEVEL + ' XP';
-    document.getElementById('sqXpBarFill').style.width    = pct + '%';
-
-    // Quests done today (defaults + dailies)
-    const todayIds = sqTodayCompletions();
-    const questsToday = todayIds.filter(id => {
-      if (id.startsWith('default_')) return true;
-      const q = sqQuests.find(q => q.id === id);
-      return q && q.type === 'daily';
-    }).length;
-
-    document.getElementById('sqStatsGrid').innerHTML = `
-      <div class="sq-stat-card">
-        <div class="sq-stat-val">${questsToday}</div>
-        <div class="sq-stat-label">Quests Today</div>
+    const sl=sqSleepActive(), wa=sqWaterActive();
+    const total=1.05*(sl?1.20:1)*(wa?1.10:1);
+    document.getElementById('sqXpStack').innerHTML=`
+      <div class="sq-xp-stack-title">Active multipliers</div>
+      <div class="sq-xp-stack-row${sl?' sq-active-buff':''}">
+        <span>&#x1F6CC; Sleep (complete Inn daily)</span>
+        <span class="sq-xp-stack-val ${sl?'sq-on':'sq-off'}">${sl?'+20%':'Inactive'}</span>
       </div>
-      <div class="sq-stat-card">
-        <div class="sq-stat-val">${sqStats.totalQuests}</div>
-        <div class="sq-stat-label">Total Quests</div>
+      <div class="sq-xp-stack-row${wa?' sq-active-buff':''}">
+        <span>&#x1F4A7; Water (complete Spring daily)</span>
+        <span class="sq-xp-stack-val ${wa?'sq-on':'sq-off'}">${wa?'+10%':'Inactive'}</span>
       </div>
-      <div class="sq-stat-card">
-        <div class="sq-stat-val">${sqStats.streak}</div>
-        <div class="sq-stat-label">Day Streak</div>
+      <div class="sq-xp-stack-row sq-active-buff">
+        <span>&#x1F9D1; Citizen bonus</span>
+        <span class="sq-xp-stack-val sq-on">+5%</span>
       </div>
-      <div class="sq-stat-card">
-        <div class="sq-stat-val">${sqStats.daysActive}</div>
-        <div class="sq-stat-label">Days Active</div>
+      <div class="sq-xp-stack-row" style="margin-top:6px;border-top:1px solid var(--color-border);padding-top:6px">
+        <span><strong>Total multiplier</strong></span>
+        <span class="sq-xp-stack-val sq-on">&times;${total.toFixed(2)}</span>
       </div>`;
 
-    // Achievements
-    const achEl = document.getElementById('sqAchGrid');
-    achEl.innerHTML = ACHIEVEMENTS.map(a => {
-      const unlocked = sqAchievements.includes(a.id);
-      return `<div class="sq-ach-badge${unlocked ? '' : ' sq-locked'}"
-                   title="${sqEsc(a.desc)}" aria-label="${sqEsc(a.name)}: ${sqEsc(a.desc)}">
-        <span class="sq-ach-icon" aria-hidden="true">${a.icon}</span>
+    const td=sqTodayCompletions();
+    const qToday=td.filter(id=>DEFAULT_QUESTS.find(q=>q.id===id)||(sqQuests.find(q=>q.id===id)&&sqQuests.find(q=>q.id===id).type==='daily')).length;
+    document.getElementById('sqStatsGrid').innerHTML=`
+      <div class="sq-stat-card"><div class="sq-stat-val">${qToday}</div><div class="sq-stat-label">Today</div></div>
+      <div class="sq-stat-card"><div class="sq-stat-val">${sqStats.totalQuests}</div><div class="sq-stat-label">All Time</div></div>
+      <div class="sq-stat-card"><div class="sq-stat-val">${sqStats.streak}</div><div class="sq-stat-label">Day Streak</div></div>
+      <div class="sq-stat-card"><div class="sq-stat-val">${sqStats.daysActive}</div><div class="sq-stat-label">Days Active</div></div>`;
+
+    document.getElementById('sqAchGrid').innerHTML=ACHIEVEMENTS.map(a=>{
+      const u=sqAchievements.includes(a.id);
+      return `<div class="sq-ach-badge${u?'':' sq-locked'}" title="${sqEsc(a.desc)}">
+        <span class="sq-ach-icon">${a.icon}</span>
         <span class="sq-ach-name">${sqEsc(a.name)}</span>
       </div>`;
     }).join('');
   }
 
-  // ─────────────────────────────────────────
-  // RENDER — Status bar XP
-  // ─────────────────────────────────────────
-
   function sqRenderTopXp() {
-    document.getElementById('sqTopXp').textContent = sqXp + ' XP';
+    document.getElementById('sqTopXp').textContent=sqXp+' XP';
+    let b='';
+    if(sqSleepActive()) b+='<span class="sq-bar-buff" title="+20% XP">&#x1F319;</span> ';
+    if(sqWaterActive())  b+='<span class="sq-bar-buff" title="+10% XP">&#x1F4A7;</span>';
+    document.getElementById('sqBarBuffs').innerHTML=b;
   }
 
-  // ─────────────────────────────────────────
-  // ACTIONS — Quest Board
-  // ─────────────────────────────────────────
-
+  // ── Actions: Dailies ──
   function sqToggleQuest(id) {
-    // Find quest (or default)
-    const quest = DEFAULT_QUESTS.find(q => q.id === id) || sqQuests.find(q => q.id === id);
-    if (!quest) return;
-
-    const wasCompleted = sqIsDone(id);
-    const prevLevel = sqLevel(sqXp);
-
-    if (!wasCompleted) {
-      // Complete it
-      sqMarkDone(id);
-      sqXp += quest.xp;
-      sqStats.totalQuests++;
-      // Ensure streak is at least 1 today
-      if (sqStats.streak === 0) sqStats.streak = 1;
-
-      sqShowXpToast('+' + quest.xp + ' XP');
+    const quest=DEFAULT_QUESTS.find(q=>q.id===id)||sqQuests.find(q=>q.id===id);
+    if(!quest) return;
+    const was=sqIsDone(id), prevLv=sqLevel(sqXp);
+    if(!was) {
+      const earned=sqApplyXp(quest.xp);
+      sqMarkDone(id); sqXp+=earned; sqStats.totalQuests++;
+      if(sqStats.streak===0) sqStats.streak=1;
+      sqShowXpToast('+'+earned+' XP');
       sqCheckAchievements();
-
-      // Check level-up
-      const newLevel = sqLevel(sqXp);
-      if (newLevel > prevLevel) {
-        pendingLevelUp = newLevel;
-        sqShowLevelUp(newLevel);
-      }
-
-      // Check perfect day
+      if(sqLevel(sqXp)>prevLv) sqShowLevelUp(sqLevel(sqXp));
       sqCheckPerfectDay();
-
+      sqShowMsgToast(COMPLETE_MSGS[Math.floor(Math.random()*COMPLETE_MSGS.length)]);
     } else {
-      // Un-complete it
-      sqUnmarkDone(id);
-      sqXp = Math.max(0, sqXp - quest.xp);
-      sqStats.totalQuests = Math.max(0, sqStats.totalQuests - 1);
+      sqUnmarkDone(id); sqXp=Math.max(0,sqXp-quest.xp);
+      sqStats.totalQuests=Math.max(0,sqStats.totalQuests-1);
     }
-
-    sqSave();
-    sqRenderQuests();
-    sqRenderTopXp();
+    sqSave(); sqRenderQuests(); sqRenderTopXp();
   }
 
   function sqDeleteQuest(id) {
-    // Remove from quests list and clear any completions
-    sqQuests = sqQuests.filter(q => q.id !== id);
-    // Also clean from completions
-    for (const date of Object.keys(sqCompletions)) {
-      sqCompletions[date] = sqCompletions[date].filter(qId => qId !== id);
-    }
-    sqSave();
-    sqRenderQuests();
+    sqQuests=sqQuests.filter(q=>q.id!==id);
+    Object.keys(sqCompletions).forEach(d=>{sqCompletions[d]=sqCompletions[d].filter(x=>x!==id);});
+    sqSave(); sqRenderQuests();
   }
 
-  // ─────────────────────────────────────────
-  // ACTIONS — Bounty Board
-  // ─────────────────────────────────────────
-
+  // ── Actions: Quests board ──
   function sqAddBounty() {
-    const input = document.getElementById('sqBountyInput');
-    const xpIn  = document.getElementById('sqBountyXp');
-    const name  = input.value.trim();
-    if (!name) { input.focus(); return; }
-
-    const mxp = Math.max(1, parseInt(xpIn.value, 10) || 20);
-    sqMissions.push({
-      id:          'bnt' + Date.now(),
-      name,
-      xp:          mxp,
-      completed:   false,
-      createdAt:   sqToday(),
-      completedAt: null,
-    });
-
-    input.value = '';
-    xpIn.value  = 20;
-
-    sqSave();
-    sqRenderBounty();
-    sqShowMsgToast('Bounty posted to the board.');
+    const inp=document.getElementById('sqBountyInput'), xpEl=document.getElementById('sqBountyXp');
+    const name=inp.value.trim(); if(!name){inp.focus();return;}
+    sqMissions.push({id:'bnt'+Date.now(),name,xp:Math.max(1,parseInt(xpEl.value,10)||20),completed:false,createdAt:sqToday(),completedAt:null});
+    inp.value=''; xpEl.value=20; sqSave(); sqRenderBounty(); sqShowMsgToast('Quest posted to the board.');
   }
 
   function sqToggleBounty(id) {
-    const m = sqMissions.find(m => m.id === id);
-    if (!m) return;
-    const prevLevel = sqLevel(sqXp);
-
-    if (!m.completed) {
-      m.completed   = true;
-      m.completedAt = sqToday();
-      sqXp += m.xp;
-      sqStats.totalBounties++;
-      sqStats.totalQuests++;
-
-      sqShowXpToast('+' + m.xp + ' XP');
-      sqCheckAchievements();
-
-      const newLevel = sqLevel(sqXp);
-      if (newLevel > prevLevel) sqShowLevelUp(newLevel);
-
-      sqShowMsgToast('Bounty fulfilled! The gold is yours.');
+    const m=sqMissions.find(m=>m.id===id); if(!m) return;
+    const prevLv=sqLevel(sqXp);
+    if(!m.completed) {
+      m.completed=true; m.completedAt=sqToday();
+      const earned=sqApplyXp(m.xp); sqXp+=earned;
+      sqStats.totalBounties++; sqStats.totalQuests++;
+      sqShowXpToast('+'+earned+' XP'); sqCheckAchievements();
+      if(sqLevel(sqXp)>prevLv) sqShowLevelUp(sqLevel(sqXp));
+      sqShowMsgToast('Quest fulfilled!');
     } else {
-      m.completed   = false;
-      m.completedAt = null;
-      sqXp = Math.max(0, sqXp - m.xp);
-      sqStats.totalBounties = Math.max(0, sqStats.totalBounties - 1);
-      sqStats.totalQuests   = Math.max(0, sqStats.totalQuests - 1);
+      m.completed=false; m.completedAt=null;
+      sqXp=Math.max(0,sqXp-m.xp);
+      sqStats.totalBounties=Math.max(0,sqStats.totalBounties-1);
+      sqStats.totalQuests=Math.max(0,sqStats.totalQuests-1);
     }
-
-    sqSave();
-    sqRenderBounty();
-    sqRenderTopXp();
+    sqSave(); sqRenderBounty(); sqRenderTopXp();
   }
 
-  function sqDeleteBounty(id) {
-    sqMissions = sqMissions.filter(m => m.id !== id);
-    sqSave();
-    sqRenderBounty();
-  }
+  function sqDeleteBounty(id) { sqMissions=sqMissions.filter(m=>m.id!==id); sqSave(); sqRenderBounty(); }
+  function sqClearBounties()  { sqMissions=sqMissions.filter(m=>!m.completed); sqSave(); sqRenderBounty(); }
 
-  function sqClearBounties() {
-    sqMissions = sqMissions.filter(m => !m.completed);
-    sqSave();
-    sqRenderBounty();
-  }
-
-  // ─────────────────────────────────────────
-  // ACTIONS — Add Quest form
-  // ─────────────────────────────────────────
-
-  function sqSetType(type) {
-    addType = type;
-    document.getElementById('sqTypeDaily').classList.toggle('sq-active',  type === 'daily');
-    document.getElementById('sqTypeWeekly').classList.toggle('sq-active', type === 'weekly');
+  // ── Actions: Add form ──
+  function sqSetType(t) {
+    addType=t;
+    document.getElementById('sqTypeDaily').classList.toggle('sq-active',t==='daily');
+    document.getElementById('sqTypeWeekly').classList.toggle('sq-active',t==='weekly');
   }
 
   function sqSaveQuest() {
-    const nameEl   = document.getElementById('sqAddName');
-    const xpEl     = document.getElementById('sqAddXp');
-    const customE  = document.getElementById('sqCustomEmoji').value.trim();
-    const name     = nameEl.value.trim();
-    if (!name) { nameEl.focus(); return; }
-
-    const emoji = customE || addEmoji;
-    const qxp   = parseInt(xpEl.value, 10) || 30;
-
-    sqQuests.push({
-      id:        'cq' + Date.now(),
-      name,
-      emoji,
-      xp:        qxp,
-      type:      addType,
-      createdAt: sqToday(),
-    });
-
-    sqSave();
-    sqRenderQuests();
-
-    // Reset form fields
-    nameEl.value = '';
-    document.getElementById('sqCustomEmoji').value = '';
-    xpEl.value   = 30;
-    document.getElementById('sqXpDisplay').textContent = '30 XP';
+    const nEl=document.getElementById('sqAddName'), xEl=document.getElementById('sqAddXp');
+    const cE=document.getElementById('sqCustomEmoji').value.trim(), name=nEl.value.trim();
+    if(!name){nEl.focus();return;}
+    sqQuests.push({id:'cq'+Date.now(),name,emoji:cE||addEmoji,xp:parseInt(xEl.value,10)||30,type:addType,createdAt:sqToday()});
+    sqSave(); sqRenderQuests();
+    nEl.value=''; document.getElementById('sqCustomEmoji').value=''; xEl.value=30;
+    document.getElementById('sqXpDisplay').textContent='30 XP';
     sqSetType('daily');
-    if (selectedEmojiBtn) {
-      selectedEmojiBtn.classList.remove('sq-selected');
-      selectedEmojiBtn = null;
-    }
-    addEmoji = '⭐';
-
-    sqShowMsgToast('Your quest has been added to the board, adventurer.');
-    // Return to Quest Board
-    sqTab('Quests', document.querySelector('[data-tab="Quests"]'));
+    if(selectedEmojiBtn){selectedEmojiBtn.classList.remove('sq-selected');selectedEmojiBtn=null;}
+    addEmoji='\u2B50';
+    sqShowMsgToast('Quest added to the board, adventurer.');
+    sqTab('Quests',document.querySelector('[data-tab="Quests"]'));
   }
 
-  // ─────────────────────────────────────────
-  // ACHIEVEMENTS
-  // ─────────────────────────────────────────
-
+  // ── Achievements ──
   function sqCheckAchievements() {
-    const level = sqLevelNum(sqXp);
-    const checks = {
-      first_quest:  sqStats.totalQuests >= 1,
-      streak_3:     sqStats.streak >= 3,
-      streak_7:     sqStats.streak >= 7,
-      streak_30:    sqStats.streak >= 30,
-      quest_10:     sqStats.totalQuests >= 10,
-      quest_50:     sqStats.totalQuests >= 50,
-      quest_100:    sqStats.totalQuests >= 100,
-      level_5:      level >= 5,
-      level_10:     level >= 10,
-      bounty_first: sqStats.totalBounties >= 1,
-      bounty_10:    sqStats.totalBounties >= 10,
-      // all_daily checked separately
+    const lv=sqLevelNum(sqXp);
+    const checks={
+      first_quest:sqStats.totalQuests>=1, streak_3:sqStats.streak>=3,
+      streak_7:sqStats.streak>=7, streak_30:sqStats.streak>=30,
+      quest_10:sqStats.totalQuests>=10, quest_50:sqStats.totalQuests>=50,
+      quest_100:sqStats.totalQuests>=100, level_5:lv>=5, level_10:lv>=10,
+      bounty_first:sqStats.totalBounties>=1, bounty_10:sqStats.totalBounties>=10
     };
-
-    for (const [id, met] of Object.entries(checks)) {
-      if (met && !sqAchievements.includes(id)) {
-        sqAchievements.push(id);
-      }
-    }
+    Object.entries(checks).forEach(([id,met])=>{ if(met&&!sqAchievements.includes(id)) sqAchievements.push(id); });
   }
 
   function sqCheckPerfectDay() {
-    // All defaults + all user dailies completed today
-    const allDailyIds = [
-      ...DEFAULT_QUESTS.map(q => q.id),
-      ...sqQuests.filter(q => q.type === 'daily').map(q => q.id),
-    ];
-    const todayIds = sqTodayCompletions();
-    const allDone  = allDailyIds.every(id => todayIds.includes(id));
-
-    if (allDone && !sqAchievements.includes('all_daily')) {
-      sqAchievements.push('all_daily');
-      sqShowMsgToast('A legendary day. All quests fulfilled.');
+    const all=[...DEFAULT_QUESTS.map(q=>q.id),...sqQuests.filter(q=>q.type==='daily').map(q=>q.id)];
+    const td=sqTodayCompletions();
+    if(all.every(id=>td.includes(id))&&!sqAchievements.includes('all_daily')){
+      sqAchievements.push('all_daily'); sqShowMsgToast('A legendary day. All quests fulfilled.');
     }
   }
 
-  // ─────────────────────────────────────────
-  // LEVEL-UP SPLASH
-  // ─────────────────────────────────────────
-
-  let lvlUpTimer = null;
-
-  function sqShowLevelUp(levelIndex) {
-    const lvNum  = levelIndex + 1;
-    const lvName = LEVEL_NAMES[levelIndex];
-    const avatar = AVATAR_BY_LEVEL[Math.min(levelIndex, AVATAR_BY_LEVEL.length - 1)];
-
-    document.getElementById('sqLvlNum').textContent   = lvNum;
-    document.getElementById('sqLvlTitle').textContent  = lvName;
-    document.getElementById('sqLvlAvatar').textContent = avatar;
-    document.getElementById('sqLvlSub').textContent    = 'You have risen to ' + lvName + '!';
-
-    const overlay = document.getElementById('sqLevelUpOverlay');
-    overlay.classList.add('sq-show');
-
-    clearTimeout(lvlUpTimer);
-    lvlUpTimer = setTimeout(sqDismissLevelUp, 3000);
+  // ── Level-up splash ──
+  function sqShowLevelUp(lv) {
+    document.getElementById('sqLvlNum').textContent=lv+1;
+    document.getElementById('sqLvlTitle').textContent=LEVEL_NAMES[lv];
+    document.getElementById('sqLvlAvatar').innerHTML=AVATAR_BY_LEVEL[Math.min(lv,AVATAR_BY_LEVEL.length-1)];
+    document.getElementById('sqLvlSub').textContent='You have risen to '+LEVEL_NAMES[lv]+'!';
+    document.getElementById('sqLvlUpOverlay').classList.add('sq-show');
+    clearTimeout(lvlUpTimer); lvlUpTimer=setTimeout(sqDismissLevelUp,3200);
   }
+  function sqDismissLevelUp() { clearTimeout(lvlUpTimer); document.getElementById('sqLvlUpOverlay').classList.remove('sq-show'); }
 
-  function sqDismissLevelUp() {
-    clearTimeout(lvlUpTimer);
-    document.getElementById('sqLevelUpOverlay').classList.remove('sq-show');
-  }
-
-  // ─────────────────────────────────────────
-  // TOASTS
-  // ─────────────────────────────────────────
-
+  // ── Toasts ──
   function sqShowXpToast(msg) {
-    const el = document.getElementById('sqXpToast');
-    el.textContent = msg;
-    el.classList.add('sq-toast-show');
-    clearTimeout(xpToastTimer);
-    xpToastTimer = setTimeout(() => el.classList.remove('sq-toast-show'), 1600);
+    const el=document.getElementById('sqXpToast');
+    el.textContent=msg; el.classList.add('sq-show');
+    clearTimeout(xpToastTimer); xpToastTimer=setTimeout(()=>el.classList.remove('sq-show'),1600);
   }
-
   function sqShowMsgToast(msg) {
-    const el = document.getElementById('sqMsgToast');
-    el.textContent = msg;
-    el.classList.add('sq-toast-show');
-    clearTimeout(msgToastTimer);
-    msgToastTimer = setTimeout(() => el.classList.remove('sq-toast-show'), 2200);
+    const el=document.getElementById('sqMsgToast');
+    el.textContent=msg; el.classList.add('sq-show');
+    clearTimeout(msgToastTimer); msgToastTimer=setTimeout(()=>el.classList.remove('sq-show'),2400);
   }
 
-  // ─────────────────────────────────────────
-  // TAB SWITCHING
-  // ─────────────────────────────────────────
-
-  function sqTab(name, btn) {
-    document.querySelectorAll('.sq-tab-panel').forEach(p => p.classList.remove('sq-active'));
-    document.querySelectorAll('.sq-tab-btn').forEach(b => {
-      b.classList.remove('sq-tab-active');
-      b.removeAttribute('aria-current');
-    });
-
-    document.getElementById('sqPanel' + name).classList.add('sq-active');
-    btn.classList.add('sq-tab-active');
-    btn.setAttribute('aria-current', 'page');
-
-    // Re-render profile each time it's opened (stats may have changed)
-    if (name === 'Hall') sqRenderHall();
+  // ── Tab switching ──
+  function sqTab(name,btn) {
+    document.querySelectorAll('.sq-tab-panel').forEach(p=>p.classList.remove('sq-active'));
+    document.querySelectorAll('.sq-tab-btn').forEach(b=>{b.classList.remove('sq-tab-active');b.removeAttribute('aria-current');});
+    document.getElementById('sqPanel'+name).classList.add('sq-active');
+    btn.classList.add('sq-tab-active'); btn.setAttribute('aria-current','page');
+    if(name==='Hall') sqRenderHall();
   }
 
-  // ─────────────────────────────────────────
-  // EMOJI GRID (Add Quest tab)
-  // ─────────────────────────────────────────
-
+  // ── Emoji grid ──
   function sqBuildEmojiGrid() {
-    const grid = document.getElementById('sqEmojiGrid');
-    grid.innerHTML = EMOJI_OPTIONS.map(e =>
-      `<button class="sq-emoji-btn" onclick="sqPickEmoji('${e}', this)"
-               aria-label="${e}" title="${e}">${e}</button>`
+    document.getElementById('sqEmojiGrid').innerHTML=EMOJI_OPTIONS.map(e=>
+      `<button class="sq-emoji-btn" onclick="sqPickEmoji('${e}',this)">${e}</button>`
     ).join('');
   }
-
-  function sqPickEmoji(e, btn) {
-    addEmoji = e;
-    if (selectedEmojiBtn) selectedEmojiBtn.classList.remove('sq-selected');
-    btn.classList.add('sq-selected');
-    selectedEmojiBtn = btn;
-    document.getElementById('sqCustomEmoji').value = '';
+  function sqPickEmoji(e,btn) {
+    addEmoji=e;
+    if(selectedEmojiBtn) selectedEmojiBtn.classList.remove('sq-selected');
+    btn.classList.add('sq-selected'); selectedEmojiBtn=btn;
+    document.getElementById('sqCustomEmoji').value='';
   }
 
-  // ─────────────────────────────────────────
-  // XSS ESCAPE HELPER
-  // ─────────────────────────────────────────
-
-  function sqEsc(str) {
-    return String(str)
-      .replace(/&/g,  '&amp;')
-      .replace(/</g,  '&lt;')
-      .replace(/>/g,  '&gt;')
-      .replace(/"/g,  '&quot;')
-      .replace(/'/g,  '&#39;');
+  // ── Share ──
+  function sqShareProgress() {
+    const t=`SideQuest v${SQ_VERSION}\nLevel ${sqLevelNum(sqXp)} ${sqLevelName(sqXp)} | ${sqXp} XP | ${sqStats.streak} day streak | ${sqStats.totalQuests} quests completed`;
+    if(navigator.share) navigator.share({title:'SideQuest',text:t}).catch(()=>{});
+    else navigator.clipboard.writeText(t).then(()=>sqShowMsgToast('Progress copied to clipboard.'));
   }
 
-  // ─────────────────────────────────────────
-  // KEYBOARD SHORTCUTS
-  // ─────────────────────────────────────────
+  // ── Export / Import ──
+  function sqExportData() {
+    const data={version:SQ_VERSION,exported:new Date().toISOString(),xp:sqXp,quests:sqQuests,missions:sqMissions,completions:sqCompletions,achievements:sqAchievements,stats:sqStats,lastReset:sqLastReset};
+    const url=URL.createObjectURL(new Blob([JSON.stringify(data,null,2)],{type:'application/json'}));
+    const a=Object.assign(document.createElement('a'),{href:url,download:'sidequest-backup.json'});
+    a.click(); URL.revokeObjectURL(url); sqShowMsgToast('Data exported.');
+  }
+  function sqImportData() { document.getElementById('sqImportFile').click(); }
+  function sqHandleImport(input) {
+    const f=input.files[0]; if(!f) return;
+    const r=new FileReader();
+    r.onload=e=>{
+      try {
+        const d=JSON.parse(e.target.result);
+        if(typeof d.xp!=='number') throw new Error();
+        sqXp=d.xp||0; sqQuests=d.quests||[]; sqMissions=d.missions||[];
+        sqCompletions=d.completions||{}; sqAchievements=d.achievements||[];
+        sqStats={totalQuests:0,streak:0,daysActive:0,lastDate:'',totalBounties:0,...(d.stats||{})};
+        sqLastReset=d.lastReset||''; sqSave(); sqRenderAll(); sqShowMsgToast('Data restored.');
+      } catch { sqShowMsgToast('Import failed. Invalid file.'); }
+    };
+    r.readAsText(f); input.value='';
+  }
 
-  document.addEventListener('keydown', e => {
-    // Enter in bounty input → add bounty
-    if (e.key === 'Enter' && document.activeElement.id === 'sqBountyInput') {
-      sqAddBounty();
+  // ── Sync code ──
+  function sqOpenSyncGenerate() {
+    sqSyncModalMode='generate';
+    const code=btoa(unescape(encodeURIComponent(JSON.stringify({xp:sqXp,quests:sqQuests,missions:sqMissions,completions:sqCompletions,achievements:sqAchievements,stats:sqStats,lastReset:sqLastReset}))));
+    document.getElementById('sqSyncTitle').textContent='Your Sync Code';
+    document.getElementById('sqSyncDesc').textContent='Copy this and paste it on another device.';
+    document.getElementById('sqSyncCode').textContent=code; document.getElementById('sqSyncCode').style.display='';
+    document.getElementById('sqSyncInput').style.display='none';
+    document.getElementById('sqSyncAction').textContent='Copy';
+    document.getElementById('sqSyncModal').classList.add('sq-show');
+  }
+  function sqOpenSyncImport() {
+    sqSyncModalMode='import';
+    document.getElementById('sqSyncTitle').textContent='Import Sync Code';
+    document.getElementById('sqSyncDesc').textContent='Paste your sync code below.';
+    document.getElementById('sqSyncCode').style.display='none';
+    document.getElementById('sqSyncInput').style.display=''; document.getElementById('sqSyncInput').value='';
+    document.getElementById('sqSyncAction').textContent='Import';
+    document.getElementById('sqSyncModal').classList.add('sq-show');
+  }
+  function sqSyncDoAction() {
+    if(sqSyncModalMode==='generate') {
+      navigator.clipboard.writeText(document.getElementById('sqSyncCode').textContent).then(()=>sqShowMsgToast('Code copied.')).catch(()=>{});
+    } else {
+      try {
+        const d=JSON.parse(decodeURIComponent(escape(atob(document.getElementById('sqSyncInput').value.trim()))));
+        sqXp=d.xp||0; sqQuests=d.quests||[]; sqMissions=d.missions||[];
+        sqCompletions=d.completions||{}; sqAchievements=d.achievements||[];
+        sqStats={totalQuests:0,streak:0,daysActive:0,lastDate:'',totalBounties:0,...(d.stats||{})};
+        sqLastReset=d.lastReset||''; sqSave(); sqRenderAll(); sqCloseSyncModal(); sqShowMsgToast('Synced.');
+      } catch { sqShowMsgToast('Invalid sync code.'); }
     }
-  });
-
-  // ─────────────────────────────────────────
-  // FULL RENDER — all visible panels
-  // ─────────────────────────────────────────
-
-  function sqRenderAll() {
-    sqRenderTopXp();
-    sqRenderQuests();
-    sqRenderBounty();
-    // Hall is rendered on tab open to stay fresh
   }
+  function sqCloseSyncModal() { document.getElementById('sqSyncModal').classList.remove('sq-show'); }
 
-  // ─────────────────────────────────────────
-  // INIT
-  // ─────────────────────────────────────────
+  // ── Keyboard ──
+  document.addEventListener('keydown',e=>{ if(e.key==='Enter'&&document.activeElement.id==='sqBountyInput') sqAddBounty(); });
 
+  // ── Full render ──
+  function sqRenderAll() { sqRenderTopXp(); sqRenderQuests(); sqRenderBounty(); }
+
+  // ── INIT ──
   sqLoad();
   sqCheckReset();
+  sqBuildStars();
   sqBuildEmojiGrid();
   sqRenderAll();
+  sqRenderHome();
+  setInterval(sqUpdateSky, 5*60*1000);
 
   </script>
 </body>
