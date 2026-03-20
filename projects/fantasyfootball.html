@@ -6,7 +6,7 @@
   <title>FPL Predicted XI — maltysnack</title>
   <link rel="stylesheet" href="../style.css" />
   <style>
-    .fpl-wrap { padding: 32px 32px 80px 48px; }
+    .fpl-wrap { padding: 32px 32px 80px 48px; flex: 1; min-width: 0; }
 
     .fpl-page-title { font-size: 1.4rem; font-weight: 700; color: #37003c; font-family: system-ui, sans-serif; letter-spacing: -0.02em; margin-bottom: 4px; }
     .fpl-page-sub   { font-size: 0.82rem; color: #888; font-family: system-ui, sans-serif; margin-bottom: 24px; }
@@ -42,7 +42,7 @@
     .fpl-gw-left { display: flex; flex-direction: column; gap: 2px; }
     .fpl-gw-label { font-size: 0.72rem; }
 
-    .fpl-pred-inline { font-size: 0.6rem; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.03em; text-transform: none; margin-left: 6px; }
+    .fpl-pred-inline { font-size: 0.6rem; font-weight: 700; color: #00ff87; letter-spacing: 0.03em; text-transform: none; margin-left: 6px; }
 
     .fpl-gw-pts { background: #00ff87; color: #37003c; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
     .fpl-gw-pts.is-actual { background: #ffe44e; color: #37003c; }
@@ -127,19 +127,22 @@
       width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
     }
 
-    /* Predicted score — green */
+    /* Predicted score — green (used by Predicted XI and bench cards) */
     .fpl-card-score {
       background: #190025; color: #00ff87;
       font-size: 0.62rem; font-weight: 800;
       text-align: center; padding: 2px 4px; width: 100%; line-height: 1.3;
     }
 
-    /* Actual score — yellow, only shown in My Team panel */
-    .fpl-card-actual {
-      background: #120018; color: #ffe44e;
-      font-size: 0.62rem; font-weight: 800;
-      text-align: center; padding: 2px 4px; width: 100%; line-height: 1.3;
+    /* My Team: predicted + actual on one line */
+    .fpl-card-scores {
+      background: #190025;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 2px 4px; width: 100%; line-height: 1.3;
+      font-size: 0.58rem; font-weight: 800; box-sizing: border-box;
     }
+    .fpl-card-scores .s-pred { color: #00ff87; }
+    .fpl-card-scores .s-act  { color: #ffe44e; }
 
     .fpl-card-opp {
       background: #120018; color: rgba(255,255,255,0.5);
@@ -171,7 +174,7 @@
     }
     .fpl-bench-card .fpl-card-name   { background: #37003c; }
     .fpl-bench-card .fpl-card-score  { background: #240135; }
-    .fpl-bench-card .fpl-card-actual { background: #1a0025; }
+    .fpl-bench-card .fpl-card-scores { background: #240135; }
     .fpl-bench-card .fpl-card-opp    { background: #1a0025; }
 
 
@@ -315,7 +318,7 @@
     <!-- Best of the Rest -->
     <div class="fpl-botr" id="botrSection" style="display:none">
       <div class="fpl-botr-title">Best of the Rest</div>
-      <div class="fpl-botr-bar">Narrowly missed the lineup</div>
+      <div class="fpl-botr-bar" id="botrBar">Gameweek — — Next week predictions</div>
       <div class="fpl-botr-body">
         <div class="fpl-botr-row" id="botrRow"></div>
       </div>
@@ -463,8 +466,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
-      <div class="fpl-card-score">${predPts}</div>
-      <div class="fpl-card-actual">${actual} pts</div>
+      <div class="fpl-card-scores"><span class="s-pred">${predPts}</span><span class="s-act">${actual}</span></div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
@@ -501,8 +503,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
-      <div class="fpl-card-score">${predPts}</div>
-      <div class="fpl-card-actual">${actual} pts</div>
+      <div class="fpl-card-scores"><span class="s-pred">${predPts}</span><span class="s-act">${actual}</span></div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
@@ -544,6 +545,7 @@
     ];
 
     document.getElementById('botrRow').innerHTML = rest.map(p => benchCardHTML(p, '', nextOppMap)).join('');
+    document.getElementById('botrBar').textContent = `Gameweek ${nextGwId} — Next week predictions`;
     document.getElementById('botrSection').style.display = '';
   }
 
