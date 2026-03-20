@@ -105,7 +105,7 @@
     .fpl-corner-br { bottom:-1px; right:-1px; border-radius:100% 0 0 0; border-bottom:none; border-right:none; }
 
     .fpl-rows { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; height: 100%; }
-    .fpl-row  { display: flex; justify-content: center; gap: 4px; }
+    .fpl-row  { display: flex; justify-content: space-evenly; padding: 0 8px; }
 
     /* ── Player card ── */
     .fpl-card { display: flex; flex-direction: column; align-items: center; width: 68px; cursor: default; user-select: none; }
@@ -134,15 +134,14 @@
       text-align: center; padding: 2px 4px; width: 100%; line-height: 1.3;
     }
 
-    /* My Team: predicted + actual on one line */
+    /* My Team: actual big + predicted small in brackets */
     .fpl-card-scores {
       background: #190025;
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 2px 4px; width: 100%; line-height: 1.3;
-      font-size: 0.58rem; font-weight: 800; box-sizing: border-box;
+      display: flex; justify-content: center; align-items: baseline;
+      padding: 2px 4px; width: 100%; line-height: 1.3; gap: 1px;
     }
-    .fpl-card-scores .s-pred { color: #00ff87; }
-    .fpl-card-scores .s-act  { color: #ffe44e; }
+    .fpl-card-scores .s-act  { color: #ffe44e; font-size: 0.66rem; font-weight: 900; }
+    .fpl-card-scores .s-pred { color: #00ff87; font-size: 0.48rem; font-weight: 600; opacity: 0.85; }
 
     .fpl-card-opp {
       background: #120018; color: rgba(255,255,255,0.5);
@@ -253,10 +252,10 @@
               <div class="fpl-corner fpl-corner-tl"></div><div class="fpl-corner fpl-corner-tr"></div>
               <div class="fpl-corner fpl-corner-bl"></div><div class="fpl-corner fpl-corner-br"></div>
               <div class="fpl-rows">
-                <div class="fpl-row" id="predRowFwd"></div>
-                <div class="fpl-row" id="predRowMid"></div>
-                <div class="fpl-row" id="predRowDef"></div>
                 <div class="fpl-row" id="predRowGkp"></div>
+                <div class="fpl-row" id="predRowDef"></div>
+                <div class="fpl-row" id="predRowMid"></div>
+                <div class="fpl-row" id="predRowFwd"></div>
               </div>
             </div>
           </div>
@@ -284,10 +283,10 @@
               <div class="fpl-corner fpl-corner-tl"></div><div class="fpl-corner fpl-corner-tr"></div>
               <div class="fpl-corner fpl-corner-bl"></div><div class="fpl-corner fpl-corner-br"></div>
               <div class="fpl-rows">
-                <div class="fpl-row" id="myRowFwd"></div>
-                <div class="fpl-row" id="myRowMid"></div>
-                <div class="fpl-row" id="myRowDef"></div>
                 <div class="fpl-row" id="myRowGkp"></div>
+                <div class="fpl-row" id="myRowDef"></div>
+                <div class="fpl-row" id="myRowMid"></div>
+                <div class="fpl-row" id="myRowFwd"></div>
               </div>
             </div>
           </div>
@@ -466,7 +465,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
-      <div class="fpl-card-scores"><span class="s-pred">${predPts}</span><span class="s-act">${actual}</span></div>
+      <div class="fpl-card-scores"><span class="s-act">${actual}</span><span class="s-pred">(${predPts})</span></div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
@@ -503,7 +502,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
-      <div class="fpl-card-scores"><span class="s-pred">${predPts}</span><span class="s-act">${actual}</span></div>
+      <div class="fpl-card-scores"><span class="s-act">${actual}</span><span class="s-pred">(${predPts})</span></div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
