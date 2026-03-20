@@ -45,6 +45,7 @@
             <li><a href="/projects/trolley-run.html" ${active('/projects/trolley-run.html')}>Trolley Run</a></li>
             <li><a href="/projects/saltysnacks.html" ${active('/projects/saltysnacks.html')}>Saltysnacks</a></li>
             <li><a href="/projects/sidequest.html" ${active('/projects/sidequest.html')}>SideQuest</a></li>
+            <li><a href="/projects/fantasyfootball.html" ${active('/projects/fantasyfootball.html')}>FPL Predicted XI</a></li>
           </ul>
         </div>
 
