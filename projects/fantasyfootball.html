@@ -108,10 +108,10 @@
     .fpl-row  { display: flex; justify-content: space-evenly; padding: 0 8px; }
 
     /* ── Player card ── */
-    .fpl-card { display: flex; flex-direction: column; align-items: center; width: 76px; cursor: default; user-select: none; }
+    .fpl-card { display: flex; flex-direction: column; align-items: center; width: 86px; cursor: default; user-select: none; padding-top: 6px; }
 
-    .fpl-card-shirt { width: 54px; height: 54px; display: flex; align-items: center; justify-content: center; }
-    .fpl-card-shirt img { width: 50px; height: auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
+    .fpl-card-shirt { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; }
+    .fpl-card-shirt img { width: 44px; height: auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
 
     .fpl-shirt-fallback {
       width: 38px; height: 42px; border-radius: 6px 6px 2px 2px;
@@ -148,9 +148,9 @@
 
     .fpl-card-opp {
       background: #120018; color: rgba(255,255,255,0.5);
-      font-size: 0.48rem; font-weight: 600;
+      font-size: 0.42rem; font-weight: 600;
       text-align: center; padding: 1px 4px 1px;
-      width: 100%; line-height: 1.25; letter-spacing: 0.03em;
+      width: 100%; line-height: 1.2; letter-spacing: 0.03em;
     }
 
     .fpl-card.is-captain .fpl-card-name::after { content: ' (C)'; color: #00ff87; }
@@ -168,7 +168,7 @@
     }
     .fpl-bench-row { display: flex; justify-content: center; gap: 8px; }
 
-    .fpl-bench-card { display: flex; flex-direction: column; align-items: center; width: 76px; }
+    .fpl-bench-card { display: flex; flex-direction: column; align-items: center; width: 86px; }
     .fpl-bench-pos {
       font-size: 0.52rem; font-weight: 700; color: #37003c;
       letter-spacing: 0.06em; text-transform: uppercase;
@@ -458,14 +458,13 @@
     </div>`;
   }
 
-  // My Team card: name → predicted → actual → opponent
+  // My Team card: name → predicted → opponent (actual total shown in GW bar)
   function myCardHTML(player, oppMap, actualPts, predScore, captain=false, vice=false) {
     const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
     const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
     const shirt   = shirtUrl(player);
     const capCls  = captain ? ' is-captain' : vice ? ' is-vice' : '';
     const opp     = oppMap[player.team] || '';
-    const actual  = actualPts !== null && actualPts !== undefined ? actualPts : '—';
     return `<div class="fpl-card${capCls}">
       <div class="fpl-card-shirt">
         <img src="${shirt}" alt="${player.web_name}"
@@ -473,7 +472,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${displayName(player.web_name)}</div>
-      <div class="fpl-card-scores"><span class="s-act">${actual}</span><span class="s-pred">(${predPts})</span></div>
+      <div class="fpl-card-score">${predPts}</div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
@@ -501,7 +500,6 @@
     const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
     const shirt   = shirtUrl(player);
     const opp     = oppMap[player.team] || '';
-    const actual  = actualPts !== null && actualPts !== undefined ? actualPts : '—';
     return `<div class="fpl-bench-card">
       <div class="fpl-bench-pos">${label}</div>
       <div class="fpl-card-shirt">
@@ -510,7 +508,7 @@
         <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
       </div>
       <div class="fpl-card-name">${displayName(player.web_name)}</div>
-      <div class="fpl-card-scores"><span class="s-act">${actual}</span><span class="s-pred">(${predPts})</span></div>
+      <div class="fpl-card-score">${predPts}</div>
       <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
