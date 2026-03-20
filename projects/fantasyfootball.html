@@ -42,8 +42,7 @@
     .fpl-gw-left { display: flex; flex-direction: column; gap: 2px; }
     .fpl-gw-label { font-size: 0.72rem; }
 
-    .fpl-tracker { font-size: 0.6rem; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 0.04em; }
-    .fpl-tracker span { color: #00ff87; font-weight: 800; }
+    .fpl-pred-inline { font-size: 0.6rem; font-weight: 600; color: rgba(255,255,255,0.6); letter-spacing: 0.03em; text-transform: none; margin-left: 6px; }
 
     .fpl-gw-pts { background: #00ff87; color: #37003c; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
     .fpl-gw-pts.is-actual { background: #ffe44e; color: #37003c; }
@@ -52,7 +51,7 @@
     .fpl-status.error { color: #c00; }
 
     /* ── Pitch ── */
-    .fpl-pitch-wrap { perspective: 900px; perspective-origin: 50% 0%; }
+    .fpl-pitch-wrap {}
 
     .fpl-pitch {
       position: relative;
@@ -65,7 +64,6 @@
       padding: 14px 8px 22px;
       overflow: hidden; min-height: 420px;
       display: flex; flex-direction: column; justify-content: space-between;
-      transform: rotateX(6deg); transform-origin: bottom center;
     }
 
     .fpl-box-top {
@@ -176,16 +174,6 @@
     .fpl-bench-card .fpl-card-actual { background: #1a0025; }
     .fpl-bench-card .fpl-card-opp    { background: #1a0025; }
 
-    /* ── Score legend (My Team) ── */
-    .fpl-score-legend {
-      display: flex; gap: 12px; align-items: center;
-      font-size: 0.65rem; font-family: system-ui, sans-serif;
-      padding: 6px 0 0; color: #555;
-    }
-    .fpl-score-legend span { display: inline-flex; align-items: center; gap: 4px; }
-    .fpl-score-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
-    .fpl-score-dot.pred { background: #00ff87; }
-    .fpl-score-dot.act  { background: #ffe44e; }
 
     /* ── Team input (below bench) ── */
     .fpl-team-footer {
@@ -209,18 +197,28 @@
     .fpl-team-btn:hover { background: #56006a; }
     .fpl-team-footer-label { font-size: 0.62rem; color: #999; font-family: system-ui, sans-serif; white-space: nowrap; }
 
-    /* ── Legend ── */
-    .fpl-legend {
-      margin-top: 16px; background: #f7f7f9;
-      border: 1px solid #e0e0e8; border-radius: 6px;
-      padding: 10px 14px; font-family: system-ui, sans-serif;
-      font-size: 0.72rem; color: #555; line-height: 1.6;
+    /* ── Best of the Rest ── */
+    .fpl-botr {
+      margin-top: 32px;
+      font-family: system-ui, sans-serif;
     }
-    .fpl-legend strong { color: #37003c; }
-    .fpl-pill {
-      display: inline-block; background: #37003c; color: #00ff87;
-      font-size: 0.6rem; font-weight: 700;
-      padding: 2px 8px; border-radius: 100px; margin: 2px 2px 0 0;
+    .fpl-botr-title {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #37003c; margin-bottom: 8px;
+    }
+    .fpl-botr-bar {
+      background: #37003c; color: #fff;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 8px 14px;
+      border-radius: 6px 6px 0 0;
+    }
+    .fpl-botr-body {
+      background: #dfe1e5;
+      padding: 14px 8px 18px;
+      border-radius: 0 0 6px 6px;
+    }
+    .fpl-botr-row {
+      display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
     }
   </style>
 </head>
@@ -264,16 +262,6 @@
             <div class="fpl-bench-row" id="predBench"></div>
           </div>
         </div>
-        <div class="fpl-legend" id="predLegend" style="display:none">
-          <strong>Prediction formula (4-4-2)</strong><br>
-          <span class="fpl-pill">FPL ep_next &times; 0.55</span>
-          <span class="fpl-pill">Form &times; 0.30</span>
-          <span class="fpl-pill">Season avg &times; 0.15</span>
-          <span class="fpl-pill">Fixture difficulty</span>
-          <span class="fpl-pill">Home/away</span>
-          <span class="fpl-pill">Availability</span>
-          <span class="fpl-pill">No fixture = 0</span>
-        </div>
       </div>
 
       <!-- ══ RIGHT: MY TEAM (last GW) ══ -->
@@ -282,10 +270,7 @@
         <div id="myStatus" class="fpl-status">Loading your team...</div>
         <div id="myOuter" style="display:none">
           <div class="fpl-gw-bar">
-            <div class="fpl-gw-left">
-              <div class="fpl-gw-label" id="myGwLabel">Gameweek —</div>
-              <div class="fpl-tracker" id="myTracker"></div>
-            </div>
+            <div class="fpl-gw-label" id="myGwLabel">Gameweek —</div>
             <div class="fpl-gw-pts is-actual" id="myTotalPts">— pts</div>
           </div>
           <div class="fpl-pitch-wrap">
@@ -307,10 +292,6 @@
             <div class="fpl-bench-label">Substitutes</div>
             <div class="fpl-bench-row" id="myBench"></div>
           </div>
-          <div class="fpl-score-legend">
-            <span><i class="fpl-score-dot pred"></i> Predicted</span>
-            <span><i class="fpl-score-dot act"></i> Actual</span>
-          </div>
           <div class="fpl-team-footer">
             <span class="fpl-team-footer-label">Team ID:</span>
             <input class="fpl-team-input" id="teamIdInput" type="number"
@@ -330,6 +311,16 @@
       </div>
 
     </div>
+
+    <!-- Best of the Rest -->
+    <div class="fpl-botr" id="botrSection" style="display:none">
+      <div class="fpl-botr-title">Best of the Rest</div>
+      <div class="fpl-botr-bar">Narrowly missed the lineup</div>
+      <div class="fpl-botr-body">
+        <div class="fpl-botr-row" id="botrRow"></div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -536,7 +527,24 @@
 
     document.getElementById('predStatus').style.display = 'none';
     document.getElementById('predOuter').style.display  = '';
-    document.getElementById('predLegend').style.display = '';
+  }
+
+  function renderBestOfRest(squad, allScored) {
+    // For each position, take top players by predicted score not already in squad
+    const squadIds = new Set(squad.map(p => p.id));
+    const notInSquad = pos => allScored
+      .filter(p => p.element_type === pos && !squadIds.has(p.id) && p.predicted > 0 && p.minutes > 0)
+      .sort((a,b) => b.predicted - a.predicted);
+
+    const rest = [
+      ...notInSquad(1).slice(0,1),   // 1 GK
+      ...notInSquad(2).slice(0,3),   // 3 DEF
+      ...notInSquad(3).slice(0,3),   // 3 MID
+      ...notInSquad(4).slice(0,2)    // 2 FWD
+    ];
+
+    document.getElementById('botrRow').innerHTML = rest.map(p => benchCardHTML(p, '', nextOppMap)).join('');
+    document.getElementById('botrSection').style.display = '';
   }
 
   async function loadMyTeam(idOverride) {
@@ -599,13 +607,10 @@
       const mids = startingPicks.filter(p => p.element_type === 3);
       const fwds = startingPicks.filter(p => p.element_type === 4);
 
-      // GW bar
-      document.getElementById('myGwLabel').textContent = `Gameweek ${lastGwId} — Result`;
+      // GW bar — inline predicted alongside label
+      document.getElementById('myGwLabel').innerHTML =
+        `Gameweek ${lastGwId} — Result <span class="fpl-pred-inline">Predicted ${totalPredicted.toFixed(1)}</span>`;
       document.getElementById('myTotalPts').textContent = `${totalActual} pts`;
-
-      // Tracker: predicted vs actual
-      const trackerEl = document.getElementById('myTracker');
-      trackerEl.innerHTML = `Predicted <span>${totalPredicted.toFixed(1)}</span> · Actual <span>${totalActual}</span>`;
 
       // Render starting XI
       document.getElementById('myRowFwd').innerHTML = fwds.map(p => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
@@ -683,7 +688,9 @@
       const squad = selectSquad442(scored);
       if (squad.length < 15) throw new Error('Budget too tight.');
 
-      renderPredicted(buildLineup442(squad));
+      const lineup = buildLineup442(squad);
+      renderPredicted(lineup);
+      renderBestOfRest(squad, scored);
 
       // Auto-load default team
       await loadMyTeam(DEFAULT_TEAM_ID);
