@@ -15,7 +15,7 @@
     .fpl-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
-      gap: 28px;
+      gap: 32px;
       align-items: start;
     }
 
@@ -34,6 +34,10 @@
       text-transform: uppercase;
       color: #37003c;
       margin-bottom: 8px;
+      /* fixed height so both panels' GW bars start at same vertical position */
+      height: 22px;
+      display: flex;
+      align-items: center;
     }
 
     /* ── GW bar ── */
@@ -84,6 +88,12 @@
     }
     .fpl-status.error { color: #c00; }
 
+    /* ── Pitch perspective wrapper ── */
+    .fpl-pitch-wrap {
+      perspective: 900px;
+      perspective-origin: 50% 0%;
+    }
+
     /* ── Pitch ── */
     .fpl-pitch {
       position: relative;
@@ -93,41 +103,67 @@
         #3d9e42 32%, #37943c 40%, #3d9e42 48%, #37943c 56%,
         #3d9e42 64%, #37943c 72%, #3d9e42 80%, #37943c 88%, #3d9e42 100%
       );
-      padding: 18px 8px 24px;
+      padding: 14px 8px 22px;
       overflow: hidden;
-      min-height: 400px;
+      min-height: 420px;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
+      transform: rotateX(6deg);
+      transform-origin: bottom center;
     }
 
-    /* Pitch markings */
+    /* Pitch markings — no centre line, just boxes + circle */
     .fpl-box-top {
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
-      width: 52%; height: 70px;
-      border: 1.5px solid rgba(255,255,255,0.3); border-top: none;
+      width: 48%; height: 22%;
+      border: 1.5px solid rgba(255,255,255,0.35); border-top: none;
+      border-radius: 0 0 2px 2px;
+    }
+    /* small box inside top penalty area */
+    .fpl-small-box-top {
+      position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+      width: 22%; height: 10%;
+      border: 1.5px solid rgba(255,255,255,0.25); border-top: none;
     }
     .fpl-box-bottom {
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
-      width: 52%; height: 70px;
-      border: 1.5px solid rgba(255,255,255,0.3); border-bottom: none;
+      width: 48%; height: 22%;
+      border: 1.5px solid rgba(255,255,255,0.35); border-bottom: none;
+      border-radius: 2px 2px 0 0;
     }
-    .fpl-halfway {
-      position: absolute; top: 50%; left: 8%; right: 8%;
-      height: 1.5px; background: rgba(255,255,255,0.3);
+    /* small box inside bottom penalty area */
+    .fpl-small-box-bottom {
+      position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+      width: 22%; height: 10%;
+      border: 1.5px solid rgba(255,255,255,0.25); border-bottom: none;
     }
+    /* Centre circle only — no halfway line */
     .fpl-circle {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
-      width: 90px; height: 90px; border-radius: 50%;
-      border: 1.5px solid rgba(255,255,255,0.3);
+      width: 80px; height: 80px; border-radius: 50%;
+      border: 1.5px solid rgba(255,255,255,0.35);
     }
+    /* Centre spot */
+    .fpl-centre-spot {
+      position: absolute; top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      width: 5px; height: 5px; border-radius: 50%;
+      background: rgba(255,255,255,0.4);
+    }
+    /* Corner arcs */
+    .fpl-corner { position: absolute; width: 14px; height: 14px; border: 1.5px solid rgba(255,255,255,0.25); }
+    .fpl-corner-tl { top: -1px; left: -1px; border-radius: 0 0 100% 0; border-top: none; border-left: none; }
+    .fpl-corner-tr { top: -1px; right: -1px; border-radius: 0 0 0 100%; border-top: none; border-right: none; }
+    .fpl-corner-bl { bottom: -1px; left: -1px; border-radius: 0 100% 0 0; border-bottom: none; border-left: none; }
+    .fpl-corner-br { bottom: -1px; right: -1px; border-radius: 100% 0 0 0; border-bottom: none; border-right: none; }
 
     /* ── Player rows — FWD top, GKP bottom ── */
     .fpl-rows {
       position: relative; z-index: 2;
       display: flex; flex-direction: column;
-      gap: 10px;
+      gap: 8px;
       height: 100%;
     }
 
@@ -140,39 +176,47 @@
     /* ── Player card ── */
     .fpl-card {
       display: flex; flex-direction: column; align-items: center;
-      width: 72px; cursor: default; user-select: none;
+      width: 68px; cursor: default; user-select: none;
     }
 
     .fpl-card-shirt {
-      width: 52px; height: 52px;
+      width: 48px; height: 48px;
       display: flex; align-items: center; justify-content: center;
     }
 
     .fpl-card-shirt img {
-      width: 48px; height: auto; display: block;
+      width: 44px; height: auto; display: block;
       filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
     }
 
     .fpl-shirt-fallback {
-      width: 42px; height: 46px; border-radius: 6px 6px 2px 2px;
+      width: 38px; height: 42px; border-radius: 6px 6px 2px 2px;
       display: none; align-items: center; justify-content: center;
-      font-size: 0.55rem; font-weight: 700; color: #fff;
+      font-size: 0.52rem; font-weight: 700; color: #fff;
       text-shadow: 0 1px 2px rgba(0,0,0,0.5);
     }
 
     .fpl-card-name {
       background: #240135; color: #fff;
-      font-size: 0.56rem; font-weight: 700;
-      text-align: center; padding: 3px 4px;
+      font-size: 0.54rem; font-weight: 700;
+      text-align: center; padding: 2px 4px;
       width: 100%; white-space: nowrap;
       overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
     }
 
     .fpl-card-score {
       background: #190025; color: #00ff87;
-      font-size: 0.64rem; font-weight: 800;
+      font-size: 0.62rem; font-weight: 800;
       text-align: center; padding: 2px 4px;
       width: 100%; line-height: 1.3;
+    }
+
+    .fpl-card-opp {
+      background: #120018; color: rgba(255,255,255,0.55);
+      font-size: 0.48rem; font-weight: 600;
+      text-align: center; padding: 1px 4px 2px;
+      width: 100%; line-height: 1.3;
+      letter-spacing: 0.03em;
     }
 
     /* Captain badge */
@@ -183,7 +227,7 @@
     .fpl-bench-wrap {
       background: #dfe1e5;
       border-top: 3px solid #37003c;
-      padding: 12px 8px 16px;
+      padding: 10px 8px 14px;
       border-radius: 0 0 6px 6px;
     }
 
@@ -199,7 +243,7 @@
     }
 
     .fpl-bench-card {
-      display: flex; flex-direction: column; align-items: center; width: 72px;
+      display: flex; flex-direction: column; align-items: center; width: 68px;
     }
 
     .fpl-bench-pos {
@@ -211,16 +255,22 @@
 
     .fpl-bench-card .fpl-card-name  { background: #37003c; }
     .fpl-bench-card .fpl-card-score { background: #240135; }
+    .fpl-bench-card .fpl-card-opp  { background: #1a0025; }
 
-    /* ── My Team input ── */
-    .fpl-team-input-row {
-      display: flex; gap: 8px; margin-bottom: 10px; align-items: center;
+    /* ── Team input (below bench) ── */
+    .fpl-team-footer {
+      margin-top: 10px;
+      padding: 10px 0 0;
+      border-top: 1px solid #e0e0e8;
+      display: flex;
+      gap: 8px;
+      align-items: center;
     }
 
     .fpl-team-input {
-      flex: 1; padding: 7px 11px;
+      flex: 1; padding: 6px 10px;
       border: 1.5px solid #ccc; border-radius: 6px;
-      font-size: 0.82rem; font-family: system-ui, sans-serif;
+      font-size: 0.78rem; font-family: system-ui, sans-serif;
       outline: none; color: #333;
     }
 
@@ -229,19 +279,18 @@
     .fpl-team-btn {
       background: #37003c; color: #fff;
       border: none; border-radius: 6px;
-      padding: 7px 14px; font-size: 0.72rem; font-weight: 700;
+      padding: 6px 12px; font-size: 0.7rem; font-weight: 700;
       cursor: pointer; font-family: system-ui, sans-serif;
       white-space: nowrap; transition: background 0.15s;
     }
 
     .fpl-team-btn:hover { background: #56006a; }
 
-    .fpl-team-hint {
-      font-size: 0.7rem; color: #999; margin-bottom: 10px;
-      font-family: system-ui, sans-serif; line-height: 1.5;
+    .fpl-team-footer-label {
+      font-size: 0.62rem; color: #999;
+      font-family: system-ui, sans-serif;
+      white-space: nowrap;
     }
-
-    .fpl-team-hint a { color: #37003c; }
 
     /* ── Legend ── */
     .fpl-legend {
@@ -266,7 +315,7 @@
 
   <div class="fpl-wrap">
     <div class="fpl-page-title">FPL Predicted XI</div>
-    <div class="fpl-page-sub">Best predicted 4-4-2 from all players vs your team. Enter your FPL team ID to compare.</div>
+    <div class="fpl-page-sub">Best predicted 4-4-2 from all players vs your team.</div>
 
     <div class="fpl-cols">
 
@@ -281,17 +330,25 @@
             </div>
             <div class="fpl-gw-pts" id="predTotalPts">— pts</div>
           </div>
-          <div class="fpl-pitch">
-            <div class="fpl-box-top"></div>
-            <div class="fpl-box-bottom"></div>
-            <div class="fpl-halfway"></div>
-            <div class="fpl-circle"></div>
-            <div class="fpl-rows">
-              <!-- FWD at top, GKP at bottom -->
-              <div class="fpl-row" id="predRowFwd"></div>
-              <div class="fpl-row" id="predRowMid"></div>
-              <div class="fpl-row" id="predRowDef"></div>
-              <div class="fpl-row" id="predRowGkp"></div>
+          <div class="fpl-pitch-wrap">
+            <div class="fpl-pitch">
+              <div class="fpl-box-top"></div>
+              <div class="fpl-small-box-top"></div>
+              <div class="fpl-box-bottom"></div>
+              <div class="fpl-small-box-bottom"></div>
+              <div class="fpl-circle"></div>
+              <div class="fpl-centre-spot"></div>
+              <div class="fpl-corner fpl-corner-tl"></div>
+              <div class="fpl-corner fpl-corner-tr"></div>
+              <div class="fpl-corner fpl-corner-bl"></div>
+              <div class="fpl-corner fpl-corner-br"></div>
+              <div class="fpl-rows">
+                <!-- FWD at top, GKP at bottom -->
+                <div class="fpl-row" id="predRowFwd"></div>
+                <div class="fpl-row" id="predRowMid"></div>
+                <div class="fpl-row" id="predRowDef"></div>
+                <div class="fpl-row" id="predRowGkp"></div>
+              </div>
             </div>
           </div>
           <div class="fpl-bench-wrap">
@@ -313,15 +370,7 @@
       <!-- ══ RIGHT: MY TEAM ══ -->
       <div class="fpl-panel">
         <div class="fpl-panel-title">My Team</div>
-        <div class="fpl-team-input-row">
-          <input class="fpl-team-input" id="teamIdInput" type="number"
-                 placeholder="Your FPL team ID" min="1" />
-          <button class="fpl-team-btn" onclick="loadMyTeam()">Load</button>
-        </div>
-        <div class="fpl-team-hint">
-          Find your ID at fantasy.premierleague.com &rarr; Points &rarr; the number in the URL.
-        </div>
-        <div id="myStatus" class="fpl-status" style="display:none">Loading your team...</div>
+        <div id="myStatus" class="fpl-status">Loading your team...</div>
         <div id="myOuter" style="display:none">
           <div class="fpl-gw-bar">
             <div class="fpl-gw-left">
@@ -330,21 +379,45 @@
             </div>
             <div class="fpl-gw-pts" id="myTotalPts">— pts</div>
           </div>
-          <div class="fpl-pitch">
-            <div class="fpl-box-top"></div>
-            <div class="fpl-box-bottom"></div>
-            <div class="fpl-halfway"></div>
-            <div class="fpl-circle"></div>
-            <div class="fpl-rows">
-              <div class="fpl-row" id="myRowFwd"></div>
-              <div class="fpl-row" id="myRowMid"></div>
-              <div class="fpl-row" id="myRowDef"></div>
-              <div class="fpl-row" id="myRowGkp"></div>
+          <div class="fpl-pitch-wrap">
+            <div class="fpl-pitch">
+              <div class="fpl-box-top"></div>
+              <div class="fpl-small-box-top"></div>
+              <div class="fpl-box-bottom"></div>
+              <div class="fpl-small-box-bottom"></div>
+              <div class="fpl-circle"></div>
+              <div class="fpl-centre-spot"></div>
+              <div class="fpl-corner fpl-corner-tl"></div>
+              <div class="fpl-corner fpl-corner-tr"></div>
+              <div class="fpl-corner fpl-corner-bl"></div>
+              <div class="fpl-corner fpl-corner-br"></div>
+              <div class="fpl-rows">
+                <div class="fpl-row" id="myRowFwd"></div>
+                <div class="fpl-row" id="myRowMid"></div>
+                <div class="fpl-row" id="myRowDef"></div>
+                <div class="fpl-row" id="myRowGkp"></div>
+              </div>
             </div>
           </div>
           <div class="fpl-bench-wrap">
             <div class="fpl-bench-label">Substitutes</div>
             <div class="fpl-bench-row" id="myBench"></div>
+          </div>
+          <!-- Team ID input sits below bench so pitches align -->
+          <div class="fpl-team-footer">
+            <span class="fpl-team-footer-label">Team ID:</span>
+            <input class="fpl-team-input" id="teamIdInput" type="number"
+                   value="6493589" min="1" placeholder="FPL team ID" />
+            <button class="fpl-team-btn" onclick="loadMyTeam()">Load</button>
+          </div>
+        </div>
+        <!-- Input visible even before load -->
+        <div id="myInputFallback" style="display:none">
+          <div class="fpl-team-footer" style="border-top:none; margin-top:0; padding-top:0">
+            <span class="fpl-team-footer-label">Team ID:</span>
+            <input class="fpl-team-input" id="teamIdInputFallback" type="number"
+                   value="6493589" min="1" placeholder="FPL team ID" />
+            <button class="fpl-team-btn" onclick="loadMyTeamFallback()">Load</button>
           </div>
         </div>
       </div>
@@ -361,6 +434,8 @@
   const CORS = 'https://corsproxy.io/?url=';
   const FPL  = 'https://fantasy.premierleague.com/api/';
 
+  const DEFAULT_TEAM_ID = '6493589';
+
   const CLUB_COLOURS = {
     3:'#EF0107',7:'#6C1D45',91:'#d71920',94:'#e30613',36:'#0057B8',
     90:'#034694',31:'#1B458F',11:'#003399',54:'#003090',40:'#FDB913',
@@ -369,11 +444,13 @@
   };
 
   // Shared bootstrap data (fetched once)
-  let bootstrap   = null;
-  let fixtureMap  = {};
-  let nextGwId    = null;
-  let lastGwId    = null;
-  let elementMap  = {};
+  let bootstrap    = null;
+  let fixtureMap   = {};   // team_id → fixture
+  let opponentMap  = {};   // team_id → "ARS (H)"
+  let teamMap      = {};   // team_id → team object
+  let nextGwId     = null;
+  let lastGwId     = null;
+  let elementMap   = {};
 
   // ── Fetch helpers ──
   async function fetchFPL(endpoint) {
@@ -408,9 +485,6 @@
   }
 
   // ── Squad selection: strict 4-4-2 ──
-  // Squad: 2 GKP, 5 DEF, 5 MID, 3 FWD
-  // Starting: 1 GKP, 4 DEF, 4 MID, 2 FWD
-  // Bench:    1 GKP, 1 DEF, 1 MID, 1 FWD
   function selectSquad442(players) {
     const BUDGET = 1000;
     const MAX_CLUB = 3;
@@ -439,27 +513,15 @@
       }
     }
 
-    pick(1, 2);
-    pick(2, 5);
-    pick(3, 5);
-    pick(4, 3);
+    pick(1, 2); pick(2, 5); pick(3, 5); pick(4, 3);
     return picked;
   }
 
   function buildLineup442(squad) {
     const sorted = pos => squad.filter(p=>p.element_type===pos).sort((a,b)=>b.predicted-a.predicted);
-    const gkps = sorted(1);
-    const defs = sorted(2);
-    const mids = sorted(3);
-    const fwds = sorted(4);
-
+    const gkps = sorted(1), defs = sorted(2), mids = sorted(3), fwds = sorted(4);
     return {
-      starting: {
-        gkp:  [gkps[0]],
-        def:  defs.slice(0,4),
-        mid:  mids.slice(0,4),
-        fwd:  fwds.slice(0,2)
-      },
+      starting: { gkp:[gkps[0]], def:defs.slice(0,4), mid:mids.slice(0,4), fwd:fwds.slice(0,2) },
       bench: [gkps[1], defs[4], mids[4], fwds[2]]
     };
   }
@@ -470,12 +532,13 @@
     return `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${player.team_code}${gk?'_1':''}-66.png`;
   }
 
-  // ── Card HTML ──
+  // ── Card HTML — name → score → opponent ──
   function cardHTML(player, captain=false, vice=false, score=null) {
     const colour = CLUB_COLOURS[player.team_code] || '#37003c';
     const pts    = score !== null ? score : player.predicted.toFixed(1);
     const shirt  = shirtUrl(player);
     const capCls = captain ? ' is-captain' : vice ? ' is-vice' : '';
+    const opp    = opponentMap[player.team] || '';
     return `<div class="fpl-card${capCls}">
       <div class="fpl-card-shirt">
         <img src="${shirt}" alt="${player.web_name}"
@@ -484,6 +547,7 @@
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
       <div class="fpl-card-score">${pts}</div>
+      <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
 
@@ -491,6 +555,7 @@
     const colour = CLUB_COLOURS[player.team_code] || '#37003c';
     const pts    = score !== null ? score : player.predicted.toFixed(1);
     const shirt  = shirtUrl(player);
+    const opp    = opponentMap[player.team] || '';
     return `<div class="fpl-bench-card">
       <div class="fpl-bench-pos">${label}</div>
       <div class="fpl-card-shirt">
@@ -500,6 +565,7 @@
       </div>
       <div class="fpl-card-name">${player.web_name}</div>
       <div class="fpl-card-score">${pts}</div>
+      <div class="fpl-card-opp">${opp}</div>
     </div>`;
   }
 
@@ -511,64 +577,70 @@
 
     document.getElementById('predGwLabel').textContent  = `Gameweek ${nextGwId} — Predicted`;
     document.getElementById('predTotalPts').textContent = total.toFixed(1) + ' pts';
-    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p)).join('');
-    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p)).join('');
-    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p)).join('');
     document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p)).join('');
+    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p)).join('');
+    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p)).join('');
+    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p)).join('');
     document.getElementById('predBench').innerHTML  = [
       benchCardHTML(bench[0], 'GKP'),
-      benchCardHTML(bench[1], '1. DEF'),
-      benchCardHTML(bench[2], '2. MID'),
-      benchCardHTML(bench[3], '3. FWD')
+      benchCardHTML(bench[1], '1. SUB'),
+      benchCardHTML(bench[2], '2. SUB'),
+      benchCardHTML(bench[3], '3. SUB')
     ].join('');
 
-    document.getElementById('predStatus').style.display  = 'none';
-    document.getElementById('predOuter').style.display   = '';
-    document.getElementById('predLegend').style.display  = '';
+    document.getElementById('predStatus').style.display = 'none';
+    document.getElementById('predOuter').style.display  = '';
+    document.getElementById('predLegend').style.display = '';
   }
 
   // ── Load my team ──
-  async function loadMyTeam() {
-    const teamId = document.getElementById('teamIdInput').value.trim();
+  async function loadMyTeam(idOverride) {
+    const inputEl = document.getElementById('teamIdInput');
+    const teamId  = idOverride || (inputEl ? inputEl.value.trim() : '');
     if (!teamId) { alert('Enter your FPL team ID'); return; }
+
+    // Sync both inputs
+    if (inputEl) inputEl.value = teamId;
 
     const statusEl = document.getElementById('myStatus');
     const outerEl  = document.getElementById('myOuter');
-    outerEl.style.display  = 'none';
-    statusEl.style.display = '';
-    statusEl.textContent   = 'Loading your team...';
+    const fallbackEl = document.getElementById('myInputFallback');
+    outerEl.style.display    = 'none';
+    fallbackEl.style.display = 'none';
+    statusEl.style.display   = '';
+    statusEl.textContent     = 'Loading your team...';
     statusEl.classList.remove('error');
 
     try {
-      // Fetch current GW picks (or last GW)
-      const gwToFetch = nextGwId || lastGwId;
-      let picks, entryHistory;
+      // Try to get upcoming GW picks (set in FPL app before deadline)
+      // Falls back to last completed GW if not yet set
+      let picks, entryHistory, activeGwId;
 
-      // Try next GW first (pre-deadline picks), fall back to last GW
       try {
-        const data = await fetchFPL(`entry/${teamId}/event/${gwToFetch}/picks/`);
+        const data = await fetchFPL(`entry/${teamId}/event/${nextGwId}/picks/`);
         picks = data.picks;
         entryHistory = data.entry_history;
+        activeGwId = nextGwId;
       } catch {
         const data = await fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`);
         picks = data.picks;
         entryHistory = data.entry_history;
+        activeGwId = lastGwId;
       }
 
-      // Also fetch last GW actual data for tracker
-      let lastGwActual = null;
+      // Fetch last GW data for tracker
+      let lastGwActual    = null;
       let lastGwPredicted = null;
       try {
         const lastData = await fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`);
         lastGwActual = lastData.entry_history.points;
-        // Predicted for last GW: sum ep_this of those picks (approximation)
         lastGwPredicted = lastData.picks
           .filter(pk => pk.position <= 11)
           .reduce((s, pk) => {
             const el = elementMap[pk.element];
             return s + (el ? (parseFloat(el.ep_this) || 0) * (pk.multiplier || 1) : 0);
           }, 0);
-      } catch { /* last GW data unavailable */ }
+      } catch { /* skip tracker if unavailable */ }
 
       // Map picks to full player objects
       const startingPicks = picks.filter(pk => pk.position <= 11)
@@ -581,46 +653,55 @@
 
       if (startingPicks.length < 11) throw new Error('Could not load picks. Check your team ID.');
 
-      // Group by position type
       const gkp  = startingPicks.filter(p => p.element_type === 1);
       const defs = startingPicks.filter(p => p.element_type === 2);
       const mids = startingPicks.filter(p => p.element_type === 3);
       const fwds = startingPicks.filter(p => p.element_type === 4);
 
-      // Predicted total for next GW
       const predicted = startingPicks.reduce((s,p) => s + (p.predicted||0) * (p.multiplier||1), 0);
 
-      // Render tracker
+      // Tracker
       const trackerEl = document.getElementById('myTracker');
       if (lastGwActual !== null) {
         trackerEl.innerHTML = `GW${lastGwId}: Predicted <span>${(lastGwPredicted||0).toFixed(1)}</span> | Actual <span>${lastGwActual}</span>`;
       }
 
-      document.getElementById('myGwLabel').textContent  = `Gameweek ${nextGwId} — Predicted`;
+      const gwLabel = activeGwId === nextGwId ? `Gameweek ${nextGwId} — Predicted` : `Gameweek ${activeGwId} — Last played`;
+      document.getElementById('myGwLabel').textContent  = gwLabel;
       document.getElementById('myTotalPts').textContent = predicted.toFixed(1) + ' pts';
 
-      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowDef').innerHTML = defs.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowMid').innerHTML = mids.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
       document.getElementById('myRowFwd').innerHTML = fwds.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowMid').innerHTML = mids.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowDef').innerHTML = defs.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
 
-      const benchLabels = ['GKP', '1. DEF', '2. MID', '3. FWD'];
+      const benchLabels = ['GKP', '1. SUB', '2. SUB', '3. SUB'];
       document.getElementById('myBench').innerHTML = benchPicks.slice(0,4)
         .map((p,i) => benchCardHTML(p, benchLabels[i] || (i+1)+'.'))
         .join('');
 
-      statusEl.style.display = 'none';
-      outerEl.style.display  = '';
+      statusEl.style.display   = 'none';
+      outerEl.style.display    = '';
 
     } catch (err) {
       statusEl.textContent = err.message || 'Could not load team.';
       statusEl.classList.add('error');
+      // Show fallback input so user can retry with different ID
+      document.getElementById('myInputFallback').style.display = '';
     }
   }
 
+  function loadMyTeamFallback() {
+    const id = document.getElementById('teamIdInputFallback').value.trim();
+    loadMyTeam(id);
+  }
+
   // Allow Enter key in team ID input
-  document.getElementById('teamIdInput').addEventListener('keydown', e => {
-    if (e.key === 'Enter') loadMyTeam();
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Enter') {
+      if (document.activeElement === document.getElementById('teamIdInput')) loadMyTeam();
+      if (document.activeElement === document.getElementById('teamIdInputFallback')) loadMyTeamFallback();
+    }
   });
 
   // ── Main init ──
@@ -630,7 +711,8 @@
       statusEl.textContent = 'Fetching FPL data...';
       bootstrap = await fetchFPL('bootstrap-static/');
 
-      // Build element lookup map
+      // Build team lookup
+      bootstrap.teams.forEach(t => { teamMap[t.id] = t; });
       bootstrap.elements.forEach(el => { elementMap[el.id] = el; });
 
       const events = bootstrap.events;
@@ -641,20 +723,33 @@
 
       statusEl.textContent = `Fetching GW${nextGwId} fixtures...`;
       const fixtures = await fetchFPL(`fixtures/?event=${nextGwId}`);
-      fixtures.forEach(f => { fixtureMap[f.team_h] = f; fixtureMap[f.team_a] = f; });
+      fixtures.forEach(f => {
+        fixtureMap[f.team_h] = f;
+        fixtureMap[f.team_a] = f;
+      });
+
+      // Build opponent map: team_id → "ARS (H)"
+      fixtures.forEach(f => {
+        const homeTeam = teamMap[f.team_h];
+        const awayTeam = teamMap[f.team_a];
+        if (homeTeam && awayTeam) {
+          opponentMap[f.team_h] = `${awayTeam.short_name} (H)`;
+          opponentMap[f.team_a] = `${homeTeam.short_name} (A)`;
+        }
+      });
 
       statusEl.textContent = 'Building predicted XI...';
 
-      // Score all players
       const scored = bootstrap.elements.map(p => ({ ...p, predicted: predictScore(p) }));
-      // Also update elementMap with predictions
       scored.forEach(p => { elementMap[p.id] = p; });
 
-      const squad  = selectSquad442(scored);
+      const squad = selectSquad442(scored);
       if (squad.length < 15) throw new Error('Budget too tight. Check API data.');
 
-      const lineup = buildLineup442(squad);
-      renderPredicted(lineup);
+      renderPredicted(buildLineup442(squad));
+
+      // Auto-load default team after predicted XI is ready
+      await loadMyTeam(DEFAULT_TEAM_ID);
 
     } catch (err) {
       statusEl.textContent = 'Could not load FPL data. ' + err.message;
