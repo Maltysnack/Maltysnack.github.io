@@ -360,6 +360,24 @@
     return res.json();
   }
 
+  // Predict score using a given fixture map (supports both next and last GW)
+  function predictScoreWithFixMap(player, fixMap) {
+    if (!fixMap[player.team]) return 0;
+    const ep   = parseFloat(player.ep_next) || 0;
+    const form = parseFloat(player.form)    || 0;
+    const avail = player.chance_of_playing_next_round === null
+      ? 1.0 : player.chance_of_playing_next_round / 100;
+    if (avail === 0) return 0;
+    const fix    = fixMap[player.team];
+    const isHome = fix.team_h === player.team;
+    const fdr    = isHome ? fix.team_h_difficulty : fix.team_a_difficulty;
+    let fdrMod   = fdr === 2 ? 1.12 : fdr === 3 ? 1.00 : fdr === 4 ? 0.87 : 0.72;
+    fdrMod      *= isHome ? 1.04 : 0.97;
+    const seasonAvg = player.total_points / Math.max(1, player.minutes / 90);
+    const base = (ep * 0.55) + (form * 0.30) + (seasonAvg * 0.15);
+    return Math.max(0, parseFloat((base * fdrMod * avail).toFixed(2)));
+  }
+
   function predictScore(player) {
     // No fixture = no points
     if (!fixtureMap[player.team]) return 0;
@@ -440,9 +458,9 @@
   }
 
   // My Team card: name → predicted → actual → opponent
-  function myCardHTML(player, oppMap, actualPts, captain=false, vice=false) {
+  function myCardHTML(player, oppMap, actualPts, predScore, captain=false, vice=false) {
     const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
-    const predPts = player.predicted !== undefined ? player.predicted.toFixed(1) : '—';
+    const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
     const shirt   = shirtUrl(player);
     const capCls  = captain ? ' is-captain' : vice ? ' is-vice' : '';
     const opp     = oppMap[player.team] || '';
@@ -478,9 +496,9 @@
     </div>`;
   }
 
-  function myBenchCardHTML(player, label, oppMap, actualPts) {
+  function myBenchCardHTML(player, label, oppMap, actualPts, predScore) {
     const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
-    const predPts = player.predicted !== undefined ? player.predicted.toFixed(1) : '—';
+    const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
     const shirt   = shirtUrl(player);
     const opp     = oppMap[player.team] || '';
     const actual  = actualPts !== null && actualPts !== undefined ? actualPts : '—';
@@ -564,19 +582,17 @@
 
       if (startingPicks.length < 11) throw new Error('Could not load picks. Check your team ID.');
 
-      // Actual points per player (captain gets ×2)
-      function actualPts(p) {
-        const base = liveMap[p.id] || 0;
-        return base * (p.multiplier || 1);
+      // Actual points per player — raw score, no captain multiplier (C marker on card handles that)
+      function actualPts(p) { return liveMap[p.id] || 0; }
+
+      // Predicted score per player using last GW fixtures
+      function predLastGw(p) {
+        const el = elementMap[p.id];
+        return el ? predictScoreWithFixMap(el, lastFixMap) : 0;
       }
 
       const totalActual = entryHistory.points;
-
-      // Predicted score for last GW: use ep_this as a proxy
-      const totalPredicted = startingPicks.reduce((s, p) => {
-        const el = elementMap[p.id];
-        return s + (el ? (parseFloat(el.ep_this) || 0) * (p.multiplier || 1) : 0);
-      }, 0);
+      const totalPredicted = startingPicks.reduce((s, p) => s + predLastGw(p), 0);
 
       const gkp  = startingPicks.filter(p => p.element_type === 1);
       const defs = startingPicks.filter(p => p.element_type === 2);
@@ -592,14 +608,14 @@
       trackerEl.innerHTML = `Predicted <span>${totalPredicted.toFixed(1)}</span> · Actual <span>${totalActual}</span>`;
 
       // Render starting XI
-      document.getElementById('myRowFwd').innerHTML = fwds.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowMid').innerHTML = mids.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowDef').innerHTML = defs.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowFwd').innerHTML = fwds.map(p => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowMid').innerHTML = mids.map(p => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowDef').innerHTML = defs.map(p => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
 
       const benchLabels = ['GKP', '1. SUB', '2. SUB', '3. SUB'];
       document.getElementById('myBench').innerHTML = benchPicks.slice(0,4)
-        .map((p,i) => myBenchCardHTML(p, benchLabels[i]||`${i+1}.`, lastOppMap, actualPts(p)))
+        .map((p,i) => myBenchCardHTML(p, benchLabels[i]||`${i+1}.`, lastOppMap, actualPts(p), predLastGw(p)))
         .join('');
 
       statusEl.style.display   = 'none';
@@ -655,6 +671,7 @@
       ]);
 
       nextFixtures.forEach(f => { fixtureMap[f.team_h] = f; fixtureMap[f.team_a] = f; });
+      lastFixtures.forEach(f => { lastFixMap[f.team_h] = f; lastFixMap[f.team_a] = f; });
       buildOppMap(nextFixtures, nextOppMap);
       buildOppMap(lastFixtures, lastOppMap);
 
