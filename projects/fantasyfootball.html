@@ -104,14 +104,14 @@
     .fpl-corner-bl { bottom:-1px; left:-1px; border-radius:0 100% 0 0; border-bottom:none; border-left:none; }
     .fpl-corner-br { bottom:-1px; right:-1px; border-radius:100% 0 0 0; border-bottom:none; border-right:none; }
 
-    .fpl-rows { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+    .fpl-rows { position: relative; z-index: 2; display: flex; flex-direction: column; justify-content: space-between; height: 100%; }
     .fpl-row  { display: flex; justify-content: space-evenly; padding: 0 8px; }
 
     /* ── Player card ── */
-    .fpl-card { display: flex; flex-direction: column; align-items: center; width: 86px; cursor: default; user-select: none; }
+    .fpl-card { display: flex; flex-direction: column; align-items: center; width: 86px; cursor: default; user-select: none; overflow: hidden; }
 
-    .fpl-card-shirt { width: 46px; height: 46px; display: flex; align-items: center; justify-content: center; margin-top: -12px; }
-    .fpl-card-shirt img { width: 44px; height: auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
+    .fpl-card-shirt { width: 86px; height: 68px; overflow: hidden; display: flex; align-items: flex-start; justify-content: center; flex-shrink: 0; }
+    .fpl-card-shirt img { width: 72px; height: auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); margin-top: 4px; }
 
     .fpl-shirt-fallback {
       width: 38px; height: 42px; border-radius: 6px 6px 2px 2px;
@@ -125,6 +125,7 @@
       font-size: 0.56rem; font-weight: 700;
       text-align: center; padding: 1px 4px;
       width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.25;
+      position: relative; z-index: 2; margin-top: -10px;
     }
 
     /* Predicted score — green (used by Predicted XI and bench cards) */
@@ -132,6 +133,7 @@
       background: #190025; color: #00ff87;
       font-size: 0.64rem; font-weight: 800;
       text-align: center; padding: 1px 4px; width: 100%; line-height: 1.25;
+      position: relative; z-index: 2;
     }
 
     /* My Team: actual centered, predicted pinned right without shifting actual */
@@ -151,6 +153,7 @@
       font-size: 0.42rem; font-weight: 600;
       text-align: center; padding: 1px 4px 1px;
       width: 100%; line-height: 1.2; letter-spacing: 0.03em;
+      position: relative; z-index: 2;
     }
 
     /* My Team: predicted shown in bottom row, smaller green */
@@ -159,6 +162,7 @@
       font-size: 0.48rem; font-weight: 700;
       text-align: center; padding: 1px 4px;
       width: 100%; line-height: 1.2;
+      position: relative; z-index: 2;
     }
 
     /* My Team: actual score row — yellow */
