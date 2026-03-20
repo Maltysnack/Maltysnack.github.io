@@ -11,7 +11,6 @@
     .fpl-page-title { font-size: 1.4rem; font-weight: 700; color: #37003c; font-family: system-ui, sans-serif; letter-spacing: -0.02em; margin-bottom: 4px; }
     .fpl-page-sub   { font-size: 0.82rem; color: #888; font-family: system-ui, sans-serif; margin-bottom: 24px; }
 
-    /* Two-column layout */
     .fpl-cols {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -24,77 +23,37 @@
       .fpl-wrap { padding: 20px 16px 60px; }
     }
 
-    /* ── Panel ── */
     .fpl-panel { font-family: system-ui, sans-serif; }
 
     .fpl-panel-title {
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      text-transform: uppercase;
-      color: #37003c;
-      margin-bottom: 8px;
-      /* fixed height so both panels' GW bars start at same vertical position */
-      height: 22px;
-      display: flex;
-      align-items: center;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #37003c; margin-bottom: 8px;
+      height: 22px; display: flex; align-items: center;
     }
 
     /* ── GW bar ── */
     .fpl-gw-bar {
-      background: #37003c;
-      color: #fff;
-      font-size: 0.72rem;
-      font-weight: 700;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      padding: 8px 14px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      border-radius: 6px 6px 0 0;
-      gap: 8px;
+      background: #37003c; color: #fff;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 8px 14px;
+      display: flex; justify-content: space-between; align-items: center;
+      border-radius: 6px 6px 0 0; gap: 8px;
     }
-
     .fpl-gw-left { display: flex; flex-direction: column; gap: 2px; }
     .fpl-gw-label { font-size: 0.72rem; }
 
-    /* Tracker: last GW predicted vs actual */
-    .fpl-tracker {
-      font-size: 0.6rem;
-      font-weight: 600;
-      color: rgba(255,255,255,0.65);
-      letter-spacing: 0.04em;
-    }
+    .fpl-tracker { font-size: 0.6rem; font-weight: 600; color: rgba(255,255,255,0.65); letter-spacing: 0.04em; }
     .fpl-tracker span { color: #00ff87; font-weight: 800; }
 
-    .fpl-gw-pts {
-      background: #00ff87;
-      color: #37003c;
-      font-size: 0.7rem;
-      font-weight: 800;
-      padding: 3px 10px;
-      border-radius: 100px;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+    .fpl-gw-pts { background: #00ff87; color: #37003c; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
+    .fpl-gw-pts.is-actual { background: #ffe44e; color: #37003c; }
 
-    /* ── Status ── */
-    .fpl-status {
-      font-size: 0.85rem;
-      color: #666;
-      padding: 32px 0;
-      text-align: center;
-    }
+    .fpl-status { font-size: 0.85rem; color: #666; padding: 32px 0; text-align: center; }
     .fpl-status.error { color: #c00; }
 
-    /* ── Pitch perspective wrapper ── */
-    .fpl-pitch-wrap {
-      perspective: 900px;
-      perspective-origin: 50% 0%;
-    }
-
     /* ── Pitch ── */
+    .fpl-pitch-wrap { perspective: 900px; perspective-origin: 50% 0%; }
+
     .fpl-pitch {
       position: relative;
       background: linear-gradient(
@@ -104,23 +63,16 @@
         #3d9e42 64%, #37943c 72%, #3d9e42 80%, #37943c 88%, #3d9e42 100%
       );
       padding: 14px 8px 22px;
-      overflow: hidden;
-      min-height: 420px;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      transform: rotateX(6deg);
-      transform-origin: bottom center;
+      overflow: hidden; min-height: 420px;
+      display: flex; flex-direction: column; justify-content: space-between;
+      transform: rotateX(6deg); transform-origin: bottom center;
     }
 
-    /* Pitch markings — no centre line, just boxes + circle */
     .fpl-box-top {
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
       width: 48%; height: 22%;
       border: 1.5px solid rgba(255,255,255,0.35); border-top: none;
-      border-radius: 0 0 2px 2px;
     }
-    /* small box inside top penalty area */
     .fpl-small-box-top {
       position: absolute; top: 0; left: 50%; transform: translateX(-50%);
       width: 22%; height: 10%;
@@ -130,64 +82,38 @@
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
       width: 48%; height: 22%;
       border: 1.5px solid rgba(255,255,255,0.35); border-bottom: none;
-      border-radius: 2px 2px 0 0;
     }
-    /* small box inside bottom penalty area */
     .fpl-small-box-bottom {
       position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
       width: 22%; height: 10%;
       border: 1.5px solid rgba(255,255,255,0.25); border-bottom: none;
     }
-    /* Centre circle only — no halfway line */
     .fpl-circle {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 80px; height: 80px; border-radius: 50%;
       border: 1.5px solid rgba(255,255,255,0.35);
     }
-    /* Centre spot */
     .fpl-centre-spot {
       position: absolute; top: 50%; left: 50%;
       transform: translate(-50%, -50%);
       width: 5px; height: 5px; border-radius: 50%;
       background: rgba(255,255,255,0.4);
     }
-    /* Corner arcs */
     .fpl-corner { position: absolute; width: 14px; height: 14px; border: 1.5px solid rgba(255,255,255,0.25); }
-    .fpl-corner-tl { top: -1px; left: -1px; border-radius: 0 0 100% 0; border-top: none; border-left: none; }
-    .fpl-corner-tr { top: -1px; right: -1px; border-radius: 0 0 0 100%; border-top: none; border-right: none; }
-    .fpl-corner-bl { bottom: -1px; left: -1px; border-radius: 0 100% 0 0; border-bottom: none; border-left: none; }
-    .fpl-corner-br { bottom: -1px; right: -1px; border-radius: 100% 0 0 0; border-bottom: none; border-right: none; }
+    .fpl-corner-tl { top:-1px; left:-1px; border-radius:0 0 100% 0; border-top:none; border-left:none; }
+    .fpl-corner-tr { top:-1px; right:-1px; border-radius:0 0 0 100%; border-top:none; border-right:none; }
+    .fpl-corner-bl { bottom:-1px; left:-1px; border-radius:0 100% 0 0; border-bottom:none; border-left:none; }
+    .fpl-corner-br { bottom:-1px; right:-1px; border-radius:100% 0 0 0; border-bottom:none; border-right:none; }
 
-    /* ── Player rows — FWD top, GKP bottom ── */
-    .fpl-rows {
-      position: relative; z-index: 2;
-      display: flex; flex-direction: column;
-      gap: 8px;
-      height: 100%;
-    }
-
-    .fpl-row {
-      display: flex;
-      justify-content: center;
-      gap: 4px;
-    }
+    .fpl-rows { position: relative; z-index: 2; display: flex; flex-direction: column; gap: 8px; height: 100%; }
+    .fpl-row  { display: flex; justify-content: center; gap: 4px; }
 
     /* ── Player card ── */
-    .fpl-card {
-      display: flex; flex-direction: column; align-items: center;
-      width: 68px; cursor: default; user-select: none;
-    }
+    .fpl-card { display: flex; flex-direction: column; align-items: center; width: 68px; cursor: default; user-select: none; }
 
-    .fpl-card-shirt {
-      width: 48px; height: 48px;
-      display: flex; align-items: center; justify-content: center;
-    }
-
-    .fpl-card-shirt img {
-      width: 44px; height: auto; display: block;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45));
-    }
+    .fpl-card-shirt { width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; }
+    .fpl-card-shirt img { width: 44px; height: auto; display: block; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.45)); }
 
     .fpl-shirt-fallback {
       width: 38px; height: 42px; border-radius: 6px 6px 2px 2px;
@@ -200,97 +126,88 @@
       background: #240135; color: #fff;
       font-size: 0.54rem; font-weight: 700;
       text-align: center; padding: 2px 4px;
-      width: 100%; white-space: nowrap;
-      overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
+      width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3;
     }
 
+    /* Predicted score — green */
     .fpl-card-score {
       background: #190025; color: #00ff87;
       font-size: 0.62rem; font-weight: 800;
-      text-align: center; padding: 2px 4px;
-      width: 100%; line-height: 1.3;
+      text-align: center; padding: 2px 4px; width: 100%; line-height: 1.3;
+    }
+
+    /* Actual score — yellow, only shown in My Team panel */
+    .fpl-card-actual {
+      background: #120018; color: #ffe44e;
+      font-size: 0.62rem; font-weight: 800;
+      text-align: center; padding: 2px 4px; width: 100%; line-height: 1.3;
     }
 
     .fpl-card-opp {
-      background: #120018; color: rgba(255,255,255,0.55);
+      background: #120018; color: rgba(255,255,255,0.5);
       font-size: 0.48rem; font-weight: 600;
       text-align: center; padding: 1px 4px 2px;
-      width: 100%; line-height: 1.3;
-      letter-spacing: 0.03em;
+      width: 100%; line-height: 1.3; letter-spacing: 0.03em;
     }
 
-    /* Captain badge */
-    .fpl-card.is-captain .fpl-card-name::after  { content: ' (C)'; color: #00ff87; }
-    .fpl-card.is-vice    .fpl-card-name::after  { content: ' (V)'; color: #d9e8ff; }
+    .fpl-card.is-captain .fpl-card-name::after { content: ' (C)'; color: #00ff87; }
+    .fpl-card.is-vice    .fpl-card-name::after { content: ' (V)'; color: #d9e8ff; }
 
     /* ── Bench ── */
     .fpl-bench-wrap {
-      background: #dfe1e5;
-      border-top: 3px solid #37003c;
-      padding: 10px 8px 14px;
-      border-radius: 0 0 6px 6px;
+      background: #dfe1e5; border-top: 3px solid #37003c;
+      padding: 10px 8px 14px; border-radius: 0 0 6px 6px;
     }
-
     .fpl-bench-label {
       font-size: 0.68rem; font-weight: 700; color: #37003c;
-      text-align: center; letter-spacing: 0.06em;
-      text-transform: uppercase; margin-bottom: 8px;
-      font-family: system-ui, sans-serif;
+      text-align: center; letter-spacing: 0.06em; text-transform: uppercase;
+      margin-bottom: 8px; font-family: system-ui, sans-serif;
     }
+    .fpl-bench-row { display: flex; justify-content: center; gap: 8px; }
 
-    .fpl-bench-row {
-      display: flex; justify-content: center; gap: 8px;
-    }
-
-    .fpl-bench-card {
-      display: flex; flex-direction: column; align-items: center; width: 68px;
-    }
-
+    .fpl-bench-card { display: flex; flex-direction: column; align-items: center; width: 68px; }
     .fpl-bench-pos {
       font-size: 0.52rem; font-weight: 700; color: #37003c;
       letter-spacing: 0.06em; text-transform: uppercase;
-      margin-bottom: 3px; text-align: center;
-      font-family: system-ui, sans-serif;
+      margin-bottom: 3px; text-align: center; font-family: system-ui, sans-serif;
     }
+    .fpl-bench-card .fpl-card-name   { background: #37003c; }
+    .fpl-bench-card .fpl-card-score  { background: #240135; }
+    .fpl-bench-card .fpl-card-actual { background: #1a0025; }
+    .fpl-bench-card .fpl-card-opp    { background: #1a0025; }
 
-    .fpl-bench-card .fpl-card-name  { background: #37003c; }
-    .fpl-bench-card .fpl-card-score { background: #240135; }
-    .fpl-bench-card .fpl-card-opp  { background: #1a0025; }
+    /* ── Score legend (My Team) ── */
+    .fpl-score-legend {
+      display: flex; gap: 12px; align-items: center;
+      font-size: 0.65rem; font-family: system-ui, sans-serif;
+      padding: 6px 0 0; color: #555;
+    }
+    .fpl-score-legend span { display: inline-flex; align-items: center; gap: 4px; }
+    .fpl-score-dot { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+    .fpl-score-dot.pred { background: #00ff87; }
+    .fpl-score-dot.act  { background: #ffe44e; }
 
     /* ── Team input (below bench) ── */
     .fpl-team-footer {
-      margin-top: 10px;
-      padding: 10px 0 0;
+      margin-top: 10px; padding: 10px 0 0;
       border-top: 1px solid #e0e0e8;
-      display: flex;
-      gap: 8px;
-      align-items: center;
+      display: flex; gap: 8px; align-items: center;
     }
-
     .fpl-team-input {
       flex: 1; padding: 6px 10px;
       border: 1.5px solid #ccc; border-radius: 6px;
       font-size: 0.78rem; font-family: system-ui, sans-serif;
       outline: none; color: #333;
     }
-
     .fpl-team-input:focus { border-color: #37003c; }
-
     .fpl-team-btn {
-      background: #37003c; color: #fff;
-      border: none; border-radius: 6px;
+      background: #37003c; color: #fff; border: none; border-radius: 6px;
       padding: 6px 12px; font-size: 0.7rem; font-weight: 700;
       cursor: pointer; font-family: system-ui, sans-serif;
       white-space: nowrap; transition: background 0.15s;
     }
-
     .fpl-team-btn:hover { background: #56006a; }
-
-    .fpl-team-footer-label {
-      font-size: 0.62rem; color: #999;
-      font-family: system-ui, sans-serif;
-      white-space: nowrap;
-    }
+    .fpl-team-footer-label { font-size: 0.62rem; color: #999; font-family: system-ui, sans-serif; white-space: nowrap; }
 
     /* ── Legend ── */
     .fpl-legend {
@@ -299,12 +216,9 @@
       padding: 10px 14px; font-family: system-ui, sans-serif;
       font-size: 0.72rem; color: #555; line-height: 1.6;
     }
-
     .fpl-legend strong { color: #37003c; }
-
     .fpl-pill {
-      display: inline-block;
-      background: #37003c; color: #00ff87;
+      display: inline-block; background: #37003c; color: #00ff87;
       font-size: 0.6rem; font-weight: 700;
       padding: 2px 8px; border-radius: 100px; margin: 2px 2px 0 0;
     }
@@ -315,7 +229,7 @@
 
   <div class="fpl-wrap">
     <div class="fpl-page-title">FPL Predicted XI</div>
-    <div class="fpl-page-sub">Best predicted 4-4-2 from all players vs your team.</div>
+    <div class="fpl-page-sub">Best predicted 4-4-2 for the next gameweek vs your last gameweek with predicted &amp; actual points.</div>
 
     <div class="fpl-cols">
 
@@ -332,18 +246,12 @@
           </div>
           <div class="fpl-pitch-wrap">
             <div class="fpl-pitch">
-              <div class="fpl-box-top"></div>
-              <div class="fpl-small-box-top"></div>
-              <div class="fpl-box-bottom"></div>
-              <div class="fpl-small-box-bottom"></div>
-              <div class="fpl-circle"></div>
-              <div class="fpl-centre-spot"></div>
-              <div class="fpl-corner fpl-corner-tl"></div>
-              <div class="fpl-corner fpl-corner-tr"></div>
-              <div class="fpl-corner fpl-corner-bl"></div>
-              <div class="fpl-corner fpl-corner-br"></div>
+              <div class="fpl-box-top"></div><div class="fpl-small-box-top"></div>
+              <div class="fpl-box-bottom"></div><div class="fpl-small-box-bottom"></div>
+              <div class="fpl-circle"></div><div class="fpl-centre-spot"></div>
+              <div class="fpl-corner fpl-corner-tl"></div><div class="fpl-corner fpl-corner-tr"></div>
+              <div class="fpl-corner fpl-corner-bl"></div><div class="fpl-corner fpl-corner-br"></div>
               <div class="fpl-rows">
-                <!-- FWD at top, GKP at bottom -->
                 <div class="fpl-row" id="predRowFwd"></div>
                 <div class="fpl-row" id="predRowMid"></div>
                 <div class="fpl-row" id="predRowDef"></div>
@@ -364,10 +272,11 @@
           <span class="fpl-pill">Fixture difficulty</span>
           <span class="fpl-pill">Home/away</span>
           <span class="fpl-pill">Availability</span>
+          <span class="fpl-pill">No fixture = 0</span>
         </div>
       </div>
 
-      <!-- ══ RIGHT: MY TEAM ══ -->
+      <!-- ══ RIGHT: MY TEAM (last GW) ══ -->
       <div class="fpl-panel">
         <div class="fpl-panel-title">My Team</div>
         <div id="myStatus" class="fpl-status">Loading your team...</div>
@@ -377,20 +286,15 @@
               <div class="fpl-gw-label" id="myGwLabel">Gameweek —</div>
               <div class="fpl-tracker" id="myTracker"></div>
             </div>
-            <div class="fpl-gw-pts" id="myTotalPts">— pts</div>
+            <div class="fpl-gw-pts is-actual" id="myTotalPts">— pts</div>
           </div>
           <div class="fpl-pitch-wrap">
             <div class="fpl-pitch">
-              <div class="fpl-box-top"></div>
-              <div class="fpl-small-box-top"></div>
-              <div class="fpl-box-bottom"></div>
-              <div class="fpl-small-box-bottom"></div>
-              <div class="fpl-circle"></div>
-              <div class="fpl-centre-spot"></div>
-              <div class="fpl-corner fpl-corner-tl"></div>
-              <div class="fpl-corner fpl-corner-tr"></div>
-              <div class="fpl-corner fpl-corner-bl"></div>
-              <div class="fpl-corner fpl-corner-br"></div>
+              <div class="fpl-box-top"></div><div class="fpl-small-box-top"></div>
+              <div class="fpl-box-bottom"></div><div class="fpl-small-box-bottom"></div>
+              <div class="fpl-circle"></div><div class="fpl-centre-spot"></div>
+              <div class="fpl-corner fpl-corner-tl"></div><div class="fpl-corner fpl-corner-tr"></div>
+              <div class="fpl-corner fpl-corner-bl"></div><div class="fpl-corner fpl-corner-br"></div>
               <div class="fpl-rows">
                 <div class="fpl-row" id="myRowFwd"></div>
                 <div class="fpl-row" id="myRowMid"></div>
@@ -403,7 +307,10 @@
             <div class="fpl-bench-label">Substitutes</div>
             <div class="fpl-bench-row" id="myBench"></div>
           </div>
-          <!-- Team ID input sits below bench so pitches align -->
+          <div class="fpl-score-legend">
+            <span><i class="fpl-score-dot pred"></i> Predicted</span>
+            <span><i class="fpl-score-dot act"></i> Actual</span>
+          </div>
           <div class="fpl-team-footer">
             <span class="fpl-team-footer-label">Team ID:</span>
             <input class="fpl-team-input" id="teamIdInput" type="number"
@@ -411,29 +318,23 @@
             <button class="fpl-team-btn" onclick="loadMyTeam()">Load</button>
           </div>
         </div>
-        <!-- Input visible even before load -->
+        <!-- fallback input shown on error -->
         <div id="myInputFallback" style="display:none">
-          <div class="fpl-team-footer" style="border-top:none; margin-top:0; padding-top:0">
+          <div class="fpl-team-footer" style="border-top:none;margin-top:0;padding-top:0">
             <span class="fpl-team-footer-label">Team ID:</span>
-            <input class="fpl-team-input" id="teamIdInputFallback" type="number"
+            <input class="fpl-team-input" id="teamIdInputFb" type="number"
                    value="6493589" min="1" placeholder="FPL team ID" />
-            <button class="fpl-team-btn" onclick="loadMyTeamFallback()">Load</button>
+            <button class="fpl-team-btn" onclick="loadMyTeam(document.getElementById('teamIdInputFb').value)">Load</button>
           </div>
         </div>
       </div>
 
-    </div><!-- /.fpl-cols -->
+    </div>
   </div>
 
   <script>
-  // ══════════════════════════════════════════
-  // FPL PREDICTED XI + MY TEAM
-  // Formation: forced 4-4-2
-  // ══════════════════════════════════════════
-
   const CORS = 'https://corsproxy.io/?url=';
   const FPL  = 'https://fantasy.premierleague.com/api/';
-
   const DEFAULT_TEAM_ID = '6493589';
 
   const CLUB_COLOURS = {
@@ -443,61 +344,51 @@
     17:'#D00027',20:'#d71920',6:'#132257',57:'#7B2C2C',39:'#003090'
   };
 
-  // Shared bootstrap data (fetched once)
   let bootstrap    = null;
-  let fixtureMap   = {};   // team_id → fixture
-  let opponentMap  = {};   // team_id → "ARS (H)"
+  let fixtureMap   = {};   // team_id → next GW fixture
+  let lastFixMap   = {};   // team_id → last GW fixture
+  let nextOppMap   = {};   // team_id → "ARS (H)" for next GW
+  let lastOppMap   = {};   // team_id → "ARS (H)" for last GW
   let teamMap      = {};   // team_id → team object
   let nextGwId     = null;
   let lastGwId     = null;
   let elementMap   = {};
 
-  // ── Fetch helpers ──
   async function fetchFPL(endpoint) {
     const res = await fetch(CORS + encodeURIComponent(FPL + endpoint));
     if (!res.ok) throw new Error('API ' + res.status);
     return res.json();
   }
 
-  // ── Prediction formula ──
   function predictScore(player) {
+    // No fixture = no points
+    if (!fixtureMap[player.team]) return 0;
+
     const ep   = parseFloat(player.ep_next) || 0;
     const form = parseFloat(player.form)    || 0;
     const avail = player.chance_of_playing_next_round === null
       ? 1.0 : player.chance_of_playing_next_round / 100;
     if (avail === 0) return 0;
 
-    let fdrMod = 1.0;
-    const fix = fixtureMap[player.team];
-    if (fix) {
-      const isHome = fix.team_h === player.team;
-      const fdr = isHome ? fix.team_h_difficulty : fix.team_a_difficulty;
-      if      (fdr === 2) fdrMod = 1.12;
-      else if (fdr === 3) fdrMod = 1.00;
-      else if (fdr === 4) fdrMod = 0.87;
-      else if (fdr === 5) fdrMod = 0.72;
-      fdrMod *= isHome ? 1.04 : 0.97;
-    }
+    const fix    = fixtureMap[player.team];
+    const isHome = fix.team_h === player.team;
+    const fdr    = isHome ? fix.team_h_difficulty : fix.team_a_difficulty;
+    let fdrMod   = fdr === 2 ? 1.12 : fdr === 3 ? 1.00 : fdr === 4 ? 0.87 : 0.72;
+    fdrMod      *= isHome ? 1.04 : 0.97;
 
     const seasonAvg = player.total_points / Math.max(1, player.minutes / 90);
     const base = (ep * 0.55) + (form * 0.30) + (seasonAvg * 0.15);
     return Math.max(0, parseFloat((base * fdrMod * avail).toFixed(2)));
   }
 
-  // ── Squad selection: strict 4-4-2 ──
   function selectSquad442(players) {
-    const BUDGET = 1000;
-    const MAX_CLUB = 3;
-
+    const BUDGET = 1000, MAX_CLUB = 3;
     const byPos = { 1:[], 2:[], 3:[], 4:[] };
-    players.forEach(p => {
-      if (p.predicted > 0 && p.minutes > 0) byPos[p.element_type].push(p);
-    });
+    players.forEach(p => { if (p.predicted > 0 && p.minutes > 0) byPos[p.element_type].push(p); });
     Object.values(byPos).forEach(arr => arr.sort((a,b) => b.predicted - a.predicted));
 
-    const picked = [];
+    const picked = [], clubCount = {};
     let budget = BUDGET;
-    const clubCount = {};
 
     function pick(pos, n) {
       let count = 0;
@@ -506,39 +397,36 @@
         if (picked.find(x => x.id === p.id)) continue;
         if (p.now_cost > budget) continue;
         if ((clubCount[p.team]||0) >= MAX_CLUB) continue;
-        picked.push(p);
-        budget -= p.now_cost;
+        picked.push(p); budget -= p.now_cost;
         clubCount[p.team] = (clubCount[p.team]||0) + 1;
         count++;
       }
     }
-
-    pick(1, 2); pick(2, 5); pick(3, 5); pick(4, 3);
+    pick(1,2); pick(2,5); pick(3,5); pick(4,3);
     return picked;
   }
 
   function buildLineup442(squad) {
     const sorted = pos => squad.filter(p=>p.element_type===pos).sort((a,b)=>b.predicted-a.predicted);
-    const gkps = sorted(1), defs = sorted(2), mids = sorted(3), fwds = sorted(4);
+    const gkps=sorted(1), defs=sorted(2), mids=sorted(3), fwds=sorted(4);
     return {
       starting: { gkp:[gkps[0]], def:defs.slice(0,4), mid:mids.slice(0,4), fwd:fwds.slice(0,2) },
       bench: [gkps[1], defs[4], mids[4], fwds[2]]
     };
   }
 
-  // ── Shirt URL ──
   function shirtUrl(player) {
     const gk = player.element_type === 1;
     return `https://fantasy.premierleague.com/dist/img/shirts/standard/shirt_${player.team_code}${gk?'_1':''}-66.png`;
   }
 
-  // ── Card HTML — name → score → opponent ──
-  function cardHTML(player, captain=false, vice=false, score=null) {
+  // Predicted XI card: name → predicted → opponent
+  function cardHTML(player, oppMap, captain=false, vice=false) {
     const colour = CLUB_COLOURS[player.team_code] || '#37003c';
-    const pts    = score !== null ? score : player.predicted.toFixed(1);
+    const pts    = player.predicted.toFixed(1);
     const shirt  = shirtUrl(player);
     const capCls = captain ? ' is-captain' : vice ? ' is-vice' : '';
-    const opp    = opponentMap[player.team] || '';
+    const opp    = oppMap[player.team] || '';
     return `<div class="fpl-card${capCls}">
       <div class="fpl-card-shirt">
         <img src="${shirt}" alt="${player.web_name}"
@@ -551,11 +439,32 @@
     </div>`;
   }
 
-  function benchCardHTML(player, label, score=null) {
+  // My Team card: name → predicted → actual → opponent
+  function myCardHTML(player, oppMap, actualPts, captain=false, vice=false) {
+    const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
+    const predPts = player.predicted !== undefined ? player.predicted.toFixed(1) : '—';
+    const shirt   = shirtUrl(player);
+    const capCls  = captain ? ' is-captain' : vice ? ' is-vice' : '';
+    const opp     = oppMap[player.team] || '';
+    const actual  = actualPts !== null && actualPts !== undefined ? actualPts : '—';
+    return `<div class="fpl-card${capCls}">
+      <div class="fpl-card-shirt">
+        <img src="${shirt}" alt="${player.web_name}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
+        <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
+      </div>
+      <div class="fpl-card-name">${player.web_name}</div>
+      <div class="fpl-card-score">${predPts}</div>
+      <div class="fpl-card-actual">${actual} pts</div>
+      <div class="fpl-card-opp">${opp}</div>
+    </div>`;
+  }
+
+  function benchCardHTML(player, label, oppMap) {
     const colour = CLUB_COLOURS[player.team_code] || '#37003c';
-    const pts    = score !== null ? score : player.predicted.toFixed(1);
+    const pts    = player.predicted.toFixed(1);
     const shirt  = shirtUrl(player);
-    const opp    = opponentMap[player.team] || '';
+    const opp    = oppMap[player.team] || '';
     return `<div class="fpl-bench-card">
       <div class="fpl-bench-pos">${label}</div>
       <div class="fpl-card-shirt">
@@ -569,7 +478,26 @@
     </div>`;
   }
 
-  // ── Render predicted pitch ──
+  function myBenchCardHTML(player, label, oppMap, actualPts) {
+    const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
+    const predPts = player.predicted !== undefined ? player.predicted.toFixed(1) : '—';
+    const shirt   = shirtUrl(player);
+    const opp     = oppMap[player.team] || '';
+    const actual  = actualPts !== null && actualPts !== undefined ? actualPts : '—';
+    return `<div class="fpl-bench-card">
+      <div class="fpl-bench-pos">${label}</div>
+      <div class="fpl-card-shirt">
+        <img src="${shirt}" alt="${player.web_name}"
+             onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" loading="lazy"/>
+        <div class="fpl-shirt-fallback" style="background:${colour}">${player.element_type===1?'GK':player.web_name.slice(0,2).toUpperCase()}</div>
+      </div>
+      <div class="fpl-card-name">${player.web_name}</div>
+      <div class="fpl-card-score">${predPts}</div>
+      <div class="fpl-card-actual">${actual} pts</div>
+      <div class="fpl-card-opp">${opp}</div>
+    </div>`;
+  }
+
   function renderPredicted(lineup) {
     const { starting, bench } = lineup;
     const total = [...starting.gkp, ...starting.def, ...starting.mid, ...starting.fwd]
@@ -577,15 +505,15 @@
 
     document.getElementById('predGwLabel').textContent  = `Gameweek ${nextGwId} — Predicted`;
     document.getElementById('predTotalPts').textContent = total.toFixed(1) + ' pts';
-    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p)).join('');
-    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p)).join('');
-    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p)).join('');
-    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p)).join('');
+    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, nextOppMap)).join('');
+    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, nextOppMap)).join('');
+    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, nextOppMap)).join('');
+    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, nextOppMap)).join('');
     document.getElementById('predBench').innerHTML  = [
-      benchCardHTML(bench[0], 'GKP'),
-      benchCardHTML(bench[1], '1. SUB'),
-      benchCardHTML(bench[2], '2. SUB'),
-      benchCardHTML(bench[3], '3. SUB')
+      benchCardHTML(bench[0], 'GKP', nextOppMap),
+      benchCardHTML(bench[1], '1. SUB', nextOppMap),
+      benchCardHTML(bench[2], '2. SUB', nextOppMap),
+      benchCardHTML(bench[3], '3. SUB', nextOppMap)
     ].join('');
 
     document.getElementById('predStatus').style.display = 'none';
@@ -593,17 +521,14 @@
     document.getElementById('predLegend').style.display = '';
   }
 
-  // ── Load my team ──
   async function loadMyTeam(idOverride) {
     const inputEl = document.getElementById('teamIdInput');
     const teamId  = idOverride || (inputEl ? inputEl.value.trim() : '');
     if (!teamId) { alert('Enter your FPL team ID'); return; }
-
-    // Sync both inputs
     if (inputEl) inputEl.value = teamId;
 
-    const statusEl = document.getElementById('myStatus');
-    const outerEl  = document.getElementById('myOuter');
+    const statusEl  = document.getElementById('myStatus');
+    const outerEl   = document.getElementById('myOuter');
     const fallbackEl = document.getElementById('myInputFallback');
     outerEl.style.display    = 'none';
     fallbackEl.style.display = 'none';
@@ -612,72 +537,69 @@
     statusEl.classList.remove('error');
 
     try {
-      // Try to get upcoming GW picks (set in FPL app before deadline)
-      // Falls back to last completed GW if not yet set
-      let picks, entryHistory, activeGwId;
+      // Always load last GW — that's where actual points live
+      const [picksData, liveData] = await Promise.all([
+        fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`),
+        fetchFPL(`event/${lastGwId}/live/`)
+      ]);
 
-      try {
-        const data = await fetchFPL(`entry/${teamId}/event/${nextGwId}/picks/`);
-        picks = data.picks;
-        entryHistory = data.entry_history;
-        activeGwId = nextGwId;
-      } catch {
-        const data = await fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`);
-        picks = data.picks;
-        entryHistory = data.entry_history;
-        activeGwId = lastGwId;
-      }
+      // Build actual points map: player_id → points (accounting for captaincy)
+      const liveMap = {};
+      liveData.elements.forEach(el => { liveMap[el.id] = el.stats.total_points; });
 
-      // Fetch last GW data for tracker
-      let lastGwActual    = null;
-      let lastGwPredicted = null;
-      try {
-        const lastData = await fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`);
-        lastGwActual = lastData.entry_history.points;
-        lastGwPredicted = lastData.picks
-          .filter(pk => pk.position <= 11)
-          .reduce((s, pk) => {
-            const el = elementMap[pk.element];
-            return s + (el ? (parseFloat(el.ep_this) || 0) * (pk.multiplier || 1) : 0);
-          }, 0);
-      } catch { /* skip tracker if unavailable */ }
+      const picks = picksData.picks;
+      const entryHistory = picksData.entry_history;
 
       // Map picks to full player objects
-      const startingPicks = picks.filter(pk => pk.position <= 11)
-        .map(pk => ({ ...elementMap[pk.element], is_captain: pk.is_captain, is_vice_captain: pk.is_vice_captain, multiplier: pk.multiplier }))
-        .filter(Boolean);
-      const benchPicks = picks.filter(pk => pk.position > 11)
-        .sort((a,b) => a.position - b.position)
-        .map(pk => elementMap[pk.element])
-        .filter(Boolean);
+      const allPicks = picks.map(pk => ({
+        ...elementMap[pk.element],
+        is_captain: pk.is_captain,
+        is_vice_captain: pk.is_vice_captain,
+        multiplier: pk.multiplier,
+        position: pk.position
+      })).filter(p => p && p.id);
+
+      const startingPicks = allPicks.filter(p => p.position <= 11);
+      const benchPicks    = allPicks.filter(p => p.position > 11).sort((a,b) => a.position - b.position);
 
       if (startingPicks.length < 11) throw new Error('Could not load picks. Check your team ID.');
+
+      // Actual points per player (captain gets ×2)
+      function actualPts(p) {
+        const base = liveMap[p.id] || 0;
+        return base * (p.multiplier || 1);
+      }
+
+      const totalActual = entryHistory.points;
+
+      // Predicted score for last GW: use ep_this as a proxy
+      const totalPredicted = startingPicks.reduce((s, p) => {
+        const el = elementMap[p.id];
+        return s + (el ? (parseFloat(el.ep_this) || 0) * (p.multiplier || 1) : 0);
+      }, 0);
 
       const gkp  = startingPicks.filter(p => p.element_type === 1);
       const defs = startingPicks.filter(p => p.element_type === 2);
       const mids = startingPicks.filter(p => p.element_type === 3);
       const fwds = startingPicks.filter(p => p.element_type === 4);
 
-      const predicted = startingPicks.reduce((s,p) => s + (p.predicted||0) * (p.multiplier||1), 0);
+      // GW bar
+      document.getElementById('myGwLabel').textContent = `Gameweek ${lastGwId} — Result`;
+      document.getElementById('myTotalPts').textContent = `${totalActual} pts`;
 
-      // Tracker
+      // Tracker: predicted vs actual
       const trackerEl = document.getElementById('myTracker');
-      if (lastGwActual !== null) {
-        trackerEl.innerHTML = `GW${lastGwId}: Predicted <span>${(lastGwPredicted||0).toFixed(1)}</span> | Actual <span>${lastGwActual}</span>`;
-      }
+      trackerEl.innerHTML = `Predicted <span>${totalPredicted.toFixed(1)}</span> · Actual <span>${totalActual}</span>`;
 
-      const gwLabel = activeGwId === nextGwId ? `Gameweek ${nextGwId} — Predicted` : `Gameweek ${activeGwId} — Last played`;
-      document.getElementById('myGwLabel').textContent  = gwLabel;
-      document.getElementById('myTotalPts').textContent = predicted.toFixed(1) + ' pts';
-
-      document.getElementById('myRowFwd').innerHTML = fwds.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowMid').innerHTML = mids.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowDef').innerHTML = defs.map(p => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
-      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => cardHTML(p, p.is_captain, p.is_vice_captain)).join('');
+      // Render starting XI
+      document.getElementById('myRowFwd').innerHTML = fwds.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowMid').innerHTML = mids.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowDef').innerHTML = defs.map(p => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
+      document.getElementById('myRowGkp').innerHTML = gkp.map(p  => myCardHTML(p, lastOppMap, actualPts(p), p.is_captain, p.is_vice_captain)).join('');
 
       const benchLabels = ['GKP', '1. SUB', '2. SUB', '3. SUB'];
       document.getElementById('myBench').innerHTML = benchPicks.slice(0,4)
-        .map((p,i) => benchCardHTML(p, benchLabels[i] || (i+1)+'.'))
+        .map((p,i) => myBenchCardHTML(p, benchLabels[i]||`${i+1}.`, lastOppMap, actualPts(p)))
         .join('');
 
       statusEl.style.display   = 'none';
@@ -686,32 +608,35 @@
     } catch (err) {
       statusEl.textContent = err.message || 'Could not load team.';
       statusEl.classList.add('error');
-      // Show fallback input so user can retry with different ID
       document.getElementById('myInputFallback').style.display = '';
     }
   }
 
-  function loadMyTeamFallback() {
-    const id = document.getElementById('teamIdInputFallback').value.trim();
-    loadMyTeam(id);
-  }
-
-  // Allow Enter key in team ID input
   document.addEventListener('keydown', e => {
     if (e.key === 'Enter') {
-      if (document.activeElement === document.getElementById('teamIdInput')) loadMyTeam();
-      if (document.activeElement === document.getElementById('teamIdInputFallback')) loadMyTeamFallback();
+      if (document.activeElement.id === 'teamIdInput') loadMyTeam();
+      if (document.activeElement.id === 'teamIdInputFb') {
+        loadMyTeam(document.getElementById('teamIdInputFb').value);
+      }
     }
   });
 
-  // ── Main init ──
+  async function buildOppMap(fixtures, target) {
+    fixtures.forEach(f => {
+      const h = teamMap[f.team_h], a = teamMap[f.team_a];
+      if (h && a) {
+        target[f.team_h] = `${a.short_name} (H)`;
+        target[f.team_a] = `${h.short_name} (A)`;
+      }
+    });
+  }
+
   async function init() {
     const statusEl = document.getElementById('predStatus');
     try {
       statusEl.textContent = 'Fetching FPL data...';
       bootstrap = await fetchFPL('bootstrap-static/');
 
-      // Build team lookup
       bootstrap.teams.forEach(t => { teamMap[t.id] = t; });
       bootstrap.elements.forEach(el => { elementMap[el.id] = el; });
 
@@ -721,22 +646,17 @@
       nextGwId = nextEv.id;
       lastGwId = lastEv ? lastEv.id : nextGwId - 1;
 
-      statusEl.textContent = `Fetching GW${nextGwId} fixtures...`;
-      const fixtures = await fetchFPL(`fixtures/?event=${nextGwId}`);
-      fixtures.forEach(f => {
-        fixtureMap[f.team_h] = f;
-        fixtureMap[f.team_a] = f;
-      });
+      statusEl.textContent = `Fetching fixtures...`;
 
-      // Build opponent map: team_id → "ARS (H)"
-      fixtures.forEach(f => {
-        const homeTeam = teamMap[f.team_h];
-        const awayTeam = teamMap[f.team_a];
-        if (homeTeam && awayTeam) {
-          opponentMap[f.team_h] = `${awayTeam.short_name} (H)`;
-          opponentMap[f.team_a] = `${homeTeam.short_name} (A)`;
-        }
-      });
+      // Fetch next GW + last GW fixtures in parallel
+      const [nextFixtures, lastFixtures] = await Promise.all([
+        fetchFPL(`fixtures/?event=${nextGwId}`),
+        fetchFPL(`fixtures/?event=${lastGwId}`)
+      ]);
+
+      nextFixtures.forEach(f => { fixtureMap[f.team_h] = f; fixtureMap[f.team_a] = f; });
+      buildOppMap(nextFixtures, nextOppMap);
+      buildOppMap(lastFixtures, lastOppMap);
 
       statusEl.textContent = 'Building predicted XI...';
 
@@ -744,11 +664,11 @@
       scored.forEach(p => { elementMap[p.id] = p; });
 
       const squad = selectSquad442(scored);
-      if (squad.length < 15) throw new Error('Budget too tight. Check API data.');
+      if (squad.length < 15) throw new Error('Budget too tight.');
 
       renderPredicted(buildLineup442(squad));
 
-      // Auto-load default team after predicted XI is ready
+      // Auto-load default team
       await loadMyTeam(DEFAULT_TEAM_ID);
 
     } catch (err) {
