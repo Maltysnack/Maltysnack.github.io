@@ -242,6 +242,53 @@
     .fpl-botr-row {
       display: flex; flex-wrap: wrap; justify-content: center; gap: 8px;
     }
+
+    /* ── Prediction Tracker ── */
+    .fpl-tracker {
+      margin-top: 40px;
+      font-family: system-ui, sans-serif;
+    }
+    .fpl-tracker-header {
+      display: flex; align-items: center; justify-content: space-between;
+      margin-bottom: 8px;
+    }
+    .fpl-tracker-title {
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #37003c;
+    }
+    .fpl-tracker-total {
+      font-size: 0.72rem; font-weight: 800; padding: 3px 12px;
+      border-radius: 100px; white-space: nowrap;
+    }
+    .fpl-tracker-total.pos { background: #00ff87; color: #37003c; }
+    .fpl-tracker-total.neg { background: #ff4d4d; color: #fff; }
+    .fpl-tracker-total.neu { background: #dfe1e5; color: #37003c; }
+    .fpl-tracker-bar {
+      background: #37003c; color: #fff;
+      display: grid; grid-template-columns: 60px 1fr 1fr 1fr;
+      font-size: 0.62rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 6px 14px;
+      border-radius: 6px 6px 0 0; gap: 0;
+    }
+    .fpl-tracker-body {
+      background: #dfe1e5;
+      border-radius: 0 0 6px 6px;
+      overflow: hidden;
+    }
+    .fpl-tracker-row {
+      display: grid; grid-template-columns: 60px 1fr 1fr 1fr;
+      padding: 7px 14px; font-size: 0.72rem; align-items: center;
+      border-bottom: 1px solid #c8cad0;
+    }
+    .fpl-tracker-row:last-child { border-bottom: none; }
+    .fpl-tracker-row:nth-child(even) { background: #e8eaee; }
+    .fpl-tracker-gw { font-weight: 700; color: #37003c; }
+    .fpl-tracker-pred { color: #00cc6a; font-weight: 700; }
+    .fpl-tracker-act  { color: #c07800; font-weight: 700; }
+    .fpl-tracker-diff { font-weight: 800; }
+    .fpl-tracker-diff.pos { color: #00aa55; }
+    .fpl-tracker-diff.neg { color: #cc2200; }
+    .fpl-tracker-empty { padding: 24px 14px; font-size: 0.78rem; color: #888; text-align: center; background: #dfe1e5; border-radius: 0 0 6px 6px; }
   </style>
 </head>
 <body>
@@ -341,6 +388,18 @@
       <div class="fpl-botr-body">
         <div class="fpl-botr-row" id="botrRow"></div>
       </div>
+    </div>
+
+    <!-- Prediction Tracker -->
+    <div class="fpl-tracker" id="trackerSection" style="display:none">
+      <div class="fpl-tracker-header">
+        <div class="fpl-tracker-title">Prediction Tracker</div>
+        <div class="fpl-tracker-total neu" id="trackerTotal">—</div>
+      </div>
+      <div class="fpl-tracker-bar">
+        <div>GW</div><div>Predicted</div><div>Actual</div><div>+/−</div>
+      </div>
+      <div id="trackerBody"></div>
     </div>
 
   </div>
@@ -719,10 +778,52 @@
       // Auto-load default team
       await loadMyTeam(DEFAULT_TEAM_ID);
 
+      // Load prediction tracker
+      loadTracker();
+
     } catch (err) {
       statusEl.textContent = 'Could not load FPL data. ' + err.message;
       statusEl.classList.add('error');
       console.error(err);
+    }
+  }
+
+  async function loadTracker() {
+    try {
+      const res = await fetch('/projects/fpl-history.json?t=' + Date.now());
+      if (!res.ok) return;
+      const data = await res.json();
+      const weeks = (data.weeks || []).slice().sort((a, b) => a.gwId - b.gwId);
+      if (!weeks.length) return;
+
+      const section   = document.getElementById('trackerSection');
+      const body      = document.getElementById('trackerBody');
+      const totalEl   = document.getElementById('trackerTotal');
+      section.style.display = '';
+
+      let runningDiff = 0;
+      let html = '';
+
+      weeks.forEach(w => {
+        const diff = (w.actualTotal || 0) - (w.predictedTotal || 0);
+        runningDiff += diff;
+        const sign     = diff >= 0 ? '+' : '';
+        const diffCls  = diff > 0 ? 'pos' : diff < 0 ? 'neg' : '';
+        html += `<div class="fpl-tracker-row">
+          <div class="fpl-tracker-gw">GW${w.gwId}</div>
+          <div class="fpl-tracker-pred">${(w.predictedTotal || 0).toFixed(1)}</div>
+          <div class="fpl-tracker-act">${w.actualTotal ?? '—'}</div>
+          <div class="fpl-tracker-diff ${diffCls}">${w.actualTotal != null ? sign + diff.toFixed(1) : '—'}</div>
+        </div>`;
+      });
+
+      body.innerHTML = html || '<div class="fpl-tracker-empty">No completed gameweeks recorded yet.</div>';
+
+      const sign = runningDiff >= 0 ? '+' : '';
+      totalEl.textContent = `Overall ${sign}${runningDiff.toFixed(1)} pts`;
+      totalEl.className = 'fpl-tracker-total ' + (runningDiff > 0 ? 'pos' : runningDiff < 0 ? 'neg' : 'neu');
+    } catch (e) {
+      // silently skip if history file doesn't exist yet
     }
   }
 
