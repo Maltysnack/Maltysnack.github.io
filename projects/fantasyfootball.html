@@ -295,6 +295,57 @@
     .fpl-tracker-diff.pos { color: #00aa55; }
     .fpl-tracker-diff.neg { color: #cc2200; }
     .fpl-tracker-empty { padding: 24px 14px; font-size: 0.78rem; color: #888; text-align: center; background: #dfe1e5; border-radius: 0 0 6px 6px; }
+
+    /* ── Captain pick ── */
+    .fpl-captain {
+      margin-top: 10px; background: #37003c; border-radius: 6px;
+      padding: 10px 14px; font-family: system-ui, sans-serif;
+    }
+    .fpl-captain-row { display: flex; align-items: center; gap: 10px; margin-bottom: 5px; }
+    .fpl-captain-label { font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(255,255,255,0.5); white-space: nowrap; }
+    .fpl-captain-name { font-size: 0.88rem; font-weight: 800; color: #fff; flex: 1; }
+    .fpl-captain-pts { background: #00ff87; color: #37003c; font-size: 0.7rem; font-weight: 800; padding: 2px 8px; border-radius: 100px; }
+    .fpl-captain-tags { display: flex; gap: 4px; flex-wrap: wrap; }
+    .fpl-captain-tag { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 3px; }
+
+    /* ── Chip advisor ── */
+    .fpl-chips { margin-top: 10px; font-family: system-ui, sans-serif; }
+    .fpl-chips-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; }
+    .fpl-chips-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
+    .fpl-chip { display: flex; align-items: flex-start; gap: 8px; background: #fff; border-radius: 5px; padding: 8px 10px; }
+    .fpl-chip-name { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; min-width: 80px; margin-top: 1px; }
+    .fpl-chip.ready .fpl-chip-name { color: #00aa55; }
+    .fpl-chip.caution .fpl-chip-name { color: #c07800; }
+    .fpl-chip.hold .fpl-chip-name { color: #999; }
+    .fpl-chip-advice { font-size: 0.68rem; color: #444; line-height: 1.45; }
+
+    /* ── Transfer suggestions ── */
+    .fpl-transfers { margin-top: 10px; font-family: system-ui, sans-serif; }
+    .fpl-transfers-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: center; }
+    .fpl-transfers-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
+    .fpl-transfer-row { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 5px; padding: 7px 10px; }
+    .fpl-transfer-player { flex: 1; min-width: 0; }
+    .fpl-transfer-name { font-size: 0.72rem; font-weight: 700; color: #37003c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .fpl-transfer-meta { font-size: 0.57rem; color: #888; margin-top: 1px; }
+    .fpl-transfer-arrow { color: #37003c; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
+    .fpl-transfer-stat { text-align: right; flex-shrink: 0; }
+    .fpl-transfer-gain { font-size: 0.68rem; font-weight: 800; color: #00aa55; }
+    .fpl-transfer-cost { font-size: 0.57rem; color: #888; }
+
+    /* ── Price watch ── */
+    .fpl-pricewatch { margin-top: 32px; font-family: system-ui, sans-serif; }
+    .fpl-pricewatch-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; }
+    .fpl-pricewatch-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 12px 14px; display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .fpl-pw-col-title { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+    .fpl-pw-col-title.rising { color: #00aa55; }
+    .fpl-pw-col-title.falling { color: #cc2200; }
+    .fpl-pw-player { display: flex; align-items: center; justify-content: space-between; padding: 4px 0; border-bottom: 1px solid #c8cad0; font-size: 0.72rem; }
+    .fpl-pw-player:last-child { border-bottom: none; }
+    .fpl-pw-name { font-weight: 600; color: #37003c; }
+    .fpl-pw-club { color: #999; font-weight: 400; }
+    .fpl-pw-change.up { color: #00aa55; font-weight: 800; }
+    .fpl-pw-change.dn { color: #cc2200; font-weight: 800; }
+    .fpl-pw-change.soon { color: #888; font-size: 0.62rem; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -336,6 +387,15 @@
           <div class="fpl-bench-wrap">
             <div class="fpl-bench-label">Substitutes</div>
             <div class="fpl-bench-row" id="predBench"></div>
+          </div>
+          <!-- Captain pick -->
+          <div id="captainCard" style="display:none" class="fpl-captain">
+            <div class="fpl-captain-row">
+              <span class="fpl-captain-label">Captain</span>
+              <span class="fpl-captain-name" id="captainName"></span>
+              <span class="fpl-captain-pts" id="captainPts"></span>
+            </div>
+            <div class="fpl-captain-tags" id="captainTags"></div>
           </div>
         </div>
       </div>
@@ -385,6 +445,19 @@
             <button class="fpl-team-btn" onclick="loadMyTeam(document.getElementById('teamIdInputFb').value)">Load</button>
           </div>
         </div>
+        <!-- Chip advisor -->
+        <div id="chipSection" style="display:none" class="fpl-chips">
+          <div class="fpl-chips-bar">Chip Advisor</div>
+          <div class="fpl-chips-body" id="chipsBody"></div>
+        </div>
+        <!-- Transfer suggestions -->
+        <div id="transferSection" style="display:none" class="fpl-transfers">
+          <div class="fpl-transfers-bar">
+            <span>Suggested Transfers</span>
+            <span id="transferBank" style="font-size:0.62rem;opacity:0.7;font-weight:400;text-transform:none;letter-spacing:0"></span>
+          </div>
+          <div class="fpl-transfers-body" id="transferBody"></div>
+        </div>
       </div>
 
     </div>
@@ -396,6 +469,12 @@
       <div class="fpl-botr-body">
         <div class="fpl-botr-row" id="botrRow"></div>
       </div>
+    </div>
+
+    <!-- Price Watch -->
+    <div class="fpl-pricewatch" id="priceSection" style="display:none">
+      <div class="fpl-pricewatch-bar">Price Watch</div>
+      <div class="fpl-pricewatch-body" id="priceBody"></div>
     </div>
 
     <!-- Prediction Tracker -->
@@ -718,6 +797,132 @@
     document.getElementById('botrSection').style.display = '';
   }
 
+  function renderCaptainPick(starting) {
+    const all = [...starting.gkp, ...starting.def, ...starting.mid, ...starting.fwd];
+    const cap = all.reduce((best, p) => p.predicted > best.predicted ? p : best);
+    const tags = [];
+    if (cap.penalties_order === 1) tags.push('pen taker');
+    const fixList = fixtureMap[cap.team] || [];
+    if (fixList.length > 1) tags.push('DGW');
+    if (fixList[0]) {
+      if (fixList[0].team_h === cap.team) tags.push('home');
+      const odds = oddsMap[cap.team];
+      if (odds?.winProb > 0.60) tags.push(`${Math.round(odds.winProb * 100)}% win prob`);
+    }
+    const opp = nextOppMap[cap.team] || '';
+    if (opp) tags.push(opp);
+    document.getElementById('captainName').textContent = displayName(cap.web_name);
+    document.getElementById('captainPts').textContent  = cap.predicted.toFixed(1) + ' pts';
+    document.getElementById('captainTags').innerHTML   = tags.map(t => `<span class="fpl-captain-tag">${t}</span>`).join('');
+    document.getElementById('captainCard').style.display = '';
+  }
+
+  function renderPriceWatch() {
+    const ps = bootstrap.elements.filter(p => p.minutes > 0 && p.status !== 'u');
+    const risen  = ps.filter(p => p.cost_change_event > 0).sort((a,b) => b.cost_change_event - a.cost_change_event).slice(0,4);
+    const fallen = ps.filter(p => p.cost_change_event < 0).sort((a,b) => a.cost_change_event - b.cost_change_event).slice(0,4);
+    const net    = p => p.transfers_in_event - p.transfers_out_event;
+    const stable = ps.filter(p => p.cost_change_event === 0);
+    const soonUp = stable.filter(p => net(p) >  80000).sort((a,b) => net(b)-net(a)).slice(0,3);
+    const soonDn = stable.filter(p => net(p) < -80000).sort((a,b) => net(a)-net(b)).slice(0,3);
+
+    const allUp = [
+      ...risen.map(p  => ({ p, label: `+£${p.cost_change_event/10}m`,          cls:'up' })),
+      ...soonUp.map(p => ({ p, label: '↑ likely',                              cls:'soon' }))
+    ].slice(0,5);
+    const allDn = [
+      ...fallen.map(p => ({ p, label: `-£${Math.abs(p.cost_change_event)/10}m`, cls:'dn' })),
+      ...soonDn.map(p => ({ p, label: '↓ likely',                              cls:'soon' }))
+    ].slice(0,5);
+
+    if (!allUp.length && !allDn.length) return;
+    const row = ({p, label, cls}) => `<div class="fpl-pw-player">
+      <span class="fpl-pw-name">${displayName(p.web_name)} <span class="fpl-pw-club">${teamMap[p.team]?.short_name||''}</span></span>
+      <span class="fpl-pw-change ${cls}">${label}</span></div>`;
+    const none = '<div style="font-size:0.7rem;color:#888;padding:4px 0">None this GW</div>';
+    document.getElementById('priceBody').innerHTML =
+      `<div><div class="fpl-pw-col-title rising">Rising</div>${allUp.map(row).join('')||none}</div>` +
+      `<div><div class="fpl-pw-col-title falling">Falling</div>${allDn.map(row).join('')||none}</div>`;
+    document.getElementById('priceSection').style.display = '';
+  }
+
+  function renderChipAdvisor(chipsUsed) {
+    const used   = new Set(chipsUsed.map(c => c.name));
+    const wcUsed = chipsUsed.filter(c => c.name === 'wildcard').length;
+    const chips  = { wc: wcUsed < 2, bb: !used.has('bboost'), tc: !used.has('3xc'), fh: !used.has('freehit') };
+    const hasDGW = Object.values(fixtureMap).some(fl => fl.length > 1);
+    const blankCount = bootstrap.teams.filter(t => !fixtureMap[t.id]).length;
+    const topPred = Object.values(elementMap).filter(p => p.predicted > 0).sort((a,b) => b.predicted - a.predicted)[0];
+
+    const advice = [];
+    if (chips.bb) advice.push(hasDGW
+      ? { chip:'Bench Boost', cls:'ready',  text:'DGW next — strong activation window.' }
+      : { chip:'Bench Boost', cls:'hold',   text:'Hold for a double gameweek.' });
+    if (chips.tc && topPred) {
+      const dgw = (fixtureMap[topPred.team]||[]).length > 1;
+      const wp  = oddsMap[topPred.team]?.winProb || 0;
+      advice.push((dgw || wp > 0.68)
+        ? { chip:'Triple Captain', cls:'ready',  text:`${displayName(topPred.web_name)} (${topPred.predicted.toFixed(1)}pts)${dgw?' — DGW':wp>0.68?` — ${Math.round(wp*100)}% win prob`:''}` }
+        : { chip:'Triple Captain', cls:'hold',   text:'Hold for a DGW or dominant home favourite.' });
+    }
+    if (chips.fh) advice.push(blankCount >= 6
+      ? { chip:'Free Hit',       cls:'ready',   text:`${blankCount} teams blank — ideal for a temporary squad.` }
+      : { chip:'Free Hit',       cls:'hold',    text:'Hold for a blank gameweek (6+ teams missing).' });
+    if (chips.wc) advice.push(
+      { chip:'Wildcard',         cls:'caution', text:'Available — use when your squad needs a full overhaul.' });
+
+    if (!advice.length) return;
+    document.getElementById('chipsBody').innerHTML = advice.map(a =>
+      `<div class="fpl-chip ${a.cls}"><div class="fpl-chip-name">${a.chip}</div><div class="fpl-chip-advice">${a.text}</div></div>`
+    ).join('');
+    document.getElementById('chipSection').style.display = '';
+  }
+
+  function renderTransferSuggestions(picks, bank) {
+    const squadIds  = new Set(picks.map(p => p.id));
+    const clubCount = {};
+    picks.forEach(p => { clubCount[p.team] = (clubCount[p.team]||0) + 1; });
+    const pos = {1:'GKP',2:'DEF',3:'MID',4:'FWD'};
+    const suggestions = [];
+
+    for (const curr of picks.filter(p => p.position <= 11)) {
+      const budget = (curr.selling_price || curr.now_cost) + bank;
+      const best   = Object.values(elementMap).filter(p =>
+        p.element_type === curr.element_type &&
+        !squadIds.has(p.id) && p.now_cost <= budget &&
+        (clubCount[p.team]||0) < 3 && (p.predicted||0) > 0 && p.minutes > 0
+      ).sort((a,b) => (b.predicted||0)-(a.predicted||0))[0];
+      if (!best) continue;
+      const gain = (best.predicted||0) - (curr.predicted||0);
+      if (gain < 0.5) continue;
+      suggestions.push({ out:curr, in:best, gain, diff: best.now_cost-(curr.selling_price||curr.now_cost) });
+    }
+
+    const top = suggestions.sort((a,b)=>b.gain-a.gain).slice(0,3);
+    if (!top.length) return;
+
+    document.getElementById('transferBank').textContent = `Bank: £${(bank/10).toFixed(1)}m`;
+    document.getElementById('transferBody').innerHTML = top.map(s => {
+      const diffStr = s.diff > 0 ? `+£${(s.diff/10).toFixed(1)}m` : s.diff < 0 ? `-£${(Math.abs(s.diff)/10).toFixed(1)}m` : 'same cost';
+      return `<div class="fpl-transfer-row">
+        <div class="fpl-transfer-player">
+          <div class="fpl-transfer-name">${displayName(s.out.web_name)}</div>
+          <div class="fpl-transfer-meta">${pos[s.out.element_type]} · ${(s.out.predicted||0).toFixed(1)}pts</div>
+        </div>
+        <div class="fpl-transfer-arrow">→</div>
+        <div class="fpl-transfer-player">
+          <div class="fpl-transfer-name">${displayName(s.in.web_name)}</div>
+          <div class="fpl-transfer-meta">${pos[s.in.element_type]} · ${(s.in.predicted||0).toFixed(1)}pts</div>
+        </div>
+        <div class="fpl-transfer-stat">
+          <div class="fpl-transfer-gain">+${s.gain.toFixed(1)}pts</div>
+          <div class="fpl-transfer-cost">${diffStr}</div>
+        </div>
+      </div>`;
+    }).join('');
+    document.getElementById('transferSection').style.display = '';
+  }
+
   async function loadMyTeam(idOverride) {
     const inputEl = document.getElementById('teamIdInput');
     const teamId  = idOverride || (inputEl ? inputEl.value.trim() : '');
@@ -735,9 +940,10 @@
 
     try {
       // Always load last GW — that's where actual points live
-      const [picksData, liveData] = await Promise.all([
+      const [picksData, liveData, entryData] = await Promise.all([
         fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`),
-        fetchFPL(`event/${lastGwId}/live/`)
+        fetchFPL(`event/${lastGwId}/live/`),
+        fetchFPL(`entry/${teamId}/`)
       ]);
 
       // Build actual points map: player_id → points (accounting for captaincy)
@@ -753,7 +959,8 @@
         is_captain: pk.is_captain,
         is_vice_captain: pk.is_vice_captain,
         multiplier: pk.multiplier,
-        position: pk.position
+        position: pk.position,
+        selling_price: pk.selling_price
       })).filter(p => p && p.id);
 
       const startingPicks = allPicks.filter(p => p.position <= 11);
@@ -796,6 +1003,9 @@
 
       statusEl.style.display   = 'none';
       outerEl.style.display    = '';
+
+      renderChipAdvisor(entryData.chips || []);
+      renderTransferSuggestions(allPicks, entryHistory.bank || 0);
 
     } catch (err) {
       statusEl.textContent = err.message || 'Could not load team.';
@@ -872,7 +1082,9 @@
 
       const lineup = buildLineup442(squad);
       renderPredicted(lineup);
+      renderCaptainPick(lineup.starting);
       renderBestOfRest(squad, scored);
+      renderPriceWatch();
 
       // Auto-load default team
       await loadMyTeam(DEFAULT_TEAM_ID);
