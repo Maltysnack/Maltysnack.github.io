@@ -23,12 +23,6 @@
   --red-muted:    #b84040;
   --red-border:   #e0c0c0;
 
-  --tag-film:     #eef3fb;
-  --tag-quiz:     #edf5ee;
-  --tag-project:  #fdf4e8;
-  --tag-writing:  #f3eef8;
-  --tag-rebels:   #faf0f0;
-
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body:    'Source Serif 4', Georgia, serif;
 
@@ -188,14 +182,6 @@ ul {
   font-weight: 400;
 }
 
-/* Red Rebels link */
-.nav-rebels {
-  color: var(--red) !important;
-}
-.nav-rebels:hover {
-  color: var(--red-hover) !important;
-}
-
 /* Sidebar footer */
 .sidebar-footer {
   margin-top: 28px;
@@ -269,98 +255,64 @@ ul {
 }
 
 
-/* ── FEED ──────────────────────────── */
-.feed-heading {
-  font-family: var(--font-body);
-  font-size: 0.68rem;
+/* ── HOME CARDS ────────────────────── */
+.home-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.home-card {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--border-light);
+  color: var(--text);
+  text-decoration: none;
+  transition: opacity 0.15s ease;
+}
+
+.home-card:first-child {
+  border-top: 1px solid var(--border-light);
+}
+
+.home-card:hover {
+  opacity: 1;
+}
+
+.home-card:hover .home-card-title {
+  color: var(--text-muted);
+}
+
+.home-card:hover .home-card-arrow {
+  opacity: 1;
+  transform: translateX(3px);
+}
+
+.home-card-label {
+  font-size: 0.65rem;
   font-weight: 400;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 28px;
+  width: 54px;
+  flex-shrink: 0;
 }
 
-/* Post cards */
-.post-card {
-  padding: 24px 0;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.post-card:first-of-type {
-  border-top: 1px solid var(--border-light);
-}
-
-.post-meta {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 8px;
-}
-
-.post-tag {
-  font-size: 0.62rem;
-  font-family: var(--font-body);
-  font-weight: 400;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-  padding: 2px 8px;
-  border-radius: 2px;
-}
-
-.post-tag--film    { background: var(--tag-film);    color: #4070b0; }
-.post-tag--quiz    { background: var(--tag-quiz);    color: #307040; }
-.post-tag--project { background: var(--tag-project); color: #a06000; }
-.post-tag--writing { background: var(--tag-writing); color: #7040a0; }
-.post-tag--rebels  { background: var(--tag-rebels);  color: var(--red); }
-
-.post-date {
-  font-size: 0.78rem;
-  color: var(--text-dim);
-}
-
-.post-title {
+.home-card-title {
   font-family: var(--font-display);
-  font-size: 1.2rem;
+  font-size: 1.05rem;
   font-weight: 600;
-  line-height: 1.35;
-  margin-bottom: 8px;
-}
-
-.post-title a {
   color: var(--text);
-  text-decoration: none;
+  flex: 1;
   transition: color 0.15s ease;
 }
 
-.post-title a:hover {
-  opacity: 1;
-  color: var(--text-muted);
-}
-
-.post-excerpt {
-  font-size: 0.92rem;
-  color: var(--text-muted);
-  line-height: 1.75;
-  max-width: 520px;
-}
-
-.post-excerpt + .post-cta {
-  margin-top: 12px;
-}
-
-.post-cta {
-  display: inline-block;
-  font-size: 0.82rem;
-  font-weight: 300;
-  color: var(--text-muted);
-  letter-spacing: 0.02em;
-  border-bottom: 1px solid var(--border);
-}
-
-.post-cta:hover {
-  opacity: 1;
-  color: var(--text);
-  border-bottom-color: var(--text);
+.home-card-arrow {
+  font-size: 0.9rem;
+  color: var(--text-dim);
+  opacity: 0;
+  transition: opacity 0.15s ease, transform 0.15s ease;
 }
 
 

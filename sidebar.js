@@ -1,6 +1,6 @@
 /* ═══════════════════════════════════════
-   sidebar.js — universal sidebar
-   Include on every page. Edit here only.
+   sidebar.js — universal nav
+   Single source of truth. Edit here only.
    Uses root-relative paths for GitHub Pages.
    Mobile: collapses to hamburger dropdown.
 ═══════════════════════════════════════ */
@@ -32,45 +32,23 @@
         <div class="nav-section">
           <span class="nav-label">Films</span>
           <ul>
-            <li><a href="/films/haikureview.html" ${active('/films/haikureview.html')}>haikureview</a></li>
-            <li><a href="/films/SPOILERALERT.html" ${active('/films/SPOILERALERT.html')}>SPOILERALERT</a></li>
+            <li><a href="/films/filmclub.html" ${active('/films/filmclub.html')}>Filmclub</a></li>
           </ul>
         </div>
 
         <div class="nav-section">
           <span class="nav-label">Projects</span>
           <ul>
-            <li><a href="/projects/yonder.html" ${active('/projects/yonder.html')}>Yonder</a></li>
-            <li><a href="/projects/mothership.html" ${active('/projects/mothership.html')}>Mothership</a></li>
-            <li><a href="/projects/trolley-run.html" ${active('/projects/trolley-run.html')}>Trolley Run</a></li>
             <li><a href="/projects/saltysnacks.html" ${active('/projects/saltysnacks.html')}>Saltysnacks</a></li>
-            <li><a href="/projects/sidequest.html" ${active('/projects/sidequest.html')}>SideQuest</a></li>
             <li><a href="/projects/fantasyfootball.html" ${active('/projects/fantasyfootball.html')}>FPL Predicted XI</a></li>
-          </ul>
-        </div>
-
-        <div class="nav-section">
-          <span class="nav-label">Words</span>
-          <ul>
-            <li><a href="/writings/thoughts.html" ${active('/writings/thoughts.html')}>Thoughts</a></li>
-            <li><a href="/writings/poems.html" ${active('/writings/poems.html')}>Poems</a></li>
-          </ul>
-        </div>
-
-        <div class="nav-section">
-          <span class="nav-label">Games</span>
-          <ul>
-            <li><a href="/games/mtgarena.html" ${active('/games/mtgarena.html')}>MTG Arena</a></li>
           </ul>
         </div>
 
         <div class="nav-section">
           <span class="nav-label">More</span>
           <ul>
-            <li><a href="/red-rebels.html" class="nav-rebels" ${active('/red-rebels.html')}>Red Rebels</a></li>
             <li><a href="/proveyourself.html" ${active('/proveyourself.html')}>proveyourself</a></li>
-            <li><a href="/busyboy.html" ${active('/busyboy.html')}>BusyBoy</a></li>
-            <li><a href="/shop.html" ${active('/shop.html')}>Shop</a></li>
+            <li><a href="/cv.html" ${active('/cv.html')}>CV</a></li>
           </ul>
         </div>
 
@@ -100,9 +78,8 @@
   if (el) {
     el.innerHTML = html;
 
-    // Hamburger toggle for mobile
     const toggle = document.getElementById('sidebar-toggle');
-    const body = document.getElementById('sidebar-body');
+    const body   = document.getElementById('sidebar-body');
     if (toggle && body) {
       toggle.addEventListener('click', function () {
         const open = body.classList.toggle('open');
