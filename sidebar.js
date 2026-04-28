@@ -1,8 +1,7 @@
 /* ═══════════════════════════════════════
    sidebar.js — universal nav
    Single source of truth. Edit here only.
-   Uses root-relative paths for GitHub Pages.
-   Mobile: collapses to hamburger dropdown.
+   Dark sidebar. Root-relative paths.
 ═══════════════════════════════════════ */
 
 (function () {
