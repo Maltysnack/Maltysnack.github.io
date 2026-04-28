@@ -417,15 +417,28 @@
     17:'#D00027',20:'#d71920',6:'#132257',57:'#7B2C2C',39:'#003090'
   };
 
+  const ODDS_API_KEY = 'c1f1ba7993be593974fe883ab413725c';
+  const ODDS_TEAM_MAP = {
+    'Arsenal':'Arsenal','Aston Villa':'Aston Villa','Bournemouth':'Bournemouth',
+    'Brentford':'Brentford','Brighton':'Brighton and Hove Albion','Burnley':'Burnley',
+    'Chelsea':'Chelsea','Crystal Palace':'Crystal Palace','Everton':'Everton',
+    'Fulham':'Fulham','Leeds':'Leeds United','Liverpool':'Liverpool',
+    'Man City':'Manchester City','Man Utd':'Manchester United',
+    'Newcastle':'Newcastle United',"Nott'm Forest":'Nottingham Forest',
+    'Spurs':'Tottenham Hotspur','Sunderland':'Sunderland',
+    'West Ham':'West Ham United','Wolves':'Wolverhampton Wanderers'
+  };
+
   let bootstrap    = null;
-  let fixtureMap   = {};   // team_id → next GW fixture
-  let lastFixMap   = {};   // team_id → last GW fixture
+  let fixtureMap   = {};   // team_id → [fixture, ...] (array; >1 = DGW)
+  let lastFixMap   = {};   // team_id → [fixture, ...]
   let nextOppMap   = {};   // team_id → "ARS (H)" for next GW
   let lastOppMap   = {};   // team_id → "ARS (H)" for last GW
   let teamMap      = {};   // team_id → team object
   let nextGwId     = null;
   let lastGwId     = null;
   let elementMap   = {};
+  let oddsMap      = {};   // team_id → { winProb, pOver25 }
 
   async function fetchFPL(endpoint) {
     const res = await fetch(CORS + encodeURIComponent(FPL + endpoint));
@@ -433,43 +446,110 @@
     return res.json();
   }
 
-  // Predict score using a given fixture map (supports both next and last GW)
-  function predictScoreWithFixMap(player, fixMap) {
-    if (!fixMap[player.team]) return 0;
-    const ep   = parseFloat(player.ep_next) || 0;
-    const form = parseFloat(player.form)    || 0;
+  async function fetchOdds() {
+    try {
+      const res = await fetch(
+        `https://api.the-odds-api.com/v4/sports/soccer_epl/odds/?apiKey=${ODDS_API_KEY}&regions=uk&markets=h2h,totals&oddsFormat=decimal`
+      );
+      if (!res.ok) return;
+      const games = await res.json();
+      if (!Array.isArray(games)) return;
+
+      const avg = arr => arr.length ? arr.reduce((a, b) => a + b) / arr.length : 0;
+
+      const namesToId = {};
+      Object.values(teamMap).forEach(t => {
+        const oddsName = ODDS_TEAM_MAP[t.name];
+        if (oddsName) namesToId[oddsName] = t.id;
+      });
+
+      games.forEach(game => {
+        const homeId = namesToId[game.home_team];
+        const awayId = namesToId[game.away_team];
+        if (!homeId || !awayId) return;
+
+        const h2h = game.bookmakers.map(bk => bk.markets.find(m => m.key === 'h2h')?.outcomes).filter(Boolean);
+        const tot = game.bookmakers.map(bk => bk.markets.find(m => m.key === 'totals')?.outcomes).filter(Boolean);
+
+        if (h2h.length) {
+          const impliedProb = name => avg(h2h.map(outs => { const o = outs.find(x => x.name === name); return o ? 1/o.price : null; }).filter(p => p !== null));
+          const rawH = impliedProb(game.home_team), rawA = impliedProb(game.away_team), rawD = impliedProb('Draw');
+          const total = rawH + rawD + rawA;
+          if (total > 0) {
+            oddsMap[homeId] = { ...(oddsMap[homeId]||{}), winProb: rawH / total };
+            oddsMap[awayId] = { ...(oddsMap[awayId]||{}), winProb: rawA / total };
+          }
+        }
+
+        if (tot.length) {
+          const rawO = avg(tot.map(outs => { const o = outs.find(x => x.name === 'Over');  return o ? 1/o.price : null; }).filter(p => p !== null));
+          const rawU = avg(tot.map(outs => { const o = outs.find(x => x.name === 'Under'); return o ? 1/o.price : null; }).filter(p => p !== null));
+          const pOver25 = (rawO + rawU) > 0 ? rawO / (rawO + rawU) : 0.5;
+          oddsMap[homeId] = { ...(oddsMap[homeId]||{}), pOver25 };
+          oddsMap[awayId] = { ...(oddsMap[awayId]||{}), pOver25 };
+        }
+      });
+    } catch(e) {
+      console.warn('Odds fetch failed, using FDR fallback:', e.message);
+    }
+  }
+
+  // Core prediction — fixList is an array (length >1 = double gameweek)
+  function predictWithFixtures(player, fixList) {
+    if (!fixList || !fixList.length) return 0;
     const avail = player.chance_of_playing_next_round === null
       ? 1.0 : player.chance_of_playing_next_round / 100;
     if (avail === 0) return 0;
-    const fix    = fixMap[player.team];
+
+    const ep        = parseFloat(player.ep_next) || 0;
+    const form      = parseFloat(player.form)    || 0;
+    const seasonAvg = player.total_points / Math.max(1, player.minutes / 90);
+    const xgi90     = parseFloat(player.expected_goal_involvements_per_90) || 0;
+    const xgc90     = parseFloat(player.expected_goals_conceded_per_90)    || 0;
+    const isPenTaker = player.penalties_order === 1;
+
+    // Primary fixture for FDR fallback
+    const fix    = fixList[0];
     const isHome = fix.team_h === player.team;
     const fdr    = isHome ? fix.team_h_difficulty : fix.team_a_difficulty;
-    let fdrMod   = fdr === 2 ? 1.12 : fdr === 3 ? 1.00 : fdr === 4 ? 0.87 : 0.72;
-    fdrMod      *= isHome ? 1.04 : 0.97;
-    const seasonAvg = player.total_points / Math.max(1, player.minutes / 90);
-    const base = (ep * 0.55) + (form * 0.30) + (seasonAvg * 0.15);
-    return Math.max(0, parseFloat((base * fdrMod * avail).toFixed(2)));
+
+    // Use bookmaker win probability if available, else fall back to FDR
+    const odds = oddsMap[player.team];
+    const fixtureMod = (odds?.winProb !== undefined)
+      ? 0.75 + odds.winProb * 0.5
+      : (fdr === 2 ? 1.12 : fdr === 3 ? 1.00 : fdr === 4 ? 0.87 : 0.72) * (isHome ? 1.04 : 0.97);
+
+    // O/U 2.5 probability scales CS value for GKP/DEF (pOver25=0.5→1.0x, 0.2→1.3x, 0.8→0.7x)
+    const pOver25  = odds?.pOver25 ?? 0.5;
+    const csFactor = Math.max(0.3, 1.5 - pOver25);
+
+    let base;
+    if (player.element_type <= 2) {
+      // GKP / DEF: xGC + match-goals signal from odds
+      const csBonus = Math.max(0, 1.0 - xgc90 / 2.0) * 2.0 * csFactor;
+      base = ep * 0.45 + form * 0.20 + seasonAvg * 0.10 + csBonus * 0.25;
+    } else {
+      // MID / FWD: weight attacking returns via xGI
+      base = ep * 0.40 + xgi90 * 2.5 * 0.25 + form * 0.25 + seasonAvg * 0.10;
+    }
+
+    if (isPenTaker) base += 0.4;
+
+    // DGW: ep_next already reflects two fixtures; boost the non-ep components
+    if (fixList.length > 1) {
+      const epPart = player.element_type <= 2 ? ep * 0.45 : ep * 0.40;
+      base = epPart + (base - epPart) * 1.6;
+    }
+
+    return Math.max(0, parseFloat((base * fixtureMod * avail).toFixed(2)));
+  }
+
+  function predictScoreWithFixMap(player, fixMap) {
+    return predictWithFixtures(player, fixMap[player.team] || []);
   }
 
   function predictScore(player) {
-    // No fixture = no points
-    if (!fixtureMap[player.team]) return 0;
-
-    const ep   = parseFloat(player.ep_next) || 0;
-    const form = parseFloat(player.form)    || 0;
-    const avail = player.chance_of_playing_next_round === null
-      ? 1.0 : player.chance_of_playing_next_round / 100;
-    if (avail === 0) return 0;
-
-    const fix    = fixtureMap[player.team];
-    const isHome = fix.team_h === player.team;
-    const fdr    = isHome ? fix.team_h_difficulty : fix.team_a_difficulty;
-    let fdrMod   = fdr === 2 ? 1.12 : fdr === 3 ? 1.00 : fdr === 4 ? 0.87 : 0.72;
-    fdrMod      *= isHome ? 1.04 : 0.97;
-
-    const seasonAvg = player.total_points / Math.max(1, player.minutes / 90);
-    const base = (ep * 0.55) + (form * 0.30) + (seasonAvg * 0.15);
-    return Math.max(0, parseFloat((base * fdrMod * avail).toFixed(2)));
+    return predictWithFixtures(player, fixtureMap[player.team] || []);
   }
 
   function selectSquad442(players) {
@@ -726,12 +806,14 @@
     }
   });
 
-  async function buildOppMap(fixtures, target) {
+  function buildOppMap(fixtures, target) {
     fixtures.forEach(f => {
       const h = teamMap[f.team_h], a = teamMap[f.team_a];
       if (h && a) {
-        target[f.team_h] = `${a.short_name} (H)`;
-        target[f.team_a] = `${h.short_name} (A)`;
+        const hStr = `${a.short_name} (H)`;
+        const aStr = `${h.short_name} (A)`;
+        target[f.team_h] = target[f.team_h] ? target[f.team_h] + ' + ' + hStr : hStr;
+        target[f.team_a] = target[f.team_a] ? target[f.team_a] + ' + ' + aStr : aStr;
       }
     });
   }
@@ -753,14 +835,23 @@
 
       statusEl.textContent = `Fetching fixtures...`;
 
-      // Fetch next GW + last GW fixtures in parallel
+      // Fetch fixtures + odds in parallel
       const [nextFixtures, lastFixtures] = await Promise.all([
         fetchFPL(`fixtures/?event=${nextGwId}`),
-        fetchFPL(`fixtures/?event=${lastGwId}`)
+        fetchFPL(`fixtures/?event=${lastGwId}`),
+        fetchOdds()
       ]);
 
-      nextFixtures.forEach(f => { fixtureMap[f.team_h] = f; fixtureMap[f.team_a] = f; });
-      lastFixtures.forEach(f => { lastFixMap[f.team_h] = f; lastFixMap[f.team_a] = f; });
+      nextFixtures.forEach(f => {
+        if (!fixtureMap[f.team_h]) fixtureMap[f.team_h] = [];
+        if (!fixtureMap[f.team_a]) fixtureMap[f.team_a] = [];
+        fixtureMap[f.team_h].push(f); fixtureMap[f.team_a].push(f);
+      });
+      lastFixtures.forEach(f => {
+        if (!lastFixMap[f.team_h]) lastFixMap[f.team_h] = [];
+        if (!lastFixMap[f.team_a]) lastFixMap[f.team_a] = [];
+        lastFixMap[f.team_h].push(f); lastFixMap[f.team_a].push(f);
+      });
       buildOppMap(nextFixtures, nextOppMap);
       buildOppMap(lastFixtures, lastOppMap);
 
