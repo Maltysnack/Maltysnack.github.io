@@ -492,7 +492,7 @@
   </div>
 
   <script>
-  const CORS = 'https://corsproxy.io/?url=';
+  const CORS = ''; // FPL API supports CORS directly — no proxy needed
   const FPL  = 'https://fantasy.premierleague.com/api/';
   const DEFAULT_TEAM_ID = '6493589';
 
@@ -527,7 +527,7 @@
   let oddsMap      = {};   // team_id → { winProb, pOver25 }
 
   async function fetchFPL(endpoint) {
-    const res = await fetch(CORS + encodeURIComponent(FPL + endpoint));
+    const res = await fetch(FPL + endpoint);
     if (!res.ok) throw new Error('API ' + res.status);
     return res.json();
   }
