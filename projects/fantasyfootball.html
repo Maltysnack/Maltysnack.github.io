@@ -308,16 +308,6 @@
     .fpl-captain-tags { display: flex; gap: 4px; flex-wrap: wrap; }
     .fpl-captain-tag { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 3px; }
 
-    /* ── Chip advisor ── */
-    .fpl-chips { margin-top: 10px; font-family: system-ui, sans-serif; }
-    .fpl-chips-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; }
-    .fpl-chips-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 5px; }
-    .fpl-chip { display: flex; align-items: flex-start; gap: 8px; background: #fff; border-radius: 5px; padding: 8px 10px; }
-    .fpl-chip-name { font-size: 0.66rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; white-space: nowrap; min-width: 80px; margin-top: 1px; }
-    .fpl-chip.ready .fpl-chip-name { color: #00aa55; }
-    .fpl-chip.caution .fpl-chip-name { color: #c07800; }
-    .fpl-chip.hold .fpl-chip-name { color: #999; }
-    .fpl-chip-advice { font-size: 0.68rem; color: #444; line-height: 1.45; }
 
     /* ── Transfer suggestions ── */
     .fpl-transfers { margin-top: 10px; font-family: system-ui, sans-serif; }
@@ -444,11 +434,6 @@
                    value="6493589" min="1" placeholder="FPL team ID" />
             <button class="fpl-team-btn" onclick="loadMyTeam(document.getElementById('teamIdInputFb').value)">Load</button>
           </div>
-        </div>
-        <!-- Chip advisor -->
-        <div id="chipSection" style="display:none" class="fpl-chips">
-          <div class="fpl-chips-bar">Chip Advisor</div>
-          <div class="fpl-chips-body" id="chipsBody"></div>
         </div>
         <!-- Transfer suggestions -->
         <div id="transferSection" style="display:none" class="fpl-transfers">
@@ -686,6 +671,10 @@
   }
 
   // Strip leading initials: "B. Fernandes" → "Fernandes", "T.A. Arnold" → "Arnold"
+  function posLabel(elementType) {
+    return ['', 'GKP', 'DEF', 'MID', 'FWD'][elementType] || '';
+  }
+
   function displayName(webName) {
     return webName.replace(/^([A-Z]\.\s*)+/, '').trim() || webName;
   }
@@ -780,12 +769,9 @@
     document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, nextOppMap)).join('');
     document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, nextOppMap)).join('');
     document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, nextOppMap)).join('');
-    document.getElementById('predBench').innerHTML  = [
-      benchCardHTML(bench[0], 'GKP', nextOppMap),
-      benchCardHTML(bench[1], '1. SUB', nextOppMap),
-      benchCardHTML(bench[2], '2. SUB', nextOppMap),
-      benchCardHTML(bench[3], '3. SUB', nextOppMap)
-    ].join('');
+    document.getElementById('predBench').innerHTML  = bench.map(p =>
+      benchCardHTML(p, posLabel(p.element_type), nextOppMap)
+    ).join('');
 
     document.getElementById('predStatus').style.display = 'none';
     document.getElementById('predOuter').style.display  = '';
@@ -857,38 +843,6 @@
       `<div><div class="fpl-pw-col-title rising">Rising</div>${allUp.map(row).join('')||none}</div>` +
       `<div><div class="fpl-pw-col-title falling">Falling</div>${allDn.map(row).join('')||none}</div>`;
     document.getElementById('priceSection').style.display = '';
-  }
-
-  function renderChipAdvisor(chipsUsed) {
-    const used   = new Set(chipsUsed.map(c => c.name));
-    const wcUsed = chipsUsed.filter(c => c.name === 'wildcard').length;
-    const chips  = { wc: wcUsed < 2, bb: !used.has('bboost'), tc: !used.has('3xc'), fh: !used.has('freehit') };
-    const hasDGW = Object.values(fixtureMap).some(fl => fl.length > 1);
-    const blankCount = bootstrap.teams.filter(t => !fixtureMap[t.id]).length;
-    const topPred = Object.values(elementMap).filter(p => p.predicted > 0).sort((a,b) => b.predicted - a.predicted)[0];
-
-    const advice = [];
-    if (chips.bb) advice.push(hasDGW
-      ? { chip:'Bench Boost', cls:'ready',  text:'DGW next — strong activation window.' }
-      : { chip:'Bench Boost', cls:'hold',   text:'Hold for a double gameweek.' });
-    if (chips.tc && topPred) {
-      const dgw = (fixtureMap[topPred.team]||[]).length > 1;
-      const wp  = oddsMap[topPred.team]?.winProb || 0;
-      advice.push((dgw || wp > 0.68)
-        ? { chip:'Triple Captain', cls:'ready',  text:`${displayName(topPred.web_name)} (${topPred.predicted.toFixed(1)}pts)${dgw?' — DGW':wp>0.68?` — ${Math.round(wp*100)}% win prob`:''}` }
-        : { chip:'Triple Captain', cls:'hold',   text:'Hold for a DGW or dominant home favourite.' });
-    }
-    if (chips.fh) advice.push(blankCount >= 6
-      ? { chip:'Free Hit',       cls:'ready',   text:`${blankCount} teams blank — ideal for a temporary squad.` }
-      : { chip:'Free Hit',       cls:'hold',    text:'Hold for a blank gameweek (6+ teams missing).' });
-    if (chips.wc) advice.push(
-      { chip:'Wildcard',         cls:'caution', text:'Available — use when your squad needs a full overhaul.' });
-
-    if (!advice.length) return;
-    document.getElementById('chipsBody').innerHTML = advice.map(a =>
-      `<div class="fpl-chip ${a.cls}"><div class="fpl-chip-name">${a.chip}</div><div class="fpl-chip-advice">${a.text}</div></div>`
-    ).join('');
-    document.getElementById('chipSection').style.display = '';
   }
 
   function renderTransferSuggestions(picks, bank) {
@@ -1009,15 +963,14 @@
       document.getElementById('myRowDef').innerHTML = defs.map(p => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
       document.getElementById('myRowGkp').innerHTML = gkp.map(p  => myCardHTML(p, lastOppMap, actualPts(p), predLastGw(p), p.is_captain, p.is_vice_captain)).join('');
 
-      const benchLabels = ['GKP', '1. SUB', '2. SUB', '3. SUB'];
       document.getElementById('myBench').innerHTML = benchPicks.slice(0,4)
-        .map((p,i) => myBenchCardHTML(p, benchLabels[i]||`${i+1}.`, lastOppMap, actualPts(p), predLastGw(p)))
+        .map(p => myBenchCardHTML(p, posLabel(p.element_type), lastOppMap, actualPts(p), predLastGw(p)))
         .join('');
 
       statusEl.style.display   = 'none';
       outerEl.style.display    = '';
 
-      renderChipAdvisor(entryData.chips || []);
+
       renderTransferSuggestions(allPicks, entryHistory.bank || 0);
 
     } catch (err) {
