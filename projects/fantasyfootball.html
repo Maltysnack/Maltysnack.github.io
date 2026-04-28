@@ -492,9 +492,16 @@
   </div>
 
   <script>
-  const CORS = ''; // FPL API supports CORS directly — no proxy needed
   const FPL  = 'https://fantasy.premierleague.com/api/';
   const DEFAULT_TEAM_ID = '6493589';
+
+  // CORS proxies tried in order for live My Team requests
+  // (main data comes from fpl-api-cache.json — no proxy needed)
+  const LIVE_PROXIES = [
+    url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
+    url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
+    url => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`
+  ];
 
   const CLUB_COLOURS = {
     3:'#EF0107',7:'#6C1D45',91:'#d71920',94:'#e30613',36:'#0057B8',
@@ -526,10 +533,16 @@
   let elementMap   = {};
   let oddsMap      = {};   // team_id → { winProb, pOver25 }
 
+  // fetchFPL — tries each CORS proxy in turn (used only for My Team live data)
   async function fetchFPL(endpoint) {
-    const res = await fetch(FPL + endpoint);
-    if (!res.ok) throw new Error('API ' + res.status);
-    return res.json();
+    const target = FPL + endpoint;
+    for (const proxy of LIVE_PROXIES) {
+      try {
+        const res = await fetch(proxy(target));
+        if (res.ok) return res.json();
+      } catch(e) { /* try next */ }
+    }
+    throw new Error('All proxies failed for ' + endpoint);
   }
 
   async function fetchOdds() {
@@ -1038,26 +1051,28 @@
   async function init() {
     const statusEl = document.getElementById('predStatus');
     try {
-      statusEl.textContent = 'Fetching FPL data...';
-      bootstrap = await fetchFPL('bootstrap-static/');
+      statusEl.textContent = 'Loading FPL data...';
+
+      // Load from static cache — no CORS proxy needed, same origin
+      const cacheRes = await fetch('/projects/fpl-api-cache.json?t=' + Date.now());
+      if (!cacheRes.ok) throw new Error('Cache not found (HTTP ' + cacheRes.status + ')');
+      const cache = await cacheRes.json();
+
+      // Reconstruct bootstrap-compatible shape
+      bootstrap = { events: cache.events, teams: cache.teams, elements: cache.elements };
 
       bootstrap.teams.forEach(t => { teamMap[t.id] = t; });
       bootstrap.elements.forEach(el => { elementMap[el.id] = el; });
 
-      const events = bootstrap.events;
-      const nextEv = events.find(e => e.is_next) || events.find(e => !e.finished) || events[events.length-1];
-      const lastEv = events.filter(e => e.finished).slice(-1)[0];
-      nextGwId = nextEv.id;
-      lastGwId = lastEv ? lastEv.id : nextGwId - 1;
+      nextGwId = cache.nextGwId;
+      lastGwId = cache.lastGwId;
 
-      statusEl.textContent = `Fetching fixtures...`;
+      statusEl.textContent = 'Fetching odds...';
 
-      // Fetch fixtures + odds in parallel
-      const [nextFixtures, lastFixtures] = await Promise.all([
-        fetchFPL(`fixtures/?event=${nextGwId}`),
-        fetchFPL(`fixtures/?event=${lastGwId}`),
-        fetchOdds()
-      ]);
+      // Fixtures already in cache; fetch odds in parallel (separate API, CORS-enabled)
+      const nextFixtures = cache.nextGwFixtures || [];
+      const lastFixtures = cache.lastGwFixtures || [];
+      await fetchOdds();
 
       nextFixtures.forEach(f => {
         if (!fixtureMap[f.team_h]) fixtureMap[f.team_h] = [];
@@ -1086,11 +1101,20 @@
       renderBestOfRest(squad, scored);
       renderPriceWatch();
 
-      // Auto-load default team
-      await loadMyTeam(DEFAULT_TEAM_ID);
+      // Auto-load default team — best-effort, uses CORS proxies, fails gracefully
+      loadMyTeam(DEFAULT_TEAM_ID).catch(() => {});
 
       // Load prediction tracker
       loadTracker();
+
+      // Show cache age
+      if (cache.updatedAt) {
+        const age  = Math.round((Date.now() - new Date(cache.updatedAt)) / 60000);
+        const ageStr = age < 60 ? `${age}m ago` : `${Math.round(age/60)}h ago`;
+        statusEl.textContent = `GW${nextGwId} — data updated ${ageStr}`;
+      } else {
+        statusEl.textContent = `GW${nextGwId} ready`;
+      }
 
     } catch (err) {
       statusEl.textContent = 'Could not load FPL data. ' + err.message;
