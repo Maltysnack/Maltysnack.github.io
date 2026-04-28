@@ -8,6 +8,384 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── FILMCLUB ACCENT ── */
+    :root {
+      --fc-gold:    #c9a84c;
+      --fc-bg:      #0c0c0e;
+      --fc-surface: #1a1a1f;
+      --fc-border:  #2a2a30;
+      --fc-text:    #f0f0f4;
+      --fc-muted:   #9898a6;
+      --fc-green:   #4caf7d;
+    }
+
+    /* ── HERO ── */
+    .fc-hero {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 40px;
+      margin-bottom: 52px;
+      flex-wrap: wrap;
+    }
+
+    .fc-hero-text {
+      flex: 1;
+      min-width: 220px;
+    }
+
+    .fc-tag {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 3px 10px;
+      margin-bottom: 20px;
+    }
+
+    .fc-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: var(--fc-bg);
+      background: var(--text);
+      border-radius: 3px;
+      padding: 11px 22px;
+      transition: opacity 0.15s ease;
+      opacity: 1;
+      letter-spacing: 0.01em;
+    }
+
+    .fc-cta:hover {
+      opacity: 0.75;
+    }
+
+    .fc-cta-arrow {
+      font-size: 0.9rem;
+    }
+
+    /* ── MOCK PHONE ── */
+    .fc-phone {
+      flex-shrink: 0;
+      width: 180px;
+    }
+
+    .fc-phone-shell {
+      background: var(--fc-bg);
+      border-radius: 24px;
+      padding: 14px 10px 18px;
+      border: 1px solid #2a2a2a;
+      box-shadow: 0 12px 40px rgba(0,0,0,0.18);
+    }
+
+    .fc-phone-notch {
+      width: 40px;
+      height: 5px;
+      background: #222;
+      border-radius: 3px;
+      margin: 0 auto 16px;
+    }
+
+    /* Swipe card mock */
+    .fc-card-stack {
+      position: relative;
+      height: 200px;
+      margin-bottom: 12px;
+    }
+
+    .fc-card {
+      position: absolute;
+      left: 0; right: 0;
+      background: var(--fc-surface);
+      border-radius: 12px;
+      border: 1px solid var(--fc-border);
+      overflow: hidden;
+    }
+
+    .fc-card--back {
+      top: 8px;
+      height: 188px;
+      transform: scale(0.95);
+      opacity: 0.5;
+    }
+
+    .fc-card--front {
+      top: 0;
+      height: 196px;
+    }
+
+    .fc-card-poster {
+      width: 100%;
+      height: 140px;
+      background: linear-gradient(135deg, #1c1c24 0%, #2a2030 100%);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 2.4rem;
+    }
+
+    .fc-card-info {
+      padding: 8px 10px 6px;
+    }
+
+    .fc-card-title {
+      font-family: var(--font-display);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--fc-text);
+      margin-bottom: 3px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .fc-card-meta {
+      font-size: 0.6rem;
+      color: var(--fc-muted);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .fc-card-rating {
+      color: var(--fc-gold);
+      font-weight: 600;
+    }
+
+    /* Swipe indicators on card */
+    .fc-like-badge {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--fc-green);
+      border: 1.5px solid var(--fc-green);
+      border-radius: 3px;
+      padding: 2px 6px;
+      opacity: 0.9;
+      transform: rotate(8deg);
+    }
+
+    /* Swipe buttons */
+    .fc-swipe-btns {
+      display: flex;
+      justify-content: center;
+      gap: 16px;
+      padding: 0 4px;
+    }
+
+    .fc-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      border: 1.5px solid var(--fc-border);
+      background: var(--fc-surface);
+    }
+
+    .fc-btn-like  { border-color: rgba(76, 175, 125, 0.4); background: rgba(76,175,125,0.08); }
+    .fc-btn-pass  { border-color: rgba(200, 80, 80, 0.4);  background: rgba(200,80,80,0.08); }
+
+    /* ── SECTION HEADING ── */
+    .fc-section {
+      margin-bottom: 48px;
+    }
+
+    .fc-section-label {
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 20px;
+    }
+
+    /* ── HOW IT WORKS STEPS ── */
+    .fc-steps {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .fc-step {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 0 20px;
+      padding: 18px 0;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    .fc-step:first-child {
+      border-top: 1px solid var(--border-light);
+    }
+
+    .fc-step-num {
+      font-family: var(--font-display);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: var(--text-dim);
+      padding-top: 2px;
+    }
+
+    .fc-step-body {}
+
+    .fc-step-title {
+      font-family: var(--font-display);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 4px;
+      line-height: 1.3;
+    }
+
+    .fc-step-desc {
+      font-size: 0.83rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 420px;
+    }
+
+    /* ── MATCH CALLOUT ── */
+    .fc-match-callout {
+      background: var(--fc-bg);
+      border-radius: 8px;
+      padding: 24px 28px;
+      margin: 8px 0 0;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .fc-match-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+    }
+
+    .fc-match-text {
+      flex: 1;
+      min-width: 180px;
+    }
+
+    .fc-match-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--fc-gold);
+      margin-bottom: 4px;
+    }
+
+    .fc-match-desc {
+      font-size: 0.82rem;
+      color: var(--fc-muted);
+      line-height: 1.65;
+    }
+
+    .fc-code {
+      font-family: 'Courier New', monospace;
+      font-size: 0.72rem;
+      font-weight: 700;
+      color: var(--fc-gold);
+      background: rgba(201,168,76,0.1);
+      border: 1px solid rgba(201,168,76,0.2);
+      border-radius: 3px;
+      padding: 2px 7px;
+      letter-spacing: 0.06em;
+    }
+
+    /* ── TECH STACK ── */
+    .fc-stack {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .fc-stack-item {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 5px 12px;
+      line-height: 1.4;
+    }
+
+    .fc-stack-item strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ── SHORTLIST SECTION ── */
+    .fc-phases {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-top: 4px;
+    }
+
+    .fc-phase {
+      background: var(--sidebar-bg);
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      padding: 14px 14px 12px;
+    }
+
+    .fc-phase-num {
+      font-size: 0.6rem;
+      font-weight: 400;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 6px;
+    }
+
+    .fc-phase-name {
+      font-family: var(--font-display);
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 5px;
+    }
+
+    .fc-phase-desc {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 640px) {
+      .fc-hero {
+        flex-direction: column;
+        gap: 32px;
+      }
+
+      .fc-phone {
+        width: 150px;
+        align-self: center;
+      }
+
+      .fc-phases {
+        grid-template-columns: repeat(2, 1fr);
+      }
+    }
+
+  </style>
 </head>
 <body>
 
@@ -15,17 +393,165 @@
 
   <main class="main">
 
-    <section class="intro">
-      <h1 class="intro-heading">Filmclub.</h1>
-      <p class="intro-body">
-        A place for film takes, lists, and whatever watching has been happening lately.
-      </p>
-    </section>
+    <!-- ── HERO ── -->
+    <div class="fc-hero">
+      <div class="fc-hero-text">
+        <span class="fc-tag">Live project</span>
+        <h1 class="intro-heading">Filmclub.</h1>
+        <p class="intro-body">
+          A mobile app for groups who can't agree on what to watch.
+          Everyone swipes anonymously — nobody knows who liked what until there's a match.
+          No social pressure. Genuine group choice.
+        </p>
+        <a class="fc-cta" href="https://filmclub.watch" target="_blank" rel="noopener">
+          filmclub.watch
+          <span class="fc-cta-arrow">↗</span>
+        </a>
+      </div>
+
+      <!-- Mock phone / swipe card -->
+      <div class="fc-phone">
+        <div class="fc-phone-shell">
+          <div class="fc-phone-notch"></div>
+          <div class="fc-card-stack">
+            <!-- Back card -->
+            <div class="fc-card fc-card--back">
+              <div class="fc-card-poster">🎬</div>
+            </div>
+            <!-- Front card -->
+            <div class="fc-card fc-card--front">
+              <div class="fc-like-badge">LIKE</div>
+              <div class="fc-card-poster">🎞️</div>
+              <div class="fc-card-info">
+                <div class="fc-card-title">The Substance</div>
+                <div class="fc-card-meta">
+                  <span>2024</span>
+                  <span>·</span>
+                  <span class="fc-card-rating">★ 7.2</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="fc-swipe-btns">
+            <div class="fc-btn fc-btn-pass">✕</div>
+            <div class="fc-btn fc-btn-like">♥</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
     <div class="divider"></div>
 
-    <div class="coming-soon">
-      <span class="coming-soon-label">Coming soon</span>
+    <!-- ── HOW IT WORKS ── -->
+    <div class="fc-section">
+      <div class="fc-section-label">How it works</div>
+
+      <div class="fc-steps">
+
+        <div class="fc-step">
+          <div class="fc-step-num">01</div>
+          <div class="fc-step-body">
+            <div class="fc-step-title">Host creates a session</div>
+            <div class="fc-step-desc">
+              Pick your streaming services (Netflix, Disney+, Stan…) and region.
+              A swipe pool of ~40 films is seeded from what's actually available to you.
+              A short session code like <span class="fc-code">WOLF-42</span> is generated — share it with your group.
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-step">
+          <div class="fc-step-num">02</div>
+          <div class="fc-step-body">
+            <div class="fc-step-title">Everyone swipes in private</div>
+            <div class="fc-step-desc">
+              No accounts, no login — friends just enter the code and join.
+              Each person swipes right to like, left to pass.
+              Long-press a card for the synopsis, cast, IMDb rating, and streaming info.
+              Can't find something? Search any film and add it to the pool.
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-step">
+          <div class="fc-step-num">03</div>
+          <div class="fc-step-body">
+            <div class="fc-step-title">A match appears for everyone at once</div>
+            <div class="fc-step-desc">
+              When a film is liked by enough people (default: everyone),
+              a match screen fires simultaneously on all devices via live sync.
+              Nobody knew who wanted what until this moment. That's the point.
+            </div>
+          </div>
+        </div>
+
+        <div class="fc-step">
+          <div class="fc-step-num">04</div>
+          <div class="fc-step-body">
+            <div class="fc-step-title">Still stuck? Shortlist vote</div>
+            <div class="fc-step-desc">
+              If the group can't match, the host triggers a structured resolution flow.
+              The highest-scored films go to a shortlist round with nominations, vetoes, and a final vote.
+              Ties go to a spin wheel — outcome is committed server-side before the animation plays.
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Match callout -->
+      <div class="fc-match-callout">
+        <div class="fc-match-icon">🎯</div>
+        <div class="fc-match-text">
+          <div class="fc-match-title">Genuine group consensus</div>
+          <div class="fc-match-desc">
+            The like threshold is configurable — 100% (everyone agrees) down to 50% (majority rules).
+            Multiple simultaneous matches resolve by score; exact ties show all winners.
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── SHORTLIST PHASES ── -->
+    <div class="fc-section">
+      <div class="fc-section-label">Tiebreaker flow</div>
+      <div class="fc-phases">
+        <div class="fc-phase">
+          <div class="fc-phase-num">Phase 1</div>
+          <div class="fc-phase-name">Nominate</div>
+          <div class="fc-phase-desc">Anyone can add a film from outside the scored shortlist.</div>
+        </div>
+        <div class="fc-phase">
+          <div class="fc-phase-num">Phase 2</div>
+          <div class="fc-phase-name">Veto</div>
+          <div class="fc-phase-desc">Each person gets one veto. Films with the most vetoes are eliminated.</div>
+        </div>
+        <div class="fc-phase">
+          <div class="fc-phase-num">Phase 3</div>
+          <div class="fc-phase-name">Vote</div>
+          <div class="fc-phase-desc">Weighted votes; survivors proceed. Repeats if no winner emerges.</div>
+        </div>
+        <div class="fc-phase">
+          <div class="fc-phase-num">Phase 4</div>
+          <div class="fc-phase-name">Spin</div>
+          <div class="fc-phase-desc">True tie triggers a spin wheel. Winner committed before the animation plays.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── TECH STACK ── -->
+    <div class="fc-section">
+      <div class="fc-section-label">Built with</div>
+      <div class="fc-stack">
+        <span class="fc-stack-item"><strong>Next.js</strong> App Router</span>
+        <span class="fc-stack-item"><strong>Supabase</strong> Postgres + Realtime</span>
+        <span class="fc-stack-item"><strong>Vercel</strong> hosting + cron</span>
+        <span class="fc-stack-item"><strong>TMDB</strong> film data + posters</span>
+        <span class="fc-stack-item"><strong>Framer Motion</strong> swipe physics</span>
+        <span class="fc-stack-item"><strong>Tailwind CSS v4</strong></span>
+        <span class="fc-stack-item"><strong>OMDb</strong> IMDb ratings</span>
+        <span class="fc-stack-item"><strong>Resend</strong> email</span>
+      </div>
     </div>
 
   </main>
