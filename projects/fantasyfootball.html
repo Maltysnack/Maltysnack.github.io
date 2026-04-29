@@ -336,6 +336,51 @@
     .fpl-pw-change.up { color: #00aa55; font-weight: 800; }
     .fpl-pw-change.dn { color: #cc2200; font-weight: 800; }
     .fpl-pw-change.soon { color: #888; font-size: 0.62rem; font-weight: 600; }
+
+    /* ── Transfer sub-headers ── */
+    .fpl-transfer-sub {
+      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
+      text-transform: uppercase; color: #37003c;
+      padding: 8px 0 4px;
+    }
+    .fpl-transfer-sub + .fpl-transfer-row { margin-top: 0; }
+    .fpl-transfer-sub:not(:first-child) {
+      margin-top: 10px; padding-top: 10px;
+      border-top: 1px solid #c8cad0;
+    }
+
+    /* ── Formula Calibration ── */
+    .fpl-calibration { margin-top: 32px; font-family: system-ui, sans-serif; }
+    .fpl-calibration-bar {
+      background: #37003c; color: #fff;
+      font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em;
+      text-transform: uppercase; padding: 8px 14px;
+      border-radius: 6px 6px 0 0;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .fpl-cal-gw-badge { font-size: 0.58rem; font-weight: 600; color: #00ff87; letter-spacing: 0.02em; text-transform: none; }
+    .fpl-calibration-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 12px 14px; }
+    .fpl-cal-intro { font-size: 0.65rem; color: #555; margin-bottom: 10px; line-height: 1.5; }
+    .fpl-cal-table { width: 100%; border-collapse: collapse; font-size: 0.68rem; }
+    .fpl-cal-table th {
+      text-align: center; color: #37003c; font-weight: 700;
+      padding: 4px 8px; font-size: 0.6rem; letter-spacing: 0.05em;
+      text-transform: uppercase; border-bottom: 1.5px solid #c0c4cc;
+    }
+    .fpl-cal-table th:first-child { text-align: left; }
+    .fpl-cal-pos { font-weight: 700; color: #37003c; padding: 5px 8px; font-size: 0.72rem; }
+    .fpl-cal-cell { text-align: center; padding: 5px 8px; font-weight: 600; border-bottom: 1px solid #c8cad0; color: #aaa; }
+    .fpl-cal-cell.pos { color: #00aa55; }
+    .fpl-cal-cell.neg { color: #cc2200; }
+    .fpl-cal-applied {
+      text-align: center; padding: 5px 8px; font-weight: 800;
+      border-bottom: 1px solid #c8cad0;
+      border-left: 1.5px solid #c0c4cc;
+    }
+    .fpl-cal-applied.pos { color: #00aa55; }
+    .fpl-cal-applied.neg { color: #cc2200; }
+    .fpl-cal-applied.neu { color: #888; }
+    .fpl-cal-table tr:last-child td { border-bottom: none; }
   </style>
 </head>
 <body>
@@ -474,6 +519,22 @@
       <div id="trackerBody"></div>
     </div>
 
+    <!-- Formula Calibration -->
+    <div class="fpl-calibration" id="calibrationSection" style="display:none">
+      <div class="fpl-calibration-bar">
+        <span>Formula Calibration</span>
+        <span class="fpl-cal-gw-badge" id="calGwBadge"></span>
+      </div>
+      <div class="fpl-calibration-body">
+        <div class="fpl-cal-intro">
+          Each gameweek the formula compares its predictions to actual FPL scores
+          per position. A rolling average of the last 4 GWs drives a small correction
+          factor applied to next week's predictions.
+        </div>
+        <div id="calibrationBody"></div>
+      </div>
+    </div>
+
   </div>
 
   <script>
@@ -510,6 +571,8 @@
   let bootstrap    = null;
   let fixtureMap   = {};   // team_id → [fixture, ...] (array; >1 = DGW)
   let lastFixMap   = {};   // team_id → [fixture, ...]
+  let gw2FixMap    = {};   // team_id → fixtures for GW+2
+  let gw3FixMap    = {};   // team_id → fixtures for GW+3
   let nextOppMap   = {};   // team_id → "ARS (H)" for next GW
   let lastOppMap   = {};   // team_id → "ARS (H)" for last GW
   let teamMap      = {};   // team_id → team object
@@ -517,6 +580,7 @@
   let lastGwId     = null;
   let elementMap   = {};
   let oddsMap      = {};   // team_id → { winProb, pOver25 }
+  let calibration  = { 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0 };  // per-position EMA correction factors
 
   // fetchFPL — tries each CORS proxy in turn (used only for My Team live data)
   async function fetchFPL(endpoint) {
@@ -592,6 +656,14 @@
     const xgc90     = parseFloat(player.expected_goals_conceded_per_90)    || 0;
     const isPenTaker = player.penalties_order === 1;
 
+    // Player-specific season stats (per 90 / per appearance)
+    const mins90      = Math.max(1, player.minutes / 90);
+    const apps        = Math.max(1, player.minutes / 65);  // approx full appearances
+    const csRate      = (player.clean_sheets  || 0) / apps;
+    const goalsPer90  = (player.goals_scored  || 0) / mins90;
+    const assistsPer90 = (player.assists      || 0) / mins90;
+    const savesPer90  = (player.saves         || 0) / mins90;
+
     // Primary fixture for FDR fallback
     const fix    = fixList[0];
     const isHome = fix.team_h === player.team;
@@ -608,24 +680,43 @@
     const csFactor = Math.max(0.3, 1.5 - pOver25);
 
     let base;
-    if (player.element_type <= 2) {
-      // GKP / DEF: xGC + match-goals signal from odds
-      const csBonus = Math.max(0, 1.0 - xgc90 / 2.0) * 2.0 * csFactor;
-      base = ep * 0.45 + form * 0.20 + seasonAvg * 0.10 + csBonus * 0.25;
+    if (player.element_type === 1) {
+      // GKP: blend actual CS rate + xGC-based probability; add saves-per-90 signal
+      const xgcCsProb  = Math.max(0, 1.0 - xgc90 / 2.0);
+      const csProb     = csRate * 0.5 + xgcCsProb * 0.5;
+      const csBonus    = csProb * 2.0 * csFactor;
+      const savesBonus = savesPer90 / 3;   // 1pt per 3 saves (FPL scoring)
+      base = ep * 0.40 + form * 0.20 + seasonAvg * 0.10 + csBonus * 0.20 + savesBonus * 0.10;
+
+    } else if (player.element_type === 2) {
+      // DEF: blend actual CS rate + xGC; blend xGI with actual goals/assists
+      const xgcCsProb = Math.max(0, 1.0 - xgc90 / 2.0);
+      const csProb    = csRate * 0.5 + xgcCsProb * 0.5;
+      const csBonus   = csProb * 2.0 * csFactor;
+      const attRet    = (xgi90 * 5) * 0.5 + (goalsPer90 * 6 + assistsPer90 * 3) * 0.5;
+      base = ep * 0.40 + form * 0.20 + seasonAvg * 0.10 + csBonus * 0.20 + attRet * 0.10;
+
+    } else if (player.element_type === 3) {
+      // MID: blend xGI with actual goal (5pts) + assist (3pts) rate per 90
+      const attRet = (xgi90 * 5) * 0.5 + (goalsPer90 * 5 + assistsPer90 * 3) * 0.5;
+      base = ep * 0.35 + form * 0.20 + seasonAvg * 0.10 + attRet * 0.35;
+
     } else {
-      // MID / FWD: weight attacking returns via xGI
-      base = ep * 0.40 + xgi90 * 2.5 * 0.25 + form * 0.25 + seasonAvg * 0.10;
+      // FWD: blend xGI with actual goal (4pts) + assist (3pts) rate per 90
+      const attRet = (xgi90 * 4) * 0.5 + (goalsPer90 * 4 + assistsPer90 * 3) * 0.5;
+      base = ep * 0.35 + form * 0.20 + seasonAvg * 0.10 + attRet * 0.35;
     }
 
     if (isPenTaker) base += 0.4;
 
     // DGW: ep_next already reflects two fixtures; boost the non-ep components
     if (fixList.length > 1) {
-      const epPart = player.element_type <= 2 ? ep * 0.45 : ep * 0.40;
+      const epPart = ep * (player.element_type <= 2 ? 0.40 : 0.35);
       base = epPart + (base - epPart) * 1.6;
     }
 
-    return Math.max(0, parseFloat((base * fixtureMod * avail).toFixed(2)));
+    const calFactor = calibration[player.element_type] || 1.0;
+    return Math.max(0, parseFloat((base * fixtureMod * avail * calFactor).toFixed(2)));
   }
 
   function predictScoreWithFixMap(player, fixMap) {
@@ -845,48 +936,112 @@
     document.getElementById('priceSection').style.display = '';
   }
 
+  // Sum of predicted scores across next 3 GWs (GW+1 already in player.predicted)
+  function predict3GW(player) {
+    return (player.predicted || 0)
+         + predictWithFixtures(player, gw2FixMap[player.team] || [])
+         + predictWithFixtures(player, gw3FixMap[player.team] || []);
+  }
+
   function renderTransferSuggestions(picks, bank) {
     const squadIds  = new Set(picks.map(p => p.id));
     const clubCount = {};
     picks.forEach(p => { clubCount[p.team] = (clubCount[p.team]||0) + 1; });
-    const pos = {1:'GKP',2:'DEF',3:'MID',4:'FWD'};
-    const suggestions = [];
+    const posLabel = { 1:'GKP', 2:'DEF', 3:'MID', 4:'FWD' };
+    const has3GW   = Object.keys(gw2FixMap).length > 0;
 
-    for (const curr of picks.filter(p => p.position <= 11)) {
+    // Find best affordable replacement for a player, ranked by scoreFn
+    function bestReplacement(curr, scoreFn) {
       const budget = (curr.selling_price || curr.now_cost) + bank;
-      const best   = Object.values(elementMap).filter(p =>
+      return Object.values(elementMap).filter(p =>
         p.element_type === curr.element_type &&
         !squadIds.has(p.id) && p.now_cost <= budget &&
         (clubCount[p.team]||0) < 3 && (p.predicted||0) > 0 && p.minutes > 0
-      ).sort((a,b) => (b.predicted||0)-(a.predicted||0))[0];
+      ).sort((a, b) => scoreFn(b) - scoreFn(a))[0];
+    }
+
+    // ── Next GW suggestions ──────────────────────────────────────────
+    const nextSugs = [];
+    for (const curr of picks.filter(p => p.position <= 11)) {
+      const best = bestReplacement(curr, p => p.predicted || 0);
       if (!best) continue;
       const gain = (best.predicted||0) - (curr.predicted||0);
       if (gain < 0.5) continue;
-      suggestions.push({ out:curr, in:best, gain, diff: best.now_cost-(curr.selling_price||curr.now_cost) });
+      nextSugs.push({
+        out: curr, in: best, gain,
+        diff: best.now_cost - (curr.selling_price || curr.now_cost)
+      });
     }
+    const topNext = nextSugs.sort((a, b) => b.gain - a.gain).slice(0, 3);
 
-    const top = suggestions.sort((a,b)=>b.gain-a.gain).slice(0,3);
-    if (!top.length) return;
+    // ── 3-Game plan suggestions ──────────────────────────────────────
+    const planSugs = [];
+    if (has3GW) {
+      for (const curr of picks.filter(p => p.position <= 11)) {
+        const currEl    = elementMap[curr.id] || curr;
+        const currScore = predict3GW(currEl);
+        const best      = bestReplacement(curr, p => predict3GW(p));
+        if (!best) continue;
+        const bestScore = predict3GW(best);
+        const gain = bestScore - currScore;
+        if (gain < 1.5) continue;
+        planSugs.push({
+          out: curr, in: best, gain, currScore, bestScore,
+          diff: best.now_cost - (curr.selling_price || curr.now_cost)
+        });
+      }
+    }
+    const topPlan = planSugs.sort((a, b) => b.gain - a.gain).slice(0, 3);
+
+    if (!topNext.length && !topPlan.length) return;
 
     document.getElementById('transferBank').textContent = `Bank: £${(bank/10).toFixed(1)}m`;
-    document.getElementById('transferBody').innerHTML = top.map(s => {
-      const diffStr = s.diff > 0 ? `+£${(s.diff/10).toFixed(1)}m` : s.diff < 0 ? `-£${(Math.abs(s.diff)/10).toFixed(1)}m` : 'same cost';
-      return `<div class="fpl-transfer-row">
+
+    function diffStr(diff) {
+      return diff > 0 ? `+£${(diff/10).toFixed(1)}m` : diff < 0 ? `-£${(Math.abs(diff)/10).toFixed(1)}m` : 'same cost';
+    }
+
+    let html = '';
+
+    if (topNext.length) {
+      html += `<div class="fpl-transfer-sub">Next GW</div>`;
+      html += topNext.map(s => `<div class="fpl-transfer-row">
         <div class="fpl-transfer-player">
           <div class="fpl-transfer-name">${displayName(s.out.web_name)}</div>
-          <div class="fpl-transfer-meta">${pos[s.out.element_type]} · ${(s.out.predicted||0).toFixed(1)}pts</div>
+          <div class="fpl-transfer-meta">${posLabel[s.out.element_type]} · ${(s.out.predicted||0).toFixed(1)} pred</div>
         </div>
         <div class="fpl-transfer-arrow">→</div>
         <div class="fpl-transfer-player">
           <div class="fpl-transfer-name">${displayName(s.in.web_name)}</div>
-          <div class="fpl-transfer-meta">${pos[s.in.element_type]} · ${(s.in.predicted||0).toFixed(1)}pts</div>
+          <div class="fpl-transfer-meta">${posLabel[s.in.element_type]} · ${(s.in.predicted||0).toFixed(1)} pred</div>
         </div>
         <div class="fpl-transfer-stat">
           <div class="fpl-transfer-gain">+${s.gain.toFixed(1)}pts</div>
-          <div class="fpl-transfer-cost">${diffStr}</div>
+          <div class="fpl-transfer-cost">${diffStr(s.diff)}</div>
         </div>
-      </div>`;
-    }).join('');
+      </div>`).join('');
+    }
+
+    if (topPlan.length) {
+      html += `<div class="fpl-transfer-sub">3-Game Plan</div>`;
+      html += topPlan.map(s => `<div class="fpl-transfer-row">
+        <div class="fpl-transfer-player">
+          <div class="fpl-transfer-name">${displayName(s.out.web_name)}</div>
+          <div class="fpl-transfer-meta">${posLabel[s.out.element_type]} · ${s.currScore.toFixed(1)} over 3 GW</div>
+        </div>
+        <div class="fpl-transfer-arrow">→</div>
+        <div class="fpl-transfer-player">
+          <div class="fpl-transfer-name">${displayName(s.in.web_name)}</div>
+          <div class="fpl-transfer-meta">${posLabel[s.in.element_type]} · ${s.bestScore.toFixed(1)} over 3 GW</div>
+        </div>
+        <div class="fpl-transfer-stat">
+          <div class="fpl-transfer-gain">+${s.gain.toFixed(1)}pts</div>
+          <div class="fpl-transfer-cost">${diffStr(s.diff)}</div>
+        </div>
+      </div>`).join('');
+    }
+
+    document.getElementById('transferBody').innerHTML = html;
     document.getElementById('transferSection').style.display = '';
   }
 
@@ -1001,6 +1156,64 @@
     });
   }
 
+  function renderCalibration(calData) {
+    if (!calData || !calData.factors) return;
+
+    const section = document.getElementById('calibrationSection');
+    const body    = document.getElementById('calibrationBody');
+    const badge   = document.getElementById('calGwBadge');
+
+    const posNames = { 1: 'GKP', 2: 'DEF', 3: 'MID', 4: 'FWD' };
+    const history  = (calData.history || []).slice(-4);
+
+    // Badge
+    if (calData.updatedGw) badge.textContent = `updated GW${calData.updatedGw}`;
+
+    // GW header columns (pad to 4 slots so the table is always a fixed width)
+    const COLS = 4;
+    const gwSlots = Array(COLS).fill(null);
+    history.forEach((h, i) => { gwSlots[COLS - history.length + i] = h; });
+
+    const headCells = gwSlots.map(h =>
+      h ? `<th>GW${h.gwId}</th>` : `<th style="color:#bbb">—</th>`
+    ).join('');
+
+    let rows = '';
+    for (const pos of [1, 2, 3, 4]) {
+      const factor  = calData.factors[pos] || 1.0;
+      const pctDiff = (factor - 1) * 100;
+      const appCls  = pctDiff > 0.5 ? 'pos' : pctDiff < -0.5 ? 'neg' : 'neu';
+      const appStr  = (pctDiff >= 0 ? '+' : '') + pctDiff.toFixed(1) + '%';
+
+      const dataCells = gwSlots.map(h => {
+        const raw = h?.raw?.[pos];
+        if (raw === null || raw === undefined) return `<td class="fpl-cal-cell">—</td>`;
+        const pct = (raw - 1) * 100;
+        const cls = pct > 0.5 ? 'pos' : pct < -0.5 ? 'neg' : '';
+        const arrow = pct > 0.5 ? '↑' : pct < -0.5 ? '↓' : '→';
+        return `<td class="fpl-cal-cell ${cls}">${arrow}${Math.abs(pct).toFixed(1)}%</td>`;
+      }).join('');
+
+      rows += `<tr>
+        <td class="fpl-cal-pos">${posNames[pos]}</td>
+        ${dataCells}
+        <td class="fpl-cal-applied ${appCls}">${appStr}</td>
+      </tr>`;
+    }
+
+    body.innerHTML = `
+      <table class="fpl-cal-table">
+        <thead>
+          <tr>
+            <th></th>${headCells}<th>Applied</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+
+    section.style.display = '';
+  }
+
   async function init() {
     const statusEl = document.getElementById('predStatus');
     try {
@@ -1020,6 +1233,11 @@
       nextGwId = cache.nextGwId;
       lastGwId = cache.lastGwId;
 
+      // Load calibration factors (applied in predictWithFixtures via calFactor)
+      if (cache.calibration && cache.calibration.factors) {
+        calibration = cache.calibration.factors;
+      }
+
       statusEl.textContent = 'Fetching odds...';
 
       // Fixtures already in cache; fetch odds in parallel (separate API, CORS-enabled)
@@ -1036,6 +1254,16 @@
         if (!lastFixMap[f.team_h]) lastFixMap[f.team_h] = [];
         if (!lastFixMap[f.team_a]) lastFixMap[f.team_a] = [];
         lastFixMap[f.team_h].push(f); lastFixMap[f.team_a].push(f);
+      });
+      (cache.gw2Fixtures || []).forEach(f => {
+        if (!gw2FixMap[f.team_h]) gw2FixMap[f.team_h] = [];
+        if (!gw2FixMap[f.team_a]) gw2FixMap[f.team_a] = [];
+        gw2FixMap[f.team_h].push(f); gw2FixMap[f.team_a].push(f);
+      });
+      (cache.gw3Fixtures || []).forEach(f => {
+        if (!gw3FixMap[f.team_h]) gw3FixMap[f.team_h] = [];
+        if (!gw3FixMap[f.team_a]) gw3FixMap[f.team_a] = [];
+        gw3FixMap[f.team_h].push(f); gw3FixMap[f.team_a].push(f);
       });
       buildOppMap(nextFixtures, nextOppMap);
       buildOppMap(lastFixtures, lastOppMap);
@@ -1059,6 +1287,9 @@
 
       // Load prediction tracker
       loadTracker();
+
+      // Render calibration table (reflects formula self-tuning history)
+      renderCalibration(cache.calibration);
 
       // Show cache age
       if (cache.updatedAt) {
