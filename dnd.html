@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Grosh — maltysnack</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+
+    /* ── GROSH ACCENT ── */
+    :root {
+      --g-red:     #8b1a1a;
+      --g-gold:    #c8a45a;
+      --g-stone:   #2c2825;
+      --g-surface: #f7f5f2;
+      --g-border:  #e2ddd8;
+      --g-muted:   #7a7168;
+    }
+
+    /* ── TAG ── */
+    .g-tag {
+      display: inline-block;
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      border: 1px solid var(--border);
+      border-radius: 2px;
+      padding: 3px 10px;
+      margin-bottom: 20px;
+    }
+
+    /* ── CTA ── */
+    .g-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      margin-top: 24px;
+      font-size: 0.85rem;
+      font-weight: 500;
+      color: #fff;
+      background: var(--g-stone);
+      border-radius: 4px;
+      padding: 10px 20px;
+      text-decoration: none;
+      transition: background 0.15s;
+    }
+    .g-cta:hover { background: var(--g-red); }
+
+    /* ── STAT CARD ── */
+    .g-stats {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 32px 0;
+    }
+    .g-stat {
+      background: var(--g-surface);
+      border: 1px solid var(--g-border);
+      border-radius: 5px;
+      padding: 10px 16px;
+      min-width: 80px;
+      text-align: center;
+    }
+    .g-stat-val {
+      font-size: 1.35rem;
+      font-weight: 700;
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+      line-height: 1;
+    }
+    .g-stat-val.red { color: var(--g-red); }
+    .g-stat-label {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--g-muted);
+      margin-top: 4px;
+    }
+
+    /* ── FEATURES ── */
+    .g-features {
+      margin: 40px 0;
+    }
+    .g-features-title {
+      font-size: 0.65rem;
+      font-weight: 700;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .g-feature-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+    @media (max-width: 500px) { .g-feature-grid { grid-template-columns: 1fr; } }
+
+    .g-feature {
+      background: var(--g-surface);
+      border: 1px solid var(--g-border);
+      border-left: 3px solid var(--g-stone);
+      border-radius: 0 4px 4px 0;
+      padding: 10px 14px;
+    }
+    .g-feature-name {
+      font-size: 0.78rem;
+      font-weight: 700;
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+    .g-feature-desc {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-top: 2px;
+      line-height: 1.5;
+    }
+
+    /* ── SPELL LIST PREVIEW ── */
+    .g-spells {
+      margin: 40px 0;
+    }
+    .g-spell-row {
+      display: flex;
+      align-items: baseline;
+      gap: 10px;
+      padding: 6px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-family: system-ui, sans-serif;
+      font-size: 0.78rem;
+    }
+    .g-spell-row:last-child { border-bottom: none; }
+    .g-spell-lvl {
+      font-size: 0.6rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: var(--g-muted);
+      width: 28px;
+      flex-shrink: 0;
+    }
+    .g-spell-name { font-weight: 600; color: var(--text); flex: 1; }
+    .g-spell-desc { font-size: 0.68rem; color: var(--text-muted); }
+    .g-spell-tag {
+      font-size: 0.54rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      padding: 1px 5px;
+      border-radius: 2px;
+      flex-shrink: 0;
+    }
+    .g-spell-tag.conc { background: #e8f0e8; color: #3a6b3a; }
+    .g-spell-tag.oath { background: #f0e8d8; color: #7a5a20; }
+    .g-spell-tag.ba   { background: #e8e8f0; color: #3a3a6b; }
+
+    /* ── WHY ── */
+    .g-why {
+      background: var(--g-surface);
+      border: 1px solid var(--g-border);
+      border-radius: 6px;
+      padding: 20px 24px;
+      margin: 40px 0;
+      font-family: system-ui, sans-serif;
+      font-size: 0.82rem;
+      color: var(--text-muted);
+      line-height: 1.7;
+    }
+    .g-why strong { color: var(--text); }
+
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <section class="intro">
+      <div class="g-tag">D&amp;D 5E</div>
+      <h1 class="intro-heading">Grosh.</h1>
+      <p class="intro-body">
+        Triton Paladin, Oath of the Ancients. Level 5. Chef background.
+        A character sheet built for live play — glanceable, stateful, fast.
+      </p>
+      <a class="g-cta" href="/dnd/index.html">Open sheet ↗</a>
+    </section>
+
+    <div class="divider"></div>
+
+    <!-- Core stats -->
+    <div class="g-stats">
+      <div class="g-stat">
+        <div class="g-stat-val red">42</div>
+        <div class="g-stat-label">HP</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val">17</div>
+        <div class="g-stat-label">AC</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val">+4</div>
+        <div class="g-stat-label">Init</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val">14</div>
+        <div class="g-stat-label">Spell DC</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val">+7</div>
+        <div class="g-stat-label">Atk</div>
+      </div>
+      <div class="g-stat">
+        <div class="g-stat-val">+3</div>
+        <div class="g-stat-label">Prof</div>
+      </div>
+    </div>
+
+    <!-- Why it exists -->
+    <div class="g-why">
+      <strong>Paper sheets get messy. D&D Beyond is slow. Claude artifacts lose state between sessions.</strong>
+      The fix: state lives in <code>localStorage</code> — survives refreshes, exportable as JSON.
+      Built to keep HP, spell slots, concentration and the reaction reminder always visible without scrolling.
+    </div>
+
+    <!-- Prepared spells -->
+    <div class="g-spells">
+      <div class="g-features-title">Prepared Spells</div>
+
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">1st</span>
+        <span class="g-spell-name">Bless</span>
+        <span class="g-spell-tag conc">C</span>
+        <span class="g-spell-desc">3 targets +1d4 to attacks &amp; saves</span>
+      </div>
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">1st</span>
+        <span class="g-spell-name">Ensnaring Strike</span>
+        <span class="g-spell-tag conc">C</span>
+        <span class="g-spell-tag ba">BA</span>
+        <span class="g-spell-tag oath">O</span>
+        <span class="g-spell-desc">next hit restrains, STR save</span>
+      </div>
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">1st</span>
+        <span class="g-spell-name">Shield of Faith</span>
+        <span class="g-spell-tag conc">C</span>
+        <span class="g-spell-tag ba">BA</span>
+        <span class="g-spell-desc">+2 AC to one target</span>
+      </div>
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">2nd</span>
+        <span class="g-spell-name">Moonbeam</span>
+        <span class="g-spell-tag conc">C</span>
+        <span class="g-spell-tag oath">O</span>
+        <span class="g-spell-desc">5 ft cylinder, 2d10 radiant</span>
+      </div>
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">2nd</span>
+        <span class="g-spell-name">Misty Step</span>
+        <span class="g-spell-tag ba">BA</span>
+        <span class="g-spell-tag oath">O</span>
+        <span class="g-spell-desc">teleport 30 ft</span>
+      </div>
+      <div class="g-spell-row">
+        <span class="g-spell-lvl">2nd</span>
+        <span class="g-spell-name">Find Steed</span>
+        <span class="g-spell-desc">summon your crocodile</span>
+      </div>
+    </div>
+
+    <!-- Sheet features -->
+    <div class="g-features">
+      <div class="g-features-title">What the sheet tracks</div>
+      <div class="g-feature-grid">
+        <div class="g-feature">
+          <div class="g-feature-name">HP + live bar</div>
+          <div class="g-feature-desc">Click to edit. Bar fills proportionally. Temp HP separate.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Spell slots</div>
+          <div class="g-feature-desc">Pip toggles. Click a spell to cast — auto-consumes lowest available slot.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Concentration</div>
+          <div class="g-feature-desc">Set automatically when you cast a C spell. Prompts before overwriting.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Class resources</div>
+          <div class="g-feature-desc">Lay on Hands pool, Channel Divinity, Divine Sense, Chef Treats — all pip-tracked.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Active buffs</div>
+          <div class="g-feature-desc">Add name + effect during play. Remove when expired.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Short / Long rest</div>
+          <div class="g-feature-desc">One button restores the right things. Scrolls remain consumed permanently.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Triton spells + scrolls</div>
+          <div class="g-feature-desc">Fog Cloud, Gust of Wind, Wall of Water (1/long). Dimension Door, Charm Monster, Counterspell scrolls.</div>
+        </div>
+        <div class="g-feature">
+          <div class="g-feature-name">Export / Import</div>
+          <div class="g-feature-desc">JSON backup. Transfer state between devices. Reset to defaults.</div>
+        </div>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
