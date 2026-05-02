@@ -44,6 +44,13 @@
         </div>
 
         <div class="nav-section">
+          <span class="nav-label">Games</span>
+          <ul>
+            <li><a href="/dnd.html" ${active('/dnd.html')}>Grosh</a></li>
+          </ul>
+        </div>
+
+        <div class="nav-section">
           <span class="nav-label">More</span>
           <ul>
             <li><a href="/proveyourself.html" ${active('/proveyourself.html')}>proveyourself</a></li>
