@@ -50,13 +50,6 @@
           </ul>
         </div>
 
-        <div class="nav-section">
-          <span class="nav-label">More</span>
-          <ul>
-            <li><a href="/proveyourself.html" ${active('/proveyourself.html')}>proveyourself</a></li>
-            <li><a href="/cv.html" ${active('/cv.html')}>CV</a></li>
-          </ul>
-        </div>
 
       </nav>
 
