@@ -2,7 +2,7 @@ name: Update Magic dataset
 
 on:
   schedule:
-    - cron: '0 12 * * 2'   # Tuesdays 12:00 UTC — magic.gg posts Mondays, we run a day later
+    - cron: '0 12 * * 2'   # Tuesdays 12:00 UTC, magic.gg posts Mondays, we run a day later
   workflow_dispatch:
 
 jobs:

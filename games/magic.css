@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   magic.css — page-specific styles for the meta explorer
+   magic.css, page-specific styles for the meta explorer
    Inherits from /style.css. No new dependencies.
 ═══════════════════════════════════════ */
 
@@ -235,7 +235,7 @@ body:has(.magic-page) .main {
   color: var(--text-dim);
 }
 
-/* Catalyst card — slightly different display */
+/* Catalyst card, slightly different display */
 .catalyst-row {
   display: flex;
   align-items: flex-start;

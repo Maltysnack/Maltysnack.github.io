@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   magic.js — meta explorer interactions
+   magic.js, meta explorer interactions
    Loads data lazily, owns search + routing + rendering.
 ═══════════════════════════════════════ */
 
@@ -554,7 +554,7 @@
           </div>
           <p class="detail-section-blurb">
             Cards that show up in most of this card's decks but where the
-            reverse isn't true — they're bigger than this card. Useful for
+            reverse isn't true, they're bigger than this card. Useful for
             "what shell does this live in".
           </p>
           ${renderStrip(p.anchors, (r) => `${(r.p_b_given_a*100).toFixed(0)}% / ${(r.p_a_given_b*100).toFixed(0)}%`)}
@@ -573,7 +573,7 @@
         </section>
       ` : `
         <div class="detail-section-empty">
-          Below the support floor (${meta.min_support_decks} decks) — not enough appearances to compute reliable companions.
+          Below the support floor (${meta.min_support_decks} decks), not enough appearances to compute reliable companions.
         </div>
       `}
     `;
