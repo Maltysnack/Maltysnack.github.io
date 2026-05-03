@@ -46,7 +46,7 @@
         <div class="nav-section">
           <span class="nav-label">Games</span>
           <ul>
-            <li><a href="/dnd.html" ${active('/dnd.html') || path.endsWith('/grosh.html') ? 'class="nav-active"' : ''}>D&amp;D</a></li>
+            <li><a href="/dnd.html" ${active('/dnd.html') || path.endsWith('/grosh.html') || path.endsWith('/reginald.html') ? 'class="nav-active"' : ''}>D&amp;D</a></li>
           </ul>
         </div>
 
