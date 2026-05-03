@@ -90,7 +90,7 @@
       width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0;
-      transition: opacity 1800ms var(--ease-out);
+      transition: opacity 3000ms var(--ease-out);
       will-change: transform, opacity;
     }
     .photo.loaded {
@@ -378,23 +378,6 @@
       vertical-align: 1px;
     }
 
-    /* Local-language cheers - small italic line under the dateline */
-    .cheers {
-      margin-top: var(--s-2);
-      font-family: var(--font-display);
-      font-style: italic;
-      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
-      font-weight: 400;
-      color: var(--c-accent);
-      letter-spacing: 0.005em;
-      text-shadow: 0 1px 12px rgba(0,0,0,0.55);
-    }
-    .cheers .cheers-mark {
-      display: inline-block;
-      margin-right: 6px;
-      color: var(--c-fg-4);
-      font-style: normal;
-    }
 
     /* ── Caption strip - single editorial line of metadata ─────── */
     .strip {
@@ -441,6 +424,13 @@
     .strip .val .drink-sep {
       color: var(--c-fg-4);
       margin: 0 8px;
+    }
+    .strip .val .toast {
+      font-family: var(--font-display);
+      font-style: italic;
+      font-weight: 500;
+      color: var(--c-accent);
+      letter-spacing: 0.005em;
     }
 
     /* ── Attribution - magazine credit treatment ──────────────── */
@@ -1538,7 +1528,7 @@
     // ── Slideshow state ──
     // Two stacked <img> elements (photo-a / photo-b) cross-fade between them.
     // Cycles every PHOTO_DWELL_MS through the city's image queue.
-    const PHOTO_DWELL_MS = 12000;        // visible time per photo
+    const PHOTO_DWELL_MS = 14000;        // visible time per photo
     const slideshow = {
       images: [],
       idx: 0,
@@ -1658,7 +1648,6 @@
         <p class="dateline reveal d-3">
           <img class="flag" src="https://flagcdn.com/${city.cc.toLowerCase()}.svg" alt="${escapeHtml(city.country)} flag" loading="lazy"><span class="country">${escapeHtml(city.country)}</span><span class="sep" aria-hidden="true"></span><span class="clock" id="local-time" data-tz="${city.tz}">${localTimeString(city.tz)}</span><span class="clock-meta">local</span>
         </p>
-        ${cheers ? `<p class="cheers reveal d-3"><span class="cheers-mark">\u2014</span> ${escapeHtml(cheers)}.</p>` : ""}
         <div class="strip reveal d-4">
           <div class="item">
             <span class="label">It's currently</span>
@@ -1668,6 +1657,11 @@
           <div class="item">
             <span class="label">What you'd order</span>
             <span class="val">${drinkHtml}</span>
+          </div>` : ""}
+          ${cheers ? `
+          <div class="item">
+            <span class="label">How you'd toast</span>
+            <span class="val"><span class="toast">${escapeHtml(cheers)}</span></span>
           </div>` : ""}
         </div>
       `;
