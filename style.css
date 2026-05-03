@@ -1,20 +1,18 @@
 /* ═══════════════════════════════════════
    MALTYSNACK.GITHUB.IO - STYLESHEET
-   Editorial. Considered. Light & dark.
-   Type: Fraunces + Inter. No frameworks.
+   Modernist sans. Considered. Light & dark.
+   Type: Inter only. No frameworks.
 ═══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,400&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
 
 /* ── THEME VARIABLES ─────────────────────── */
 
-/* Default to light. [data-theme="dark"] switches.
-   Dark also auto-applies via prefers-color-scheme below. */
 :root {
   /* Surfaces */
   --bg:           #faf7f0;   /* warm paper */
-  --bg-soft:      #f4f0e6;   /* slightly deeper paper */
-  --bg-island:    #13110d;   /* always-dark sidebar in light mode */
+  --bg-soft:      #f4f0e6;
+  --bg-island:    #11110e;
   --surface:      #efeadd;
   --border:       #e3dcc9;
   --border-light: #efeadd;
@@ -25,22 +23,27 @@
   --text-muted:   #5b5750;
   --text-dim:     #9c988a;
 
-  /* Sidebar (always darker than main, even in dark mode) */
-  --nav-bg:       #13110d;
+  /* Sidebar (always darker than main) */
+  --nav-bg:       #11110e;
   --nav-text:     #8a877d;
   --nav-active:   #fbf9f4;
-  --nav-border:   #29261f;
+  --nav-border:   #2a2722;
   --nav-label:    #4a463d;
   --nav-icon:     #45413a;
 
-  /* Accent — restrained */
-  --accent:       #b56a00;
-  --accent-soft:  #fdf3df;
-  --selection:    #ecdfb3;
+  /* Accents - drawn from shark/ocean palette + a quiet red */
+  --accent-red:   #b3402f;   /* deep brick - your favorite */
+  --accent-gold:  #c89a3e;   /* antique gold */
+  --accent-blue:  #1f3a5f;   /* deep ocean */
+
+  /* Functional accent variables */
+  --accent:       var(--accent-red);
+  --selection:    #e8c97a;   /* warm gold highlight */
+  --selection-fg: #1a1814;
 
   /* Type families */
-  --font-display: 'Fraunces', 'Playfair Display', Georgia, serif;
   --font-body:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: var(--font-body);   /* same family, hierarchy via weight + size */
   --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Type scale (Major Third 1.25) */
@@ -64,8 +67,6 @@
   --space-10:     2.5rem;
   --space-12:     3rem;
   --space-16:     4rem;
-  --space-20:     5rem;
-  --space-24:     6rem;
 
   /* Layout */
   --sidebar-w:    216px;
@@ -76,60 +77,69 @@
   --transition:   180ms var(--ease);
   --transition-slow: 280ms var(--ease);
 
-  /* Shadows (light) */
-  --shadow-sm:    0 1px 2px rgba(20, 18, 14, 0.04);
-  --shadow-md:    0 4px 12px rgba(20, 18, 14, 0.06);
+  /* Sidebar separator */
+  --sidebar-border: transparent;
 }
 
 [data-theme="dark"] {
-  --bg:           #14120e;
-  --bg-soft:      #1c1a14;
-  --bg-island:    #0c0a07;
-  --surface:      #221f17;
-  --border:       #2a2620;
-  --border-light: #1f1c17;
+  /* Main: warm dark with brown undertone */
+  --bg:           #1a1612;
+  --bg-soft:      #221d18;
+  --bg-island:    #0b0d11;
+  --surface:      #2a241e;
+  --border:       #322c25;
+  --border-light: #25201a;
+
+  /* Sidebar in dark: cool blue-ink, contrasting hue with main warm dark */
+  --nav-bg:       #0b0d11;
+  --nav-text:     #6f6e6a;
+  --nav-active:   #fbf9f4;
+  --nav-border:   #1a1d23;
+  --nav-label:    #393b40;
+  --nav-icon:     #4a4d52;
 
   --text:         #f3eee0;
   --text-strong:  #fbf9f4;
   --text-muted:   #a39e91;
   --text-dim:     #6a6660;
 
-  --nav-bg:       #0c0a07;
-  --nav-text:     #6f6b62;
-  --nav-active:   #fbf9f4;
-  --nav-border:   #1c1a14;
-  --nav-label:    #3a3730;
-  --nav-icon:     #4a463d;
+  /* Accents in dark - slightly brighter for contrast */
+  --accent-red:   #d8553f;
+  --accent-gold:  #d9a948;
+  --accent-blue:  #5a86b8;
 
-  --accent:       #d59445;
-  --accent-soft:  #2a1d0a;
-  --selection:    #4a3818;
+  --accent:       var(--accent-red);
+  --selection:    #6a4a14;
+  --selection-fg: #fbf9f4;
 
-  --shadow-sm:    0 1px 2px rgba(0, 0, 0, 0.3);
-  --shadow-md:    0 4px 16px rgba(0, 0, 0, 0.35);
+  --sidebar-border: rgba(60, 65, 75, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:           #14120e;
-    --bg-soft:      #1c1a14;
-    --bg-island:    #0c0a07;
-    --surface:      #221f17;
-    --border:       #2a2620;
-    --border-light: #1f1c17;
+    --bg:           #1a1612;
+    --bg-soft:      #221d18;
+    --bg-island:    #0b0d11;
+    --surface:      #2a241e;
+    --border:       #322c25;
+    --border-light: #25201a;
+    --nav-bg:       #0b0d11;
+    --nav-text:     #6f6e6a;
+    --nav-active:   #fbf9f4;
+    --nav-border:   #1a1d23;
+    --nav-label:    #393b40;
+    --nav-icon:     #4a4d52;
     --text:         #f3eee0;
     --text-strong:  #fbf9f4;
     --text-muted:   #a39e91;
     --text-dim:     #6a6660;
-    --nav-bg:       #0c0a07;
-    --nav-text:     #6f6b62;
-    --nav-active:   #fbf9f4;
-    --nav-border:   #1c1a14;
-    --nav-label:    #3a3730;
-    --nav-icon:     #4a463d;
-    --accent:       #d59445;
-    --accent-soft:  #2a1d0a;
-    --selection:    #4a3818;
+    --accent-red:   #d8553f;
+    --accent-gold:  #d9a948;
+    --accent-blue:  #5a86b8;
+    --accent:       var(--accent-red);
+    --selection:    #6a4a14;
+    --selection-fg: #fbf9f4;
+    --sidebar-border: rgba(60, 65, 75, 0.4);
   }
 }
 
@@ -147,7 +157,6 @@ html {
   -moz-osx-font-smoothing: grayscale;
   scroll-behavior: smooth;
   text-rendering: optimizeLegibility;
-  hanging-punctuation: first allow-end last;
 }
 
 body {
@@ -157,13 +166,13 @@ body {
   color: var(--text);
   font-family: var(--font-body);
   font-weight: 400;
-  font-feature-settings: "kern", "liga", "calt", "ss01", "tnum";
-  line-height: 1.65;
+  font-feature-settings: "kern", "liga", "calt", "tnum";
+  line-height: 1.6;
 }
 
 ::selection {
   background: var(--selection);
-  color: var(--text-strong);
+  color: var(--selection-fg);
 }
 
 a {
@@ -176,7 +185,6 @@ ul {
   list-style: none;
 }
 
-/* Page fade-in on load - feels considered without being slow */
 @keyframes page-in {
   from { opacity: 0; transform: translateY(4px); }
   to   { opacity: 1; transform: translateY(0); }
@@ -188,7 +196,7 @@ ul {
 
 
 /* ═══════════════════════════════════════
-   SIDEBAR - always darker than main
+   SIDEBAR
 ═══════════════════════════════════════ */
 
 .sidebar {
@@ -203,6 +211,7 @@ ul {
   height: 100vh;
   overflow-y: auto;
   flex-shrink: 0;
+  border-right: 1px solid var(--sidebar-border);
 }
 
 .sidebar-header {
@@ -221,11 +230,10 @@ ul {
   align-items: center;
   gap: 10px;
   color: var(--nav-active);
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: 0.95rem;
-  font-weight: 500;
-  font-variation-settings: "opsz" 14;
-  letter-spacing: -0.005em;
+  font-weight: 600;
+  letter-spacing: -0.01em;
 }
 
 .logo-link:hover {
@@ -266,7 +274,7 @@ ul {
 
 .nav-label {
   font-size: 0.62rem;
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.16em;
   text-transform: uppercase;
   color: var(--nav-label);
@@ -310,11 +318,11 @@ ul {
   transform: translateY(-50%);
   width: 2px;
   height: 12px;
-  background: var(--nav-active);
+  background: var(--accent-red);
   border-radius: 1px;
 }
 
-/* Sidebar footer with theme toggle + social icons */
+/* Sidebar footer */
 .sidebar-footer {
   margin-top: 32px;
   padding-top: 20px;
@@ -345,7 +353,6 @@ ul {
   color: #ff0000;
 }
 
-/* Theme toggle */
 .theme-toggle {
   background: none;
   border: none;
@@ -395,48 +402,45 @@ ul {
 .intro-eyebrow {
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-dim);
-  margin-bottom: 20px;
+  margin-bottom: 22px;
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
 }
 
 .intro-eyebrow::before {
   content: "";
   width: 24px;
   height: 1px;
-  background: currentColor;
+  background: var(--accent-red);
   display: inline-block;
 }
 
 .intro-heading {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-3xl);
-  font-weight: 400;
-  font-variation-settings: "opsz" 144, "SOFT" 50;
+  font-weight: 600;
   line-height: 1.0;
   color: var(--text-strong);
   margin-bottom: 24px;
-  letter-spacing: -0.025em;
+  letter-spacing: -0.035em;
 }
 
 .intro-body {
   font-size: var(--text-md);
   color: var(--text-muted);
   max-width: 540px;
-  line-height: 1.65;
+  line-height: 1.6;
   font-weight: 400;
 }
 
 .intro-body em {
-  font-family: var(--font-display);
   font-style: italic;
-  font-weight: 400;
-  font-variation-settings: "opsz" 18;
+  font-weight: 500;
   color: var(--text);
 }
 
@@ -466,19 +470,36 @@ ul {
   color: var(--text);
   text-decoration: none;
   transition: padding-left var(--transition-slow), background var(--transition);
+  position: relative;
 }
 
 .home-card:first-child {
   border-top: 1px solid var(--border-light);
 }
 
+.home-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--accent-red);
+  transition: width var(--transition);
+}
+
 .home-card:hover {
-  padding-left: 6px;
+  padding-left: 12px;
+}
+
+.home-card:hover::before {
+  width: 2px;
 }
 
 .home-card:hover .home-card-arrow {
   opacity: 1;
   transform: translateX(2px);
+  color: var(--accent-red);
 }
 
 .home-card:hover .home-card-title {
@@ -488,7 +509,7 @@ ul {
 .home-card-label {
   font-family: var(--font-body);
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -496,12 +517,11 @@ ul {
 }
 
 .home-card-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-md);
-  font-weight: 500;
-  font-variation-settings: "opsz" 24;
+  font-weight: 600;
   color: var(--text-strong);
-  letter-spacing: -0.005em;
+  letter-spacing: -0.01em;
   transition: color var(--transition);
 }
 
@@ -509,7 +529,7 @@ ul {
   font-size: 0.95rem;
   color: var(--text-dim);
   opacity: 0;
-  transition: opacity var(--transition), transform var(--transition);
+  transition: opacity var(--transition), transform var(--transition), color var(--transition);
   text-align: right;
 }
 
@@ -539,12 +559,11 @@ ul {
 }
 
 .page-title {
-  font-family: var(--font-display);
+  font-family: var(--font-body);
   font-size: var(--text-2xl);
-  font-weight: 400;
-  font-variation-settings: "opsz" 144;
+  font-weight: 600;
   line-height: 1.05;
-  letter-spacing: -0.022em;
+  letter-spacing: -0.03em;
   color: var(--text-strong);
   margin-bottom: 14px;
 }
@@ -553,21 +572,20 @@ ul {
   font-size: var(--text-base);
   color: var(--text-muted);
   max-width: 540px;
-  line-height: 1.7;
+  line-height: 1.65;
 }
 
 
 /* ── DROP CAP UTILITY ─────────────────────── */
 .drop-cap::first-letter,
 .drop::first-letter {
-  font-family: var(--font-display);
-  font-weight: 400;
-  font-size: 4.2em;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 3.6em;
   line-height: 0.85;
   float: left;
-  margin: 0.06em 0.08em -0.02em 0;
-  color: var(--text-strong);
-  font-variation-settings: "opsz" 144;
+  margin: 0.06em 0.08em -0.05em 0;
+  color: var(--accent-red);
 }
 
 
@@ -579,7 +597,7 @@ ul {
 .coming-soon-label {
   display: inline-block;
   font-size: var(--text-xs);
-  font-weight: 500;
+  font-weight: 600;
   letter-spacing: 0.14em;
   text-transform: uppercase;
   color: var(--text-dim);
@@ -615,8 +633,8 @@ ul {
 }
 
 .colophon a:hover {
-  color: var(--text-muted);
-  border-bottom-color: var(--text-muted);
+  color: var(--accent-red);
+  border-bottom-color: var(--accent-red);
 }
 
 
@@ -629,6 +647,13 @@ ul {
   pointer-events: none;
   transition: opacity var(--transition);
   z-index: 1;
+  color: var(--text-strong);
+}
+
+/* Single red cell in the watermark for accent (the seed of rule 30) */
+.watermark .seed {
+  fill: var(--accent-red);
+  opacity: 0.85;
 }
 
 .watermark:hover {
@@ -662,6 +687,8 @@ ul {
     z-index: 1000;
     padding: 16px 20px;
     overflow: visible;
+    border-right: none;
+    border-bottom: 1px solid var(--sidebar-border);
   }
 
   .sidebar-header {

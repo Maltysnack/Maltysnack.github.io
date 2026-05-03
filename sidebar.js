@@ -34,7 +34,6 @@
     try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
   }
 
-  /* Apply stored theme as early as possible */
   try {
     const saved = localStorage.getItem('theme');
     if (saved === 'light' || saved === 'dark') applyTheme(saved);
@@ -75,15 +74,16 @@
         <div class="nav-section">
           <span class="nav-label">Games</span>
           <ul>
-            <li><a href="/dnd.html" ${active('/dnd.html') || path.endsWith('/grosh.html') || path.endsWith('/reginald.html') ? 'class="nav-active"' : ''}>D&amp;D</a></li>
+            <li><a href="/dnd.html" ${active('/dnd.html') || path.endsWith('/grosh.html') || path.endsWith('/reginald.html') ? 'class="nav-active"' : ''}>dnd</a></li>
             <li><a href="/projects/duoclue/" ${path.startsWith('/projects/duoclue') ? 'class="nav-active"' : ''}>Duoclue</a></li>
           </ul>
         </div>
 
         <div class="nav-section">
-          <span class="nav-label">Other</span>
+          <span class="nav-label">Wren</span>
           <ul>
             <li><a href="/shelf/" ${path.startsWith('/shelf') ? 'class="nav-active"' : ''}>Shelf</a></li>
+            <li><a href="/wren/negative-space.html" ${path.startsWith('/wren/') ? 'class="nav-active"' : ''}>Negative Space</a></li>
           </ul>
         </div>
 
@@ -118,11 +118,12 @@
     </div>
   `;
 
-  /* ── Watermark (Wren mark, fixed bottom-right) ────────── */
+  /* ── Watermark with red seed cell ────────── */
   const watermarkHtml = `
     <div class="watermark" aria-hidden="true">
       <svg viewBox="0 0 33 21" width="44" height="28">
-        <path fill="currentColor" d="M15,0h3v3h-3z M12,3h3v3h-3z M15,3h3v3h-3z M18,3h3v3h-3z M9,6h3v3h-3z M12,6h3v3h-3z M21,6h3v3h-3z M6,9h3v3h-3z M9,9h3v3h-3z M15,9h3v3h-3z M18,9h3v3h-3z M21,9h3v3h-3z M24,9h3v3h-3z M3,12h3v3h-3z M6,12h3v3h-3z M15,12h3v3h-3z M27,12h3v3h-3z M0,15h3v3h-3z M3,15h3v3h-3z M9,15h3v3h-3z M12,15h3v3h-3z M15,15h3v3h-3z M18,15h3v3h-3z M24,15h3v3h-3z M27,15h3v3h-3z M30,15h3v3h-3z M0,18h3v3h-3z M9,18h3v3h-3z M24,18h3v3h-3z"/>
+        <rect class="seed" x="15" y="0" width="3" height="3"/>
+        <path fill="currentColor" d="M12,3h3v3h-3z M15,3h3v3h-3z M18,3h3v3h-3z M9,6h3v3h-3z M12,6h3v3h-3z M21,6h3v3h-3z M6,9h3v3h-3z M9,9h3v3h-3z M15,9h3v3h-3z M18,9h3v3h-3z M21,9h3v3h-3z M24,9h3v3h-3z M3,12h3v3h-3z M6,12h3v3h-3z M15,12h3v3h-3z M27,12h3v3h-3z M0,15h3v3h-3z M3,15h3v3h-3z M9,15h3v3h-3z M12,15h3v3h-3z M15,15h3v3h-3z M18,15h3v3h-3z M24,15h3v3h-3z M27,15h3v3h-3z M30,15h3v3h-3z M0,18h3v3h-3z M9,18h3v3h-3z M24,18h3v3h-3z"/>
       </svg>
     </div>
   `;
@@ -145,7 +146,6 @@
       themeBtn.addEventListener('click', toggleTheme);
     }
 
-    /* Insert watermark once at end of body if not already there */
     if (!document.querySelector('.watermark')) {
       document.body.insertAdjacentHTML('beforeend', watermarkHtml);
     }
