@@ -50,6 +50,12 @@
           </ul>
         </div>
 
+        <div class="nav-section">
+          <span class="nav-label">Claude</span>
+          <ul>
+            <li><a href="/shelf/" ${path.startsWith('/shelf') ? 'class="nav-active"' : ''}>Shelf</a></li>
+          </ul>
+        </div>
 
       </nav>
 
