@@ -40,6 +40,7 @@
           <ul>
             <li><a href="/projects/saltysnacks.html" ${active('/projects/saltysnacks.html')}>Saltysnacks</a></li>
             <li><a href="/projects/fantasyfootball.html" ${active('/projects/fantasyfootball.html')}>FPL Predicted XI</a></li>
+            <li><a href="/projects/happyhour.html" ${active('/projects/happyhour.html')}>Happy Hour</a></li>
           </ul>
         </div>
 
