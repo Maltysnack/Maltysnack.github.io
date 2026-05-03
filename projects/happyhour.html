@@ -84,18 +84,18 @@
       overflow: hidden;
     }
 
-    /* Photo */
+    /* Photo — two stacked layers cross-fade for the slideshow */
     .photo {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0;
-      transition: opacity var(--d-cinema) var(--ease-out);
+      transition: opacity 1800ms var(--ease-out);
       will-change: transform, opacity;
     }
     .photo.loaded {
       opacity: 1;
-      animation: ken-burns 60s var(--ease-out) forwards;
+      animation: ken-burns 26s var(--ease-out) forwards;
     }
 
     /* Gradient fallback (shown when no photo / loading) */
@@ -586,7 +586,7 @@
     /* ── Keyframes ────────────────────────────────────────────── */
     @keyframes ken-burns {
       from { transform: scale(1.04) translate(0, 0); }
-      to   { transform: scale(1.16) translate(-1.8%, -1.2%); }
+      to   { transform: scale(1.10) translate(-0.8%, -0.5%); }
     }
     @keyframes rise {
       from { opacity: 0; transform: translateY(18px); }
@@ -626,7 +626,9 @@
   <div class="grain" aria-hidden="true"></div>
 
   <main class="stage">
-    <img id="photo" class="photo" alt="" crossorigin="anonymous" />
+    <!-- Two stacked photo layers for slow cross-fades -->
+    <img id="photo-a" class="photo" alt="" crossorigin="anonymous" />
+    <img id="photo-b" class="photo" alt="" crossorigin="anonymous" />
     <div id="fallback" class="fallback" aria-hidden="true"></div>
     <div id="tint" class="tint" aria-hidden="true"></div>
     <div class="shade" aria-hidden="true"></div>
@@ -1243,17 +1245,19 @@
       };
     }
 
-    async function fetchImage(city) {
-      if (!IMAGE_PROXY_URL) return null;
+    async function fetchImages(city, count = 8) {
+      if (!IMAGE_PROXY_URL) return [];
       try {
         const url = new URL(IMAGE_PROXY_URL);
         url.searchParams.set("city", city.name);
         url.searchParams.set("country", city.country);
+        url.searchParams.set("count", String(count));
         const res = await fetch(url.toString());
-        if (!res.ok) return null;
-        return await res.json();
+        if (!res.ok) return [];
+        const data = await res.json();
+        return Array.isArray(data.images) ? data.images : [];
       } catch {
-        return null;
+        return [];
       }
     }
 
@@ -1393,10 +1397,10 @@
       let firstWithWeather = null; // fallback target if no images load
       for (const city of ordered) {
         try {
-          const [weather, image] = await Promise.all([fetchWeather(city), fetchImage(city)]);
+          const [weather, images] = await Promise.all([fetchWeather(city), fetchImages(city, 8)]);
           if (!firstWithWeather) firstWithWeather = { city, weather };
-          if (IMAGE_PROXY_URL && !image) continue;
-          await render(city, weather, image);
+          if (IMAGE_PROXY_URL && (!images || images.length === 0)) continue;
+          await render(city, weather, images);
           lastCity = city.name;
           rendered = true;
           break;
@@ -1407,7 +1411,7 @@
       // If proxy is unreachable for every city, still render the first one
       // with the gradient fallback so the page never gets stuck on the veil.
       if (!rendered && firstWithWeather) {
-        await render(firstWithWeather.city, firstWithWeather.weather, null);
+        await render(firstWithWeather.city, firstWithWeather.weather, []);
         lastCity = firstWithWeather.city.name;
       }
 
@@ -1416,45 +1420,109 @@
       firstLoad = false;
     }
 
-    async function render(city, weather, image) {
-      const photo    = document.getElementById("photo");
+    // ── Slideshow state ──
+    // Two stacked <img> elements (photo-a / photo-b) cross-fade between them.
+    // Cycles every PHOTO_DWELL_MS through the city's image queue.
+    const PHOTO_DWELL_MS = 12000;        // visible time per photo
+    const slideshow = {
+      images: [],
+      idx: 0,
+      activeKey: "a",                    // which layer is currently shown
+      timer: null,
+      currentImage: null,                // image currently displayed (for credit)
+    };
+
+    function stopSlideshow() {
+      if (slideshow.timer) {
+        clearTimeout(slideshow.timer);
+        slideshow.timer = null;
+      }
+    }
+
+    // Cross-fade to the given image. Loads in background, swaps onLoad.
+    function showSlide(image, isFirst) {
+      const nextKey = slideshow.activeKey === "a" ? "b" : "a";
+      const nextEl = document.getElementById(`photo-${nextKey}`);
+      const currEl = document.getElementById(`photo-${slideshow.activeKey}`);
       const fallback = document.getElementById("fallback");
+      const tint = document.getElementById("tint");
+
+      const loader = new Image();
+      loader.crossOrigin = "anonymous";
+      const onReady = (ok) => {
+        if (!ok) return;
+        nextEl.src = image.url;
+        nextEl.alt = image.altDescription || "";
+        // Swap on the next browser tick. Use setTimeout(0) instead of rAF
+        // because rAF can be paused when the tab isn't focused, leaving the
+        // slideshow stuck without the .loaded class.
+        setTimeout(() => {
+          nextEl.classList.add("loaded");
+          if (!isFirst && currEl) currEl.classList.remove("loaded");
+          fallback.classList.remove("visible");
+        }, 16);
+        slideshow.activeKey = nextKey;
+        slideshow.currentImage = image;
+        updateCredit(image);
+
+        // Pull color only from the FIRST photo of a city — keeps accent stable
+        // across the slideshow so UI elements don't flicker color.
+        if (isFirst) {
+          extractAccent(loader).then((rgb) => {
+            applyAccent(rgb);
+            tint.classList.add("visible");
+          });
+        }
+      };
+      const t = setTimeout(() => onReady(false), 12000);
+      loader.onload = () => { clearTimeout(t); onReady(true); };
+      loader.onerror = () => { clearTimeout(t); onReady(false); };
+      loader.src = image.url;
+    }
+
+    function startSlideshow(images) {
+      stopSlideshow();
+      slideshow.images = images;
+      slideshow.idx = 0;
+      if (!images.length) return;
+      showSlide(images[0], true);
+      const tick = () => {
+        slideshow.idx = (slideshow.idx + 1) % slideshow.images.length;
+        showSlide(slideshow.images[slideshow.idx], false);
+        slideshow.timer = setTimeout(tick, PHOTO_DWELL_MS);
+      };
+      slideshow.timer = setTimeout(tick, PHOTO_DWELL_MS);
+    }
+
+    function updateCredit(image) {
+      const credit = document.getElementById("hero")?.querySelector(".credit");
+      if (!credit) return;
+      // Find the photographer span and update without re-running animations
+      credit.innerHTML = `<span>Photograph — <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> <span class="dim">/</span> Unsplash</span><br><span>Weather <span class="dim">·</span> Open-Meteo</span>`;
+    }
+
+    async function render(city, weather, images) {
       const tint     = document.getElementById("tint");
+      const fallback = document.getElementById("fallback");
+      const photoA   = document.getElementById("photo-a");
+      const photoB   = document.getElementById("photo-b");
 
       // Move the world-map dot to this city
       updateMap(city);
 
       // Reset visual layers
-      photo.classList.remove("loaded");
+      stopSlideshow();
+      photoA.classList.remove("loaded");
+      photoB.classList.remove("loaded");
       tint.classList.remove("visible");
 
-      if (image) {
-        // Show gradient as a visual placeholder while photo decodes
+      if (images && images.length > 0) {
         fallback.classList.add("visible");
-        photo.alt = image.altDescription || `${city.name}, ${city.country}`;
-
-        // Load photo in the background with a hard timeout — never block render.
-        const loader = new Image();
-        loader.crossOrigin = "anonymous";
-        const onReady = (ok) => {
-          if (!ok) return;
-          photo.src = image.url;
-          requestAnimationFrame(() => {
-            photo.classList.add("loaded");
-            fallback.classList.remove("visible");
-          });
-          extractAccent(loader).then(rgb => {
-            applyAccent(rgb);
-            tint.classList.add("visible");
-          });
-        };
-        const t = setTimeout(() => onReady(false), 12000);
-        loader.onload = () => { clearTimeout(t); onReady(true); };
-        loader.onerror = () => { clearTimeout(t); onReady(false); };
-        loader.src = image.url;
+        startSlideshow(images);
       } else {
         applyAccent(null);
-        photo.removeAttribute("src");
+        photoA.removeAttribute("src");
+        photoB.removeAttribute("src");
         fallback.classList.add("visible");
       }
 
@@ -1495,9 +1563,12 @@
         hero.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
       });
 
-      // Credit lives inside hero (in-flow on mobile, fixed bottom-right on desktop via CSS)
-      const creditHTML = image
-        ? `<div class="credit reveal d-5"><span>Photograph — <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> <span class="dim">/</span> Unsplash</span><br><span>Weather <span class="dim">·</span> Open-Meteo</span></div>`
+      // Credit lives inside hero (in-flow on mobile, fixed bottom-right on desktop via CSS).
+      // Starts as a placeholder; updateCredit() rewrites it with photographer info as
+      // each slideshow image loads. Wrapper element keeps the rise-in animation stable.
+      const initialImage = (images && images[0]) || null;
+      const creditHTML = initialImage
+        ? `<div class="credit reveal d-5"><span>Photograph — <a href="${escapeHtml(initialImage.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(initialImage.photographer)}</a> <span class="dim">/</span> Unsplash</span><br><span>Weather <span class="dim">·</span> Open-Meteo</span></div>`
         : `<div class="credit reveal d-5"><span>Weather <span class="dim">·</span> Open-Meteo</span></div>`;
       hero.insertAdjacentHTML("beforeend", creditHTML);
       requestAnimationFrame(() => {
@@ -1524,8 +1595,12 @@
     }
 
     function renderError(headline, sub) {
+      stopSlideshow();
       applyAccent(null);
-      document.getElementById("photo").removeAttribute("src");
+      document.getElementById("photo-a").removeAttribute("src");
+      document.getElementById("photo-b").removeAttribute("src");
+      document.getElementById("photo-a").classList.remove("loaded");
+      document.getElementById("photo-b").classList.remove("loaded");
       document.getElementById("fallback").classList.add("visible");
       document.getElementById("tint").classList.remove("visible");
       const hero = document.getElementById("hero");
