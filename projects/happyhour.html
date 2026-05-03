@@ -425,12 +425,18 @@
       color: var(--c-fg-4);
       margin: 0 8px;
     }
-    .strip .val .toast {
+    /* Subtle italic toast word that sits below the strip - no label,
+       reads like a closing punctuation rather than another data row. */
+    .toast-mark {
+      margin-top: var(--s-3);
       font-family: var(--font-display);
       font-style: italic;
-      font-weight: 500;
+      font-weight: 400;
+      font-size: 0.95rem;
       color: var(--c-accent);
-      letter-spacing: 0.005em;
+      opacity: 0.85;
+      letter-spacing: 0.01em;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.55);
     }
 
     /* ── Attribution - magazine credit treatment ──────────────── */
@@ -1658,12 +1664,8 @@
             <span class="label">What you'd order</span>
             <span class="val">${drinkHtml}</span>
           </div>` : ""}
-          ${cheers ? `
-          <div class="item">
-            <span class="label">How you'd toast</span>
-            <span class="val"><span class="toast">${escapeHtml(cheers)}</span></span>
-          </div>` : ""}
         </div>
+        ${cheers ? `<p class="toast-mark reveal d-5">${escapeHtml(cheers)}.</p>` : ""}
       `;
 
       // Trigger the staggered reveal \u2014 re-add .in on the next frame so
