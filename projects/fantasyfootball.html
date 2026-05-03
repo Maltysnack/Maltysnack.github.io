@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>FPL Predicted XI — maltysnack</title>
+  <title>FPL Predicted XI - maltysnack</title>
   <link rel="stylesheet" href="../style.css" />
   <style>
     body { background: #eeecea; }
@@ -134,7 +134,7 @@
       position: relative; z-index: 2; margin-top: -10px;
     }
 
-    /* Predicted score — green (used by Predicted XI and bench cards) */
+    /* Predicted score - green (used by Predicted XI and bench cards) */
     .fpl-card-score {
       background: #190025; color: #00ff87;
       font-size: 0.64rem; font-weight: 800;
@@ -171,7 +171,7 @@
       position: relative; z-index: 2;
     }
 
-    /* My Team: actual score row — yellow */
+    /* My Team: actual score row - yellow */
     .fpl-card-score.is-actual {
       color: #ffe44e;
     }
@@ -399,9 +399,9 @@
         <div id="predOuter" style="display:none">
           <div class="fpl-gw-bar">
             <div class="fpl-gw-left">
-              <div class="fpl-gw-label" id="predGwLabel">Gameweek —</div>
+              <div class="fpl-gw-label" id="predGwLabel">Gameweek -</div>
             </div>
-            <div class="fpl-gw-pts" id="predTotalPts">— pts</div>
+            <div class="fpl-gw-pts" id="predTotalPts">- pts</div>
           </div>
           <div class="fpl-pitch-wrap">
             <div class="fpl-pitch">
@@ -441,8 +441,8 @@
         <div id="myStatus" class="fpl-status">Loading your team...</div>
         <div id="myOuter" style="display:none">
           <div class="fpl-gw-bar">
-            <div class="fpl-gw-label" id="myGwLabel">Gameweek —</div>
-            <div class="fpl-gw-pts is-actual" id="myTotalPts">— pts</div>
+            <div class="fpl-gw-label" id="myGwLabel">Gameweek -</div>
+            <div class="fpl-gw-pts is-actual" id="myTotalPts">- pts</div>
           </div>
           <div class="fpl-pitch-wrap">
             <div class="fpl-pitch">
@@ -495,7 +495,7 @@
     <!-- Best of the Rest -->
     <div class="fpl-botr" id="botrSection" style="display:none">
       <div class="fpl-botr-title">Best of the Rest</div>
-      <div class="fpl-botr-bar" id="botrBar">Gameweek — — Next week predictions</div>
+      <div class="fpl-botr-bar" id="botrBar">Gameweek - - Next week predictions</div>
       <div class="fpl-botr-body">
         <div class="fpl-botr-row" id="botrRow"></div>
       </div>
@@ -511,7 +511,7 @@
     <div class="fpl-tracker" id="trackerSection" style="display:none">
       <div class="fpl-tracker-header">
         <div class="fpl-tracker-title">Prediction Tracker</div>
-        <div class="fpl-tracker-total neu" id="trackerTotal">—</div>
+        <div class="fpl-tracker-total neu" id="trackerTotal">-</div>
       </div>
       <div class="fpl-tracker-bar">
         <div>GW</div><div>Predicted</div><div>Actual</div><div>+/−</div>
@@ -542,7 +542,7 @@
   const DEFAULT_TEAM_ID = '6493589';
 
   // CORS proxies tried in order for live My Team requests
-  // (main data comes from fpl-api-cache.json — no proxy needed)
+  // (main data comes from fpl-api-cache.json - no proxy needed)
   const LIVE_PROXIES = [
     url => `https://corsproxy.io/?url=${encodeURIComponent(url)}`,
     url => `https://api.allorigins.win/raw?url=${encodeURIComponent(url)}`,
@@ -582,7 +582,7 @@
   let oddsMap      = {};   // team_id → { winProb, pOver25 }
   let calibration  = { 1: 1.0, 2: 1.0, 3: 1.0, 4: 1.0 };  // per-position EMA correction factors
 
-  // fetchFPL — tries each CORS proxy in turn (used only for My Team live data)
+  // fetchFPL - tries each CORS proxy in turn (used only for My Team live data)
   async function fetchFPL(endpoint) {
     const target = FPL + endpoint;
     for (const proxy of LIVE_PROXIES) {
@@ -642,7 +642,7 @@
     }
   }
 
-  // Core prediction — fixList is an array (length >1 = double gameweek)
+  // Core prediction - fixList is an array (length >1 = double gameweek)
   function predictWithFixtures(player, fixList) {
     if (!fixList || !fixList.length) return 0;
     const avail = player.chance_of_playing_next_round === null
@@ -797,8 +797,8 @@
   // My Team card: name → actual (yellow) → predicted (small green)
   function myCardHTML(player, oppMap, actualScore, predScore, captain=false, vice=false) {
     const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
-    const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
-    const actual  = actualScore !== null && actualScore !== undefined ? actualScore : '—';
+    const predPts = predScore !== undefined ? predScore.toFixed(1) : '-';
+    const actual  = actualScore !== null && actualScore !== undefined ? actualScore : '-';
     const shirt   = shirtUrl(player);
     const capCls  = captain ? ' is-captain' : vice ? ' is-vice' : '';
     return `<div class="fpl-card${capCls}">
@@ -833,8 +833,8 @@
 
   function myBenchCardHTML(player, label, oppMap, actualScore, predScore) {
     const colour  = CLUB_COLOURS[player.team_code] || '#37003c';
-    const predPts = predScore !== undefined ? predScore.toFixed(1) : '—';
-    const actual  = actualScore !== null && actualScore !== undefined ? actualScore : '—';
+    const predPts = predScore !== undefined ? predScore.toFixed(1) : '-';
+    const actual  = actualScore !== null && actualScore !== undefined ? actualScore : '-';
     const shirt   = shirtUrl(player);
     return `<div class="fpl-bench-card">
       <div class="fpl-bench-pos">${label}</div>
@@ -854,7 +854,7 @@
     const total = [...starting.gkp, ...starting.def, ...starting.mid, ...starting.fwd]
       .reduce((s,p) => s + p.predicted, 0);
 
-    document.getElementById('predGwLabel').textContent  = `Gameweek ${nextGwId} — Predicted`;
+    document.getElementById('predGwLabel').textContent  = `Gameweek ${nextGwId} - Predicted`;
     document.getElementById('predTotalPts').textContent = total.toFixed(1) + ' pts';
     document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, nextOppMap)).join('');
     document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, nextOppMap)).join('');
@@ -883,7 +883,7 @@
     ];
 
     document.getElementById('botrRow').innerHTML = rest.map(p => benchCardHTML(p, '', nextOppMap)).join('');
-    document.getElementById('botrBar').textContent = `Gameweek ${nextGwId} — Next week predictions`;
+    document.getElementById('botrBar').textContent = `Gameweek ${nextGwId} - Next week predictions`;
     document.getElementById('botrSection').style.display = '';
   }
 
@@ -1061,7 +1061,7 @@
     statusEl.classList.remove('error');
 
     try {
-      // Always load last GW — that's where actual points live
+      // Always load last GW - that's where actual points live
       const [picksData, liveData, entryData] = await Promise.all([
         fetchFPL(`entry/${teamId}/event/${lastGwId}/picks/`),
         fetchFPL(`event/${lastGwId}/live/`),
@@ -1090,7 +1090,7 @@
 
       if (startingPicks.length < 11) throw new Error('Could not load picks. Check your team ID.');
 
-      // Actual points per player — raw score, no captain multiplier (C marker on card handles that)
+      // Actual points per player - raw score, no captain multiplier (C marker on card handles that)
       function actualPts(p) { return liveMap[p.id] || 0; }
 
       // Predicted score per player using last GW fixtures
@@ -1107,9 +1107,9 @@
       const mids = startingPicks.filter(p => p.element_type === 3);
       const fwds = startingPicks.filter(p => p.element_type === 4);
 
-      // GW bar — inline predicted alongside label
+      // GW bar - inline predicted alongside label
       document.getElementById('myGwLabel').innerHTML =
-        `Gameweek ${lastGwId} — Result <span class="fpl-pred-inline">Predicted ${totalPredicted.toFixed(1)}</span>`;
+        `Gameweek ${lastGwId} - Result <span class="fpl-pred-inline">Predicted ${totalPredicted.toFixed(1)}</span>`;
       document.getElementById('myTotalPts').textContent = `${totalActual} pts`;
 
       // Render starting XI
@@ -1175,7 +1175,7 @@
     history.forEach((h, i) => { gwSlots[COLS - history.length + i] = h; });
 
     const headCells = gwSlots.map(h =>
-      h ? `<th>GW${h.gwId}</th>` : `<th style="color:#bbb">—</th>`
+      h ? `<th>GW${h.gwId}</th>` : `<th style="color:#bbb">-</th>`
     ).join('');
 
     let rows = '';
@@ -1187,7 +1187,7 @@
 
       const dataCells = gwSlots.map(h => {
         const raw = h?.raw?.[pos];
-        if (raw === null || raw === undefined) return `<td class="fpl-cal-cell">—</td>`;
+        if (raw === null || raw === undefined) return `<td class="fpl-cal-cell">-</td>`;
         const pct = (raw - 1) * 100;
         const cls = pct > 0.5 ? 'pos' : pct < -0.5 ? 'neg' : '';
         const arrow = pct > 0.5 ? '↑' : pct < -0.5 ? '↓' : '→';
@@ -1219,7 +1219,7 @@
     try {
       statusEl.textContent = 'Loading FPL data...';
 
-      // Load from static cache — no CORS proxy needed, same origin
+      // Load from static cache - no CORS proxy needed, same origin
       const cacheRes = await fetch('/projects/fpl-api-cache.json?t=' + Date.now());
       if (!cacheRes.ok) throw new Error('Cache not found (HTTP ' + cacheRes.status + ')');
       const cache = await cacheRes.json();
@@ -1282,7 +1282,7 @@
       renderBestOfRest(squad, scored);
       renderPriceWatch();
 
-      // Auto-load default team — best-effort, uses CORS proxies, fails gracefully
+      // Auto-load default team - best-effort, uses CORS proxies, fails gracefully
       loadMyTeam(DEFAULT_TEAM_ID).catch(() => {});
 
       // Load prediction tracker
@@ -1295,7 +1295,7 @@
       if (cache.updatedAt) {
         const age  = Math.round((Date.now() - new Date(cache.updatedAt)) / 60000);
         const ageStr = age < 60 ? `${age}m ago` : `${Math.round(age/60)}h ago`;
-        statusEl.textContent = `GW${nextGwId} — data updated ${ageStr}`;
+        statusEl.textContent = `GW${nextGwId} - data updated ${ageStr}`;
       } else {
         statusEl.textContent = `GW${nextGwId} ready`;
       }
@@ -1331,8 +1331,8 @@
         html += `<div class="fpl-tracker-row">
           <div class="fpl-tracker-gw">GW${w.gwId}</div>
           <div class="fpl-tracker-pred">${(w.predictedTotal || 0).toFixed(1)}</div>
-          <div class="fpl-tracker-act">${w.actualTotal ?? '—'}</div>
-          <div class="fpl-tracker-diff ${diffCls}">${w.actualTotal != null ? sign + diff.toFixed(1) : '—'}</div>
+          <div class="fpl-tracker-act">${w.actualTotal ?? '-'}</div>
+          <div class="fpl-tracker-diff ${diffCls}">${w.actualTotal != null ? sign + diff.toFixed(1) : '-'}</div>
         </div>`;
       });
 

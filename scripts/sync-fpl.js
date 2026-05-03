@@ -6,7 +6,7 @@
  * per-position calibration factors (EMA, α=0.3, 4-week window).
  *
  * Writes a slim cache to projects/fpl-api-cache.json
- * Runs via GitHub Actions — no CORS issues here.
+ * Runs via GitHub Actions - no CORS issues here.
  */
 
 const https = require('https');
@@ -156,7 +156,7 @@ async function computeCalibration(elements, lastGwId, lastGwFixtures, existingCa
     console.log(`  Fetching GW${lastGwId} live scores...`);
     liveData = await get(`${FPL}event/${lastGwId}/live/`);
   } catch (e) {
-    console.warn(`  Calibration skipped — live fetch failed: ${e.message}`);
+    console.warn(`  Calibration skipped - live fetch failed: ${e.message}`);
     return existingCal || null;
   }
 
@@ -168,7 +168,7 @@ async function computeCalibration(elements, lastGwId, lastGwFixtures, existingCa
   });
 
   // Collect (predicted, actual) pairs by position.
-  // Only players who played >= 45 mins — below that the formula's signals
+  // Only players who played >= 45 mins - below that the formula's signals
   // (CS, saves, goals) don't apply cleanly and would add noise.
   const byPos = { 1: [], 2: [], 3: [], 4: [] };
   elements.forEach(p => {
@@ -185,7 +185,7 @@ async function computeCalibration(elements, lastGwId, lastGwFixtures, existingCa
   // EMA: new = α * thisWeek + (1-α) * old
   const ALPHA      = 0.3;
   const MIN_SAMPLE = 5;           // need at least N players per position to trust signal
-  const CLAMP      = [0.65, 1.50]; // hard rails — never correct by more than ±35%
+  const CLAMP      = [0.65, 1.50]; // hard rails - never correct by more than ±35%
 
   const posNames = { 1: 'GKP', 2: 'DEF', 3: 'MID', 4: 'FWD' };
   const factors  = {};
@@ -248,7 +248,7 @@ async function main() {
   let gw2Fixtures    = [];
   let gw3Fixtures    = [];
 
-  // GW+2 and GW+3 IDs — check against the events list to avoid fetching past the season end
+  // GW+2 and GW+3 IDs - check against the events list to avoid fetching past the season end
   const eventIds = new Set(events.map(e => e.id));
   const gw2Id    = nextGwId && eventIds.has(nextGwId + 1) ? nextGwId + 1 : null;
   const gw3Id    = nextGwId && eventIds.has(nextGwId + 2) ? nextGwId + 2 : null;
@@ -279,7 +279,7 @@ async function main() {
   let existingCal = null;
   try {
     existingCal = JSON.parse(fs.readFileSync(OUT, 'utf8')).calibration || null;
-  } catch (e) { /* first run or missing file — start fresh */ }
+  } catch (e) { /* first run or missing file - start fresh */ }
 
   // Compute / update calibration
   console.log('Computing calibration...');

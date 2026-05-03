@@ -112,9 +112,9 @@ async function main() {
 
   if (added > 0) {
     fs.writeFileSync(FILMS_PATH, JSON.stringify(films, null, 2));
-    console.log(`Done — added ${added} new ${added === 1 ? 'entry' : 'entries'} to films.json`);
+    console.log(`Done - added ${added} new ${added === 1 ? 'entry' : 'entries'} to films.json`);
   } else {
-    console.log('No new entries — films.json unchanged');
+    console.log('No new entries - films.json unchanged');
   }
 }
 

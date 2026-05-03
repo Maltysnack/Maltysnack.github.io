@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   sidebar.js — universal nav
+   sidebar.js - universal nav
    Single source of truth. Edit here only.
    Dark sidebar. Root-relative paths.
 ═══════════════════════════════════════ */

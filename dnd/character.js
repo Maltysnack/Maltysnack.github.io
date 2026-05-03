@@ -1,12 +1,12 @@
 /* =====================================================================
-   character.js — Grosh
+   character.js - Grosh
    ---------------------------------------------------------------------
    This is the ONLY file you need to edit for level-ups, prepared spell
    changes, new attacks, ASIs, found loot defaults, etc.
    app.js never needs to be touched for character changes.
 
    Derived values (Spell DC, Spell Atk, Init, save/skill bonuses, etc.)
-   are computed automatically from the inputs below — change the inputs,
+   are computed automatically from the inputs below - change the inputs,
    the values follow.
 
    Manually-tracked: AC (depends on armor worn), HP max (depends on rolls
@@ -154,7 +154,7 @@ const CHARACTER = {
 };
 
 /* =====================================================================
-   Derived helpers — read from CHARACTER, do not edit
+   Derived helpers - read from CHARACTER, do not edit
    ===================================================================== */
 
 const C = {
