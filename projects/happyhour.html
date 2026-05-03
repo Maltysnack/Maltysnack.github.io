@@ -1,0 +1,836 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>happyhour - maltysnack</title>
+  <meta name="description" content="It's happy hour somewhere." />
+  <meta name="theme-color" content="#0a0a0a" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: #0a0a0a;
+      color: #fafafa;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+      overscroll-behavior: none;
+    }
+    a { color: inherit; text-decoration: none; }
+
+    .stage {
+      position: relative;
+      height: 100dvh;
+      width: 100vw;
+      overflow: hidden;
+    }
+
+    .bg-img {
+      position: absolute; inset: 0;
+      width: 100%; height: 100%;
+      object-fit: cover;
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .bg-img.loaded { opacity: 1; animation: ken-burns 45s ease-out forwards; }
+
+    .bg-gradient {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 30% 20%, #f6b96f 0%, #e57a4d 30%, #7a2e4f 65%, #15131f 100%);
+      opacity: 0;
+      transition: opacity 1s ease;
+    }
+    .bg-gradient.visible { opacity: 1; animation: fade-in 1.2s ease-out forwards; }
+
+    .overlay-1 { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.85)); pointer-events: none; }
+    .overlay-2 { position: absolute; inset: 0; background: linear-gradient(to top right, rgba(0,0,0,0.4), transparent, rgba(0,0,0,0.2)); pointer-events: none; }
+    .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 240px rgba(0,0,0,0.55); pointer-events: none; }
+
+    .content {
+      position: relative; z-index: 10;
+      height: 100%;
+      display: flex; flex-direction: column;
+      padding: 24px;
+    }
+    @media (min-width: 640px) { .content { padding: 32px 40px; } }
+    @media (min-width: 768px) { .content { padding: 40px 56px; } }
+
+    header {
+      display: flex; align-items: flex-start; justify-content: space-between;
+      gap: 16px;
+    }
+    .wordmark {
+      font-family: 'Fraunces', serif;
+      font-size: 22px;
+      font-weight: 300;
+      letter-spacing: -0.01em;
+    }
+    @media (min-width: 640px) { .wordmark { font-size: 26px; } }
+
+    .wordmark-tag {
+      font-size: 11px;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.6);
+      margin-left: 8px;
+      display: none;
+    }
+    @media (min-width: 640px) { .wordmark-tag { display: inline; } }
+
+    .top-actions { display: flex; align-items: center; gap: 10px; }
+
+    .pill, .icon-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      color: rgba(255,255,255,0.85);
+      padding: 7px 14px;
+      border-radius: 999px;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      cursor: pointer;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+    }
+    .pill:hover, .icon-btn:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
+    .pill:disabled { opacity: 0.5; cursor: wait; }
+
+    .icon-btn {
+      padding: 7px;
+      width: 32px; height: 32px;
+      justify-content: center;
+    }
+
+    .pill svg { transition: transform 0.4s ease; }
+    .pill:hover svg { transform: rotate(90deg); }
+    .pill.spinning svg { animation: spin 0.8s linear infinite; }
+
+    .spacer { flex: 1; }
+
+    .block { max-width: 880px; opacity: 0; transform: translateY(12px); }
+    .block.in { animation: rise-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+
+    .eyebrow {
+      font-size: 11px;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 12px;
+    }
+
+    h1.city {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      line-height: 0.95;
+      letter-spacing: -0.02em;
+      display: flex; flex-wrap: wrap; align-items: baseline;
+      gap: 12px 20px;
+    }
+    h1.city .name { font-size: clamp(3rem, 11vw, 9rem); }
+    h1.city .flag { font-size: clamp(2rem, 5vw, 3.5rem); }
+
+    .country {
+      margin-top: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.7);
+    }
+    @media (min-width: 640px) { .country { font-size: 16px; } }
+
+    .stats {
+      margin-top: 28px;
+      display: flex; flex-wrap: wrap;
+      gap: 20px 40px;
+    }
+    .stat { display: flex; flex-direction: column; }
+    .stat-label {
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+    }
+    .stat-value {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 24px;
+      line-height: 1.3;
+      margin-top: 4px;
+    }
+    @media (min-width: 640px) { .stat-value { font-size: 30px; } }
+    .stat-value.mono { font-variant-numeric: tabular-nums; }
+
+    .weather-line { display: inline-flex; align-items: baseline; gap: 8px; }
+    .weather-desc { font-size: 14px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; }
+
+    .beers { display: flex; flex-direction: column; }
+    .beer-item { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.5; }
+    @media (min-width: 640px) { .beer-item { font-size: 18px; } }
+    .beer-sep { color: rgba(255,255,255,0.4); margin: 0 4px; }
+    .beer-price { color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
+
+    .footer-row {
+      margin-top: 24px;
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      gap: 12px;
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+    }
+    .footer-row a { text-underline-offset: 4px; }
+    .footer-row a:hover { color: white; text-decoration: underline; }
+
+    .err {
+      max-width: 640px;
+    }
+    .err h2 {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 28px;
+      color: rgba(255,255,255,0.9);
+    }
+    .err button { margin-top: 16px; }
+
+    .veil {
+      position: absolute; inset: 0; z-index: 20;
+      background: #0a0a0a;
+      display: grid; place-items: center;
+      gap: 16px;
+      transition: opacity 0.5s ease;
+    }
+    .veil.hidden { opacity: 0; pointer-events: none; }
+    .veil-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 2px solid rgba(255,255,255,0.2);
+      border-top-color: rgba(255,255,255,1);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    .veil-text {
+      font-family: 'Fraunces', serif;
+      font-weight: 300;
+      font-size: 20px;
+      color: rgba(255,255,255,0.7);
+    }
+
+    @keyframes ken-burns {
+      0%   { transform: scale(1.04) translate(0, 0); }
+      100% { transform: scale(1.14) translate(-1.5%, -1%); }
+    }
+    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes rise-in {
+      from { opacity: 0; transform: translateY(12px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+
+    .back {
+      position: fixed;
+      top: 16px; left: 16px;
+      z-index: 30;
+      font-size: 11px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.55);
+      padding: 6px 10px;
+      background: rgba(0,0,0,0.2);
+      border-radius: 999px;
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      transition: color 0.2s ease;
+    }
+    .back:hover { color: white; }
+    @media (min-width: 640px) { .back { display: none; } }
+  </style>
+</head>
+<body>
+  <a class="back" href="/index.html">← maltysnack</a>
+
+  <div class="stage">
+    <img id="bg-img" class="bg-img" alt="" />
+    <div id="bg-grad" class="bg-gradient"></div>
+    <div class="overlay-1"></div>
+    <div class="overlay-2"></div>
+    <div class="vignette"></div>
+
+    <div class="content">
+      <header>
+        <div>
+          <span class="wordmark">happyhour</span>
+          <span class="wordmark-tag">somewhere</span>
+        </div>
+        <div class="top-actions">
+          <a href="/index.html" class="icon-btn" aria-label="Back to maltysnack" title="Back" style="display:none" id="back-btn-desktop">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M15 18l-6-6 6-6"/>
+            </svg>
+          </a>
+          <button id="refresh-btn" class="pill" aria-label="Show another city">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+              <path d="M21 3v5h-5"/>
+              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+              <path d="M3 21v-5h5"/>
+            </svg>
+            <span>Another</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="spacer"></div>
+
+      <div id="content-area"></div>
+
+      <div id="footer-area"></div>
+    </div>
+
+    <div id="veil" class="veil">
+      <div class="veil-inner">
+        <div class="spinner"></div>
+        <p class="veil-text">finding the party…</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ────────────────────────────────────────────────────────────────
+    //  CONFIG
+    // ────────────────────────────────────────────────────────────────
+    // Get a free key at https://unsplash.com/developers (50 req/hr demo).
+    // The key lives in client JS — fine for low-traffic personal use, but
+    // anyone can read it from devtools and burn through the rate limit.
+    const UNSPLASH_KEY = "";
+
+    // Auto-refresh interval (ms). Default: 15 minutes.
+    const AUTO_REFRESH_MS = 15 * 60 * 1000;
+
+    // Happy-hour window (local hours, 24h). 16 ≤ h < 18 = 4–6pm.
+    const HAPPY_START = 16;
+    const HAPPY_END = 18;
+
+    // ────────────────────────────────────────────────────────────────
+    //  DATA
+    // ────────────────────────────────────────────────────────────────
+    const CITIES = [
+      // Asia / Pacific
+      { name:"Tokyo", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:35.6762, lon:139.6503 },
+      { name:"Kyoto", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:35.0116, lon:135.7681 },
+      { name:"Osaka", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:34.6937, lon:135.5023 },
+      { name:"Seoul", country:"South Korea", cc:"KR", flag:"🇰🇷", tz:"Asia/Seoul", lat:37.5665, lon:126.9780 },
+      { name:"Busan", country:"South Korea", cc:"KR", flag:"🇰🇷", tz:"Asia/Seoul", lat:35.1796, lon:129.0756 },
+      { name:"Beijing", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:39.9042, lon:116.4074 },
+      { name:"Shanghai", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:31.2304, lon:121.4737 },
+      { name:"Hong Kong", country:"Hong Kong", cc:"HK", flag:"🇭🇰", tz:"Asia/Hong_Kong", lat:22.3193, lon:114.1694 },
+      { name:"Taipei", country:"Taiwan", cc:"TW", flag:"🇹🇼", tz:"Asia/Taipei", lat:25.0330, lon:121.5654 },
+      { name:"Singapore", country:"Singapore", cc:"SG", flag:"🇸🇬", tz:"Asia/Singapore", lat:1.3521, lon:103.8198 },
+      { name:"Bangkok", country:"Thailand", cc:"TH", flag:"🇹🇭", tz:"Asia/Bangkok", lat:13.7563, lon:100.5018 },
+      { name:"Phuket", country:"Thailand", cc:"TH", flag:"🇹🇭", tz:"Asia/Bangkok", lat:7.8804, lon:98.3923 },
+      { name:"Chiang Mai", country:"Thailand", cc:"TH", flag:"🇹🇭", tz:"Asia/Bangkok", lat:18.7883, lon:98.9853 },
+      { name:"Hanoi", country:"Vietnam", cc:"VN", flag:"🇻🇳", tz:"Asia/Ho_Chi_Minh", lat:21.0285, lon:105.8542 },
+      { name:"Ho Chi Minh City", country:"Vietnam", cc:"VN", flag:"🇻🇳", tz:"Asia/Ho_Chi_Minh", lat:10.8231, lon:106.6297 },
+      { name:"Bali", country:"Indonesia", cc:"ID", flag:"🇮🇩", tz:"Asia/Makassar", lat:-8.4095, lon:115.1889 },
+      { name:"Jakarta", country:"Indonesia", cc:"ID", flag:"🇮🇩", tz:"Asia/Jakarta", lat:-6.2088, lon:106.8456 },
+      { name:"Manila", country:"Philippines", cc:"PH", flag:"🇵🇭", tz:"Asia/Manila", lat:14.5995, lon:120.9842 },
+      { name:"Cebu", country:"Philippines", cc:"PH", flag:"🇵🇭", tz:"Asia/Manila", lat:10.3157, lon:123.8854 },
+      { name:"Kuala Lumpur", country:"Malaysia", cc:"MY", flag:"🇲🇾", tz:"Asia/Kuala_Lumpur", lat:3.1390, lon:101.6869 },
+      { name:"Penang", country:"Malaysia", cc:"MY", flag:"🇲🇾", tz:"Asia/Kuala_Lumpur", lat:5.4141, lon:100.3288 },
+      { name:"Mumbai", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:19.0760, lon:72.8777 },
+      { name:"New Delhi", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:28.6139, lon:77.2090 },
+      { name:"Goa", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:15.2993, lon:74.1240 },
+      { name:"Dubai", country:"United Arab Emirates", cc:"AE", flag:"🇦🇪", tz:"Asia/Dubai", lat:25.2048, lon:55.2708 },
+      { name:"Abu Dhabi", country:"United Arab Emirates", cc:"AE", flag:"🇦🇪", tz:"Asia/Dubai", lat:24.4539, lon:54.3773 },
+      // Europe / Africa / Middle East
+      { name:"Istanbul", country:"Türkiye", cc:"TR", flag:"🇹🇷", tz:"Europe/Istanbul", lat:41.0082, lon:28.9784 },
+      { name:"Athens", country:"Greece", cc:"GR", flag:"🇬🇷", tz:"Europe/Athens", lat:37.9838, lon:23.7275 },
+      { name:"Mykonos", country:"Greece", cc:"GR", flag:"🇬🇷", tz:"Europe/Athens", lat:37.4467, lon:25.3289 },
+      { name:"Santorini", country:"Greece", cc:"GR", flag:"🇬🇷", tz:"Europe/Athens", lat:36.3932, lon:25.4615 },
+      { name:"Cairo", country:"Egypt", cc:"EG", flag:"🇪🇬", tz:"Africa/Cairo", lat:30.0444, lon:31.2357 },
+      { name:"Marrakech", country:"Morocco", cc:"MA", flag:"🇲🇦", tz:"Africa/Casablanca", lat:31.6295, lon:-7.9811 },
+      { name:"Casablanca", country:"Morocco", cc:"MA", flag:"🇲🇦", tz:"Africa/Casablanca", lat:33.5731, lon:-7.5898 },
+      { name:"Nairobi", country:"Kenya", cc:"KE", flag:"🇰🇪", tz:"Africa/Nairobi", lat:-1.2921, lon:36.8219 },
+      { name:"Mombasa", country:"Kenya", cc:"KE", flag:"🇰🇪", tz:"Africa/Nairobi", lat:-4.0435, lon:39.6682 },
+      { name:"Zanzibar", country:"Tanzania", cc:"TZ", flag:"🇹🇿", tz:"Africa/Dar_es_Salaam", lat:-6.1659, lon:39.2026 },
+      { name:"Cape Town", country:"South Africa", cc:"ZA", flag:"🇿🇦", tz:"Africa/Johannesburg", lat:-33.9249, lon:18.4241 },
+      { name:"Johannesburg", country:"South Africa", cc:"ZA", flag:"🇿🇦", tz:"Africa/Johannesburg", lat:-26.2041, lon:28.0473 },
+      { name:"Mauritius", country:"Mauritius", cc:"MU", flag:"🇲🇺", tz:"Indian/Mauritius", lat:-20.3484, lon:57.5522 },
+      { name:"Seychelles", country:"Seychelles", cc:"SC", flag:"🇸🇨", tz:"Indian/Mahe", lat:-4.6796, lon:55.4920 },
+      { name:"Madrid", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:40.4168, lon:-3.7038 },
+      { name:"Barcelona", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:41.3851, lon:2.1734 },
+      { name:"Seville", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:37.3891, lon:-5.9845 },
+      { name:"Ibiza", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:38.9067, lon:1.4206 },
+      { name:"Mallorca", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:39.6953, lon:3.0176 },
+      { name:"Lisbon", country:"Portugal", cc:"PT", flag:"🇵🇹", tz:"Europe/Lisbon", lat:38.7223, lon:-9.1393 },
+      { name:"Porto", country:"Portugal", cc:"PT", flag:"🇵🇹", tz:"Europe/Lisbon", lat:41.1579, lon:-8.6291 },
+      { name:"Madeira", country:"Portugal", cc:"PT", flag:"🇵🇹", tz:"Atlantic/Madeira", lat:32.7607, lon:-16.9595 },
+      { name:"Paris", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:48.8566, lon:2.3522 },
+      { name:"Nice", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:43.7102, lon:7.2620 },
+      { name:"Marseille", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:43.2965, lon:5.3698 },
+      { name:"Rome", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:41.9028, lon:12.4964 },
+      { name:"Milan", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:45.4642, lon:9.1900 },
+      { name:"Florence", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:43.7696, lon:11.2558 },
+      { name:"Venice", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:45.4408, lon:12.3155 },
+      { name:"Naples", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:40.8518, lon:14.2681 },
+      { name:"Amalfi", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:40.6340, lon:14.6027 },
+      { name:"Berlin", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:52.5200, lon:13.4050 },
+      { name:"Munich", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:48.1351, lon:11.5820 },
+      { name:"Hamburg", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:53.5511, lon:9.9937 },
+      { name:"Amsterdam", country:"Netherlands", cc:"NL", flag:"🇳🇱", tz:"Europe/Amsterdam", lat:52.3676, lon:4.9041 },
+      { name:"Brussels", country:"Belgium", cc:"BE", flag:"🇧🇪", tz:"Europe/Brussels", lat:50.8503, lon:4.3517 },
+      { name:"Vienna", country:"Austria", cc:"AT", flag:"🇦🇹", tz:"Europe/Vienna", lat:48.2082, lon:16.3738 },
+      { name:"Zurich", country:"Switzerland", cc:"CH", flag:"🇨🇭", tz:"Europe/Zurich", lat:47.3769, lon:8.5417 },
+      { name:"Geneva", country:"Switzerland", cc:"CH", flag:"🇨🇭", tz:"Europe/Zurich", lat:46.2044, lon:6.1432 },
+      { name:"Prague", country:"Czechia", cc:"CZ", flag:"🇨🇿", tz:"Europe/Prague", lat:50.0755, lon:14.4378 },
+      { name:"Budapest", country:"Hungary", cc:"HU", flag:"🇭🇺", tz:"Europe/Budapest", lat:47.4979, lon:19.0402 },
+      { name:"Warsaw", country:"Poland", cc:"PL", flag:"🇵🇱", tz:"Europe/Warsaw", lat:52.2297, lon:21.0122 },
+      { name:"Kraków", country:"Poland", cc:"PL", flag:"🇵🇱", tz:"Europe/Warsaw", lat:50.0647, lon:19.9450 },
+      { name:"Stockholm", country:"Sweden", cc:"SE", flag:"🇸🇪", tz:"Europe/Stockholm", lat:59.3293, lon:18.0686 },
+      { name:"Oslo", country:"Norway", cc:"NO", flag:"🇳🇴", tz:"Europe/Oslo", lat:59.9139, lon:10.7522 },
+      { name:"Copenhagen", country:"Denmark", cc:"DK", flag:"🇩🇰", tz:"Europe/Copenhagen", lat:55.6761, lon:12.5683 },
+      { name:"Helsinki", country:"Finland", cc:"FI", flag:"🇫🇮", tz:"Europe/Helsinki", lat:60.1699, lon:24.9384 },
+      { name:"Reykjavik", country:"Iceland", cc:"IS", flag:"🇮🇸", tz:"Atlantic/Reykjavik", lat:64.1466, lon:-21.9426 },
+      { name:"Dublin", country:"Ireland", cc:"IE", flag:"🇮🇪", tz:"Europe/Dublin", lat:53.3498, lon:-6.2603 },
+      { name:"London", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:51.5074, lon:-0.1278 },
+      { name:"Edinburgh", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:55.9533, lon:-3.1883 },
+      { name:"Dubrovnik", country:"Croatia", cc:"HR", flag:"🇭🇷", tz:"Europe/Zagreb", lat:42.6507, lon:18.0944 },
+      { name:"Split", country:"Croatia", cc:"HR", flag:"🇭🇷", tz:"Europe/Zagreb", lat:43.5081, lon:16.4402 },
+      { name:"Cape Verde", country:"Cape Verde", cc:"CV", flag:"🇨🇻", tz:"Atlantic/Cape_Verde", lat:14.9330, lon:-23.5133 },
+      // Americas
+      { name:"New York", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:40.7128, lon:-74.0060 },
+      { name:"Miami", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:25.7617, lon:-80.1918 },
+      { name:"Chicago", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Chicago", lat:41.8781, lon:-87.6298 },
+      { name:"New Orleans", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Chicago", lat:29.9511, lon:-90.0715 },
+      { name:"Austin", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Chicago", lat:30.2672, lon:-97.7431 },
+      { name:"Las Vegas", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Los_Angeles", lat:36.1699, lon:-115.1398 },
+      { name:"Los Angeles", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Los_Angeles", lat:34.0522, lon:-118.2437 },
+      { name:"San Francisco", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Los_Angeles", lat:37.7749, lon:-122.4194 },
+      { name:"Seattle", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Los_Angeles", lat:47.6062, lon:-122.3321 },
+      { name:"Honolulu", country:"United States", cc:"US", flag:"🇺🇸", tz:"Pacific/Honolulu", lat:21.3099, lon:-157.8581 },
+      { name:"Toronto", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Toronto", lat:43.6532, lon:-79.3832 },
+      { name:"Montreal", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Toronto", lat:45.5017, lon:-73.5673 },
+      { name:"Vancouver", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Vancouver", lat:49.2827, lon:-123.1207 },
+      { name:"Mexico City", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Mexico_City", lat:19.4326, lon:-99.1332 },
+      { name:"Tulum", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Cancun", lat:20.2114, lon:-87.4654 },
+      { name:"Cancún", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Cancun", lat:21.1619, lon:-86.8515 },
+      { name:"Oaxaca", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Mexico_City", lat:17.0732, lon:-96.7266 },
+      { name:"Havana", country:"Cuba", cc:"CU", flag:"🇨🇺", tz:"America/Havana", lat:23.1136, lon:-82.3666 },
+      { name:"San Juan", country:"Puerto Rico", cc:"PR", flag:"🇵🇷", tz:"America/Puerto_Rico", lat:18.4655, lon:-66.1057 },
+      { name:"Kingston", country:"Jamaica", cc:"JM", flag:"🇯🇲", tz:"America/Jamaica", lat:17.9712, lon:-76.7928 },
+      { name:"Nassau", country:"Bahamas", cc:"BS", flag:"🇧🇸", tz:"America/Nassau", lat:25.0480, lon:-77.3554 },
+      { name:"Bridgetown", country:"Barbados", cc:"BB", flag:"🇧🇧", tz:"America/Barbados", lat:13.1132, lon:-59.5988 },
+      { name:"Panama City", country:"Panama", cc:"PA", flag:"🇵🇦", tz:"America/Panama", lat:8.9824, lon:-79.5199 },
+      { name:"San José", country:"Costa Rica", cc:"CR", flag:"🇨🇷", tz:"America/Costa_Rica", lat:9.9281, lon:-84.0907 },
+      { name:"Cartagena", country:"Colombia", cc:"CO", flag:"🇨🇴", tz:"America/Bogota", lat:10.3910, lon:-75.4794 },
+      { name:"Bogotá", country:"Colombia", cc:"CO", flag:"🇨🇴", tz:"America/Bogota", lat:4.7110, lon:-74.0721 },
+      { name:"Medellín", country:"Colombia", cc:"CO", flag:"🇨🇴", tz:"America/Bogota", lat:6.2476, lon:-75.5658 },
+      { name:"Lima", country:"Peru", cc:"PE", flag:"🇵🇪", tz:"America/Lima", lat:-12.0464, lon:-77.0428 },
+      { name:"Cusco", country:"Peru", cc:"PE", flag:"🇵🇪", tz:"America/Lima", lat:-13.5319, lon:-71.9675 },
+      { name:"Santiago", country:"Chile", cc:"CL", flag:"🇨🇱", tz:"America/Santiago", lat:-33.4489, lon:-70.6693 },
+      { name:"Buenos Aires", country:"Argentina", cc:"AR", flag:"🇦🇷", tz:"America/Argentina/Buenos_Aires", lat:-34.6037, lon:-58.3816 },
+      { name:"Mendoza", country:"Argentina", cc:"AR", flag:"🇦🇷", tz:"America/Argentina/Buenos_Aires", lat:-32.8895, lon:-68.8458 },
+      { name:"Montevideo", country:"Uruguay", cc:"UY", flag:"🇺🇾", tz:"America/Montevideo", lat:-34.9011, lon:-56.1645 },
+      { name:"Rio de Janeiro", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-22.9068, lon:-43.1729 },
+      { name:"São Paulo", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-23.5505, lon:-46.6333 },
+      { name:"Salvador", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Bahia", lat:-12.9714, lon:-38.5014 },
+      { name:"Florianópolis", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-27.5954, lon:-48.5480 },
+      // Oceania
+      { name:"Sydney", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Sydney", lat:-33.8688, lon:151.2093 },
+      { name:"Melbourne", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Melbourne", lat:-37.8136, lon:144.9631 },
+      { name:"Brisbane", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Brisbane", lat:-27.4698, lon:153.0251 },
+      { name:"Perth", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Perth", lat:-31.9505, lon:115.8605 },
+      { name:"Auckland", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-36.8485, lon:174.7633 },
+      { name:"Queenstown", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-45.0312, lon:168.6626 },
+      { name:"Wellington", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-41.2865, lon:174.7762 },
+    ];
+
+    // Beer prices are estimates from general knowledge — adjust as you find real numbers.
+    const BEERS = {
+      "Tokyo-JP":[{n:"Asahi Super Dry",p:600,c:"JPY"},{n:"Sapporo",p:650,c:"JPY"}],
+      "Kyoto-JP":[{n:"Yebisu",p:700,c:"JPY"},{n:"Kyoto Beer Co.",p:900,c:"JPY"}],
+      "Osaka-JP":[{n:"Sapporo",p:600,c:"JPY"},{n:"Asahi",p:600,c:"JPY"}],
+      "Seoul-KR":[{n:"Cass",p:4500,c:"KRW"},{n:"Hite",p:4500,c:"KRW"}],
+      "Busan-KR":[{n:"Hite",p:4000,c:"KRW"},{n:"Cass",p:4500,c:"KRW"}],
+      "Beijing-CN":[{n:"Tsingtao",p:25,c:"CNY"},{n:"Yanjing",p:20,c:"CNY"}],
+      "Shanghai-CN":[{n:"Tsingtao",p:30,c:"CNY"},{n:"Snow",p:25,c:"CNY"}],
+      "Hong Kong-HK":[{n:"San Miguel",p:60,c:"HKD"},{n:"Tsingtao",p:55,c:"HKD"}],
+      "Taipei-TW":[{n:"Taiwan Beer",p:80,c:"TWD"},{n:"Heineken",p:120,c:"TWD"}],
+      "Singapore-SG":[{n:"Tiger",p:12,c:"SGD"},{n:"Heineken",p:14,c:"SGD"}],
+      "Bangkok-TH":[{n:"Singha",p:120,c:"THB"},{n:"Chang",p:100,c:"THB"}],
+      "Phuket-TH":[{n:"Chang",p:100,c:"THB"},{n:"Leo",p:90,c:"THB"}],
+      "Chiang Mai-TH":[{n:"Singha",p:100,c:"THB"},{n:"Chang",p:90,c:"THB"}],
+      "Hanoi-VN":[{n:"Bia Hà Nội",p:25000,c:"VND"},{n:"Saigon",p:30000,c:"VND"}],
+      "Ho Chi Minh City-VN":[{n:"Saigon",p:30000,c:"VND"},{n:"333",p:28000,c:"VND"}],
+      "Bali-ID":[{n:"Bintang",p:45000,c:"IDR"},{n:"Storm",p:60000,c:"IDR"}],
+      "Jakarta-ID":[{n:"Bintang",p:50000,c:"IDR"},{n:"Anker",p:45000,c:"IDR"}],
+      "Manila-PH":[{n:"San Miguel Pale Pilsen",p:100,c:"PHP"},{n:"Red Horse",p:110,c:"PHP"}],
+      "Cebu-PH":[{n:"Red Horse",p:90,c:"PHP"},{n:"San Miguel",p:95,c:"PHP"}],
+      "Kuala Lumpur-MY":[{n:"Tiger",p:18,c:"MYR"},{n:"Carlsberg",p:18,c:"MYR"}],
+      "Penang-MY":[{n:"Tiger",p:16,c:"MYR"},{n:"Heineken",p:18,c:"MYR"}],
+      "Mumbai-IN":[{n:"Kingfisher",p:250,c:"INR"},{n:"Bira 91",p:300,c:"INR"}],
+      "New Delhi-IN":[{n:"Kingfisher",p:300,c:"INR"},{n:"Bira 91",p:350,c:"INR"}],
+      "Goa-IN":[{n:"Kingfisher",p:200,c:"INR"},{n:"Bira 91",p:250,c:"INR"}],
+      "Dubai-AE":[{n:"Stella Artois",p:45,c:"AED"},{n:"Heineken",p:50,c:"AED"}],
+      "Abu Dhabi-AE":[{n:"Heineken",p:50,c:"AED"},{n:"Corona",p:55,c:"AED"}],
+      "Istanbul-TR":[{n:"Efes",p:80,c:"TRY"},{n:"Bomonti",p:90,c:"TRY"}],
+      "Athens-GR":[{n:"Mythos",p:4.5,c:"EUR"},{n:"Alfa",p:4,c:"EUR"}],
+      "Mykonos-GR":[{n:"Alfa",p:7,c:"EUR"},{n:"Mythos",p:7,c:"EUR"}],
+      "Santorini-GR":[{n:"Mythos",p:6,c:"EUR"},{n:"Volkan",p:7,c:"EUR"}],
+      "Cairo-EG":[{n:"Stella",p:60,c:"EGP"},{n:"Sakara",p:70,c:"EGP"}],
+      "Marrakech-MA":[{n:"Casablanca",p:40,c:"MAD"},{n:"Flag Spéciale",p:35,c:"MAD"}],
+      "Casablanca-MA":[{n:"Casablanca",p:35,c:"MAD"},{n:"Flag Spéciale",p:30,c:"MAD"}],
+      "Nairobi-KE":[{n:"Tusker",p:250,c:"KES"},{n:"White Cap",p:250,c:"KES"}],
+      "Mombasa-KE":[{n:"Tusker",p:300,c:"KES"},{n:"Pilsner",p:280,c:"KES"}],
+      "Zanzibar-TZ":[{n:"Kilimanjaro",p:6000,c:"TZS"},{n:"Serengeti",p:6000,c:"TZS"}],
+      "Cape Town-ZA":[{n:"Castle Lager",p:35,c:"ZAR"},{n:"Windhoek",p:40,c:"ZAR"}],
+      "Johannesburg-ZA":[{n:"Castle Lager",p:35,c:"ZAR"},{n:"Black Label",p:35,c:"ZAR"}],
+      "Mauritius-MU":[{n:"Phoenix",p:120,c:"MUR"},{n:"Blue Marlin",p:140,c:"MUR"}],
+      "Seychelles-SC":[{n:"Seybrew",p:80,c:"SCR"},{n:"Eku",p:100,c:"SCR"}],
+      "Madrid-ES":[{n:"Mahou",p:4.5,c:"EUR"},{n:"Estrella Damm",p:4.5,c:"EUR"}],
+      "Barcelona-ES":[{n:"Estrella Damm",p:5,c:"EUR"},{n:"Moritz",p:5,c:"EUR"}],
+      "Seville-ES":[{n:"Cruzcampo",p:3.5,c:"EUR"},{n:"Alhambra",p:4,c:"EUR"}],
+      "Ibiza-ES":[{n:"Estrella Damm",p:7,c:"EUR"},{n:"San Miguel",p:7,c:"EUR"}],
+      "Mallorca-ES":[{n:"Estrella Damm",p:5,c:"EUR"},{n:"Rosa Blanca",p:5,c:"EUR"}],
+      "Lisbon-PT":[{n:"Super Bock",p:3,c:"EUR"},{n:"Sagres",p:3,c:"EUR"}],
+      "Porto-PT":[{n:"Super Bock",p:2.5,c:"EUR"},{n:"Sagres",p:2.5,c:"EUR"}],
+      "Madeira-PT":[{n:"Coral",p:3,c:"EUR"},{n:"Super Bock",p:3,c:"EUR"}],
+      "Paris-FR":[{n:"Kronenbourg 1664",p:7,c:"EUR"},{n:"Heineken",p:7,c:"EUR"}],
+      "Nice-FR":[{n:"Kronenbourg 1664",p:7,c:"EUR"},{n:"Pelforth",p:6.5,c:"EUR"}],
+      "Marseille-FR":[{n:"Pelforth",p:6.5,c:"EUR"},{n:"Kronenbourg",p:6.5,c:"EUR"}],
+      "Rome-IT":[{n:"Peroni",p:5,c:"EUR"},{n:"Moretti",p:5,c:"EUR"}],
+      "Milan-IT":[{n:"Moretti",p:6,c:"EUR"},{n:"Menabrea",p:7,c:"EUR"}],
+      "Florence-IT":[{n:"Peroni",p:5,c:"EUR"},{n:"Moretti",p:5,c:"EUR"}],
+      "Venice-IT":[{n:"Peroni",p:6,c:"EUR"},{n:"Birra Venezia",p:7,c:"EUR"}],
+      "Naples-IT":[{n:"Peroni",p:4,c:"EUR"},{n:"Nastro Azzurro",p:4,c:"EUR"}],
+      "Amalfi-IT":[{n:"Peroni",p:6,c:"EUR"},{n:"Moretti",p:6,c:"EUR"}],
+      "Berlin-DE":[{n:"Berliner Pilsner",p:4,c:"EUR"},{n:"Beck's",p:4.5,c:"EUR"}],
+      "Munich-DE":[{n:"Augustiner",p:5,c:"EUR"},{n:"Paulaner",p:5,c:"EUR"}],
+      "Hamburg-DE":[{n:"Astra",p:4.5,c:"EUR"},{n:"Holsten",p:4.5,c:"EUR"}],
+      "Amsterdam-NL":[{n:"Heineken",p:5.5,c:"EUR"},{n:"Amstel",p:5,c:"EUR"}],
+      "Brussels-BE":[{n:"Stella Artois",p:4.5,c:"EUR"},{n:"Jupiler",p:4,c:"EUR"}],
+      "Vienna-AT":[{n:"Stiegl",p:4.5,c:"EUR"},{n:"Ottakringer",p:4.5,c:"EUR"}],
+      "Zurich-CH":[{n:"Feldschlösschen",p:8,c:"CHF"},{n:"Calanda",p:8,c:"CHF"}],
+      "Geneva-CH":[{n:"Cardinal",p:8,c:"CHF"},{n:"Feldschlösschen",p:8,c:"CHF"}],
+      "Prague-CZ":[{n:"Pilsner Urquell",p:60,c:"CZK"},{n:"Staropramen",p:55,c:"CZK"}],
+      "Budapest-HU":[{n:"Soproni",p:700,c:"HUF"},{n:"Dreher",p:750,c:"HUF"}],
+      "Warsaw-PL":[{n:"Żywiec",p:12,c:"PLN"},{n:"Tyskie",p:11,c:"PLN"}],
+      "Kraków-PL":[{n:"Tyskie",p:10,c:"PLN"},{n:"Żywiec",p:11,c:"PLN"}],
+      "Stockholm-SE":[{n:"Carlsberg",p:75,c:"SEK"},{n:"Mariestads",p:80,c:"SEK"}],
+      "Oslo-NO":[{n:"Ringnes",p:100,c:"NOK"},{n:"Hansa",p:100,c:"NOK"}],
+      "Copenhagen-DK":[{n:"Carlsberg",p:55,c:"DKK"},{n:"Tuborg",p:55,c:"DKK"}],
+      "Helsinki-FI":[{n:"Karhu",p:7.5,c:"EUR"},{n:"Koff",p:7,c:"EUR"}],
+      "Reykjavik-IS":[{n:"Gull",p:1300,c:"ISK"},{n:"Einstök",p:1500,c:"ISK"}],
+      "Dublin-IE":[{n:"Guinness",p:6.5,c:"EUR"},{n:"Smithwick's",p:6.5,c:"EUR"}],
+      "London-GB":[{n:"Stella Artois",p:6.5,c:"GBP"},{n:"Camden Hells",p:7,c:"GBP"}],
+      "Edinburgh-GB":[{n:"Tennent's",p:5,c:"GBP"},{n:"Innis & Gunn",p:6,c:"GBP"}],
+      "Dubrovnik-HR":[{n:"Karlovačko",p:4,c:"EUR"},{n:"Ožujsko",p:4,c:"EUR"}],
+      "Split-HR":[{n:"Ožujsko",p:4,c:"EUR"},{n:"Karlovačko",p:4,c:"EUR"}],
+      "Cape Verde-CV":[{n:"Strela",p:200,c:"CVE"},{n:"Super Bock",p:250,c:"CVE"}],
+      "New York-US":[{n:"Brooklyn Lager",p:9,c:"USD"},{n:"Bud Light",p:8,c:"USD"}],
+      "Miami-US":[{n:"Corona",p:8,c:"USD"},{n:"Modelo",p:8,c:"USD"}],
+      "Chicago-US":[{n:"Goose Island",p:7,c:"USD"},{n:"Old Style",p:5,c:"USD"}],
+      "New Orleans-US":[{n:"Abita",p:7,c:"USD"},{n:"NOLA Blonde",p:7,c:"USD"}],
+      "Austin-US":[{n:"Lone Star",p:6,c:"USD"},{n:"Shiner Bock",p:6,c:"USD"}],
+      "Las Vegas-US":[{n:"Coors Light",p:9,c:"USD"},{n:"Modelo",p:10,c:"USD"}],
+      "Los Angeles-US":[{n:"Modelo",p:8,c:"USD"},{n:"Stone IPA",p:9,c:"USD"}],
+      "San Francisco-US":[{n:"Anchor Steam",p:9,c:"USD"},{n:"Sierra Nevada",p:8,c:"USD"}],
+      "Seattle-US":[{n:"Rainier",p:6,c:"USD"},{n:"Pyramid",p:7,c:"USD"}],
+      "Honolulu-US":[{n:"Kona Big Wave",p:9,c:"USD"},{n:"Primo",p:7,c:"USD"}],
+      "Toronto-CA":[{n:"Molson Canadian",p:8,c:"CAD"},{n:"Steam Whistle",p:9,c:"CAD"}],
+      "Montreal-CA":[{n:"Boréale",p:8,c:"CAD"},{n:"Unibroue Blanche",p:9,c:"CAD"}],
+      "Vancouver-CA":[{n:"Stanley Park",p:8,c:"CAD"},{n:"Granville Island",p:8,c:"CAD"}],
+      "Mexico City-MX":[{n:"Modelo Especial",p:50,c:"MXN"},{n:"Victoria",p:45,c:"MXN"}],
+      "Tulum-MX":[{n:"Corona",p:80,c:"MXN"},{n:"Pacífico",p:80,c:"MXN"}],
+      "Cancún-MX":[{n:"Sol",p:60,c:"MXN"},{n:"Corona",p:70,c:"MXN"}],
+      "Oaxaca-MX":[{n:"Victoria",p:40,c:"MXN"},{n:"Modelo",p:45,c:"MXN"}],
+      "Havana-CU":[{n:"Cristal",p:2,c:"USD"},{n:"Bucanero",p:2.5,c:"USD"}],
+      "San Juan-PR":[{n:"Medalla",p:4,c:"USD"},{n:"Magna",p:4,c:"USD"}],
+      "Kingston-JM":[{n:"Red Stripe",p:400,c:"JMD"},{n:"Dragon Stout",p:450,c:"JMD"}],
+      "Nassau-BS":[{n:"Kalik",p:7,c:"BSD"},{n:"Sands",p:7,c:"BSD"}],
+      "Bridgetown-BB":[{n:"Banks",p:8,c:"BBD"},{n:"10 Saints",p:12,c:"BBD"}],
+      "Panama City-PA":[{n:"Balboa",p:2,c:"USD"},{n:"Panamá",p:2,c:"USD"}],
+      "San José-CR":[{n:"Imperial",p:1500,c:"CRC"},{n:"Pilsen",p:1400,c:"CRC"}],
+      "Cartagena-CO":[{n:"Águila",p:8000,c:"COP"},{n:"Club Colombia",p:10000,c:"COP"}],
+      "Bogotá-CO":[{n:"Club Colombia",p:9000,c:"COP"},{n:"Águila",p:7000,c:"COP"}],
+      "Medellín-CO":[{n:"Águila",p:7000,c:"COP"},{n:"Poker",p:6000,c:"COP"}],
+      "Lima-PE":[{n:"Cusqueña",p:10,c:"PEN"},{n:"Pilsen Callao",p:9,c:"PEN"}],
+      "Cusco-PE":[{n:"Cusqueña",p:12,c:"PEN"},{n:"Cristal",p:10,c:"PEN"}],
+      "Santiago-CL":[{n:"Cristal",p:2500,c:"CLP"},{n:"Escudo",p:2500,c:"CLP"}],
+      "Buenos Aires-AR":[{n:"Quilmes",p:3000,c:"ARS"},{n:"Patagonia",p:4500,c:"ARS"}],
+      "Mendoza-AR":[{n:"Andes",p:2500,c:"ARS"},{n:"Quilmes",p:2500,c:"ARS"}],
+      "Montevideo-UY":[{n:"Pilsen",p:200,c:"UYU"},{n:"Patricia",p:220,c:"UYU"}],
+      "Rio de Janeiro-BR":[{n:"Brahma",p:10,c:"BRL"},{n:"Antarctica",p:10,c:"BRL"}],
+      "São Paulo-BR":[{n:"Skol",p:12,c:"BRL"},{n:"Brahma",p:11,c:"BRL"}],
+      "Salvador-BR":[{n:"Antarctica",p:8,c:"BRL"},{n:"Brahma",p:8,c:"BRL"}],
+      "Florianópolis-BR":[{n:"Brahma",p:10,c:"BRL"},{n:"Eisenbahn",p:12,c:"BRL"}],
+      "Sydney-AU":[{n:"VB",p:10,c:"AUD"},{n:"Coopers",p:11,c:"AUD"}],
+      "Melbourne-AU":[{n:"Carlton Draught",p:10,c:"AUD"},{n:"Stone & Wood",p:12,c:"AUD"}],
+      "Brisbane-AU":[{n:"XXXX Gold",p:9,c:"AUD"},{n:"Great Northern",p:9,c:"AUD"}],
+      "Perth-AU":[{n:"Swan Draught",p:9,c:"AUD"},{n:"Little Creatures",p:11,c:"AUD"}],
+      "Auckland-NZ":[{n:"Steinlager",p:11,c:"NZD"},{n:"Export Gold",p:10,c:"NZD"}],
+      "Queenstown-NZ":[{n:"Speights",p:11,c:"NZD"},{n:"Monteith's",p:12,c:"NZD"}],
+      "Wellington-NZ":[{n:"Tui",p:10,c:"NZD"},{n:"Garage Project",p:13,c:"NZD"}],
+    };
+
+    // ────────────────────────────────────────────────────────────────
+    //  HELPERS
+    // ────────────────────────────────────────────────────────────────
+    function localHour(tz) {
+      const h = new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", hour12: false }).format(new Date());
+      return parseInt(h, 10);
+    }
+    function localTimeString(tz, date) {
+      return new Intl.DateTimeFormat("en-GB", { timeZone: tz, hour: "2-digit", minute: "2-digit", hour12: false }).format(date || new Date());
+    }
+    function isHappyHour(tz) {
+      const h = localHour(tz);
+      return h >= HAPPY_START && h < HAPPY_END;
+    }
+    function shuffle(arr) {
+      const a = arr.slice();
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+    function describeWeather(code, isDay) {
+      const sun = isDay ? "☀️" : "🌙";
+      const partly = isDay ? "⛅" : "☁️";
+      switch (code) {
+        case 0:  return { e: sun, d: "Clear" };
+        case 1:  return { e: sun, d: "Mostly clear" };
+        case 2:  return { e: partly, d: "Partly cloudy" };
+        case 3:  return { e: "☁️", d: "Overcast" };
+        case 45: case 48: return { e: "🌫️", d: "Foggy" };
+        case 51: case 53: case 55: return { e: "🌦️", d: "Drizzle" };
+        case 56: case 57: return { e: "🌨️", d: "Freezing drizzle" };
+        case 61: return { e: "🌧️", d: "Light rain" };
+        case 63: return { e: "🌧️", d: "Rain" };
+        case 65: return { e: "🌧️", d: "Heavy rain" };
+        case 66: case 67: return { e: "🌧️", d: "Freezing rain" };
+        case 71: return { e: "🌨️", d: "Light snow" };
+        case 73: return { e: "🌨️", d: "Snow" };
+        case 75: return { e: "❄️", d: "Heavy snow" };
+        case 77: return { e: "🌨️", d: "Snow grains" };
+        case 80: case 81: case 82: return { e: "🌦️", d: "Showers" };
+        case 85: case 86: return { e: "🌨️", d: "Snow showers" };
+        case 95: return { e: "⛈️", d: "Thunderstorm" };
+        case 96: case 99: return { e: "⛈️", d: "Thunderstorm with hail" };
+        default: return { e: partly, d: "—" };
+      }
+    }
+    function formatBeerPrice(price, currency) {
+      try {
+        return new Intl.NumberFormat(undefined, {
+          style: "currency", currency,
+          maximumFractionDigits: price < 10 ? 2 : 0,
+        }).format(price);
+      } catch {
+        return price + " " + currency;
+      }
+    }
+    function escapeHtml(s) {
+      return String(s).replace(/[&<>"']/g, m => ({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[m]));
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  FETCHERS
+    // ────────────────────────────────────────────────────────────────
+    async function fetchWeather(city) {
+      const url = new URL("https://api.open-meteo.com/v1/forecast");
+      url.searchParams.set("latitude", city.lat);
+      url.searchParams.set("longitude", city.lon);
+      url.searchParams.set("current", "temperature_2m,apparent_temperature,weather_code,wind_speed_10m,is_day");
+      url.searchParams.set("temperature_unit", "celsius");
+      url.searchParams.set("wind_speed_unit", "kmh");
+      url.searchParams.set("timezone", city.tz);
+      const res = await fetch(url.toString());
+      if (!res.ok) throw new Error("weather");
+      const data = await res.json();
+      const c = data.current;
+      const isDay = c.is_day === 1;
+      const w = describeWeather(c.weather_code, isDay);
+      return {
+        tempC: Math.round(c.temperature_2m),
+        feelsLikeC: Math.round(c.apparent_temperature),
+        windKph: Math.round(c.wind_speed_10m),
+        emoji: w.e,
+        description: w.d,
+        isDay,
+      };
+    }
+
+    async function fetchImage(city) {
+      if (!UNSPLASH_KEY) return null;
+      const queries = [
+        city.name + " golden hour",
+        city.name + " sunset",
+        city.name + " " + city.country,
+        city.name,
+      ];
+      for (const q of queries) {
+        const url = new URL("https://api.unsplash.com/search/photos");
+        url.searchParams.set("query", q);
+        url.searchParams.set("orientation", "landscape");
+        url.searchParams.set("per_page", "20");
+        url.searchParams.set("content_filter", "high");
+        try {
+          const res = await fetch(url.toString(), { headers: { Authorization: "Client-ID " + UNSPLASH_KEY } });
+          if (!res.ok) continue;
+          const data = await res.json();
+          if (!data.results || data.results.length === 0) continue;
+          const photo = data.results[Math.floor(Math.random() * data.results.length)];
+          return {
+            url: photo.urls.regular,
+            photographer: photo.user.name,
+            photographerUrl: photo.user.links.html,
+            altDescription: photo.alt_description,
+          };
+        } catch {}
+      }
+      return null;
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  RENDER
+    // ────────────────────────────────────────────────────────────────
+    let lastCity = null;
+    let timeIntervalId = null;
+
+    async function load(excludeName) {
+      const refreshBtn = document.getElementById("refresh-btn");
+      refreshBtn.classList.add("spinning");
+      refreshBtn.disabled = true;
+
+      const eligible = shuffle(CITIES.filter(c => isHappyHour(c.tz)));
+      const ordered = excludeName
+        ? [
+            ...eligible.filter(c => c.name !== excludeName),
+            ...eligible.filter(c => c.name === excludeName),
+          ]
+        : eligible;
+
+      if (ordered.length === 0) {
+        renderError("No cities currently in happy hour. (That shouldn't happen — try again.)");
+        refreshBtn.classList.remove("spinning");
+        refreshBtn.disabled = false;
+        return;
+      }
+
+      for (const city of ordered) {
+        try {
+          const [weather, image] = await Promise.all([fetchWeather(city), fetchImage(city)]);
+          // If a key is configured but the image failed for this city, try next.
+          if (UNSPLASH_KEY && !image) continue;
+          render(city, weather, image);
+          lastCity = city.name;
+          break;
+        } catch (e) {
+          continue;
+        }
+      }
+
+      refreshBtn.classList.remove("spinning");
+      refreshBtn.disabled = false;
+    }
+
+    function render(city, weather, image) {
+      const bgImg = document.getElementById("bg-img");
+      const bgGrad = document.getElementById("bg-grad");
+      bgImg.classList.remove("loaded");
+      bgGrad.classList.remove("visible");
+
+      if (image) {
+        bgImg.onload = () => bgImg.classList.add("loaded");
+        bgImg.src = image.url;
+        bgImg.alt = image.altDescription || city.name;
+      } else {
+        bgGrad.classList.add("visible");
+        bgImg.src = "";
+      }
+
+      const beers = BEERS[city.name + "-" + city.cc] || [];
+      const beersHtml = beers.slice(0, 2).map(b =>
+        `<span class="beer-item"><strong>${escapeHtml(b.n)}</strong><span class="beer-sep">·</span><span class="beer-price">${escapeHtml(formatBeerPrice(b.p, b.c))}</span></span>`
+      ).join("");
+
+      const contentArea = document.getElementById("content-area");
+      contentArea.innerHTML = `
+        <div class="block in" id="city-block">
+          <div class="eyebrow">It's happy hour in</div>
+          <h1 class="city">
+            <span class="name">${escapeHtml(city.name)}</span>
+            <span class="flag" aria-label="${escapeHtml(city.country)}">${city.flag}</span>
+          </h1>
+          <div class="country">${escapeHtml(city.country)}</div>
+          <div class="stats">
+            <div class="stat">
+              <span class="stat-label">Local time</span>
+              <span class="stat-value mono" id="local-time" data-tz="${city.tz}">${localTimeString(city.tz)}</span>
+            </div>
+            <div class="stat">
+              <span class="stat-label">Weather</span>
+              <span class="stat-value">
+                <span class="weather-line">
+                  <span aria-hidden="true">${weather.emoji}</span>
+                  <span>${weather.tempC}°C</span>
+                  <span class="weather-desc">${escapeHtml(weather.description)}</span>
+                </span>
+              </span>
+            </div>
+            ${beers.length ? `
+              <div class="stat">
+                <span class="stat-label">A cold one</span>
+                <span class="stat-value beers">${beersHtml}</span>
+              </div>
+            ` : ""}
+          </div>
+        </div>
+      `;
+
+      const footerArea = document.getElementById("footer-area");
+      footerArea.innerHTML = `
+        <div class="footer-row">
+          ${image
+            ? `<span>Photo by <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> on <a href="https://unsplash.com/?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">Unsplash</a></span>`
+            : `<span style="opacity:0.6">Add an Unsplash key in source for photos</span>`}
+          <span style="opacity:0.7">Weather by Open-Meteo</span>
+        </div>
+      `;
+
+      // Restart the live-time updater
+      if (timeIntervalId) clearInterval(timeIntervalId);
+      timeIntervalId = setInterval(() => {
+        const el = document.getElementById("local-time");
+        if (el) el.textContent = localTimeString(el.dataset.tz);
+      }, 30000);
+
+      // Hide the loading veil
+      document.getElementById("veil").classList.add("hidden");
+    }
+
+    function renderError(msg) {
+      document.getElementById("bg-grad").classList.add("visible");
+      document.getElementById("bg-img").classList.remove("loaded");
+      document.getElementById("content-area").innerHTML = `
+        <div class="block in err">
+          <h2>${escapeHtml(msg)}</h2>
+          <button class="pill" onclick="load()">Try again</button>
+        </div>
+      `;
+      document.getElementById("footer-area").innerHTML = "";
+      document.getElementById("veil").classList.add("hidden");
+    }
+
+    // ────────────────────────────────────────────────────────────────
+    //  WIRE UP
+    // ────────────────────────────────────────────────────────────────
+    document.getElementById("refresh-btn").addEventListener("click", () => load(lastCity));
+    load();
+    setInterval(() => load(), AUTO_REFRESH_MS);
+  </script>
+</body>
+</html>
