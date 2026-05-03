@@ -4,10 +4,17 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>maltysnack</title>
+  <meta name="description" content="A small site by maltysnack. Films, projects, games, and a slow gallery." />
   <link rel="stylesheet" href="/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
+  <script>
+    /* Apply theme before paint to avoid flash. */
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
 
@@ -16,10 +23,11 @@
   <main class="main">
 
     <section class="intro">
+      <span class="intro-eyebrow">maltysnack &middot; Melbourne</span>
       <h1 class="intro-heading">Hello.</h1>
       <p class="intro-body">
-        Based in Melbourne. Interested in film, football,
-        and building things that don't quite have a category yet.
+        I make things that don't quite have a category yet. Some <em>films</em>,
+        some <em>football</em>, some <em>games</em>. Not in any particular order.
       </p>
     </section>
 
@@ -30,47 +38,60 @@
       <a class="home-card" href="/films/filmclub.html">
         <span class="home-card-label">Films</span>
         <span class="home-card-title">Filmclub</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
       <a class="home-card" href="/projects/saltysnacks.html">
         <span class="home-card-label">Project</span>
         <span class="home-card-title">Saltysnacks</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
       <a class="home-card" href="/projects/fantasyfootball.html">
         <span class="home-card-label">Project</span>
         <span class="home-card-title">FPL Predicted XI</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
       <a class="home-card" href="/projects/happyhour.html">
         <span class="home-card-label">Project</span>
         <span class="home-card-title">Happy Hour</span>
-        <span class="home-card-arrow">→</span>
-      </a>
-
-      <a class="home-card" href="/projects/duoclue/">
-        <span class="home-card-label">Game</span>
-        <span class="home-card-title">Duoclue</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
       <a class="home-card" href="/projects/worldcup.html">
         <span class="home-card-label">Project</span>
         <span class="home-card-title">World Cup 2026</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/projects/duoclue/">
+        <span class="home-card-label">Game</span>
+        <span class="home-card-title">Duoclue</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
       <a class="home-card" href="/dnd.html">
-        <span class="home-card-label">D&amp;D 5E</span>
-        <span class="home-card-title">Characters</span>
-        <span class="home-card-arrow">→</span>
+        <span class="home-card-label">Game</span>
+        <span class="home-card-title">D&amp;D 5E</span>
+        <span class="home-card-arrow">&rarr;</span>
       </a>
 
+      <a class="home-card" href="/shelf/">
+        <span class="home-card-label">Other</span>
+        <span class="home-card-title">Shelf</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
 
     </section>
+
+    <footer class="colophon">
+      <span>set in <em>Fraunces</em> &amp; <em>Inter</em></span>
+      <span class="colophon-divider">&middot;</span>
+      <span>plain HTML, no framework</span>
+      <span class="colophon-divider">&middot;</span>
+      <a href="https://github.com/Maltysnack/Maltysnack.github.io">source</a>
+    </footer>
 
   </main>
 

@@ -1,7 +1,7 @@
 /* ═══════════════════════════════════════
-   sidebar.js - universal nav
+   sidebar.js - universal nav + theme toggle + watermark
    Single source of truth. Edit here only.
-   Dark sidebar. Root-relative paths.
+   Root-relative paths.
 ═══════════════════════════════════════ */
 
 (function () {
@@ -14,6 +14,33 @@
       : '';
   }
 
+  /* ── Theme: read prior choice or system pref ────────── */
+  function applyTheme(theme) {
+    if (theme === 'light' || theme === 'dark') {
+      document.documentElement.setAttribute('data-theme', theme);
+    } else {
+      document.documentElement.removeAttribute('data-theme');
+    }
+  }
+
+  function toggleTheme() {
+    const cur = document.documentElement.getAttribute('data-theme');
+    const sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+    let next;
+    if (!cur) next = sys === 'dark' ? 'light' : 'dark';
+    else if (cur === 'dark') next = 'light';
+    else next = 'dark';
+    applyTheme(next);
+    try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
+  }
+
+  /* Apply stored theme as early as possible */
+  try {
+    const saved = localStorage.getItem('theme');
+    if (saved === 'light' || saved === 'dark') applyTheme(saved);
+  } catch (e) { /* ignore */ }
+
+  /* ── Sidebar HTML ────────── */
   const html = `
     <div class="sidebar-header">
       <a href="/index.html" class="logo-link">
@@ -78,7 +105,25 @@
             <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
           </svg>
         </a>
+        <button class="theme-toggle" id="theme-toggle" aria-label="Toggle theme" title="Toggle light / dark">
+          <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
+          </svg>
+          <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="4.2"/>
+            <path d="M12 3v1.8M12 19.2V21M3 12h1.8M19.2 12H21M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3"/>
+          </svg>
+        </button>
       </footer>
+    </div>
+  `;
+
+  /* ── Watermark (Wren mark, fixed bottom-right) ────────── */
+  const watermarkHtml = `
+    <div class="watermark" aria-hidden="true">
+      <svg viewBox="0 0 33 21" width="44" height="28">
+        <path fill="currentColor" d="M15,0h3v3h-3z M12,3h3v3h-3z M15,3h3v3h-3z M18,3h3v3h-3z M9,6h3v3h-3z M12,6h3v3h-3z M21,6h3v3h-3z M6,9h3v3h-3z M9,9h3v3h-3z M15,9h3v3h-3z M18,9h3v3h-3z M21,9h3v3h-3z M24,9h3v3h-3z M3,12h3v3h-3z M6,12h3v3h-3z M15,12h3v3h-3z M27,12h3v3h-3z M0,15h3v3h-3z M3,15h3v3h-3z M9,15h3v3h-3z M12,15h3v3h-3z M15,15h3v3h-3z M18,15h3v3h-3z M24,15h3v3h-3z M27,15h3v3h-3z M30,15h3v3h-3z M0,18h3v3h-3z M9,18h3v3h-3z M24,18h3v3h-3z"/>
+      </svg>
     </div>
   `;
 
@@ -93,6 +138,16 @@
         const open = body.classList.toggle('open');
         toggle.classList.toggle('open', open);
       });
+    }
+
+    const themeBtn = document.getElementById('theme-toggle');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', toggleTheme);
+    }
+
+    /* Insert watermark once at end of body if not already there */
+    if (!document.querySelector('.watermark')) {
+      document.body.insertAdjacentHTML('beforeend', watermarkHtml);
     }
   }
 })();
