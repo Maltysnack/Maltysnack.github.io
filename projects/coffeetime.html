@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>happyhour - maltysnack</title>
-  <meta name="description" content="It's happy hour somewhere." />
+  <title>coffeetime - maltysnack</title>
+  <meta name="description" content="It's coffee time somewhere." />
   <meta name="theme-color" content="#0a0a0a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -659,7 +659,7 @@
     <div class="vignette" aria-hidden="true"></div>
 
     <header class="chrome">
-      <span class="wordmark-row"><a href="/index.html" class="wordmark">happyhour<span class="pulse">.</span></a><span class="wordmark-sep" aria-hidden="true">·</span><a href="/projects/coffeetime.html" class="sister-link">coffeetime</a></span>
+      <span class="wordmark-row"><a href="/projects/happyhour.html" class="sister-link">happyhour</a><span class="wordmark-sep" aria-hidden="true">·</span><a href="/index.html" class="wordmark">coffeetime<span class="pulse">.</span></a></span>
       <button id="refresh-btn" class="refresh" aria-label="Show another city">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
@@ -697,7 +697,7 @@
 
     <div id="veil" class="veil">
       <div class="veil-inner">
-        <div class="veil-mark"><em>happyhour</em><span class="pulse">.</span></div>
+        <div class="veil-mark"><em>coffeetime</em><span class="pulse">.</span></div>
         <div class="veil-line"></div>
       </div>
     </div>
@@ -717,8 +717,8 @@
     const AUTO_REFRESH_MS = 0;
 
     // Happy-hour window (local hours, 24h). 16 ≤ h < 18 = 4–6pm.
-    const HAPPY_START = 16;
-    const HAPPY_END = 18;
+    const HAPPY_START = 6;
+    const HAPPY_END = 8;
 
     // ────────────────────────────────────────────────────────────────
     //  DATA
@@ -1023,270 +1023,357 @@
     // Locally-iconic drinks per city. Mix of beer / cocktail / wine / spirit
     // / aperitif as appropriate. Real brand names where one dominates;
     // drink-type names where the iconic order is a category (Caipirinha, etc).
-    // Cities not in the map fall through to weather-only display.
-    const DRINKS = {
-      // ── Asia / Pacific ────────────────────────────
-      "Tokyo-JP":            ["Asahi Super Dry", "Highball", "Sake"],
-      "Kyoto-JP":            ["Matcha", "Yebisu", "Local Sake"],
-      "Osaka-JP":            ["Asahi", "Highball", "Sake"],
-      "Sapporo-JP":          ["Sapporo Classic", "Yoichi Whisky", "Highball"],
-      "Fukuoka-JP":          ["Asahi", "Shochu", "Mentai-pairing Sake"],
-      "Hiroshima-JP":        ["Asahi", "Hiroshima Sake", "Highball"],
-      "Yokohama-JP":         ["Yebisu", "Highball", "Asahi"],
-      "Nagoya-JP":           ["Asahi", "Sake", "Highball"],
-      "Kobe-JP":             ["Hakushu Whisky", "Sake", "Asahi"],
-      "Seoul-KR":            ["Soju (Chamisul)", "Cass", "Makgeolli"],
-      "Busan-KR":            ["Hite", "Soju", "Makgeolli"],
-      "Beijing-CN":          ["Tsingtao", "Baijiu (Moutai)", "Yanjing"],
-      "Shanghai-CN":         ["Tsingtao", "Snow", "Baijiu"],
-      "Shenzhen-CN":         ["Tsingtao", "Snow", "Baijiu"],
-      "Chengdu-CN":          ["Snow", "Baijiu", "Sichuan Erguotou"],
-      "Hong Kong-HK":        ["San Miguel", "Tsingtao", "Lemon Tea (Hard)"],
-      "Taipei-TW":           ["Taiwan Beer", "Kaoliang", "Bubble Tea"],
-      "Singapore-SG":        ["Tiger", "Singapore Sling", "Heineken"],
-      "Bangkok-TH":          ["Singha", "Mekhong & Soda", "Chang"],
-      "Phuket-TH":           ["Chang", "SangSom & Coke", "Singha"],
-      "Chiang Mai-TH":       ["Singha", "Mekhong", "Chang"],
-      "Hanoi-VN":            ["Bia Hà Nội", "Cà phê sữa đá", "Rượu cần"],
-      "Ho Chi Minh City-VN": ["Saigon Beer", "333", "Cà phê sữa đá"],
-      "Da Nang-VN":          ["Saigon", "Larue", "333"],
-      "Bali-ID":             ["Bintang", "Arak Bali", "Storm"],
-      "Jakarta-ID":          ["Bintang", "Anker", "Tuak"],
-      "Manila-PH":           ["San Miguel", "Tanduay Rum", "Red Horse"],
-      "Cebu-PH":             ["Red Horse", "San Miguel", "Tanduay"],
-      "Kuala Lumpur-MY":     ["Tiger", "Carlsberg", "Teh Tarik"],
-      "Penang-MY":           ["Tiger", "Heineken", "Toddy"],
-      "Mumbai-IN":           ["Kingfisher", "Old Monk", "Bira 91"],
-      "New Delhi-IN":        ["Kingfisher", "Royal Stag", "Bira 91"],
-      "Bangalore-IN":        ["Kingfisher", "Bira 91", "Old Monk"],
-      "Chennai-IN":          ["Kingfisher", "Old Monk", "Bira 91"],
-      "Goa-IN":              ["Kingfisher", "Feni", "Old Monk"],
-      "Jaipur-IN":           ["Kingfisher", "Old Monk", "Royal Stag"],
-      "Dubai-AE":            ["Heineken", "Stella Artois", "Mocktail"],
-      "Abu Dhabi-AE":        ["Heineken", "Corona", "Mocktail"],
-      "Istanbul-TR":         ["Efes", "Rakı", "Turkish Coffee"],
-      "Athens-GR":           ["Mythos", "Ouzo", "Tsipouro"],
-      "Mykonos-GR":          ["Aperol Spritz", "Mythos", "Mastiha"],
-      "Santorini-GR":        ["Vinsanto", "Assyrtiko", "Mythos"],
-      "Cairo-EG":            ["Stella", "Karkadeh (hibiscus)", "Sakara"],
-      "Marrakech-MA":        ["Casablanca Beer", "Mint Tea", "Mahia"],
-      "Casablanca-MA":       ["Casablanca", "Mint Tea", "Flag Spéciale"],
-      "Nairobi-KE":          ["Tusker", "Dawa", "White Cap"],
-      "Mombasa-KE":          ["Tusker", "Dawa", "Pilsner"],
-      "Cape Town-ZA":        ["Castle Lager", "Pinotage", "Amarula"],
-      "Johannesburg-ZA":     ["Castle Lager", "Klipdrift", "Amarula"],
+    // Locally-iconic morning order per city: [coffee, pastry/snack].
+    // Names reflect what locals actually order, not generic "espresso" everywhere.
+    const COFFEES = {
+      // ── Asia / Pacific ─────────────────────────────────
+      "Tokyo-JP":            ["Pour-over", "Tamago Sando"],
+      "Kyoto-JP":            ["Drip Coffee", "Wagashi"],
+      "Osaka-JP":            ["Drip Coffee", "Anpan"],
+      "Sapporo-JP":          ["Drip Coffee", "Castella"],
+      "Fukuoka-JP":          ["Drip Coffee", "Mentaiko Toast"],
+      "Yokohama-JP":         ["Drip Coffee", "Anpan"],
+      "Hiroshima-JP":        ["Drip Coffee", "Momiji Manju"],
+      "Nagoya-JP":           ["Coffee", "Ogura Toast"],
+      "Kobe-JP":             ["Drip Coffee", "Pudding"],
+      "Seoul-KR":            ["Iced Americano", "Soboro Ppang"],
+      "Busan-KR":            ["Iced Americano", "Eomuk"],
+      "Beijing-CN":          ["Pour Over", "Jianbing"],
+      "Shanghai-CN":         ["Latte", "Shengjianbao"],
+      "Shenzhen-CN":         ["Latte", "Cheung Fun"],
+      "Chengdu-CN":          ["Pour Over", "Dan Hong Gao"],
+      "Guangzhou-CN":        ["Yuanyang", "Char Siu Bao"],
+      "Xi'an-CN":            ["Coffee", "Roujiamo"],
+      "Hong Kong-HK":        ["Yuanyang", "Pineapple Bun"],
+      "Taipei-TW":           ["Hand Drip", "Pineapple Cake"],
+      "Macau-MO":            ["Galao", "Egg Tart"],
+      "Singapore-SG":        ["Kopi", "Kaya Toast"],
+      "Bangkok-TH":          ["Oliang", "Patongko"],
+      "Phuket-TH":           ["Iced Coffee", "Roti"],
+      "Chiang Mai-TH":       ["Hand Drip", "Khanom Krok"],
+      "Hanoi-VN":            ["Ca phe sua nong", "Banh Mi"],
+      "Ho Chi Minh City-VN": ["Ca phe sua da", "Banh Mi"],
+      "Da Nang-VN":          ["Ca phe trung", "Banh Mi"],
+      "Bali-ID":             ["Kopi Bali", "Bubur Injin"],
+      "Jakarta-ID":          ["Kopi Tubruk", "Roti Bakar"],
+      "Yogyakarta-ID":       ["Kopi Joss", "Gudeg"],
+      "Surabaya-ID":         ["Kopi Tubruk", "Lontong Kupang"],
+      "Manila-PH":           ["Barako Coffee", "Pandesal"],
+      "Cebu-PH":             ["Sikwate", "Bibingka"],
+      "Kuala Lumpur-MY":     ["Kopi", "Roti Bakar"],
+      "Penang-MY":           ["White Coffee", "Apam Balik"],
+      "Mumbai-IN":           ["Filter Coffee", "Vada Pav"],
+      "Bangalore-IN":        ["Filter Coffee", "Masala Dosa"],
+      "Chennai-IN":          ["Filter Coffee", "Idli"],
+      "Hyderabad-IN":        ["Irani Chai", "Osmania Biscuit"],
+      "Kolkata-IN":          ["Filter Coffee", "Singara"],
+      "Pune-IN":             ["Filter Coffee", "Misal Pav"],
+      "New Delhi-IN":        ["Masala Chai", "Aloo Paratha"],
+      "Jaipur-IN":           ["Masala Chai", "Pyaaz Kachori"],
+      "Goa-IN":              ["Filter Coffee", "Bebinca"],
+      "Dhaka-BD":            ["Cha", "Singara"],
+      "Colombo-LK":          ["Ceylon Coffee", "Pol Roti"],
+      "Kathmandu-NP":        ["Sherpa Coffee", "Sel Roti"],
+      "Lahore-PK":           ["Doodh Patti Chai", "Halwa Puri"],
+      "Islamabad-PK":        ["Doodh Patti Chai", "Halwa Puri"],
+      "Almaty-KZ":           ["Coffee", "Baursak"],
+      "Tashkent-UZ":         ["Coffee", "Patyr"],
+      "Dubai-AE":            ["Arabic Coffee", "Luqaimat"],
+      "Abu Dhabi-AE":        ["Karak Chai", "Khameer Bread"],
+      "Istanbul-TR":         ["Turk Kahvesi", "Simit"],
 
-      // ── Europe ────────────────────────────────────
-      "Madrid-ES":           ["Mahou", "Tinto de Verano", "Vermut"],
-      "Barcelona-ES":        ["Estrella Damm", "Cava", "Vermut"],
-      "Seville-ES":          ["Cruzcampo", "Manzanilla Sherry", "Rebujito"],
-      "Granada-ES":          ["Alhambra", "Tinto de Verano", "Sangria"],
-      "Bilbao-ES":           ["Txakoli", "Estrella Galicia", "Kalimotxo"],
-      "Valencia-ES":         ["Estrella Damm", "Agua de Valencia", "Horchata"],
-      "San Sebastián-ES":    ["Txakoli", "Sidra", "Estrella Galicia"],
-      "Ibiza-ES":            ["Estrella Damm", "Hierbas Ibicencas", "Mojito"],
-      "Mallorca-ES":         ["Estrella Damm", "Hierbas de Mallorca", "Sangria"],
-      "Lisbon-PT":           ["Super Bock", "Vinho Verde", "Ginjinha"],
-      "Porto-PT":            ["Vinho do Porto", "Super Bock", "Sagres"],
-      "Madeira-PT":          ["Madeira Wine", "Coral", "Poncha"],
-      "Paris-FR":            ["Pastis", "Aperol Spritz", "Kronenbourg 1664"],
-      "Lyon-FR":             ["Beaujolais", "Côtes du Rhône", "Kir"],
-      "Bordeaux-FR":         ["Bordeaux Rouge", "Lillet Blanc", "Médoc"],
-      "Toulouse-FR":         ["Armagnac", "Gaillac", "1664"],
-      "Nantes-FR":           ["Muscadet", "Cidre", "1664"],
-      "Strasbourg-FR":       ["Kronenbourg", "Riesling", "Crémant d'Alsace"],
-      "Nice-FR":             ["Pastis", "Provençal Rosé", "1664"],
-      "Marseille-FR":        ["Pastis 51", "Ricard", "Pelforth"],
-      "Rome-IT":             ["Aperol Spritz", "Negroni", "Peroni"],
-      "Milan-IT":            ["Negroni", "Campari Soda", "Moretti"],
-      "Florence-IT":         ["Negroni", "Chianti", "Peroni"],
-      "Venice-IT":           ["Aperol Spritz", "Bellini", "Ombra di Vino"],
-      "Naples-IT":           ["Limoncello", "Aperol Spritz", "Peroni"],
-      "Amalfi-IT":           ["Limoncello", "Aperol Spritz", "Falanghina"],
-      "Bologna-IT":          ["Lambrusco", "Aperol Spritz", "Negroni"],
-      "Verona-IT":           ["Spritz Bianco", "Valpolicella", "Aperol Spritz"],
-      "Genoa-IT":            ["Sciacchetrà", "Aperol Spritz", "Peroni"],
-      "Pisa-IT":             ["Chianti", "Aperol Spritz", "Peroni"],
-      "Palermo-IT":          ["Marsala", "Aperol Spritz", "Birra Messina"],
-      "Cagliari-IT":         ["Mirto", "Cannonau", "Ichnusa"],
-      "Bari-IT":             ["Primitivo", "Negroamaro", "Peroni"],
-      "Berlin-DE":           ["Berliner Weisse", "Club-Mate", "Aperol Spritz"],
-      "Munich-DE":           ["Augustiner Helles", "Weißbier", "Radler"],
-      "Hamburg-DE":          ["Astra", "Mexikaner", "Holsten"],
-      "Cologne-DE":          ["Kölsch (Früh)", "Reissdorf", "Gaffel"],
-      "Frankfurt-DE":        ["Apfelwein", "Pilsner", "Hugo"],
-      "Stuttgart-DE":        ["Trollinger", "Stuttgarter Hofbräu", "Schorle"],
-      "Düsseldorf-DE":       ["Altbier (Uerige)", "Killepitsch", "Pilsner"],
-      "Vienna-AT":           ["Almdudler", "Wiener Melange", "Stiegl"],
-      "Salzburg-AT":         ["Stiegl", "Almdudler", "Schnaps"],
-      "Innsbruck-AT":        ["Zillertal Bier", "Almdudler", "Schnaps"],
-      "Zurich-CH":           ["Feldschlösschen", "Rivella", "Hugo"],
-      "Geneva-CH":           ["Cardinal", "Genevoise", "Fendant"],
-      "Amsterdam-NL":        ["Heineken", "Bols Genever", "Bitterballen + Pils"],
-      "Rotterdam-NL":        ["Heineken", "Genever", "Amstel"],
-      "Utrecht-NL":          ["Heineken", "Genever", "Amstel"],
-      "Brussels-BE":         ["Stella Artois", "Geuze (Cantillon)", "Trappist Ale"],
-      "Antwerp-BE":          ["De Koninck", "Westmalle", "Genever"],
-      "Ghent-BE":            ["Gulden Draak", "Tripel Karmeliet", "Jenever"],
-      "Prague-CZ":           ["Pilsner Urquell", "Becherovka", "Staropramen"],
-      "Brno-CZ":             ["Starobrno", "Pilsner Urquell", "Becherovka"],
-      "Budapest-HU":         ["Unicum", "Pálinka", "Soproni"],
-      "Warsaw-PL":           ["Żubrówka", "Tyskie", "Polish Vodka"],
-      "Kraków-PL":           ["Żubrówka", "Tyskie", "Krupnik"],
-      "Wrocław-PL":          ["Tyskie", "Wódka", "Żywiec"],
-      "Gdańsk-PL":           ["Goldwasser", "Tyskie", "Żywiec"],
-      "Bratislava-SK":       ["Borovička", "Zlatý Bažant", "Slivovica"],
-      "Ljubljana-SI":        ["Union", "Laško", "Cviček"],
-      "Belgrade-RS":         ["Rakija", "Jelen Pivo", "Lav"],
-      "Sofia-BG":            ["Rakia", "Mastika", "Zagorka"],
-      "Bucharest-RO":        ["Țuică", "Ursus", "Pelin"],
-      "Vilnius-LT":          ["Švyturys", "Trauktinė", "Mead"],
-      "Riga-LV":             ["Riga Black Balsam", "Aldaris", "Užavas"],
-      "Tallinn-EE":          ["Vana Tallinn", "Saku", "A. Le Coq"],
-      "Stockholm-SE":        ["Carlsberg Sverige", "Snaps", "Brännvin"],
-      "Gothenburg-SE":       ["Pripps Blå", "Snaps", "Mariestads"],
-      "Malmö-SE":            ["Carlsberg", "Snaps", "Mariestads"],
-      "Oslo-NO":             ["Aquavit", "Mack Pilsner", "Hansa"],
-      "Bergen-NO":           ["Aquavit", "Hansa", "Tuborg"],
-      "Trondheim-NO":        ["Aquavit", "Mack", "Dahls"],
-      "Stavanger-NO":        ["Aquavit", "Hansa", "Tuborg"],
-      "Copenhagen-DK":       ["Carlsberg", "Akvavit", "Mikkeller"],
-      "Aarhus-DK":           ["Tuborg", "Akvavit", "Mikkeller"],
-      "Helsinki-FI":         ["Karhu", "Salmiakki Koskenkorva", "Lonkero"],
-      "Tampere-FI":          ["Karhu", "Lonkero", "Koskenkorva"],
-      "Reykjavik-IS":        ["Brennivín", "Einstök", "Gull"],
-      "Dublin-IE":           ["Guinness", "Jameson", "Smithwick's"],
-      "Cork-IE":             ["Murphy's", "Beamish", "Guinness"],
-      "Galway-IE":           ["Galway Hooker", "Guinness", "Connemara Whiskey"],
-      "London-GB":           ["Pimm's", "Gin & Tonic", "Camden Hells"],
-      "Manchester-GB":       ["Boddington's", "Punk IPA", "Whisky Mac"],
-      "Liverpool-GB":        ["Carling", "Holy Vodka", "Stella"],
-      "Brighton-GB":         ["Aperol Spritz", "Harvey's", "Beavertown"],
-      "Bath-GB":             ["Bath Ales", "Pimm's", "G&T"],
-      "Glasgow-GB":          ["Tennent's", "Highland Whisky", "Innis & Gunn"],
-      "Edinburgh-GB":        ["Tennent's", "Highland Whisky", "Innis & Gunn"],
-      "York-GB":             ["Theakston's", "Yorkshire Bitter", "G&T"],
-      "Dubrovnik-HR":        ["Karlovačko", "Ožujsko", "Rakija"],
-      "Split-HR":            ["Ožujsko", "Karlovačko", "Bevanda"],
+      // ── Africa ──────────────────────────────────────────
+      "Marrakech-MA":        ["Cafe au Lait", "Msemen"],
+      "Casablanca-MA":       ["Cafe au Lait", "Sfenj"],
+      "Cairo-EG":            ["Turkish Coffee", "Fool & Tameya"],
+      "Aswan-EG":            ["Hibiscus", "Aish Baladi"],
+      "Tunis-TN":            ["Cafe Direct", "Baguette + Olive Oil"],
+      "Algiers-DZ":          ["Cafe Noir", "Khobz Eddar"],
+      "Cape Town-ZA":        ["Flat White", "Koeksister"],
+      "Johannesburg-ZA":     ["Flat White", "Vetkoek"],
+      "Nairobi-KE":          ["Kahawa", "Mandazi"],
+      "Mombasa-KE":          ["Kahawa", "Mahamri"],
+      "Kigali-RW":           ["Rwandan Bourbon", "Mandazi"],
+      "Kampala-UG":          ["Ugandan Robusta", "Rolex"],
+      "Addis Ababa-ET":      ["Buna", "Himbasha"],
+      "Lusaka-ZM":           ["Coffee", "Vitumbuwa"],
+      "Maputo-MZ":           ["Cafe", "Pao com Chourico"],
+      "Windhoek-NA":         ["Filter Coffee", "Vetkoek"],
+      "Zanzibar-TZ":         ["Spiced Coffee", "Mandazi"],
 
-      // ── Americas ──────────────────────────────────
-      "New York-US":         ["Brooklyn Lager", "Manhattan", "Bud Light"],
-      "Boston-US":           ["Sam Adams", "Harpoon IPA", "Old Fashioned"],
-      "Philadelphia-US":     ["Yuengling", "Yards Brawler", "Manhattan"],
-      "Washington-US":       ["DC Brau", "Old Fashioned", "Half Smoke + Beer"],
-      "Atlanta-US":          ["Sweetwater 420", "Terrapin", "Bourbon"],
-      "Nashville-US":        ["Yazoo", "Whiskey Sour", "Jack & Coke"],
-      "Charleston-US":       ["Westbrook IPA", "Old Fashioned", "Mojito"],
-      "Savannah-US":         ["Service Brewing", "Mint Julep", "Bourbon"],
-      "Chicago-US":          ["Goose Island", "Old Style", "Malört"],
-      "New Orleans-US":      ["Sazerac", "Hurricane", "Abita"],
-      "Austin-US":           ["Lone Star", "Shiner Bock", "Margarita"],
-      "Miami-US":            ["Mojito", "Cuban Coffee", "Corona"],
-      "Las Vegas-US":        ["Coors Light", "Old Fashioned", "Modelo"],
-      "Denver-US":           ["Coors Banquet", "Avery", "Margarita"],
-      "Phoenix-US":          ["Four Peaks", "Margarita", "Modelo"],
-      "Minneapolis-US":      ["Surly Furious", "Old Fashioned", "Grain Belt"],
-      "Los Angeles-US":      ["Modelo", "Margarita", "Stone IPA"],
-      "San Francisco-US":    ["Anchor Steam", "Sazerac", "Negroni"],
-      "Seattle-US":          ["Rainier", "Espresso Martini", "Old Fashioned"],
-      "Portland-US":         ["Deschutes", "Old Fashioned", "Pinot Noir"],
-      "Honolulu-US":         ["Mai Tai", "Kona Big Wave", "Blue Hawaiian"],
-      "Toronto-CA":          ["Molson Canadian", "Caesar", "Steam Whistle"],
-      "Montreal-CA":         ["Boréale", "Caribou", "Caesar"],
-      "Vancouver-CA":        ["Granville Island IPA", "Caesar", "Stanley Park"],
-      "Calgary-CA":          ["Big Rock", "Caesar", "Molson"],
-      "Quebec City-CA":      ["Unibroue Blanche", "Caribou", "Caesar"],
-      "Mexico City-MX":      ["Modelo Especial", "Mezcal", "Margarita"],
-      "Guadalajara-MX":      ["Tequila", "Modelo", "Cantarito"],
-      "Tulum-MX":            ["Mezcal Margarita", "Corona", "Pacífico"],
-      "Cancún-MX":           ["Sol", "Tequila Sunrise", "Margarita"],
-      "Oaxaca-MX":           ["Mezcal", "Tepache", "Modelo"],
-      "Mérida-MX":           ["Xtabentún", "Modelo", "Michelada"],
-      "Havana-CU":           ["Mojito", "Daiquiri", "Cuba Libre"],
-      "San Juan-PR":         ["Piña Colada", "Medalla", "Bacardi"],
-      "Kingston-JM":         ["Red Stripe", "Rum Punch", "Appleton Estate"],
-      "Nassau-BS":           ["Kalik", "Bahama Mama", "Goombay Smash"],
-      "Bridgetown-BB":       ["Banks", "Mount Gay", "Rum Punch"],
-      "Cartagena-CO":        ["Águila", "Aguardiente", "Limonada de Coco"],
-      "Bogotá-CO":           ["Aguardiente", "Club Colombia", "Refajo"],
-      "Medellín-CO":         ["Aguardiente Antioqueño", "Club Colombia", "Águila"],
-      "Lima-PE":             ["Pisco Sour", "Cusqueña", "Chicha Morada"],
-      "Cusco-PE":            ["Pisco Sour", "Cusqueña", "Chicha de Jora"],
-      "Quito-EC":            ["Pilsener", "Canelazo", "Aguardiente"],
-      "Guayaquil-EC":        ["Pilsener", "Cerveza Club", "Pájaro Azul"],
-      "La Paz-BO":           ["Singani", "Paceña", "Coca Tea"],
-      "Sucre-BO":            ["Singani", "Paceña", "Chuflay"],
-      "Asunción-PY":         ["Pilsen", "Caña", "Tereré"],
-      "Santiago-CL":         ["Pisco Sour", "Cristal", "Carmenère"],
-      "Buenos Aires-AR":     ["Fernet con Coca", "Quilmes", "Malbec"],
-      "Mendoza-AR":          ["Malbec", "Andes", "Fernet con Coca"],
-      "Montevideo-UY":       ["Pilsen", "Tannat", "Mate"],
-      "Punta del Este-UY":   ["Patricia", "Tannat", "Caipirinha"],
-      "Rio de Janeiro-BR":   ["Caipirinha", "Brahma", "Antarctica"],
-      "São Paulo-BR":        ["Caipirinha", "Skol", "Negroni Sbagliato"],
-      "Salvador-BR":         ["Caipirinha", "Antarctica", "Catuaba"],
-      "Brasília-BR":         ["Caipirinha", "Brahma", "Cachaça"],
-      "Recife-BR":           ["Caipirinha", "Bohemia", "Pitú"],
-      "Florianópolis-BR":    ["Caipirinha", "Eisenbahn", "Brahma"],
-      "Curitiba-BR":         ["Bodebrown", "Caipirinha", "Brahma"],
-      "Belo Horizonte-BR":   ["Cachaça", "Caipirinha", "Brahma"],
-      "Fortaleza-BR":        ["Caipirinha", "Bohemia", "Pitú"],
-      "Manaus-BR":           ["Cachaça", "Caipirinha", "Brahma"],
+      // ── Europe ──────────────────────────────────────────
+      "Lisbon-PT":           ["Bica", "Pastel de Nata"],
+      "Porto-PT":            ["Cimbalino", "Bola de Berlim"],
+      "Madeira-PT":          ["Galao", "Bolo de Mel"],
+      "Madrid-ES":           ["Cafe con Leche", "Churros"],
+      "Barcelona-ES":        ["Cortado", "Ensaimada"],
+      "Granada-ES":          ["Cafe Solo", "Tostada"],
+      "Bilbao-ES":           ["Cafe con Leche", "Talo"],
+      "San Sebastian-ES":    ["Cafe con Leche", "Pintxo"],
+      "Seville-ES":          ["Cafe con Leche", "Tostada con Tomate"],
+      "Valencia-ES":         ["Cafe con Leche", "Pa amb Oli"],
+      "Ibiza-ES":            ["Cortado", "Flao"],
+      "Mallorca-ES":         ["Cafe con Leche", "Ensaimada"],
+      "Paris-FR":            ["Cafe Creme", "Pain au Chocolat"],
+      "Lyon-FR":             ["Cafe Noisette", "Brioche aux Pralines"],
+      "Marseille-FR":        ["Cafe au Lait", "Navette"],
+      "Bordeaux-FR":         ["Cafe Creme", "Canele"],
+      "Nice-FR":             ["Cafe Creme", "Socca"],
+      "Strasbourg-FR":       ["Cafe au Lait", "Kougelhopf"],
+      "Toulouse-FR":         ["Cafe Noisette", "Chocolatine"],
+      "Nantes-FR":           ["Cafe Creme", "Gateau Nantais"],
+      "Rome-IT":             ["Espresso", "Cornetto"],
+      "Milan-IT":            ["Espresso Macchiato", "Brioche"],
+      "Florence-IT":         ["Espresso", "Schiacciata"],
+      "Venice-IT":           ["Caffe", "Frittelle"],
+      "Naples-IT":           ["Espresso", "Sfogliatella"],
+      "Bologna-IT":          ["Espresso", "Crescentina"],
+      "Verona-IT":           ["Espresso", "Pandoro"],
+      "Genoa-IT":            ["Espresso", "Focaccia"],
+      "Pisa-IT":             ["Espresso", "Cantucci"],
+      "Amalfi-IT":           ["Espresso", "Sfogliatella"],
+      "Palermo-IT":          ["Espresso", "Cannolo"],
+      "Cagliari-IT":         ["Espresso", "Pardulas"],
+      "Bari-IT":             ["Espresso", "Pasticciotto"],
+      "Berlin-DE":           ["Filterkaffee", "Pretzel"],
+      "Munich-DE":           ["Milchkaffee", "Brezel"],
+      "Hamburg-DE":          ["Filterkaffee", "Franzbrotchen"],
+      "Cologne-DE":          ["Cafe au Lait", "Mutzenmandeln"],
+      "Frankfurt-DE":        ["Filterkaffee", "Bethmaennchen"],
+      "Stuttgart-DE":        ["Filterkaffee", "Brezel"],
+      "Duesseldorf-DE":      ["Filterkaffee", "Reibekuchen"],
+      "Vienna-AT":           ["Wiener Melange", "Apfelstrudel"],
+      "Salzburg-AT":         ["Wiener Melange", "Salzburger Nockerl"],
+      "Innsbruck-AT":        ["Wiener Melange", "Apfelstrudel"],
+      "Zurich-CH":           ["Cafe Creme", "Birchermuesli"],
+      "Geneva-CH":           ["Cafe Creme", "Pain au Chocolat"],
+      "Amsterdam-NL":        ["Koffie Verkeerd", "Stroopwafel"],
+      "Rotterdam-NL":        ["Koffie Verkeerd", "Bossche Bol"],
+      "Utrecht-NL":          ["Koffie Verkeerd", "Stroopwafel"],
+      "Brussels-BE":         ["Cafe Creme", "Speculoos"],
+      "Antwerp-BE":          ["Cafe au Lait", "Speculoos"],
+      "Ghent-BE":            ["Cafe au Lait", "Mastellen"],
+      "Prague-CZ":           ["Espresso", "Trdelnik"],
+      "Brno-CZ":             ["Espresso", "Kolac"],
+      "Budapest-HU":         ["Hosszu Kave", "Pogacsa"],
+      "Warsaw-PL":           ["Kawa po Polsku", "Paczek"],
+      "Krakow-PL":           ["Kawa po Turecku", "Obwarzanek"],
+      "Wroclaw-PL":          ["Kawa po Polsku", "Paczek"],
+      "Gdansk-PL":           ["Kawa po Polsku", "Sernik"],
+      "Bratislava-SK":       ["Espresso", "Kolac"],
+      "Ljubljana-SI":        ["Espresso", "Potica"],
+      "Belgrade-RS":         ["Domaca Kafa", "Burek"],
+      "Sofia-BG":            ["Tursko Kafe", "Banitsa"],
+      "Bucharest-RO":        ["Cafea", "Covrigi"],
+      "Vilnius-LT":          ["Cappuccino", "Sakotis"],
+      "Riga-LV":             ["Filtered Coffee", "Sklandrausis"],
+      "Tallinn-EE":          ["Espresso", "Kohuke"],
+      "Athens-GR":           ["Greek Coffee", "Bougatsa"],
+      "Mykonos-GR":          ["Frappe", "Loukoumades"],
+      "Santorini-GR":        ["Frappe", "Melitinia"],
+      "Dublin-IE":           ["Filter Coffee", "Soda Bread"],
+      "Cork-IE":             ["Filter Coffee", "Brack"],
+      "Galway-IE":           ["Filter Coffee", "Soda Bread"],
+      "London-GB":           ["Flat White", "Bacon Sarnie"],
+      "Manchester-GB":       ["Flat White", "Eccles Cake"],
+      "Liverpool-GB":        ["Flat White", "Wet Nelly"],
+      "Brighton-GB":         ["Flat White", "Croissant"],
+      "Bath-GB":             ["Flat White", "Bath Bun"],
+      "Glasgow-GB":          ["Flat White", "Tunnock's Tea Cake"],
+      "Edinburgh-GB":        ["Flat White", "Empire Biscuit"],
+      "York-GB":             ["Filter Coffee", "Yorkshire Curd Tart"],
+      "Copenhagen-DK":       ["Filterkaffe", "Wienerbrod"],
+      "Aarhus-DK":           ["Filterkaffe", "Smorrebrod"],
+      "Stockholm-SE":        ["Bryggkaffe", "Kanelbulle"],
+      "Gothenburg-SE":       ["Bryggkaffe", "Semla"],
+      "Malmo-SE":            ["Bryggkaffe", "Spettekaka"],
+      "Oslo-NO":             ["Filterkaffe", "Skolebolle"],
+      "Bergen-NO":           ["Filterkaffe", "Lefse"],
+      "Trondheim-NO":        ["Filterkaffe", "Krumkake"],
+      "Stavanger-NO":        ["Filterkaffe", "Kringle"],
+      "Helsinki-FI":         ["Suodatinkahvi", "Korvapuusti"],
+      "Tampere-FI":          ["Suodatinkahvi", "Pulla"],
+      "Reykjavik-IS":        ["Filterkaffi", "Snudur"],
+      "Dubrovnik-HR":        ["Espresso", "Dubrovacka Rozata"],
+      "Split-HR":            ["Espresso", "Soparnik"],
 
-      // ── Oceania ───────────────────────────────────
-      "Sydney-AU":           ["VB", "Aperol Spritz", "Coopers Pale"],
-      "Melbourne-AU":        ["Carlton Draught", "Espresso Martini", "Mountain Goat"],
-      "Brisbane-AU":         ["XXXX Gold", "Bundy & Coke", "Stone & Wood"],
-      "Perth-AU":            ["Swan Draught", "Little Creatures", "Aperol Spritz"],
-      "Hobart-AU":           ["Cascade", "Pinot Noir", "Espresso Martini"],
-      "Adelaide-AU":         ["Coopers Sparkling", "Shiraz", "Pale Ale"],
-      "Auckland-NZ":         ["Steinlager", "L&P (with Rum)", "Sauvignon Blanc"],
-      "Wellington-NZ":       ["Tui", "Garage Project", "Pinot Noir"],
-      "Queenstown-NZ":       ["Speights", "Central Otago Pinot", "Aperol Spritz"],
-      "Christchurch-NZ":     ["Speights", "Pinot Noir", "Garage Project"],
+      // ── Americas ────────────────────────────────────────
+      "New York-US":         ["Drip Coffee", "Bagel"],
+      "Boston-US":           ["Drip Coffee", "Boston Cream Donut"],
+      "Philadelphia-US":     ["Drip Coffee", "Soft Pretzel"],
+      "Washington-US":       ["Drip Coffee", "Half Smoke"],
+      "Atlanta-US":          ["Drip Coffee", "Biscuit"],
+      "Nashville-US":        ["Drip Coffee", "Hot Chicken Biscuit"],
+      "Charleston-US":       ["Drip Coffee", "Benne Wafer"],
+      "Savannah-US":         ["Drip Coffee", "Pecan Pie"],
+      "Chicago-US":          ["Drip Coffee", "Paczki"],
+      "New Orleans-US":      ["Cafe au Lait (Chicory)", "Beignet"],
+      "Austin-US":           ["Drip Coffee", "Breakfast Taco"],
+      "Miami-US":            ["Cortadito", "Pastelito"],
+      "Las Vegas-US":        ["Drip Coffee", "Bagel"],
+      "Denver-US":           ["Drip Coffee", "Green Chile Burrito"],
+      "Phoenix-US":          ["Drip Coffee", "Breakfast Burrito"],
+      "Minneapolis-US":      ["Drip Coffee", "Lefse"],
+      "Los Angeles-US":      ["Cold Brew", "Avocado Toast"],
+      "San Francisco-US":    ["Cortado", "Sourdough Toast"],
+      "Seattle-US":          ["Latte", "Croissant"],
+      "Portland-US":         ["Pour Over", "Stumptown Donut"],
+      "Honolulu-US":         ["Kona Coffee", "Malasada"],
+      "Toronto-CA":          ["Filter Coffee", "Butter Tart"],
+      "Montreal-CA":         ["Cafe au Lait", "Bagel"],
+      "Vancouver-CA":        ["Flat White", "Nanaimo Bar"],
+      "Calgary-CA":          ["Drip Coffee", "Pancakes"],
+      "Edmonton-CA":         ["Drip Coffee", "Cinnamon Bun"],
+      "Quebec City-CA":      ["Cafe au Lait", "Croissant"],
+      "Halifax-CA":          ["Drip Coffee", "Donair"],
+      "Mexico City-MX":      ["Cafe de Olla", "Concha"],
+      "Guadalajara-MX":      ["Cafe de Olla", "Birote"],
+      "Monterrey-MX":        ["Cafe de Olla", "Empanada"],
+      "Puebla-MX":           ["Cafe de Olla", "Cemita"],
+      "Merida-MX":           ["Cafe Yucateco", "Marquesita"],
+      "Oaxaca-MX":           ["Cafe de Olla", "Pan de Yema"],
+      "Cancun-MX":           ["Cafe Americano", "Concha"],
+      "Tulum-MX":            ["Pour Over", "Marquesita"],
+      "Antigua-GT":          ["Antigua Coffee", "Atol"],
+      "San Salvador-SV":     ["Cafe Negro", "Pupusa"],
+      "Managua-NI":          ["Cafe Negro", "Rosquilla"],
+      "Tegucigalpa-HN":      ["Cafe Honduras", "Baleada"],
+      "Belize City-BZ":      ["Drip Coffee", "Fry Jack"],
+      "Havana-CU":           ["Cafe Cubano", "Pastelito"],
+      "San Juan-PR":         ["Cafe Puertorriqueno", "Quesito"],
+      "Kingston-JM":         ["Blue Mountain Coffee", "Hardo Bread"],
+      "Nassau-BS":           ["Drip Coffee", "Conch Fritter"],
+      "Bridgetown-BB":       ["Drip Coffee", "Bakes"],
+      "Oranjestad-AW":       ["Drip Coffee", "Pan Bati"],
+      "Willemstad-CW":       ["Cafe Negro", "Pastechi"],
+      "Port of Spain-TT":    ["Coffee", "Doubles"],
+      "Castries-LC":         ["Drip Coffee", "Bakes"],
+      "Panama City-PA":      ["Cafe Geisha", "Hojaldre"],
+      "San Jose-CR":         ["Tarrazu Coffee", "Gallo Pinto"],
+      "Cartagena-CO":        ["Tinto", "Arepa de Huevo"],
+      "Bogota-CO":           ["Tinto", "Almojabana"],
+      "Medellin-CO":         ["Tinto", "Pandebono"],
+      "Lima-PE":             ["Cafe Pasado", "Pan con Chicharron"],
+      "Cusco-PE":            ["Cafe Pasado", "Pan Chuta"],
+      "Quito-EC":            ["Cafe Pasillo", "Bolon de Verde"],
+      "Guayaquil-EC":        ["Cafe Pasillo", "Bolon de Verde"],
+      "La Paz-BO":           ["Cafe Pasado", "Salteña"],
+      "Sucre-BO":            ["Cafe Pasado", "Mistela"],
+      "Asuncion-PY":         ["Cafe Negro", "Chipa"],
+      "Santiago-CL":         ["Cafe Helado", "Marraqueta"],
+      "Buenos Aires-AR":     ["Cafe con Leche", "Medialuna"],
+      "Mendoza-AR":          ["Cafe con Leche", "Pan Casero"],
+      "Montevideo-UY":       ["Cafe con Leche", "Bizcocho"],
+      "Punta del Este-UY":   ["Cafe Cortado", "Chivito"],
+      "Rio de Janeiro-BR":   ["Cafezinho", "Pao de Queijo"],
+      "Sao Paulo-BR":        ["Pingado", "Pao de Queijo"],
+      "Salvador-BR":         ["Cafezinho", "Acaraje"],
+      "Brasilia-BR":         ["Cafezinho", "Pao de Queijo"],
+      "Recife-BR":           ["Cafezinho", "Tapioca"],
+      "Curitiba-BR":         ["Cafezinho", "Quibebe"],
+      "Belo Horizonte-BR":   ["Cafezinho", "Pao de Queijo"],
+      "Florianopolis-BR":    ["Cafe com Leite", "Pastel"],
+      "Fortaleza-BR":        ["Cafezinho", "Tapioca"],
+      "Manaus-BR":           ["Cafe Forte", "Tucuma Sandwich"],
 
-      // ── Africa (additional) ───────────────────────
-      "Kigali-RW":           ["Mützig", "Primus", "Urwagwa"],
-      "Kampala-UG":          ["Bell Lager", "Nile Special", "Waragi"],
-      "Addis Ababa-ET":      ["Bedele", "Tej (honey wine)", "Buna (coffee)"],
-      "Lusaka-ZM":           ["Mosi", "Castle", "Munkoyo"],
-      "Maputo-MZ":           ["2M", "Laurentina", "R&R"],
-      "Windhoek-NA":         ["Windhoek Lager", "Tafel", "Castle"],
-      "Tunis-TN":            ["Celtia", "Boukha", "Berber Mint Tea"],
-      "Algiers-DZ":          ["Selecto", "Tassili Wine", "Mint Tea"],
+      // ── Oceania ─────────────────────────────────────────
+      "Sydney-AU":           ["Flat White", "Vegemite Toast"],
+      "Melbourne-AU":        ["Flat White", "Lamington"],
+      "Brisbane-AU":         ["Flat White", "Anzac Biscuit"],
+      "Perth-AU":            ["Flat White", "Vegemite Toast"],
+      "Hobart-AU":           ["Flat White", "Apple Slice"],
+      "Adelaide-AU":         ["Flat White", "Pie Floater"],
+      "Cairns-AU":           ["Flat White", "Damper"],
+      "Darwin-AU":           ["Flat White", "Damper"],
+      "Auckland-NZ":         ["Flat White", "Mince Pie"],
+      "Wellington-NZ":       ["Flat White", "Lolly Cake"],
+      "Queenstown-NZ":       ["Flat White", "Bacon Butty"],
+      "Christchurch-NZ":     ["Flat White", "Afghan Biscuit"],
+      "Apia-WS":             ["Coffee", "Panikeke"],
     };
 
-    // Local-language toasts, keyed by ISO country code.
-    // Shown small under the city name as a humanizing detail.
-    const CHEERS = {
-      JP: "Kanpai", KR: "Geonbae", CN: "Gānbēi", HK: "Gānbēi", TW: "Gānbēi", MO: "Gānbēi",
-      TH: "Chok dee", VN: "Một hai ba dô", ID: "Bersulang", PH: "Tagay", MY: "Yum seng", SG: "Yum seng",
-      IN: "Cheers", PK: "Cheers", BD: "Cheers", LK: "Cheers", NP: "Cheers", KZ: "Şeref", UZ: "Olding",
-      AE: "Cheers", TR: "Şerefe",
-      GR: "Yamas", EG: "Fi sahatak", MA: "Bsahtek",
-      KE: "Maisha", TZ: "Maisha", ZA: "Gesondheid",
-      MU: "À votre santé", SC: "Sante",
-      ES: "Salud", PT: "Saúde",
-      FR: "Santé", IT: "Salute", DE: "Prost", AT: "Prost", CH: "Prost",
-      NL: "Proost", BE: "Schol",
-      CZ: "Na zdraví", SK: "Na zdravie", PL: "Na zdrowie", HU: "Egészségedre",
-      SE: "Skål", NO: "Skål", DK: "Skål", FI: "Kippis", IS: "Skál",
-      IE: "Sláinte", GB: "Cheers",
-      HR: "Živjeli", SI: "Na zdravje", RS: "Živeli", BG: "Nazdrave", RO: "Noroc",
-      LT: "Į sveikatą", LV: "Priekā", EE: "Terviseks",
-      CV: "Saúde",
-      RW: "Murakaza", UG: "Cheers", ET: "Letenachen", ZM: "Cheers", ZW: "Cheers",
-      MZ: "Saúde", MG: "Misaotra", NA: "Prost", BW: "Cheers",
-      CI: "Santé", SN: "Santé", TN: "Bsahtek", DZ: "Bsahtek",
-      US: "Cheers", CA: "Cheers",
-      MX: "Salud", GT: "Salud", SV: "Salud", NI: "Salud", HN: "Salud", BZ: "Cheers",
-      CU: "Salud", PR: "Salud", JM: "Cheers", BS: "Cheers", BB: "Cheers", PA: "Salud", CR: "Salud",
-      CO: "Salud", PE: "Salud", CL: "Salud", AR: "Salud", UY: "Salud",
-      EC: "Salud", BO: "Salud", PY: "Salud",
-      BR: "Saúde",
-      AW: "Salud", CW: "Proost", TT: "Cheers", LC: "Cheers",
-      AU: "Cheers", NZ: "Cheers", WS: "Manuia", TO: "Mālō", VU: "Toa",
+    // Local-language morning greetings, keyed by ISO country code.
+    const GREETINGS = {
+      JP: "Ohayō", KR: "Annyeonghaseyo", CN: "Zǎo", HK: "Zǎo", TW: "Zǎo", MO: "Zǎo",
+      TH: "Aroon sawat", VN: "Chào buổi sáng", ID: "Selamat pagi", PH: "Magandang umaga",
+      MY: "Selamat pagi", SG: "Good morning",
+      IN: "Suprabhat", PK: "Subah Bakhair", BD: "Suprabhat", LK: "Suba dawasak",
+      NP: "Suprabhat", KZ: "Tan zhaqsy", UZ: "Hayrli tong",
+      AE: "Sabah al-khair", TR: "Günaydın",
+      GR: "Kalimera", EG: "Sabah al-khair", MA: "Sabah al-khair",
+      KE: "Habari za asubuhi", TZ: "Habari za asubuhi", ZA: "Goeie môre",
+      MU: "Bonjour", SC: "Bonzour",
+      ES: "Buenos días", PT: "Bom dia",
+      FR: "Bonjour", IT: "Buongiorno", DE: "Guten Morgen", AT: "Guten Morgen", CH: "Guten Morgen",
+      NL: "Goedemorgen", BE: "Goedemorgen",
+      CZ: "Dobré ráno", SK: "Dobré ráno", PL: "Dzień dobry", HU: "Jó reggelt",
+      SE: "God morgon", NO: "God morgen", DK: "Godmorgen", FI: "Hyvää huomenta", IS: "Góðan daginn",
+      IE: "Maidin mhaith", GB: "Morning",
+      HR: "Dobro jutro", SI: "Dobro jutro", RS: "Dobro jutro", BG: "Dobro utro", RO: "Bună dimineața",
+      LT: "Labas rytas", LV: "Labrīt", EE: "Tere hommikust",
+      CV: "Bom dia",
+      RW: "Mwaramutse", UG: "Wasuze otya", ET: "Endemen aderachehu",
+      ZM: "Good morning", ZW: "Good morning", MZ: "Bom dia",
+      MG: "Salama", NA: "Goeie môre", BW: "Good morning",
+      CI: "Bonjour", SN: "Bonjour", TN: "Sabah al-khair", DZ: "Sabah al-khair",
+      US: "Morning", CA: "Morning",
+      MX: "Buenos días", GT: "Buenos días", SV: "Buenos días", NI: "Buenos días",
+      HN: "Buenos días", BZ: "Good morning",
+      CU: "Buenos días", PR: "Buenos días", JM: "Good morning", BS: "Good morning",
+      BB: "Good morning", PA: "Buenos días", CR: "Buenos días",
+      CO: "Buenos días", PE: "Buenos días", CL: "Buenos días", AR: "Buenos días",
+      UY: "Buenos días", EC: "Buenos días", BO: "Buenos días", PY: "Buenos días",
+      BR: "Bom dia",
+      AW: "Bon dia", CW: "Bon dia", TT: "Good morning", LC: "Good morning",
+      AU: "Morning", NZ: "Morning", WS: "Manuia", TO: "Mālō", VU: "Halo",
     };
+
+    // Major coffee-growing regions with rough centroids. nearestBeans()
+    // finds the closest one to the city's lat/lon (quick haversine).
+    const COFFEE_ORIGINS = [
+      { lat:-19.0, lon:-45.0,  name:"Brazilian (Minas Gerais)" },
+      { lat:-12.0, lon:-39.0,  name:"Brazilian (Bahia)" },
+      { lat:  5.0, lon:-75.5,  name:"Colombian (Eje Cafetero)" },
+      { lat:  7.0, lon: 38.5,  name:"Ethiopian (Sidamo)" },
+      { lat: -1.0, lon: 37.0,  name:"Kenyan AA" },
+      { lat: -6.0, lon: 35.0,  name:"Tanzanian Peaberry" },
+      { lat: -1.9, lon: 29.9,  name:"Rwandan Bourbon" },
+      { lat:  1.0, lon: 32.5,  name:"Ugandan Robusta" },
+      { lat: 12.7, lon:108.0,  name:"Vietnamese Robusta" },
+      { lat:  0.0, lon:102.0,  name:"Sumatran Mandheling" },
+      { lat: -7.5, lon:110.0,  name:"Javanese" },
+      { lat: -8.4, lon:115.2,  name:"Balinese" },
+      { lat: 14.5, lon:-87.0,  name:"Honduran" },
+      { lat:  9.7, lon:-83.5,  name:"Costa Rican Tarrazú" },
+      { lat: 14.5, lon:-90.5,  name:"Guatemalan Antigua" },
+      { lat: 16.5, lon:-92.5,  name:"Mexican Chiapas" },
+      { lat: 19.6, lon:-155.9, name:"Kona" },
+      { lat: 18.0, lon:-76.7,  name:"Jamaican Blue Mountain" },
+      { lat: 15.4, lon: 44.0,  name:"Yemeni Mocha" },
+      { lat: -6.0, lon:145.5,  name:"PNG Sigri" },
+      { lat: 13.0, lon: 76.0,  name:"Indian Mysore" },
+      { lat:-10.0, lon:-75.0,  name:"Peruvian Chanchamayo" },
+      { lat:  8.5, lon:-80.0,  name:"Panamanian Geisha" },
+      { lat: 13.0, lon:-85.5,  name:"Nicaraguan" },
+      { lat: 25.0, lon:102.0,  name:"Yunnan" },
+      { lat:-21.1, lon: 55.5,  name:"Bourbon Pointu (Réunion)" },
+      { lat:-16.5, lon:145.5,  name:"Skybury (Queensland)" },
+    ];
+
+    function nearestBeans(lat, lon) {
+      const toRad = (x) => x * Math.PI / 180;
+      const R = 6371;
+      let best = COFFEE_ORIGINS[0];
+      let bestDist = Infinity;
+      for (const o of COFFEE_ORIGINS) {
+        const dLat = toRad(o.lat - lat);
+        const dLon = toRad(o.lon - lon);
+        const a = Math.sin(dLat/2) ** 2 + Math.cos(toRad(lat)) * Math.cos(toRad(o.lat)) * Math.sin(dLon/2) ** 2;
+        const d = 2 * R * Math.asin(Math.sqrt(a));
+        if (d < bestDist) { bestDist = d; best = o; }
+      }
+      return best.name;
+    }
 
     // ────────────────────────────────────────────────────────────────
     //  HELPERS
@@ -1384,6 +1471,7 @@
         url.searchParams.set("city", city.name);
         url.searchParams.set("country", city.country);
         url.searchParams.set("count", String(count));
+        url.searchParams.set("type", "coffee");
         const res = await fetch(url.toString());
         if (!res.ok) return [];
         const data = await res.json();
@@ -1659,17 +1747,18 @@
       }
 
       // Build the hero block
-      const drinks = DRINKS[city.name + "-" + city.cc] || [];
-      const drinkHtml = drinks.slice(0, 3).map(d =>
-        `<span class="drink">${escapeHtml(d)}</span>`
-      ).join('<span class="drink-sep" aria-hidden="true">·</span>');
-
-      const cheers = CHEERS[city.cc];
+      const order = COFFEES[city.name + "-" + city.cc] || null;
+      const orderHtml = order
+        ? order.map(item => `<span class="drink">${escapeHtml(item)}</span>`)
+               .join('<span class="drink-sep" aria-hidden="true">·</span>')
+        : "";
+      const beans = nearestBeans(city.lat, city.lon);
+      const greeting = GREETINGS[city.cc];
       const hero = document.getElementById("hero");
       hero.innerHTML = `
         <p class="eyebrow reveal d-1">
           <span class="live-dot" aria-hidden="true"></span>
-          <span>It's happy hour in</span>
+          <span>It's coffee time in</span>
         </p>
         <h1 class="city reveal d-2">${escapeHtml(city.name)}</h1>
         <p class="dateline reveal d-3">
@@ -1680,13 +1769,17 @@
             <span class="label">It's currently</span>
             <span class="val"><span class="glyph" aria-hidden="true">${weather.emoji}</span><span class="num">${weather.tempC}°</span><span class="muted" style="margin-left:6px">${escapeHtml(weather.description.toLowerCase())}</span></span>
           </div>
-          ${drinks.length ? `
+          ${order ? `
           <div class="item">
             <span class="label">What you'd order</span>
-            <span class="val">${drinkHtml}</span>
+            <span class="val">${orderHtml}</span>
           </div>` : ""}
+          <div class="item">
+            <span class="label">Beans from</span>
+            <span class="val"><span class="drink">${escapeHtml(beans)}</span></span>
+          </div>
         </div>
-        ${cheers ? `<p class="toast-mark reveal d-5">${escapeHtml(cheers)}.</p>` : ""}
+        ${greeting ? `<p class="toast-mark reveal d-5">${escapeHtml(greeting)}.</p>` : ""}
       `;
 
       // Trigger the staggered reveal \u2014 re-add .in on the next frame so
