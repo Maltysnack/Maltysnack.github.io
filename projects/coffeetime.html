@@ -90,7 +90,7 @@
       width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0;
-      transition: opacity 3000ms var(--ease-out);
+      transition: opacity 4500ms var(--ease-out);
       will-change: transform, opacity;
     }
     .photo.loaded {
@@ -206,20 +206,15 @@
 
     /* Refresh - refined, hairline, blur+saturate backdrop */
     .refresh {
-      display: inline-flex; align-items: center; gap: var(--s-2);
-      height: 36px;
-      padding: 0 var(--s-4);
+      display: inline-flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      padding: 0;
       border: 1px solid var(--c-fg-5);
-      border-radius: 999px;
+      border-radius: 50%;
       color: var(--c-fg-1);
       background: rgba(255, 255, 255, 0.04);
       backdrop-filter: blur(20px) saturate(140%);
       -webkit-backdrop-filter: blur(20px) saturate(140%);
-      font-family: var(--font-sans);
-      font-size: var(--t-micro);
-      font-weight: 500;
-      letter-spacing: 0.22em;
-      text-transform: uppercase;
       transition:
         transform var(--d-quick) var(--ease-soft),
         background var(--d-quick) var(--ease-soft),
@@ -229,14 +224,14 @@
       animation: fade var(--d-slow) var(--ease-out) 100ms forwards;
     }
     .refresh:hover {
-      transform: scale(1.04);
+      transform: scale(1.06);
       background: rgba(255, 255, 255, 0.10);
       border-color: rgba(255, 255, 255, 0.30);
     }
-    .refresh:active { transform: scale(0.96); }
+    .refresh:active { transform: scale(0.94); }
     .refresh:disabled { opacity: 0.5; cursor: wait; }
     .refresh .ico {
-      width: 13px; height: 13px;
+      width: 14px; height: 14px;
       transition: transform var(--d-base) var(--ease-soft);
     }
     .refresh:hover .ico { transform: rotate(90deg); }
@@ -557,37 +552,6 @@
       background: rgba(255,255,255,0.06);
     }
 
-    /* ── Hint (keyboard shortcut) - fades in late, very quiet ─── */
-    .hint {
-      position: absolute;
-      bottom: var(--s-3); left: 50%; transform: translateX(-50%);
-      font-family: var(--font-sans);
-      font-size: 10px;
-      letter-spacing: 0.24em;
-      text-transform: uppercase;
-      color: var(--c-fg-4);
-      z-index: 5;
-      opacity: 0;
-      animation: fade 1200ms var(--ease-out) 1800ms forwards;
-      pointer-events: none;
-      display: none;
-    }
-    @media (min-width: 768px) { .hint { display: block; } }
-    .hint kbd {
-      display: inline-block;
-      margin: 0 4px;
-      padding: 2px 6px;
-      font-family: var(--font-sans);
-      font-size: 9px;
-      font-weight: 600;
-      letter-spacing: 0.15em;
-      color: var(--c-fg-2);
-      background: rgba(255, 255, 255, 0.05);
-      border: 1px solid var(--c-fg-5);
-      border-radius: 3px;
-      vertical-align: 0.5px;
-    }
-
     /* ── Mobile back link (only when chrome wordmark might hide) ─ */
     .back {
       position: absolute;
@@ -660,14 +624,13 @@
 
     <header class="chrome">
       <span class="wordmark-row"><a href="/projects/happyhour.html" class="sister-link">happyhour</a><span class="wordmark-sep" aria-hidden="true">·</span><a href="/index.html" class="wordmark">coffeetime<span class="pulse">.</span></a></span>
-      <button id="refresh-btn" class="refresh" aria-label="Show another city">
+      <button id="refresh-btn" class="refresh" aria-label="Show another city" title="Another city">
         <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
           <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
           <path d="M21 3v5h-5"/>
           <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
           <path d="M3 21v-5h5"/>
         </svg>
-        <span>Another</span>
       </button>
     </header>
 
@@ -692,8 +655,6 @@
       </svg>
       <div class="map-coords" id="map-coords"></div>
     </aside>
-
-    <p class="hint"><kbd>N</kbd> for another city</p>
 
     <div id="veil" class="veil">
       <div class="veil-inner">
@@ -1643,7 +1604,9 @@
     // ── Slideshow state ──
     // Two stacked <img> elements (photo-a / photo-b) cross-fade between them.
     // Cycles every PHOTO_DWELL_MS through the city's image queue.
-    const PHOTO_DWELL_MS = 14000;        // visible time per photo
+    const PHOTO_DWELL_MS = 18000;        // total cycle per photo (transition + visible)
+    const FADE_DURATION_MS = 4500;       // matches CSS .photo transition duration
+    const DARK_GAP_MS      = 600;        // brief dark pause between fade-out and fade-in
     const slideshow = {
       images: [],
       idx: 0,
@@ -1660,12 +1623,22 @@
     }
 
     // Cross-fade to the given image. Loads in background, swaps onLoad.
+    // Sequential fade-through-dark transition: the current photo fades out
+    // first (~4.5s), then a brief dark pause, then the new photo fades in.
+    // Slower and more cinematic than a cross-fade \u2014 gives the eye a rest.
+    // Fade-in is scheduled from when showSlide was called, NOT from when the
+    // loader fired, so slow image loads don't extend the dark gap.
     function showSlide(image, isFirst) {
       const nextKey = slideshow.activeKey === "a" ? "b" : "a";
       const nextEl = document.getElementById(`photo-${nextKey}`);
       const currEl = document.getElementById(`photo-${slideshow.activeKey}`);
       const fallback = document.getElementById("fallback");
       const tint = document.getElementById("tint");
+      const callTime = performance.now();
+
+      // Start fade-out of the current photo immediately (parallel with
+      // loading the next one). The CSS transition handles the fade.
+      if (!isFirst && currEl) currEl.classList.remove("loaded");
 
       const loader = new Image();
       loader.crossOrigin = "anonymous";
@@ -1673,14 +1646,16 @@
         if (!ok) return;
         nextEl.src = image.url;
         nextEl.alt = image.altDescription || "";
-        // Swap on the next browser tick. Use setTimeout(0) instead of rAF
-        // because rAF can be paused when the tab isn't focused, leaving the
-        // slideshow stuck without the .loaded class.
+        // Schedule the fade-in for fade_duration + gap after showSlide was
+        // called, regardless of how long the loader took. If the loader is
+        // already past that point, fire immediately.
+        const targetT = isFirst ? 16 : FADE_DURATION_MS + DARK_GAP_MS;
+        const elapsed = performance.now() - callTime;
+        const delay = Math.max(0, targetT - elapsed);
         setTimeout(() => {
           nextEl.classList.add("loaded");
-          if (!isFirst && currEl) currEl.classList.remove("loaded");
           fallback.classList.remove("visible");
-        }, 16);
+        }, delay);
         slideshow.activeKey = nextKey;
         slideshow.currentImage = image;
         updateCredit(image);
