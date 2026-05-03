@@ -46,7 +46,7 @@
         <div class="nav-section">
           <span class="nav-label">Games</span>
           <ul>
-            <li><a href="/dnd/index.html" ${active('/dnd/index.html')}>Grosh</a></li>
+            <li><a href="/dnd.html" ${active('/dnd.html')}>Grosh</a></li>
           </ul>
         </div>
 

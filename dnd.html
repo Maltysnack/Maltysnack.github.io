@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Grosh — Character Sheet</title>
+  <link rel="stylesheet" href="/dnd/style.css">
+</head>
+<body>
+
+  <!-- TIER 4: identity strip -->
+  <div class="meta-strip">
+    <span><strong id="meta-name"></strong></span>
+    <span id="meta-class"></span>
+    <span id="meta-bg"></span>
+    <span>Alignment: <span class="editable" id="alignment" contenteditable="true"></span></span>
+    <span>XP: <span class="editable" id="xp" contenteditable="true"></span></span>
+    <span>GP: <span class="editable" id="gold" contenteditable="true"></span></span>
+    <span id="meta-speed"></span>
+    <span id="meta-langs"></span>
+    <span id="meta-prof"></span>
+  </div>
+
+  <!-- TIER 1: hero strip (single row) -->
+  <section class="hero">
+    <div class="h-item h-hp">
+      <span class="h-label">HP</span>
+      <span class="h-big editable" id="hp-current" contenteditable="true">42</span>
+      <span class="muted">/ <span class="editable" id="hp-max" contenteditable="true">42</span></span>
+      <span class="muted h-sub">temp <span class="editable" id="hp-temp" contenteditable="true">0</span></span>
+      <div class="h-bar"><div id="hp-fill" class="hp-fill"></div></div>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item">
+      <span class="h-label">AC</span>
+      <span class="h-big" id="hero-ac"></span>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item h-stats">
+      <span><strong id="hero-init"></strong> <span class="muted">init</span></span>
+      <span><strong id="hero-dc"></strong> <span class="muted">DC</span></span>
+      <span><strong id="hero-atk"></strong> <span class="muted">atk</span></span>
+      <span><strong id="hero-prof"></strong> <span class="muted">prof</span></span>
+      <span><strong id="hero-pp"></strong> <span class="muted">PP</span></span>
+      <span><strong><span class="editable" id="hd-current" contenteditable="true">5</span>/<span id="hd-max"></span></strong> <span class="muted">HD</span></span>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item h-conc">
+      <span class="h-label">Conc</span>
+      <span id="conc-active" class="conc-name">none</span>
+      <button id="conc-clear" class="ghost">drop</button>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item h-reaction">
+      <span class="h-label">Reaction</span>
+      <strong id="reaction-title"></strong>
+      <span class="muted" id="reaction-desc"></span>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item">
+      <button class="pip-toggle" id="inspiration"></button>
+      <span class="muted">insp</span>
+    </div>
+    <div class="h-div"></div>
+    <div class="h-item">
+      <span class="h-label">Death</span>
+      <div class="pips" id="ds-success"></div>
+      <span class="muted">/</span>
+      <div class="pips" id="ds-failure"></div>
+    </div>
+  </section>
+
+  <!-- TIER 1: slots bar -->
+  <section class="slots-bar">
+    <div class="slot-block">
+      <span class="slot-tier">1st</span>
+      <div class="big-pips" data-slots="1"></div>
+    </div>
+    <div class="slot-block">
+      <span class="slot-tier">2nd</span>
+      <div class="big-pips" data-slots="2"></div>
+    </div>
+    <div class="slot-divider"></div>
+    <div class="slot-block">
+      <span class="slot-tier loh">Lay on Hands</span>
+      <span class="loh-num"><span class="editable" id="loh-current" contenteditable="true">25</span>/<span id="loh-max"></span></span>
+    </div>
+    <div class="slot-block">
+      <span class="slot-tier">Channel D.</span>
+      <div class="big-pips" id="cd-pip"></div>
+    </div>
+    <div class="slot-block">
+      <span class="slot-tier">Treats</span>
+      <div class="big-pips" id="treats-pips"></div>
+    </div>
+    <div class="slot-block">
+      <span class="slot-tier">Divine Sense</span>
+      <div class="big-pips" id="ds-pips"></div>
+    </div>
+  </section>
+
+  <!-- 3-column main: stats / active / extras -->
+  <main class="three-col">
+
+    <!-- LEFT: stats + skills (big list) -->
+    <section class="stats-col">
+      <div class="block">
+        <h2>Abilities</h2>
+        <ul class="check-list big" id="abilities"></ul>
+      </div>
+      <div class="block">
+        <h2>Saves</h2>
+        <ul class="check-list big" id="saves"></ul>
+      </div>
+      <div class="block fill">
+        <h2>Skills</h2>
+        <ul class="check-list big" id="skills"></ul>
+      </div>
+    </section>
+
+    <!-- MIDDLE: active stuff -->
+    <section class="active-col">
+      <div class="block">
+        <h2>Attacks</h2>
+        <table class="attacks">
+          <tbody id="attacks-body"></tbody>
+        </table>
+      </div>
+
+      <div class="block">
+        <h2>Prepared Spells <span class="hint">click to cast</span></h2>
+        <ul class="spell-list" id="all-spells"></ul>
+      </div>
+
+      <div class="block fill">
+        <h2>Features &amp; Traits</h2>
+        <ul class="feat-list" id="features-list"></ul>
+      </div>
+    </section>
+
+    <!-- RIGHT: buffs / refs / notes -->
+    <section class="extras-col">
+      <div class="block">
+        <h2>Active Buffs</h2>
+        <ul id="buffs-list"></ul>
+        <form id="buff-form" class="add-form">
+          <input type="text" id="buff-name" placeholder="name">
+          <input type="text" id="buff-notes" placeholder="effect, duration">
+          <button type="submit">add</button>
+        </form>
+      </div>
+
+      <div class="block">
+        <h2>Triton (1/long)</h2>
+        <ul class="spell-list compact" id="triton-list"></ul>
+      </div>
+
+      <div class="block">
+        <h2>Scrolls</h2>
+        <ul class="spell-list compact" id="scrolls-list"></ul>
+      </div>
+
+      <div class="block">
+        <h2>Equipment</h2>
+        <ul id="inventory-list"></ul>
+        <form id="inv-form" class="add-form">
+          <input type="text" id="inv-name" placeholder="item">
+          <input type="text" id="inv-notes" placeholder="notes">
+          <button type="submit">add</button>
+        </form>
+      </div>
+
+      <div class="block fill">
+        <h2>Notes</h2>
+        <textarea id="notes" placeholder="session notes, NPCs, plot threads"></textarea>
+      </div>
+    </section>
+
+  </main>
+
+  <footer class="footer">
+    <button id="short-rest" class="big">Short Rest</button>
+    <button id="long-rest" class="big primary">Long Rest</button>
+    <span class="spacer"></span>
+    <button id="export-btn" class="ghost">Export</button>
+    <label class="ghost btn-label">
+      Import
+      <input type="file" id="import-input" accept="application/json" hidden>
+    </label>
+    <button id="reset-btn" class="ghost danger">Reset</button>
+  </footer>
+
+  <script src="/dnd/character.js"></script>
+  <script src="/dnd/app.js"></script>
+</body>
+</html>
