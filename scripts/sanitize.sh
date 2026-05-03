@@ -101,9 +101,11 @@ fi
 
 # ── 6. New page added without sidebar entry ──────────────────────────────────
 # Heuristic: a top-level *.html or /projects/*.html that exists but isn't in sidebar.js
+# Intentional easter eggs (reachable only via in-page links) go in the ignore list.
+# coffeetime is the morning sister of happyhour, only linked from the wordmark toggle.
 echo ""
 echo "[6] orphaned pages (exist but not in sidebar)"
-ignore_paths='/index.html|/grosh.html|/reginald.html|/wren/.*|/shelf/.*|/dnd/.*'
+ignore_paths='/index.html|/grosh.html|/reginald.html|/wren/.*|/shelf/.*|/dnd/.*|/projects/coffeetime.html'
 orphans=""
 while IFS= read -r p; do
   rel="${p#.}"

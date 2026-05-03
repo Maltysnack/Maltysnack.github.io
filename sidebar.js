@@ -67,7 +67,6 @@
             <li><a href="/projects/saltysnacks.html" ${active('/projects/saltysnacks.html')}>Saltysnacks</a></li>
             <li><a href="/projects/fantasyfootball.html" ${active('/projects/fantasyfootball.html')}>FPL Predicted XI</a></li>
             <li><a href="/projects/happyhour.html" ${active('/projects/happyhour.html')}>Happy Hour</a></li>
-            <li><a href="/projects/coffeetime.html" ${active('/projects/coffeetime.html')}>Coffee Time</a></li>
             <li><a href="/projects/worldcup.html" ${active('/projects/worldcup.html')}>World Cup 2026</a></li>
           </ul>
         </div>
