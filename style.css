@@ -282,6 +282,21 @@ ul {
   margin-bottom: 7px;
 }
 
+.nav-label-link {
+  display: inline-block;
+  width: fit-content;
+  transition: color var(--transition);
+  cursor: pointer;
+}
+
+.nav-label-link:hover {
+  color: var(--nav-active);
+}
+
+.nav-label-active {
+  color: var(--nav-active);
+}
+
 .nav-section:first-child .nav-label {
   margin-top: 0;
 }
