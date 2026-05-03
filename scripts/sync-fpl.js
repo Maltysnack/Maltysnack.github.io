@@ -16,9 +16,10 @@ const path  = require('path');
 const FPL = 'https://fantasy.premierleague.com/api/';
 const OUT  = path.join(__dirname, '..', 'projects', 'fpl-api-cache.json');
 
-function get(url) {
+function getOnce(url) {
   return new Promise((resolve, reject) => {
     const req = https.get(url, {
+      timeout: 30000,
       headers: {
         'User-Agent': 'Mozilla/5.0 (compatible; FPL-cache-bot/1.0)',
         'Accept':     'application/json'
@@ -33,8 +34,20 @@ function get(url) {
       });
     });
     req.on('error', reject);
-    req.setTimeout(20000, () => { req.destroy(new Error('Timeout')); });
+    req.on('timeout', () => req.destroy(new Error('Timeout')));
   });
+}
+
+async function get(url, attempts = 3) {
+  for (let i = 1; i <= attempts; i++) {
+    try { return await getOnce(url); }
+    catch (e) {
+      if (i === attempts) throw e;
+      const delay = 2000 * i;
+      console.warn(`  ${url} attempt ${i} failed (${e.message}), retrying in ${delay}ms`);
+      await new Promise(r => setTimeout(r, delay));
+    }
+  }
 }
 
 // Only keep the fields the page actually uses
