@@ -78,4 +78,18 @@ Multiple sessions work in this repo. Before you start:
 git pull --rebase origin main
 ```
 
-If you'll be editing a shared file (sidebar.js, index.html, style.css), do it quickly and push so you don't sit on an outdated tree. The longer you hold a stale tree, the more likely you'll merge-conflict with another session that just shipped a feature.
+A few rules to keep parallel sessions from clobbering each other:
+
+1. **Check recent activity on the file.** Before any non-trivial edit:
+   ```sh
+   git log --oneline -10 -- path/to/file
+   ```
+   If another session committed within the last hour, expect possible conflicts. Ping the user before doing a big rewrite.
+
+2. **Sanitization belongs in its own commit.** If you're adding a feature, don't *also* normalize quotes, run prettier, strip em-dashes from a colleague's strings, or reflow comments in the same diff. When sanitize and feature edits arrive at the same time, auto-merge tends to drop the feature work because the diffs overlap on too many lines. The right pattern: feature commit first → push → run `bash scripts/sanitize.sh` as a follow-up commit.
+
+3. **If a feature commit and a sanitization commit conflict during merge, prefer the feature commit's version of the file.** Sanitization is mechanical and easy to re-apply; lost feature work is hard to recover. After the merge, re-run sanitize on the merged result to reapply any cosmetic rules.
+
+4. **Commit per concept, push immediately.** Long-running uncommitted work is the highest-risk state. Three small commits beat one big one: easier to merge, easier to bisect, easier to recover from.
+
+If you'll be editing a shared file (sidebar.js, index.html, style.css), do it quickly and push so you don't sit on an outdated tree.
