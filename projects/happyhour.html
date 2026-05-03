@@ -300,13 +300,14 @@
     // ────────────────────────────────────────────────────────────────
     //  CONFIG
     // ────────────────────────────────────────────────────────────────
-    // Get a free key at https://unsplash.com/developers (50 req/hr demo).
-    // The key lives in client JS — fine for low-traffic personal use, but
-    // anyone can read it from devtools and burn through the rate limit.
-    const UNSPLASH_KEY = "";
+    // Photos come from a tiny serverless proxy on Vercel that hides the
+    // Unsplash key (so we don't violate Unsplash's "keys must remain
+    // confidential" guideline). Source: https://github.com/...happyhour-proxy
+    const IMAGE_PROXY_URL = "https://happyhour-proxy.vercel.app/api/image";
 
-    // Auto-refresh interval (ms). Default: 15 minutes.
-    const AUTO_REFRESH_MS = 15 * 60 * 1000;
+    // Auto-refresh disabled — Unsplash forbids automated/non-user-driven
+    // calls. The "Another" button is the only way to fetch a new image.
+    const AUTO_REFRESH_MS = 0;
 
     // Happy-hour window (local hours, 24h). 16 ≤ h < 18 = 4–6pm.
     const HAPPY_START = 16;
@@ -664,34 +665,17 @@
     }
 
     async function fetchImage(city) {
-      if (!UNSPLASH_KEY) return null;
-      const queries = [
-        city.name + " golden hour",
-        city.name + " sunset",
-        city.name + " " + city.country,
-        city.name,
-      ];
-      for (const q of queries) {
-        const url = new URL("https://api.unsplash.com/search/photos");
-        url.searchParams.set("query", q);
-        url.searchParams.set("orientation", "landscape");
-        url.searchParams.set("per_page", "20");
-        url.searchParams.set("content_filter", "high");
-        try {
-          const res = await fetch(url.toString(), { headers: { Authorization: "Client-ID " + UNSPLASH_KEY } });
-          if (!res.ok) continue;
-          const data = await res.json();
-          if (!data.results || data.results.length === 0) continue;
-          const photo = data.results[Math.floor(Math.random() * data.results.length)];
-          return {
-            url: photo.urls.regular,
-            photographer: photo.user.name,
-            photographerUrl: photo.user.links.html,
-            altDescription: photo.alt_description,
-          };
-        } catch {}
+      if (!IMAGE_PROXY_URL) return null;
+      try {
+        const url = new URL(IMAGE_PROXY_URL);
+        url.searchParams.set("city", city.name);
+        url.searchParams.set("country", city.country);
+        const res = await fetch(url.toString());
+        if (!res.ok) return null;
+        return await res.json();
+      } catch {
+        return null;
       }
-      return null;
     }
 
     // ────────────────────────────────────────────────────────────────
@@ -723,8 +707,8 @@
       for (const city of ordered) {
         try {
           const [weather, image] = await Promise.all([fetchWeather(city), fetchImage(city)]);
-          // If a key is configured but the image failed for this city, try next.
-          if (UNSPLASH_KEY && !image) continue;
+          // If proxy is configured but no image came back for this city, try next.
+          if (IMAGE_PROXY_URL && !image) continue;
           render(city, weather, image);
           lastCity = city.name;
           break;
@@ -796,7 +780,7 @@
         <div class="footer-row">
           ${image
             ? `<span>Photo by <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> on <a href="https://unsplash.com/?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">Unsplash</a></span>`
-            : `<span style="opacity:0.6">Add an Unsplash key in source for photos</span>`}
+            : `<span style="opacity:0.6">Photo unavailable</span>`}
           <span style="opacity:0.7">Weather by Open-Meteo</span>
         </div>
       `;
@@ -830,7 +814,7 @@
     // ────────────────────────────────────────────────────────────────
     document.getElementById("refresh-btn").addEventListener("click", () => load(lastCity));
     load();
-    setInterval(() => load(), AUTO_REFRESH_MS);
+    if (AUTO_REFRESH_MS > 0) setInterval(() => load(), AUTO_REFRESH_MS);
   </script>
 </body>
 </html>
