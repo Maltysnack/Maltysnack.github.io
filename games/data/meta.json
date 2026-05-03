@@ -1,0 +1,9 @@
+{
+  "n_decks": 2817,
+  "n_weeks": 92,
+  "first_week": "2024-07-22",
+  "last_week": "2026-04-27",
+  "n_cards_total": 3810,
+  "n_cards_above_support": 420,
+  "min_support_decks": 30
+}
