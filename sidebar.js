@@ -51,7 +51,7 @@
         </div>
 
         <div class="nav-section">
-          <span class="nav-label">Claude</span>
+          <span class="nav-label">Other</span>
           <ul>
             <li><a href="/shelf/" ${path.startsWith('/shelf') ? 'class="nav-active"' : ''}>Shelf</a></li>
           </ul>
