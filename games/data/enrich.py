@@ -32,10 +32,25 @@ def http_json(url: str) -> dict:
         return json.loads(resp.read())
 
 
-def http_bytes(url: str) -> bytes:
-    req = urllib.request.Request(url, headers={"User-Agent": UA})
-    with urllib.request.urlopen(req, timeout=300) as resp:
-        return resp.read()
+def http_bytes(url: str, attempts: int = 3) -> bytes:
+    """Stream-download with retries — bulk files are >100MB and connections drop."""
+    last_err = None
+    for attempt in range(attempts):
+        try:
+            req = urllib.request.Request(url, headers={"User-Agent": UA})
+            with urllib.request.urlopen(req, timeout=600) as resp:
+                chunks = []
+                while True:
+                    chunk = resp.read(1 << 20)  # 1 MB
+                    if not chunk:
+                        break
+                    chunks.append(chunk)
+                return b"".join(chunks)
+        except Exception as e:
+            last_err = e
+            print(f"  download attempt {attempt + 1}/{attempts} failed: {e}", file=sys.stderr)
+            time.sleep(2 ** attempt)
+    raise last_err
 
 
 def extract_meta(card: dict) -> dict:

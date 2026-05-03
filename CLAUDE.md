@@ -15,6 +15,7 @@ These will fail CI via `scripts/sanitize.sh`:
    - No personal emails, no phone numbers.
 3. **No `.DS_Store` or junk files committed.** `.gitignore` already covers `.DS_Store`. Don't fight it.
 4. **No broken internal links** from `sidebar.js` or `index.html`.
+5. **All user-facing dates are `dd-mm-yyyy`.** e.g. `04-05-2026`, never `2026-05-04` or `May 4, 2026` or `4 May`. Applies to anything rendered to the page (timestamps, labels, sparkline axes, "last updated" stamps). Internal data files can stay in ISO `yyyy-mm-dd` for sortability; convert at the render layer.
 
 ## Adding a new page
 
