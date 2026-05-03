@@ -27,6 +27,15 @@
     return sign + Math.abs(v * 100).toFixed(1) + "pp";
   }
 
+  // Internal dates are ISO (yyyy-mm-dd) for sortability. User-facing dates
+  // on this site are always dd-mm-yyyy (see CLAUDE.md hard rule 5).
+  function fmtDate(iso) {
+    if (!iso || typeof iso !== "string") return "";
+    const m = iso.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+    if (!m) return iso;
+    return `${m[3]}-${m[2]}-${m[1]}`;
+  }
+
   function img(name, kind = "small") {
     if (!scryfall) return "";
     const m = scryfall[name];
@@ -89,7 +98,7 @@
   function renderDatasetStamp() {
     const stamp = $(".dataset-stamp");
     if (stamp && meta) {
-      stamp.textContent = `${meta.n_decks.toLocaleString()} winning decks · ${meta.n_weeks} weeks · ${meta.first_week} → ${meta.last_week}`;
+      stamp.textContent = `${meta.n_decks.toLocaleString()} winning decks · ${meta.n_weeks} weeks · ${fmtDate(meta.first_week)} to ${fmtDate(meta.last_week)}`;
     }
   }
 
@@ -268,10 +277,10 @@
   function renderHome() {
     const main = $(".magic-page");
     const recentRange = explore.recent_window_weeks.length
-      ? `${explore.recent_window_weeks[0]} → ${explore.recent_window_weeks.at(-1)}`
+      ? `${fmtDate(explore.recent_window_weeks[0])} to ${fmtDate(explore.recent_window_weeks.at(-1))}`
       : "";
     const priorRange = explore.prior_window_weeks.length
-      ? `${explore.prior_window_weeks[0]} → ${explore.prior_window_weeks.at(-1)}`
+      ? `${fmtDate(explore.prior_window_weeks[0])} to ${fmtDate(explore.prior_window_weeks.at(-1))}`
       : "";
 
     main.innerHTML = `
@@ -396,7 +405,7 @@
           <div class="catalyst-info">
             <div class="catalyst-name">${escapeHtml(r.name)}</div>
             <div class="catalyst-shell-trace">
-              Arrived ${r.first_week} · its shell (${shellNames})
+              Arrived ${fmtDate(r.first_week)} · its shell (${shellNames})
               moved <strong>${fmtPct(r.shell_before)} → ${fmtPct(r.shell_after)}</strong>
               (${fmtPp(r.shell_delta)}). Card itself only ${fmtPct(r.card_main_prevalence)} of decks.
             </div>
@@ -526,8 +535,8 @@
               <path d="${sparkPath}"></path>
             </svg>
             <div class="sparkline-axis">
-              <span>${trendStart}</span>
-              <span>${trendEnd}</span>
+              <span>${fmtDate(trendStart)}</span>
+              <span>${fmtDate(trendEnd)}</span>
             </div>
           </div>` : ""}
         </div>
