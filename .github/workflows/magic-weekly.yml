@@ -1,0 +1,36 @@
+name: Update Magic dataset
+
+on:
+  schedule:
+    - cron: '0 12 * * 2'   # Tuesdays 12:00 UTC — magic.gg posts Mondays, we run a day later
+  workflow_dispatch:
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Scrape latest decklists
+        run: python3 games/data/scrape.py
+
+      - name: Recompute card stats
+        run: python3 games/data/analyze.py
+
+      - name: Enrich new cards from Scryfall (incremental)
+        run: python3 games/data/enrich.py
+
+      - name: Commit and push if changed
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add games/data/decks_raw.json games/data/cards.json games/data/pairs.json games/data/explore.json games/data/meta.json games/data/scryfall.json
+          git diff --staged --quiet || git commit -m "magic: weekly dataset refresh"
+          git push
