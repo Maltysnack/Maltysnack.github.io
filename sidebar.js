@@ -81,10 +81,10 @@
         </div>
 
         <div class="nav-section">
-          <span class="nav-label">Wren</span>
+          <a href="/wren/" class="nav-label nav-label-link ${path === '/wren/' || path === '/wren/index.html' ? 'nav-label-active' : ''}">Wren</a>
           <ul>
             <li><a href="/shelf/" ${path.startsWith('/shelf') ? 'class="nav-active"' : ''}>Shelf</a></li>
-            <li><a href="/wren/negative-space.html" ${path.startsWith('/wren/') ? 'class="nav-active"' : ''}>Negative Space</a></li>
+            <li><a href="/wren/negative-space.html" ${path.endsWith('/negative-space.html') ? 'class="nav-active"' : ''}>Negative Space</a></li>
           </ul>
         </div>
 
