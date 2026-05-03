@@ -43,6 +43,11 @@
     return kind === "small" ? m.image_small : m.image;
   }
 
+  function isLand(name) {
+    const m = scryfall && scryfall[name];
+    return !!(m && m.type_line && m.type_line.includes("Land"));
+  }
+
   function escapeHtml(s) {
     const div = document.createElement("div");
     div.textContent = s;
@@ -266,7 +271,7 @@
   }
 
   function attachMiniCardClicks(container) {
-    container.querySelectorAll(".mini-card, .catalyst-row").forEach((el) => {
+    container.querySelectorAll(".mini-card, .catalyst-row, .manabase-card").forEach((el) => {
       el.addEventListener("click", () => {
         navigateToCard(el.dataset.name);
       });
@@ -481,13 +486,36 @@
     const trendStart = trend.length ? trend[0][0] : "";
     const trendEnd = trend.length ? trend.at(-1)[0] : "";
 
-    const renderStrip = (items, statFn) => {
+    const stripFor = (items, statFn) => {
       if (!items || !items.length) return `<div class="detail-section-empty">none above the noise floor</div>`;
       return `<div class="card-strip">${items.map((r) => miniCard(r.name, {
         extraClass: "companion-card",
         overlayHtml: r.lift !== undefined ? `<div class="companion-lift">×${r.lift.toFixed(1)}</div>` : "",
         statHtml: statFn(r),
       })).join("")}</div>`;
+    };
+
+    // Split lands out into a separate manabase row, which is informative but
+    // not the relationship signal you came here for. Spells stay in the main strip.
+    const renderStrip = (items, statFn) => {
+      if (!items || !items.length) return `<div class="detail-section-empty">none above the noise floor</div>`;
+      const spells = items.filter((r) => !isLand(r.name));
+      const lands = items.filter((r) => isLand(r.name));
+      let out = stripFor(spells.length ? spells : items.slice(0, 0), statFn);
+      if (lands.length) {
+        out += `
+          <div class="manabase-row">
+            <div class="manabase-label">Manabase ties</div>
+            <div class="manabase-strip">${lands.map((r) => {
+              const im = img(r.name, "small");
+              const thumb = im
+                ? `<img class="manabase-thumb" src="${im}" alt="" loading="lazy">`
+                : `<div class="manabase-thumb"></div>`;
+              return `<button class="manabase-card" data-name="${escapeHtml(r.name)}" title="${escapeHtml(r.name)} · ×${r.lift.toFixed(1)}">${thumb}<span class="manabase-name">${escapeHtml(r.name)}</span></button>`;
+            }).join("")}</div>
+          </div>`;
+      }
+      return out;
     };
 
     main.innerHTML = `
