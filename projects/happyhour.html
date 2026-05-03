@@ -8,7 +8,7 @@
   <meta name="theme-color" content="#0a0a0a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..700;1,9..144,300..500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
     /* ──────────────────────────────────────────────────────────────
        happyhour — design system
@@ -18,7 +18,7 @@
 
     :root {
       /* Type families */
-      --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+      --font-display: 'Playfair Display', 'Times New Roman', Georgia, serif;
       --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
 
       /* Type scale (modular, restrained) */
@@ -169,11 +169,10 @@
       display: inline-flex; align-items: baseline; gap: 1px;
       font-family: var(--font-display);
       font-size: 0.875rem;
-      font-weight: 350;
+      font-weight: 400;
       font-style: italic;
       letter-spacing: -0.005em;
       color: var(--c-fg-1);
-      font-variation-settings: "opsz" 14;
       text-shadow: 0 1px 14px rgba(0,0,0,0.45);
       opacity: 0;
       animation: fade var(--d-slow) var(--ease-out) 100ms forwards;
@@ -222,6 +221,65 @@
     .refresh:hover .ico { transform: rotate(90deg); }
     .refresh.spinning .ico { animation: spin 0.9s linear infinite; }
 
+    /* ── Minimap — small world chart, top-right, hover expands ──── */
+    .map {
+      position: fixed;
+      top: 88px;
+      right: var(--s-5);
+      width: 188px;
+      z-index: 8;
+      color: var(--c-fg-1);
+      transform-origin: top right;
+      transition: transform var(--d-base) var(--ease-soft);
+      cursor: default;
+      filter: drop-shadow(0 1px 14px rgba(0,0,0,0.35));
+    }
+    @media (min-width: 768px) {
+      .map { top: 92px; right: var(--s-7); width: 210px; }
+    }
+    .map:hover { transform: scale(1.35); }
+    .map-svg {
+      display: block;
+      width: 100%; height: auto;
+      overflow: visible;
+    }
+    /* Continents fade in/out separately from dot so dot stays prominent */
+    .map .continents {
+      opacity: 0.45;
+      transition: opacity var(--d-base) var(--ease-soft);
+    }
+    .map:hover .continents { opacity: 0.85; }
+    .map #map-dot-group {
+      opacity: 0.95;
+    }
+    .map .grid { stroke-width: 1; opacity: 0.4; }
+    .map:hover .grid { opacity: 0.7; }
+    .map-coords {
+      position: absolute;
+      top: calc(100% + 6px);
+      right: 0;
+      font-family: var(--font-sans);
+      font-size: 9.5px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--c-fg-2);
+      white-space: nowrap;
+      opacity: 0;
+      transform: translateY(-2px);
+      transition: opacity var(--d-quick) var(--ease-soft), transform var(--d-quick) var(--ease-soft);
+      pointer-events: none;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.5);
+    }
+    .map:hover .map-coords { opacity: 1; transform: translateY(0); }
+    /* Pulse the inner halo */
+    #map-dot-pulse { animation: map-pulse 2.4s ease-in-out infinite; transform-origin: center; transform-box: fill-box; }
+    @keyframes map-pulse {
+      0%, 100% { transform: scale(1); opacity: 0.45; }
+      50% { transform: scale(1.6); opacity: 0.10; }
+    }
+    /* Hide on very narrow viewports */
+    @media (max-width: 420px) { .map { display: none; } }
+
     /* ── Hero (bottom-left anchor) ─────────────────────────────── */
     .hero {
       position: absolute;
@@ -262,10 +320,9 @@
     .city {
       font-family: var(--font-display);
       font-size: var(--t-display);
-      font-weight: 250;
-      font-variation-settings: "opsz" 144, "SOFT" 50;
-      line-height: 0.92;
-      letter-spacing: -0.04em;
+      font-weight: 400;
+      line-height: 0.95;
+      letter-spacing: -0.025em;
       color: var(--c-fg-1);
       /* Two-layer text-shadow: tight (sharpens edges) + diffuse (atmospheric) */
       text-shadow: 0 1px 2px rgba(0,0,0,0.20), 0 4px 60px rgba(0,0,0,0.55);
@@ -276,8 +333,7 @@
       font-family: var(--font-display);
       font-style: italic;
       font-size: var(--t-headline);
-      font-weight: 350;
-      font-variation-settings: "opsz" 24;
+      font-weight: 400;
       color: var(--c-fg-2);
       letter-spacing: 0.005em;
       line-height: 1.4;
@@ -323,6 +379,24 @@
       color: var(--c-fg-3);
       margin-left: 6px;
       vertical-align: 1px;
+    }
+
+    /* Local-language cheers — small italic line under the dateline */
+    .cheers {
+      margin-top: var(--s-2);
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: clamp(0.95rem, 1.4vw, 1.1rem);
+      font-weight: 400;
+      color: var(--c-accent);
+      letter-spacing: 0.005em;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.55);
+    }
+    .cheers .cheers-mark {
+      display: inline-block;
+      margin-right: 6px;
+      color: var(--c-fg-4);
+      font-style: normal;
     }
 
     /* ── Caption strip — single editorial line of metadata ─────── */
@@ -576,6 +650,40 @@
 
     <article id="hero" class="hero" aria-live="polite"></article>
 
+    <aside id="map" class="map" aria-hidden="true">
+      <svg class="map-svg" viewBox="0 0 600 300" preserveAspectRatio="xMidYMid meet">
+        <!-- Continents — intentionally rough polygon approximations. Style: low-opacity outlines. -->
+        <g class="continents" fill="currentColor" fill-opacity="0.42">
+          <path d="M 50 78 L 88 64 L 130 58 L 168 72 L 175 102 L 168 128 L 145 150 L 110 158 L 80 148 L 58 128 Z"/>
+          <path d="M 195 50 L 222 46 L 228 64 L 222 78 L 205 82 L 192 70 Z"/>
+          <path d="M 142 152 L 156 165 L 162 178 L 152 178 L 138 168 Z"/>
+          <path d="M 162 178 L 198 182 L 215 205 L 220 232 L 205 262 L 185 274 L 168 252 L 156 220 L 158 196 Z"/>
+          <path d="M 280 70 L 322 66 L 340 78 L 343 95 L 320 102 L 296 96 L 278 88 Z"/>
+          <path d="M 296 105 L 332 100 L 348 116 L 354 148 L 348 178 L 336 202 L 318 218 L 302 212 L 292 196 L 287 165 L 285 132 Z"/>
+          <path d="M 340 102 L 365 102 L 376 120 L 370 134 L 354 134 L 340 122 Z"/>
+          <path d="M 340 65 L 412 56 L 472 60 L 512 76 L 535 88 L 542 110 L 520 124 L 482 132 L 440 128 L 398 116 L 358 104 Z"/>
+          <path d="M 410 132 L 428 132 L 432 148 L 426 166 L 414 166 L 408 150 Z"/>
+          <path d="M 470 144 L 498 144 L 514 156 L 514 172 L 492 178 L 470 168 Z"/>
+          <path d="M 525 95 L 538 95 L 540 112 L 528 114 Z"/>
+          <path d="M 510 142 L 519 142 L 519 162 L 510 162 Z"/>
+          <path d="M 478 196 L 528 192 L 548 208 L 538 228 L 510 232 L 484 222 Z"/>
+          <path d="M 555 232 L 568 232 L 568 248 L 555 248 Z"/>
+          <rect x="0" y="284" width="600" height="16"/>
+        </g>
+        <!-- Equator + prime meridian — very faint guides -->
+        <line class="grid" x1="0" y1="150" x2="600" y2="150" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="2 4"/>
+        <line class="grid" x1="300" y1="0" x2="300" y2="300" stroke="currentColor" stroke-opacity="0.15" stroke-dasharray="2 4"/>
+        <!-- City dot — set by JS -->
+        <g id="map-dot-group">
+          <circle id="map-dot-halo" cx="0" cy="0" r="20" fill="var(--c-accent)" fill-opacity="0.22"/>
+          <circle id="map-dot-pulse" cx="0" cy="0" r="8" fill="var(--c-accent)" fill-opacity="0.55"/>
+          <circle id="map-dot" cx="0" cy="0" r="4.5" fill="var(--c-accent)"/>
+          <circle id="map-dot-core" cx="0" cy="0" r="1.8" fill="white" fill-opacity="0.95"/>
+        </g>
+      </svg>
+      <div class="map-coords" id="map-coords"></div>
+    </aside>
+
     <p class="hint"><kbd>N</kbd> for another city</p>
 
     <div id="veil" class="veil">
@@ -735,6 +843,172 @@
       { name:"Auckland", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-36.8485, lon:174.7633 },
       { name:"Queenstown", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-45.0312, lon:168.6626 },
       { name:"Wellington", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-41.2865, lon:174.7762 },
+      // ── Added in variation pass (no beer data — strip will skip "cold one" item) ──
+      // United States
+      { name:"Boston", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:42.3601, lon:-71.0589 },
+      { name:"Philadelphia", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:39.9526, lon:-75.1652 },
+      { name:"Washington", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:38.9072, lon:-77.0369 },
+      { name:"Atlanta", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:33.7490, lon:-84.3880 },
+      { name:"Nashville", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Chicago", lat:36.1627, lon:-86.7816 },
+      { name:"Portland", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Los_Angeles", lat:45.5152, lon:-122.6784 },
+      { name:"Phoenix", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Phoenix", lat:33.4484, lon:-112.0740 },
+      { name:"Denver", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Denver", lat:39.7392, lon:-104.9903 },
+      { name:"Minneapolis", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Chicago", lat:44.9778, lon:-93.2650 },
+      { name:"Charleston", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:32.7765, lon:-79.9311 },
+      { name:"Savannah", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/New_York", lat:32.0809, lon:-81.0912 },
+      // Canada
+      { name:"Calgary", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Edmonton", lat:51.0447, lon:-114.0719 },
+      { name:"Edmonton", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Edmonton", lat:53.5461, lon:-113.4938 },
+      { name:"Quebec City", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Toronto", lat:46.8139, lon:-71.2080 },
+      { name:"Halifax", country:"Canada", cc:"CA", flag:"🇨🇦", tz:"America/Halifax", lat:44.6488, lon:-63.5752 },
+      // Latin America
+      { name:"Guadalajara", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Mexico_City", lat:20.6597, lon:-103.3496 },
+      { name:"Monterrey", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Monterrey", lat:25.6866, lon:-100.3161 },
+      { name:"Puebla", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Mexico_City", lat:19.0414, lon:-98.2063 },
+      { name:"Mérida", country:"Mexico", cc:"MX", flag:"🇲🇽", tz:"America/Merida", lat:20.9674, lon:-89.5926 },
+      { name:"Antigua", country:"Guatemala", cc:"GT", flag:"🇬🇹", tz:"America/Guatemala", lat:14.5586, lon:-90.7295 },
+      { name:"San Salvador", country:"El Salvador", cc:"SV", flag:"🇸🇻", tz:"America/El_Salvador", lat:13.6929, lon:-89.2182 },
+      { name:"Managua", country:"Nicaragua", cc:"NI", flag:"🇳🇮", tz:"America/Managua", lat:12.1140, lon:-86.2362 },
+      { name:"Tegucigalpa", country:"Honduras", cc:"HN", flag:"🇭🇳", tz:"America/Tegucigalpa", lat:14.0723, lon:-87.1921 },
+      { name:"Belize City", country:"Belize", cc:"BZ", flag:"🇧🇿", tz:"America/Belize", lat:17.5046, lon:-88.1962 },
+      { name:"Quito", country:"Ecuador", cc:"EC", flag:"🇪🇨", tz:"America/Guayaquil", lat:-0.1807, lon:-78.4678 },
+      { name:"Guayaquil", country:"Ecuador", cc:"EC", flag:"🇪🇨", tz:"America/Guayaquil", lat:-2.1709, lon:-79.9224 },
+      { name:"La Paz", country:"Bolivia", cc:"BO", flag:"🇧🇴", tz:"America/La_Paz", lat:-16.4897, lon:-68.1193 },
+      { name:"Sucre", country:"Bolivia", cc:"BO", flag:"🇧🇴", tz:"America/La_Paz", lat:-19.0196, lon:-65.2619 },
+      { name:"Asunción", country:"Paraguay", cc:"PY", flag:"🇵🇾", tz:"America/Asuncion", lat:-25.2637, lon:-57.5759 },
+      { name:"Curitiba", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-25.4284, lon:-49.2733 },
+      { name:"Belo Horizonte", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-19.9167, lon:-43.9345 },
+      { name:"Recife", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Recife", lat:-8.0476, lon:-34.8770 },
+      { name:"Fortaleza", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Fortaleza", lat:-3.7172, lon:-38.5433 },
+      { name:"Manaus", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Manaus", lat:-3.1190, lon:-60.0217 },
+      { name:"Brasília", country:"Brazil", cc:"BR", flag:"🇧🇷", tz:"America/Sao_Paulo", lat:-15.8267, lon:-47.9218 },
+      { name:"Punta del Este", country:"Uruguay", cc:"UY", flag:"🇺🇾", tz:"America/Montevideo", lat:-34.9667, lon:-54.9500 },
+      // Caribbean
+      { name:"Oranjestad", country:"Aruba", cc:"AW", flag:"🇦🇼", tz:"America/Aruba", lat:12.5246, lon:-70.0274 },
+      { name:"Willemstad", country:"Curaçao", cc:"CW", flag:"🇨🇼", tz:"America/Curacao", lat:12.1696, lon:-68.9900 },
+      { name:"Port of Spain", country:"Trinidad and Tobago", cc:"TT", flag:"🇹🇹", tz:"America/Port_of_Spain", lat:10.6549, lon:-61.5019 },
+      { name:"Castries", country:"Saint Lucia", cc:"LC", flag:"🇱🇨", tz:"America/St_Lucia", lat:14.0101, lon:-60.9874 },
+      // Europe — France
+      { name:"Lyon", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:45.7640, lon:4.8357 },
+      { name:"Bordeaux", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:44.8378, lon:-0.5792 },
+      { name:"Toulouse", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:43.6047, lon:1.4442 },
+      { name:"Nantes", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:47.2184, lon:-1.5536 },
+      { name:"Strasbourg", country:"France", cc:"FR", flag:"🇫🇷", tz:"Europe/Paris", lat:48.5734, lon:7.7521 },
+      // Italy
+      { name:"Bologna", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:44.4949, lon:11.3426 },
+      { name:"Verona", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:45.4384, lon:10.9916 },
+      { name:"Genoa", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:44.4056, lon:8.9463 },
+      { name:"Pisa", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:43.7228, lon:10.4017 },
+      { name:"Palermo", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:38.1157, lon:13.3615 },
+      { name:"Cagliari", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:39.2238, lon:9.1217 },
+      { name:"Bari", country:"Italy", cc:"IT", flag:"🇮🇹", tz:"Europe/Rome", lat:41.1171, lon:16.8719 },
+      // Spain
+      { name:"Bilbao", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:43.2630, lon:-2.9350 },
+      { name:"Valencia", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:39.4699, lon:-0.3763 },
+      { name:"Granada", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:37.1773, lon:-3.5986 },
+      { name:"San Sebastián", country:"Spain", cc:"ES", flag:"🇪🇸", tz:"Europe/Madrid", lat:43.3183, lon:-1.9812 },
+      // Germany
+      { name:"Cologne", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:50.9375, lon:6.9603 },
+      { name:"Frankfurt", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:50.1109, lon:8.6821 },
+      { name:"Stuttgart", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:48.7758, lon:9.1829 },
+      { name:"Düsseldorf", country:"Germany", cc:"DE", flag:"🇩🇪", tz:"Europe/Berlin", lat:51.2277, lon:6.7735 },
+      // UK & Ireland
+      { name:"Manchester", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:53.4808, lon:-2.2426 },
+      { name:"Liverpool", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:53.4084, lon:-2.9916 },
+      { name:"Brighton", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:50.8225, lon:-0.1372 },
+      { name:"Bath", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:51.3811, lon:-2.3590 },
+      { name:"Glasgow", country:"United Kingdom", cc:"GB", flag:"🇬🇧", tz:"Europe/London", lat:55.8642, lon:-4.2518 },
+      { name:"Galway", country:"Ireland", cc:"IE", flag:"🇮🇪", tz:"Europe/Dublin", lat:53.2707, lon:-9.0568 },
+      { name:"Cork", country:"Ireland", cc:"IE", flag:"🇮🇪", tz:"Europe/Dublin", lat:51.8985, lon:-8.4756 },
+      // Low Countries
+      { name:"Antwerp", country:"Belgium", cc:"BE", flag:"🇧🇪", tz:"Europe/Brussels", lat:51.2194, lon:4.4025 },
+      { name:"Ghent", country:"Belgium", cc:"BE", flag:"🇧🇪", tz:"Europe/Brussels", lat:51.0543, lon:3.7174 },
+      { name:"Rotterdam", country:"Netherlands", cc:"NL", flag:"🇳🇱", tz:"Europe/Amsterdam", lat:51.9244, lon:4.4777 },
+      { name:"Utrecht", country:"Netherlands", cc:"NL", flag:"🇳🇱", tz:"Europe/Amsterdam", lat:52.0907, lon:5.1214 },
+      // Alps
+      { name:"Salzburg", country:"Austria", cc:"AT", flag:"🇦🇹", tz:"Europe/Vienna", lat:47.8095, lon:13.0550 },
+      { name:"Innsbruck", country:"Austria", cc:"AT", flag:"🇦🇹", tz:"Europe/Vienna", lat:47.2692, lon:11.4041 },
+      // Nordics
+      { name:"Bergen", country:"Norway", cc:"NO", flag:"🇳🇴", tz:"Europe/Oslo", lat:60.3913, lon:5.3221 },
+      { name:"Trondheim", country:"Norway", cc:"NO", flag:"🇳🇴", tz:"Europe/Oslo", lat:63.4305, lon:10.3951 },
+      { name:"Stavanger", country:"Norway", cc:"NO", flag:"🇳🇴", tz:"Europe/Oslo", lat:58.9700, lon:5.7331 },
+      { name:"Gothenburg", country:"Sweden", cc:"SE", flag:"🇸🇪", tz:"Europe/Stockholm", lat:57.7089, lon:11.9746 },
+      { name:"Malmö", country:"Sweden", cc:"SE", flag:"🇸🇪", tz:"Europe/Stockholm", lat:55.6050, lon:13.0038 },
+      { name:"Aarhus", country:"Denmark", cc:"DK", flag:"🇩🇰", tz:"Europe/Copenhagen", lat:56.1629, lon:10.2039 },
+      { name:"Tampere", country:"Finland", cc:"FI", flag:"🇫🇮", tz:"Europe/Helsinki", lat:61.4978, lon:23.7610 },
+      // Eastern Europe
+      { name:"Bratislava", country:"Slovakia", cc:"SK", flag:"🇸🇰", tz:"Europe/Bratislava", lat:48.1486, lon:17.1077 },
+      { name:"Ljubljana", country:"Slovenia", cc:"SI", flag:"🇸🇮", tz:"Europe/Ljubljana", lat:46.0569, lon:14.5058 },
+      { name:"Belgrade", country:"Serbia", cc:"RS", flag:"🇷🇸", tz:"Europe/Belgrade", lat:44.7866, lon:20.4489 },
+      { name:"Sofia", country:"Bulgaria", cc:"BG", flag:"🇧🇬", tz:"Europe/Sofia", lat:42.6977, lon:23.3219 },
+      { name:"Bucharest", country:"Romania", cc:"RO", flag:"🇷🇴", tz:"Europe/Bucharest", lat:44.4268, lon:26.1025 },
+      { name:"Vilnius", country:"Lithuania", cc:"LT", flag:"🇱🇹", tz:"Europe/Vilnius", lat:54.6872, lon:25.2797 },
+      { name:"Riga", country:"Latvia", cc:"LV", flag:"🇱🇻", tz:"Europe/Riga", lat:56.9496, lon:24.1052 },
+      { name:"Tallinn", country:"Estonia", cc:"EE", flag:"🇪🇪", tz:"Europe/Tallinn", lat:59.4370, lon:24.7536 },
+      { name:"Wrocław", country:"Poland", cc:"PL", flag:"🇵🇱", tz:"Europe/Warsaw", lat:51.1079, lon:17.0385 },
+      { name:"Gdańsk", country:"Poland", cc:"PL", flag:"🇵🇱", tz:"Europe/Warsaw", lat:54.3520, lon:18.6466 },
+      { name:"Brno", country:"Czechia", cc:"CZ", flag:"🇨🇿", tz:"Europe/Prague", lat:49.1951, lon:16.6068 },
+      // Asia — India
+      { name:"Bangalore", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:12.9716, lon:77.5946 },
+      { name:"Chennai", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:13.0827, lon:80.2707 },
+      { name:"Hyderabad", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:17.3850, lon:78.4867 },
+      { name:"Kolkata", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:22.5726, lon:88.3639 },
+      { name:"Pune", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:18.5204, lon:73.8567 },
+      { name:"Jaipur", country:"India", cc:"IN", flag:"🇮🇳", tz:"Asia/Kolkata", lat:26.9124, lon:75.7873 },
+      // Japan
+      { name:"Sapporo", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:43.0618, lon:141.3545 },
+      { name:"Fukuoka", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:33.5904, lon:130.4017 },
+      { name:"Hiroshima", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:34.3853, lon:132.4553 },
+      { name:"Yokohama", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:35.4437, lon:139.6380 },
+      { name:"Nagoya", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:35.1815, lon:136.9066 },
+      { name:"Kobe", country:"Japan", cc:"JP", flag:"🇯🇵", tz:"Asia/Tokyo", lat:34.6901, lon:135.1956 },
+      // SE Asia
+      { name:"Da Nang", country:"Vietnam", cc:"VN", flag:"🇻🇳", tz:"Asia/Ho_Chi_Minh", lat:16.0544, lon:108.2022 },
+      { name:"Hue", country:"Vietnam", cc:"VN", flag:"🇻🇳", tz:"Asia/Ho_Chi_Minh", lat:16.4637, lon:107.5909 },
+      { name:"Nha Trang", country:"Vietnam", cc:"VN", flag:"🇻🇳", tz:"Asia/Ho_Chi_Minh", lat:12.2388, lon:109.1967 },
+      { name:"Phnom Penh", country:"Cambodia", cc:"KH", flag:"🇰🇭", tz:"Asia/Phnom_Penh", lat:11.5564, lon:104.9282 },
+      { name:"Siem Reap", country:"Cambodia", cc:"KH", flag:"🇰🇭", tz:"Asia/Phnom_Penh", lat:13.3633, lon:103.8564 },
+      { name:"Yogyakarta", country:"Indonesia", cc:"ID", flag:"🇮🇩", tz:"Asia/Jakarta", lat:-7.7956, lon:110.3695 },
+      { name:"Surabaya", country:"Indonesia", cc:"ID", flag:"🇮🇩", tz:"Asia/Jakarta", lat:-7.2575, lon:112.7521 },
+      // South Asia
+      { name:"Lahore", country:"Pakistan", cc:"PK", flag:"🇵🇰", tz:"Asia/Karachi", lat:31.5497, lon:74.3436 },
+      { name:"Islamabad", country:"Pakistan", cc:"PK", flag:"🇵🇰", tz:"Asia/Karachi", lat:33.6844, lon:73.0479 },
+      { name:"Dhaka", country:"Bangladesh", cc:"BD", flag:"🇧🇩", tz:"Asia/Dhaka", lat:23.8103, lon:90.4125 },
+      { name:"Colombo", country:"Sri Lanka", cc:"LK", flag:"🇱🇰", tz:"Asia/Colombo", lat:6.9271, lon:79.8612 },
+      { name:"Kathmandu", country:"Nepal", cc:"NP", flag:"🇳🇵", tz:"Asia/Kathmandu", lat:27.7172, lon:85.3240 },
+      // China
+      { name:"Shenzhen", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:22.5431, lon:114.0579 },
+      { name:"Chengdu", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:30.5728, lon:104.0668 },
+      { name:"Guangzhou", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:23.1291, lon:113.2644 },
+      { name:"Xi'an", country:"China", cc:"CN", flag:"🇨🇳", tz:"Asia/Shanghai", lat:34.3416, lon:108.9398 },
+      { name:"Macau", country:"Macau", cc:"MO", flag:"🇲🇴", tz:"Asia/Macau", lat:22.1987, lon:113.5439 },
+      // Central Asia
+      { name:"Almaty", country:"Kazakhstan", cc:"KZ", flag:"🇰🇿", tz:"Asia/Almaty", lat:43.2220, lon:76.8512 },
+      { name:"Tashkent", country:"Uzbekistan", cc:"UZ", flag:"🇺🇿", tz:"Asia/Tashkent", lat:41.2995, lon:69.2401 },
+      // Africa
+      { name:"Kigali", country:"Rwanda", cc:"RW", flag:"🇷🇼", tz:"Africa/Kigali", lat:-1.9706, lon:30.1044 },
+      { name:"Kampala", country:"Uganda", cc:"UG", flag:"🇺🇬", tz:"Africa/Kampala", lat:0.3476, lon:32.5825 },
+      { name:"Addis Ababa", country:"Ethiopia", cc:"ET", flag:"🇪🇹", tz:"Africa/Addis_Ababa", lat:9.0320, lon:38.7469 },
+      { name:"Lusaka", country:"Zambia", cc:"ZM", flag:"🇿🇲", tz:"Africa/Lusaka", lat:-15.3875, lon:28.3228 },
+      { name:"Harare", country:"Zimbabwe", cc:"ZW", flag:"🇿🇼", tz:"Africa/Harare", lat:-17.8252, lon:31.0335 },
+      { name:"Maputo", country:"Mozambique", cc:"MZ", flag:"🇲🇿", tz:"Africa/Maputo", lat:-25.9692, lon:32.5732 },
+      { name:"Antananarivo", country:"Madagascar", cc:"MG", flag:"🇲🇬", tz:"Indian/Antananarivo", lat:-18.8792, lon:47.5079 },
+      { name:"Windhoek", country:"Namibia", cc:"NA", flag:"🇳🇦", tz:"Africa/Windhoek", lat:-22.5609, lon:17.0658 },
+      { name:"Gaborone", country:"Botswana", cc:"BW", flag:"🇧🇼", tz:"Africa/Gaborone", lat:-24.6282, lon:25.9231 },
+      { name:"Abidjan", country:"Côte d'Ivoire", cc:"CI", flag:"🇨🇮", tz:"Africa/Abidjan", lat:5.3600, lon:-4.0083 },
+      { name:"Dakar", country:"Senegal", cc:"SN", flag:"🇸🇳", tz:"Africa/Dakar", lat:14.7167, lon:-17.4677 },
+      { name:"Tunis", country:"Tunisia", cc:"TN", flag:"🇹🇳", tz:"Africa/Tunis", lat:36.8065, lon:10.1815 },
+      { name:"Algiers", country:"Algeria", cc:"DZ", flag:"🇩🇿", tz:"Africa/Algiers", lat:36.7538, lon:3.0588 },
+      { name:"Aswan", country:"Egypt", cc:"EG", flag:"🇪🇬", tz:"Africa/Cairo", lat:24.0889, lon:32.8998 },
+      // Oceania
+      { name:"Hobart", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Hobart", lat:-42.8821, lon:147.3272 },
+      { name:"Adelaide", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Adelaide", lat:-34.9285, lon:138.6007 },
+      { name:"Cairns", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Brisbane", lat:-16.9186, lon:145.7781 },
+      { name:"Darwin", country:"Australia", cc:"AU", flag:"🇦🇺", tz:"Australia/Darwin", lat:-12.4634, lon:130.8456 },
+      { name:"Christchurch", country:"New Zealand", cc:"NZ", flag:"🇳🇿", tz:"Pacific/Auckland", lat:-43.5321, lon:172.6362 },
+      { name:"Apia", country:"Samoa", cc:"WS", flag:"🇼🇸", tz:"Pacific/Apia", lat:-13.8506, lon:-171.7513 },
+      { name:"Nukuʻalofa", country:"Tonga", cc:"TO", flag:"🇹🇴", tz:"Pacific/Tongatapu", lat:-21.1394, lon:-175.2049 },
+      { name:"Port Vila", country:"Vanuatu", cc:"VU", flag:"🇻🇺", tz:"Pacific/Efate", lat:-17.7333, lon:168.3273 },
     ];
 
     // Beer prices are estimates from general knowledge — adjust as you find real numbers.
@@ -863,6 +1137,38 @@
       "Auckland-NZ":[{n:"Steinlager",p:11,c:"NZD"},{n:"Export Gold",p:10,c:"NZD"}],
       "Queenstown-NZ":[{n:"Speights",p:11,c:"NZD"},{n:"Monteith's",p:12,c:"NZD"}],
       "Wellington-NZ":[{n:"Tui",p:10,c:"NZD"},{n:"Garage Project",p:13,c:"NZD"}],
+    };
+
+    // Local-language toasts, keyed by ISO country code.
+    // Shown small under the city name as a humanizing detail.
+    const CHEERS = {
+      JP: "Kanpai", KR: "Geonbae", CN: "Gānbēi", HK: "Gānbēi", TW: "Gānbēi", MO: "Gānbēi",
+      TH: "Chok dee", VN: "Một hai ba dô", ID: "Bersulang", PH: "Tagay", MY: "Yum seng", SG: "Yum seng",
+      IN: "Cheers", PK: "Cheers", BD: "Cheers", LK: "Cheers", NP: "Cheers", KZ: "Şeref", UZ: "Olding",
+      AE: "Cheers", TR: "Şerefe",
+      GR: "Yamas", EG: "Fi sahatak", MA: "Bsahtek",
+      KE: "Maisha", TZ: "Maisha", ZA: "Gesondheid",
+      MU: "À votre santé", SC: "Sante",
+      ES: "Salud", PT: "Saúde",
+      FR: "Santé", IT: "Salute", DE: "Prost", AT: "Prost", CH: "Prost",
+      NL: "Proost", BE: "Schol",
+      CZ: "Na zdraví", SK: "Na zdravie", PL: "Na zdrowie", HU: "Egészségedre",
+      SE: "Skål", NO: "Skål", DK: "Skål", FI: "Kippis", IS: "Skál",
+      IE: "Sláinte", GB: "Cheers",
+      HR: "Živjeli", SI: "Na zdravje", RS: "Živeli", BG: "Nazdrave", RO: "Noroc",
+      LT: "Į sveikatą", LV: "Priekā", EE: "Terviseks",
+      CV: "Saúde",
+      RW: "Murakaza", UG: "Cheers", ET: "Letenachen", ZM: "Cheers", ZW: "Cheers",
+      MZ: "Saúde", MG: "Misaotra", NA: "Prost", BW: "Cheers",
+      CI: "Santé", SN: "Santé", TN: "Bsahtek", DZ: "Bsahtek",
+      US: "Cheers", CA: "Cheers",
+      MX: "Salud", GT: "Salud", SV: "Salud", NI: "Salud", HN: "Salud", BZ: "Cheers",
+      CU: "Salud", PR: "Salud", JM: "Cheers", BS: "Cheers", BB: "Cheers", PA: "Salud", CR: "Salud",
+      CO: "Salud", PE: "Salud", CL: "Salud", AR: "Salud", UY: "Salud",
+      EC: "Salud", BO: "Salud", PY: "Salud",
+      BR: "Saúde",
+      AW: "Salud", CW: "Proost", TT: "Cheers", LC: "Cheers",
+      AU: "Cheers", NZ: "Cheers", WS: "Manuia", TO: "Mālō", VU: "Toa",
     };
 
     // ────────────────────────────────────────────────────────────────
@@ -1050,6 +1356,25 @@
       }
     }
 
+    // Position the minimap dot using equirectangular projection.
+    // Called every render so the dot moves to the new city.
+    function updateMap(city) {
+      const svg = document.querySelector(".map-svg");
+      if (!svg) return;
+      // viewBox is 600x300, lon -180..180 → 0..600, lat 90..-90 → 0..300.
+      const x = (city.lon + 180) * 600 / 360;
+      const y = (90 - city.lat) * 300 / 180;
+      ["map-dot", "map-dot-pulse", "map-dot-halo", "map-dot-core"].forEach((id) => {
+        const el = document.getElementById(id);
+        if (el) { el.setAttribute("cx", x); el.setAttribute("cy", y); }
+      });
+      // Coordinates label
+      const latStr = `${Math.abs(city.lat).toFixed(2)}°${city.lat >= 0 ? "N" : "S"}`;
+      const lonStr = `${Math.abs(city.lon).toFixed(2)}°${city.lon >= 0 ? "E" : "W"}`;
+      const coords = document.getElementById("map-coords");
+      if (coords) coords.textContent = `${latStr} · ${lonStr}`;
+    }
+
     function applyAccent(rgb) {
       const root = document.documentElement;
       if (rgb) {
@@ -1113,6 +1438,9 @@
       const fallback = document.getElementById("fallback");
       const tint     = document.getElementById("tint");
 
+      // Move the world-map dot to this city
+      updateMap(city);
+
       // Reset visual layers
       photo.classList.remove("loaded");
       tint.classList.remove("visible");
@@ -1153,6 +1481,7 @@
         `<span class="muted">${escapeHtml(b.n)}</span><span class="price">${escapeHtml(formatBeerPrice(b.p, b.c))}</span>`
       ).join('<span class="muted" style="margin:0 8px;opacity:0.5">/</span>');
 
+      const cheers = CHEERS[city.cc];
       const hero = document.getElementById("hero");
       hero.innerHTML = `
         <p class="eyebrow reveal d-1">
@@ -1163,14 +1492,15 @@
         <p class="dateline reveal d-3">
           <span class="iso">${escapeHtml(city.cc)}</span><span class="country">${escapeHtml(city.country)}</span><span class="sep" aria-hidden="true"></span><span class="clock" id="local-time" data-tz="${city.tz}">${localTimeString(city.tz)}</span><span class="clock-meta">local</span>
         </p>
+        ${cheers ? `<p class="cheers reveal d-3"><span class="cheers-mark">—</span> ${escapeHtml(cheers)}.</p>` : ""}
         <div class="strip reveal d-4">
           <div class="item">
-            <span class="label">Weather</span>
+            <span class="label">It's currently</span>
             <span class="val"><span class="glyph" aria-hidden="true">${weather.emoji}</span><span class="num">${weather.tempC}°</span><span class="muted" style="margin-left:6px">${escapeHtml(weather.description.toLowerCase())}</span></span>
           </div>
           ${beers.length ? `
           <div class="item">
-            <span class="label">Pour</span>
+            <span class="label">A cold one will cost you</span>
             <span class="val">${beerHtml}</span>
           </div>` : ""}
         </div>
