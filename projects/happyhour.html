@@ -8,293 +8,583 @@
   <meta name="theme-color" content="#0a0a0a" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500&family=Inter:wght@300;400;500&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,200..700;1,9..144,300..500&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
   <style>
+    /* ──────────────────────────────────────────────────────────────
+       happyhour — design system
+       Reference grammar: editorial dateline, magazine masthead,
+       film opening title card. Type-led, photo as canvas.
+    ────────────────────────────────────────────────────────────── */
+
+    :root {
+      /* Type families */
+      --font-display: 'Fraunces', 'Times New Roman', Georgia, serif;
+      --font-sans:    'Inter', -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+
+      /* Type scale (modular, restrained) */
+      --t-display:  clamp(3.5rem, 13vw, 11rem);   /* hero city name */
+      --t-headline: clamp(1.05rem, 1.7vw, 1.35rem);/* dateline */
+      --t-body:     1rem;
+      --t-small:    0.875rem;
+      --t-caption:  0.75rem;
+      --t-micro:    0.6875rem;     /* 11px — eyebrows & labels */
+
+      /* Layered opacity tiers — depth without color */
+      --c-fg-1: rgba(255, 255, 255, 0.96);  /* hero, primary text */
+      --c-fg-2: rgba(255, 255, 255, 0.62);  /* dateline, secondary */
+      --c-fg-3: rgba(255, 255, 255, 0.38);  /* labels, tertiary */
+      --c-fg-4: rgba(255, 255, 255, 0.18);  /* dividers, decorative */
+      --c-fg-5: rgba(255, 255, 255, 0.10);  /* borders */
+
+      /* Photo-extracted accent (set at runtime) */
+      --c-accent:      rgba(245, 200, 150, 1);
+      --c-accent-soft: rgba(245, 200, 150, 0.35);
+
+      /* Spacing scale (4px base) */
+      --s-1: 4px;  --s-2: 8px;  --s-3: 12px; --s-4: 16px;
+      --s-5: 24px; --s-6: 32px; --s-7: 48px; --s-8: 64px;
+      --s-9: 96px;
+
+      /* Easing & duration */
+      --ease-out:  cubic-bezier(0.16, 1, 0.30, 1);
+      --ease-soft: cubic-bezier(0.20, 0.80, 0.20, 1);
+      --d-quick:  180ms;
+      --d-base:   320ms;
+      --d-slow:   720ms;
+      --d-cinema: 1100ms;
+    }
+
+    /* ── Reset ─────────────────────────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     html, body {
       height: 100%;
-      background: #0a0a0a;
-      color: #fafafa;
-      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      background: #08090b;
+      color: var(--c-fg-1);
+      font-family: var(--font-sans);
+      font-size: 16px;
+      line-height: 1.5;
       -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      text-rendering: optimizeLegibility;
       overflow: hidden;
       overscroll-behavior: none;
     }
-    a { color: inherit; text-decoration: none; }
 
+    a { color: inherit; text-decoration: none; }
+    button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+    img { display: block; max-width: 100%; }
+
+    /* Tabular numerals everywhere by default — clocks, prices, temps */
+    .num { font-feature-settings: "tnum" 1, "ss01" 1; font-variant-numeric: tabular-nums; }
+
+    /* ── Stage ─────────────────────────────────────────────────── */
     .stage {
-      position: relative;
-      height: 100dvh;
-      width: 100vw;
+      position: fixed; inset: 0;
       overflow: hidden;
     }
 
-    .bg-img {
+    /* Photo */
+    .photo {
       position: absolute; inset: 0;
       width: 100%; height: 100%;
       object-fit: cover;
       opacity: 0;
-      transition: opacity 1s ease;
+      transition: opacity var(--d-cinema) var(--ease-out);
+      will-change: transform, opacity;
     }
-    .bg-img.loaded { opacity: 1; animation: ken-burns 45s ease-out forwards; }
+    .photo.loaded {
+      opacity: 1;
+      animation: ken-burns 60s var(--ease-out) forwards;
+    }
 
-    .bg-gradient {
+    /* Gradient fallback (shown when no photo / loading) */
+    .fallback {
       position: absolute; inset: 0;
-      background: radial-gradient(ellipse at 30% 20%, #f6b96f 0%, #e57a4d 30%, #7a2e4f 65%, #15131f 100%);
+      background:
+        radial-gradient(ellipse at 30% 20%, #f6b96f 0%, #e57a4d 28%, #7a2e4f 65%, #15131f 100%);
       opacity: 0;
-      transition: opacity 1s ease;
+      transition: opacity var(--d-slow) var(--ease-out);
     }
-    .bg-gradient.visible { opacity: 1; animation: fade-in 1.2s ease-out forwards; }
+    .fallback.visible { opacity: 1; }
 
-    .overlay-1 { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.1) 60%, rgba(0,0,0,0.85)); pointer-events: none; }
-    .overlay-2 { position: absolute; inset: 0; background: linear-gradient(to top right, rgba(0,0,0,0.4), transparent, rgba(0,0,0,0.2)); pointer-events: none; }
-    .vignette { position: absolute; inset: 0; box-shadow: inset 0 0 240px rgba(0,0,0,0.55); pointer-events: none; }
-
-    .content {
-      position: relative; z-index: 10;
-      height: 100%;
-      display: flex; flex-direction: column;
-      padding: 24px;
+    /* Color-extracted ambient tint — gives each city its own palette */
+    .tint {
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse 70% 60% at 25% 20%, var(--c-accent-soft), transparent 65%);
+      mix-blend-mode: overlay;
+      opacity: 0;
+      transition: opacity var(--d-cinema) var(--ease-out);
+      pointer-events: none;
     }
-    @media (min-width: 640px) { .content { padding: 32px 40px; } }
-    @media (min-width: 768px) { .content { padding: 40px 56px; } }
+    .tint.visible { opacity: 0.30; }
 
-    header {
-      display: flex; align-items: flex-start; justify-content: space-between;
-      gap: 16px;
+    /* Cinematic shading — protects type without being a flat overlay.
+       Layered: a soft top scrim for chrome, and a heavy bottom for hero text. */
+    .shade {
+      position: absolute; inset: 0;
+      background:
+        linear-gradient(to bottom,
+          rgba(0,0,0,0.70) 0%,
+          rgba(0,0,0,0.20) 14%,
+          rgba(0,0,0,0)    36%,
+          rgba(0,0,0,0)    52%,
+          rgba(0,0,0,0.18) 68%,
+          rgba(0,0,0,0.86) 100%);
+      pointer-events: none;
     }
+
+    /* Inset vignette — pulls eyes inward */
+    .vignette {
+      position: absolute; inset: 0;
+      box-shadow: inset 0 0 320px rgba(0,0,0,0.50);
+      pointer-events: none;
+    }
+
+    /* Film grain — fixed, blends into photo for filmic texture */
+    .grain {
+      position: fixed; inset: 0;
+      pointer-events: none;
+      z-index: 6;
+      opacity: 0.045;
+      mix-blend-mode: overlay;
+      background-image:
+        url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='240' height='240'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch' seed='3'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 0.5 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+    }
+
+    /* ── Chrome (top bar) ──────────────────────────────────────── */
+    .chrome {
+      position: absolute;
+      top: max(var(--s-5), env(safe-area-inset-top));
+      left: var(--s-5); right: var(--s-5);
+      display: flex; align-items: center; justify-content: space-between;
+      gap: var(--s-4);
+      z-index: 10;
+    }
+    @media (min-width: 768px) {
+      .chrome { top: var(--s-6); left: var(--s-7); right: var(--s-7); }
+    }
+
     .wordmark {
-      font-family: 'Fraunces', serif;
-      font-size: 22px;
-      font-weight: 300;
-      letter-spacing: -0.01em;
+      display: inline-flex; align-items: baseline; gap: 1px;
+      font-family: var(--font-display);
+      font-size: 0.875rem;
+      font-weight: 350;
+      font-style: italic;
+      letter-spacing: -0.005em;
+      color: var(--c-fg-1);
+      font-variation-settings: "opsz" 14;
+      text-shadow: 0 1px 14px rgba(0,0,0,0.45);
+      opacity: 0;
+      animation: fade var(--d-slow) var(--ease-out) 100ms forwards;
     }
-    @media (min-width: 640px) { .wordmark { font-size: 26px; } }
-
-    .wordmark-tag {
-      font-size: 11px;
-      letter-spacing: 0.2em;
-      text-transform: uppercase;
-      color: rgba(255,255,255,0.6);
-      margin-left: 8px;
-      display: none;
+    .wordmark .pulse {
+      display: inline-block;
+      margin-left: 1px;
+      animation: pulse 2.6s ease-in-out infinite;
     }
-    @media (min-width: 640px) { .wordmark-tag { display: inline; } }
 
-    .top-actions { display: flex; align-items: center; gap: 10px; }
-
-    .pill, .icon-btn {
-      display: inline-flex; align-items: center; gap: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: rgba(255,255,255,0.05);
-      color: rgba(255,255,255,0.85);
-      padding: 7px 14px;
+    /* Refresh — refined, hairline, blur+saturate backdrop */
+    .refresh {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      height: 36px;
+      padding: 0 var(--s-4);
+      border: 1px solid var(--c-fg-5);
       border-radius: 999px;
-      font-size: 11px;
-      letter-spacing: 0.18em;
+      color: var(--c-fg-1);
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.22em;
       text-transform: uppercase;
-      cursor: pointer;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: border-color 0.2s ease, background 0.2s ease, transform 0.2s ease;
+      transition:
+        transform var(--d-quick) var(--ease-soft),
+        background var(--d-quick) var(--ease-soft),
+        border-color var(--d-quick) var(--ease-soft),
+        opacity var(--d-quick) var(--ease-soft);
+      opacity: 0;
+      animation: fade var(--d-slow) var(--ease-out) 100ms forwards;
     }
-    .pill:hover, .icon-btn:hover { border-color: rgba(255,255,255,0.4); background: rgba(255,255,255,0.1); }
-    .pill:disabled { opacity: 0.5; cursor: wait; }
-
-    .icon-btn {
-      padding: 7px;
-      width: 32px; height: 32px;
-      justify-content: center;
+    .refresh:hover {
+      transform: scale(1.04);
+      background: rgba(255, 255, 255, 0.10);
+      border-color: rgba(255, 255, 255, 0.30);
     }
+    .refresh:active { transform: scale(0.96); }
+    .refresh:disabled { opacity: 0.5; cursor: wait; }
+    .refresh .ico {
+      width: 13px; height: 13px;
+      transition: transform var(--d-base) var(--ease-soft);
+    }
+    .refresh:hover .ico { transform: rotate(90deg); }
+    .refresh.spinning .ico { animation: spin 0.9s linear infinite; }
 
-    .pill svg { transition: transform 0.4s ease; }
-    .pill:hover svg { transform: rotate(90deg); }
-    .pill.spinning svg { animation: spin 0.8s linear infinite; }
-
-    .spacer { flex: 1; }
-
-    .block { max-width: 880px; opacity: 0; transform: translateY(12px); }
-    .block.in { animation: rise-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) forwards; }
+    /* ── Hero (bottom-left anchor) ─────────────────────────────── */
+    .hero {
+      position: absolute;
+      bottom: max(var(--s-7), env(safe-area-inset-bottom) + var(--s-5));
+      left: var(--s-5); right: var(--s-5);
+      max-width: 920px;
+      z-index: 5;
+    }
+    @media (min-width: 768px) {
+      .hero { bottom: var(--s-8); left: var(--s-7); right: var(--s-7); }
+    }
+    @media (min-width: 1100px) {
+      .hero { left: var(--s-9); }
+    }
 
     .eyebrow {
-      font-size: 11px;
-      letter-spacing: 0.28em;
+      display: inline-flex; align-items: center; gap: var(--s-3);
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
+      letter-spacing: 0.32em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.7);
-      margin-bottom: 12px;
+      color: rgba(255, 255, 255, 0.72);
+      text-shadow: 0 1px 16px rgba(0,0,0,0.55);
+      margin-bottom: var(--s-4);
+    }
+    .eyebrow .accent {
+      color: var(--c-accent);
+      text-shadow: 0 0 18px var(--c-accent-soft);
+    }
+    .eyebrow .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--c-accent);
+      box-shadow: 0 0 10px var(--c-accent-soft);
+      animation: live-pulse 2s ease-in-out infinite;
     }
 
-    h1.city {
-      font-family: 'Fraunces', serif;
-      font-weight: 300;
-      line-height: 0.95;
-      letter-spacing: -0.02em;
-      display: flex; flex-wrap: wrap; align-items: baseline;
-      gap: 12px 20px;
+    .city {
+      font-family: var(--font-display);
+      font-size: var(--t-display);
+      font-weight: 250;
+      font-variation-settings: "opsz" 144, "SOFT" 50;
+      line-height: 0.92;
+      letter-spacing: -0.04em;
+      color: var(--c-fg-1);
+      /* Two-layer text-shadow: tight (sharpens edges) + diffuse (atmospheric) */
+      text-shadow: 0 1px 2px rgba(0,0,0,0.20), 0 4px 60px rgba(0,0,0,0.55);
     }
-    h1.city .name { font-size: clamp(3rem, 11vw, 9rem); }
-    h1.city .flag { font-size: clamp(2rem, 5vw, 3.5rem); }
 
-    .country {
-      margin-top: 8px;
-      font-size: 14px;
-      color: rgba(255,255,255,0.7);
+    .dateline {
+      margin-top: var(--s-4);
+      font-family: var(--font-display);
+      font-style: italic;
+      font-size: var(--t-headline);
+      font-weight: 350;
+      font-variation-settings: "opsz" 24;
+      color: var(--c-fg-2);
+      letter-spacing: 0.005em;
+      line-height: 1.4;
+      text-shadow: 0 1px 14px rgba(0,0,0,0.45);
     }
-    @media (min-width: 640px) { .country { font-size: 16px; } }
+    .dateline .country { color: var(--c-fg-2); }
+    .dateline .iso {
+      display: inline-block;
+      margin-right: var(--s-3);
+      padding: 1px 6px 2px;
+      font-family: var(--font-sans);
+      font-style: normal;
+      font-size: 9.5px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--c-fg-3);
+      background: rgba(255, 255, 255, 0.06);
+      border: 1px solid var(--c-fg-5);
+      border-radius: 3px;
+      vertical-align: 2px;
+    }
+    .dateline .sep {
+      display: inline-block;
+      width: 1px; height: 0.85em;
+      background: var(--c-fg-4);
+      margin: 0 var(--s-3);
+      vertical-align: -1px;
+    }
+    .dateline .clock {
+      font-family: var(--font-sans);
+      font-style: normal;
+      font-feature-settings: "tnum" 1;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0;
+      color: var(--c-fg-2);
+    }
+    .dateline .clock-meta {
+      font-family: var(--font-sans);
+      font-style: normal;
+      font-size: var(--t-micro);
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--c-fg-3);
+      margin-left: 6px;
+      vertical-align: 1px;
+    }
 
-    .stats {
-      margin-top: 28px;
+    /* ── Caption strip — single editorial line of metadata ─────── */
+    .strip {
+      margin-top: var(--s-7);
+      padding-top: var(--s-4);
+      border-top: 1px solid var(--c-fg-5);
       display: flex; flex-wrap: wrap;
-      gap: 20px 40px;
+      gap: var(--s-2) var(--s-7);
+      max-width: 720px;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.40);
     }
-    .stat { display: flex; flex-direction: column; }
-    .stat-label {
-      font-size: 10px;
+    .strip .item {
+      display: inline-flex; align-items: baseline; gap: var(--s-3);
+      flex-wrap: wrap;
+    }
+    .strip .label {
+      font-family: var(--font-sans);
+      font-size: var(--t-micro);
+      font-weight: 500;
       letter-spacing: 0.24em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
+      color: var(--c-fg-3);
     }
-    .stat-value {
-      font-family: 'Fraunces', serif;
+    .strip .val {
+      font-family: var(--font-sans);
+      font-size: var(--t-small);
+      font-weight: 400;
+      color: var(--c-fg-1);
+      letter-spacing: 0.005em;
+    }
+    .strip .val .muted {
+      color: var(--c-fg-2);
+    }
+    .strip .val .price {
+      font-feature-settings: "tnum" 1;
+      font-variant-numeric: tabular-nums;
+      color: var(--c-fg-2);
+      margin-left: 2px;
+    }
+    .strip .val .glyph { margin-right: 4px; }
+
+    /* ── Attribution — magazine credit treatment ──────────────── */
+    /* Mobile default: in-flow at end of hero. Desktop: fixed bottom-right. */
+    .credit {
+      margin-top: var(--s-6);
+      padding-top: var(--s-3);
+      border-top: 1px solid var(--c-fg-5);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--c-fg-3);
+      line-height: 1.7;
+      text-shadow: 0 1px 12px rgba(0,0,0,0.40);
+      z-index: 5;
+    }
+    @media (min-width: 768px) {
+      .credit {
+        position: fixed;
+        bottom: var(--s-6);
+        right: var(--s-7);
+        max-width: 50%;
+        margin-top: 0;
+        padding-top: 0;
+        border-top: 0;
+        text-align: right;
+      }
+    }
+    .credit a {
+      color: var(--c-fg-2);
+      border-bottom: 1px solid transparent;
+      transition: color var(--d-quick) var(--ease-soft), border-color var(--d-quick) var(--ease-soft);
+    }
+    .credit a:hover { color: var(--c-fg-1); border-bottom-color: var(--c-fg-4); }
+    .credit .dim { color: var(--c-fg-4); margin: 0 4px; }
+
+    /* ── Reveal — staggered cinematic stagger ─────────────────── */
+    .reveal { opacity: 0; transform: translateY(18px); }
+    .reveal.in { animation: rise 1000ms var(--ease-out) forwards; }
+    .reveal.d-1.in { animation-delay: 200ms; }
+    .reveal.d-2.in { animation-delay: 380ms; }
+    .reveal.d-3.in { animation-delay: 580ms; }
+    .reveal.d-4.in { animation-delay: 780ms; }
+    .reveal.d-5.in { animation-delay: 980ms; }
+
+    /* ── Loading veil ─────────────────────────────────────────── */
+    .veil {
+      position: absolute; inset: 0;
+      background: #08090b;
+      display: grid; place-items: center;
+      z-index: 30;
+      transition: opacity var(--d-slow) var(--ease-out);
+    }
+    .veil.hidden { opacity: 0; pointer-events: none; }
+    .veil-inner { display: flex; flex-direction: column; align-items: center; gap: var(--s-5); }
+    .veil-mark {
+      font-family: var(--font-display);
+      font-style: italic;
       font-weight: 300;
-      font-size: 24px;
-      line-height: 1.3;
-      margin-top: 4px;
+      font-size: 1.6rem;
+      letter-spacing: -0.01em;
+      color: var(--c-fg-1);
+      opacity: 0.85;
     }
-    @media (min-width: 640px) { .stat-value { font-size: 30px; } }
-    .stat-value.mono { font-variant-numeric: tabular-nums; }
-
-    .weather-line { display: inline-flex; align-items: baseline; gap: 8px; }
-    .weather-desc { font-size: 14px; color: rgba(255,255,255,0.6); font-family: 'Inter', sans-serif; }
-
-    .beers { display: flex; flex-direction: column; }
-    .beer-item { font-family: 'Inter', sans-serif; font-size: 16px; font-weight: 400; line-height: 1.5; }
-    @media (min-width: 640px) { .beer-item { font-size: 18px; } }
-    .beer-sep { color: rgba(255,255,255,0.4); margin: 0 4px; }
-    .beer-price { color: rgba(255,255,255,0.85); font-variant-numeric: tabular-nums; }
-
-    .footer-row {
-      margin-top: 24px;
-      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
-      gap: 12px;
-      font-size: 11px;
-      color: rgba(255,255,255,0.55);
+    .veil-mark .pulse { animation: pulse 1.4s ease-in-out infinite; }
+    .veil-line {
+      width: 80px; height: 1px;
+      background: linear-gradient(to right, transparent, var(--c-fg-4), transparent);
+      animation: shimmer 2s ease-in-out infinite;
     }
-    .footer-row a { text-underline-offset: 4px; }
-    .footer-row a:hover { color: white; text-decoration: underline; }
 
+    /* ── Error state ──────────────────────────────────────────── */
     .err {
       max-width: 640px;
     }
     .err h2 {
-      font-family: 'Fraunces', serif;
+      font-family: var(--font-display);
       font-weight: 300;
-      font-size: 28px;
-      color: rgba(255,255,255,0.9);
+      font-size: clamp(1.5rem, 3vw, 2.25rem);
+      color: var(--c-fg-1);
+      letter-spacing: -0.01em;
+      margin-bottom: var(--s-5);
     }
-    .err button { margin-top: 16px; }
-
-    .veil {
-      position: absolute; inset: 0; z-index: 20;
-      background: #0a0a0a;
-      display: grid; place-items: center;
-      gap: 16px;
-      transition: opacity 0.5s ease;
+    .err .retry {
+      display: inline-flex; align-items: center; gap: var(--s-2);
+      padding: var(--s-3) var(--s-4);
+      border: 1px solid var(--c-fg-5);
+      border-radius: 999px;
+      font-size: var(--t-micro);
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      transition: border-color var(--d-quick) var(--ease-soft), background var(--d-quick) var(--ease-soft);
     }
-    .veil.hidden { opacity: 0; pointer-events: none; }
-    .veil-inner { display: flex; flex-direction: column; align-items: center; gap: 16px; }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 2px solid rgba(255,255,255,0.2);
-      border-top-color: rgba(255,255,255,1);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    .veil-text {
-      font-family: 'Fraunces', serif;
-      font-weight: 300;
-      font-size: 20px;
-      color: rgba(255,255,255,0.7);
+    .err .retry:hover {
+      border-color: rgba(255,255,255,0.30);
+      background: rgba(255,255,255,0.06);
     }
 
-    @keyframes ken-burns {
-      0%   { transform: scale(1.04) translate(0, 0); }
-      100% { transform: scale(1.14) translate(-1.5%, -1%); }
+    /* ── Hint (keyboard shortcut) — fades in late, very quiet ─── */
+    .hint {
+      position: absolute;
+      bottom: var(--s-3); left: 50%; transform: translateX(-50%);
+      font-family: var(--font-sans);
+      font-size: 10px;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      color: var(--c-fg-4);
+      z-index: 5;
+      opacity: 0;
+      animation: fade 1200ms var(--ease-out) 1800ms forwards;
+      pointer-events: none;
+      display: none;
     }
-    @keyframes fade-in { from { opacity: 0; } to { opacity: 1; } }
-    @keyframes rise-in {
-      from { opacity: 0; transform: translateY(12px); }
-      to   { opacity: 1; transform: translateY(0); }
+    @media (min-width: 768px) { .hint { display: block; } }
+    .hint kbd {
+      display: inline-block;
+      margin: 0 4px;
+      padding: 2px 6px;
+      font-family: var(--font-sans);
+      font-size: 9px;
+      font-weight: 600;
+      letter-spacing: 0.15em;
+      color: var(--c-fg-2);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid var(--c-fg-5);
+      border-radius: 3px;
+      vertical-align: 0.5px;
     }
-    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
+    /* ── Mobile back link (only when chrome wordmark might hide) ─ */
     .back {
-      position: fixed;
-      top: 16px; left: 16px;
+      position: absolute;
+      top: var(--s-3); left: var(--s-3);
       z-index: 30;
-      font-size: 11px;
+      font-family: var(--font-sans);
+      font-size: 10px;
       letter-spacing: 0.18em;
       text-transform: uppercase;
-      color: rgba(255,255,255,0.55);
+      color: var(--c-fg-3);
       padding: 6px 10px;
-      background: rgba(0,0,0,0.2);
       border-radius: 999px;
-      backdrop-filter: blur(8px);
-      -webkit-backdrop-filter: blur(8px);
-      transition: color 0.2s ease;
+      transition: color var(--d-quick) var(--ease-soft);
+      display: none;
     }
-    .back:hover { color: white; }
-    @media (min-width: 640px) { .back { display: none; } }
+    /* only show on very narrow viewports where wordmark gets crowded */
+    @media (max-width: 380px) { .back { display: inline-block; } }
+    .back:hover { color: var(--c-fg-1); }
+
+    /* ── Keyframes ────────────────────────────────────────────── */
+    @keyframes ken-burns {
+      from { transform: scale(1.04) translate(0, 0); }
+      to   { transform: scale(1.16) translate(-1.8%, -1.2%); }
+    }
+    @keyframes rise {
+      from { opacity: 0; transform: translateY(18px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes fade {
+      from { opacity: 0; }
+      to   { opacity: 1; }
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 0.32; }
+      50%      { opacity: 1; }
+    }
+    @keyframes live-pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%      { transform: scale(1.4); opacity: 0.55; }
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    @keyframes shimmer {
+      0%   { opacity: 0.3; transform: scaleX(0.85); }
+      50%  { opacity: 1;   transform: scaleX(1); }
+      100% { opacity: 0.3; transform: scaleX(0.85); }
+    }
+
+    /* ── Reduced motion ───────────────────────────────────────── */
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: 0.01ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: 0.01ms !important;
+      }
+      .photo.loaded { animation: none; }
+    }
   </style>
 </head>
 <body>
-  <a class="back" href="/index.html">← maltysnack</a>
+  <div class="grain" aria-hidden="true"></div>
 
-  <div class="stage">
-    <img id="bg-img" class="bg-img" alt="" />
-    <div id="bg-grad" class="bg-gradient"></div>
-    <div class="overlay-1"></div>
-    <div class="overlay-2"></div>
-    <div class="vignette"></div>
+  <main class="stage">
+    <img id="photo" class="photo" alt="" crossorigin="anonymous" />
+    <div id="fallback" class="fallback" aria-hidden="true"></div>
+    <div id="tint" class="tint" aria-hidden="true"></div>
+    <div class="shade" aria-hidden="true"></div>
+    <div class="vignette" aria-hidden="true"></div>
 
-    <div class="content">
-      <header>
-        <div>
-          <span class="wordmark">happyhour</span>
-          <span class="wordmark-tag">somewhere</span>
-        </div>
-        <div class="top-actions">
-          <a href="/index.html" class="icon-btn" aria-label="Back to maltysnack" title="Back" style="display:none" id="back-btn-desktop">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M15 18l-6-6 6-6"/>
-            </svg>
-          </a>
-          <button id="refresh-btn" class="pill" aria-label="Show another city">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
-              <path d="M21 3v5h-5"/>
-              <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
-              <path d="M3 21v-5h5"/>
-            </svg>
-            <span>Another</span>
-          </button>
-        </div>
-      </header>
+    <header class="chrome">
+      <a href="/index.html" class="wordmark">happyhour<span class="pulse">.</span></a>
+      <button id="refresh-btn" class="refresh" aria-label="Show another city">
+        <svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 12a9 9 0 0 1 15-6.7L21 8"/>
+          <path d="M21 3v5h-5"/>
+          <path d="M21 12a9 9 0 0 1-15 6.7L3 16"/>
+          <path d="M3 21v-5h5"/>
+        </svg>
+        <span>Another</span>
+      </button>
+    </header>
 
-      <div class="spacer"></div>
+    <article id="hero" class="hero" aria-live="polite"></article>
 
-      <div id="content-area"></div>
-
-      <div id="footer-area"></div>
-    </div>
+    <p class="hint"><kbd>N</kbd> for another city</p>
 
     <div id="veil" class="veil">
       <div class="veil-inner">
-        <div class="spinner"></div>
-        <p class="veil-text">finding the party…</p>
+        <div class="veil-mark"><em>happyhour</em><span class="pulse">.</span></div>
+        <div class="veil-line"></div>
       </div>
     </div>
-  </div>
+  </main>
 
   <script>
     // ────────────────────────────────────────────────────────────────
@@ -683,6 +973,93 @@
     // ────────────────────────────────────────────────────────────────
     let lastCity = null;
     let timeIntervalId = null;
+    let firstLoad = true;
+
+    // Extract a representative dominant color from the photo, weighted toward
+    // saturated pixels so we get the hero color (the warm sky / neon sign /
+    // golden-hour glow) rather than washed-out averages.
+    async function extractAccent(imgEl) {
+      try {
+        if (!imgEl.complete || !imgEl.naturalWidth) {
+          await new Promise(res => imgEl.addEventListener("load", res, { once: true }));
+        }
+        const N = 32;
+        const canvas = document.createElement("canvas");
+        canvas.width = canvas.height = N;
+        const ctx = canvas.getContext("2d");
+        ctx.drawImage(imgEl, 0, 0, N, N);
+        const data = ctx.getImageData(0, 0, N, N).data;
+        let r = 0, g = 0, b = 0, w = 0;
+        for (let i = 0; i < data.length; i += 4) {
+          const ar = data[i], ag = data[i + 1], ab = data[i + 2];
+          // Skip near-black and near-white — they're usually overlay/sky/shadow.
+          const lum = (ar * 299 + ag * 587 + ab * 114) / 1000;
+          if (lum < 24 || lum > 232) continue;
+          // Weight by saturation so we pick out the colorful bit.
+          const max = Math.max(ar, ag, ab), min = Math.min(ar, ag, ab);
+          const sat = (max - min) / (max || 1);
+          const weight = 0.4 + sat * 1.6;
+          r += ar * weight; g += ag * weight; b += ab * weight; w += weight;
+        }
+        if (w === 0) return null;
+        r = Math.round(r / w); g = Math.round(g / w); b = Math.round(b / w);
+        // Lift toward higher value/saturation so the accent has presence as
+        // a UI color (eyebrow text, dot, dividers). Pure averages tend to
+        // sit too muddy. Convert to HSL, raise S and L, convert back.
+        const max = Math.max(r, g, b), min = Math.min(r, g, b);
+        const d = max - min;
+        const l = (max + min) / 2 / 255;
+        const s = d === 0 ? 0 : d / (255 - Math.abs(max + min - 255));
+        let h = 0;
+        if (d !== 0) {
+          if (max === r)      h = ((g - b) / d) % 6;
+          else if (max === g) h = (b - r) / d + 2;
+          else                h = (r - g) / d + 4;
+          h *= 60;
+          if (h < 0) h += 360;
+        }
+        // Constrain hue to the warm "happy hour" band: amber → coral → magenta.
+        // Cool hues (cyan/blue/green) get pulled toward their warm complement,
+        // so we never get a cold UI accent that fights the brand.
+        let warmH = h;
+        if (h > 70 && h < 280) {
+          // Reflect across the warm axis. Pulls greens/cyans/blues into golds/reds.
+          warmH = (h + 180) % 360;
+        }
+        // Push saturation up to at least 0.65 and lightness into a sweet spot.
+        const newS = Math.min(0.92, Math.max(0.65, s * 1.5));
+        const newL = Math.min(0.72, Math.max(0.58, l < 0.4 ? l + 0.28 : l + 0.05));
+        // HSL → RGB
+        const c = (1 - Math.abs(2 * newL - 1)) * newS;
+        const x = c * (1 - Math.abs((warmH / 60) % 2 - 1));
+        const m = newL - c / 2;
+        let rr, gg, bb;
+        if (warmH < 60)       { rr = c; gg = x; bb = 0; }
+        else if (warmH < 120) { rr = x; gg = c; bb = 0; }
+        else if (warmH < 180) { rr = 0; gg = c; bb = x; }
+        else if (warmH < 240) { rr = 0; gg = x; bb = c; }
+        else if (warmH < 300) { rr = x; gg = 0; bb = c; }
+        else                  { rr = c; gg = 0; bb = x; }
+        return {
+          r: Math.round((rr + m) * 255),
+          g: Math.round((gg + m) * 255),
+          b: Math.round((bb + m) * 255),
+        };
+      } catch {
+        return null;
+      }
+    }
+
+    function applyAccent(rgb) {
+      const root = document.documentElement;
+      if (rgb) {
+        root.style.setProperty("--c-accent",      `rgb(${rgb.r}, ${rgb.g}, ${rgb.b})`);
+        root.style.setProperty("--c-accent-soft", `rgba(${rgb.r}, ${rgb.g}, ${rgb.b}, 0.40)`);
+      } else {
+        root.style.removeProperty("--c-accent");
+        root.style.removeProperty("--c-accent-soft");
+      }
+    }
 
     async function load(excludeName) {
       const refreshBtn = document.getElementById("refresh-btn");
@@ -698,114 +1075,158 @@
         : eligible;
 
       if (ordered.length === 0) {
-        renderError("No cities currently in happy hour. (That shouldn't happen — try again.)");
+        renderError("Nothing in happy hour right now.", "That shouldn't happen — try again in a moment.");
         refreshBtn.classList.remove("spinning");
         refreshBtn.disabled = false;
         return;
       }
 
+      let rendered = false;
+      let firstWithWeather = null; // fallback target if no images load
       for (const city of ordered) {
         try {
           const [weather, image] = await Promise.all([fetchWeather(city), fetchImage(city)]);
-          // If proxy is configured but no image came back for this city, try next.
+          if (!firstWithWeather) firstWithWeather = { city, weather };
           if (IMAGE_PROXY_URL && !image) continue;
-          render(city, weather, image);
+          await render(city, weather, image);
           lastCity = city.name;
+          rendered = true;
           break;
         } catch (e) {
           continue;
         }
       }
+      // If proxy is unreachable for every city, still render the first one
+      // with the gradient fallback so the page never gets stuck on the veil.
+      if (!rendered && firstWithWeather) {
+        await render(firstWithWeather.city, firstWithWeather.weather, null);
+        lastCity = firstWithWeather.city.name;
+      }
 
       refreshBtn.classList.remove("spinning");
       refreshBtn.disabled = false;
+      firstLoad = false;
     }
 
-    function render(city, weather, image) {
-      const bgImg = document.getElementById("bg-img");
-      const bgGrad = document.getElementById("bg-grad");
-      bgImg.classList.remove("loaded");
-      bgGrad.classList.remove("visible");
+    async function render(city, weather, image) {
+      const photo    = document.getElementById("photo");
+      const fallback = document.getElementById("fallback");
+      const tint     = document.getElementById("tint");
+
+      // Reset visual layers
+      photo.classList.remove("loaded");
+      tint.classList.remove("visible");
 
       if (image) {
-        bgImg.onload = () => bgImg.classList.add("loaded");
-        bgImg.src = image.url;
-        bgImg.alt = image.altDescription || city.name;
+        // Show gradient as a visual placeholder while photo decodes
+        fallback.classList.add("visible");
+        photo.alt = image.altDescription || `${city.name}, ${city.country}`;
+
+        // Load photo in the background with a hard timeout — never block render.
+        const loader = new Image();
+        loader.crossOrigin = "anonymous";
+        const onReady = (ok) => {
+          if (!ok) return;
+          photo.src = image.url;
+          requestAnimationFrame(() => {
+            photo.classList.add("loaded");
+            fallback.classList.remove("visible");
+          });
+          extractAccent(loader).then(rgb => {
+            applyAccent(rgb);
+            tint.classList.add("visible");
+          });
+        };
+        const t = setTimeout(() => onReady(false), 12000);
+        loader.onload = () => { clearTimeout(t); onReady(true); };
+        loader.onerror = () => { clearTimeout(t); onReady(false); };
+        loader.src = image.url;
       } else {
-        bgGrad.classList.add("visible");
-        bgImg.src = "";
+        applyAccent(null);
+        photo.removeAttribute("src");
+        fallback.classList.add("visible");
       }
 
+      // Build the hero block
       const beers = BEERS[city.name + "-" + city.cc] || [];
-      const beersHtml = beers.slice(0, 2).map(b =>
-        `<span class="beer-item"><strong>${escapeHtml(b.n)}</strong><span class="beer-sep">·</span><span class="beer-price">${escapeHtml(formatBeerPrice(b.p, b.c))}</span></span>`
-      ).join("");
+      const beerHtml = beers.slice(0, 2).map(b =>
+        `<span class="muted">${escapeHtml(b.n)}</span><span class="price">${escapeHtml(formatBeerPrice(b.p, b.c))}</span>`
+      ).join('<span class="muted" style="margin:0 8px;opacity:0.5">/</span>');
 
-      const contentArea = document.getElementById("content-area");
-      contentArea.innerHTML = `
-        <div class="block in" id="city-block">
-          <div class="eyebrow">It's happy hour in</div>
-          <h1 class="city">
-            <span class="name">${escapeHtml(city.name)}</span>
-            <span class="flag" aria-label="${escapeHtml(city.country)}">${city.flag}</span>
-          </h1>
-          <div class="country">${escapeHtml(city.country)}</div>
-          <div class="stats">
-            <div class="stat">
-              <span class="stat-label">Local time</span>
-              <span class="stat-value mono" id="local-time" data-tz="${city.tz}">${localTimeString(city.tz)}</span>
-            </div>
-            <div class="stat">
-              <span class="stat-label">Weather</span>
-              <span class="stat-value">
-                <span class="weather-line">
-                  <span aria-hidden="true">${weather.emoji}</span>
-                  <span>${weather.tempC}°C</span>
-                  <span class="weather-desc">${escapeHtml(weather.description)}</span>
-                </span>
-              </span>
-            </div>
-            ${beers.length ? `
-              <div class="stat">
-                <span class="stat-label">A cold one</span>
-                <span class="stat-value beers">${beersHtml}</span>
-              </div>
-            ` : ""}
+      const hero = document.getElementById("hero");
+      hero.innerHTML = `
+        <p class="eyebrow reveal d-1">
+          <span class="live-dot" aria-hidden="true"></span>
+          <span>It's happy hour in</span>
+        </p>
+        <h1 class="city reveal d-2">${escapeHtml(city.name)}</h1>
+        <p class="dateline reveal d-3">
+          <span class="iso">${escapeHtml(city.cc)}</span><span class="country">${escapeHtml(city.country)}</span><span class="sep" aria-hidden="true"></span><span class="clock" id="local-time" data-tz="${city.tz}">${localTimeString(city.tz)}</span><span class="clock-meta">local</span>
+        </p>
+        <div class="strip reveal d-4">
+          <div class="item">
+            <span class="label">Weather</span>
+            <span class="val"><span class="glyph" aria-hidden="true">${weather.emoji}</span><span class="num">${weather.tempC}°</span><span class="muted" style="margin-left:6px">${escapeHtml(weather.description.toLowerCase())}</span></span>
           </div>
+          ${beers.length ? `
+          <div class="item">
+            <span class="label">Pour</span>
+            <span class="val">${beerHtml}</span>
+          </div>` : ""}
         </div>
       `;
 
-      const footerArea = document.getElementById("footer-area");
-      footerArea.innerHTML = `
-        <div class="footer-row">
-          ${image
-            ? `<span>Photo by <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> on <a href="https://unsplash.com/?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">Unsplash</a></span>`
-            : `<span style="opacity:0.6">Photo unavailable</span>`}
-          <span style="opacity:0.7">Weather by Open-Meteo</span>
-        </div>
-      `;
+      // Trigger the staggered reveal — re-add .in on the next frame so
+      // browsers re-run the keyframes when the DOM was just replaced.
+      requestAnimationFrame(() => {
+        hero.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+      });
 
-      // Restart the live-time updater
+      // Credit lives inside hero (in-flow on mobile, fixed bottom-right on desktop via CSS)
+      const creditHTML = image
+        ? `<div class="credit reveal d-5"><span>Photograph — <a href="${escapeHtml(image.photographerUrl)}?utm_source=happyhour&utm_medium=referral" target="_blank" rel="noreferrer">${escapeHtml(image.photographer)}</a> <span class="dim">/</span> Unsplash</span><br><span>Weather <span class="dim">·</span> Open-Meteo</span></div>`
+        : `<div class="credit reveal d-5"><span>Weather <span class="dim">·</span> Open-Meteo</span></div>`;
+      hero.insertAdjacentHTML("beforeend", creditHTML);
+      requestAnimationFrame(() => {
+        hero.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+      });
+
+      // Live local-time updates with a tiny cross-fade
       if (timeIntervalId) clearInterval(timeIntervalId);
       timeIntervalId = setInterval(() => {
         const el = document.getElementById("local-time");
-        if (el) el.textContent = localTimeString(el.dataset.tz);
+        if (!el) return;
+        const next = localTimeString(el.dataset.tz);
+        if (next === el.textContent) return;
+        el.style.transition = "opacity 240ms ease-out";
+        el.style.opacity = "0";
+        setTimeout(() => {
+          el.textContent = next;
+          el.style.opacity = "1";
+        }, 240);
       }, 30000);
 
-      // Hide the loading veil
+      // Lift the loading veil
       document.getElementById("veil").classList.add("hidden");
     }
 
-    function renderError(msg) {
-      document.getElementById("bg-grad").classList.add("visible");
-      document.getElementById("bg-img").classList.remove("loaded");
-      document.getElementById("content-area").innerHTML = `
-        <div class="block in err">
-          <h2>${escapeHtml(msg)}</h2>
-          <button class="pill" onclick="load()">Try again</button>
+    function renderError(headline, sub) {
+      applyAccent(null);
+      document.getElementById("photo").removeAttribute("src");
+      document.getElementById("fallback").classList.add("visible");
+      document.getElementById("tint").classList.remove("visible");
+      const hero = document.getElementById("hero");
+      hero.innerHTML = `
+        <div class="err">
+          <p class="eyebrow reveal d-1"><span>Status</span></p>
+          <h2 class="reveal d-2">${escapeHtml(headline)}</h2>
+          <p class="dateline reveal d-3" style="margin-bottom: 24px">${escapeHtml(sub || "")}</p>
+          <a class="retry reveal d-4" href="#" onclick="event.preventDefault(); load();">Try again</a>
         </div>
       `;
-      document.getElementById("footer-area").innerHTML = "";
+      requestAnimationFrame(() => {
+        hero.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+      });
       document.getElementById("veil").classList.add("hidden");
     }
 
@@ -813,6 +1234,17 @@
     //  WIRE UP
     // ────────────────────────────────────────────────────────────────
     document.getElementById("refresh-btn").addEventListener("click", () => load(lastCity));
+
+    // Keyboard: 'n' or space → next city. Ignore when typing in inputs.
+    document.addEventListener("keydown", (e) => {
+      if (e.target.matches("input, textarea, [contenteditable]")) return;
+      if (e.key === "n" || e.key === "N" || e.code === "Space") {
+        e.preventDefault();
+        load(lastCity);
+      }
+    });
+
+    // Kick it off
     load();
     if (AUTO_REFRESH_MS > 0) setInterval(() => load(), AUTO_REFRESH_MS);
   </script>
