@@ -6,7 +6,7 @@
    Don't edit this for character changes - edit character.js.
    ===================================================================== */
 
-const STORAGE_KEY = 'grosh-character-v1';
+const STORAGE_KEY = CHARACTER.identity.name.toLowerCase().replace(/\s+/g, '-') + '-character-v1';
 const WIKI_BASE = 'https://dnd5e.wikidot.com/spell:';
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -258,6 +258,7 @@ function renderLoH() {
 
 function renderCD() {
   const c = document.getElementById('cd-pip');
+  if (!c) return;
   c.innerHTML = '';
   const pip = document.createElement('div');
   pip.className = 'pip' + (state.channelDivinity ? ' used' : '');
@@ -270,6 +271,7 @@ function renderTreats() { renderPipArray('treats-pips', state.chefTreats); }
 
 function renderPipArray(id, arr) {
   const c = document.getElementById(id);
+  if (!c) return;
   c.innerHTML = '';
   arr.forEach((used, i) => {
     const pip = document.createElement('div');
