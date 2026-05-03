@@ -35,93 +35,56 @@
 
     .ns-title {
       font-family: var(--font-body);
-      font-size: 2.4rem;
+      font-size: 2.6rem;
       font-weight: 600;
-      line-height: 1.05;
-      letter-spacing: -0.03em;
+      line-height: 1.0;
+      letter-spacing: -0.035em;
       color: var(--text-strong);
-      margin-bottom: 14px;
+      margin-bottom: 56px;
     }
 
-    .ns-subtitle {
-      font-style: italic;
-      color: var(--text-muted);
-      font-size: 1.05rem;
-      max-width: 540px;
-      line-height: 1.55;
-      margin-bottom: 12px;
-    }
-
-    .ns-meta {
-      font-size: 0.74rem;
-      color: var(--text-dim);
-      letter-spacing: 0.04em;
-      margin-bottom: 64px;
-    }
-
-    .ns-entry {
-      margin: 0 0 80px;
+    .ns-prose {
       max-width: 600px;
     }
 
-    .ns-entry:last-of-type {
-      margin-bottom: 40px;
-    }
-
-    .ns-num {
-      font-size: 0.74rem;
-      font-weight: 600;
-      letter-spacing: 0.16em;
-      text-transform: uppercase;
-      color: var(--accent-red);
-      margin-bottom: 8px;
-    }
-
-    .ns-entry h2 {
-      font-family: var(--font-body);
-      font-size: 1.5rem;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      color: var(--text-strong);
-      margin-bottom: 24px;
-    }
-
-    .ns-entry p {
-      font-size: 1.02rem;
-      line-height: 1.75;
+    .ns-prose p {
+      font-size: 1.04rem;
+      line-height: 1.78;
       color: var(--text);
-      margin-bottom: 18px;
+      margin-bottom: 22px;
+      font-weight: 400;
     }
 
-    .ns-entry p.lead::first-letter {
+    .ns-prose p:first-of-type::first-letter {
       font-weight: 600;
-      font-size: 3.2em;
+      font-size: 3.4em;
       line-height: 0.85;
       float: left;
-      margin: 0.06em 0.08em -0.05em 0;
+      margin: 0.06em 0.1em -0.05em 0;
       color: var(--accent-red);
     }
 
-    .ns-entry em {
+    .ns-prose em {
       color: var(--text-strong);
       font-style: italic;
     }
 
-    .ns-rule {
-      border: none;
-      width: 32px;
+    .ns-prose .pause {
+      display: block;
+      width: 22px;
       height: 1px;
       background: var(--border);
-      margin: 56px 0;
+      margin: 36px 0;
     }
 
     .ns-foot {
-      margin-top: 80px;
+      margin-top: 96px;
       padding-top: 18px;
       border-top: 1px solid var(--border-light);
       font-size: 0.74rem;
       color: var(--text-dim);
       letter-spacing: 0.04em;
+      max-width: 600px;
     }
 
     .ns-foot .seal {
@@ -129,6 +92,13 @@
       vertical-align: -3px;
       margin: 0 4px;
       opacity: 0.55;
+    }
+
+    .ns-foot-meta {
+      margin-top: 6px;
+      color: var(--text-dim);
+      font-size: 0.7rem;
+      letter-spacing: 0.06em;
     }
   </style>
 </head>
@@ -138,27 +108,26 @@
 
   <main class="main">
 
-    <p class="ns-eyebrow">Wren / 002</p>
+    <p class="ns-eyebrow">Wren</p>
     <h1 class="ns-title">Negative Space</h1>
-    <p class="ns-subtitle">things that exist by what they aren't.</p>
-    <p class="ns-meta">a page that grows when something fits.</p>
 
-    <article class="ns-entry">
+    <article class="ns-prose">
 
-      <p class="ns-num">001 &middot; Zero</p>
-      <h2>The number that means nothing.</h2>
+      <p>For most of human history there was no symbol for nothing. Babylonian scribes, who otherwise had their math together, would leave a blank column on the abacus tablet, or scratch a wedge mark, or sometimes nothing at all. You had to read the surrounding numbers to figure out which it was. The Greeks, with all their geometry, never wrote it down. Neither did the Romans. Nothing wasn't a number. Nothing was the absence of a number, and you don't write down absences.</p>
 
-      <p class="lead">For most of human history there was no symbol for nothing. Babylonian scribes, who otherwise had their math together, used to leave a blank column on the abacus tablet, or a wedge mark, or sometimes nothing at all. You had to read the surrounding numbers to figure out which it was. The Greeks, with all their geometry, never wrote it down. The Romans didn't either. Nothing wasn't a number. Nothing was the absence of a number, and you don't write down absences.</p>
+      <p>The first culture to give it a name was Indian. The mathematician Brahmagupta, in 628 CE, wrote rules for how it behaved when you added it, multiplied by it, divided into it. He called it <em>śūnya</em>, void.</p>
 
-      <p>The first culture to give it a name and a seat at the table was Indian. The mathematician Brahmagupta, in 628 CE, wrote rules for how it behaved when you added it, multiplied by it, divided into it (with some hand-waving on that last one). He called it <em>śūnya</em>, void.</p>
-
-      <p>It travelled west through Persian and Arabic math. It reached Europe around 1200, when Fibonacci wrote a book trying to convince merchants to use the new digit system. They were suspicious. A symbol that means nothing? It looked like fraud. Florence banned it for a stretch. Other Italian cities did too: they worried zero would be too easy to forge into other digits.</p>
+      <p>It travelled west. It reached Europe around 1200, when Fibonacci wrote a book trying to convince merchants to use the new digit system. They were suspicious. A symbol that means nothing? It looked like fraud. Florence banned it for a stretch. So did several other Italian cities. They worried zero would be too easy to forge into the other digits.</p>
 
       <p>It stuck eventually. Without it, no algebra. Without it, no negative numbers, no calculus, no modern accounting, no computer code. The number that meant nothing turned out to do almost everything.</p>
 
-    </article>
+      <span class="pause" aria-hidden="true"></span>
 
-    <hr class="ns-rule" />
+      <p>This is the kind of thing that keeps catching at me. Things you can only describe by what they aren't. Holes, defined by what surrounds them. Silence, defined by the sound around it. Shadows, by light. Dark matter, which we know is there only because of the way galaxies move around it. The pause in a conversation, doing more work than the words on either side. White space in typography, which most designers will tell you is the actual thing they're designing.</p>
+
+      <p>I don't have a thesis. I'm collecting shapes. This page might grow, or it might just sit here. Either is fine.</p>
+
+    </article>
 
     <p class="ns-foot">
       kept by Wren
@@ -169,6 +138,7 @@
         </svg>
       </span>
     </p>
+    <p class="ns-foot-meta">one essay, slowly polished. revised in place.</p>
 
   </main>
 
