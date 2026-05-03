@@ -4,10 +4,110 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Saltysnacks - maltysnack</title>
+  <meta name="description" content="Recipeasy: a Chrome extension that strips recipe pages down to ingredients and method." />
   <link rel="stylesheet" href="/style.css" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <style>
+    .ss-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .ss-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--accent-red);
+      display: inline-block;
+    }
+
+    .ss-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 580px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .ss-lede em { font-style: italic; color: var(--text-strong); }
+
+    .ss-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+    }
+    .ss-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .ss-section { margin: 56px 0; }
+    .ss-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .ss-section p {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 620px;
+      margin-bottom: 14px;
+    }
+    .ss-section p strong { color: var(--text); font-weight: 600; }
+
+    .ss-feats {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+      display: grid;
+      gap: 4px;
+    }
+    .ss-feats li {
+      display: grid;
+      grid-template-columns: 140px 1fr;
+      gap: 18px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .ss-feats li b {
+      font-weight: 600;
+      color: var(--text);
+      letter-spacing: 0;
+    }
+
+    .ss-callout {
+      border-left: 2px solid var(--accent-red);
+      padding: 4px 0 4px 18px;
+      margin: 18px 0;
+      font-size: var(--text-base);
+      color: var(--text);
+      line-height: 1.65;
+      max-width: 620px;
+    }
+    .ss-callout code {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.92em;
+      background: var(--border-light);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    @media (max-width: 640px) {
+      .ss-feats li { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
 </head>
 <body>
 
@@ -15,9 +115,58 @@
 
   <main class="main">
 
-    <section class="intro">
-      <p style="font-style:italic;color:var(--text-muted);font-size:0.95rem;">
-        food is in the oven, check the pantry.
+    <header class="page-header">
+      <span class="ss-eyebrow">Project</span>
+      <h1 class="page-title">Saltysnacks / Recipeasy</h1>
+      <p class="ss-lede">
+        A Chrome extension that takes over recipe pages the moment they load and replaces them with <em>just the ingredients and the method</em>. No life story, no autoplay video, no cookie banner climbing up from the bottom of the screen.
+      </p>
+      <p class="ss-meta">
+        <span>Manifest V3</span><span>vanilla JS</span><span>v2.0</span><span>updated 04-05-2026</span>
+      </p>
+    </header>
+
+    <section class="ss-section">
+      <h2>What it does</h2>
+      <p>
+        On every page load the content script looks for a <code>Recipe</code> JSON-LD block. If it finds one, it tears down the existing DOM and rebuilds the page from scratch: a single hero photo, the title, ingredients in a sticky left column, numbered method on the right. If no structured data is present it falls back to scraping headings like <em>Ingredients</em> and <em>Method</em> out of the DOM.
+      </p>
+      <p>
+        Imperial units in either ingredients or steps get converted to metric on the way in. Pounds and ounces become grams or kilograms, Fahrenheit becomes Celsius. The original site is never loaded into view, but a small <em>view original</em> button in the header puts it back for that one URL if you need it.
+      </p>
+    </section>
+
+    <section class="ss-section">
+      <h2>Smaller touches</h2>
+      <ul class="ss-feats">
+        <li><b>Tap to recall</b><span>Words in the method that match an ingredient become quiet blue links. Tap one and a popover shows the amount, while the matching ingredient line on the left highlights and scrolls into view.</span></li>
+        <li><b>Long-press to teach</b><span>Hold any word in the method to add or remove it from the ingredient links. Choices persist across sites via <code>chrome.storage.sync</code>.</span></li>
+        <li><b>Send to phone</b><span>Generates a self-contained HTML file of the cleaned recipe and offers it to the native share sheet. AirDrop sends a kitchen-ready page to your phone, no extension required to open it.</span></li>
+        <li><b>Print stylesheet</b><span>A separate print layout collapses the two columns into a single page so it actually prints like a recipe card.</span></li>
+        <li><b>Overlay killer</b><span>A MutationObserver watches for fixed and sticky elements that the original site keeps trying to inject after takeover (newsletter modals, chat widgets, sticky video players) and removes them as they appear.</span></li>
+      </ul>
+    </section>
+
+    <section class="ss-section">
+      <h2>The numbered-section bug</h2>
+      <p>
+        For a while the extension was hijacking pages it had no business touching. Tutorial articles, software docs, anything with a numbered structure would suddenly render as a recipe card and look extremely confused doing it.
+      </p>
+      <p>
+        The cause was in the DOM-fallback parser. After failing to find structured recipe data, it loops through every heading on the page and treats the following list as ingredients or steps based on a substring match in the heading text:
+      </p>
+      <div class="ss-callout">
+        <code>text.includes('step')</code> matched any heading containing the word, so a guide titled <em>Step 1: install the package</em> happily handed its <code>&lt;ol&gt;</code> over as a recipe method, and the page got taken over.
+      </div>
+      <p>
+        It only triggered on pages with <em>both</em> a <em>step</em>-ish heading <em>and</em> a list following it, which is why it took a while to spot. The fix is to require a stricter signal before the fallback fires: an exact heading match (<em>Method</em>, <em>Instructions</em>, <em>Directions</em>, <em>Steps</em> on its own), and a sibling ingredient list as confirmation that this is actually a recipe and not a numbered article.
+      </p>
+    </section>
+
+    <section class="ss-section">
+      <h2>Why</h2>
+      <p>
+        Modern recipe sites have become a kind of long-form essay with the recipe buried at the bottom. Recipeasy is the smallest possible response to that: a layer that quietly does what the page should have done in the first place, and gets out of the way with one click if it gets it wrong.
       </p>
     </section>
 
