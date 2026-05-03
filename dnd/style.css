@@ -226,7 +226,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   font-variant-numeric: tabular-nums;
 }
 
-/* abilities don't have a prof dot — pad the row to align */
+/* abilities don't have a prof dot - pad the row to align */
 .check-list .ability-row { padding-left: 15px; }
 
 /* ---------- Attacks ---------- */

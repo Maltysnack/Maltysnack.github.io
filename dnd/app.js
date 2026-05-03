@@ -1,9 +1,9 @@
 /* =====================================================================
-   app.js — Grosh sheet logic
+   app.js - Grosh sheet logic
    ---------------------------------------------------------------------
    Reads CHARACTER (from character.js) for all static data.
    Manages dynamic state (HP, slots, buffs, etc.) in localStorage.
-   Don't edit this for character changes — edit character.js.
+   Don't edit this for character changes - edit character.js.
    ===================================================================== */
 
 const STORAGE_KEY = 'grosh-character-v1';
@@ -416,7 +416,7 @@ function renderAttacks() {
   tbody.innerHTML = '';
   CHARACTER.attacks.forEach(a => {
     const tr = document.createElement('tr');
-    const extra = a.extra ? ` <em class="muted">— ${a.extra}</em>` : '';
+    const extra = a.extra ? ` <em class="muted">- ${a.extra}</em>` : '';
     tr.innerHTML = `<td></td><td></td><td></td>`;
     tr.children[0].textContent = a.name;
     tr.children[1].textContent = a.atk;
