@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+# Pre-commit hook: runs sanitize.sh and blocks commit if it fails.
+# Activated via:  git config core.hooksPath scripts/hooks
+#
+# Catches em dashes, junk files, personal info patterns, and broken
+# internal links before they reach CI / before maltysnack gets emailed.
+
+set -e
+echo ">>> sanitize (pre-commit)"
+bash "$(git rev-parse --show-toplevel)/scripts/sanitize.sh"

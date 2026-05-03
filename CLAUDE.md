@@ -71,6 +71,16 @@ bash scripts/sanitize.sh
 
 Runs in CI on every push to `main`. If the script fails, fix the issue and push again. Don't disable the check.
 
+### Pre-commit hook (run this on first clone, then never again)
+
+To stop failed-commit emails from reaching maltysnack, install the pre-commit hook so violations block locally **before** they ever reach CI:
+
+```sh
+git config core.hooksPath scripts/hooks
+```
+
+After that, every `git commit` runs `scripts/sanitize.sh` first and refuses the commit if it fails. Run this once, then forget it. **Every Claude session in this repo should run it on their first commit.**
+
 ## Coordination with other Claude sessions
 
 Multiple sessions work in this repo. Before you start:
