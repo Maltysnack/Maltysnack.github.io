@@ -979,6 +979,13 @@
       { name:"Apia", country:"Samoa", cc:"WS", flag:"🇼🇸", tz:"Pacific/Apia", lat:-13.8506, lon:-171.7513 },
       { name:"Nukuʻalofa", country:"Tonga", cc:"TO", flag:"🇹🇴", tz:"Pacific/Tongatapu", lat:-21.1394, lon:-175.2049 },
       { name:"Port Vila", country:"Vanuatu", cc:"VU", flag:"🇻🇺", tz:"Pacific/Efate", lat:-17.7333, lon:168.3273 },
+      { name:"Suva", country:"Fiji", cc:"FJ", flag:"🇫🇯", tz:"Pacific/Fiji", lat:-18.1248, lon:178.4501 },
+      { name:"Honiara", country:"Solomon Islands", cc:"SB", flag:"🇸🇧", tz:"Pacific/Guadalcanal", lat:-9.4280, lon:159.9729 },
+      { name:"Nouméa", country:"New Caledonia", cc:"NC", flag:"🇳🇨", tz:"Pacific/Noumea", lat:-22.2758, lon:166.4581 },
+      { name:"Papeete", country:"French Polynesia", cc:"PF", flag:"🇵🇫", tz:"Pacific/Tahiti", lat:-17.5516, lon:-149.5585 },
+      { name:"Pago Pago", country:"American Samoa", cc:"AS", flag:"🇦🇸", tz:"Pacific/Pago_Pago", lat:-14.2756, lon:-170.7020 },
+      { name:"Anchorage", country:"United States", cc:"US", flag:"🇺🇸", tz:"America/Anchorage", lat:61.2181, lon:-149.9003 },
+      { name:"Tarawa", country:"Kiribati", cc:"KI", flag:"🇰🇮", tz:"Pacific/Tarawa", lat:1.3290, lon:172.9790 },
     ];
 
     // Locally-iconic drinks per city. Mix of beer / cocktail / wine / spirit
@@ -1568,7 +1575,7 @@
         : eligible;
 
       if (ordered.length === 0) {
-        renderError("Nothing in happy hour right now.", "That shouldn't happen \u2014 try again in a moment.");
+        renderEmpty();
         refreshBtn.classList.remove("spinning");
         refreshBtn.disabled = false;
         return;
@@ -1810,6 +1817,32 @@
           <h2 class="reveal d-2">${escapeHtml(headline)}</h2>
           <p class="dateline reveal d-3" style="margin-bottom: 24px">${escapeHtml(sub || "")}</p>
           <a class="retry reveal d-4" href="#" onclick="event.preventDefault(); load();">Try again</a>
+        </div>
+      `;
+      requestAnimationFrame(() => {
+        hero.querySelectorAll(".reveal").forEach(el => el.classList.add("in"));
+      });
+      document.getElementById("veil").classList.add("hidden");
+    }
+
+    // Hit when no city is currently in coffee time. Most likely the world
+    // is mid-evening instead, point the visitor to happyhour.
+    function renderEmpty() {
+      stopSlideshow();
+      applyAccent(null);
+      document.getElementById("photo-a").removeAttribute("src");
+      document.getElementById("photo-b").removeAttribute("src");
+      document.getElementById("photo-a").classList.remove("loaded");
+      document.getElementById("photo-b").classList.remove("loaded");
+      document.getElementById("fallback").classList.add("visible");
+      document.getElementById("tint").classList.remove("visible");
+      const hero = document.getElementById("hero");
+      hero.innerHTML = `
+        <div class="err">
+          <p class="eyebrow reveal d-1"><span>Quiet hour</span></p>
+          <h2 class="reveal d-2">It's evening everywhere.</h2>
+          <p class="dateline reveal d-3" style="margin-bottom: 28px">Nothing's at coffee time right now. The world's mostly winding down.</p>
+          <a class="retry reveal d-4" href="/projects/happyhour.html">Try happyhour &rarr;</a>
         </div>
       `;
       requestAnimationFrame(() => {
