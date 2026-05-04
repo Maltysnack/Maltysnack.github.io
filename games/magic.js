@@ -12,6 +12,8 @@
   let cards = null, cardsByName = null, pairs = null;
   let allNames = null;
   let dataReady = false;
+  let decks = null; // raw decks, lazy-loaded on first "view lists" action
+  let listsOpen = false;
 
   // ── Selection (mirrored to URL hash #sel=a,b,c) ──
   let selection = parseSelectionFromHash();
@@ -31,11 +33,13 @@
   function selectionAdd(name) {
     if (!name || selection.includes(name)) return;
     selection = [...selection, name];
+    listsOpen = false;
     writeSelectionToHash();
     render();
   }
   function selectionRemove(name) {
     selection = selection.filter((n) => n !== name);
+    if (!selection.length) listsOpen = false;
     writeSelectionToHash();
     render();
   }
@@ -312,6 +316,16 @@
     `;
   }
 
+  // ── Matching decks ──
+  // Decks (in decks_raw.json) where every card in selection appears in main.
+  function matchingDecks() {
+    if (!decks || !selection.length) return [];
+    return decks.filter((d) => {
+      const names = new Set((d.main || []).map((c) => c.name));
+      return selection.every((n) => names.has(n));
+    });
+  }
+
   function renderRecommendations() {
     if (!dataReady) return `<div class="loading">loading…</div>`;
     const recs = combinedRecommendations(selection);
@@ -344,7 +358,79 @@
       <div class="stacked">
         ${section("What fits", subtitle, renderGrid(items))}
         ${landItems ? `<div class="manabase-row"><div class="manabase-label">Manabase ties</div><div class="manabase-strip">${landItems}</div></div>` : ""}
+        ${renderListsSection()}
       </div>
+    `;
+  }
+
+  function renderListsSection() {
+    // Always offer the toggle when selection is non-empty. Lazy-load decks_raw on first open.
+    const matchCount = decks ? matchingDecks().length : null;
+    const label = matchCount === null
+      ? "view matching lists"
+      : `${matchCount} matching list${matchCount === 1 ? "" : "s"}`;
+    const arrow = listsOpen ? "▴" : "▾";
+    return `
+      <section class="sec lists-sec">
+        <button class="lists-toggle" id="lists-toggle">${label} ${arrow}</button>
+        ${listsOpen && decks ? renderListsBody() : ""}
+      </section>
+    `;
+  }
+
+  function renderListsBody() {
+    const ms = matchingDecks();
+    if (!ms.length) {
+      return `<div class="rec-empty">no winning lists contain all of these cards together</div>`;
+    }
+    // Sort by weight (PT Top 8 first) then by event date (newest first)
+    ms.sort((a, b) => (b.weight || 1) - (a.weight || 1) || (b.week || "").localeCompare(a.week || ""));
+    return `<div class="lists-body">${ms.map(renderDeck).join("")}</div>`;
+  }
+
+  function tierLabelForWeight(w) {
+    if (w >= 10) return "PT Top 8";
+    if (w >= 5) return "Pro Tour";
+    if (w >= 3) return "Premier event";
+    return "Ladder";
+  }
+
+  function renderDeck(d) {
+    const title = d.deck_title || "Unknown player";
+    const sub = d.subtitle || "";
+    const ev = d.event_name || "";
+    const dt = d.event_date || (d.week ? fmtDate(d.week) : "");
+    const tag = tierLabelForWeight(d.weight || 1);
+    const link = d.source ? `<a class="deck-source" href="${escapeAttr(d.source)}" target="_blank" rel="noopener">source ↗</a>` : "";
+    const renderCardLine = (c) => {
+      const inSel = selection.includes(c.name);
+      return `<li class="${inSel ? "deck-line-hit" : ""}"><span class="deck-line-q">${c.qty}</span><button class="deck-line-name" data-name="${escapeAttr(c.name)}">${escapeHtml(c.name)}</button></li>`;
+    };
+    const main = (d.main || []).map(renderCardLine).join("");
+    const side = (d.side || []).map(renderCardLine).join("");
+    return `
+      <article class="deck-card">
+        <header class="deck-card-head">
+          <div class="deck-card-title">${escapeHtml(title)}</div>
+          <div class="deck-card-sub">
+            ${sub ? `<span>${escapeHtml(sub)}</span>` : ""}
+            ${ev ? `<span>${escapeHtml(ev)}</span>` : ""}
+            ${dt ? `<span>${escapeHtml(dt)}</span>` : ""}
+            <span class="deck-card-tag">${tag}</span>
+            ${link}
+          </div>
+        </header>
+        <div class="deck-card-cols">
+          <div class="deck-card-col">
+            <div class="deck-card-col-label">Main</div>
+            <ul class="deck-card-list">${main}</ul>
+          </div>
+          ${side ? `<div class="deck-card-col">
+            <div class="deck-card-col-label">Sideboard</div>
+            <ul class="deck-card-list">${side}</ul>
+          </div>` : ""}
+        </div>
+      </article>
     `;
   }
 
@@ -490,6 +576,25 @@
     // Export
     const exp = $("#sel-export");
     if (exp) exp.addEventListener("click", exportToMtga);
+    // View matching lists toggle
+    const ltog = $("#lists-toggle");
+    if (ltog) ltog.addEventListener("click", async () => {
+      if (!decks) {
+        ltog.textContent = "loading lists…";
+        try { decks = await loadJson("decks_raw"); }
+        catch { ltog.textContent = "couldn't load lists"; return; }
+      }
+      listsOpen = !listsOpen;
+      render();
+      if (listsOpen) {
+        const sec = $(".lists-sec");
+        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+    // Cards inside a deck list are clickable to add to selection
+    $$(".deck-line-name").forEach((el) => {
+      el.addEventListener("click", () => selectionToggle(el.dataset.name));
+    });
   }
 
   // ── MTGA export ──
