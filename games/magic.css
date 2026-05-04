@@ -333,6 +333,115 @@ body:has(.magic-page) .main {
 }
 
 
+/* ── Matching lists ─────────────────── */
+.lists-sec { margin-top: 16px; }
+.lists-toggle {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 14px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+  align-self: flex-start;
+}
+.lists-toggle:hover { color: var(--text); border-color: var(--text-dim); }
+
+.lists-body {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  margin-top: 18px;
+}
+.deck-card {
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 14px 16px;
+  background: var(--bg);
+}
+.deck-card-head { margin-bottom: 12px; }
+.deck-card-title {
+  font-size: var(--text-base);
+  font-weight: 600;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  margin-bottom: 4px;
+}
+.deck-card-sub {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  align-items: center;
+}
+.deck-card-tag {
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  border: 1px solid var(--accent-red);
+  padding: 1px 5px;
+  border-radius: 2px;
+}
+.deck-source {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  border-bottom: 1px dotted var(--text-dim);
+}
+.deck-source:hover { color: var(--accent-red); border-bottom-color: var(--accent-red); }
+
+.deck-card-cols {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 18px 32px;
+}
+.deck-card-col-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.deck-card-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.deck-card-list li {
+  display: flex;
+  gap: 6px;
+  font-size: var(--text-sm);
+  font-variant-numeric: tabular-nums;
+  align-items: baseline;
+}
+.deck-line-q {
+  color: var(--text-dim);
+  min-width: 1.2em;
+  text-align: right;
+}
+.deck-line-name {
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-size: var(--text-sm);
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+.deck-line-name:hover { color: var(--accent-red); }
+.deck-line-hit .deck-line-name { color: var(--accent-red); font-weight: 600; }
+
+@media (max-width: 720px) {
+  .deck-card-cols { grid-template-columns: 1fr; gap: 14px; }
+}
+
+
 /* ── Misc ─────────────────── */
 .dataset-stamp {
   margin-top: 80px;
