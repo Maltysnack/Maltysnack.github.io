@@ -21,11 +21,12 @@ jobs:
       - name: Scrape latest decklists
         run: python3 games/data/scrape.py
 
-      - name: Recompute card stats
-        run: python3 games/data/analyze.py
-
       - name: Enrich new cards from Scryfall (incremental)
         run: python3 games/data/enrich.py
+
+      # Analyze runs after enrich so it can use scryfall data for land detection
+      - name: Recompute card stats
+        run: python3 games/data/analyze.py
 
       - name: Commit and push if changed
         run: |

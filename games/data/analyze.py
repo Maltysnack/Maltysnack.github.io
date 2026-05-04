@@ -18,6 +18,7 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 RAW = HERE / "decks_raw.json"
+SCRYFALL = HERE / "scryfall.json"
 
 MIN_SUPPORT = 30           # weighted-deck floor for pair stats and trend data
 PAIR_FLOOR = 10            # weighted co-occurrence floor for any pair
@@ -44,9 +45,20 @@ def load_decks():
     return json.loads(RAW.read_text())
 
 
-def tier_for(centerpiece_prevalence: float, name: str) -> str | None:
-    if name in BASIC_LANDS:
-        return None  # basics aren't tiered
+def load_land_set() -> set[str]:
+    """Names of every card whose Scryfall type_line includes 'Land'.
+    Lands are excluded from tier classification and from explore panels:
+    "Steam Vents defines the meta" is technically true but useless."""
+    if not SCRYFALL.exists():
+        return set(BASIC_LANDS)
+    sf = json.loads(SCRYFALL.read_text())
+    return {n for n, m in sf.items()
+            if isinstance(m, dict) and "Land" in (m.get("type_line", "") or "")} | BASIC_LANDS
+
+
+def tier_for(centerpiece_prevalence: float, name: str, lands: set[str]) -> str | None:
+    if name in lands:
+        return None
     for threshold, label in TIER_BOUNDARIES:
         if centerpiece_prevalence >= threshold:
             return label
@@ -57,6 +69,7 @@ def main():
     decks = load_decks()
     n_decks = len(decks)
     total_weight = sum(d["weight"] for d in decks)
+    lands = load_land_set()
 
     main_w = defaultdict(float)         # weighted decks containing card in main
     side_w = defaultdict(float)
@@ -118,7 +131,7 @@ def main():
             "avg_copies_main": (sum(copies) / len(copies)) if copies else 0,
             "copy_hist_main": {str(k): copy_hist[k] for k in sorted(copy_hist)},
             "first_week": first_week.get(name, ""),
-            "tier": tier_for(cp_prev, name),
+            "tier": tier_for(cp_prev, name, lands),
         }
 
     # raw any_decks count (unweighted, for sample-size context)
@@ -199,8 +212,8 @@ def main():
 
     pillars, risen, disappeared = [], [], []
     for name, c in cards.items():
-        if name in BASIC_LANDS:
-            continue
+        if name in lands:
+            continue  # lands are excluded from explore panels
         if c["main_decks"] + c["side_decks"] < MIN_SUPPORT:
             continue
         rc = window_prevalence(name, recent, by_week_main_w)

@@ -20,7 +20,6 @@
   let meta = null;
   let dataReady = false;
   let deck = loadJsonLs(LS_DECK, { main: {}, side: {} });
-  let deckPanelClosed = false;
 
   // ── Utils ─────────────────────────────────────────────
   const $ = (s, root = document) => root.querySelector(s);
@@ -292,25 +291,17 @@
   // ── Deck state ─────────────────────────
   function deckCount(name) { return (deck.main || {})[name] || 0; }
   function deckUniqueCount() { return Object.keys(deck.main || {}).length; }
-  function deckCompactMode() { return deckUniqueCount() >= 2; }
   function deckCycle(name) {
     const cur = deckCount(name);
     const next = cur === 0 ? 4 : cur - 1;
     if (next === 0) delete deck.main[name];
     else deck.main[name] = next;
     saveLs(LS_DECK, deck);
-    // Compact mode hides the rail by default (deck is at the top of the page)
-    if (deckCompactMode()) deckPanelClosed = true;
-    else if (deckUniqueCount() > 0) deckPanelClosed = false;
-    applyDeckRailMode();
-    renderDeckRail();
     refreshCurrentView();
   }
   function deckClear() {
     deck = { main: {}, side: {} };
     saveLs(LS_DECK, deck);
-    applyDeckRailMode();
-    renderDeckRail();
     refreshCurrentView();
   }
   function deckTotalMain() {
@@ -460,6 +451,7 @@
       : "";
 
     main.innerHTML = `
+      ${topDeckStripHtml("")}
       <section class="intro">
         <h1 class="intro-heading">Magic.</h1>
         <p class="intro-body">
@@ -546,6 +538,7 @@
       </div>`;
     }).join("");
 
+    attachTopDeckStripActions(main);
     attachCardActions(main);
     if (dataReady) setSearchStatus("");
   }
@@ -577,9 +570,119 @@
     else renderVoidCard(name);
   }
 
-  function renderCardDetail(name, c) {
-    if (deckCompactMode()) return renderCardCompact(name, c);
+  // ── Top deck strip (always visible when deck has cards) ─────────────────
+  function buildMtgaExport() {
+    const lines = ["Deck"];
+    const sortedMain = Object.entries(deck.main || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    for (const [n, q] of sortedMain) {
+      const sf = scryfall[n] || {};
+      const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
+      lines.push(`${q} ${n}${setCn}`);
+    }
+    const sortedSide = Object.entries(deck.side || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+    if (sortedSide.length) {
+      lines.push("", "Sideboard");
+      for (const [n, q] of sortedSide) {
+        const sf = scryfall[n] || {};
+        const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
+        lines.push(`${q} ${n}${setCn}`);
+      }
+    }
+    return lines.join("\n");
+  }
+  function deckColorIdentity() {
+    const colors = new Set();
+    for (const n of Object.keys(deck.main || {})) {
+      const sf = scryfall[n] || {};
+      for (const col of sf.colors || []) colors.add(col);
+    }
+    return [...colors].sort().join("");
+  }
+  function deckCurve() {
+    const buckets = [0, 0, 0, 0, 0, 0, 0, 0];
+    for (const [n, q] of Object.entries(deck.main || {})) {
+      const sf = scryfall[n] || {};
+      if (!sf.type_line || sf.type_line.includes("Land")) continue;
+      const cmc = Math.min(7, Math.floor(sf.cmc || 0));
+      buckets[cmc] += q;
+    }
+    return buckets;
+  }
 
+  function topDeckStripHtml(viewedName) {
+    const total = deckTotalMain();
+    if (total === 0) return "";
+    const cards = Object.keys(deck.main).sort((a, b) => deck.main[b] - deck.main[a] || a.localeCompare(b));
+    const showConsidering = viewedName && deckCount(viewedName) === 0;
+    const cardsToShow = showConsidering ? [...cards, viewedName] : cards;
+    const colors = deckColorIdentity();
+    const curve = deckCurve();
+    const curveMax = Math.max(...curve, 1);
+
+    const cardsHtml = cardsToShow.map((n) => {
+      const im = img(n);
+      const dc = deckCount(n);
+      const isViewed = n === viewedName;
+      const isConsidering = isViewed && dc === 0;
+      const cls = "deck-top-card" + (isViewed ? " viewed" : "") + (isConsidering ? " considering" : "");
+      return `<button class="${cls}" data-name="${escapeHtml(n)}" title="${escapeHtml(n)}${isConsidering ? ", considering" : ""}">
+        ${im ? `<img src="${im}" alt="">` : `<div class="deck-top-card-noimg">${escapeHtml(n)}</div>`}
+        ${dc > 0 ? `<span class="deck-top-qty" data-deck-cycle="${escapeHtml(n)}" title="cycle copies">${dc}</span>` : `<span class="deck-top-considering">+</span>`}
+      </button>`;
+    }).join("");
+
+    return `
+      <div class="deck-top-bar">
+        <div class="deck-top-strip">${cardsHtml}</div>
+        <div class="deck-top-meta">
+          <span class="deck-top-stat"><strong>${total}</strong>/60 main</span>
+          <span class="deck-top-stat"><strong>${colors || "-"}</strong> colors</span>
+          <div class="deck-top-curve" title="mana curve">
+            ${curve.map((v, i) => `<span class="deck-top-curve-bar" style="height:${(v/curveMax)*100}%" title="${i === 7 ? "7+" : i}: ${v}"></span>`).join("")}
+          </div>
+          <button class="deck-top-action" id="deck-top-export">Copy MTGA import</button>
+          <button class="deck-top-action danger" id="deck-top-clear">Clear</button>
+        </div>
+        <div class="deck-top-status" id="deck-top-status"></div>
+      </div>
+    `;
+  }
+
+  function attachTopDeckStripActions(container) {
+    $$(".deck-top-card", container).forEach((el) => {
+      el.addEventListener("click", (e) => {
+        if (e.target.matches(".deck-top-qty")) return;
+        navigateToCard(el.dataset.name);
+      });
+    });
+    $$("[data-deck-cycle]", container).forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        deckCycle(el.dataset.deckCycle);
+      });
+    });
+    const exp = $("#deck-top-export", container);
+    if (exp) exp.addEventListener("click", async () => {
+      const text = buildMtgaExport();
+      const status = $("#deck-top-status", container);
+      try {
+        await navigator.clipboard.writeText(text);
+        status.textContent = "Copied. Paste into MTGA's deck import.";
+      } catch {
+        const ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); status.textContent = "Copied (fallback)."; }
+        catch { status.textContent = "Copy failed."; }
+        finally { document.body.removeChild(ta); }
+      }
+    });
+    const clr = $("#deck-top-clear", container);
+    if (clr) clr.addEventListener("click", () => {
+      if (confirm("Clear the entire deck?")) deckClear();
+    });
+  }
+
+  function renderCardDetail(name, c) {
     const main = $(".magic-page");
     const sf = scryfall[name] || {};
     const im = sf.image || sf.image_small || "";
@@ -645,11 +748,8 @@
       </div>`;
     };
 
-    const adaptiveBanner = usingDeck
-      ? `<div class="adaptive-banner">Recommendations adjusted for your deck (${deckCards.length} unique card${deckCards.length === 1 ? "" : "s"}). Combined lift across all of them, ranked.</div>`
-      : "";
-
     main.innerHTML = `
+      ${topDeckStripHtml(name)}
       <div class="detail-toolbar">
         <button class="detail-back">← back to explore</button>
         <div class="detail-toolbar-actions">
@@ -690,8 +790,6 @@
         </div>
       </div>
 
-      ${adaptiveBanner}
-
       <section class="detail-section">
         <div class="detail-section-header">
           <h3 class="detail-section-title">${usingDeck ? "What fits with your shell" : `Cards ${escapeHtml(name)} loves`}</h3>
@@ -709,96 +807,7 @@
 
     $(".detail-back").addEventListener("click", navigateHome);
     $("#primary-deck-toggle").addEventListener("click", () => deckCycle(name));
-    attachCardActions(main);
-  }
-
-  // ── Compact card view (used when deck has 2+ cards) ─────────────────────
-  // The big stats/sparkline disappear; deck assembled at top; companions below.
-  function renderCardCompact(name, c) {
-    const main = $(".magic-page");
-    const inDeck = deckCount(name) > 0;
-    const deckCards = deckCardNames();
-    const ctx = inDeck ? deckCards.slice() : [...deckCards, name];
-    const adaptive = adaptiveCompanions(ctx);
-
-    // Top strip: every card in the deck, plus the considered card if not in deck
-    const topCards = inDeck ? deckCards.slice() : [...deckCards, name];
-    const topStripHtml = topCards.map((n) => {
-      const im = img(n);
-      const dc = deckCount(n);
-      const isViewed = n === name;
-      const isConsidering = isViewed && !inDeck;
-      const cls = "deck-top-card" + (isViewed ? " viewed" : "") + (isConsidering ? " considering" : "");
-      return `<button class="${cls}" data-name="${escapeHtml(n)}" title="${escapeHtml(n)}${isConsidering ? " (considering)" : ""}">
-        ${im ? `<img src="${im}" alt="">` : `<div class="deck-top-card-noimg">${escapeHtml(n)}</div>`}
-        ${dc > 0 ? `<span class="deck-top-qty">${dc}</span>` : `<span class="deck-top-considering">+</span>`}
-      </button>`;
-    }).join("");
-
-    const renderAdaptiveStrip = (items) => {
-      if (!items.length) return `<div class="detail-section-empty">none above the noise floor</div>`;
-      const top = items.slice(0, 24);
-      const maxLift = Math.max(...top.map((c) => c.combinedLift), 0.01);
-      return `<div class="card-strip">${top.map((cc) => {
-        const stat = `<span class="freq-label">in <strong>${naturalFreq(cc.bestPGivenA)}</strong> of decks with your shell</span>`;
-        return miniCard(cc.name, {
-          extraClass: "companion-card" + (deckCount(cc.name) > 0 ? " companion-already-in" : ""),
-          lift: cc.combinedLift,
-          maxLift,
-          statHtml: stat,
-        });
-      }).join("")}</div>`;
-    };
-
-    const renderManabaseStrip = (items) => {
-      if (!items.length) return "";
-      const maxLift = Math.max(...items.map((c) => c.combinedLift), 0.01);
-      return `<div class="manabase-row">
-        <div class="manabase-label">Manabase ties</div>
-        <div class="manabase-strip">${items.map((c) => {
-          const im = img(c.name);
-          const thumb = im ? `<img class="manabase-thumb" src="${im}" alt="" loading="lazy">` : `<div class="manabase-thumb"></div>`;
-          const widthPct = Math.min(100, (c.combinedLift / maxLift) * 100).toFixed(0);
-          return `<button class="manabase-card" data-name="${escapeHtml(c.name)}">${thumb}<span class="manabase-name">${escapeHtml(c.name)}</span><span class="manabase-bar"><span class="manabase-bar-fill" style="width:${widthPct}%"></span></span></button>`;
-        }).join("")}</div>
-      </div>`;
-    };
-
-    const sf = scryfall[name] || {};
-    const consideringNote = inDeck
-      ? `<div class="compact-note">${deckCount(name)}× in your deck</div>`
-      : `<div class="compact-note compact-considering">Considering <strong>${escapeHtml(name)}</strong> alongside your ${deckCards.length} deck cards.</div>`;
-
-    main.innerHTML = `
-      <div class="detail-toolbar">
-        <button class="detail-back">← back to explore</button>
-        <div class="detail-toolbar-actions">
-          <button class="primary-deck-toggle ${inDeck ? "in-deck" : ""}" id="primary-deck-toggle">
-            ${inDeck ? `${deckCount(name)}× in deck, click to cycle` : `+ add to deck`}
-          </button>
-        </div>
-      </div>
-
-      <div class="deck-top-strip">
-        ${topStripHtml}
-      </div>
-      ${consideringNote}
-
-      <section class="detail-section">
-        <div class="detail-section-header">
-          <h3 class="detail-section-title">What fits with your shell</h3>
-          <span class="detail-section-explainer">geometric mean of lift across all of these</span>
-        </div>
-        ${renderAdaptiveStrip(adaptive.spells)}
-        ${renderManabaseStrip(adaptive.lands)}
-      </section>
-    `;
-
-    $(".detail-back").addEventListener("click", navigateHome);
-    $("#primary-deck-toggle").addEventListener("click", () => deckCycle(name));
-    $$(".deck-top-card", main).forEach((el) => {
-      el.addEventListener("click", () => navigateToCard(el.dataset.name));
-    });
+    attachTopDeckStripActions(main);
     attachCardActions(main);
   }
 
@@ -845,6 +854,7 @@
     const top = similar.slice(0, 12);
 
     main.innerHTML = `
+      ${topDeckStripHtml(name)}
       <div class="detail-toolbar">
         <button class="detail-back">← back to explore</button>
         <div class="detail-toolbar-actions">
@@ -877,146 +887,8 @@
 
     $(".detail-back").addEventListener("click", navigateHome);
     $("#primary-deck-toggle").addEventListener("click", () => deckCycle(name));
+    attachTopDeckStripActions(main);
     attachCardActions(main);
-  }
-
-  // ── Deck rail (persistent right column when populated) ─────────────────────
-  function applyDeckRailMode() {
-    const total = deckTotalMain();
-    document.body.classList.toggle("has-deck", total > 0 && !deckPanelClosed);
-  }
-
-  function buildMtgaExport() {
-    const lines = ["Deck"];
-    const sortedMain = Object.entries(deck.main || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    for (const [n, q] of sortedMain) {
-      const sf = scryfall[n] || {};
-      const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
-      lines.push(`${q} ${n}${setCn}`);
-    }
-    const sortedSide = Object.entries(deck.side || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    if (sortedSide.length) {
-      lines.push("", "Sideboard");
-      for (const [n, q] of sortedSide) {
-        const sf = scryfall[n] || {};
-        const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
-        lines.push(`${q} ${n}${setCn}`);
-      }
-    }
-    return lines.join("\n");
-  }
-
-  function deckColorIdentity() {
-    const colors = new Set();
-    for (const n of Object.keys(deck.main || {})) {
-      const sf = scryfall[n] || {};
-      for (const col of sf.colors || []) colors.add(col);
-    }
-    return [...colors].sort().join("");
-  }
-
-  function deckCurve() {
-    const buckets = [0, 0, 0, 0, 0, 0, 0, 0];
-    for (const [n, q] of Object.entries(deck.main || {})) {
-      const sf = scryfall[n] || {};
-      if (!sf.type_line || sf.type_line.includes("Land")) continue;
-      const cmc = Math.min(7, Math.floor(sf.cmc || 0));
-      buckets[cmc] += q;
-    }
-    return buckets;
-  }
-
-  function renderDeckRail() {
-    let rail = $(".deck-rail");
-    if (!rail) {
-      document.body.insertAdjacentHTML("beforeend", `<aside class="deck-rail"></aside>`);
-      rail = $(".deck-rail");
-    }
-    const total = deckTotalMain();
-    if (total === 0) {
-      rail.style.display = "none";
-      const opener = $(".deck-opener"); if (opener) opener.classList.remove("has-cards");
-      return;
-    }
-    rail.style.display = "flex";
-
-    const mainEntries = Object.entries(deck.main || {}).sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]));
-    const colors = deckColorIdentity();
-    const curve = deckCurve();
-    const curveMax = Math.max(...curve, 1);
-
-    rail.innerHTML = `
-      <div class="deck-rail-header">
-        <div class="deck-rail-title">Deck <span class="deck-rail-count">${total}/60</span></div>
-        <button class="deck-rail-close" id="deck-rail-close" aria-label="hide">−</button>
-      </div>
-
-      <div class="deck-rail-meta">
-        <div><span class="deck-meta-label">Colors</span> <span class="deck-meta-val">${colors || "-"}</span></div>
-        <div class="deck-curve">
-          ${curve.map((v, i) => `<div class="deck-curve-bar" style="height:${(v/curveMax)*100}%" title="${i === 7 ? "7+" : i}: ${v} cards"></div>`).join("")}
-        </div>
-        <div class="deck-curve-labels">${curve.map((_, i) => `<span>${i === 7 ? "7+" : i}</span>`).join("")}</div>
-      </div>
-
-      <div class="deck-rail-list">
-        ${mainEntries.map(([n, q]) => `
-          <div class="deck-line">
-            <button class="deck-line-qty" data-deck-cycle="${escapeHtml(n)}">${q}</button>
-            <button class="deck-line-name" data-name="${escapeHtml(n)}">${escapeHtml(n)}</button>
-          </div>
-        `).join("")}
-      </div>
-
-      <div class="deck-rail-actions">
-        <button class="deck-action" id="deck-export">Copy MTGA import</button>
-        <button class="deck-action danger" id="deck-clear">Clear</button>
-      </div>
-      <div class="deck-export-status" id="deck-export-status"></div>
-    `;
-
-    $("#deck-rail-close").addEventListener("click", () => {
-      deckPanelClosed = true;
-      applyDeckRailMode();
-      rail.style.display = "none";
-      const opener = $(".deck-opener"); if (opener) opener.classList.add("has-cards");
-    });
-    $$("[data-deck-cycle]", rail).forEach((el) => {
-      el.addEventListener("click", () => deckCycle(el.dataset.deckCycle));
-    });
-    $$(".deck-line-name", rail).forEach((el) => {
-      el.addEventListener("click", () => navigateToCard(el.dataset.name));
-    });
-    $("#deck-export").addEventListener("click", async () => {
-      const text = buildMtgaExport();
-      try {
-        await navigator.clipboard.writeText(text);
-        $("#deck-export-status").textContent = "Copied. Paste into MTGA's deck import.";
-      } catch {
-        const ta = document.createElement("textarea");
-        ta.value = text; document.body.appendChild(ta); ta.select();
-        try { document.execCommand("copy"); $("#deck-export-status").textContent = "Copied (fallback)."; }
-        catch { $("#deck-export-status").textContent = "Copy failed."; }
-        finally { document.body.removeChild(ta); }
-      }
-    });
-    $("#deck-clear").addEventListener("click", () => {
-      if (confirm("Clear the entire deck?")) deckClear();
-    });
-
-    // Reopen via a small floating button (only present after closing)
-    let opener = $(".deck-opener");
-    if (!opener) {
-      document.body.insertAdjacentHTML("beforeend", `<button class="deck-opener" title="show deck">🃏 <span class="deck-opener-count"></span></button>`);
-      opener = $(".deck-opener");
-      opener.addEventListener("click", () => {
-        deckPanelClosed = false;
-        applyDeckRailMode();
-        renderDeckRail();
-      });
-    }
-    opener.querySelector(".deck-opener-count").textContent = total > 0 ? `${total}` : "";
-    opener.classList.toggle("has-cards", deckPanelClosed && total > 0);
   }
 
   // ── Boot ─────────────────────────
@@ -1024,15 +896,11 @@
   window.addEventListener("storage", (e) => {
     if (e.key === LS_DECK) {
       deck = loadJsonLs(LS_DECK, { main: {}, side: {} });
-      applyDeckRailMode();
-      renderDeckRail();
-      renderRoute();
+      refreshCurrentView();
     }
   });
 
   loadInitial().then(() => {
-    applyDeckRailMode();
-    renderDeckRail();
     renderRoute();
     loadFull();
   }).catch((err) => {
