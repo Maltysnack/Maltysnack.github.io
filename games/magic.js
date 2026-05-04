@@ -291,25 +291,27 @@
 
   // ── Deck state ─────────────────────────
   function deckCount(name) { return (deck.main || {})[name] || 0; }
+  function deckUniqueCount() { return Object.keys(deck.main || {}).length; }
+  function deckCompactMode() { return deckUniqueCount() >= 2; }
   function deckCycle(name) {
     const cur = deckCount(name);
     const next = cur === 0 ? 4 : cur - 1;
     if (next === 0) delete deck.main[name];
     else deck.main[name] = next;
     saveLs(LS_DECK, deck);
-    if (Object.keys(deck.main).length > 0) deckPanelClosed = false;
+    // Compact mode hides the rail by default (deck is at the top of the page)
+    if (deckCompactMode()) deckPanelClosed = true;
+    else if (deckUniqueCount() > 0) deckPanelClosed = false;
     applyDeckRailMode();
     renderDeckRail();
-    if (currentRoute().type === "card") renderRoute();
-    else refreshThumbnailDeckBadges();
+    refreshCurrentView();
   }
   function deckClear() {
     deck = { main: {}, side: {} };
     saveLs(LS_DECK, deck);
     applyDeckRailMode();
     renderDeckRail();
-    if (currentRoute().type === "card") renderRoute();
-    else refreshThumbnailDeckBadges();
+    refreshCurrentView();
   }
   function deckTotalMain() {
     return Object.values(deck.main || {}).reduce((a, b) => a + b, 0);
@@ -382,11 +384,25 @@
     return { type: "home" };
   }
 
+  let lastRenderedKey = "";
   function renderRoute() {
     const route = currentRoute();
+    const key = route.type + ":" + (route.slug || "");
+    const isNewRoute = key !== lastRenderedKey;
     if (route.type === "card") renderCard(route.slug);
     else renderHome();
-    window.scrollTo(0, 0);
+    // Only scroll to top on actual route changes, not on in-place re-renders
+    if (isNewRoute) window.scrollTo(0, 0);
+    lastRenderedKey = key;
+  }
+  // For in-place updates triggered by deck changes; re-render content but
+  // preserve scroll position.
+  function refreshCurrentView() {
+    const route = currentRoute();
+    const x = window.scrollX, y = window.scrollY;
+    if (route.type === "card") renderCard(route.slug);
+    else refreshThumbnailDeckBadges();
+    window.scrollTo(x, y);
   }
 
   // ── Mini card with lift bar (Cleveland-McGill: length encodes magnitude) ─
@@ -562,6 +578,8 @@
   }
 
   function renderCardDetail(name, c) {
+    if (deckCompactMode()) return renderCardCompact(name, c);
+
     const main = $(".magic-page");
     const sf = scryfall[name] || {};
     const im = sf.image || sf.image_small || "";
@@ -691,6 +709,96 @@
 
     $(".detail-back").addEventListener("click", navigateHome);
     $("#primary-deck-toggle").addEventListener("click", () => deckCycle(name));
+    attachCardActions(main);
+  }
+
+  // ── Compact card view (used when deck has 2+ cards) ─────────────────────
+  // The big stats/sparkline disappear; deck assembled at top; companions below.
+  function renderCardCompact(name, c) {
+    const main = $(".magic-page");
+    const inDeck = deckCount(name) > 0;
+    const deckCards = deckCardNames();
+    const ctx = inDeck ? deckCards.slice() : [...deckCards, name];
+    const adaptive = adaptiveCompanions(ctx);
+
+    // Top strip: every card in the deck, plus the considered card if not in deck
+    const topCards = inDeck ? deckCards.slice() : [...deckCards, name];
+    const topStripHtml = topCards.map((n) => {
+      const im = img(n);
+      const dc = deckCount(n);
+      const isViewed = n === name;
+      const isConsidering = isViewed && !inDeck;
+      const cls = "deck-top-card" + (isViewed ? " viewed" : "") + (isConsidering ? " considering" : "");
+      return `<button class="${cls}" data-name="${escapeHtml(n)}" title="${escapeHtml(n)}${isConsidering ? " (considering)" : ""}">
+        ${im ? `<img src="${im}" alt="">` : `<div class="deck-top-card-noimg">${escapeHtml(n)}</div>`}
+        ${dc > 0 ? `<span class="deck-top-qty">${dc}</span>` : `<span class="deck-top-considering">+</span>`}
+      </button>`;
+    }).join("");
+
+    const renderAdaptiveStrip = (items) => {
+      if (!items.length) return `<div class="detail-section-empty">none above the noise floor</div>`;
+      const top = items.slice(0, 24);
+      const maxLift = Math.max(...top.map((c) => c.combinedLift), 0.01);
+      return `<div class="card-strip">${top.map((cc) => {
+        const stat = `<span class="freq-label">in <strong>${naturalFreq(cc.bestPGivenA)}</strong> of decks with your shell</span>`;
+        return miniCard(cc.name, {
+          extraClass: "companion-card" + (deckCount(cc.name) > 0 ? " companion-already-in" : ""),
+          lift: cc.combinedLift,
+          maxLift,
+          statHtml: stat,
+        });
+      }).join("")}</div>`;
+    };
+
+    const renderManabaseStrip = (items) => {
+      if (!items.length) return "";
+      const maxLift = Math.max(...items.map((c) => c.combinedLift), 0.01);
+      return `<div class="manabase-row">
+        <div class="manabase-label">Manabase ties</div>
+        <div class="manabase-strip">${items.map((c) => {
+          const im = img(c.name);
+          const thumb = im ? `<img class="manabase-thumb" src="${im}" alt="" loading="lazy">` : `<div class="manabase-thumb"></div>`;
+          const widthPct = Math.min(100, (c.combinedLift / maxLift) * 100).toFixed(0);
+          return `<button class="manabase-card" data-name="${escapeHtml(c.name)}">${thumb}<span class="manabase-name">${escapeHtml(c.name)}</span><span class="manabase-bar"><span class="manabase-bar-fill" style="width:${widthPct}%"></span></span></button>`;
+        }).join("")}</div>
+      </div>`;
+    };
+
+    const sf = scryfall[name] || {};
+    const consideringNote = inDeck
+      ? `<div class="compact-note">${deckCount(name)}× in your deck</div>`
+      : `<div class="compact-note compact-considering">Considering <strong>${escapeHtml(name)}</strong> alongside your ${deckCards.length} deck cards.</div>`;
+
+    main.innerHTML = `
+      <div class="detail-toolbar">
+        <button class="detail-back">← back to explore</button>
+        <div class="detail-toolbar-actions">
+          <button class="primary-deck-toggle ${inDeck ? "in-deck" : ""}" id="primary-deck-toggle">
+            ${inDeck ? `${deckCount(name)}× in deck, click to cycle` : `+ add to deck`}
+          </button>
+        </div>
+      </div>
+
+      <div class="deck-top-strip">
+        ${topStripHtml}
+      </div>
+      ${consideringNote}
+
+      <section class="detail-section">
+        <div class="detail-section-header">
+          <h3 class="detail-section-title">What fits with your shell</h3>
+          <span class="detail-section-explainer">geometric mean of lift across all of these</span>
+        </div>
+        ${renderAdaptiveStrip(adaptive.spells)}
+        ${renderManabaseStrip(adaptive.lands)}
+      </section>
+    `;
+
+    $(".detail-back").addEventListener("click", navigateHome);
+    $("#primary-deck-toggle").addEventListener("click", () => deckCycle(name));
+    $$(".deck-top-card", main).forEach((el) => {
+      el.addEventListener("click", () => navigateToCard(el.dataset.name));
+    });
     attachCardActions(main);
   }
 
