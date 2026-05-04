@@ -1,103 +1,18 @@
 /* ═══════════════════════════════════════
-   magic.css, page-specific styles for the meta explorer
-   Inherits from /style.css. No new dependencies.
+   magic.css
+   Encoding hierarchy: position > length > color (Cleveland-McGill).
+   Numbers as natural frequencies in language, not raw percentages.
+   The deck IS the lens. When populated, page becomes 2-column.
 ═══════════════════════════════════════ */
 
-/* The explorer needs more horizontal room than the default content-max */
 body:has(.magic-page) .main {
   max-width: none;
   padding-right: 56px;
 }
+.magic-page { max-width: 920px; }
 
-.magic-page {
-  max-width: 920px;
-}
-
-/* ── Pin strip ── */
-.pin-strip {
-  display: none;
-  align-items: center;
-  gap: 12px;
-  padding: 10px 16px;
-  margin: 0 0 24px;
-  background: var(--bg-soft);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  flex-wrap: wrap;
-  font-size: var(--text-sm);
-}
-.pin-strip.visible { display: flex; }
-.pin-strip-label {
-  font-size: var(--text-xs);
-  letter-spacing: 0.10em;
-  text-transform: uppercase;
-  font-weight: 600;
-  color: var(--text-dim);
-}
-.pin-strip-chips {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  flex: 1;
-}
-.pin-chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 3px 6px 3px 3px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  cursor: pointer;
-  transition: border-color var(--transition);
-  max-width: 220px;
-}
-.pin-chip:hover { border-color: var(--accent-red); }
-.pin-chip img {
-  width: 18px;
-  height: 25px;
-  border-radius: 1px;
-  object-fit: cover;
-}
-.pin-chip-name {
-  font-size: var(--text-xs);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 160px;
-}
-.pin-chip-x {
-  background: none;
-  border: none;
-  color: var(--text-dim);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-  padding: 0 4px;
-}
-.pin-chip-x:hover { color: var(--accent-red); }
-.pin-strip-action,
-.pin-strip-clear {
-  background: none;
-  border: 1px solid var(--accent-red);
-  color: var(--accent-red);
-  padding: 5px 10px;
-  border-radius: 3px;
-  font-family: inherit;
-  font-size: var(--text-xs);
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  cursor: pointer;
-  transition: background var(--transition), color var(--transition);
-}
-.pin-strip-action:hover { background: var(--accent-red); color: #fff; }
-.pin-strip-clear { border-color: var(--border); color: var(--text-dim); }
-.pin-strip-clear:hover { color: var(--text); border-color: var(--text-dim); }
-.pin-strip-hint {
-  font-size: var(--text-xs);
-  color: var(--text-dim);
-  font-style: italic;
-}
+/* When deck is populated, the rail takes ~300px on the right */
+body.has-deck .main { padding-right: 360px; }
 
 /* ── Search ── */
 .search-shell { margin: 0 0 64px; position: relative; }
@@ -105,7 +20,6 @@ body:has(.magic-page) .main {
   width: 100%;
   font-family: var(--font-body);
   font-size: var(--text-md);
-  font-weight: 400;
   color: var(--text-strong);
   background: var(--bg-soft);
   border: 1px solid var(--border);
@@ -115,7 +29,7 @@ body:has(.magic-page) .main {
   transition: border-color var(--transition), background var(--transition);
 }
 .search-input:focus { border-color: var(--accent-red); background: var(--bg); }
-.search-input::placeholder { color: var(--text-dim); font-weight: 400; }
+.search-input::placeholder { color: var(--text-dim); }
 .search-results {
   position: absolute;
   top: calc(100% + 4px);
@@ -186,13 +100,13 @@ body:has(.magic-page) .main {
   font-variant-numeric: tabular-nums;
 }
 .tier-badge-lg { font-size: var(--text-xs); padding: 4px 10px; }
-.tier-defines  { background: var(--accent-red); color: #fff; }
-.tier-driving  { background: transparent; color: var(--accent-red); border: 1px solid var(--accent-red); }
-.tier-major    { background: var(--accent-gold); color: var(--text-strong); }
-.tier-played   { background: var(--bg-soft); color: var(--text-muted); border: 1px solid var(--border); }
-.tier-fringe   { background: transparent; color: var(--text-dim); font-style: italic; }
+.tier-defines { background: var(--accent-red); color: #fff; }
+.tier-driving { background: transparent; color: var(--accent-red); border: 1px solid var(--accent-red); }
+.tier-major   { background: var(--accent-gold); color: var(--text-strong); }
+.tier-played  { background: var(--bg-soft); color: var(--text-muted); border: 1px solid var(--border); }
+.tier-fringe  { background: transparent; color: var(--text-dim); font-style: italic; }
 
-/* tiny corner tier dot on thumbnails */
+/* Tier dot on thumbnail */
 .thumb-tier {
   position: absolute;
   top: 4px;
@@ -264,6 +178,77 @@ body:has(.magic-page) .main {
   padding: 8px;
   cursor: default;
 }
+
+/* "In deck" visual treatment: subtle border, no opacity tricks */
+.mini-card.in-deck .mini-card-art {
+  outline: 2px solid var(--accent-red);
+  outline-offset: -2px;
+}
+.thumb-in-deck {
+  font-size: 10px;
+  color: var(--accent-red);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* Lift bar: position+length encoding (Cleveland-McGill #1).
+   Sits at the bottom of the card art. Length proportional to relative lift. */
+.lift-bar {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: 2;
+}
+.lift-bar-fill {
+  height: 100%;
+  background: var(--accent-red);
+  transition: width var(--transition-slow);
+}
+
+/* Tiny lift number, secondary to the bar */
+.lift-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  margin-left: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* "Add to deck" badge on thumbnail */
+.thumb-deck-badge {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 22px;
+  height: 22px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.65);
+  color: #fff;
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity var(--transition), background var(--transition);
+  z-index: 3;
+  font-family: inherit;
+  font-weight: 600;
+}
+.thumb-deck-badge.active {
+  opacity: 1;
+  background: var(--accent-red);
+}
+.mini-card-art:hover .thumb-deck-badge,
+.thumb-deck-badge:focus { opacity: 1; }
+.thumb-deck-badge:hover { background: var(--accent-red); }
+
 .mini-card-name-btn {
   background: none;
   border: none;
@@ -281,46 +266,10 @@ body:has(.magic-page) .main {
 .mini-card-stat {
   font-size: var(--text-xs);
   color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
 }
-.mini-card-stat strong { color: var(--accent-red); font-weight: 600; }
+.freq-label strong { color: var(--text); font-weight: 600; }
 .mini-card-delta-pos { color: var(--accent-red); font-weight: 600; }
 .mini-card-delta-neg { color: var(--text-dim); }
-
-/* Thumbnail action buttons (pin and add-to-deck) */
-.thumb-pin-toggle,
-.thumb-deck-badge {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 22px;
-  height: 22px;
-  border-radius: 3px;
-  background: rgba(0, 0, 0, 0.65);
-  color: #fff;
-  border: none;
-  font-size: 11px;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  transition: opacity var(--transition), background var(--transition);
-  z-index: 3;
-  font-family: inherit;
-  font-weight: 600;
-}
-.thumb-deck-badge { right: 4px; top: 30px; }
-.thumb-pin-toggle.active,
-.thumb-deck-badge.active {
-  opacity: 1;
-  background: var(--accent-red);
-}
-.mini-card-art:hover .thumb-pin-toggle,
-.mini-card-art:hover .thumb-deck-badge,
-.thumb-pin-toggle:focus,
-.thumb-deck-badge:focus { opacity: 1; }
-.thumb-pin-toggle:hover { background: var(--accent-red); }
 
 /* Catalyst rows */
 .catalyst-row {
@@ -348,7 +297,7 @@ body:has(.magic-page) .main {
 .catalyst-shell-trace { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.5; }
 .catalyst-shell-trace strong { color: var(--accent-red); font-weight: 600; }
 
-/* ── Detail toolbar (above card detail) ── */
+/* ── Detail toolbar ── */
 .detail-toolbar {
   display: flex;
   justify-content: space-between;
@@ -372,45 +321,27 @@ body:has(.magic-page) .main {
   transition: color var(--transition);
 }
 .detail-back:hover { color: var(--text); }
-.pin-toggle,
-.deck-control,
-.build-around-btn {
+
+.primary-deck-toggle {
   background: none;
-  border: 1px solid var(--border);
-  color: var(--text);
-  padding: 5px 10px;
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  padding: 8px 14px;
   border-radius: 3px;
   font-family: inherit;
-  font-size: var(--text-xs);
+  font-size: var(--text-sm);
   font-weight: 600;
-  letter-spacing: 0.04em;
   cursor: pointer;
-  transition: background var(--transition), color var(--transition), border-color var(--transition);
+  transition: background var(--transition), color var(--transition);
 }
-.pin-toggle:hover,
-.deck-control:hover { border-color: var(--accent-red); color: var(--accent-red); }
-.pin-toggle.active {
-  background: var(--accent-red);
-  color: #fff;
-  border-color: var(--accent-red);
-}
-.deck-control.in-deck {
-  background: var(--accent-red);
-  color: #fff;
-  border-color: var(--accent-red);
-}
-.deck-control-count { margin-right: 4px; }
-.build-around-btn {
-  border-color: var(--accent-gold);
-  color: var(--accent-gold);
-}
-.build-around-btn:hover { background: var(--accent-gold); color: var(--text-strong); }
+.primary-deck-toggle:hover { background: var(--accent-red); color: #fff; }
+.primary-deck-toggle.in-deck { background: var(--accent-red); color: #fff; }
 
 /* ── Card detail ── */
 .card-detail {
   display: flex;
   gap: 40px;
-  margin-bottom: 56px;
+  margin-bottom: 32px;
   align-items: flex-start;
 }
 .card-detail-art {
@@ -469,7 +400,6 @@ body:has(.magic-page) .main {
   background: var(--accent-red);
   border-radius: 2px 2px 0 0;
   min-height: 2px;
-  position: relative;
 }
 .copy-hist-bar.empty { background: var(--border); opacity: 0.4; }
 .copy-hist-labels {
@@ -500,7 +430,18 @@ body:has(.magic-page) .main {
   margin-top: 4px;
 }
 
-/* ── Detail sections ── */
+/* ── Adaptive banner ── */
+.adaptive-banner {
+  background: var(--bg-soft);
+  border-left: 3px solid var(--accent-red);
+  padding: 12px 16px;
+  border-radius: 3px;
+  margin-bottom: 24px;
+  font-size: var(--text-sm);
+  color: var(--text);
+}
+
+/* Detail sections */
 .detail-section { margin-bottom: 48px; }
 .detail-section-header {
   display: flex;
@@ -530,23 +471,7 @@ body:has(.magic-page) .main {
   font-style: italic;
 }
 
-.companion-card { position: relative; }
-.companion-lift {
-  position: absolute;
-  top: 4px;
-  left: 4px;
-  background: rgba(0, 0, 0, 0.72);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  padding: 2px 5px;
-  border-radius: 2px;
-  font-variant-numeric: tabular-nums;
-  z-index: 2;
-}
-
-/* Manabase row */
+/* Manabase row with bar viz */
 .manabase-row {
   margin-top: 18px;
   padding-top: 14px;
@@ -560,21 +485,24 @@ body:has(.magic-page) .main {
   font-weight: 600;
   margin-bottom: 10px;
 }
-.manabase-strip { display: flex; flex-wrap: wrap; gap: 8px 14px; }
+.manabase-strip { display: flex; flex-direction: column; gap: 4px; }
 .manabase-card {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: 22px 1fr 80px;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   background: none;
   border: none;
   cursor: pointer;
-  padding: 0;
+  padding: 4px 6px;
   font-family: inherit;
   color: var(--text-muted);
   font-size: var(--text-xs);
-  transition: color var(--transition);
+  transition: background var(--transition);
+  border-radius: 2px;
+  text-align: left;
 }
-.manabase-card:hover { color: var(--text-strong); }
+.manabase-card:hover { background: var(--bg-soft); color: var(--text-strong); }
 .manabase-thumb {
   width: 18px;
   height: 26px;
@@ -583,6 +511,19 @@ body:has(.magic-page) .main {
   object-fit: cover;
 }
 .manabase-name { font-weight: 500; }
+.manabase-bar {
+  width: 80px;
+  height: 4px;
+  background: var(--surface);
+  border-radius: 2px;
+  display: block;
+  overflow: hidden;
+}
+.manabase-bar-fill {
+  display: block;
+  height: 100%;
+  background: var(--accent-blue);
+}
 
 /* ── Void card view ── */
 .void-banner {
@@ -604,127 +545,59 @@ body:has(.magic-page) .main {
 }
 .void-banner.void-bad .void-banner-title { color: var(--accent-red); }
 
-/* ── Page title for web view ── */
-.page-title {
-  font-family: var(--font-body);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  letter-spacing: -0.025em;
-  color: var(--text-strong);
-  margin-bottom: 8px;
-}
-.page-subtitle { font-size: var(--text-base); color: var(--text-muted); margin-bottom: 32px; max-width: 580px; }
-
-.web-pinned-row {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-  gap: 14px;
-  margin-bottom: 48px;
-  padding-bottom: 32px;
-  border-bottom: 1px solid var(--border-light);
-}
-.web-pin-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  text-align: center;
-}
-.web-pin-card img {
-  width: 100%;
-  aspect-ratio: 488 / 680;
-  object-fit: cover;
-  border-radius: 4px;
-}
-.web-pin-name {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text-strong);
-}
-.web-pin-remove {
-  background: none;
-  border: 1px solid var(--border);
-  color: var(--text-dim);
-  font-size: var(--text-xs);
-  padding: 3px 8px;
-  border-radius: 2px;
-  cursor: pointer;
-  font-family: inherit;
-}
-.web-pin-remove:hover { color: var(--accent-red); border-color: var(--accent-red); }
-.web-subset-badge {
-  position: absolute;
-  bottom: 4px;
-  left: 4px;
-  background: rgba(31, 58, 95, 0.8);
-  color: #fff;
-  font-size: 10px;
-  font-weight: 600;
-  padding: 2px 5px;
-  border-radius: 2px;
-  z-index: 2;
-}
-
-/* ── Deck panel ── */
-.deck-panel {
+/* ── Deck rail (persistent right column) ── */
+.deck-rail {
   position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
-  width: 340px;
-  max-width: 90vw;
-  background: var(--bg);
+  width: 320px;
+  background: var(--bg-soft);
   border-left: 1px solid var(--border);
-  box-shadow: -8px 0 24px rgba(0, 0, 0, 0.10);
-  display: flex;
   flex-direction: column;
-  z-index: 200;
-  transform: translateX(100%);
-  transition: transform 240ms var(--ease);
-  padding: 20px 22px;
+  z-index: 50;
+  padding: 24px 22px;
   overflow-y: auto;
+  display: none;
 }
-.deck-panel.open { transform: translateX(0); }
-.deck-panel-header {
+body.has-deck .deck-rail { display: flex; }
+
+.deck-rail-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin-bottom: 18px;
 }
-.deck-panel-title {
+.deck-rail-title {
   font-size: var(--text-lg);
   font-weight: 600;
   color: var(--text-strong);
   letter-spacing: -0.02em;
 }
-.deck-panel-count {
+.deck-rail-count {
   font-size: var(--text-sm);
   color: var(--text-muted);
   font-weight: 400;
   margin-left: 6px;
   font-variant-numeric: tabular-nums;
 }
-.deck-panel-close {
+.deck-rail-close {
   background: none;
   border: none;
-  font-size: 24px;
+  font-size: 22px;
   line-height: 1;
   color: var(--text-dim);
   cursor: pointer;
-  padding: 0;
+  padding: 0 6px;
 }
-.deck-panel-close:hover { color: var(--text); }
-.deck-panel-empty {
-  font-size: var(--text-sm);
-  color: var(--text-muted);
-  padding: 20px 0;
-  line-height: 1.5;
-}
-.deck-panel-meta {
+.deck-rail-close:hover { color: var(--text); }
+
+.deck-rail-meta {
   margin-bottom: 18px;
   padding: 10px 12px;
-  background: var(--bg-soft);
+  background: var(--bg);
   border-radius: 3px;
+  border: 1px solid var(--border);
 }
 .deck-meta-label {
   font-size: var(--text-xs);
@@ -762,10 +635,12 @@ body:has(.magic-page) .main {
 }
 .deck-curve-labels span { flex: 1; text-align: center; }
 
-.deck-panel-list {
+.deck-rail-list {
   flex: 1;
   overflow-y: auto;
   margin-bottom: 14px;
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
 }
 .deck-line {
   display: flex;
@@ -805,7 +680,7 @@ body:has(.magic-page) .main {
 }
 .deck-line-name:hover { color: var(--accent-red); }
 
-.deck-panel-actions { display: flex; gap: 8px; }
+.deck-rail-actions { display: flex; gap: 8px; }
 .deck-action {
   flex: 1;
   background: none;
@@ -821,13 +696,11 @@ body:has(.magic-page) .main {
 }
 .deck-action:hover { background: var(--accent-red); color: #fff; }
 .deck-action.danger {
+  flex: 0 0 auto;
   border-color: var(--border);
   color: var(--text-dim);
 }
-.deck-action.danger:hover {
-  background: var(--text-dim);
-  color: var(--bg);
-}
+.deck-action.danger:hover { background: var(--text-dim); color: var(--bg); }
 .deck-export-status {
   font-size: var(--text-xs);
   color: var(--text-muted);
@@ -836,7 +709,7 @@ body:has(.magic-page) .main {
   min-height: 1em;
 }
 
-/* Floating deck opener button */
+/* Floating opener (only visible after deck rail is closed manually) */
 .deck-opener {
   position: fixed;
   bottom: 22px;
@@ -848,15 +721,15 @@ body:has(.magic-page) .main {
   border: 1px solid var(--border);
   cursor: pointer;
   font-size: 20px;
-  display: flex;
+  display: none;
   align-items: center;
   justify-content: center;
   z-index: 199;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.10);
   transition: transform var(--transition), background var(--transition);
 }
+.deck-opener.has-cards { display: flex; }
 .deck-opener:hover { transform: scale(1.05); }
-.deck-opener.has-cards { background: var(--accent-red); border-color: var(--accent-red); }
 .deck-opener-count {
   position: absolute;
   bottom: -4px;
@@ -871,11 +744,6 @@ body:has(.magic-page) .main {
   border: 2px solid var(--bg);
   min-width: 16px;
   text-align: center;
-}
-.deck-opener.has-cards .deck-opener-count {
-  background: #fff;
-  color: var(--accent-red);
-  border-color: var(--accent-red);
 }
 
 .dataset-stamp {
@@ -900,13 +768,19 @@ body:has(.magic-page) .main {
 /* ── Responsive ── */
 @media (max-width: 720px) {
   body:has(.magic-page) .main { padding: 36px 24px 72px; }
+  body.has-deck .main { padding-right: 24px; }
   .card-detail { flex-direction: column; gap: 24px; }
   .card-detail-art { width: 200px; margin: 0 auto; }
   .card-detail-stat-grid { grid-template-columns: 1fr 1fr; gap: 14px 24px; }
   .card-strip { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
-  .deck-panel { width: 100vw; max-width: 100vw; }
-  .web-pinned-row { grid-template-columns: repeat(auto-fill, minmax(110px, 1fr)); }
-
-  /* On touch devices, always show pin/deck buttons since hover doesn't fire */
-  .thumb-pin-toggle, .thumb-deck-badge { opacity: 0.85; }
+  .deck-rail {
+    width: 100vw;
+    max-width: 100vw;
+    bottom: 0;
+    top: auto;
+    height: 60vh;
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+  .thumb-deck-badge { opacity: 0.85; }
 }
