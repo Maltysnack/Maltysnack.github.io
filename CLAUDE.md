@@ -24,9 +24,19 @@ You **must** do all of these:
 1. Create the HTML page.
 2. Add it to `sidebar.js` in the right section.
 3. Add a card to `index.html`'s `home-links` section.
-4. `git add` the new page. CI will fail if it's untracked.
+4. **Include the favicon / apple-touch-icon block** in `<head>` (sanitize.sh will fail the build if it's missing on a `/style.css` page):
 
-If your page is self-contained with its own design system (like Happy Hour or Duoclue), it can skip `/style.css`. It still needs to live in the sidebar and home cards.
+   ```html
+   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+   <link rel="icon" href="/favicon.ico" sizes="any" />
+   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+   <link rel="manifest" href="/manifest.json" />
+   <meta name="theme-color" content="#13110d" />
+   ```
+
+5. `git add` the new page. CI will fail if it's untracked.
+
+If your page is self-contained with its own design system (like Happy Hour or Duoclue), it can skip `/style.css` and the icon block above. It still needs to live in the sidebar and home cards.
 
 ## Git hygiene
 
