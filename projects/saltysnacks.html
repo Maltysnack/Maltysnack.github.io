@@ -108,6 +108,12 @@
       .ss-feats li { grid-template-columns: 1fr; gap: 4px; }
     }
   </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#13110d" />
+
 </head>
 <body>
 
@@ -119,54 +125,38 @@
       <span class="ss-eyebrow">Project</span>
       <h1 class="page-title">Saltysnacks</h1>
       <p class="ss-lede">
-        A Chrome extension that takes over recipe pages the moment they load and replaces them with <em>just the ingredients and the method</em>. No life story, no autoplay video, no cookie banner climbing up from the bottom of the screen.
+        Chrome extension. Replaces recipe pages with a clean two-column view: ingredients left, method right.
       </p>
       <p class="ss-meta">
-        <span>Manifest V3</span><span>vanilla JS</span><span>v2.0</span><span>updated 04-05-2026</span>
+        <span>Manifest V3</span><span>vanilla JS</span><span>v2.0</span><span>04-05-2026</span>
       </p>
     </header>
 
     <section class="ss-section">
-      <h2>What it does</h2>
+      <h2>How it works</h2>
       <p>
-        On every page load the content script looks for a <code>Recipe</code> JSON-LD block. If it finds one, it tears down the existing DOM and rebuilds the page from scratch: a single hero photo, the title, ingredients in a sticky left column, numbered method on the right. If no structured data is present it falls back to scraping headings like <em>Ingredients</em> and <em>Method</em> out of the DOM.
-      </p>
-      <p>
-        Imperial units in either ingredients or steps get converted to metric on the way in. Pounds and ounces become grams or kilograms, Fahrenheit becomes Celsius. The original site is never loaded into view, but a small <em>view original</em> button in the header puts it back for that one URL if you need it.
+        Reads <code>Recipe</code> JSON-LD if present, otherwise scrapes headings called <em>Ingredients</em> and <em>Method</em>. Imperial units convert to metric on the way in. A <em>view original</em> button restores the source page for that URL.
       </p>
     </section>
 
     <section class="ss-section">
-      <h2>Smaller touches</h2>
+      <h2>Features</h2>
       <ul class="ss-feats">
-        <li><b>Tap to recall</b><span>Words in the method that match an ingredient become quiet blue links. Tap one and a popover shows the amount, while the matching ingredient line on the left highlights and scrolls into view.</span></li>
-        <li><b>Long-press to teach</b><span>Hold any word in the method to add or remove it from the ingredient links. Choices persist across sites via <code>chrome.storage.sync</code>.</span></li>
-        <li><b>Send to phone</b><span>Generates a self-contained HTML file of the cleaned recipe and offers it to the native share sheet. AirDrop sends a kitchen-ready page to your phone, no extension required to open it.</span></li>
-        <li><b>Print stylesheet</b><span>A separate print layout collapses the two columns into a single page so it actually prints like a recipe card.</span></li>
-        <li><b>Overlay killer</b><span>A MutationObserver watches for fixed and sticky elements that the original site keeps trying to inject after takeover (newsletter modals, chat widgets, sticky video players) and removes them as they appear.</span></li>
+        <li><b>Ingredient links</b><span>Words in the method that match an ingredient are tappable. Tap to see the amount; the matching line on the left highlights and scrolls into view.</span></li>
+        <li><b>Long-press</b><span>Hold any word to add or remove it as a highlight. Choices sync via <code>chrome.storage.sync</code>.</span></li>
+        <li><b>Send to phone</b><span>Generates a self-contained HTML file and hands it to the native share sheet.</span></li>
+        <li><b>Print</b><span>Collapses to a single column for paper.</span></li>
+        <li><b>Overlay cleanup</b><span>MutationObserver removes fixed and sticky elements the original page reinjects after takeover.</span></li>
       </ul>
     </section>
 
     <section class="ss-section">
       <h2>The numbered-section bug</h2>
       <p>
-        For a while the extension was hijacking pages it had no business touching. Tutorial articles, software docs, anything with a numbered structure would suddenly render as a recipe card and look extremely confused doing it.
+        The DOM-fallback parser treated any heading whose text contained the substring <code>step</code> as a recipe method. So a tutorial titled <em>Step 1: install the package</em> matched, and the next <code>&lt;ol&gt;</code> got rendered as a recipe.
       </p>
       <p>
-        The cause was in the DOM-fallback parser. After failing to find structured recipe data, it loops through every heading on the page and treats the following list as ingredients or steps based on a substring match in the heading text:
-      </p>
-      <div class="ss-callout">
-        <code>text.includes('step')</code> matched any heading containing the word, so a guide titled <em>Step 1: install the package</em> happily handed its <code>&lt;ol&gt;</code> over as a recipe method, and the page got taken over.
-      </div>
-      <p>
-        It only triggered on pages with <em>both</em> a <em>step</em>-ish heading <em>and</em> a list following it, which is why it took a while to spot. The fix is to require a stricter signal before the fallback fires: an exact heading match (<em>Method</em>, <em>Instructions</em>, <em>Directions</em>, <em>Steps</em> on its own), and a sibling ingredient list as confirmation that this is actually a recipe and not a numbered article.
-      </p>
-    </section>
-
-    <section class="ss-section">
-      <h2>Why</h2>
-      <p>
-        Modern recipe sites have become a kind of long-form essay with the recipe buried at the bottom. Saltysnacks is the smallest possible response to that: a layer that quietly does what the page should have done in the first place, and gets out of the way with one click if it gets it wrong.
+        Fix: require an exact heading word (<em>Method</em>, <em>Instructions</em>, <em>Directions</em>, <em>Steps</em>), and require a sibling ingredient list before the fallback fires.
       </p>
     </section>
 
