@@ -11,7 +11,7 @@ These will fail CI via `scripts/sanitize.sh`:
 1. **No em dashes anywhere.** Use a comma, period, semicolon, or restructure the sentence. maltysnack hates them. The script greps for the unicode em dash character and fails the build.
 2. **No personal info on public pages.**
    - Refer to the user as **`maltysnack`**, never their real name.
-   - The city `Melbourne` is fine. More specific isn't.
+   - No city, region, or location identifiers (yes, including the previously-allowed "Melbourne" reference). City-name data inside an app's content (e.g. world-clock cities) is fine; identifying maltysnack as living somewhere isn't.
    - No personal emails, no phone numbers.
 3. **No `.DS_Store` or junk files committed.** `.gitignore` already covers `.DS_Store`. Don't fight it.
 4. **No broken internal links** from `sidebar.js` or `index.html`.

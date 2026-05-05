@@ -83,10 +83,12 @@ echo "[5] broken internal links"
 links=$(grep -hoE 'href="/[^"#]+"' sidebar.js index.html 2>/dev/null | sed 's/href="//;s/"$//' | sort -u)
 broken=""
 for l in $links; do
-  if [[ "$l" == */ ]]; then
-    target=".${l}index.html"
+  # Strip query strings before resolving to a file
+  base="${l%%\?*}"
+  if [[ "$base" == */ ]]; then
+    target=".${base}index.html"
   else
-    target=".${l}"
+    target=".${base}"
   fi
   if [[ ! -e "$target" ]]; then
     broken="${broken}        $l -> $target (missing)\n"
