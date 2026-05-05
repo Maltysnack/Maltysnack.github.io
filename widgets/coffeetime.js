@@ -1,16 +1,17 @@
 // coffeetime widget for Scriptable
-// Shows a city currently in coffee time (6am–8am local) with a photo,
-// time, temp, and what locals would order. Refreshes ~every 15 min.
+// Shows a city currently in coffee time (6am to 8am local) with a photo,
+// weather, and what locals would order. Refreshes ~every 15 min.
 //
-// To install: long-press the home screen → "+" → Scriptable → choose the
-// medium widget size → tap the placeholder widget → Script: "coffeetime".
-// Tap the widget at any time to open the full happyhour page.
+// To install: long-press the home screen, tap "+", choose Scriptable,
+// pick the medium widget size, then tap the placeholder widget and set
+// Script: "coffeetime". Tap the widget at any time to open the full page.
 
 const PROXY        = "https://happyhour-proxy.vercel.app/api/image";
 const SITE_URL     = "https://maltysnack.github.io/projects/coffeetime.html";
 const HAPPY_START  = 6;
 const HAPPY_END    = 8;
 const REFRESH_MIN  = 15;
+const ACCENT       = "#ffba6a"; // warm gold for the eyebrow pulse-dot
 
 // ── DATA (auto-extracted from the website) ─────────────────────────
 const CITIES = [
@@ -638,13 +639,54 @@ function shuffle(arr) {
   return a;
 }
 function weatherEmoji(code) {
-  if (code === 0 || code === 1) return "☀";          // ☀
-  if (code === 2 || code === 3) return "⛅";          // ⛅
-  if (code >= 45 && code <= 48) return "🌫";    // 🌫
-  if (code >= 51 && code <= 67) return "🌦";    // 🌦
-  if (code >= 71 && code <= 86) return "❄";          // ❄
-  if (code >= 95) return "⛈";                        // ⛈
+  if (code === 0 || code === 1) return "☀";
+  if (code === 2 || code === 3) return "⛅";
+  if (code >= 45 && code <= 48) return "🌫";
+  if (code >= 51 && code <= 67) return "🌦";
+  if (code >= 71 && code <= 86) return "❄";
+  if (code >= 95) return "⛈";
   return "⛅";
+}
+
+// Bake a smooth dark gradient into the bottom 65% of the photo so
+// text reads cleanly on any image without relying on shadow alone.
+function darkenImage(src) {
+  const W = 360;
+  const H = 170;
+  const ctx = new DrawContext();
+  ctx.size = new Size(W, H);
+  ctx.respectScreenScale = true;
+  ctx.opaque = true;
+
+  // Cover-fit the source image into the canvas (object-fit: cover)
+  const sw = src.size.width;
+  const sh = src.size.height;
+  const imgRatio = sw / sh;
+  const ctxRatio = W / H;
+  let drawRect;
+  if (imgRatio > ctxRatio) {
+    const drawW = H * imgRatio;
+    drawRect = new Rect((W - drawW) / 2, 0, drawW, H);
+  } else {
+    const drawH = W / imgRatio;
+    drawRect = new Rect(0, (H - drawH) / 2, W, drawH);
+  }
+  ctx.drawImageInRect(src, drawRect);
+
+  // Bottom gradient: 0 alpha at 35% from top, ramping to 0.78 at bottom
+  const steps = 30;
+  const startY = H * 0.35;
+  const stripH = (H - startY) / steps;
+  for (let i = 0; i < steps; i++) {
+    const alpha = (i / (steps - 1)) * 0.78;
+    ctx.setFillColor(new Color("#000000", alpha));
+    ctx.fillRect(new Rect(0, startY + i * stripH, W, stripH + 1));
+  }
+  // Subtle top scrim so the temp top-right reads on bright skies
+  ctx.setFillColor(new Color("#000000", 0.32));
+  ctx.fillRect(new Rect(0, 0, W, 36));
+
+  return ctx.getImage();
 }
 
 // ── FETCH ───────────────────────────────────────────────────────────
@@ -655,19 +697,16 @@ async function fetchPayload() {
       const photoUrl = `${PROXY}?city=${encodeURIComponent(city.name)}&country=${encodeURIComponent(city.country)}&type=coffee`;
       const photoData = await new Request(photoUrl).loadJSON();
       if (!photoData || !photoData.url) continue;
-      const img = await new Request(photoData.url).loadImage();
+      const rawImg = await new Request(photoData.url).loadImage();
+      const img = darkenImage(rawImg);
 
       const wxUrl = `https://api.open-meteo.com/v1/forecast?latitude=${city.lat}&longitude=${city.lon}&current=temperature_2m,weather_code&temperature_unit=celsius&timezone=${encodeURIComponent(city.tz)}`;
       const wx = await new Request(wxUrl).loadJSON();
       const temp = Math.round(wx.current.temperature_2m);
       const code = wx.current.weather_code;
 
-      const time = new Intl.DateTimeFormat("en-US", {
-        timeZone: city.tz, hour: "numeric", minute: "2-digit", hour12: true,
-      }).format(new Date());
-
-      const order = COFFEES[`${city.name}-${city.cc}`] || [];
-      return { city, img, temp, code, time, order };
+      const drinks = COFFEES[`${city.name}-${city.cc}`] || [];
+      return { city, img, temp, code, drinks };
     } catch (e) {
       continue;
     }
@@ -682,62 +721,85 @@ function buildWidget(data) {
   w.refreshAfterDate = new Date(Date.now() + REFRESH_MIN * 60 * 1000);
 
   if (!data) {
-    // Empty state, point at happyhour
     w.backgroundColor = new Color("#0a0a0a");
-    w.setPadding(16, 16, 16, 16);
-    const eyebrow = w.addText("QUIET HOUR");
+    w.setPadding(16, 18, 16, 18);
+    const eyebrow = w.addText("· QUIET HOUR");
     eyebrow.font = Font.semiboldSystemFont(9);
     eyebrow.textColor = new Color("#ffffff", 0.55);
-    w.addSpacer(6);
+    w.addSpacer(8);
     const head = w.addText("It's evening everywhere.");
     head.font = new Font("Georgia-Italic", 18);
     head.textColor = new Color("#ffffff", 0.92);
     w.addSpacer(6);
-    const sub = w.addText("Try happyhour →");
+    const sub = w.addText("Try happyhour  →");
     sub.font = Font.regularSystemFont(11);
     sub.textColor = new Color("#ffffff", 0.65);
     return w;
   }
 
-  const { city, img, temp, code, time, order } = data;
+  const { city, img, temp, code, drinks } = data;
   w.backgroundImage = img;
-  w.setPadding(14, 16, 14, 16);
+  w.setPadding(12, 16, 14, 16);
 
-  // Top: tiny italic wordmark
-  const wm = w.addText("happyhour");
-  wm.font = new Font("Georgia-Italic", 11);
-  wm.textColor = new Color("#ffffff", 0.85);
-  wm.shadowColor = new Color("#000000", 0.7);
-  wm.shadowRadius = 4;
-
-  w.addSpacer();
-
-  // City row: name (left) + temp (right)
-  const row = w.addStack();
-  row.bottomAlignContent();
-  const cityText = row.addText(city.name);
-  cityText.font = new Font("Georgia", 26);
-  cityText.textColor = Color.white();
-  cityText.shadowColor = new Color("#000000", 0.75);
-  cityText.shadowRadius = 5;
-  cityText.lineLimit = 1;
-  cityText.minimumScaleFactor = 0.5;
-  row.addSpacer();
-  const tempText = row.addText(`${weatherEmoji(code)} ${temp}°`);
+  // Top row: weather temp pinned right
+  const topRow = w.addStack();
+  topRow.layoutHorizontally();
+  topRow.addSpacer();
+  const tempText = topRow.addText(`${weatherEmoji(code)} ${temp}°`);
   tempText.font = Font.semiboldSystemFont(13);
-  tempText.textColor = new Color("#ffffff", 0.95);
+  tempText.textColor = Color.white();
   tempText.shadowColor = new Color("#000000", 0.7);
   tempText.shadowRadius = 4;
 
+  w.addSpacer();
+
+  // Eyebrow: gold pulse-dot + label
+  const eyebrowRow = w.addStack();
+  eyebrowRow.layoutHorizontally();
+  eyebrowRow.centerAlignContent();
+  const dot = eyebrowRow.addText("·");
+  dot.font = Font.heavySystemFont(13);
+  dot.textColor = new Color(ACCENT);
+  dot.shadowColor = new Color("#000000", 0.7);
+  dot.shadowRadius = 4;
+  eyebrowRow.addSpacer(7);
+  const label = eyebrowRow.addText("IT'S COFFEE TIME IN");
+  label.font = Font.semiboldSystemFont(9.5);
+  label.textColor = new Color("#ffffff", 0.78);
+  label.shadowColor = new Color("#000000", 0.7);
+  label.shadowRadius = 4;
+
   w.addSpacer(2);
 
-  // Bottom line: time · top drink
-  const line = order[0] ? `${time}  ·  ${order[0]}` : time;
-  const meta = w.addText(line);
-  meta.font = Font.regularSystemFont(11);
-  meta.textColor = new Color("#ffffff", 0.78);
-  meta.shadowColor = new Color("#000000", 0.7);
-  meta.shadowRadius = 4;
+  // City: large serif
+  const cityText = w.addText(city.name);
+  cityText.font = new Font("Georgia", 26);
+  cityText.textColor = Color.white();
+  cityText.shadowColor = new Color("#000000", 0.7);
+  cityText.shadowRadius = 5;
+  cityText.lineLimit = 1;
+  cityText.minimumScaleFactor = 0.5;
+
+  // Country: smaller italic serif
+  const countryText = w.addText(city.country);
+  countryText.font = new Font("Georgia-Italic", 11);
+  countryText.textColor = new Color("#ffffff", 0.62);
+  countryText.shadowColor = new Color("#000000", 0.6);
+  countryText.shadowRadius = 4;
+  countryText.lineLimit = 1;
+  countryText.minimumScaleFactor = 0.7;
+
+  w.addSpacer(5);
+
+  // Drinks: top two, middot-separated
+  const drinkLine = drinks.slice(0, 2).join("  ·  ") || city.country;
+  const drinkText = w.addText(drinkLine);
+  drinkText.font = Font.regularSystemFont(11);
+  drinkText.textColor = new Color("#ffffff", 0.82);
+  drinkText.shadowColor = new Color("#000000", 0.6);
+  drinkText.shadowRadius = 4;
+  drinkText.lineLimit = 1;
+  drinkText.minimumScaleFactor = 0.7;
 
   return w;
 }
