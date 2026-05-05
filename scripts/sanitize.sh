@@ -107,7 +107,7 @@ fi
 # coffeetime is the morning sister of happyhour, only linked from the wordmark toggle.
 echo ""
 echo "[6] orphaned pages (exist but not in sidebar)"
-ignore_paths='/index.html|/grosh.html|/reginald.html|/wren/.*|/shelf/.*|/dnd/.*|/projects/coffeetime.html'
+ignore_paths='/index.html|/wren/.*|/shelf/.*|/dnd/.*|/projects/coffeetime.html'
 orphans=""
 while IFS= read -r p; do
   rel="${p#.}"
