@@ -1,16 +1,16 @@
 {
-  "n_decks": 3245,
+  "n_decks": 3264,
   "n_decks_by_weight": {
-    "1": 2817,
-    "3": 86,
-    "5": 334,
+    "1": 2840,
+    "3": 83,
+    "5": 333,
     "10": 8
   },
-  "total_weighted_decks": 4825,
-  "n_weeks": 98,
+  "total_weighted_decks": 4834,
+  "n_weeks": 99,
   "first_week": "2024-07-22",
   "last_week": "2026-05-08",
-  "n_cards_total": 3851,
+  "n_cards_total": 3867,
   "n_cards_above_support": 523,
   "min_support_decks": 30,
   "tier_boundaries": [
