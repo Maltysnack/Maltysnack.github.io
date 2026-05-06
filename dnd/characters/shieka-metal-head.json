@@ -1,0 +1,198 @@
+{
+  "schemaVersion": 1,
+  "id": "shieka-metal-head",
+  "descriptors": [
+    "metal",
+    "head"
+  ],
+  "identity": {
+    "name": "Shieka",
+    "classLine": "5 Warlock",
+    "background": "",
+    "speedLine": "Speed 30",
+    "languages": "",
+    "otherProficiencies": ""
+  },
+  "class": "warlock",
+  "level": 1,
+  "profBonus": 3,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 16,
+    "hpMax": 35,
+    "hitDiceMax": 1,
+    "hitDiceType": "d8"
+  },
+  "startingGold": 0,
+  "abilities": [
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 15
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 12
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": 17
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 15
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 12
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 9
+    }
+  ],
+  "saves": [
+    {
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "ability": "con",
+      "proficient": false
+    },
+    {
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "ability": "cha",
+      "proficient": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Arcana",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Athletics",
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "name": "Deception",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "History",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Insight",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Intimidation",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Investigation",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Medicine",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Nature",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Perception",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Performance",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Persuasion",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Religion",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Stealth",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Survival",
+      "ability": "wis",
+      "proficient": false
+    }
+  ],
+  "attacks": [],
+  "spellSlots": {
+    "1": 1
+  },
+  "resources": [],
+  "spells": [],
+  "limitedSpells": [],
+  "features": [
+    {
+      "name": "agonising blast",
+      "tag": "",
+      "desc": "armor of shadows"
+    }
+  ],
+  "defaultInventory": [
+    {
+      "name": "magic wand",
+      "notes": ""
+    }
+  ],
+  "homebrew": "magic wand has +5 damage but -3 atk rolls\nexploding skulls are the same damage as fireball but easier for people to dodge due to flight time. \nhit dice were just the aveerage each level instead of rolling\nchose arcana and decption\npact of the blade\n\n---\nAttacks/Spellcasting (from sheet, please review):\nexploding skull\n\nPersonalityTraits: loves heavy metal\nIdeals: looking for the sickest shred"
+}
