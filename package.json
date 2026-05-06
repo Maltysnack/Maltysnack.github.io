@@ -1,0 +1,7 @@
+{
+  "name": "maltysnack-site",
+  "private": true,
+  "engines": {
+    "node": ">=18"
+  }
+}

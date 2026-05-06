@@ -1,0 +1,25 @@
+# Vercel only needs the API + a tiny placeholder static site. Everything
+# else lives on github.io and would just bloat the deploy.
+.git
+.github
+.claude
+node_modules
+duoclue
+projects
+games
+films
+shelf
+wren
+fonts
+filmclub
+dnd
+sidebar.js
+style.css
+manifest.json
+404.html
+*.png
+*.ico
+*.csv
+*.md
+sitemap.xml
+robots.txt
