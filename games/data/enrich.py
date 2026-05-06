@@ -130,27 +130,44 @@ BAD_FRAME_EFFECTS = {"showcase", "extendedart", "borderless", "fullart", "etched
 
 
 def printing_score(card) -> int:
-    """Higher = more standard art. Used to pick the best printing per name."""
+    """Higher = more standard art. Used to pick the best printing per name.
+
+    Hard rules first (set_type, border, frame_effects, image_status), then a
+    recency tiebreaker so reprints from current Standard sets win over older
+    printings when both are clean.
+    """
     score = 0
     set_type = card.get("set_type", "")
-    if set_type in ("expansion", "core"): score += 100
-    elif set_type == "draft_innovation": score += 80
-    elif set_type == "starter": score += 60
-    elif set_type in ("masters", "commander"): score += 40
-    elif set_type in PROMO_SET_TYPES: score -= 50
+    if set_type in ("expansion", "core"): score += 1000
+    elif set_type == "draft_innovation": score += 800
+    elif set_type == "starter": score += 600
+    elif set_type in ("masters", "commander"): score += 400
+    elif set_type in PROMO_SET_TYPES: score -= 500
     border = card.get("border_color", "")
-    if border == "black": score += 30
-    elif border == "white": score += 10
-    elif border == "borderless": score -= 40
-    elif border == "silver": score -= 20
+    if border == "black": score += 300
+    elif border == "white": score += 100
+    elif border == "borderless": score -= 400
+    elif border == "silver": score -= 200
     frame_effects = set(card.get("frame_effects", []) or [])
-    if frame_effects & BAD_FRAME_EFFECTS: score -= 60
-    if card.get("lang", "") == "en": score += 10
+    if frame_effects & BAD_FRAME_EFFECTS: score -= 600
+    if card.get("lang", "") == "en": score += 100
     img_status = card.get("image_status", "")
-    if img_status == "highres_scan": score += 10
-    elif img_status in ("missing", "placeholder"): score -= 200
-    if card.get("digital", False): score -= 30  # Arena-only printings sometimes have weird art
-    if card.get("legalities", {}).get("standard", "") == "legal": score += 5
+    if img_status == "highres_scan": score += 100
+    elif img_status in ("missing", "placeholder"): score -= 2000
+    if card.get("digital", False): score -= 300
+    if card.get("legalities", {}).get("standard", "") == "legal": score += 50
+
+    # Recency tiebreaker: prefer the newest clean printing. Adds up to ~1500
+    # for very-recent cards, decaying for older ones. Keeps reprints from
+    # current Standard sets winning over the original 1990s/2000s printing.
+    released = card.get("released_at", "") or ""
+    if len(released) >= 4:
+        try:
+            year = int(released[:4])
+            score += min(1500, max(0, (year - 1993) * 30))  # 30 pts per year since 1993
+        except ValueError:
+            pass
+
     return score
 
 
@@ -167,7 +184,7 @@ def main():
     # We've changed printing-selection logic. Force-refresh every entry so we
     # pick the best printing under the new scoring rules. Marker key tracks
     # the schema version; bumping it triggers a full rebuild of the cache.
-    SCHEMA_VERSION = "v2-printing-score"
+    SCHEMA_VERSION = "v3-recency-tiebreak"
     if cache.get("__schema__") != SCHEMA_VERSION:
         print(f"  schema bump: rebuilding entire cache ({len(cache)} entries)",
               file=sys.stderr)
