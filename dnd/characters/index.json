@@ -5,8 +5,12 @@
     {
       "id": "grosh-chef-lifeguard",
       "name": "Grosh",
-      "descriptors": ["chef", "lifeguard"],
-      "class": "Triton Paladin (Ancients)",
+      "descriptors": [
+        "chef",
+        "lifeguard"
+      ],
+      "classLine": "Triton Paladin (Ancients) 5",
+      "class": "paladin",
       "level": 5,
       "background": "Chef"
     }
