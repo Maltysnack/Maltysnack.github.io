@@ -1,11 +1,43 @@
 /* ═══════════════════════════════════════
-   sidebar.js - universal nav + theme toggle + watermark
+   sidebar.js - universal nav + theme toggle + watermark + favicons
    Single source of truth. Edit here only.
    Root-relative paths.
+
+   Favicons: bump FAVICON_VERSION when the icon files change. Every
+   page that includes this script automatically picks up the new
+   version on next load. Pages no longer need to hand-roll the icon
+   block; this script injects canonical links into <head> if they're
+   missing or stale.
 ═══════════════════════════════════════ */
 
 (function () {
   const path = window.location.pathname;
+  const FAVICON_VERSION = '3';
+
+  /* ── Inject canonical favicon block into <head> ────────── */
+  function ensureFavicons() {
+    const want = [
+      { rel: 'icon',             type: 'image/png', sizes: '32x32', href: `/favicon-32.png?v=${FAVICON_VERSION}` },
+      { rel: 'icon',             href: `/favicon.ico?v=${FAVICON_VERSION}`, sizes: 'any' },
+      { rel: 'apple-touch-icon', href: `/apple-touch-icon.png?v=${FAVICON_VERSION}` },
+      { rel: 'manifest',         href: `/manifest.json?v=${FAVICON_VERSION}` },
+    ];
+    // Drop existing favicon-related links (any version) so we don't double up.
+    document.head.querySelectorAll('link[rel="icon"], link[rel="apple-touch-icon"], link[rel="manifest"]').forEach(l => l.remove());
+    for (const attrs of want) {
+      const link = document.createElement('link');
+      for (const [k, v] of Object.entries(attrs)) link.setAttribute(k, v);
+      document.head.appendChild(link);
+    }
+    // Theme color meta (idempotent)
+    if (!document.querySelector('meta[name="theme-color"]')) {
+      const m = document.createElement('meta');
+      m.name = 'theme-color';
+      m.content = '#13110d';
+      document.head.appendChild(m);
+    }
+  }
+  ensureFavicons();
 
   function active(href) {
     const file = href.split('/').pop();

@@ -125,27 +125,29 @@ else
   note_ok "every public page is reachable from sidebar"
 fi
 
-# ── 7. Site pages missing the apple-touch-icon block ─────────────────────────
-# Any HTML page that includes /style.css (so it's part of the main site) must
-# also include apple-touch-icon. Self-contained sub-apps (Duoclue, Happy Hour,
-# anything not using /style.css) are exempt.
+# ── 7. Site pages must include sidebar.js (which injects favicons + nav) ─────
+# Any HTML page that uses /style.css (so it's part of the main site) must load
+# sidebar.js. sidebar.js is the source of truth for the canonical favicon
+# block, so a page that loads it gets the right icons automatically.
+# Self-contained sub-apps (Duoclue, Happy Hour, anything not using /style.css)
+# are exempt because they ship their own design and chrome.
 echo ""
-echo "[7] favicon / apple-touch-icon coverage"
-missing_icons=""
+echo "[7] sidebar.js coverage (favicons + nav)"
+missing_sidebar=""
 while IFS= read -r p; do
   if grep -q '"/style.css"' "$p" 2>/dev/null; then
-    if ! grep -q 'apple-touch-icon' "$p" 2>/dev/null; then
-      missing_icons="${missing_icons}        ${p#./}\n"
+    if ! grep -q '/sidebar.js' "$p" 2>/dev/null; then
+      missing_sidebar="${missing_sidebar}        ${p#./}\n"
     fi
   fi
 done < <(find . -type f -name "*.html" \
   -not -path "./.git/*" -not -path "*/node_modules/*" -not -path "*/_next/*" -not -path "*/duoclue/*")
 
-if [[ -n "$missing_icons" ]]; then
-  note_fail "site pages missing apple-touch-icon block:"
-  echo -e "$missing_icons"
+if [[ -n "$missing_sidebar" ]]; then
+  note_fail "site pages missing sidebar.js:"
+  echo -e "$missing_sidebar"
 else
-  note_ok "every site page has the icon block"
+  note_ok "every site page loads sidebar.js (gets favicons + nav)"
 fi
 
 # ── Summary ──────────────────────────────────────────────────────────────────
