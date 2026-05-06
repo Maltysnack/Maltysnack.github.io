@@ -65,17 +65,29 @@ body:has(.magic-page) .main {
 .sr-sub { font-size: var(--text-xs); color: var(--text-dim); margin-top: 2px; }
 
 
-/* ── Selection strip ─────────────────── */
+/* ── Selection / ban strips ─────────────────── */
 .sel-strip {
   display: flex;
   align-items: center;
   gap: 12px;
   padding: 10px 14px;
-  margin: 0 0 32px;
+  margin: 0 0 12px;
   background: var(--bg-soft);
   border: 1px solid var(--border);
   border-radius: 4px;
   flex-wrap: wrap;
+}
+.sel-strip:last-of-type { margin-bottom: 32px; }
+.sel-strip.ban-strip {
+  border-color: rgba(179, 64, 47, 0.4);
+  background: rgba(179, 64, 47, 0.06);
+}
+.sel-strip-label {
+  font-size: var(--text-xs);
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  font-weight: 600;
+  color: var(--text-dim);
 }
 .sel-strip-cards {
   display: flex;
@@ -83,39 +95,75 @@ body:has(.magic-page) .main {
   flex-wrap: wrap;
   flex: 1;
 }
-.sel-card {
+
+/* Chip = a card thumbnail with action buttons that show on hover */
+.chip {
   position: relative;
   width: 50px;
   aspect-ratio: 488 / 680;
+}
+.chip-card {
+  width: 100%;
+  height: 100%;
   border: none;
   padding: 0;
   background: var(--surface);
   border-radius: 3px;
   overflow: hidden;
-  cursor: pointer;
+  cursor: default;
+  display: block;
   transition: transform var(--transition);
 }
-.sel-card:hover { transform: translateY(-1px); }
-.sel-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
-.sel-card-noimg {
-  display: flex; align-items: center; justify-content: center;
-  width: 100%; height: 100%;
-  font-size: 8px; padding: 2px; color: var(--text-dim); text-align: center;
+.chip:hover .chip-card { transform: translateY(-1px); }
+.chip-card img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.chip-noimg {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  font-size: 8px;
+  padding: 2px;
+  color: var(--text-dim);
+  text-align: center;
 }
-.sel-card-x {
+.chip-ban .chip-card { filter: grayscale(70%) brightness(0.7); }
+
+.chip-actions {
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: rgba(180, 60, 50, 0.78);
-  color: #fff;
-  font-size: 22px;
-  font-weight: 600;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.78);
+  border-radius: 3px;
   opacity: 0;
   transition: opacity var(--transition);
 }
-.sel-card:hover .sel-card-x { opacity: 1; }
+.chip:hover .chip-actions { opacity: 1; }
+.chip-act {
+  background: var(--accent-red);
+  color: #fff;
+  border: none;
+  border-radius: 50%;
+  width: 22px;
+  height: 22px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: inherit;
+  line-height: 1;
+}
+.chip-act.chip-rem { background: var(--text-dim); }
+.chip-act.chip-rem:hover { background: var(--accent-red); }
+.chip-act.chip-ban { background: rgba(11, 11, 11, 0.92); border: 1px solid #fff; }
+.chip-act.chip-ban:hover { background: var(--accent-red); }
+.chip-act.chip-promote { background: var(--accent-gold); color: var(--text-strong); }
+.chip-act.chip-promote:hover { background: #efbe5b; }
 .sel-strip-export,
 .sel-strip-clear,
 .sel-strip-jump {
@@ -525,5 +573,6 @@ body:has(.magic-page) .main {
 @media (max-width: 720px) {
   body:has(.magic-page) .main { padding: 36px 24px 72px; }
   .grid { grid-template-columns: repeat(auto-fill, minmax(90px, 1fr)); gap: 10px; }
-  .thumb-tip { width: 180px; }
+  /* On touch devices, hover doesn't fire reliably; show actions at lower opacity by default */
+  .chip-actions { opacity: 0.85; }
 }

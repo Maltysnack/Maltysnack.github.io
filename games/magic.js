@@ -15,37 +15,80 @@
   let decks = null; // raw decks, lazy-loaded on first "view lists" action
   let listsOpen = false;
 
-  // ── Selection (mirrored to URL hash #sel=a,b,c) ──
-  let selection = parseSelectionFromHash();
+  // ── Selection + Bans (mirrored to URL hash #sel=a,b&ban=x,y) ──
+  let selection = parseHashList("sel");
+  let bans = parseHashList("ban");
 
-  function parseSelectionFromHash() {
-    const m = (location.hash || "").match(/^#sel=([^&]*)/);
+  function parseHashList(key) {
+    const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
     if (!m) return [];
     return m[1].split(",").filter(Boolean).map(decodeURIComponent);
   }
-  function writeSelectionToHash() {
-    const slugs = selection.map(encodeURIComponent).join(",");
-    const newHash = slugs ? "#sel=" + slugs : "";
+  function writeHash() {
+    const parts = [];
+    if (selection.length) parts.push("sel=" + selection.map(encodeURIComponent).join(","));
+    if (bans.length) parts.push("ban=" + bans.map(encodeURIComponent).join(","));
+    const newHash = parts.length ? "#" + parts.join("&") : "";
     if (newHash !== location.hash) {
       history.replaceState(null, "", location.pathname + newHash);
     }
   }
+  // Backward compat shim: old name
+  function writeSelectionToHash() { writeHash(); }
   function selectionAdd(name) {
     if (!name || selection.includes(name)) return;
+    bans = bans.filter((n) => n !== name);   // adding to selection unbans
     selection = [...selection, name];
     listsOpen = false;
-    writeSelectionToHash();
+    _adHocPairs = null;
+    writeHash();
+    ensureDecksForBansIfNeeded();
     render();
   }
   function selectionRemove(name) {
     selection = selection.filter((n) => n !== name);
     if (!selection.length) listsOpen = false;
-    writeSelectionToHash();
+    _adHocPairs = null;
+    writeHash();
     render();
   }
   function selectionToggle(name) {
     if (selection.includes(name)) selectionRemove(name);
     else selectionAdd(name);
+  }
+  function banAdd(name) {
+    if (!name || bans.includes(name)) return;
+    selection = selection.filter((n) => n !== name);  // banning removes from selection
+    bans = [...bans, name];
+    _adHocPairs = null;
+    writeHash();
+    ensureDecksForBansIfNeeded();
+    render();
+  }
+  function banRemove(name) {
+    bans = bans.filter((n) => n !== name);
+    _adHocPairs = null;
+    writeHash();
+    render();
+  }
+  function bansClear() {
+    bans = [];
+    _adHocPairs = null;
+    writeHash();
+    render();
+  }
+
+  // When bans become active, we need decks_raw.json loaded so we can filter
+  // the deck pool. Lazy-fetches in the background if not already loaded.
+  async function ensureDecksForBansIfNeeded() {
+    if (!bans.length || decks) return;
+    try {
+      decks = await loadJson("decks_raw");
+      _adHocPairs = null;
+      render();
+    } catch {
+      // silent: recommendations fall back to precomputed pairs without ban filter
+    }
   }
 
   // ── Utilities ──
@@ -94,16 +137,18 @@
   function synergyScore(name, sel) {
     if (!isLegal(name)) return null;
     if (sel.includes(name)) return null;
-    if (!pairs) return null;
+    if (bans.includes(name)) return null;
+    const activePairs = getActivePairs();
+    if (!activePairs) return null;
 
     const card = cardData(name);
     const recentPrev = card ? (card.recent_main_prevalence || 0) : 0;
 
     // Direct pair signal: collect lifts to each card in selection that has data
-    const validSel = sel.filter((s) => pairs[s]);
+    const validSel = sel.filter((s) => activePairs[s]);
     let lifts = [], cos = [], pCondToSel = [];
     for (const s of validSel) {
-      const r = (pairs[s].companions || []).find((x) => x.name === name);
+      const r = (activePairs[s].companions || []).find((x) => x.name === name);
       if (!r) continue;
       lifts.push(Math.min(r.lift, LIFT_CAP));
       cos.push(r.co_decks);
@@ -344,35 +389,60 @@
     `;
   }
 
-  function renderSelection() {
-    if (!selection.length) return "";
-    const cards = selection.map((n) => {
-      const im = img(n);
-      return `<button class="sel-card" data-name="${escapeAttr(n)}" title="${escapeAttr(n)}, click to remove">
-        ${im ? `<img src="${im}" alt="">` : `<span class="sel-card-noimg">${escapeHtml(n)}</span>`}
-        <span class="sel-card-x">×</span>
-      </button>`;
-    }).join("");
-
-    // Pro-lists indicator: show count if data already loaded, otherwise prompt
-    const matchHint = decks
-      ? (() => {
-          const n = matchingDecks().length;
-          return n > 0
-            ? `<button class="sel-strip-jump" id="sel-jump-lists">${n} matching list${n === 1 ? "" : "s"} ↓</button>`
-            : `<span class="sel-strip-hint">no matching lists yet</span>`;
-        })()
-      : `<button class="sel-strip-jump" id="sel-jump-lists">find matching lists ↓</button>`;
-
-    return `
-      <div class="sel-strip">
-        <div class="sel-strip-cards">${cards}</div>
-        ${matchHint}
-        <button class="sel-strip-export" id="sel-export" title="copy all selected cards as 4-of into MTGA paste format">export</button>
-        <button class="sel-strip-clear" id="sel-clear" title="clear selection (no confirmation)">clear</button>
-        <div class="sel-strip-status" id="sel-status"></div>
+  function chipHtml(n, kind) {
+    const im = img(n);
+    return `<div class="chip chip-${kind}" data-name="${escapeAttr(n)}">
+      <button class="chip-card" data-action="open" title="${escapeAttr(n)}">
+        ${im ? `<img src="${im}" alt="">` : `<span class="chip-noimg">${escapeHtml(n)}</span>`}
+      </button>
+      <div class="chip-actions">
+        ${kind === "sel"
+          ? `<button class="chip-act chip-rem" data-action="remove" title="remove from selection">×</button>
+             <button class="chip-act chip-ban" data-action="ban" title="ban this card">⊘</button>`
+          : `<button class="chip-act chip-rem" data-action="unban" title="remove ban">×</button>
+             <button class="chip-act chip-promote" data-action="promote" title="move to selection">↑</button>`}
       </div>
-    `;
+    </div>`;
+  }
+
+  function renderSelection() {
+    if (!selection.length && !bans.length) return "";
+
+    let html = "";
+
+    if (selection.length) {
+      const matchHint = decks
+        ? (() => {
+            const n = matchingDecks().length;
+            return n > 0
+              ? `<button class="sel-strip-jump" id="sel-jump-lists">${n} matching list${n === 1 ? "" : "s"} ↓</button>`
+              : `<span class="sel-strip-hint">no matching lists</span>`;
+          })()
+        : `<button class="sel-strip-jump" id="sel-jump-lists">find matching lists ↓</button>`;
+      html += `
+        <div class="sel-strip">
+          <div class="sel-strip-label">Selection</div>
+          <div class="sel-strip-cards">${selection.map((n) => chipHtml(n, "sel")).join("")}</div>
+          ${matchHint}
+          <button class="sel-strip-export" id="sel-export" title="copy as 4-of for MTGA import">export</button>
+          <button class="sel-strip-clear" id="sel-clear" title="clear selection">clear</button>
+          <div class="sel-strip-status" id="sel-status"></div>
+        </div>
+      `;
+    }
+
+    if (bans.length) {
+      html += `
+        <div class="sel-strip ban-strip">
+          <div class="sel-strip-label">Banned</div>
+          <div class="sel-strip-cards">${bans.map((n) => chipHtml(n, "ban")).join("")}</div>
+          <span class="sel-strip-hint">these cards and decks containing them are excluded from all stats</span>
+          <button class="sel-strip-clear" id="ban-clear" title="clear bans">clear</button>
+        </div>
+      `;
+    }
+
+    return html;
   }
 
   function renderLanding() {
@@ -419,28 +489,100 @@
 
   // ── Matching decks ──
   // Decks (in decks_raw.json) where every card in selection appears in main.
+  // When bans are active, decks containing any banned card are excluded.
   function matchingDecks() {
     if (!decks || !selection.length) return [];
+    const banSet = new Set(bans);
     return decks.filter((d) => {
       const names = new Set((d.main || []).map((c) => c.name));
+      if (bans.length && [...names].some((n) => banSet.has(n))) return false;
       return selection.every((n) => names.has(n));
     });
+  }
+
+  // ── Ban-aware ad-hoc pair stats ──
+  // When bans are active we recompute pair stats in the browser, filtering
+  // out any deck containing a banned card. Cached until selection or bans change.
+  let _adHocPairs = null;
+
+  function getActivePairs() {
+    if (!bans.length) return pairs;            // no bans: use precomputed
+    if (!decks) return pairs;                  // not loaded yet: fall back gracefully
+    if (_adHocPairs) return _adHocPairs;       // cached for this state
+    const banSet = new Set(bans);
+    const cutoff = (meta && meta.pair_window_first_week) || "";
+    const filtered = decks.filter((d) => {
+      if (cutoff && (d.week || "") < cutoff) return false;
+      return !(d.main || []).some((c) => banSet.has(c.name));
+    });
+    _adHocPairs = computeAdHocPairs(filtered, selection);
+    return _adHocPairs;
+  }
+
+  function computeAdHocPairs(filteredDecks, sel) {
+    const totalW = filteredDecks.reduce((s, d) => s + (d.weight || 1), 0);
+    if (totalW === 0 || !sel.length) return {};
+    const cardW = new Map();
+    for (const d of filteredDecks) {
+      const w = d.weight || 1;
+      for (const c of d.main || []) {
+        cardW.set(c.name, (cardW.get(c.name) || 0) + w);
+      }
+    }
+    const result = {};
+    for (const a of sel) {
+      const decksWithA = filteredDecks.filter((d) => (d.main || []).some((c) => c.name === a));
+      const aW = decksWithA.reduce((s, d) => s + (d.weight || 1), 0);
+      if (aW === 0) continue;
+      const pA = aW / totalW;
+      const candCoW = new Map();
+      for (const d of decksWithA) {
+        const w = d.weight || 1;
+        for (const c of d.main || []) {
+          if (c.name === a) continue;
+          candCoW.set(c.name, (candCoW.get(c.name) || 0) + w);
+        }
+      }
+      const companions = [];
+      for (const [cand, coW] of candCoW) {
+        if (coW < 4) continue;  // noise floor
+        const candTotal = cardW.get(cand) || 0;
+        if (candTotal === 0) continue;
+        const pCand = candTotal / totalW;
+        const pCo = coW / totalW;
+        const lift = pCo / (pA * pCand);
+        companions.push({
+          name: cand,
+          lift,
+          co_decks: Math.round(coW),
+          p_b_given_a: coW / aW,
+          p_a_given_b: coW / candTotal,
+        });
+      }
+      companions.sort((a, b) => b.lift - a.lift);
+      result[a] = { companions };
+    }
+    return result;
   }
 
   function renderRecommendations() {
     if (!dataReady) return `<div class="loading">loading…</div>`;
 
     // Score every viable candidate and rank
+    const activePairs = getActivePairs();
     const scored = [];
     const seen = new Set(selection);
+    const banSet = new Set(bans);
     const candidates = new Set();
     for (const s of selection) {
-      if (pairs[s]) for (const r of pairs[s].companions) candidates.add(r.name);
+      if (activePairs && activePairs[s]) for (const r of activePairs[s].companions) candidates.add(r.name);
     }
     // For sparse selections without pair data, also score the eligible card pool
     if (candidates.size < 12) {
       for (const c of cards || []) candidates.add(c.name);
     }
+    // Hard filter banned cards
+    for (const b of banSet) candidates.delete(b);
     for (const name of candidates) {
       if (seen.has(name)) continue;
       const score = synergyScore(name, selection);
@@ -660,9 +802,21 @@
         selectionToggle(el.dataset.name);
       });
     });
-    // Selection strip (click removes)
-    $$(".sel-card").forEach((el) => {
-      el.addEventListener("click", () => selectionRemove(el.dataset.name));
+    // Selection / ban chip actions
+    $$(".chip").forEach((el) => {
+      const name = el.dataset.name;
+      el.addEventListener("click", (e) => {
+        const target = e.target.closest("[data-action]");
+        if (!target) return;
+        const action = target.dataset.action;
+        if (action === "open") {
+          // Click on the card art does nothing in selection (use the × button to remove).
+          // For bans, also no-op on art click.
+        } else if (action === "remove") selectionRemove(name);
+        else if (action === "ban") banAdd(name);
+        else if (action === "unban") banRemove(name);
+        else if (action === "promote") { banRemove(name); selectionAdd(name); }
+      });
     });
     // Manabase rows
     $$(".manabase-card").forEach((el) => {
@@ -678,9 +832,12 @@
     const clr = $("#sel-clear");
     if (clr) clr.addEventListener("click", () => {
       selection = [];
-      writeSelectionToHash();
+      _adHocPairs = null;
+      writeHash();
       render();
     });
+    const banClr = $("#ban-clear");
+    if (banClr) banClr.addEventListener("click", bansClear);
     // Jump-to-lists button in selection strip
     const jump = $("#sel-jump-lists");
     if (jump) jump.addEventListener("click", async () => {
@@ -816,13 +973,17 @@
 
   // ── Boot ──
   window.addEventListener("hashchange", () => {
-    selection = parseSelectionFromHash();
+    selection = parseHashList("sel");
+    bans = parseHashList("ban");
+    _adHocPairs = null;
     render();
+    ensureDecksForBansIfNeeded();
   });
 
   loadInitial().then(() => {
     render();
     loadFull();
+    if (bans.length) ensureDecksForBansIfNeeded();
   }).catch((err) => {
     $(".magic-page").innerHTML = `<div class="error">couldn't load the dataset. ${escapeHtml(String(err))}</div>`;
   });
