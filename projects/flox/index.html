@@ -141,14 +141,21 @@
     <section class="fx-section">
       <h2>Example</h2>
       <p class="fx-codetitle">Program</p>
-      <pre class="fx-code">system Demo;
+      <pre class="fx-code">// A small two-source demo system.
+// Two upland creeks meet at a confluence and flow to an outlet.
+system Demo;
 
-Spring[2, 2.0, 0.7]    -&gt; Confluence[3, 1.8];
-Tributary[1, 1.5, 0.6] -&gt; Confluence[3, 1.8];
-Confluence[3, 1.8]     -&gt; Outlet[];
+/* River params: [baseFlow, peakMultiplier, decayRate]
+   baseFlow is L/s with no rainfall.
+   peakMultiplier scales the rainfall surge.
+   decayRate is the fraction of the surge retained each subsequent day. */
+
+Spring[2, 2.0, 0.7]    -&gt; Confluence[3, 1.8];   // upland creek
+Tributary[1, 1.5, 0.6] -&gt; Confluence[3, 1.8];   // smaller side branch
+Confluence[3, 1.8]     -&gt; Outlet[];             // empty brackets = outlet
 
 map Demo;
-print Demo 5;</pre>
+print Demo 5;   // simulate at 5mm of rainfall</pre>
       <p class="fx-codetitle">Output</p>
       <pre class="fx-code fx-output">=== RIVER SYSTEM MAP: Demo ===
 
