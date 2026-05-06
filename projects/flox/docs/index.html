@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flox Docs - maltysnack</title>
-  <meta name="description" content="Flox documentation: grammar, semantics, and language reference." />
+  <meta name="description" content="Flox documentation: grammar and language reference." />
   <link rel="stylesheet" href="/style.css" />
   <style>
     .dx-eyebrow {
@@ -32,14 +32,6 @@
     }
     .dx-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
 
-    .dx-lede {
-      font-size: var(--text-base);
-      color: var(--text-muted);
-      max-width: 620px;
-      line-height: 1.65;
-      margin-bottom: 8px;
-    }
-
     .dx-section { margin: 40px 0; }
     .dx-section h2 {
       font-size: var(--text-xs);
@@ -56,13 +48,12 @@
       list-style: none;
       padding: 0;
       margin: 0;
-      max-width: 620px;
     }
     .dx-toc li {
       display: grid;
       grid-template-columns: 36px 1fr;
       gap: 18px;
-      padding: 14px 0;
+      padding: 18px 0;
       border-bottom: 1px solid var(--border-light);
     }
     .dx-toc .num {
@@ -86,11 +77,6 @@
       font-size: var(--text-sm);
       line-height: 1.55;
       margin-top: 4px;
-    }
-    .dx-toc .pending {
-      color: var(--text-dim);
-      font-weight: 600;
-      font-size: var(--text-base);
     }
 
     .dx-foot {
@@ -122,9 +108,6 @@
       <p class="dx-meta">
         <span>v0.1</span><span>06-05-2026</span>
       </p>
-      <p class="dx-lede">
-        Reference material for the Flox language. Updated with each milestone. Sections marked <em>pending</em> exist as roadmap items only and are not yet implemented.
-      </p>
     </header>
 
     <section class="dx-section">
@@ -134,28 +117,7 @@
           <span class="num">01</span>
           <span>
             <a href="/projects/flox/docs/grammar.html">Grammar reference</a>
-            <span class="desc">Lexical structure, BNF, statements, node types, operators, semantics for river mode.</span>
-          </span>
-        </li>
-        <li>
-          <span class="num">02</span>
-          <span>
-            <span class="pending">Examples (pending)</span>
-            <span class="desc">Annotated walkthroughs of each example program in the repository.</span>
-          </span>
-        </li>
-        <li>
-          <span class="num">03</span>
-          <span>
-            <span class="pending">Modes (pending)</span>
-            <span class="desc">River mode today. Markov, traffic, SIR, supply, plumbing in later milestones.</span>
-          </span>
-        </li>
-        <li>
-          <span class="num">04</span>
-          <span>
-            <span class="pending">Implementation notes (pending)</span>
-            <span class="desc">Scanner, parser, AST, interpreter. Internal architecture and how to extend it.</span>
+            <span class="desc">Lexical structure, BNF, statements, node types, operators, semantics.</span>
           </span>
         </li>
       </ul>
