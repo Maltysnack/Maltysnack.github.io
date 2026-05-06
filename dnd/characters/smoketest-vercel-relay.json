@@ -1,0 +1,65 @@
+{
+  "schemaVersion": 1,
+  "id": "smoketest-vercel-relay",
+  "descriptors": [
+    "smoketest",
+    "vercel-relay"
+  ],
+  "identity": {
+    "name": "Smoketest",
+    "classLine": "Test Wizard 1",
+    "background": "Smoketest"
+  },
+  "class": "wizard",
+  "level": 1,
+  "profBonus": 2,
+  "spellcastingAbility": "int",
+  "combat": {
+    "ac": 10,
+    "hpMax": 6,
+    "hitDiceMax": 1,
+    "hitDiceType": "d6"
+  },
+  "abilities": [
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 10
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 10
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": 10
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 10
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 10
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 10
+    }
+  ],
+  "saves": [],
+  "skills": [],
+  "attacks": [],
+  "spellSlots": {},
+  "resources": [],
+  "spells": [],
+  "limitedSpells": [],
+  "features": [],
+  "defaultInventory": [],
+  "homebrew": ""
+}
