@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flox - maltysnack</title>
+  <meta name="description" content="Flox: a tiny domain-specific language for flow networks. Rivers today, Markov chains and traffic tomorrow." />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .fx-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .fx-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--accent-red);
+      display: inline-block;
+    }
+
+    .fx-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    .fx-lede em { font-style: italic; color: var(--text-strong); }
+
+    .fx-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+    }
+    .fx-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .fx-section { margin: 56px 0; }
+    .fx-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .fx-section p {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 640px;
+      margin-bottom: 14px;
+    }
+    .fx-section p strong { color: var(--text); font-weight: 600; }
+    .fx-section code {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.92em;
+      background: var(--border-light);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+
+    .fx-callout {
+      border-left: 2px solid var(--accent-red);
+      padding: 4px 0 4px 18px;
+      margin: 18px 0;
+      font-size: var(--text-base);
+      color: var(--text);
+      line-height: 1.65;
+      max-width: 640px;
+    }
+
+    .fx-stage {
+      display: grid;
+      grid-template-columns: 90px 1fr;
+      gap: 18px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+    .fx-stage b { font-weight: 600; color: var(--text); }
+    .fx-stage.fx-now b { color: var(--accent-red); }
+
+    @media (max-width: 640px) {
+      .fx-stage { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <header class="page-header">
+      <span class="fx-eyebrow">Project</span>
+      <h1 class="page-title">Flox</h1>
+      <p class="fx-lede">
+        A small domain-specific language for describing <em>flow networks</em> and simulating how stuff moves through them over time. Today it's rivers and dams. Tomorrow, Markov chains, traffic, and supply chains, all sharing one parser and one engine.
+      </p>
+      <p class="fx-meta">
+        <span>Java</span><span>tree-walking interpreter</span><span>placeholder</span><span>06-05-2026</span>
+      </p>
+    </header>
+
+    <section class="fx-section">
+      <h2>The pitch</h2>
+      <p>
+        Flow networks show up everywhere. Water through a catchment. Probability through a Markov chain. Cars through intersections. Goods through warehouses. They all share the same shape: nodes connected by directed edges, with stuff being redistributed each tick.
+      </p>
+      <p>
+        Flox is a tiny language that lets you describe one with an arrow operator and a few brackets, then watch it run. The river preset comes first because the dynamics are concrete and the visualisation is fun. Other modes plug into the same engine.
+      </p>
+    </section>
+
+    <section class="fx-section">
+      <h2>A taste</h2>
+      <div class="fx-callout">
+<pre style="margin:0;font-family:var(--font-mono, JetBrains Mono, monospace);font-size:0.9em;line-height:1.55;white-space:pre-wrap;">system Canberra;
+
+Googong[2, 2.0, 0.7] -&gt; googongDam{1000, 80%, 0.8, 1.2} -&gt; Queanbeyan[3, 1.5];
+upperMongolo[3, 1.8, 0.6] -&gt; Queanbeyan[3, 1.5];
+Queanbeyan[3, 1.5] -&gt; centralMongolo[];
+centralMongolo[] -&gt; burleyGriffinDam{5000, 60%, 0.9, 1.5} -&gt; lowerMongolo[];
+
+map Canberra;
+print Canberra 10;</pre>
+      </div>
+      <p>
+        Square brackets are rivers (<code>baseFlow</code>, <code>peakMultiplier</code>, <code>decayRate</code>). Curly brackets are dams (<code>capacity</code>, <code>threshold</code>, <code>normalRate</code>, <code>openRate</code>). Empty brackets are outlets. The <code>-&gt;</code> says water flows left to right.
+      </p>
+    </section>
+
+    <section class="fx-section">
+      <h2>Where we are</h2>
+      <div class="fx-stage fx-now">
+        <b>Now</b>
+        <span>Working scanner, parser, AST and tree-walking interpreter in Java. River hydrograph simulation, network map, per-day flow tables. Known rough edges: dam units bug, no comments, positional params only.</span>
+      </div>
+      <div class="fx-stage">
+        <b>Next</b>
+        <span>Harden the river language. Comments, named parameters, declare-once references, fix the dam units bug, rainfall as a series instead of a scalar, a golden-file test harness.</span>
+      </div>
+      <div class="fx-stage">
+        <b>Then</b>
+        <span>Port the interpreter to TypeScript. Ship a browser playground: Monaco editor, D3 graph, Recharts hydrograph, shareable permalinks.</span>
+      </div>
+      <div class="fx-stage">
+        <b>After</b>
+        <span>Generalise the engine with a <code>mode</code> switch and edge weights. Same parser, different tick rule. First non-river demo: a Markov chain.</span>
+      </div>
+      <div class="fx-stage">
+        <b>Eventually</b>
+        <span>Three.js renderer with procedural terrain. More modes: traffic, SIR epidemics, supply chains, pressure-driven plumbing.</span>
+      </div>
+    </section>
+
+    <section class="fx-section">
+      <h2>This page</h2>
+      <p>
+        Placeholder. As Flox grows, this is where findings land. Bugs uncovered, design decisions, screenshots, eventually an embedded playground. Updated as we go, not at the end.
+      </p>
+    </section>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
