@@ -148,8 +148,13 @@
   // baseline" framing taking out the rarity inflation.
   const NOVELTY_K = 5;
   const ROBUSTNESS_REF = 200;
-  const SCORE_SCALE = 235;
   const SEMANTIC_CAP = 30;
+  // Asymptotic mapping: score = 99 * (1 - exp(-CURVE_K * raw)). Approaches
+  // 99 but never reaches without an effectively perfect pairing. Reserves
+  // the very top of the scale for genuine outliers instead of clipping
+  // everything good to 99. CURVE_K tuned so a strong real-world pairing
+  // (raw ≈ 0.42) lands around 85, a perfect pairing (raw → 1) lands ~95+.
+  const CURVE_K = 4.5;
 
   function synergyScore(name, sel) {
     if (!isLegal(name)) return null;
@@ -172,19 +177,19 @@
     }
     if (pConds.length === 0) return semanticScore(name, sel);
 
-    // Mean P(B|A) across selection. Geometric mean would punish coverage
-    // gaps too harshly; arithmetic plus a coverage exponent is cleaner.
     const meanP = pConds.reduce((a, b) => a + b, 0) / pConds.length;
     const strength = recentPrev < 1 ? (meanP - recentPrev) / (1 - recentPrev) : 0;
     if (strength <= 0) return null;
 
     const totalCo = cos.reduce((a, b) => a + b, 0);
-    const robustness = Math.sqrt(totalCo / ROBUSTNESS_REF);
+    const robustness = Math.min(Math.sqrt(totalCo / ROBUSTNESS_REF), 1);  // capped
     const novelty = 1 / (1 + NOVELTY_K * recentPrev);
     const coverage = pConds.length / Math.max(validSel.length, 1);
 
     const raw = strength * robustness * novelty * Math.pow(coverage, 0.6);
-    return Math.round(Math.min(99, Math.max(0, raw * SCORE_SCALE)));
+    // Asymptotic to 99, never quite reaching it. 99 means truly singular.
+    const score = 99 * (1 - Math.exp(-CURVE_K * raw));
+    return Math.round(Math.min(99, Math.max(0, score)));
   }
 
   // Semantic fallback: shared color identity + same primary type. Bounded low.
@@ -1024,10 +1029,33 @@
   async function loadFull() {
     [cards, pairs] = await Promise.all([loadJson("cards"), loadJson("pairs")]);
     cardsByName = Object.fromEntries(cards.map((c) => [c.name, c]));
-    allNames = Array.from(new Set([
+    // Build the search index, deduping DFC name pairs. magic.gg's deck data
+    // uses the front-face name ("Hearth Elemental") for most DFCs, but some
+    // cards appear under the full "X // Y" form. Prefer whichever name the
+    // deck data actually uses (the one in cardsByName), hide the other.
+    const seenImage = new Map(); // image_url -> chosen name
+    const candidates = new Set([
       ...Object.keys(scryfall).filter((n) => !n.startsWith("__")),
       ...Object.keys(cardsByName),
-    ])).sort();
+    ]);
+    for (const n of candidates) {
+      const m = scryfall[n];
+      if (!m || typeof m !== "object") { seenImage.set(n, n); continue; }
+      const key = m.image_small || m.image || n;
+      const prior = seenImage.get(key);
+      if (!prior) { seenImage.set(key, n); continue; }
+      // Already have a name for this card. Pick the one that's in deck data.
+      const priorInData = !!cardsByName[prior];
+      const currentInData = !!cardsByName[n];
+      if (currentInData && !priorInData) seenImage.set(key, n);
+      else if (currentInData === priorInData) {
+        // Both or neither in data: prefer the canonical (full) name when both
+        // are valid Scryfall entries; otherwise keep whichever came first.
+        const priorMeta = scryfall[prior];
+        if (priorMeta && priorMeta.is_alias && !m.is_alias) seenImage.set(key, n);
+      }
+    }
+    allNames = Array.from(new Set(seenImage.values())).sort();
     dataReady = true;
     render(); // re-render now that we have full data
   }
