@@ -4,7 +4,7 @@
   "descriptors": ["metal", "head"],
   "identity": {
     "name": "Shieka",
-    "classLine": "Giant Fiend Warlock 5",
+    "classLine": "Giant Warlock (Fiend) 5",
     "background": "",
     "speedLine": "Speed 30",
     "languages": "Common, Giant",
@@ -102,5 +102,5 @@
     { "name": "Component Pouch", "notes": "" },
     { "name": "Scholar's Pack",  "notes": "books, ink, parchment, sand, knife" }
   ],
-  "homebrew": "DERIVED FROM RAW (corrected from sheet):\n* HP: 43 = 8 (lvl 1 max d8) + 4x5 (avg per d8 lvls 2-5) + 5x3 (CON 17 mod). Sheet said 35.\n* AC: 14 = Mage Armor (13 + DEX 1). Sheet said 16, but Fiend Patron grants no medium armor / shield prof, so the math doesn't justify 16. Override per uploader instruction. Add a magic item to homebrew if there's a 16 source.\n* Race: Giant (homebrew, not a standard 5E race). Speed defaulted to 30.\n* Alignment: goodytwoshoes (homebrew label).\n* Patron: Fiend, identified by 'dark ones blessing' + 'dark ones own luck' in the Feat+Traits field.\n* Spell levels corrected from the PDF where placed in wrong columns:\n  - Invisibility was in cantrip column -> 2nd lvl\n  - Hellish Rebuke was in 2nd-lvl column -> 1st lvl\n  - Vampiric Touch was in 2nd-lvl column -> 3rd lvl\n  - Fireball was in 2nd-lvl column -> 3rd lvl\n  - Magic Circle was in 2nd-lvl column -> 3rd lvl\n* Eldritch Blast was written as 'eldritch blase' in the Wpn Name field; corrected.\n\nHOMEBREW RULES:\n* Magic Wand: +5 damage on hit, -3 to attack rolls.\n* Exploding Skulls: 8d6 fire, 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on the save (DM ruling).\n* HP rolled hit dice taken as flat averages, not rolled.\n\nSTILL TO FILL IN:\n* Background (gives 2 skill profs, 2 languages or tools, equipment, a feature). Empty on the sheet.\n* Three more invocations: warlock 5 has 5 invocation slots, Shieka has 2 listed (Agonizing Blast, Armor of Shadows). Pick 3 more if not already chosen.\n* Confirm whether Fireball as a spell-known is intentional (already free via Fiend bonus list)."
+  "homebrew": "Magic Wand: +5 damage on hit, -3 to attack rolls.\n\nExploding Skulls: 8d6 fire, 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on the save (DM ruling)."
 }

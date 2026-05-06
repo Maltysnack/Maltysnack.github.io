@@ -165,7 +165,7 @@ function renderCards() {
     a.querySelector('.home-card-title').textContent = c.name;
     a.querySelector('.card-descriptors').textContent = desc;
     a.querySelector('.char-head').textContent = headParts || (c.classLine || '');
-    a.querySelector('.char-level').textContent = lvl ? `Lv ${lvl}` : '';
+    a.querySelector('.char-level').textContent = lvl ? `Level ${lvl}` : '';
     a.querySelector('.char-subclass').textContent = parts.subclass;
     grid.appendChild(a);
   });
