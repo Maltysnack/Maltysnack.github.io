@@ -18,6 +18,8 @@
   // ── Selection + Bans (mirrored to URL hash #sel=a,b&ban=x,y) ──
   let selection = parseHashList("sel");
   let bans = parseHashList("ban");
+  let showLands = false;     // lands toggle near "what fits" header
+  let searchQuery = "";      // live search input value, drives results strip
 
   function parseHashList(key) {
     const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
@@ -119,20 +121,35 @@
     return c && (c.tier === "defines" || c.tier === "driving");
   }
 
-  // ── Synergy Score (0-100, calibrated absolute) ──
-  // Components:
-  //   1. Recency-weighted geometric-mean lift across selection (capped at 30)
-  //   2. Sample-size dampening: log(1 + co-occurrence count)
-  //   3. Novelty discount: 1 / (1 + 8 * own_recent_prevalence)
-  //   4. Coverage: fraction of selection cards this candidate pairs with
-  //   5. Standard-legal hard filter (illegal cards return null)
-  //   6. Semantic fallback when no direct pair data: capped at 30
-  // Calibration constant tuned so that "obvious meta staples" land around 70-80,
-  // strong-but-novel hits land 85+, weak/popular noise stays in 30-60.
-  const SCORE_SCALE = 16;            // multiplier on raw to push into 0-100
-  const NOVELTY_K = 8;               // novelty curve steepness
-  const SEMANTIC_CAP = 30;           // ceiling for semantic-only matches
-  const LIFT_CAP = 30;
+  // ── Synergy Score (0-99, calibrated absolute) ──
+  //
+  // Three signals combined:
+  //
+  //   1. STRENGTH: how much higher P(card | selection) is than the card's
+  //      baseline P(card). Normalized as (P(B|A) - P(B)) / (1 - P(B)). This
+  //      is the lift improvement over chance on a 0..1 scale. Doesn't blow up
+  //      for tiny denominators the way raw lift does.
+  //
+  //   2. ROBUSTNESS: sqrt(total co-occurrences / 200). At 200+ co decks it's
+  //      already 1, at 50 co it's 0.5, at 5 co it's 0.16. Stops fluke pairs
+  //      from looking strong.
+  //
+  //   3. NOVELTY: 1 / (1 + 5 * P(card)). Pushes obvious meta staples down so
+  //      the more interesting hits rise above them.
+  //
+  // Multiplied together, then by COVERAGE^0.6 (fraction of selection the pair
+  // has data for), then by SCORE_SCALE to land in 0-99 range. Standard-legal
+  // hard filter; semantic fallback (capped at 30) when no direct pair data.
+  //
+  // Why not raw lift? Because two rare cards trivially have lift 30+ but
+  // those big numbers are almost entirely an artifact of small denominators.
+  // Strength sidesteps that: P(B|A)=0.98 for a rare pair vs P(B|A)=0.67 for
+  // a tight popular pair gets compared directly, with the "improvement over
+  // baseline" framing taking out the rarity inflation.
+  const NOVELTY_K = 5;
+  const ROBUSTNESS_REF = 200;
+  const SCORE_SCALE = 235;
+  const SEMANTIC_CAP = 30;
 
   function synergyScore(name, sel) {
     if (!isLegal(name)) return null;
@@ -144,34 +161,30 @@
     const card = cardData(name);
     const recentPrev = card ? (card.recent_main_prevalence || 0) : 0;
 
-    // Direct pair signal: collect lifts to each card in selection that has data
+    // Direct pair signal: collect P(B|A) and co_decks against each selection card
     const validSel = sel.filter((s) => activePairs[s]);
-    let lifts = [], cos = [], pCondToSel = [];
+    let pConds = [], cos = [];
     for (const s of validSel) {
       const r = (activePairs[s].companions || []).find((x) => x.name === name);
       if (!r) continue;
-      lifts.push(Math.min(r.lift, LIFT_CAP));
+      pConds.push(r.p_b_given_a);
       cos.push(r.co_decks);
-      pCondToSel.push(r.p_b_given_a);
     }
+    if (pConds.length === 0) return semanticScore(name, sel);
 
-    if (lifts.length === 0) {
-      // No direct data; semantic fallback if at least one selection card has a profile
-      return semanticScore(name, sel);
-    }
+    // Mean P(B|A) across selection. Geometric mean would punish coverage
+    // gaps too harshly; arithmetic plus a coverage exponent is cleaner.
+    const meanP = pConds.reduce((a, b) => a + b, 0) / pConds.length;
+    const strength = recentPrev < 1 ? (meanP - recentPrev) / (1 - recentPrev) : 0;
+    if (strength <= 0) return null;
 
-    // Geometric mean of lifts (anchored at 1 so missing pairs neutral, not 0)
-    const product = lifts.reduce((a, b) => a * b, 1);
-    const geomLift = Math.pow(product, 1 / lifts.length);
-    const sumCo = cos.reduce((a, b) => a + b, 0);
-    const sample = Math.log(1 + sumCo);
-    const coverage = lifts.length / Math.max(validSel.length, 1);
+    const totalCo = cos.reduce((a, b) => a + b, 0);
+    const robustness = Math.sqrt(totalCo / ROBUSTNESS_REF);
     const novelty = 1 / (1 + NOVELTY_K * recentPrev);
-    // Composite raw score
-    const raw = Math.log(geomLift) * sample * Math.pow(coverage, 0.7) * novelty;
-    // Map raw to 0-100 via the calibration scale
-    let score = Math.round(Math.min(99, Math.max(0, raw * SCORE_SCALE)));
-    return score;
+    const coverage = pConds.length / Math.max(validSel.length, 1);
+
+    const raw = strength * robustness * novelty * Math.pow(coverage, 0.6);
+    return Math.round(Math.min(99, Math.max(0, raw * SCORE_SCALE)));
   }
 
   // Semantic fallback: shared color identity + same primary type. Bounded low.
@@ -370,8 +383,10 @@
     const root = $(".magic-page");
     if (!root) return;
     root.innerHTML = `
-      ${renderSearch()}
       ${renderSelection()}
+      ${renderMatchingListsTag()}
+      ${renderSearch()}
+      ${renderSearchResultsSection()}
       ${selection.length ? renderRecommendations() : renderLanding()}
       <footer class="dataset-stamp" id="dataset-stamp"></footer>
     `;
@@ -380,28 +395,72 @@
     wireCardClicks();
   }
 
+  // Indicator that sits between selection and search, "outside" the selection
+  // box but visually anchored to it. Shown only when selection has cards.
+  function renderMatchingListsTag() {
+    if (!selection.length) return "";
+    if (!decks) {
+      return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">find matching pro lists ↓</button></div>`;
+    }
+    const n = matchingDecks().length;
+    if (n === 0) {
+      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no winning lists contain all of these together</span></div>`;
+    }
+    return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">${n} matching pro list${n === 1 ? "" : "s"} ↓</button></div>`;
+  }
+
+  function renderSearchResultsSection() {
+    if (!searchQuery.trim() || !dataReady) return "";
+    const hits = searchMatches(searchQuery);
+    if (!hits.length) {
+      return `<section class="sec"><header class="sec-header"><h2 class="sec-title">Search</h2><span class="sec-sub">no matches</span></header></section>`;
+    }
+    const items = hits.map((n) => {
+      const score = synergyScore(n, selection);
+      return { name: n, score };
+    });
+    return `
+      <section class="sec sec-search">
+        <header class="sec-header">
+          <h2 class="sec-title">Search</h2>
+          <span class="sec-sub">${hits.length} match${hits.length === 1 ? "" : "es"}</span>
+        </header>
+        ${renderGrid(items)}
+      </section>
+    `;
+  }
+
   function renderSearch() {
     return `
       <div class="search-shell">
-        <input class="search-input" type="text" placeholder="search…  try t:creature  c:ur  cmc<=3" autocomplete="off" spellcheck="false" value="">
-        <div class="search-results"></div>
+        <input class="search-input" type="text" placeholder="search…  try t:creature  c:ur  cmc<=3" autocomplete="off" spellcheck="false" value="${escapeAttr(searchQuery)}">
       </div>
     `;
   }
 
+  // Two-mode chip: top-half hover reveals one action, bottom-half another.
+  // Visually distinct icons + colors make them unambiguous.
   function chipHtml(n, kind) {
     const im = img(n);
     return `<div class="chip chip-${kind}" data-name="${escapeAttr(n)}">
-      <button class="chip-card" data-action="open" title="${escapeAttr(n)}">
+      <div class="chip-card">
         ${im ? `<img src="${im}" alt="">` : `<span class="chip-noimg">${escapeHtml(n)}</span>`}
-      </button>
-      <div class="chip-actions">
-        ${kind === "sel"
-          ? `<button class="chip-act chip-rem" data-action="remove" title="remove from selection">×</button>
-             <button class="chip-act chip-ban" data-action="ban" title="ban this card">⊘</button>`
-          : `<button class="chip-act chip-rem" data-action="unban" title="remove ban">×</button>
-             <button class="chip-act chip-promote" data-action="promote" title="move to selection">↑</button>`}
       </div>
+      ${kind === "sel" ? `
+        <button class="chip-half chip-half-top" data-action="remove" title="remove from selection">
+          <span class="chip-icon">remove</span>
+        </button>
+        <button class="chip-half chip-half-bottom" data-action="ban" title="ban this card from all calculations">
+          <span class="chip-icon">ban</span>
+        </button>
+      ` : `
+        <button class="chip-half chip-half-top" data-action="unban" title="remove ban">
+          <span class="chip-icon">unban</span>
+        </button>
+        <button class="chip-half chip-half-bottom" data-action="promote" title="move to selection">
+          <span class="chip-icon">use</span>
+        </button>
+      `}
     </div>`;
   }
 
@@ -411,21 +470,14 @@
     let html = "";
 
     if (selection.length) {
-      const matchHint = decks
-        ? (() => {
-            const n = matchingDecks().length;
-            return n > 0
-              ? `<button class="sel-strip-jump" id="sel-jump-lists">${n} matching list${n === 1 ? "" : "s"} ↓</button>`
-              : `<span class="sel-strip-hint">no matching lists</span>`;
-          })()
-        : `<button class="sel-strip-jump" id="sel-jump-lists">find matching lists ↓</button>`;
       html += `
         <div class="sel-strip">
           <div class="sel-strip-label">Selection</div>
           <div class="sel-strip-cards">${selection.map((n) => chipHtml(n, "sel")).join("")}</div>
-          ${matchHint}
-          <button class="sel-strip-export" id="sel-export" title="copy as 4-of for MTGA import">export</button>
-          <button class="sel-strip-clear" id="sel-clear" title="clear selection">clear</button>
+          <div class="sel-strip-actions">
+            <button class="sel-strip-export" id="sel-export" title="copy as 4-of for MTGA import">export</button>
+            <button class="sel-strip-clear" id="sel-clear" title="clear selection">clear</button>
+          </div>
           <div class="sel-strip-status" id="sel-status"></div>
         </div>
       `;
@@ -436,8 +488,9 @@
         <div class="sel-strip ban-strip">
           <div class="sel-strip-label">Banned</div>
           <div class="sel-strip-cards">${bans.map((n) => chipHtml(n, "ban")).join("")}</div>
-          <span class="sel-strip-hint">these cards and decks containing them are excluded from all stats</span>
-          <button class="sel-strip-clear" id="ban-clear" title="clear bans">clear</button>
+          <div class="sel-strip-actions">
+            <button class="sel-strip-clear" id="ban-clear" title="clear bans">clear</button>
+          </div>
         </div>
       `;
     }
@@ -591,28 +644,35 @@
     }
     scored.sort((a, b) => b.score - a.score);
 
-    const spells = scored.filter((r) => !isLand(r.name)).slice(0, 36);
-    const lands = scored.filter((r) => isLand(r.name)).slice(0, 12);
+    const spells = scored.filter((r) => !isLand(r.name)).slice(0, 48);
+    const lands = scored.filter((r) => isLand(r.name)).slice(0, 24);
+    const items = showLands ? lands : spells;
 
     const subtitle = selection.length === 1
       ? `cards that go with ${escapeHtml(selection[0])}`
       : `cards that go with all ${selection.length} of your team`;
 
-    const landItems = lands.map((r) => {
-      const im = img(r.name);
-      const cls = scoreColorClass(r.score);
-      return `<button class="manabase-card" data-name="${escapeAttr(r.name)}" title="${escapeAttr(r.name)}">
-        ${im ? `<img class="manabase-thumb" src="${im}" alt="">` : `<div class="manabase-thumb"></div>`}
-        <span class="manabase-score ${cls}">${r.score}</span>
-      </button>`;
-    }).join("");
-
     return `
       <div class="stacked">
-        ${section("What fits", subtitle, renderGrid(spells))}
-        ${landItems ? `<div class="manabase-row"><div class="manabase-label">Manabase ties</div><div class="manabase-strip">${landItems}</div></div>` : ""}
+        ${sectionWithToggle("What fits", subtitle, renderGrid(items))}
         ${renderListsSection()}
       </div>
+    `;
+  }
+
+  // "What fits" section with a right-aligned lands toggle in the header.
+  function sectionWithToggle(title, sub, body) {
+    return `
+      <section class="sec sec-rec">
+        <header class="sec-header">
+          <h2 class="sec-title">${escapeHtml(title)}</h2>
+          <span class="sec-sub">${escapeHtml(sub)}</span>
+          <button class="lands-toggle" id="lands-toggle" title="toggle between spell and land recommendations">
+            ${showLands ? "showing lands · click for spells" : "showing spells · click for lands"}
+          </button>
+        </header>
+        ${body}
+      </section>
     `;
   }
 
@@ -744,53 +804,34 @@
   // ── Wiring ──
   function wireSearch() {
     const input = $(".search-input");
-    const box = $(".search-results");
     if (!input) return;
-    let activeIdx = -1, currentResults = [];
-
-    function showResults(names) {
-      currentResults = names;
-      activeIdx = -1;
-      if (!names.length) { box.classList.remove("open"); box.innerHTML = ""; return; }
-      box.innerHTML = names.map((n, i) => {
-        const im = img(n);
-        const c = cardData(n);
-        const sub = c ? `${naturalFreq(c.centerpiece_prevalence)} winning decks` :
-                    (scryfall[n] && scryfall[n].released_at) ? `not in winning lists` : "";
-        return `<div class="sr" data-idx="${i}" data-name="${escapeAttr(n)}">
-          ${im ? `<img class="sr-img" src="${im}" alt="">` : `<div class="sr-img"></div>`}
-          <div class="sr-text"><div class="sr-name">${escapeHtml(n)}</div><div class="sr-sub">${sub}</div></div>
-        </div>`;
-      }).join("");
-      box.classList.add("open");
-      $$(".sr", box).forEach((el) => {
-        el.addEventListener("mousedown", (e) => {
-          e.preventDefault();
-          selectionAdd(el.dataset.name);
-          input.value = "";
-          showResults([]);
-        });
-      });
+    // Restore focus + caret position after re-render so typing flows
+    if (searchQuery) {
+      input.focus();
+      const len = input.value.length;
+      input.setSelectionRange(len, len);
     }
-
+    let pending = null;
     input.addEventListener("input", () => {
-      if (!dataReady) return;
-      showResults(searchMatches(input.value.trim()));
+      searchQuery = input.value;
+      // Debounce so we don't re-render on every keystroke
+      clearTimeout(pending);
+      pending = setTimeout(() => render(), 80);
     });
     input.addEventListener("keydown", (e) => {
-      if (e.key === "ArrowDown") { e.preventDefault(); activeIdx = Math.min(activeIdx + 1, currentResults.length - 1); highlight(); }
-      else if (e.key === "ArrowUp") { e.preventDefault(); activeIdx = Math.max(activeIdx - 1, 0); highlight(); }
-      else if (e.key === "Enter") {
+      if (e.key === "Escape") {
+        searchQuery = "";
+        input.value = "";
+        render();
+      } else if (e.key === "Enter") {
+        // Add the top match to selection
         e.preventDefault();
-        const target = currentResults[activeIdx >= 0 ? activeIdx : 0];
-        if (target) { selectionAdd(target); input.value = ""; showResults([]); }
-      } else if (e.key === "Escape") { input.value = ""; showResults([]); }
-    });
-    function highlight() {
-      $$(".sr", box).forEach((el, i) => el.classList.toggle("active", i === activeIdx));
-    }
-    document.addEventListener("click", (e) => {
-      if (!box.contains(e.target) && e.target !== input) box.classList.remove("open");
+        const hits = searchMatches(searchQuery);
+        if (hits.length) {
+          searchQuery = "";
+          selectionAdd(hits[0]);
+        }
+      }
     });
   }
 
@@ -812,17 +853,15 @@
         }
       });
     });
-    // Selection / ban chip actions
-    $$(".chip").forEach((el) => {
-      const name = el.dataset.name;
+    // Selection / ban chip actions (top half = remove/unban, bottom half = ban/promote)
+    $$(".chip-half").forEach((el) => {
       el.addEventListener("click", (e) => {
-        const target = e.target.closest("[data-action]");
-        if (!target) return;
-        const action = target.dataset.action;
-        if (action === "open") {
-          // Click on the card art does nothing in selection (use the × button to remove).
-          // For bans, also no-op on art click.
-        } else if (action === "remove") selectionRemove(name);
+        e.stopPropagation();
+        const chip = el.closest(".chip");
+        const name = chip && chip.dataset.name;
+        if (!name) return;
+        const action = el.dataset.action;
+        if (action === "remove") selectionRemove(name);
         else if (action === "ban") banAdd(name);
         else if (action === "unban") banRemove(name);
         else if (action === "promote") { banRemove(name); selectionAdd(name); }
@@ -851,18 +890,24 @@
     });
     const banClr = $("#ban-clear");
     if (banClr) banClr.addEventListener("click", bansClear);
-    // Jump-to-lists button in selection strip
-    const jump = $("#sel-jump-lists");
-    if (jump) jump.addEventListener("click", async () => {
+    // Matching-lists tag button (separate row outside selection)
+    const tag = $("#match-tag-btn");
+    if (tag) tag.addEventListener("click", async () => {
       if (!decks) {
-        jump.textContent = "loading lists…";
+        tag.textContent = "loading lists…";
         try { decks = await loadJson("decks_raw"); }
-        catch { jump.textContent = "couldn't load lists"; return; }
+        catch { tag.textContent = "couldn't load lists"; return; }
       }
       listsOpen = true;
       render();
       const sec = $(".lists-sec");
       if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    // Lands toggle in "what fits" header
+    const lt = $("#lands-toggle");
+    if (lt) lt.addEventListener("click", () => {
+      showLands = !showLands;
+      render();
     });
     // View matching lists toggle (in body)
     const ltog = $("#lists-toggle");
