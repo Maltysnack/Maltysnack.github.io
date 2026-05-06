@@ -13,7 +13,95 @@
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
   <link rel="manifest" href="/manifest.json?v=3" />
   <meta name="theme-color" content="#13110d" />
-
+  <style>
+    .browse-controls {
+      display: flex;
+      gap: 8px;
+      margin: 0 0 16px;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+    .browse-controls input[type="search"] {
+      flex: 1 1 220px;
+      min-width: 160px;
+      padding: 6px 10px;
+      font-family: inherit;
+      font-size: 14px;
+      border: 1px solid var(--border, #d0d7de);
+      border-radius: 4px;
+      background: var(--bg, #fff);
+      color: var(--text, #1f2328);
+    }
+    .browse-controls input[type="search"]:focus {
+      outline: none;
+      border-color: var(--text, #1f2328);
+    }
+    .browse-controls select {
+      padding: 6px 8px;
+      font-family: inherit;
+      font-size: 13px;
+      border: 1px solid var(--border, #d0d7de);
+      border-radius: 4px;
+      background: var(--bg, #fff);
+      color: var(--text, #1f2328);
+    }
+    .browse-controls select:focus {
+      outline: none;
+      border-color: var(--text, #1f2328);
+    }
+    .card-descriptors {
+      display: block;
+      font-size: 11px;
+      color: var(--muted, #57606a);
+      letter-spacing: 0.4px;
+      margin-top: 2px;
+      font-style: italic;
+    }
+    .home-card .home-card-arrow {
+      align-self: center;
+    }
+    .empty-state {
+      text-align: center;
+      color: var(--muted, #57606a);
+      font-size: 14px;
+      padding: 32px 16px;
+      font-style: italic;
+    }
+    .pagination {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: center;
+      margin: 16px 0 0;
+      font-size: 13px;
+      color: var(--muted, #57606a);
+    }
+    .pagination button {
+      padding: 4px 10px;
+      font-family: inherit;
+      font-size: 13px;
+      border: 1px solid var(--border, #d0d7de);
+      border-radius: 4px;
+      background: var(--bg, #fff);
+      color: var(--text, #1f2328);
+      cursor: pointer;
+    }
+    .pagination button:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+    .pagination button:not(:disabled):hover {
+      background: var(--subtle, #f6f8fa);
+    }
+    @media (max-width: 700px) {
+      .browse-controls {
+        gap: 6px;
+      }
+      .browse-controls select {
+        flex: 1 1 calc(50% - 4px);
+      }
+    }
+  </style>
 </head>
 <body>
 
@@ -30,18 +118,38 @@
 
     <div class="divider"></div>
 
-    <section class="home-links">
-
-      <a class="home-card" href="/dnd/grosh.html">
-        <span class="home-card-label">Paladin 5</span>
-        <span class="home-card-title">Grosh</span>
-        <span class="home-card-arrow">→</span>
-      </a>
-
+    <section class="browse-controls">
+      <input type="search" id="search" placeholder="Search by name, descriptor, class..." aria-label="Search characters" />
+      <select id="sort" aria-label="Sort by">
+        <option value="name-asc">Name A&ndash;Z</option>
+        <option value="name-desc">Name Z&ndash;A</option>
+        <option value="level-desc">Level high&ndash;low</option>
+        <option value="level-asc">Level low&ndash;high</option>
+        <option value="class-asc">Class A&ndash;Z</option>
+      </select>
+      <select id="filter-class" aria-label="Filter by class">
+        <option value="">Any class</option>
+      </select>
+      <select id="filter-level" aria-label="Filter by level">
+        <option value="">Any level</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+      </select>
     </section>
+
+    <section class="home-links" id="character-grid"></section>
+
+    <nav class="pagination" id="pagination" style="display:none">
+      <button id="prev-page" type="button">&larr; prev</button>
+      <span id="page-info"></span>
+      <button id="next-page" type="button">next &rarr;</button>
+    </nav>
 
   </main>
 
   <script src="/sidebar.js"></script>
+  <script src="/dnd/index.js"></script>
 </body>
 </html>
