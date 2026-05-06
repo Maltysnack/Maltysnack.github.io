@@ -102,11 +102,6 @@
       }
     }
     /* Upload panel */
-    .upload-toggle-row {
-      margin: 0 0 12px;
-      display: flex;
-      justify-content: flex-end;
-    }
     .upload-toggle-btn {
       padding: 6px 12px;
       font-family: inherit;
@@ -116,9 +111,53 @@
       background: var(--bg, #fff);
       color: var(--text, #1f2328);
       cursor: pointer;
+      white-space: nowrap;
     }
     .upload-toggle-btn:hover {
       background: var(--subtle, #f6f8fa);
+    }
+    /* Character cards: skip the label column, give info room to breathe */
+    .home-card.character-card {
+      grid-template-columns: 1fr 28px;
+      gap: 0 16px;
+    }
+    .character-card .character-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      min-width: 0;
+    }
+    .character-card .home-card-title {
+      font-size: var(--text-md, 18px);
+      line-height: 1.2;
+    }
+    .character-card .card-descriptors {
+      margin-top: 0;
+      letter-spacing: 0.4px;
+    }
+    .character-card .char-meta {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 8px;
+      letter-spacing: 0;
+      text-transform: none;
+      font-size: 13px;
+      color: var(--text-muted, #8a8a8a);
+    }
+    .character-card .char-head {
+      color: var(--text, #fff);
+      font-weight: 600;
+      font-size: 14px;
+    }
+    .character-card .char-level {
+      color: var(--text-muted, #8a8a8a);
+      font-size: 13px;
+    }
+    .character-card .char-subclass {
+      font-style: italic;
+      font-size: 12px;
+      opacity: 0.85;
     }
     .upload-panel {
       margin: 0 0 24px;
@@ -280,12 +319,6 @@
 
     <div class="divider"></div>
 
-    <div class="upload-toggle-row">
-      <button type="button" class="upload-toggle-btn" id="upload-toggle" aria-expanded="false" aria-controls="upload-panel">
-        Upload your character
-      </button>
-    </div>
-
     <section class="upload-panel" id="upload-panel" hidden>
       <h2>Upload your character</h2>
       <p>
@@ -364,6 +397,9 @@
         <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
         <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
       </select>
+      <button type="button" class="upload-toggle-btn" id="upload-toggle" aria-expanded="false" aria-controls="upload-panel">
+        + upload
+      </button>
     </section>
 
     <section class="home-links" id="character-grid"></section>
