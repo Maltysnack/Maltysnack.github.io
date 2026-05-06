@@ -66,10 +66,99 @@
     const m = scryfall && scryfall[name];
     return !!(m && (m.type_line || "").includes("Land"));
   }
+  function isLegal(name) {
+    const m = scryfall && scryfall[name];
+    return m ? !!m.legal_standard : false;
+  }
   function cardData(name) { return cardsByName && cardsByName[name]; }
   function tierTopMark(name) {
     const c = cardData(name);
     return c && (c.tier === "defines" || c.tier === "driving");
+  }
+
+  // ── Synergy Score (0-100, calibrated absolute) ──
+  // Components:
+  //   1. Recency-weighted geometric-mean lift across selection (capped at 30)
+  //   2. Sample-size dampening: log(1 + co-occurrence count)
+  //   3. Novelty discount: 1 / (1 + 8 * own_recent_prevalence)
+  //   4. Coverage: fraction of selection cards this candidate pairs with
+  //   5. Standard-legal hard filter (illegal cards return null)
+  //   6. Semantic fallback when no direct pair data: capped at 30
+  // Calibration constant tuned so that "obvious meta staples" land around 70-80,
+  // strong-but-novel hits land 85+, weak/popular noise stays in 30-60.
+  const SCORE_SCALE = 16;            // multiplier on raw to push into 0-100
+  const NOVELTY_K = 8;               // novelty curve steepness
+  const SEMANTIC_CAP = 30;           // ceiling for semantic-only matches
+  const LIFT_CAP = 30;
+
+  function synergyScore(name, sel) {
+    if (!isLegal(name)) return null;
+    if (sel.includes(name)) return null;
+    if (!pairs) return null;
+
+    const card = cardData(name);
+    const recentPrev = card ? (card.recent_main_prevalence || 0) : 0;
+
+    // Direct pair signal: collect lifts to each card in selection that has data
+    const validSel = sel.filter((s) => pairs[s]);
+    let lifts = [], cos = [], pCondToSel = [];
+    for (const s of validSel) {
+      const r = (pairs[s].companions || []).find((x) => x.name === name);
+      if (!r) continue;
+      lifts.push(Math.min(r.lift, LIFT_CAP));
+      cos.push(r.co_decks);
+      pCondToSel.push(r.p_b_given_a);
+    }
+
+    if (lifts.length === 0) {
+      // No direct data; semantic fallback if at least one selection card has a profile
+      return semanticScore(name, sel);
+    }
+
+    // Geometric mean of lifts (anchored at 1 so missing pairs neutral, not 0)
+    const product = lifts.reduce((a, b) => a * b, 1);
+    const geomLift = Math.pow(product, 1 / lifts.length);
+    const sumCo = cos.reduce((a, b) => a + b, 0);
+    const sample = Math.log(1 + sumCo);
+    const coverage = lifts.length / Math.max(validSel.length, 1);
+    const novelty = 1 / (1 + NOVELTY_K * recentPrev);
+    // Composite raw score
+    const raw = Math.log(geomLift) * sample * Math.pow(coverage, 0.7) * novelty;
+    // Map raw to 0-100 via the calibration scale
+    let score = Math.round(Math.min(99, Math.max(0, raw * SCORE_SCALE)));
+    return score;
+  }
+
+  // Semantic fallback: shared color identity + same primary type. Bounded low.
+  function semanticScore(name, sel) {
+    const sf = scryfall && scryfall[name];
+    if (!sf) return null;
+    let colorOverlap = 0, typeOverlap = 0;
+    const myColors = new Set(sf.colors || []);
+    const myType = (sf.type_line || "").split(" ")[0];
+    let n = 0;
+    for (const s of sel) {
+      const ssf = scryfall[s];
+      if (!ssf) continue;
+      n++;
+      const sColors = new Set(ssf.colors || []);
+      const shared = [...myColors].filter((c) => sColors.has(c)).length;
+      if (myColors.size && sColors.size) colorOverlap += shared / Math.max(myColors.size, sColors.size);
+      const sType = (ssf.type_line || "").split(" ")[0];
+      if (myType && myType === sType) typeOverlap += 1;
+    }
+    if (n === 0) return null;
+    const score = Math.round(((colorOverlap / n) * 0.65 + (typeOverlap / n) * 0.35) * SEMANTIC_CAP);
+    return score > 0 ? score : null;
+  }
+
+  function scoreColorClass(score) {
+    if (score >= 90) return "score-90";
+    if (score >= 80) return "score-80";
+    if (score >= 70) return "score-70";
+    if (score >= 60) return "score-60";
+    if (score >= 50) return "score-50";
+    return "score-low";
   }
 
   // Natural-frequency formatter: 0.20 -> "1 in 5"
@@ -328,35 +417,45 @@
 
   function renderRecommendations() {
     if (!dataReady) return `<div class="loading">loading…</div>`;
-    const recs = combinedRecommendations(selection);
-    if (!recs.length) {
-      return `<div class="rec-empty">No clean overlaps yet. Try removing a card or starting from one with more data.</div>`;
+
+    // Score every viable candidate and rank
+    const scored = [];
+    const seen = new Set(selection);
+    const candidates = new Set();
+    for (const s of selection) {
+      if (pairs[s]) for (const r of pairs[s].companions) candidates.add(r.name);
     }
-    const spells = recs.filter((r) => !isLand(r.name));
-    const lands = recs.filter((r) => isLand(r.name));
+    // For sparse selections without pair data, also score the eligible card pool
+    if (candidates.size < 12) {
+      for (const c of cards || []) candidates.add(c.name);
+    }
+    for (const name of candidates) {
+      if (seen.has(name)) continue;
+      const score = synergyScore(name, selection);
+      if (score === null) continue;
+      scored.push({ name, score });
+    }
+    scored.sort((a, b) => b.score - a.score);
 
-    const items = spells.map((r) => {
-      const line = r.coverage > 0
-        ? `${naturalFreq(r.avgPGivenSel)} decks with your team`
-        : `same color space`;
-      return { name: r.name, line };
-    });
-
-    const landItems = lands.slice(0, 12).map((r) => {
-      const im = img(r.name);
-      return `<button class="manabase-card" data-name="${escapeAttr(r.name)}" title="${escapeAttr(r.name)}">
-        ${im ? `<img class="manabase-thumb" src="${im}" alt="">` : `<div class="manabase-thumb"></div>`}
-        <span class="manabase-name">${escapeHtml(r.name)}</span>
-      </button>`;
-    }).join("");
+    const spells = scored.filter((r) => !isLand(r.name)).slice(0, 36);
+    const lands = scored.filter((r) => isLand(r.name)).slice(0, 12);
 
     const subtitle = selection.length === 1
       ? `cards that go with ${escapeHtml(selection[0])}`
       : `cards that go with all ${selection.length} of your team`;
 
+    const landItems = lands.map((r) => {
+      const im = img(r.name);
+      const cls = scoreColorClass(r.score);
+      return `<button class="manabase-card" data-name="${escapeAttr(r.name)}" title="${escapeAttr(r.name)}">
+        ${im ? `<img class="manabase-thumb" src="${im}" alt="">` : `<div class="manabase-thumb"></div>`}
+        <span class="manabase-score ${cls}">${r.score}</span>
+      </button>`;
+    }).join("");
+
     return `
       <div class="stacked">
-        ${section("What fits", subtitle, renderGrid(items))}
+        ${section("What fits", subtitle, renderGrid(spells))}
         ${landItems ? `<div class="manabase-row"><div class="manabase-label">Manabase ties</div><div class="manabase-strip">${landItems}</div></div>` : ""}
         ${renderListsSection()}
       </div>
@@ -451,45 +550,20 @@
     return `<div class="grid">${items.map(renderThumb).join("")}</div>`;
   }
 
-  function renderThumb({ name, line }) {
+  // Items are either {name, score} (recommendation context) or {name, line} (landing).
+  // Landing thumbs show no number; recommendation thumbs show only the colored score.
+  function renderThumb(item) {
+    const name = item.name;
     const im = img(name);
     const inSel = selection.includes(name);
-    const isTop = tierTopMark(name);
-    return `<button class="thumb${inSel ? " in-sel" : ""}${isTop ? " top" : ""}" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
+    const score = typeof item.score === "number" ? item.score : null;
+    const cls = score !== null ? scoreColorClass(score) : "";
+    return `<button class="thumb${inSel ? " in-sel" : ""}" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
-      ${isTop ? `<span class="thumb-dot"></span>` : ""}
-      <div class="thumb-meta">
-        <div class="thumb-name">${escapeHtml(name)}</div>
-        ${line ? `<div class="thumb-line">${line}</div>` : ""}
-      </div>
-      ${tooltipHtml(name)}
+      ${score !== null ? `
+        <a class="thumb-score ${cls}" href="/games/synergy-score.html" title="synergy score, click for explanation" data-stop>${score}</a>
+      ` : ""}
     </button>`;
-  }
-
-  function tooltipHtml(name) {
-    const c = cardData(name);
-    const sf = scryfall[name] || {};
-    const inSel = selection.includes(name);
-    let lines = [];
-    if (c) {
-      lines.push(`${naturalFreq(c.centerpiece_prevalence)} winning decks (3+ copies)`);
-      const p = pairs && pairs[name];
-      if (p && p.companions.length) {
-        const top = p.companions.slice(0, 3).map((r) => r.name).join(", ");
-        lines.push(`plays with: ${top}`);
-      }
-    } else if (sf.released_at) {
-      const ageWeeks = (Date.now() - new Date(sf.released_at).getTime()) / (1000 * 60 * 60 * 24 * 7);
-      if (ageWeeks < 8) lines.push(`new from ${sf.set || "latest set"}, ${fmtDate(sf.released_at)}`);
-      else lines.push(`Standard-legal but not in winning lists`);
-    }
-    const action = inSel ? "click to remove" : "click to add";
-    return `<div class="thumb-tip">
-      <div class="thumb-tip-name">${escapeHtml(name)}</div>
-      ${(sf.type_line || sf.mana_cost) ? `<div class="thumb-tip-type">${escapeHtml(sf.mana_cost || "")} ${escapeHtml(sf.type_line || "")}</div>` : ""}
-      ${lines.map((l) => `<div class="thumb-tip-line">${l}</div>`).join("")}
-      <div class="thumb-tip-action">${action}</div>
-    </div>`;
   }
 
   function fillDatasetStamp() {
@@ -558,9 +632,10 @@
   }
 
   function wireCardClicks() {
-    // Grid thumbnails
+    // Grid thumbnails: click on art toggles selection, click on score follows the link
     $$(".thumb").forEach((el) => {
       el.addEventListener("click", (e) => {
+        if (e.target.closest("[data-stop]")) return; // let the score link navigate
         e.preventDefault();
         selectionToggle(el.dataset.name);
       });
@@ -571,7 +646,10 @@
     });
     // Manabase rows
     $$(".manabase-card").forEach((el) => {
-      el.addEventListener("click", () => selectionToggle(el.dataset.name));
+      el.addEventListener("click", (e) => {
+        if (e.target.closest("[data-stop]")) return;
+        selectionToggle(el.dataset.name);
+      });
     });
     // Export
     const exp = $("#sel-export");

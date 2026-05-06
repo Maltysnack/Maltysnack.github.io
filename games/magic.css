@@ -209,90 +209,91 @@ body:has(.magic-page) .main {
   padding: 8px;
 }
 
-/* the only chrome on a thumb: a subtle red dot for top tier */
-.thumb-dot {
+/* Synergy score badge (the only chrome on a recommendation thumb).
+   Bottom-right of the art, color-coded 50→99 from muted grey to vivid green.
+   Hover shows a 2-line description; click navigates to the explainer. */
+.thumb-score {
   position: absolute;
-  top: 5px;
-  left: 5px;
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--accent-red);
-  border: 1.5px solid var(--bg);
-}
-
-.thumb-meta {
-  display: flex;
-  flex-direction: column;
-  gap: 1px;
-}
-.thumb-name {
-  font-size: var(--text-sm);
-  font-weight: 500;
-  color: var(--text);
-  line-height: 1.25;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.thumb-line {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
+  bottom: 6px;
+  right: 6px;
+  min-width: 30px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 3px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
   font-variant-numeric: tabular-nums;
-}
-
-
-/* ── Hover info popup ─────────────────── */
-.thumb-tip {
+  text-decoration: none;
+  color: #0d0c0a;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.16);
+  z-index: 3;
+  cursor: pointer;
+  transition: transform var(--transition);
   position: absolute;
-  bottom: calc(100% + 4px);
-  left: 50%;
-  transform: translateX(-50%) translateY(4px);
-  width: 220px;
+}
+.thumb-score:hover { transform: scale(1.08); }
+
+/* Five steps from bright green to muted grey. Linear gradient by tier. */
+.thumb-score.score-90 { background: #2cc26b; color: #fff; border-color: #2cc26b; }
+.thumb-score.score-80 { background: #6dd083; color: #06250f; border-color: #6dd083; }
+.thumb-score.score-70 { background: #d4d164; color: #2a2614; border-color: #d4d164; }
+.thumb-score.score-60 { background: #d99947; color: #2a1a08; border-color: #d99947; }
+.thumb-score.score-50 { background: #b07a55; color: #fff; border-color: #b07a55; }
+.thumb-score.score-low { background: #8a877d; color: #2a2722; border-color: #8a877d; }
+
+/* Native title= attribute is too plain. Stronger custom tooltip on hover. */
+.thumb-score::after {
+  content: "synergy score: how well this card fits with your selection. click to read the math.";
+  position: absolute;
+  bottom: calc(100% + 6px);
+  right: 0;
+  width: 200px;
+  padding: 8px 10px;
   background: var(--bg);
-  color: var(--text);
   border: 1px solid var(--border);
-  border-radius: 4px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-  padding: 10px 12px;
-  z-index: 50;
+  border-radius: 3px;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.18);
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.4;
+  letter-spacing: 0;
+  text-transform: none;
   pointer-events: none;
   opacity: 0;
-  transition: opacity 120ms var(--ease), transform 120ms var(--ease);
+  transform: translateY(4px);
+  transition: opacity 100ms var(--ease), transform 100ms var(--ease);
 }
-.thumb:hover .thumb-tip {
+.thumb-score:hover::after {
   opacity: 1;
-  transform: translateX(-50%) translateY(0);
-  transition-delay: 220ms; /* don't fire on incidental hover */
+  transform: translateY(0);
+  transition-delay: 320ms;
 }
-.thumb-tip-name {
-  font-size: var(--text-sm);
-  font-weight: 600;
-  color: var(--text-strong);
-  margin-bottom: 4px;
-}
-.thumb-tip-type {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  margin-bottom: 6px;
+
+.manabase-score {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 2px;
   font-variant-numeric: tabular-nums;
+  margin-left: 4px;
 }
-.thumb-tip-line {
-  font-size: var(--text-xs);
-  color: var(--text-muted);
-  line-height: 1.4;
-  margin-bottom: 2px;
-}
-.thumb-tip-action {
-  font-size: 10px;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--accent-red);
-  font-weight: 600;
-  margin-top: 8px;
-  border-top: 1px solid var(--border-light);
-  padding-top: 6px;
-}
+.manabase-score.score-90 { background: #2cc26b; color: #fff; }
+.manabase-score.score-80 { background: #6dd083; color: #06250f; }
+.manabase-score.score-70 { background: #d4d164; color: #2a2614; }
+.manabase-score.score-60 { background: #d99947; color: #2a1a08; }
+.manabase-score.score-50 { background: #b07a55; color: #fff; }
+.manabase-score.score-low { background: #8a877d; color: #2a2722; }
+
 
 
 /* ── Manabase row (under recs only) ─────────────────── */
