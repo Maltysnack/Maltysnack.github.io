@@ -519,6 +519,55 @@ button.big { padding: 5px 14px; font-size: 12px; }
 .btn-label:hover { color: var(--text); border-color: var(--border); background: var(--subtle); }
 
 @media (max-width: 1200px) {
-  .hero { grid-template-columns: 1fr 1fr; }
-  .three-col { grid-template-columns: 1fr 1fr; }
+  .three-col { grid-template-columns: 200px 1fr; }
+  .extras-col {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+  .extras-col > * { flex: 1 1 240px; }
+}
+
+@media (max-width: 900px) {
+  body { padding: 4px 8px 80px; }
+  .meta-strip { font-size: 9px; gap: 3px 10px; }
+  .meta-strip strong { font-size: 11px; }
+
+  .hero {
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 6px 8px;
+  }
+  .hero .h-div { display: none; }
+  .h-item { font-size: 11px; gap: 4px; }
+  .h-big { font-size: 18px; }
+  .h-stats { gap: 8px; flex-wrap: wrap; }
+  .h-reaction { width: 100%; }
+  .h-reaction .muted { display: block; font-size: 10px; }
+
+  .slots-bar { gap: 10px; padding: 6px 8px; }
+  .slot-divider { display: none; }
+
+  .three-col {
+    grid-template-columns: 1fr;
+  }
+  .extras-col {
+    flex-direction: column;
+  }
+  .extras-col > * { flex: none; }
+
+  .footer {
+    padding: 4px 8px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  .footer .spacer { display: none; }
+}
+
+/* Homebrew block on the sheet */
+.homebrew-body {
+  font-size: 11px;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--text);
 }
