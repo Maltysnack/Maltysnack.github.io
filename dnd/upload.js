@@ -11,6 +11,7 @@
 
 const PDFJS_CDN = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.min.mjs';
 const PDFJS_WORKER = 'https://cdn.jsdelivr.net/npm/pdfjs-dist@4.7.76/build/pdf.worker.min.mjs';
+const UPLOAD_ENDPOINT = 'https://dnd-upload-maltysnacks-projects.vercel.app/api/upload';
 
 let pdfjsLib = null;
 let draft = null;
@@ -290,6 +291,8 @@ function initUploadPanel() {
   });
 
   $u('download-btn').addEventListener('click', downloadJson);
+  const submitBtn = $u('submit-btn');
+  if (submitBtn) submitBtn.addEventListener('click', submitToReviewer);
 }
 
 function setStatus(msg, kind = 'info') {
@@ -358,7 +361,10 @@ function updateDraftFromForm() {
   const fullSlug = [nameSlug, d1, d2].filter(Boolean).join('-');
   draft.id = fullSlug;
   $u('preview-slug').textContent = fullSlug ? `${fullSlug}.json` : '(needs name + 2 descriptors)';
-  $u('download-btn').disabled = !(nameSlug && d1 && d2);
+  const ready = !!(nameSlug && d1 && d2);
+  $u('download-btn').disabled = !ready;
+  const submit = $u('submit-btn');
+  if (submit) submit.disabled = !ready;
 
   draft.homebrew = combineHomebrew();
   renderPreview();
@@ -381,10 +387,15 @@ function renderPreview() {
   out.textContent = JSON.stringify(clean, null, 2);
 }
 
-function downloadJson() {
-  if (!draft || !draft.id) return;
+function cleanDraft() {
   const clean = JSON.parse(JSON.stringify(draft));
   delete clean._parsedHomebrew;
+  return clean;
+}
+
+function downloadJson() {
+  if (!draft || !draft.id) return;
+  const clean = cleanDraft();
   const blob = new Blob([JSON.stringify(clean, null, 2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -392,7 +403,36 @@ function downloadJson() {
   a.download = `${draft.id}.json`;
   a.click();
   URL.revokeObjectURL(url);
-  setStatus(`Downloaded ${draft.id}.json. Send it to maltysnack.`, 'ok');
+  setStatus(`Downloaded ${draft.id}.json. You can also click "Submit for review" to email it directly.`, 'ok');
+}
+
+async function submitToReviewer() {
+  if (!draft || !draft.id) return;
+  const btn = $u('submit-btn');
+  btn.disabled = true;
+  setStatus('Submitting to maltysnack...', 'info');
+  try {
+    const payload = {
+      character: cleanDraft(),
+      notes: $u('upload-notes').value.trim(),
+      website: '',
+    };
+    const res = await fetch(UPLOAD_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) {
+      const detail = data?.error || `HTTP ${res.status}`;
+      throw new Error(detail);
+    }
+    setStatus(`Submitted! maltysnack will review. PR: ${data.prUrl || '(opened)'}`, 'ok');
+  } catch (err) {
+    setStatus(`Submit failed: ${err.message}. You can still download the file and send it manually.`, 'error');
+  } finally {
+    btn.disabled = !(draft.id && draft.descriptors?.length === 2);
+  }
 }
 
 initUploadPanel();
