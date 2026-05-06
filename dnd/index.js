@@ -41,9 +41,9 @@ function populateClassFilter() {
   // include only classes that appear in the current set, plus a few standards for futureproofing
   const present = new Set();
   allCharacters.forEach(c => {
-    if (!c.class) return;
-    // primary class is the last word that matches a known class, fall back to whole string
-    const found = CLASSES_5E.find(cls => c.class.toLowerCase().includes(cls.toLowerCase()));
+    const hay = `${c.classLine || ''} ${c.class || ''}`.toLowerCase();
+    if (!hay.trim()) return;
+    const found = CLASSES_5E.find(cls => hay.includes(cls.toLowerCase()));
     if (found) present.add(found);
   });
   CLASSES_5E.forEach(cls => {
@@ -82,10 +82,11 @@ function applyFiltersAndRender() {
 
   filtered = allCharacters.filter(c => {
     if (q) {
-      const hay = `${c.name} ${(c.descriptors || []).join(' ')} ${c.class || ''} ${c.background || ''}`.toLowerCase();
+      const hay = `${c.name} ${(c.descriptors || []).join(' ')} ${c.classLine || c.class || ''} ${c.background || ''}`.toLowerCase();
       if (!hay.includes(q)) return false;
     }
-    if (klass && !(c.class || '').toLowerCase().includes(klass.toLowerCase())) return false;
+    const classHay = `${c.classLine || ''} ${c.class || ''}`.toLowerCase();
+    if (klass && !classHay.includes(klass.toLowerCase())) return false;
     if (lvl && String(c.level) !== lvl) return false;
     return true;
   });
@@ -123,7 +124,7 @@ function renderCards() {
     a.href = `/dnd/${c.id}.html`;
 
     const desc = (c.descriptors || []).join(' · ');
-    const subtitle = c.class && c.level ? `${c.class} ${c.level}` : (c.class || '');
+    const subtitle = c.classLine || (c.class && c.level ? `${c.class} ${c.level}` : (c.class || ''));
 
     a.innerHTML = `
       <span class="home-card-title"></span>
