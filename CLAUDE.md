@@ -24,15 +24,7 @@ You **must** do all of these:
 1. Create the HTML page.
 2. Add it to `sidebar.js` in the right section.
 3. Add a card to `index.html`'s `home-links` section.
-4. **Include the favicon / apple-touch-icon block** in `<head>` (sanitize.sh will fail the build if it's missing on a `/style.css` page):
-
-   ```html
-   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
-   <link rel="icon" href="/favicon.ico" sizes="any" />
-   <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-   <link rel="manifest" href="/manifest.json" />
-   <meta name="theme-color" content="#13110d" />
-   ```
+4. **Include `<script src="/sidebar.js"></script>` before `</body>`.** sidebar.js injects the canonical favicon links (with the current cache-buster version) into `<head>` automatically, so you don't need to hand-roll the icon block. The static block still works if you want defense-in-depth, but it isn't required and the version on it can drift; sidebar.js is the source of truth.
 
 5. `git add` the new page. CI will fail if it's untracked.
 
