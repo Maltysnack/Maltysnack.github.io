@@ -150,6 +150,15 @@ else
   note_ok "every site page loads sidebar.js (gets favicons + nav)"
 fi
 
+# ── 8.5. README in sync with page descriptions ──────────────────────────────
+echo ""
+echo "[8.5] README sync"
+if python3 scripts/build-readme.py --check >/dev/null 2>&1; then
+  note_ok "README is in sync with page descriptions"
+else
+  note_fail "README is stale. Run: python3 scripts/build-readme.py"
+fi
+
 # ── 8. Profanity / unprofessional language (soft warn) ──────────────────────
 # This site is linked in maltysnack's job applications. We don't fail the build
 # on borderline language because context matters, but we surface anything that
