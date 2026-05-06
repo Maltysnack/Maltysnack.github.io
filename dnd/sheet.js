@@ -843,7 +843,7 @@ function wireEvents() {
   });
 
   document.getElementById('short-rest').addEventListener('click', () => {
-    if (!confirm('Short rest? Restores resources marked 1/short and any limited spells with restoresOn=short.')) return;
+    if (!confirm('Short rest? Restores resources marked 1/short, any limited spells with restoresOn=short, and (Pact Magic) spell slots if spellSlotsRestoresOn=short.')) return;
     (CHARACTER.resources || []).forEach(r => {
       if (r.restoresOn !== 'short') return;
       if (r.type === 'pip') state.resources[r.key] = Array(r.max).fill(false);
@@ -853,6 +853,12 @@ function wireEvents() {
     (CHARACTER.limitedSpells || []).forEach(s => {
       if (s.restoresOn === 'short') state.limitedSpells[s.key] = Array(s.count || 1).fill(false);
     });
+    // Warlock Pact Magic slots restore on short rest when configured
+    if (CHARACTER.spellSlotsRestoresOn === 'short') {
+      Object.entries(CHARACTER.spellSlots || {}).forEach(([k, n]) => {
+        state.spellSlots[k] = Array(n).fill(false);
+      });
+    }
     render();
   });
 

@@ -240,6 +240,42 @@ function parseSheet(fields) {
     character.homebrew = (character.homebrew ? character.homebrew + '\n\n' : '') + bioParts.join('\n');
   }
 
+  // Capture every other non-empty text field the structured parser didn't touch.
+  // The WotC fillable PDF has 100+ Spells fields plus other rows the parser
+  // doesn't model. Dump them verbatim so the polish step can interpret.
+  const handled = new Set([
+    'CharacterName', 'ClassLevel', 'Background', 'PlayerName', 'Race ',
+    'Alignment', 'XP', 'Inspiration',
+    'STR', 'DEX', 'CON', 'INT', 'WIS', 'CHA',
+    'STRmod', 'DEXmod ', 'CONmod', 'INTmod', 'WISmod', 'CHamod',
+    'ProfBonus', 'AC', 'Initiative', 'Speed',
+    'HPMax', 'HPCurrent', 'HPTemp', 'HDTotal', 'HD',
+    'Passive', 'ProficienciesLang', 'Equipment',
+    'Features and Traits', 'AttacksSpellcasting',
+    'CP', 'SP', 'EP', 'GP', 'PP',
+    'PersonalityTraits ', 'Ideals', 'Bonds', 'Flaws', 'Backstory',
+    'Allies', 'Treasure', 'FactionName',
+    'Age', 'Height', 'Weight', 'Eyes', 'Skin', 'Hair',
+    'Wpn Name', 'Wpn Name 2', 'Wpn Name 3',
+    ...SAVE_FIELDS.map(f => f[1]),
+    ...SKILL_FIELDS.map(f => f[1]),
+  ]);
+
+  const extras = [];
+  for (const [name, arr] of Object.entries(fields)) {
+    if (handled.has(name)) continue;
+    if (!arr || !arr[0]) continue;
+    if (arr[0].type !== 'text') continue;
+    const v = (arr[0].value ?? '').toString().trim();
+    if (!v) continue;
+    extras.push(`  ${name}: ${v}`);
+  }
+  if (extras.length) {
+    character.homebrew = (character.homebrew ? character.homebrew + '\n\n' : '') +
+      'RAW PDF FIELDS (parser did not structure these, polish step please interpret):\n' +
+      extras.join('\n');
+  }
+
   return character;
 }
 
