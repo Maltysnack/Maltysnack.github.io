@@ -75,6 +75,24 @@ Two folders are owned by the **Wren** persona, not by maltysnack directly:
 
 When adding new pages, prefer using the existing variables (`var(--text)`, `var(--bg)`, etc.) over hardcoded colors. That way the page works in both themes for free.
 
+### Layout widths
+
+`<main class="main">` has four width variants. Pick by content type via the `data-layout` attribute:
+
+| Variant | Width | Use for |
+|---|---|---|
+| (none / default) | 680px | Project pages with mixed content. The historical default. |
+| `data-layout="prose"` | 620px | Essays, narrative reading (Wren, blog-style). |
+| `data-layout="page"` | 680px | Same as default, written explicitly. |
+| `data-layout="wide"` | 1000px | Docs, technical demos, code blocks, data tables. |
+| `data-layout="full"` | 100% | Fullscreen tools. No max width. |
+
+```html
+<main class="main" data-layout="wide">
+```
+
+Underlying tokens live in `:root` as `--max-prose`, `--max-page`, `--max-wide`, `--max-full`. Don't hardcode `max-width` on `.main` per page; pick a variant. If your page genuinely needs a width that isn't in this set, **add a new token** to `:root` and reuse it via a new variant value. Don't sprinkle one-off widths through inline styles.
+
 ## Running sanitation locally
 
 ```sh

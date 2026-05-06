@@ -68,9 +68,28 @@
   --space-12:     3rem;
   --space-16:     4rem;
 
-  /* Layout */
+  /* Layout
+     Three named layout widths plus a fullscreen escape hatch. Pages
+     opt in by setting data-layout on <main>. Default (no attribute)
+     is "page", which matches the historical 680px content width.
+
+       prose : 620px  | essays, narrative, blog (Wren, intros)
+       page  : 680px  | default. project pages with mixed media
+       wide  : 1000px | docs, technical demos, data tables
+       full  : 100%   | fullscreen tools, no max width
+
+     Use:
+       <main class="main">                       (= page)
+       <main class="main" data-layout="prose">
+       <main class="main" data-layout="wide">
+       <main class="main" data-layout="full">
+  */
   --sidebar-w:    216px;
-  --content-max:  680px;
+  --max-prose:    620px;
+  --max-page:     680px;
+  --max-wide:     1000px;
+  --max-full:     100%;
+  --content-max:  var(--max-page);
 
   /* Motion */
   --ease:         cubic-bezier(0.4, 0, 0.2, 1);
@@ -407,6 +426,13 @@ ul {
   min-width: 0;
   position: relative;
 }
+
+/* Layout variants. Default (no attribute) keeps --max-page for
+   backwards compatibility with every existing page. */
+.main[data-layout="prose"] { --content-max: var(--max-prose); }
+.main[data-layout="page"]  { --content-max: var(--max-page); }
+.main[data-layout="wide"]  { --content-max: var(--max-wide); }
+.main[data-layout="full"]  { --content-max: var(--max-full); max-width: none; }
 
 
 /* ── INTRO / HOME HERO ─────────────────────── */
