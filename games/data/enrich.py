@@ -84,9 +84,11 @@ def extract_meta(card: dict) -> dict:
 
 
 def name_keys(card: dict) :
-    """Possible names a card could be referenced by in our deck data."""
+    """Possible names a card could be referenced by in our deck data.
+    magic.gg uses both 'X // Y' (full) and 'X' (front-face only) inconsistently
+    for DFC and split cards, so we cache under both. Aliases are marked so the
+    frontend can dedupe at search time."""
     keys = [card["name"]]
-    # DFC: also accept the front face name alone
     if "//" in card["name"]:
         keys.append(card["name"].split(" // ")[0])
     return keys
@@ -184,7 +186,7 @@ def main():
     # We've changed printing-selection logic. Force-refresh every entry so we
     # pick the best printing under the new scoring rules. Marker key tracks
     # the schema version; bumping it triggers a full rebuild of the cache.
-    SCHEMA_VERSION = "v3-recency-tiebreak"
+    SCHEMA_VERSION = "v5-marked-aliases"
     if cache.get("__schema__") != SCHEMA_VERSION:
         print(f"  schema bump: rebuilding entire cache ({len(cache)} entries)",
               file=sys.stderr)
@@ -226,8 +228,11 @@ def main():
     still_missing = []
     for name in needed:
         if name in index:
-            meta = extract_meta(index[name])
+            card = index[name]
+            meta = extract_meta(card)
             meta["in_dataset"] = name in in_dataset
+            # Mark front-face-only aliases so frontend can hide them from search
+            meta["is_alias"] = ("//" in card["name"]) and (name != card["name"])
             cache[name] = meta
             resolved_via_bulk += 1
         else:
