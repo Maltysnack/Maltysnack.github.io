@@ -32,11 +32,13 @@ These will fail CI via `scripts/sanitize.sh`:
 You **must** do all of these:
 
 1. Create the HTML page.
-2. Add it to `sidebar.js` in the right section.
-3. Add a card to `index.html`'s `home-links` section.
-4. **Include `<script src="/sidebar.js"></script>` before `</body>`.** sidebar.js injects the canonical favicon links (with the current cache-buster version) into `<head>` automatically, so you don't need to hand-roll the icon block. The static block still works if you want defense-in-depth, but it isn't required and the version on it can drift; sidebar.js is the source of truth.
-
-5. `git add` the new page. CI will fail if it's untracked.
+2. Include a `<meta name="description" content="...">` in `<head>`. One sentence. This is what shows up in the auto-generated README and in search snippets.
+3. Add it to `sidebar.js` in the right section.
+4. Add a card to `index.html`'s `home-links` section.
+5. Add it to the `SECTIONS` list in `scripts/build-readme.py` so it appears in the README.
+6. Run `python3 scripts/build-readme.py` to regenerate the README's pages section.
+7. **Include `<script src="/sidebar.js"></script>` before `</body>`.** sidebar.js injects the canonical favicon links (with the current cache-buster version) into `<head>` automatically, so you don't need to hand-roll the icon block. The static block still works if you want defense-in-depth, but it isn't required and the version on it can drift; sidebar.js is the source of truth.
+8. `git add` the new page and the regenerated `README.md`. CI will fail if either is missing or stale.
 
 If your page is self-contained with its own design system (like Happy Hour or Duoclue), it can skip `/style.css` and the icon block above. It still needs to live in the sidebar and home cards.
 
