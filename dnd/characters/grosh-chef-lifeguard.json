@@ -84,9 +84,9 @@
     { "lvl": 2, "lvlLabel": "2nd", "name": "Prayer of Healing",   "slug": "prayer-of-healing",    "tags": ["10min"],           "desc": "6 targets 2d8+3 HP, 10 min cast" }
   ],
   "limitedSpells": [
-    { "group": "Triton (1/long)", "key": "fogCloud",      "name": "Fog Cloud",       "slug": "fog-cloud",       "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "20 ft sphere, heavily obscured" },
-    { "group": "Triton (1/long)", "key": "gustOfWind",    "name": "Gust of Wind",    "slug": "gust-of-wind",    "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "60 ft line, STR save or push 15 ft" },
-    { "group": "Triton (1/long)", "key": "wallOfWater",   "name": "Wall of Water",   "slug": "wall-of-water",   "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "30x10 ft wall, halves fire dmg through it" },
+    { "group": "Racials", "key": "fogCloud",      "name": "Fog Cloud",       "slug": "fog-cloud",       "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "20 ft sphere, heavily obscured" },
+    { "group": "Racials", "key": "gustOfWind",    "name": "Gust of Wind",    "slug": "gust-of-wind",    "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "60 ft line, STR save or push 15 ft" },
+    { "group": "Racials", "key": "wallOfWater",   "name": "Wall of Water",   "slug": "wall-of-water",   "count": 1, "restoresOn": "long",  "tags": ["conc"], "desc": "30x10 ft wall, halves fire dmg through it" },
     { "group": "Scrolls",         "key": "dimensionDoor", "name": "Dimension Door",  "slug": "dimension-door",  "count": 2, "restoresOn": "never", "meta": "4th DC14", "desc": "teleport self up to 500 ft" },
     { "group": "Scrolls",         "key": "charmMonster",  "name": "Charm Monster",   "slug": "charm-monster",   "count": 1, "restoresOn": "never", "meta": "4th DC14", "desc": "one creature charmed 1 hr, WIS save" },
     { "group": "Scrolls",         "key": "counterspell",  "name": "Counterspell",    "slug": "counterspell",    "count": 1, "restoresOn": "never", "meta": "3rd DC13", "desc": "interrupt spell <=3rd auto, higher needs check" }
