@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flox - maltysnack</title>
+  <meta name="description" content="Flox: a small language for describing flow networks." />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+    .fx-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .fx-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 620px;
+      line-height: 1.6;
+      margin-bottom: 10px;
+    }
+    .fx-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 48px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+    }
+    .fx-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .fx-section { margin: 40px 0; }
+    .fx-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 16px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .fx-section p {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.65;
+      max-width: 620px;
+      margin-bottom: 12px;
+    }
+    .fx-section code {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.92em;
+      background: var(--border-light);
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .fx-section ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .fx-section ul li {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.6;
+      padding: 6px 0;
+      max-width: 620px;
+    }
+    .fx-section ol {
+      padding-left: 0;
+      list-style: none;
+      counter-reset: step;
+    }
+    .fx-section ol li {
+      counter-increment: step;
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.6;
+      padding: 8px 0 8px 36px;
+      max-width: 620px;
+      position: relative;
+    }
+    .fx-section ol li::before {
+      content: counter(step);
+      position: absolute;
+      left: 0;
+      top: 8px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+
+    .fx-code {
+      background: var(--border-light);
+      padding: 14px 16px;
+      border-radius: 4px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.88em;
+      line-height: 1.55;
+      max-width: 620px;
+      overflow-x: auto;
+      color: var(--text);
+    }
+
+    .fx-status {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 14px;
+      padding: 8px 0;
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.55;
+      max-width: 620px;
+    }
+    .fx-status b { font-weight: 600; color: var(--text); font-size: var(--text-xs); letter-spacing: 0.08em; text-transform: uppercase; padding-top: 2px; }
+
+    .fx-link {
+      color: var(--accent-red);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .fx-link:hover { border-bottom-color: var(--accent-red); }
+
+    @media (max-width: 640px) {
+      .fx-status { grid-template-columns: 1fr; gap: 4px; }
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <header class="page-header">
+      <span class="fx-eyebrow">Project</span>
+      <h1 class="page-title">Flox</h1>
+      <p class="fx-lede">
+        A small language for describing flow networks. You write nodes and arrows; it simulates how stuff moves through them over time.
+      </p>
+      <p class="fx-meta">
+        <span>v0.1</span><span>Java</span><span>private repo</span><span>06-05-2026</span>
+      </p>
+    </header>
+
+    <section class="fx-section">
+      <h2>Example</h2>
+      <pre class="fx-code">system Canberra;
+
+Googong[2, 2.0, 0.7] -&gt; googongDam{1000, 80%, 0.8, 1.2} -&gt; Queanbeyan[3, 1.5];
+upperMongolo[3, 1.8, 0.6] -&gt; Queanbeyan[3, 1.5];
+Queanbeyan[3, 1.5] -&gt; centralMongolo[];
+centralMongolo[] -&gt; burleyGriffinDam{5000, 60%, 0.9, 1.5} -&gt; lowerMongolo[];
+
+map Canberra;
+print Canberra 10;</pre>
+      <p>
+        Square brackets are rivers. Curly brackets are dams. Empty brackets are outlets. <code>-&gt;</code> means flow from left to right. <code>print Canberra 10</code> simulates ten days and prints the flow table.
+      </p>
+    </section>
+
+    <section class="fx-section">
+      <h2>Status</h2>
+      <div class="fx-status"><b>Works</b><span>Scanner, parser, AST, tree-walking interpreter. River hydrograph simulation. Network map. Multi-day flow tables.</span></div>
+      <div class="fx-status"><b>Broken</b><span>Dam units bug: inflow (L/s) and storage (ML) are mixed, so threshold is never reached and dam dynamics are effectively stubbed.</span></div>
+      <div class="fx-status"><b>Missing</b><span>Comments. Named parameters. Declare-once references. Rainfall as a series. Tests.</span></div>
+    </section>
+
+    <section class="fx-section">
+      <h2>Roadmap</h2>
+      <ol>
+        <li>Harden the river language. Comments, named parameters, declare-once references, fix the dam units bug, rainfall as a series, golden-file tests.</li>
+        <li>Port the interpreter to TypeScript. Browser playground with Monaco editor, D3 graph, Recharts hydrograph, shareable permalinks.</li>
+        <li>Generalise the engine. <code>mode</code> switch, edge weights, cycles. First non-river demo: a Markov chain.</li>
+        <li>Three.js renderer. Procedural terrain, splined rivers, dam geometries.</li>
+        <li>More modes. Traffic, SIR epidemics, supply chains, pressure-driven plumbing.</li>
+      </ol>
+    </section>
+
+    <section class="fx-section">
+      <h2>Docs</h2>
+      <ul>
+        <li><a class="fx-link" href="/projects/flox/docs/">Documentation index</a></li>
+        <li><a class="fx-link" href="/projects/flox/docs/grammar.html">Grammar reference</a></li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
