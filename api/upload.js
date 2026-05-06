@@ -29,8 +29,12 @@ module.exports = async function handler(req, res) {
   if (req.method === 'OPTIONS') return res.status(204).end();
   if (req.method !== 'POST') return res.status(405).json({ error: 'POST only' });
 
-  const token = process.env.GITHUB_TOKEN;
-  if (!token) return res.status(500).json({ error: 'Server not configured (no GITHUB_TOKEN).' });
+  // Accept any of these names for the GitHub PAT, so the user can pick.
+  const token = process.env.GITHUB_TOKEN
+    || process.env.dnd_upload
+    || process.env.DND_UPLOAD
+    || process.env.GH_TOKEN;
+  if (!token) return res.status(500).json({ error: 'Server not configured (no GITHUB_TOKEN / dnd_upload env var).' });
 
   let body;
   try {
