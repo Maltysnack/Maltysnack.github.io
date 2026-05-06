@@ -10,8 +10,11 @@
   "n_weeks": 99,
   "first_week": "2024-07-22",
   "last_week": "2026-05-08",
+  "pair_window_weeks": 12,
+  "pair_window_first_week": "2026-03-09",
+  "pair_window_total_weighted": 2034.0,
   "n_cards_total": 3867,
-  "n_cards_above_support": 523,
+  "n_cards_above_support": 334,
   "min_support_decks": 30,
   "tier_boundaries": [
     {
