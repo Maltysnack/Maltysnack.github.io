@@ -102,5 +102,5 @@
     { "name": "Component Pouch", "notes": "" },
     { "name": "Scholar's Pack",  "notes": "books, ink, parchment, sand, knife" }
   ],
-  "homebrew": "Magic Wand: +5 damage on hit, -3 to attack rolls.\n\nExploding Skulls: 8d6 fire, 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on the save (DM ruling)."
+  "homebrew": ""
 }

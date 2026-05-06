@@ -239,8 +239,6 @@ function buildLayout() {
 
         <div id="limited-spells-container"></div>
 
-        <div id="homebrew-block"></div>
-
         <div class="block">
           <h2>Equipment</h2>
           <ul id="inventory-list"></ul>
@@ -303,7 +301,6 @@ function render() {
   renderAttacks();
   renderSpells();
   renderLimitedSpells();
-  renderHomebrew();
   renderFeatures();
   renderBuffs();
   renderInventory();
@@ -684,22 +681,6 @@ function renderLimitedSpells() {
     block.appendChild(ul);
     container.appendChild(block);
   });
-}
-
-function renderHomebrew() {
-  const slot = document.getElementById('homebrew-block');
-  slot.innerHTML = '';
-  if (!CHARACTER.homebrew || !CHARACTER.homebrew.trim()) return;
-  const block = document.createElement('div');
-  block.className = 'block';
-  const h2 = document.createElement('h2');
-  h2.textContent = 'Homebrew & Notes';
-  block.appendChild(h2);
-  const p = document.createElement('div');
-  p.className = 'homebrew-body';
-  p.textContent = CHARACTER.homebrew;
-  block.appendChild(p);
-  slot.appendChild(block);
 }
 
 function renderAttacks() {
