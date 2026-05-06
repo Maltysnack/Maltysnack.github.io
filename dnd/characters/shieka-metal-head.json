@@ -4,11 +4,11 @@
   "descriptors": ["metal", "head"],
   "identity": {
     "name": "Shieka",
-    "classLine": "Warlock 5",
+    "classLine": "Hexblade Warlock 5",
     "background": "",
     "speedLine": "Speed 30",
     "languages": "Common",
-    "otherProficiencies": "light armor, simple weapons, pact weapon (any)"
+    "otherProficiencies": "light + medium armor, shields, simple + martial weapons (Hexblade), pact weapon (any)"
   },
   "class": "warlock",
   "level": 5,
@@ -16,7 +16,7 @@
   "spellcastingAbility": "cha",
   "combat": {
     "ac": 16,
-    "hpMax": 35,
+    "hpMax": 43,
     "hitDiceMax": 5,
     "hitDiceType": "d8"
   },
@@ -58,30 +58,48 @@
     { "name": "Survival",        "ability": "wis", "proficient": false }
   ],
   "attacks": [
-    { "name": "Eldritch Blast", "atk": "+2", "notes": "1d10 force per beam, 2 beams at lvl 5, 120 ft", "extra": "with Agonizing Blast: +CHA mod to dmg per beam (CHA -1 here, no boost)" },
-    { "name": "Pact Weapon",    "atk": "+5", "notes": "1d8+2 slashing (longsword form, STR-based)", "extra": "summon as action, counts as magic for resistances" },
-    { "name": "Magic Wand",     "atk": "-1", "notes": "+5 damage on hit, -3 to atk rolls (homebrew)", "extra": "trade accuracy for raw damage" }
+    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing (longsword form, STR-based)", "extra": "summon as action, magic for resistance, +prof dmg vs cursed target via Hexblade's Curse" },
+    { "name": "Eldritch Blast","atk": "+2", "notes": "1d10 force per beam, 2 beams at lvl 5, 120 ft", "extra": "Agonizing Blast adds CHA mod to dmg per beam (CHA -1 here, no help until you bump CHA)" },
+    { "name": "Magic Wand",    "atk": "-1", "notes": "+5 damage on hit, -3 to atk rolls (homebrew)", "extra": "trade accuracy for raw damage" },
+    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse / thrown 20/60", "extra": "" }
   ],
+  "reaction": {
+    "title": "Hellish Rebuke",
+    "desc": "1d10 fire when a creature damages you (2d10 if upcast 2nd, 4d10 at 3rd). Burns a slot."
+  },
   "spellSlots": { "3": 2 },
   "spellSlotsRestoresOn": "short",
   "resources": [],
   "spells": [
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast", "slug": "eldritch-blast", "tags": [], "desc": "ranged spell atk, 1d10 force, 120 ft, +1 beam at 5/11/17" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Mage Armor",     "slug": "mage-armor",     "tags": ["BA"], "desc": "AC 13 + DEX (free via Armor of Shadows, no slot)" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls", "slug": "fireball",     "tags": ["homebrew"], "desc": "8d6 fire 20 ft sphere, DEX save DC 10 for half. Slow flight, easier to dodge (DM ruling)" }
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast",   "slug": "eldritch-blast",  "tags": [],             "desc": "ranged spell atk, 1d10 force, 120 ft. +1 beam at 5/11/17" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Mage Hand",        "slug": "mage-hand",       "tags": ["RAW default"],"desc": "spectral hand, 30 ft, 10 lb manipulate. RAW guess, replace if needed" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Prestidigitation", "slug": "prestidigitation","tags": ["RAW default"],"desc": "minor magical effects. RAW guess, replace if needed" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Mage Armor",       "slug": "mage-armor",      "tags": ["BA"],         "desc": "AC 13 + DEX (free at-will via Armor of Shadows, no slot)" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Hex",              "slug": "hex",             "tags": ["conc","BA","RAW default"], "desc": "+1d6 necrotic on each hit, dis on chosen ability check. 1 hr conc" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Hellish Rebuke",   "slug": "hellish-rebuke",  "tags": ["RX","RAW default"], "desc": "reaction, 2d10 fire when damaged, save half. +1d10/slot" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Misty Step",       "slug": "misty-step",      "tags": ["BA","RAW default"], "desc": "teleport 30 ft as bonus action" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Suggestion",       "slug": "suggestion",      "tags": ["conc","RAW default"], "desc": "verbal command, WIS save, 8 hr" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Fly",              "slug": "fly",             "tags": ["conc","RAW default"], "desc": "60 ft flying speed, 10 min conc, 1 target" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls", "slug": "fireball",        "tags": ["homebrew"],   "desc": "8d6 fire 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on save (DM ruling)" }
   ],
   "limitedSpells": [],
   "features": [
-    { "name": "Pact Magic",         "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at the highest level you've unlocked (3rd at lvl 5)." },
-    { "name": "Agonizing Blast",    "tag": "invocation",   "desc": "Add CHA mod to damage of each Eldritch Blast beam. Currently -1, useful when CHA goes positive." },
-    { "name": "Armor of Shadows",   "tag": "invocation",   "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
-    { "name": "Pact of the Blade",  "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; can change form when summoned." },
-    { "name": "Patron",             "tag": "TBD",          "desc": "Pick a Patron (Fiend / Archfey / Great Old One / Hexblade / Celestial / Fathomless / Genie). Adds a 1st-lvl feature, an expanded spell list, and more at lvl 6/10/14.", "upcoming": true }
+    { "name": "Hexblade's Curse",  "tag": "1/short, BA", "desc": "Curse a creature within 30 ft for 1 min: +prof bonus dmg vs them, crit on 19-20, regain HP equal to lvl + CHA mod when they die." },
+    { "name": "Hex Warrior",       "tag": "lvl 1",       "desc": "Use CHA instead of STR/DEX for atk + dmg with one weapon you touch (or your pact weapon). With CHA 9 vs STR 15 here, STR wins anyway." },
+    { "name": "Pact Magic",        "tag": "warlock core","desc": "Slots restore on short rest. All slots cast at the highest level you've unlocked (3rd at lvl 5)." },
+    { "name": "Pact of the Blade", "tag": "lvl 3 boon",  "desc": "Summon a magical weapon as an action; counts as magic; can change form when summoned." },
+    { "name": "Agonizing Blast",   "tag": "invocation",  "desc": "Add CHA mod to damage of each Eldritch Blast beam. Currently -1. Useful when CHA improves." },
+    { "name": "Armor of Shadows",  "tag": "invocation",  "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
+    { "name": "Mystic Arcanum",    "tag": "lvl 11+, upcoming", "desc": "Pick a 6th-lvl spell, cast 1/long rest without a slot. Adds 7th/8th/9th at lvls 13/15/17.", "upcoming": true }
   ],
   "defaultInventory": [
+    { "name": "Pact Weapon",     "notes": "summoned, current form: longsword" },
     { "name": "Magic Wand",      "notes": "homebrew: +5 dmg, -3 atk" },
+    { "name": "Chain Shirt",     "notes": "AC 13, medium armor (Hexblade prof)" },
+    { "name": "Shield",          "notes": "+2 AC (Hexblade prof)" },
+    { "name": "Dagger",          "notes": "1d4 piercing, finesse, thrown 20/60" },
     { "name": "Component Pouch", "notes": "" },
-    { "name": "Pact Weapon",     "notes": "summoned, current form: longsword" }
+    { "name": "Scholar's Pack",  "notes": "books, ink, parchment, sand, knife" }
   ],
-  "homebrew": "Magic Wand: +5 damage on hit, -3 to attack rolls.\n\nExploding Skulls: same damage as Fireball (8d6 fire, DEX save half), but slow flight time means targets can react. DM ruling: advantage on the save, or DC -2.\n\nHP: rolled hit dice were taken as flat averages (5 per d8 after 1st), not rolled.\n\nKnown spells need filling in: at lvl 5 Warlock knows 6 spells (any level you have slots for) plus 3 cantrips. Currently listed: Eldritch Blast, Mage Armor (free via Armor of Shadows), Exploding Skulls. Need 5 more spells + 2 more cantrips.\n\nPatron not picked yet (Fiend / Archfey / Great Old One / Hexblade / Celestial / Fathomless / Genie). The patron grants extra features at lvls 1, 6, 10, 14 plus an expanded spell list."
+  "homebrew": "DERIVED FROM RAW (correct as needed):\n* HP: 43 = 8 (lvl 1 max d8) + 4x5 (avg per d8 lvls 2-5) + 5x3 (CON 17 mod). Original sheet said 35.\n* AC: 16 = chain shirt 13 + DEX 1 + shield 2. Justified by Hexblade Patron giving medium armor + shield proficiency. Mage Armor (Armor of Shadows invocation) ignored, since it requires no armor.\n* Spell slots: 2 x 3rd lvl, restore on short rest.\n* Saves: WIS + CHA proficient (warlock baseline).\n* Cantrips: Eldritch Blast (mandatory for Agonizing Blast) + 2 RAW defaults (Mage Hand, Prestidigitation).\n* Spells known: 6 at lvl 5. Listed: Hex, Hellish Rebuke, Misty Step, Suggestion, Fly + Exploding Skulls (homebrew). Replace any with actual choices.\n* Patron: Hexblade guess. Justifies AC 16 + the metal-head vibe. Swap to Fiend/Archfey/Great Old One/Celestial/etc. if wrong.\n* Pact Boon: Pact of the Blade (per uploader notes).\n\nHOMEBREW RULES:\n* Magic Wand: +5 damage on hit, -3 to attack rolls.\n* Exploding Skulls: 8d6 fire, 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on the save (DM ruling).\n* HP rolled hit dice taken as flat averages, not rolled.\n\nSTILL TO FILL IN:\n* Race (drives Speed, languages, racial traits)\n* Background (proficiencies, languages, feature)\n* Confirm spell list vs RAW defaults marked above"
 }
