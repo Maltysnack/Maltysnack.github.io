@@ -150,6 +150,21 @@ else
   note_ok "every site page loads sidebar.js (gets favicons + nav)"
 fi
 
+# ── 8. Profanity / unprofessional language (soft warn) ──────────────────────
+# This site is linked in maltysnack's job applications. We don't fail the build
+# on borderline language because context matters, but we surface anything that
+# would make a hiring manager raise an eyebrow on first skim. /dnd/ is excluded
+# because character notes can legitimately have game-violence words.
+echo ""
+echo "[8] casual / profane language (soft check)"
+profanity_hits=$(src_files | grep -v "/dnd/" | xargs grep -lEni "\b(fuck|shit|damn|crap|bitch|bastard|dick|piss|bullshit|wtf|stfu)\b" 2>/dev/null | grep -v scripts/sanitize.sh || true)
+if [[ -n "$profanity_hits" ]]; then
+  note_warn "potentially unprofessional language (review for hiring-context):"
+  echo "$profanity_hits" | sed 's/^/        /'
+else
+  note_ok "no profanity flagged"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 echo ""
 echo "=== Summary ==="

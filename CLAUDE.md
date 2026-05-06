@@ -4,6 +4,16 @@ Read this before doing anything. It's short.
 
 This is **maltysnack's** personal site (`maltysnack.github.io`). Plain HTML, no framework, served by GitHub Pages from `main`. Multiple Claude sessions work on it in parallel, so the rules below exist to keep things clean across sessions.
 
+## Context
+
+maltysnack links this site in job applications. The tone is honest, considered, personal. It doesn't need to read like a corporate portfolio, but it shouldn't read like content a hiring manager would raise an eyebrow at.
+
+- **OK**: quirky voice, Wren persona, drop caps, opinions about typography, personal projects with a clear point.
+- **Not OK**: profanity in user-facing copy, politics, hot takes, slurs, oversharing, edgy humor that doesn't add anything, anything that wouldn't survive a quick skim by a stranger evaluating maltysnack as a candidate.
+- **Borderline, ask first**: jokes that might land flat without context, technical takedowns of named companies or people, anything that names individuals other than maltysnack.
+
+The sanitize script has a soft warning for common profanity. Editorial judgment beyond that is the responsibility of whoever's writing or reviewing.
+
 ## Hard rules
 
 These will fail CI via `scripts/sanitize.sh`:
