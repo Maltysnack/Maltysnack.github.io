@@ -714,18 +714,19 @@
 
   // Items are either {name, score} (recommendation context) or {name, line} (landing).
   // Landing thumbs show no number; recommendation thumbs show only the colored score.
+  // The wrapper is a <div role="button"> rather than <button>, because the score
+  // badge needs to be a separate clickable element (links inside <button> get
+  // auto-relocated by the HTML parser, which moves the score outside the thumb).
   function renderThumb(item) {
     const name = item.name;
     const im = img(name);
     const inSel = selection.includes(name);
     const score = typeof item.score === "number" ? item.score : null;
     const cls = score !== null ? scoreColorClass(score) : "";
-    return `<button class="thumb${inSel ? " in-sel" : ""}" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
+    return `<div class="thumb${inSel ? " in-sel" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
-      ${score !== null ? `
-        <a class="thumb-score ${cls}" href="/games/synergy-score.html" title="synergy score, click for explanation" data-stop>${score}</a>
-      ` : ""}
-    </button>`;
+      ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="link" tabindex="0">${score}</span>` : ""}
+    </div>`;
   }
 
   function fillDatasetStamp() {
@@ -794,12 +795,21 @@
   }
 
   function wireCardClicks() {
-    // Grid thumbnails: click on art toggles selection, click on score follows the link
+    // Grid thumbnails: click on art toggles selection, click on score navigates
     $$(".thumb").forEach((el) => {
       el.addEventListener("click", (e) => {
-        if (e.target.closest("[data-stop]")) return; // let the score link navigate
-        e.preventDefault();
+        if (e.target.closest("[data-score-link]")) {
+          window.location.href = "/games/synergy-score.html";
+          return;
+        }
         selectionToggle(el.dataset.name);
+      });
+      el.addEventListener("keydown", (e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          if (e.target.matches("[data-score-link]")) window.location.href = "/games/synergy-score.html";
+          else selectionToggle(el.dataset.name);
+        }
       });
     });
     // Selection / ban chip actions
@@ -821,7 +831,10 @@
     // Manabase rows
     $$(".manabase-card").forEach((el) => {
       el.addEventListener("click", (e) => {
-        if (e.target.closest("[data-stop]")) return;
+        if (e.target.closest("[data-score-link]")) {
+          window.location.href = "/games/synergy-score.html";
+          return;
+        }
         selectionToggle(el.dataset.name);
       });
     });
@@ -966,7 +979,10 @@
   async function loadFull() {
     [cards, pairs] = await Promise.all([loadJson("cards"), loadJson("pairs")]);
     cardsByName = Object.fromEntries(cards.map((c) => [c.name, c]));
-    allNames = Array.from(new Set([...Object.keys(scryfall), ...Object.keys(cardsByName)])).sort();
+    allNames = Array.from(new Set([
+      ...Object.keys(scryfall).filter((n) => !n.startsWith("__")),
+      ...Object.keys(cardsByName),
+    ])).sort();
     dataReady = true;
     render(); // re-render now that we have full data
   }

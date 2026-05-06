@@ -239,9 +239,7 @@ body:has(.magic-page) .main {
 
 .thumb {
   position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
+  display: block;
   background: none;
   border: none;
   padding: 0;
@@ -249,7 +247,9 @@ body:has(.magic-page) .main {
   cursor: pointer;
   font-family: inherit;
   color: inherit;
+  outline: none;
 }
+.thumb:focus-visible { outline: 2px solid var(--accent-red); outline-offset: 2px; border-radius: 4px; }
 .thumb-img {
   width: 100%;
   aspect-ratio: 488 / 680;
@@ -301,7 +301,6 @@ body:has(.magic-page) .main {
   z-index: 3;
   cursor: pointer;
   transition: transform var(--transition);
-  position: absolute;
 }
 .thumb-score:hover { transform: scale(1.08); }
 

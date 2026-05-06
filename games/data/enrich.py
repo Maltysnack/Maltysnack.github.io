@@ -121,6 +121,39 @@ def standard_legal_names_from_bulk(bulk) :
     return names
 
 
+# ── Printing-quality scoring ─────────────────────────────────────────────────
+# When picking which printing to cache for a given card name, we prefer base
+# black-bordered prints from booster sets over promos, showcases, borderless,
+# extended-art, etc. Score each printing; highest wins.
+PROMO_SET_TYPES = {"promo", "memorabilia", "alchemy", "spellbook", "minigame", "treasure_chest", "vanguard", "planechase", "archenemy"}
+BAD_FRAME_EFFECTS = {"showcase", "extendedart", "borderless", "fullart", "etched", "snow"}
+
+
+def printing_score(card) -> int:
+    """Higher = more standard art. Used to pick the best printing per name."""
+    score = 0
+    set_type = card.get("set_type", "")
+    if set_type in ("expansion", "core"): score += 100
+    elif set_type == "draft_innovation": score += 80
+    elif set_type == "starter": score += 60
+    elif set_type in ("masters", "commander"): score += 40
+    elif set_type in PROMO_SET_TYPES: score -= 50
+    border = card.get("border_color", "")
+    if border == "black": score += 30
+    elif border == "white": score += 10
+    elif border == "borderless": score -= 40
+    elif border == "silver": score -= 20
+    frame_effects = set(card.get("frame_effects", []) or [])
+    if frame_effects & BAD_FRAME_EFFECTS: score -= 60
+    if card.get("lang", "") == "en": score += 10
+    img_status = card.get("image_status", "")
+    if img_status == "highres_scan": score += 10
+    elif img_status in ("missing", "placeholder"): score -= 200
+    if card.get("digital", False): score -= 30  # Arena-only printings sometimes have weird art
+    if card.get("legalities", {}).get("standard", "") == "legal": score += 5
+    return score
+
+
 def main():
     decks = json.loads(RAW.read_text())
     in_dataset = set()
@@ -131,32 +164,37 @@ def main():
             in_dataset.add(c["name"])
 
     cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
-    # Schema migration: old cache entries may lack new fields. Force-refresh
-    # any entry missing the latest fields so we get them on this pass.
-    stale = {n for n, m in cache.items()
-             if not isinstance(m, dict) or "legal_standard" not in m}
-    if stale:
-        print(f"  forcing refresh of {len(stale)} entries (missing released_at)",
+    # We've changed printing-selection logic. Force-refresh every entry so we
+    # pick the best printing under the new scoring rules. Marker key tracks
+    # the schema version; bumping it triggers a full rebuild of the cache.
+    SCHEMA_VERSION = "v2-printing-score"
+    if cache.get("__schema__") != SCHEMA_VERSION:
+        print(f"  schema bump: rebuilding entire cache ({len(cache)} entries)",
               file=sys.stderr)
-        for n in stale:
-            cache.pop(n, None)
+        cache = {"__schema__": SCHEMA_VERSION}
 
     print("fetching Scryfall bulk-data manifest…", file=sys.stderr)
     bulk_index = http_json("https://api.scryfall.com/bulk-data")
-    oracle = next((b for b in bulk_index["data"]
-                   if b["type"] == "oracle_cards"), None)
-    if not oracle:
-        print("ERROR: oracle_cards bulk file not found", file=sys.stderr)
+    # default_cards has multiple printings per card; pick the best one ourselves
+    # (oracle_cards picks one but doesn't always pick the standard art).
+    default_bulk = next((b for b in bulk_index["data"]
+                         if b["type"] == "default_cards"), None)
+    if not default_bulk:
+        print("ERROR: default_cards bulk file not found", file=sys.stderr)
         sys.exit(1)
-    size_mb = oracle["size"] / (1024 * 1024)
-    print(f"downloading {size_mb:.0f}MB oracle_cards bulk…", file=sys.stderr)
-    bulk = json.loads(http_bytes(oracle["download_uri"]))
-    print(f"  {len(bulk)} cards in bulk file, indexing…", file=sys.stderr)
+    size_mb = default_bulk["size"] / (1024 * 1024)
+    print(f"downloading {size_mb:.0f}MB default_cards bulk…", file=sys.stderr)
+    bulk = json.loads(http_bytes(default_bulk["download_uri"]))
+    print(f"  {len(bulk)} printings in bulk file, picking best per name…", file=sys.stderr)
 
+    # For each name, pick the printing with the highest printing_score.
     index = {}
+    best_score = {}
     for card in bulk:
+        s = printing_score(card)
         for key in name_keys(card):
-            if key not in index:
+            if key not in best_score or s > best_score[key]:
+                best_score[key] = s
                 index[key] = card
 
     standard_legal = standard_legal_names_from_bulk(bulk)
