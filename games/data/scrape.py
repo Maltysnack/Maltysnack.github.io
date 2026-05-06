@@ -44,7 +44,7 @@ def mondays(start: date, end: date):
         d += timedelta(days=7)
 
 
-def fetch(url: str) -> str | None:
+def fetch(url: str) -> str:
     req = urllib.request.Request(url, headers={"User-Agent": UA})
     try:
         with urllib.request.urlopen(req, timeout=30) as resp:
@@ -61,7 +61,7 @@ SECTION_RE = re.compile(r"<(main-deck|side-board|companion-card)>(.*?)</\1>", re
 LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s*$")
 
 
-def parse_section(body: str) -> list[dict]:
+def parse_section(body: str) :
     out = []
     for raw in body.strip().splitlines():
         m = LINE_RE.match(raw)
@@ -70,7 +70,7 @@ def parse_section(body: str) -> list[dict]:
     return out
 
 
-def parse_event_date(s: str) -> str | None:
+def parse_event_date(s: str) -> str:
     """Convert "May 01, 2026" to "2026-05-01". Tolerates variants."""
     if not s:
         return None
@@ -82,7 +82,7 @@ def parse_event_date(s: str) -> str | None:
     return None
 
 
-def parse_page(html: str, weight: int, source_url: str, default_week: str = "") -> list[dict]:
+def parse_page(html: str, weight: int, source_url: str, default_week: str = "") :
     decks = []
     for attrs_blob, body in DECK_RE.findall(html):
         attrs = dict(ATTR_RE.findall(attrs_blob))
@@ -130,20 +130,20 @@ INDEX_LINK_RE = re.compile(r'href="(/decklists/[a-z0-9\-]+)"')
 NEWS_LINK_RE = re.compile(r'href="(/news/[a-z0-9\-]+)"')
 
 
-def discover_decklist_slugs() -> list[str]:
+def discover_decklist_slugs() :
     html = fetch(DECKLISTS_INDEX) or ""
     slugs = sorted(set(INDEX_LINK_RE.findall(html)))
     # Strip the leading "/decklists/" prefix
     return [s.removeprefix("/decklists/") for s in slugs]
 
 
-def discover_news_slugs() -> list[str]:
+def discover_news_slugs() :
     html = fetch(NEWS_INDEX) or ""
     slugs = sorted(set(NEWS_LINK_RE.findall(html)))
     return [s.removeprefix("/news/") for s in slugs]
 
 
-def dedupe(decks: list[dict]) -> list[dict]:
+def dedupe(decks) :
     """If the same NAMED player + event_date appears more than once (e.g., a
     Top 8 deck also appears in the Day 1 page), keep the highest-weight copy.
 
@@ -154,7 +154,7 @@ def dedupe(decks: list[dict]) -> list[dict]:
     anon_decks = [d for d in decks if not d.get("deck_title") or d["deck_title"] == ANON]
     named_decks = [d for d in decks if d.get("deck_title") and d["deck_title"] != ANON]
 
-    best_by_key: dict[tuple, dict] = {}
+    best_by_key = {}
     for d in named_decks:
         key = (d["deck_title"], d.get("event_date", ""), d.get("event_name", ""))
         if key not in best_by_key or d["weight"] > best_by_key[key]["weight"]:
@@ -164,7 +164,7 @@ def dedupe(decks: list[dict]) -> list[dict]:
 
 def main():
     out_path = Path(__file__).parent / "decks_raw.json"
-    all_decks: list[dict] = []
+    all_decks = []
     counts = {"ladder": 0, "premier_index": 0, "news_articles": 0}
 
     # ── Source 1: weekly Traditional ladder ──

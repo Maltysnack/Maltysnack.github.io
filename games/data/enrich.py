@@ -65,6 +65,7 @@ def extract_meta(card: dict) -> dict:
         imgs = {}
         mana = ""
 
+    legalities = card.get("legalities", {}) or {}
     return {
         "image": imgs.get("normal", ""),
         "image_small": imgs.get("small", ""),
@@ -77,10 +78,12 @@ def extract_meta(card: dict) -> dict:
         "cn": card.get("collector_number", ""),
         "released_at": card.get("released_at", ""),
         "scryfall_uri": card.get("scryfall_uri", ""),
+        "legal_standard": legalities.get("standard", "") == "legal",
+        "keywords": card.get("keywords", []),
     }
 
 
-def name_keys(card: dict) -> list[str]:
+def name_keys(card: dict) :
     """Possible names a card could be referenced by in our deck data."""
     keys = [card["name"]]
     # DFC: also accept the front face name alone
@@ -89,7 +92,7 @@ def name_keys(card: dict) -> list[str]:
     return keys
 
 
-def fetch_card(name: str) -> dict | None:
+def fetch_card(name: str) -> dict:
     q = urllib.parse.quote(name)
     for endpoint in (f"https://api.scryfall.com/cards/named?exact={q}",
                      f"https://api.scryfall.com/cards/named?fuzzy={q}"):
@@ -103,7 +106,7 @@ def fetch_card(name: str) -> dict | None:
     return None
 
 
-def standard_legal_names_from_bulk(bulk: list[dict]) -> set[str]:
+def standard_legal_names_from_bulk(bulk) :
     """Return the set of names of all Standard-legal cards (one printing each).
     Lets us surface playable cards in search even if no winning deck has run them.
     """
@@ -129,9 +132,9 @@ def main():
 
     cache = json.loads(CACHE.read_text()) if CACHE.exists() else {}
     # Schema migration: old cache entries may lack new fields. Force-refresh
-    # any entry missing released_at so we get it on this pass.
+    # any entry missing the latest fields so we get them on this pass.
     stale = {n for n, m in cache.items()
-             if not isinstance(m, dict) or "released_at" not in m}
+             if not isinstance(m, dict) or "legal_standard" not in m}
     if stale:
         print(f"  forcing refresh of {len(stale)} entries (missing released_at)",
               file=sys.stderr)

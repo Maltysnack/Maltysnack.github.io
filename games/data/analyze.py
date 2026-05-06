@@ -21,9 +21,10 @@ RAW = HERE / "decks_raw.json"
 SCRYFALL = HERE / "scryfall.json"
 
 MIN_SUPPORT = 30           # weighted-deck floor for pair stats and trend data
-PAIR_FLOOR = 10            # weighted co-occurrence floor for any pair
-TOP_N_PAIRS = 12           # how many to keep per relationship strip
-RECENT_WEEKS = 8           # window for "recent" panels
+PAIR_FLOOR = 8             # weighted co-occurrence floor for any pair (lower for recency)
+TOP_N_PAIRS = 16           # how many to keep per relationship strip
+RECENT_WEEKS = 8           # window for "recent" panels (risen / disappeared)
+PAIR_RECENT_WEEKS = 12     # synergy score window: pair stats only count last 12 weeks
 NEW_ARRIVAL_WEEKS = 30     # catalyst candidate window
 NEW_ARRIVAL_MIN_DECKS = 10 # weighted-deck minimum for catalyst eligibility
 CENTERPIECE_THRESHOLD = 3  # 3+ copies = centerpiece
@@ -45,7 +46,7 @@ def load_decks():
     return json.loads(RAW.read_text())
 
 
-def load_land_set() -> set[str]:
+def load_land_set() :
     """Names of every card whose Scryfall type_line includes 'Land'.
     Lands are excluded from tier classification and from explore panels:
     "Steam Vents defines the meta" is technically true but useless."""
@@ -56,7 +57,7 @@ def load_land_set() -> set[str]:
             if isinstance(m, dict) and "Land" in (m.get("type_line", "") or "")} | BASIC_LANDS
 
 
-def tier_for(centerpiece_prevalence: float, name: str, lands: set[str]) -> str | None:
+def tier_for(centerpiece_prevalence: float, name: str, lands) -> str:
     if name in lands:
         return None
     for threshold, label in TIER_BOUNDARIES:
@@ -81,7 +82,15 @@ def main():
     week_total_w = defaultdict(float)
     first_week = {}
 
-    deck_main_sets = []  # (set of card names, weight) for pair co-occurrence
+    deck_main_sets = []  # (set of card names, weight) for pair co-occurrence (RECENT only)
+
+    # Compute the recency cutoff first by sorting all weeks
+    all_weeks = sorted({d.get("week", "") for d in decks if d.get("week")})
+    pair_cutoff_week = all_weeks[-PAIR_RECENT_WEEKS] if len(all_weeks) >= PAIR_RECENT_WEEKS else (all_weeks[0] if all_weeks else "")
+
+    # Recent prevalence (12-week window) for the synergy score's novelty discount
+    recent_main_w = defaultdict(float)
+    recent_total_w = 0.0
 
     for deck in decks:
         w = deck["weight"]
@@ -107,7 +116,12 @@ def main():
             if name not in first_week or wk < first_week[name]:
                 first_week[name] = wk
 
-        deck_main_sets.append((set(m), w))
+        # Pair stats and recent prevalence: only count decks in the recent window
+        if wk and wk >= pair_cutoff_week:
+            deck_main_sets.append((set(m), w))
+            recent_total_w += w
+            for name in m:
+                recent_main_w[name] += w
 
     weeks_sorted = sorted(w for w in week_total_w if w)
 
@@ -118,13 +132,16 @@ def main():
         copies = main_copies.get(name, [])
         copy_hist = Counter(copies)
         cp_prev = centerpiece_w[name] / total_weight
+        recent_prev = (recent_main_w[name] / recent_total_w) if recent_total_w else 0
         cards[name] = {
             "name": name,
             "main_decks": int(round(main_w[name])),
+            "recent_main_decks": int(round(recent_main_w[name])),
             "side_decks": int(round(side_w[name])),
             "centerpiece_decks": int(round(centerpiece_w[name])),
             "flex_decks": int(round(flex_w[name])),
             "main_prevalence": main_w[name] / total_weight,
+            "recent_main_prevalence": recent_prev,  # used by synergy score
             "centerpiece_prevalence": cp_prev,
             "flex_prevalence": flex_w[name] / total_weight,
             "side_prevalence": side_w[name] / total_weight,
@@ -155,8 +172,11 @@ def main():
             c["weekly_main"] = tm
             c["weekly_side"] = ts
 
-    # ── pair stats: weighted lift ──
-    eligible = [n for n, c in cards.items() if c["main_decks"] >= MIN_SUPPORT]
+    # ── pair stats: weighted lift, RECENT 12-WEEK WINDOW ONLY ──
+    # eligible = cards with enough recent appearances to warrant pair stats.
+    # We use a lower floor than MIN_SUPPORT because the recent window is smaller.
+    RECENT_MIN = max(8, MIN_SUPPORT // 4)
+    eligible = [n for n, c in cards.items() if c["recent_main_decks"] >= RECENT_MIN]
     eligible_set = set(eligible)
     co_w = defaultdict(lambda: defaultdict(float))
     for s, w in deck_main_sets:
@@ -168,16 +188,18 @@ def main():
 
     pairs = {}
     for a in eligible:
-        pa = main_w[a] / total_weight
+        pa = recent_main_w[a] / recent_total_w if recent_total_w else 0
+        if pa == 0:
+            continue
         scored = []
         for b, ab_w in co_w[a].items():
             if ab_w < PAIR_FLOOR:
                 continue
-            pb = main_w[b] / total_weight
-            pab = ab_w / total_weight
-            lift = pab / (pa * pb)
-            p_b_given_a = ab_w / main_w[a]
-            p_a_given_b = ab_w / main_w[b]
+            pb = recent_main_w[b] / recent_total_w
+            pab = ab_w / recent_total_w
+            lift = pab / (pa * pb) if pa * pb > 0 else 0
+            p_b_given_a = ab_w / recent_main_w[a] if recent_main_w[a] else 0
+            p_a_given_b = ab_w / recent_main_w[b] if recent_main_w[b] else 0
             scored.append({
                 "name": b,
                 "co_decks": int(round(ab_w)),
@@ -316,6 +338,9 @@ def main():
         "n_weeks": len(weeks_sorted),
         "first_week": weeks_sorted[0] if weeks_sorted else None,
         "last_week": weeks_sorted[-1] if weeks_sorted else None,
+        "pair_window_weeks": PAIR_RECENT_WEEKS,
+        "pair_window_first_week": pair_cutoff_week,
+        "pair_window_total_weighted": round(recent_total_w, 2),
         "n_cards_total": len(cards),
         "n_cards_above_support": len(eligible),
         "min_support_decks": MIN_SUPPORT,
