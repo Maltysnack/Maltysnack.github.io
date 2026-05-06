@@ -10,6 +10,28 @@ const CLASSES_5E = [
   'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard', 'Artificer'
 ];
 
+function parseClassLine(line) {
+  if (!line) return { race: '', baseClass: '', subclass: '', level: null };
+  const subMatch = line.match(/\(([^)]+)\)/);
+  const subclass = subMatch ? subMatch[1].trim() : '';
+  const stripped = line.replace(/\([^)]+\)/, ' ').replace(/\s+/g, ' ').trim();
+  const lvlMatch = stripped.match(/(\d+)\s*$/);
+  const level = lvlMatch ? parseInt(lvlMatch[1], 10) : null;
+  const noLvl = stripped.replace(/\d+\s*$/, '').trim();
+
+  let baseClass = '';
+  let race = noLvl;
+  for (const c of CLASSES_5E) {
+    const re = new RegExp(`\\b${c}\\b`, 'i');
+    if (re.test(noLvl)) {
+      baseClass = c;
+      race = noLvl.replace(re, '').trim();
+      break;
+    }
+  }
+  return { race, baseClass, subclass, level };
+}
+
 let allCharacters = [];
 let filtered = [];
 let page = 1;
@@ -120,21 +142,31 @@ function renderCards() {
 
   slice.forEach(c => {
     const a = document.createElement('a');
-    a.className = 'home-card';
+    a.className = 'home-card character-card';
     a.href = `/dnd/${c.id}.html`;
 
     const desc = (c.descriptors || []).join(' · ');
-    const subtitle = c.classLine || (c.class && c.level ? `${c.class} ${c.level}` : (c.class || ''));
+    const parts = parseClassLine(c.classLine || c.class || '');
+    const headParts = [parts.race, parts.baseClass].filter(Boolean).join(' ');
+    const lvl = parts.level || c.level;
 
     a.innerHTML = `
-      <span class="home-card-title"></span>
-      <span class="card-descriptors"></span>
-      <span class="home-card-label"></span>
+      <span class="character-info">
+        <span class="home-card-title"></span>
+        <span class="card-descriptors"></span>
+        <span class="char-meta">
+          <strong class="char-head"></strong>
+          <span class="char-level"></span>
+          <em class="char-subclass"></em>
+        </span>
+      </span>
       <span class="home-card-arrow">&rarr;</span>
     `;
     a.querySelector('.home-card-title').textContent = c.name;
     a.querySelector('.card-descriptors').textContent = desc;
-    a.querySelector('.home-card-label').textContent = subtitle;
+    a.querySelector('.char-head').textContent = headParts || (c.classLine || '');
+    a.querySelector('.char-level').textContent = lvl ? `Lv ${lvl}` : '';
+    a.querySelector('.char-subclass').textContent = parts.subclass;
     grid.appendChild(a);
   });
 }
