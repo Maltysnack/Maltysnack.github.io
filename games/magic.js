@@ -348,16 +348,28 @@
     if (!selection.length) return "";
     const cards = selection.map((n) => {
       const im = img(n);
-      const inDataset = !!cardData(n);
-      return `<button class="sel-card" data-name="${escapeAttr(n)}" title="${escapeAttr(n)} · click to remove">
+      return `<button class="sel-card" data-name="${escapeAttr(n)}" title="${escapeAttr(n)}, click to remove">
         ${im ? `<img src="${im}" alt="">` : `<span class="sel-card-noimg">${escapeHtml(n)}</span>`}
         <span class="sel-card-x">×</span>
       </button>`;
     }).join("");
+
+    // Pro-lists indicator: show count if data already loaded, otherwise prompt
+    const matchHint = decks
+      ? (() => {
+          const n = matchingDecks().length;
+          return n > 0
+            ? `<button class="sel-strip-jump" id="sel-jump-lists">${n} matching list${n === 1 ? "" : "s"} ↓</button>`
+            : `<span class="sel-strip-hint">no matching lists yet</span>`;
+        })()
+      : `<button class="sel-strip-jump" id="sel-jump-lists">find matching lists ↓</button>`;
+
     return `
       <div class="sel-strip">
         <div class="sel-strip-cards">${cards}</div>
-        <button class="sel-strip-export" id="sel-export">export</button>
+        ${matchHint}
+        <button class="sel-strip-export" id="sel-export" title="copy all selected cards as 4-of into MTGA paste format">export</button>
+        <button class="sel-strip-clear" id="sel-clear" title="clear selection (no confirmation)">clear</button>
         <div class="sel-strip-status" id="sel-status"></div>
       </div>
     `;
@@ -477,14 +489,15 @@
     `;
   }
 
+  let _matchingCache = null;
   function renderListsBody() {
     const ms = matchingDecks();
     if (!ms.length) {
       return `<div class="rec-empty">no winning lists contain all of these cards together</div>`;
     }
-    // Sort by weight (PT Top 8 first) then by event date (newest first)
     ms.sort((a, b) => (b.weight || 1) - (a.weight || 1) || (b.week || "").localeCompare(a.week || ""));
-    return `<div class="lists-body">${ms.map(renderDeck).join("")}</div>`;
+    _matchingCache = ms;
+    return `<div class="lists-body">${ms.map((d, i) => renderDeck(d, i)).join("")}</div>`;
   }
 
   function tierLabelForWeight(w) {
@@ -494,7 +507,7 @@
     return "Ladder";
   }
 
-  function renderDeck(d) {
+  function renderDeck(d, idx) {
     const title = d.deck_title || "Unknown player";
     const sub = d.subtitle || "";
     const ev = d.event_name || "";
@@ -510,7 +523,13 @@
     return `
       <article class="deck-card">
         <header class="deck-card-head">
-          <div class="deck-card-title">${escapeHtml(title)}</div>
+          <div class="deck-card-row">
+            <div class="deck-card-title">${escapeHtml(title)}</div>
+            <div class="deck-card-actions">
+              <button class="deck-card-action" data-deck-action="copy-mtga" data-deck-idx="${idx}">copy to MTGA</button>
+              <button class="deck-card-action" data-deck-action="load-sel" data-deck-idx="${idx}">load into selection</button>
+            </div>
+          </div>
           <div class="deck-card-sub">
             ${sub ? `<span>${escapeHtml(sub)}</span>` : ""}
             ${ev ? `<span>${escapeHtml(ev)}</span>` : ""}
@@ -529,6 +548,7 @@
             <ul class="deck-card-list">${side}</ul>
           </div>` : ""}
         </div>
+        <div class="deck-card-status" id="deck-card-status-${idx}"></div>
       </article>
     `;
   }
@@ -654,7 +674,27 @@
     // Export
     const exp = $("#sel-export");
     if (exp) exp.addEventListener("click", exportToMtga);
-    // View matching lists toggle
+    // Selection clear (no confirmation, per design)
+    const clr = $("#sel-clear");
+    if (clr) clr.addEventListener("click", () => {
+      selection = [];
+      writeSelectionToHash();
+      render();
+    });
+    // Jump-to-lists button in selection strip
+    const jump = $("#sel-jump-lists");
+    if (jump) jump.addEventListener("click", async () => {
+      if (!decks) {
+        jump.textContent = "loading lists…";
+        try { decks = await loadJson("decks_raw"); }
+        catch { jump.textContent = "couldn't load lists"; return; }
+      }
+      listsOpen = true;
+      render();
+      const sec = $(".lists-sec");
+      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+    // View matching lists toggle (in body)
     const ltog = $("#lists-toggle");
     if (ltog) ltog.addEventListener("click", async () => {
       if (!decks) {
@@ -673,6 +713,62 @@
     $$(".deck-line-name").forEach((el) => {
       el.addEventListener("click", () => selectionToggle(el.dataset.name));
     });
+    // Per-list actions
+    $$("[data-deck-action]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const idx = parseInt(el.dataset.deckIdx, 10);
+        const action = el.dataset.deckAction;
+        const d = _matchingCache && _matchingCache[idx];
+        if (!d) return;
+        if (action === "copy-mtga") copyDeckToMtga(d, idx);
+        if (action === "load-sel") loadDeckIntoSelection(d);
+      });
+    });
+  }
+
+  function deckToMtgaText(d) {
+    const lines = ["Deck"];
+    for (const c of d.main || []) {
+      const sf = scryfall[c.name] || {};
+      const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
+      lines.push(`${c.qty} ${c.name}${setCn}`);
+    }
+    if (d.side && d.side.length) {
+      lines.push("", "Sideboard");
+      for (const c of d.side) {
+        const sf = scryfall[c.name] || {};
+        const setCn = sf.set && sf.cn ? ` (${sf.set}) ${sf.cn}` : "";
+        lines.push(`${c.qty} ${c.name}${setCn}`);
+      }
+    }
+    return lines.join("\n");
+  }
+
+  function copyDeckToMtga(d, idx) {
+    const text = deckToMtgaText(d);
+    const status = $("#deck-card-status-" + idx);
+    navigator.clipboard.writeText(text).then(() => {
+      if (status) { status.textContent = "copied. paste into MTGA import."; setTimeout(() => status.textContent = "", 4000); }
+    }).catch(() => {
+      const ta = document.createElement("textarea");
+      ta.value = text; document.body.appendChild(ta); ta.select();
+      try { document.execCommand("copy"); if (status) status.textContent = "copied (fallback)."; }
+      catch { if (status) status.textContent = "copy failed."; }
+      finally { document.body.removeChild(ta); }
+    });
+  }
+
+  function loadDeckIntoSelection(d) {
+    const cardCount = (d.main || []).length + (d.side || []).length;
+    const player = d.deck_title || "this list";
+    if (!confirm(`Replace your current selection with ${player}'s ${cardCount}-card list?\n\nYour current selection will be lost.`)) return;
+    const names = new Set();
+    for (const c of d.main || []) names.add(c.name);
+    selection = [...names];
+    writeSelectionToHash();
+    listsOpen = false;
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
 
   // ── MTGA export ──
