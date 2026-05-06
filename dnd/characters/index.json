@@ -3,18 +3,6 @@
   "generatedAt": "2026-05-06",
   "characters": [
     {
-      "id": "greg-chicken-salad",
-      "name": "Greg",
-      "descriptors": [
-        "chicken",
-        "salad"
-      ],
-      "classLine": "5 ranger",
-      "class": "ranger",
-      "level": 1,
-      "background": ""
-    },
-    {
       "id": "grosh-chef-lifeguard",
       "name": "Grosh",
       "descriptors": [
