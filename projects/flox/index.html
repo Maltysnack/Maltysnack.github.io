@@ -77,6 +77,19 @@
       color: var(--text);
       white-space: pre;
     }
+    .fx-code.fx-output {
+      font-size: 0.8em;
+      line-height: 1.55;
+    }
+    .fx-codetitle {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin: 18px 0 10px;
+    }
+    .fx-codetitle:first-of-type { margin-top: 0; }
 
     .fx-status {
       display: grid;
@@ -127,17 +140,43 @@
 
     <section class="fx-section">
       <h2>Example</h2>
-      <pre class="fx-code">system Canberra;
+      <p class="fx-codetitle">Program</p>
+      <pre class="fx-code">system Demo;
 
-Googong[2, 2.0, 0.7] -&gt; googongDam{1000, 80%, 0.8, 1.2} -&gt; Queanbeyan[3, 1.5];
-upperMongolo[3, 1.8, 0.6] -&gt; Queanbeyan[3, 1.5];
-Queanbeyan[3, 1.5] -&gt; centralMongolo[];
-centralMongolo[] -&gt; burleyGriffinDam{5000, 60%, 0.9, 1.5} -&gt; lowerMongolo[];
+Spring[2, 2.0, 0.7]    -&gt; Confluence[3, 1.8];
+Tributary[1, 1.5, 0.6] -&gt; Confluence[3, 1.8];
+Confluence[3, 1.8]     -&gt; Outlet[];
 
-map Canberra;
-print Canberra 10;</pre>
+map Demo;
+print Demo 5;</pre>
+      <p class="fx-codetitle">Output</p>
+      <pre class="fx-code fx-output">=== RIVER SYSTEM MAP: Demo ===
+
+Tributary (source)
+  └──▶ Confluence
+    └──▶ Outlet [OUTLET]
+
+Spring (source)
+  └──▶ Confluence
+    └──▶ Outlet [OUTLET]
+
+
+=== FLOW SIMULATION: Demo (5.0mm rainfall) ===
+
+(Flow values represent water volume per day in L/s)
+
+Location            | Day  1 | Day  2 | Day  3 | Day  4 | Day  5 | Day  6 | Day  7 | Day  8 | Day  9 | Day 10 |
+--------------------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+Spring              |    5.0 |   12.0 |    9.0 |    6.9 |    5.4 |    4.4 |    3.7 |    3.2 |    2.8 |    2.6 |
+Confluence          |   14.0 |   32.5 |   23.8 |   18.0 |   14.1 |   11.5 |    9.8 |    8.6 |    7.8 |    7.2 |
+Tributary           |    3.3 |    8.5 |    5.5 |    3.7 |    2.6 |    2.0 |    1.6 |    1.3 |    1.2 |    1.1 |
+--------------------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
+Cumulative Outlet (converted to actual volume):
+Outlet [OUTLET]     |  1.21ML|  4.01ML|  6.07ML|  7.63ML|  8.85ML|  9.84ML| 10.69ML| 11.43ML| 12.10ML| 12.73ML|
+
+Total water accumulated at outlet: 12.73 ML</pre>
       <p>
-        Square brackets are rivers. Curly brackets are dams. Empty brackets are outlets. <code>-&gt;</code> means flow from left to right. <code>print Canberra 10</code> simulates ten days and prints the flow table.
+        Square brackets are rivers (base flow, peak multiplier, decay). Curly brackets are dams. Empty brackets are outlets. <code>-&gt;</code> is directed flow. <code>print Demo 5</code> runs the simulation at 5mm of rainfall.
       </p>
     </section>
 
