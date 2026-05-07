@@ -109,7 +109,7 @@
           <ul>
             <li><a href="/dnd/" ${path.startsWith('/dnd/') || path.startsWith('/dnd.html') ? 'class="nav-active"' : ''}>dnd</a></li>
             <li><a href="/projects/duoclue/" ${path.startsWith('/projects/duoclue') ? 'class="nav-active"' : ''}>Duoclue</a></li>
-            <li><a href="/games/magic.html" ${path.startsWith('/games/magic') ? 'class="nav-active"' : ''}>Magic</a></li>
+            <li><a href="/games/magic.html" ${path.startsWith('/games/magic') ? 'class="nav-active"' : ''}>Magic: The Gathering</a></li>
           </ul>
         </div>
 
