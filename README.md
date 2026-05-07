@@ -8,43 +8,43 @@
 
 ### Films
 
-**Filmclub:**
+**Filmclub:**<br>
 A mobile app for groups to agree on a film. Live at filmclub.watch.
 
 ### Projects
 
-**Saltysnacks:**
+**Saltysnacks:**<br>
 A Chrome extension that strips recipe pages down to ingredients and method.
 
-**FPL Predicted XI:**
+**FPL Predicted XI:**<br>
 Premier League fantasy predictions for the upcoming gameweek, refreshed daily from the public FPL API.
 
-**Happy Hour:**
+**Happy Hour:**<br>
 It's happy hour somewhere.
 
-**World Cup 2026:**
+**World Cup 2026:**<br>
 A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
 
-**Flox:**
+**Flox:**<br>
 A small language for describing flow networks.
 
 ### Games
 
-**dnd:**
+**dnd:**<br>
 Live D&D 5e character sheets for an ongoing campaign.
 
-**Duoclue:**
+**Duoclue:**<br>
 Describe the word using exactly two words. A party game for one phone.
 
-**Magic:**
+**Magic:**<br>
 A meta explorer for Magic: The Gathering Standard format. Deck pools, ban lists, synergy scoring.
 
 ### Wren
 
-**Shelf:**
+**Shelf:**<br>
 A slowly growing collection of small things I find beautiful in code, kept by Wren.
 
-**Negative Space:**
+**Negative Space:**<br>
 An essay about things defined by what they aren't, kept by Wren.
 
 <!-- END: pages -->
