@@ -1,0 +1,113 @@
+{
+  "schemaVersion": 1,
+  "id": "japlan-chaos-master",
+  "descriptors": ["chaos", "master"],
+  "identity": {
+    "name": "japlan",
+    "classLine": "Sorcerer (Draconic, Brass) 5",
+    "background": "Soldier",
+    "speedLine": "Speed 30",
+    "languages": "Common, Draconic",
+    "otherProficiencies": "daggers, darts, slings, quarterstaffs, light crossbows; gaming set; vehicles (land)"
+  },
+  "class": "sorcerer",
+  "level": 5,
+  "profBonus": 3,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 17,
+    "hpMax": 32,
+    "hitDiceMax": 5,
+    "hitDiceType": "d6"
+  },
+  "startingGold": 0,
+  "abilities": [
+    { "key": "str", "name": "Strength",     "score": 11 },
+    { "key": "dex", "name": "Dexterity",    "score": 13 },
+    { "key": "con", "name": "Constitution", "score": 13 },
+    { "key": "int", "name": "Intelligence", "score": 14 },
+    { "key": "wis", "name": "Wisdom",       "score": 12 },
+    { "key": "cha", "name": "Charisma",     "score": 11 }
+  ],
+  "saves": [
+    { "ability": "str", "proficient": false },
+    { "ability": "dex", "proficient": false },
+    { "ability": "con", "proficient": true  },
+    { "ability": "int", "proficient": false },
+    { "ability": "wis", "proficient": false },
+    { "ability": "cha", "proficient": true  }
+  ],
+  "skills": [
+    { "name": "Acrobatics",      "ability": "dex", "proficient": false },
+    { "name": "Animal Handling", "ability": "wis", "proficient": false },
+    { "name": "Arcana",          "ability": "int", "proficient": true  },
+    { "name": "Athletics",       "ability": "str", "proficient": true  },
+    { "name": "Deception",       "ability": "cha", "proficient": false },
+    { "name": "History",         "ability": "int", "proficient": false },
+    { "name": "Insight",         "ability": "wis", "proficient": false },
+    { "name": "Intimidation",    "ability": "cha", "proficient": true  },
+    { "name": "Investigation",   "ability": "int", "proficient": false },
+    { "name": "Medicine",        "ability": "wis", "proficient": false },
+    { "name": "Nature",          "ability": "int", "proficient": false },
+    { "name": "Perception",      "ability": "wis", "proficient": false },
+    { "name": "Performance",     "ability": "cha", "proficient": false },
+    { "name": "Persuasion",      "ability": "cha", "proficient": true  },
+    { "name": "Religion",        "ability": "int", "proficient": false },
+    { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
+    { "name": "Stealth",         "ability": "dex", "proficient": false },
+    { "name": "Survival",        "ability": "wis", "proficient": false }
+  ],
+  "attacks": [
+    { "name": "Fire Bolt",      "atk": "+4", "notes": "2d10 fire, 120 ft", "extra": "cantrip; +1 atk via wand" },
+    { "name": "Booming Blade",  "atk": "+5", "notes": "weapon dmg + 1d8 thunder if target moves", "extra": "melee cantrip + dagger; +1 atk via wand" },
+    { "name": "Dagger",         "atk": "+4", "notes": "1d4+1 piercing", "extra": "finesse, thrown 20/60" },
+    { "name": "Light Crossbow", "atk": "+4", "notes": "1d8+1 piercing, 80/320", "extra": "loading, 2H" }
+  ],
+  "reaction": {
+    "title": "Shield (cast)",
+    "desc": "1st RX, +5 AC until next turn"
+  },
+  "spellSlots": { "1": 4, "2": 3, "3": 2 },
+  "resources": [
+    { "key": "sp", "name": "Sorcery Pts", "type": "counter", "max": 5, "restoresOn": "long" }
+  ],
+  "spellSource": "",
+  "spells": [
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Booming Blade",   "slug": "booming-blade",  "tags": [], "desc": "melee atk + weapon dmg, +1d8 thunder if target moves" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Fire Bolt",       "slug": "fire-bolt",      "tags": [], "desc": "2d10 fire, 120 ft" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Light",           "slug": "light",          "tags": [], "desc": "object glows 20 ft, 1 hr" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Mage Hand",       "slug": "mage-hand",      "tags": [], "desc": "spectral hand 30 ft, 10 lb" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Prestidigitation","slug": "prestidigitation","tags": ["RAW default"], "desc": "minor magical effects (RAW default, 5th cantrip)" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Shield",          "slug": "shield",         "tags": ["RX"], "desc": "+5 AC until next turn" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Earth Tremor",    "slug": "earth-tremor",   "tags": [], "desc": "10 ft burst, 1d6 bludgeon, DEX save, prone + difficult terrain" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Web",             "slug": "web",            "tags": ["conc"], "desc": "20 ft cube, restrain on STR save fail, 1 hr" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Shadow Blade",    "slug": "shadow-blade",   "tags": ["BA", "conc"], "desc": "summon 2d8 psychic blade, finesse, dim light = adv" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Tidal Wave",      "slug": "tidal-wave",     "tags": [], "desc": "10x10x10 cube, 4d8 bludgeon, DEX save half + prone" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",        "slug": "fireball",       "tags": [], "desc": "8d6 fire 20 ft sphere, DEX save half" }
+  ],
+  "limitedSpells": [],
+  "racialTraits": [],
+  "features": [
+    { "name": "Spellcasting",         "tag": "sorcerer",       "desc": "CHA-based, 6 spells known + 5 cantrips at lvl 5" },
+    { "name": "Font of Magic",        "tag": "lvl 2",          "desc": "5 SP at lvl 5; convert SP <-> slots (2/3/5/6/7 SP per 1st-5th)" },
+    { "name": "Metamagic",            "tag": "lvl 3",          "desc": "pick 2 RAW; player listed 3 below (1 may be Tasha's optional)" },
+    { "name": "Empowered Spell",      "tag": "1 SP",           "desc": "reroll up to CHA mod dmg dice on a spell" },
+    { "name": "Quickened Spell",      "tag": "2 SP",           "desc": "1 action spell -> BA" },
+    { "name": "Magical Guidance",     "tag": "1 SP, Tasha's",  "desc": "reroll a failed ability check" },
+    { "name": "Dragon Ancestor",      "tag": "Draconic Brass", "desc": "learn Draconic, double prof on CHA checks vs dragons" },
+    { "name": "Draconic Resilience",  "tag": "Draconic",       "desc": "+1 HP/sorc lvl baked in; AC 13+DEX if no armor" },
+    { "name": "War Caster",           "tag": "feat",           "desc": "adv on conc saves; OAs can be cantrips; somatic w/ hands full" },
+    { "name": "Soldier",              "tag": "background",     "desc": "Military Rank: command lower-rank soldiers" },
+    { "name": "Elemental Affinity",   "tag": "Draconic lvl 6", "desc": "+CHA mod fire dmg; spend SP for fire resistance 1 hr", "upcoming": true }
+  ],
+  "defaultInventory": [
+    { "name": "Wand of Cantrip Atk +1", "notes": "homebrew, +1 atk on cantrips" },
+    { "name": "Robes of Chain",         "notes": "homebrew, AC 16 chainmail-equiv, no prof needed" },
+    { "name": "Furry Slippers",         "notes": "homebrew, cold resistance" },
+    { "name": "Dagger",                 "notes": "1d4 piercing, finesse, thrown" },
+    { "name": "Light Crossbow",         "notes": "1d8 piercing, 80/320" },
+    { "name": "Component Pouch",        "notes": "" },
+    { "name": "Explorer's Pack",        "notes": "rope, rations, etc." }
+  ],
+  "homebrew": ""
+}
