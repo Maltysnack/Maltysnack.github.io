@@ -1,0 +1,218 @@
+{
+  "schemaVersion": 1,
+  "id": "jhotan-shield-wall",
+  "descriptors": [
+    "shield",
+    "wall"
+  ],
+  "identity": {
+    "name": "Jhotan",
+    "classLine": "fighter 5",
+    "background": "hermit",
+    "speedLine": "Speed 30",
+    "languages": "",
+    "otherProficiencies": ""
+  },
+  "class": "fighter",
+  "level": 5,
+  "profBonus": 2,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 10,
+    "hpMax": 10,
+    "hitDiceMax": 1,
+    "hitDiceType": "d10"
+  },
+  "startingGold": 0,
+  "abilities": [
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 16
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 12
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": 19
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 11
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 13
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 12
+    }
+  ],
+  "saves": [
+    {
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "ability": "con",
+      "proficient": false
+    },
+    {
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "ability": "cha",
+      "proficient": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Arcana",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Athletics",
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "name": "Deception",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "History",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Insight",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Intimidation",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Investigation",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Medicine",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Nature",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Perception",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Performance",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Persuasion",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Religion",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Stealth",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Survival",
+      "ability": "wis",
+      "proficient": false
+    }
+  ],
+  "attacks": [],
+  "spellSlots": {},
+  "resources": [
+    {
+      "key": "secondWind",
+      "name": "Second Wind",
+      "type": "toggle",
+      "restoresOn": "short"
+    },
+    {
+      "key": "actionSurge",
+      "name": "Action Surge",
+      "type": "pip",
+      "max": 1,
+      "restoresOn": "short"
+    }
+  ],
+  "spells": [],
+  "limitedSpells": [],
+  "features": [
+    {
+      "name": "defense fighting style",
+      "tag": "",
+      "desc": "battlemaster sentinel feat maneuvers: brace grappling strike rally"
+    }
+  ],
+  "defaultInventory": [
+    {
+      "name": "full plate",
+      "notes": ""
+    },
+    {
+      "name": "long sword",
+      "notes": ""
+    },
+    {
+      "name": "shield",
+      "notes": ""
+    }
+  ],
+  "homebrew": "shield is a magic shield so +3 and can push people back 5ft if they dont hitme (if i block).\nbrooch of misty step 2 casts per long rest\ni have a scroll of goblin mayhem. shoot it and it summons 5 little goblins that attack anyone and anything\nextra profiency in nature and medicine\nbit slower on foot but good climbing speed"
+}
