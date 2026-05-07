@@ -234,7 +234,7 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 
 .attacks td { padding: 3px 4px; border-bottom: 1px dotted var(--rule); }
 .attacks tr:last-child td { border-bottom: none; }
-.attacks td:first-child { font-weight: 600; width: 70px; }
+.attacks td:first-child { font-weight: 600; width: 110px; white-space: nowrap; }
 .attacks td:nth-child(2) { font-variant-numeric: tabular-nums; width: 30px; color: var(--muted); }
 .attacks em.muted { font-size: 10px; }
 

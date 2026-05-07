@@ -630,12 +630,20 @@ function renderSpells() {
 function renderLimitedSpells() {
   const container = document.getElementById('limited-spells-container');
   container.innerHTML = '';
-  if (!CHARACTER.limitedSpells || !CHARACTER.limitedSpells.length) return;
 
-  // group by `group` field, preserving first-seen order
+  // Standard slots that always render even if empty, in this order
+  const STANDARD_GROUPS = ['Racials', 'Scrolls'];
+
+  // group by `group` field, preserving first-seen order; ensure standards exist
   const groups = [];
   const groupMap = {};
-  CHARACTER.limitedSpells.forEach(s => {
+
+  STANDARD_GROUPS.forEach(name => {
+    groupMap[name] = { name, items: [] };
+    groups.push(groupMap[name]);
+  });
+
+  (CHARACTER.limitedSpells || []).forEach(s => {
     if (!groupMap[s.group]) {
       groupMap[s.group] = { name: s.group, items: [] };
       groups.push(groupMap[s.group]);
@@ -652,6 +660,12 @@ function renderLimitedSpells() {
 
     const ul = document.createElement('ul');
     ul.className = 'spell-list compact';
+    if (g.items.length === 0) {
+      const li = document.createElement('li');
+      li.style.cssText = 'color:var(--faint);font-size:11px;font-style:italic;padding:4px 0;';
+      li.textContent = 'none';
+      ul.appendChild(li);
+    }
     g.items.forEach(s => {
       const usesArr = state.limitedSpells[s.key];
       // for multi-count items (scrolls with 2 charges), render one row per charge

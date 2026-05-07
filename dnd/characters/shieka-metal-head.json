@@ -5,10 +5,10 @@
   "identity": {
     "name": "Shieka",
     "classLine": "Giant Warlock (Fiend) 5",
-    "background": "",
+    "background": "Entertainer",
     "speedLine": "Speed 30",
     "languages": "Common, Giant",
-    "otherProficiencies": "light armor, simple weapons, pact weapon (any)"
+    "otherProficiencies": "light armor, simple weapons, pact weapon, disguise kit, one musical instrument"
   },
   "class": "warlock",
   "level": 5,
@@ -38,7 +38,7 @@
     { "ability": "cha", "proficient": true  }
   ],
   "skills": [
-    { "name": "Acrobatics",      "ability": "dex", "proficient": false },
+    { "name": "Acrobatics",      "ability": "dex", "proficient": true  },
     { "name": "Animal Handling", "ability": "wis", "proficient": false },
     { "name": "Arcana",          "ability": "int", "proficient": true  },
     { "name": "Athletics",       "ability": "str", "proficient": false },
@@ -50,7 +50,7 @@
     { "name": "Medicine",        "ability": "wis", "proficient": false },
     { "name": "Nature",          "ability": "int", "proficient": false },
     { "name": "Perception",      "ability": "wis", "proficient": false },
-    { "name": "Performance",     "ability": "cha", "proficient": false },
+    { "name": "Performance",     "ability": "cha", "proficient": true  },
     { "name": "Persuasion",      "ability": "cha", "proficient": false },
     { "name": "Religion",        "ability": "int", "proficient": false },
     { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
@@ -58,10 +58,10 @@
     { "name": "Survival",        "ability": "wis", "proficient": false }
   ],
   "attacks": [
-    { "name": "Eldritch Blast","atk": "+2", "notes": "1d10 force per beam, 2 beams at lvl 5, 120 ft", "extra": "Agonizing Blast adds CHA mod per beam (CHA -1 here, no help until you bump CHA)" },
-    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing (longsword form, STR-based)", "extra": "summon as action, magic for resistance" },
-    { "name": "Magic Wand",    "atk": "-1", "notes": "+5 damage on hit, -3 to atk rolls (homebrew)", "extra": "trade accuracy for raw damage" },
-    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse / thrown 20/60", "extra": "" }
+    { "name": "Eldritch Blast","atk": "+2", "notes": "1d10 force per beam, 2 beams", "extra": "120 ft, +CHA dmg per beam via Agonizing Blast" },
+    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing", "extra": "longsword form, magic, summon as action" },
+    { "name": "Magic Wand",    "atk": "-1", "notes": "+5 dmg on hit, -3 to atk", "extra": "homebrew" },
+    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse", "extra": "thrown 20/60" }
   ],
   "reaction": {
     "title": "Hellish Rebuke",
@@ -69,7 +69,9 @@
   },
   "spellSlots": { "3": 2 },
   "spellSlotsRestoresOn": "short",
-  "resources": [],
+  "resources": [
+    { "key": "stoneEnd", "name": "Stone's End.", "type": "pip", "max": 1, "restoresOn": "short" }
+  ],
   "spells": [
     { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast", "slug": "eldritch-blast",  "tags": [],         "desc": "ranged spell atk, 1d10 force, 120 ft. +1 beam at 5/11/17" },
     { "lvl": 0, "lvlLabel": "Cant", "name": "Blade Ward",     "slug": "blade-ward",      "tags": [],         "desc": "resistance to bludgeon/pierce/slash from weapon attacks until end of next turn" },
@@ -86,14 +88,16 @@
   ],
   "limitedSpells": [],
   "features": [
-    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "When you reduce a hostile creature to 0 HP, gain temp HP equal to CHA mod + warlock lvl. Currently 5 + (-1) = 4 temp HP." },
-    { "name": "Pact Magic",          "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at the highest level you've unlocked (3rd at lvl 5)." },
-    { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; can change form when summoned." },
-    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to damage of each Eldritch Blast beam. Currently -1, useful when CHA improves." },
+    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 4)." },
+    { "name": "Pact Magic",          "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at highest unlocked level (3rd at lvl 5)." },
+    { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; change form when summoned." },
+    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently -1." },
     { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
-    { "name": "Fiend Expanded Spells","tag": "always known","desc": "Burning Hands (1), Command (1), Blindness/Deafness (2), Scorching Ray (2), Fireball (3), Stinking Cloud (3). Always counted as warlock spells, don't count against spells known." },
-    { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6, upcoming", "desc": "1/short rest: add 1d10 to a failed ability check or save. Unlocks at lvl 6.", "upcoming": true },
-    { "name": "Mystic Arcanum",      "tag": "lvl 11+, upcoming",     "desc": "Pick a 6th-lvl spell, cast 1/long rest without a slot. Adds 7th/8th/9th at lvls 13/15/17.", "upcoming": true }
+    { "name": "Fiend Expanded Spells","tag": "always known","desc": "Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud. Don't count against spells known." },
+    { "name": "Giant",               "tag": "race, homebrew", "desc": "Homebrew race; statline assumed similar to Goliath: Powerful Build (count as Large for carry), Stone's Endurance (1d12+CON to a hit, 1/short)." },
+    { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: always find a place to perform for free lodging + food. +Acrobatics + Performance, disguise kit + instrument prof." },
+    { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6, upcoming", "desc": "1/short rest: +1d10 to a failed ability check or save. Unlocks at lvl 6.", "upcoming": true },
+    { "name": "Mystic Arcanum",      "tag": "lvl 11+, upcoming",     "desc": "Pick a 6th-lvl spell, cast 1/long without a slot. +7th/8th/9th at 13/15/17.", "upcoming": true }
   ],
   "defaultInventory": [
     { "name": "Pact Weapon",     "notes": "summoned, current form: longsword" },
