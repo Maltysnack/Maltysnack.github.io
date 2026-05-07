@@ -15,6 +15,30 @@
       "background": "Chef"
     },
     {
+      "id": "japlan-chaos-master",
+      "name": "japlan",
+      "descriptors": [
+        "chaos",
+        "master"
+      ],
+      "classLine": "Sorcerer (Draconic, Brass) 5",
+      "class": "sorcerer",
+      "level": 5,
+      "background": "Soldier"
+    },
+    {
+      "id": "jhotan-shield-wall",
+      "name": "Jhotan",
+      "descriptors": [
+        "shield",
+        "wall"
+      ],
+      "classLine": "Fighter (Battle Master) 5",
+      "class": "fighter",
+      "level": 5,
+      "background": "Hermit"
+    },
+    {
       "id": "shieka-metal-head",
       "name": "Shieka",
       "descriptors": [
