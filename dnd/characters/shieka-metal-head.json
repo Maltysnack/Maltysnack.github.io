@@ -1,7 +1,10 @@
 {
   "schemaVersion": 1,
   "id": "shieka-metal-head",
-  "descriptors": ["metal", "head"],
+  "descriptors": [
+    "metal",
+    "head"
+  ],
   "identity": {
     "name": "Shieka",
     "classLine": "Giant Warlock (Fiend) 5",
@@ -22,89 +25,409 @@
   },
   "startingGold": 0,
   "abilities": [
-    { "key": "str", "name": "Strength",     "score": 15 },
-    { "key": "dex", "name": "Dexterity",    "score": 12 },
-    { "key": "con", "name": "Constitution", "score": 17 },
-    { "key": "int", "name": "Intelligence", "score": 15 },
-    { "key": "wis", "name": "Wisdom",       "score": 12 },
-    { "key": "cha", "name": "Charisma",     "score": 9  }
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 15
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 12
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": 17
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 15
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 12
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 9
+    }
   ],
   "saves": [
-    { "ability": "str", "proficient": false },
-    { "ability": "dex", "proficient": false },
-    { "ability": "con", "proficient": false },
-    { "ability": "int", "proficient": false },
-    { "ability": "wis", "proficient": true  },
-    { "ability": "cha", "proficient": true  }
+    {
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "ability": "con",
+      "proficient": false
+    },
+    {
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "ability": "cha",
+      "proficient": true
+    }
   ],
   "skills": [
-    { "name": "Acrobatics",      "ability": "dex", "proficient": true  },
-    { "name": "Animal Handling", "ability": "wis", "proficient": false },
-    { "name": "Arcana",          "ability": "int", "proficient": true  },
-    { "name": "Athletics",       "ability": "str", "proficient": false },
-    { "name": "Deception",       "ability": "cha", "proficient": true  },
-    { "name": "History",         "ability": "int", "proficient": false },
-    { "name": "Insight",         "ability": "wis", "proficient": false },
-    { "name": "Intimidation",    "ability": "cha", "proficient": false },
-    { "name": "Investigation",   "ability": "int", "proficient": false },
-    { "name": "Medicine",        "ability": "wis", "proficient": false },
-    { "name": "Nature",          "ability": "int", "proficient": false },
-    { "name": "Perception",      "ability": "wis", "proficient": false },
-    { "name": "Performance",     "ability": "cha", "proficient": true  },
-    { "name": "Persuasion",      "ability": "cha", "proficient": false },
-    { "name": "Religion",        "ability": "int", "proficient": false },
-    { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
-    { "name": "Stealth",         "ability": "dex", "proficient": false },
-    { "name": "Survival",        "ability": "wis", "proficient": false }
+    {
+      "name": "Acrobatics",
+      "ability": "dex",
+      "proficient": true
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Arcana",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Athletics",
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "name": "Deception",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "History",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Insight",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Intimidation",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Investigation",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Medicine",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Nature",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Perception",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Performance",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "Persuasion",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Religion",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Stealth",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Survival",
+      "ability": "wis",
+      "proficient": false
+    }
   ],
   "attacks": [
-    { "name": "Eldritch Blast","atk": "+2", "notes": "1d10 force per beam, 2 beams", "extra": "120 ft, +CHA dmg per beam via Agonizing Blast" },
-    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing", "extra": "longsword form, magic, summon as action" },
-    { "name": "Magic Wand",    "atk": "-1", "notes": "+5 dmg on hit, -3 to atk", "extra": "homebrew" },
-    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse", "extra": "thrown 20/60" }
+    {
+      "name": "Eldritch Blast",
+      "atk": "+2",
+      "notes": "1d10 force per beam, 2 beams",
+      "extra": "120 ft, +CHA dmg per beam via Agonizing Blast"
+    },
+    {
+      "name": "Pact Weapon",
+      "atk": "+5",
+      "notes": "1d8+2 slashing",
+      "extra": "longsword form, magic, summon as action"
+    },
+    {
+      "name": "Magic Wand",
+      "atk": "-1",
+      "notes": "+5 dmg on hit, -3 to atk",
+      "extra": "homebrew"
+    },
+    {
+      "name": "Dagger",
+      "atk": "+5",
+      "notes": "1d4+2 piercing, finesse",
+      "extra": "thrown 20/60"
+    }
   ],
   "reaction": {
     "title": "Hellish Rebuke",
     "desc": "1d10 fire when a creature damages you (2d10 if upcast 2nd, 4d10 at 3rd). Burns a slot."
   },
-  "spellSlots": { "3": 2 },
+  "spellSlots": {
+    "3": 2
+  },
   "spellSlotsRestoresOn": "short",
   "resources": [
-    { "key": "stoneEnd", "name": "Stone's End.", "type": "pip", "max": 1, "restoresOn": "short" }
+    {
+      "key": "stoneEnd",
+      "name": "Stone's End.",
+      "type": "pip",
+      "max": 1,
+      "restoresOn": "short"
+    }
   ],
   "spells": [
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast", "slug": "eldritch-blast",  "tags": [],         "desc": "ranged spell atk, 1d10 force, 120 ft. +1 beam at 5/11/17" },
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Blade Ward",     "slug": "blade-ward",      "tags": [],         "desc": "resistance to bludgeon/pierce/slash from weapon attacks until end of next turn" },
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Chill Touch",    "slug": "chill-touch",     "tags": [],         "desc": "1d8 necrotic, 120 ft, target can't regain HP, 1 round; dis on attacks vs you if undead" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Mage Armor",     "slug": "mage-armor",      "tags": ["BA"],     "desc": "AC 13 + DEX (free at-will via Armor of Shadows, no slot)" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Witch Bolt",     "slug": "witch-bolt",      "tags": ["conc"],   "desc": "1d12 lightning on hit, sustain to deal 1d12 each turn as action. 1 min conc" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Hellish Rebuke", "slug": "hellish-rebuke",  "tags": ["RX"],     "desc": "reaction, 2d10 fire when damaged, save half. +1d10/slot" },
-    { "lvl": 2, "lvlLabel": "2nd",  "name": "Invisibility",   "slug": "invisibility",    "tags": ["conc"],   "desc": "target invisible 1 hr conc, ends if attacks/casts" },
-    { "lvl": 2, "lvlLabel": "2nd",  "name": "Scorching Ray",  "slug": "scorching-ray",   "tags": ["fiend"],  "desc": "3 rays of fire 2d6 each, +1 ray/slot. Free from Fiend bonus list" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Vampiric Touch", "slug": "vampiric-touch",  "tags": ["conc"],   "desc": "melee spell atk 3d6 necrotic, regain half as HP. 1 min conc, repeat as action" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Magic Circle",   "slug": "magic-circle",    "tags": [],         "desc": "10 ft cylinder, named creature type can't enter or charm/frighten. 1 hr cast, lasts 1 hr" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",       "slug": "fireball",        "tags": ["fiend"],  "desc": "8d6 fire 20 ft sphere, DEX save half, 150 ft. Free from Fiend bonus list" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls","slug": "fireball",       "tags": ["homebrew"],"desc": "8d6 fire 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on save (DM ruling)" }
+    {
+      "lvl": 0,
+      "lvlLabel": "Cant",
+      "name": "Eldritch Blast",
+      "slug": "eldritch-blast",
+      "tags": [],
+      "desc": "ranged spell atk, 1d10 force, 120 ft. +1 beam at 5/11/17"
+    },
+    {
+      "lvl": 0,
+      "lvlLabel": "Cant",
+      "name": "Blade Ward",
+      "slug": "blade-ward",
+      "tags": [],
+      "desc": "resistance to bludgeon/pierce/slash from weapon attacks until end of next turn"
+    },
+    {
+      "lvl": 0,
+      "lvlLabel": "Cant",
+      "name": "Chill Touch",
+      "slug": "chill-touch",
+      "tags": [],
+      "desc": "1d8 necrotic, 120 ft, target can't regain HP, 1 round; dis on attacks vs you if undead"
+    },
+    {
+      "lvl": 1,
+      "lvlLabel": "1st",
+      "name": "Mage Armor",
+      "slug": "mage-armor",
+      "tags": [
+        "BA"
+      ],
+      "desc": "AC 13 + DEX (free at-will via Armor of Shadows, no slot)"
+    },
+    {
+      "lvl": 1,
+      "lvlLabel": "1st",
+      "name": "Witch Bolt",
+      "slug": "witch-bolt",
+      "tags": [
+        "conc"
+      ],
+      "desc": "1d12 lightning on hit, sustain to deal 1d12 each turn as action. 1 min conc"
+    },
+    {
+      "lvl": 1,
+      "lvlLabel": "1st",
+      "name": "Hellish Rebuke",
+      "slug": "hellish-rebuke",
+      "tags": [
+        "RX"
+      ],
+      "desc": "reaction, 2d10 fire when damaged, save half. +1d10/slot"
+    },
+    {
+      "lvl": 2,
+      "lvlLabel": "2nd",
+      "name": "Invisibility",
+      "slug": "invisibility",
+      "tags": [
+        "conc"
+      ],
+      "desc": "target invisible 1 hr conc, ends if attacks/casts"
+    },
+    {
+      "lvl": 2,
+      "lvlLabel": "2nd",
+      "name": "Scorching Ray",
+      "slug": "scorching-ray",
+      "tags": [
+        "fiend"
+      ],
+      "desc": "3 rays of fire 2d6 each, +1 ray/slot. Free from Fiend bonus list"
+    },
+    {
+      "lvl": 3,
+      "lvlLabel": "3rd",
+      "name": "Vampiric Touch",
+      "slug": "vampiric-touch",
+      "tags": [
+        "conc"
+      ],
+      "desc": "melee spell atk 3d6 necrotic, regain half as HP. 1 min conc, repeat as action"
+    },
+    {
+      "lvl": 3,
+      "lvlLabel": "3rd",
+      "name": "Magic Circle",
+      "slug": "magic-circle",
+      "tags": [],
+      "desc": "10 ft cylinder, named creature type can't enter or charm/frighten. 1 hr cast, lasts 1 hr"
+    },
+    {
+      "lvl": 3,
+      "lvlLabel": "3rd",
+      "name": "Fireball",
+      "slug": "fireball",
+      "tags": [
+        "fiend"
+      ],
+      "desc": "8d6 fire 20 ft sphere, DEX save half, 150 ft. Free from Fiend bonus list"
+    },
+    {
+      "lvl": 3,
+      "lvlLabel": "3rd",
+      "name": "Exploding Skulls",
+      "slug": "fireball",
+      "tags": [
+        "homebrew"
+      ],
+      "desc": "8d6 fire 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on save (DM ruling)"
+    }
   ],
   "limitedSpells": [],
   "features": [
-    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 4)." },
-    { "name": "Pact Magic",          "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at highest unlocked level (3rd at lvl 5)." },
-    { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; change form when summoned." },
-    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently -1." },
-    { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
-    { "name": "Fiend Expanded Spells","tag": "always known","desc": "Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud. Don't count against spells known." },
-    { "name": "Giant",               "tag": "race, homebrew", "desc": "Homebrew race; statline assumed similar to Goliath: Powerful Build (count as Large for carry), Stone's Endurance (1d12+CON to a hit, 1/short)." },
-    { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: always find a place to perform for free lodging + food. +Acrobatics + Performance, disguise kit + instrument prof." },
-    { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6, upcoming", "desc": "1/short rest: +1d10 to a failed ability check or save. Unlocks at lvl 6.", "upcoming": true },
-    { "name": "Mystic Arcanum",      "tag": "lvl 11+, upcoming",     "desc": "Pick a 6th-lvl spell, cast 1/long without a slot. +7th/8th/9th at 13/15/17.", "upcoming": true }
+    {
+      "name": "Dark One's Blessing",
+      "tag": "Fiend lvl 1",
+      "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 4)."
+    },
+    {
+      "name": "Pact Magic",
+      "tag": "warlock core",
+      "desc": "Slots restore on short rest. All slots cast at highest unlocked level (3rd at lvl 5)."
+    },
+    {
+      "name": "Pact of the Blade",
+      "tag": "lvl 3 boon",
+      "desc": "Summon a magical weapon as an action; counts as magic; change form when summoned."
+    },
+    {
+      "name": "Agonizing Blast",
+      "tag": "invocation",
+      "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently -1."
+    },
+    {
+      "name": "Armor of Shadows",
+      "tag": "invocation",
+      "desc": "Cast Mage Armor on yourself at will, no slot, no components."
+    },
+    {
+      "name": "Fiend Expanded Spells",
+      "tag": "always known",
+      "desc": "Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud. Don't count against spells known."
+    },
+    {
+      "name": "Giant",
+      "tag": "race, homebrew",
+      "desc": "Homebrew race; statline assumed similar to Goliath: Powerful Build (count as Large for carry), Stone's Endurance (1d12+CON to a hit, 1/short)."
+    },
+    {
+      "name": "Entertainer",
+      "tag": "background",
+      "desc": "By Popular Demand: always find a place to perform for free lodging + food. +Acrobatics + Performance, disguise kit + instrument prof."
+    },
+    {
+      "name": "Dark One's Own Luck",
+      "tag": "Fiend lvl 6, upcoming",
+      "desc": "1/short rest: +1d10 to a failed ability check or save. Unlocks at lvl 6.",
+      "upcoming": true
+    },
+    {
+      "name": "Mystic Arcanum",
+      "tag": "lvl 11+, upcoming",
+      "desc": "Pick a 6th-lvl spell, cast 1/long without a slot. +7th/8th/9th at 13/15/17.",
+      "upcoming": true
+    }
   ],
   "defaultInventory": [
-    { "name": "Pact Weapon",     "notes": "summoned, current form: longsword" },
-    { "name": "Magic Wand",      "notes": "homebrew: +5 dmg, -3 atk" },
-    { "name": "Dagger",          "notes": "1d4 piercing, finesse, thrown 20/60" },
-    { "name": "Component Pouch", "notes": "" },
-    { "name": "Scholar's Pack",  "notes": "books, ink, parchment, sand, knife" }
+    {
+      "name": "Pact Weapon",
+      "notes": "summoned, current form: longsword"
+    },
+    {
+      "name": "Magic Wand",
+      "notes": "homebrew: +5 dmg, -3 atk"
+    },
+    {
+      "name": "Dagger",
+      "notes": "1d4 piercing, finesse, thrown 20/60"
+    },
+    {
+      "name": "Component Pouch",
+      "notes": ""
+    },
+    {
+      "name": "Scholar's Pack",
+      "notes": "books, ink, parchment, sand, knife"
+    },
+    {
+      "name": "+1 Longbow",
+      "notes": "loot from giant"
+    }
   ],
-  "homebrew": ""
+  "homebrew": "",
+  "_pendingUpdate": {
+    "description": "Smoke test from Wren. Safe to close without merging. Imagined: leveled to 6, took Sentinel feat, found a +1 longbow.",
+    "submittedAt": "2026-05-07T03:15:46.600Z",
+    "sessionState": {
+      "hp": {
+        "current": 28,
+        "max": 43,
+        "temp": 0
+      },
+      "gold": 75,
+      "notes": "session log: fought a giant, took the bow off its body",
+      "buffs": [],
+      "alignment": "goodytwoshoes",
+      "xp": "6500",
+      "inventoryAdds": 3
+    }
+  }
 }
