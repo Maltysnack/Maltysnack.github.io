@@ -37,4 +37,19 @@ jobs:
           fi
           MSG=$'build(dnd): rebuild index after merge [skip ci]\n\nCo-Authored-By: Wren <wren@maltysnack.dev>'
           git commit -m "$MSG"
-          git push
+          # Race-safe push: if another action advanced main while we ran,
+          # rebase + retry up to 3 times. The build script is deterministic
+          # so re-running on top of the new HEAD produces the same result.
+          for i in 1 2 3; do
+            if git push; then
+              exit 0
+            fi
+            echo "Push rejected (attempt $i). Pulling + rebuilding..."
+            git pull --rebase origin main
+            node scripts/build-dnd-index.js
+            git add dnd/characters/index.json 'dnd/*.html' 2>/dev/null || true
+            git diff --staged --quiet && exit 0
+            git commit --amend --no-edit
+          done
+          echo "Push still rejected after 3 retries."
+          exit 1
