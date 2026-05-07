@@ -27,7 +27,7 @@
     { "key": "con", "name": "Constitution", "score": 17 },
     { "key": "int", "name": "Intelligence", "score": 15 },
     { "key": "wis", "name": "Wisdom",       "score": 12 },
-    { "key": "cha", "name": "Charisma",     "score": 9  }
+    { "key": "cha", "name": "Charisma",     "score": 10 }
   ],
   "saves": [
     { "ability": "str", "proficient": false },
@@ -39,7 +39,7 @@
   ],
   "skills": [
     { "name": "Acrobatics",      "ability": "dex", "proficient": true  },
-    { "name": "Animal Handling", "ability": "wis", "proficient": false },
+    { "name": "Animal Handling", "ability": "wis", "proficient": true  },
     { "name": "Arcana",          "ability": "int", "proficient": true  },
     { "name": "Athletics",       "ability": "str", "proficient": false },
     { "name": "Deception",       "ability": "cha", "proficient": true  },
@@ -58,9 +58,9 @@
     { "name": "Survival",        "ability": "wis", "proficient": false }
   ],
   "attacks": [
-    { "name": "Eldritch Blast","atk": "+2", "notes": "1d10 force per beam, 2 beams", "extra": "120 ft, +CHA dmg per beam via Agonizing Blast" },
+    { "name": "Eldritch Blast","atk": "+3", "notes": "1d10 force per beam, 2 beams", "extra": "120 ft, +CHA dmg per beam via Agonizing Blast" },
     { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing", "extra": "longsword form, magic, summon as action" },
-    { "name": "Magic Wand",    "atk": "-1", "notes": "+5 dmg on hit, -3 to atk", "extra": "homebrew" },
+    { "name": "Magic Wand",    "atk": "0",  "notes": "+5 dmg on hit, -3 to atk", "extra": "homebrew" },
     { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse", "extra": "thrown 20/60" }
   ],
   "reaction": {
@@ -84,27 +84,31 @@
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Vampiric Touch", "slug": "vampiric-touch",  "tags": ["conc"],   "desc": "melee spell atk 3d6 necrotic, regain half as HP. 1 min conc, repeat as action" },
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Magic Circle",   "slug": "magic-circle",    "tags": [],         "desc": "10 ft cylinder, named creature type can't enter or charm/frighten. 1 hr cast, lasts 1 hr" },
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",       "slug": "fireball",        "tags": ["fiend"],  "desc": "8d6 fire 20 ft sphere, DEX save half, 150 ft. Free from Fiend bonus list" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls","slug": "fireball",       "tags": ["homebrew"],"desc": "8d6 fire 20 ft sphere, DEX save DC 10 for half. Slow flight gives targets advantage on save (DM ruling)" }
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls","slug": "fireball",       "tags": ["homebrew"],"desc": "8d6 fire 20 ft sphere, DEX save DC 11 for half. Slow flight gives targets advantage on save (DM ruling)" }
   ],
-  "limitedSpells": [],
+  "limitedSpells": [
+    { "group": "Scrolls", "key": "scrollJump", "name": "Jump", "slug": "jump", "count": 1, "restoresOn": "never", "meta": "1st", "tags": ["BA"], "desc": "target's jump distance x3 for 1 min. Bonus action." }
+  ],
   "features": [
-    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 4)." },
+    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 5)." },
     { "name": "Pact Magic",          "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at highest unlocked level (3rd at lvl 5)." },
     { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; change form when summoned." },
-    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently -1." },
+    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently +0 with the CHA hat (was -1)." },
     { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
     { "name": "Fiend Expanded Spells","tag": "always known","desc": "Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud. Don't count against spells known." },
+    { "name": "Hat of CHA +1",       "tag": "magic item",   "desc": "Homebrew. While worn, CHA increases by 1 (9 -> 10). Effects: spell DC 10 -> 11, spell atk +2 -> +3, CHA save +2 -> +3, Dark One's Blessing temp HP 4 -> 5, Agonizing Blast dmg -1 -> +0." },
     { "name": "Giant",               "tag": "race, homebrew", "desc": "Homebrew race; statline assumed similar to Goliath: Powerful Build (count as Large for carry), Stone's Endurance (1d12+CON to a hit, 1/short)." },
     { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: always find a place to perform for free lodging + food. +Acrobatics + Performance, disguise kit + instrument prof." },
     { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6, upcoming", "desc": "1/short rest: +1d10 to a failed ability check or save. Unlocks at lvl 6.", "upcoming": true },
     { "name": "Mystic Arcanum",      "tag": "lvl 11+, upcoming",     "desc": "Pick a 6th-lvl spell, cast 1/long without a slot. +7th/8th/9th at 13/15/17.", "upcoming": true }
   ],
   "defaultInventory": [
-    { "name": "Pact Weapon",     "notes": "summoned, current form: longsword" },
-    { "name": "Magic Wand",      "notes": "homebrew: +5 dmg, -3 atk" },
-    { "name": "Dagger",          "notes": "1d4 piercing, finesse, thrown 20/60" },
-    { "name": "Component Pouch", "notes": "" },
-    { "name": "Scholar's Pack",  "notes": "books, ink, parchment, sand, knife" }
+    { "name": "Pact Weapon",        "notes": "summoned, current form: longsword" },
+    { "name": "Magic Wand",         "notes": "homebrew: +5 dmg, -3 atk" },
+    { "name": "Hat of CHA +1",      "notes": "homebrew, +1 CHA while worn" },
+    { "name": "Dagger",             "notes": "1d4 piercing, finesse, thrown 20/60" },
+    { "name": "Component Pouch",    "notes": "" },
+    { "name": "Scholar's Pack",     "notes": "books, ink, parchment, sand, knife" }
   ],
   "homebrew": ""
 }
