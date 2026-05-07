@@ -770,7 +770,7 @@ async function fetchPayload() {
   const eligible = shuffle(CITIES.filter((c) => isHappyHour(c.tz)));
   for (const city of eligible) {
     try {
-      const photoUrl = `${PROXY}?city=${encodeURIComponent(city.name)}&country=${encodeURIComponent(city.country)}`;
+      const photoUrl = `${PROXY}?city=${encodeURIComponent(city.name)}&country=${encodeURIComponent(city.country)}&res=widget`;
       const photoData = await new Request(photoUrl).loadJSON();
       if (!photoData || !photoData.url) continue;
       const rawImg = await new Request(photoData.url).loadImage();
