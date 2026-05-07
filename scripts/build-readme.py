@@ -63,15 +63,21 @@ def read_description(href: str) -> str:
 
 
 def render() -> str:
-    """Build the markdown block that goes between the markers."""
+    """Build the markdown block that goes between the markers.
+
+    Format: bold title on its own line followed by a colon, description
+    on the next line. Blank line between entries. No inline page link.
+    Reads visually consistent regardless of title length.
+    """
     lines = [BEGIN, ""]
     for section, pages in SECTIONS:
         lines.append(f"### {section}")
         lines.append("")
         for href, label in pages:
             desc = read_description(href)
-            lines.append(f"- **{label}** ([`{href}`]({href})): {desc}")
-        lines.append("")
+            lines.append(f"**{label}:**")
+            lines.append(desc)
+            lines.append("")
     lines.append(END)
     return "\n".join(lines)
 
