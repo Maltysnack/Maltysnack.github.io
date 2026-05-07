@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-06",
+  "generatedAt": "2026-05-07",
   "characters": [
     {
       "id": "grosh-chef-lifeguard",
@@ -24,7 +24,7 @@
       "classLine": "Giant Warlock (Fiend) 5",
       "class": "warlock",
       "level": 5,
-      "background": ""
+      "background": "Entertainer"
     }
   ]
 }
