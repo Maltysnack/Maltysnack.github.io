@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 1,
+  "id": "jhotan-shield-wall",
+  "descriptors": ["shield", "wall"],
+  "identity": {
+    "name": "Jhotan",
+    "classLine": "Fighter (Battle Master) 5",
+    "background": "Hermit",
+    "speedLine": "Speed 25 (climb 25)",
+    "languages": "Common",
+    "otherProficiencies": "all armor, shields, simple + martial weapons, herbalism kit"
+  },
+  "class": "fighter",
+  "level": 5,
+  "profBonus": 3,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 22,
+    "hpMax": 54,
+    "hitDiceMax": 5,
+    "hitDiceType": "d10"
+  },
+  "startingGold": 0,
+  "abilities": [
+    { "key": "str", "name": "Strength",     "score": 16 },
+    { "key": "dex", "name": "Dexterity",    "score": 12 },
+    { "key": "con", "name": "Constitution", "score": 19 },
+    { "key": "int", "name": "Intelligence", "score": 11 },
+    { "key": "wis", "name": "Wisdom",       "score": 13 },
+    { "key": "cha", "name": "Charisma",     "score": 12 }
+  ],
+  "saves": [
+    { "ability": "str", "proficient": true  },
+    { "ability": "dex", "proficient": false },
+    { "ability": "con", "proficient": true  },
+    { "ability": "int", "proficient": false },
+    { "ability": "wis", "proficient": false },
+    { "ability": "cha", "proficient": false }
+  ],
+  "skills": [
+    { "name": "Acrobatics",      "ability": "dex", "proficient": false },
+    { "name": "Animal Handling", "ability": "wis", "proficient": false },
+    { "name": "Arcana",          "ability": "int", "proficient": false },
+    { "name": "Athletics",       "ability": "str", "proficient": true  },
+    { "name": "Deception",       "ability": "cha", "proficient": false },
+    { "name": "History",         "ability": "int", "proficient": false },
+    { "name": "Insight",         "ability": "wis", "proficient": false },
+    { "name": "Intimidation",    "ability": "cha", "proficient": false },
+    { "name": "Investigation",   "ability": "int", "proficient": false },
+    { "name": "Medicine",        "ability": "wis", "proficient": true  },
+    { "name": "Nature",          "ability": "int", "proficient": true  },
+    { "name": "Perception",      "ability": "wis", "proficient": true  },
+    { "name": "Performance",     "ability": "cha", "proficient": false },
+    { "name": "Persuasion",      "ability": "cha", "proficient": false },
+    { "name": "Religion",        "ability": "int", "proficient": true  },
+    { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
+    { "name": "Stealth",         "ability": "dex", "proficient": false },
+    { "name": "Survival",        "ability": "wis", "proficient": false }
+  ],
+  "attacks": [
+    { "name": "Longsword", "atk": "+6", "notes": "1d8+3 slashing", "extra": "extra atk x2, versatile 1d10 if 2H" }
+  ],
+  "reaction": {
+    "title": "Sentinel",
+    "desc": "RX atk creature attacking ally w/in 5 ft, hit stops their movement"
+  },
+  "spellSlots": {},
+  "resources": [
+    { "key": "secondWind",  "name": "Second Wind",  "type": "toggle", "restoresOn": "short" },
+    { "key": "actionSurge", "name": "Action Surge", "type": "pip",  "max": 1, "restoresOn": "short" },
+    { "key": "supDice",     "name": "Sup. Dice d8", "type": "counter", "max": 4, "restoresOn": "short" }
+  ],
+  "spellSource": "",
+  "spells": [],
+  "limitedSpells": [
+    { "group": "Items",   "key": "broochMistyStep", "name": "Misty Step", "slug": "misty-step", "count": 2, "restoresOn": "long",  "tags": ["BA"], "meta": "brooch", "desc": "teleport 30 ft" },
+    { "group": "Scrolls", "key": "scrollGoblinMayhem", "name": "Goblin Mayhem", "slug": "summon-fey", "count": 1, "restoresOn": "never", "tags": ["homebrew"], "meta": "scroll", "desc": "summon 5 hostile goblins, attack everyone" }
+  ],
+  "racialTraits": [
+    { "name": "Slow", "desc": "Speed 25 (homebrew)" },
+    { "name": "Climber", "desc": "climb 25" }
+  ],
+  "features": [
+    { "name": "Defense Fighting Style", "tag": "lvl 1",        "desc": "+1 AC while wearing armor" },
+    { "name": "Second Wind",            "tag": "1/short",      "desc": "BA: regain 1d10 + lvl HP" },
+    { "name": "Action Surge",           "tag": "1/short",      "desc": "extra action this turn" },
+    { "name": "Extra Attack",           "tag": "lvl 5",        "desc": "2 atks per Attack action" },
+    { "name": "Combat Superiority",     "tag": "Battle Master","desc": "4 d8 sup dice, expend on maneuvers, restore on short" },
+    { "name": "Brace",                  "tag": "maneuver",     "desc": "RX: when creature enters reach, atk + sup die dmg" },
+    { "name": "Grappling Strike",       "tag": "maneuver, hb", "desc": "BA after weapon hit: +sup die dmg + grapple check (homebrew, not standard)" },
+    { "name": "Rally",                  "tag": "maneuver",     "desc": "BA: ally w/in 30 ft = sup die + CHA mod temp HP" },
+    { "name": "Student of War",         "tag": "Battle Master","desc": "prof in 1 artisan tool (smith's by default)" },
+    { "name": "Sentinel",               "tag": "feat",         "desc": "OAs at adv don't need; OA hit halts target; RX atk a creature in 5 ft attacking ally" },
+    { "name": "Magic Shield Pushback",  "tag": "magic shield", "desc": "RX block (atk misses): push attacker 5 ft (homebrew)" },
+    { "name": "Hermit Discovery",       "tag": "background",   "desc": "uncovered a unique secret in seclusion" }
+  ],
+  "defaultInventory": [
+    { "name": "Full Plate",        "notes": "AC 18, disadv stealth" },
+    { "name": "Magic Shield +3",   "notes": "homebrew, +3 AC, push 5 ft on block" },
+    { "name": "Longsword",         "notes": "1d8 slashing, versatile 1d10" },
+    { "name": "Brooch of Misty Step", "notes": "2 casts/long" },
+    { "name": "Scroll of Goblin Mayhem", "notes": "homebrew, 1 use" },
+    { "name": "Dungeoneer's Pack", "notes": "rope, rations, etc." }
+  ],
+  "homebrew": ""
+}
