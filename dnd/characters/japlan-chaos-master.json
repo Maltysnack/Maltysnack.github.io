@@ -3,7 +3,7 @@
   "id": "japlan-chaos-master",
   "descriptors": ["chaos", "master"],
   "identity": {
-    "name": "japlan",
+    "name": "Japlan",
     "classLine": "Sorcerer (Draconic, Brass) 5",
     "background": "Soldier",
     "speedLine": "Speed 30",
@@ -69,7 +69,7 @@
   },
   "spellSlots": { "1": 4, "2": 3, "3": 2 },
   "resources": [
-    { "key": "sp", "name": "Sorcery Pts", "type": "counter", "max": 5, "restoresOn": "long" }
+    { "key": "sp", "name": "Sorcery Pts", "type": "pip", "max": 5, "restoresOn": "long" }
   ],
   "spellSource": "",
   "spells": [
@@ -91,9 +91,9 @@
     { "name": "Spellcasting",         "tag": "sorcerer",       "desc": "CHA-based, 6 spells known + 5 cantrips at lvl 5" },
     { "name": "Font of Magic",        "tag": "lvl 2",          "desc": "5 SP at lvl 5; convert SP <-> slots (2/3/5/6/7 SP per 1st-5th)" },
     { "name": "Metamagic",            "tag": "lvl 3",          "desc": "pick 2 RAW; player listed 3 below (1 may be Tasha's optional)" },
-    { "name": "Empowered Spell",      "tag": "1 SP",           "desc": "reroll up to CHA mod dmg dice on a spell" },
-    { "name": "Quickened Spell",      "tag": "2 SP",           "desc": "1 action spell -> BA" },
-    { "name": "Magical Guidance",     "tag": "1 SP, Tasha's",  "desc": "reroll a failed ability check" },
+    { "name": "Empowered Spell",      "group": "Metamagic", "tag": "1 SP",           "desc": "reroll up to CHA mod dmg dice on a spell" },
+    { "name": "Quickened Spell",      "group": "Metamagic", "tag": "2 SP",           "desc": "1 action spell -> BA" },
+    { "name": "Magical Guidance",     "group": "Metamagic", "tag": "1 SP, Tasha's",  "desc": "reroll a failed ability check" },
     { "name": "Dragon Ancestor",      "tag": "Draconic Brass", "desc": "learn Draconic, double prof on CHA checks vs dragons" },
     { "name": "Draconic Resilience",  "tag": "Draconic",       "desc": "+1 HP/sorc lvl baked in; AC 13+DEX if no armor" },
     { "name": "War Caster",           "tag": "feat",           "desc": "adv on conc saves; OAs can be cantrips; somatic w/ hands full" },

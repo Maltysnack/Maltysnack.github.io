@@ -198,12 +198,6 @@ function buildLayout() {
         <span><strong><span class="editable" id="hd-current" contenteditable="true"></span>/<span id="hd-max"></span></strong> <span class="muted">HD</span></span>
       </div>
       <div class="h-div"></div>
-      <div class="h-item h-conc">
-        <span class="h-label">Conc</span>
-        <span id="conc-active" class="conc-name">none</span>
-        <button id="conc-clear" class="ghost">drop</button>
-      </div>
-      <div class="h-div"></div>
       <div class="h-item h-reaction">
         <span class="h-label">Reaction</span>
         <strong id="reaction-title"></strong>
@@ -267,6 +261,11 @@ function buildLayout() {
       <section class="extras-col">
         <div class="block">
           <h2>Active Buffs</h2>
+          <div class="conc-row">
+            <span class="muted conc-label">Conc:</span>
+            <span id="conc-active" class="conc-name">none</span>
+            <button id="conc-clear" class="ghost">drop</button>
+          </div>
           <ul id="buffs-list"></ul>
           <form id="buff-form" class="add-form">
             <input type="text" id="buff-name" placeholder="name">
@@ -798,9 +797,24 @@ function renderAttacks() {
 function renderFeatures() {
   const ul = document.getElementById('features-list');
   ul.innerHTML = '';
+  let lastGroup = null;
   (CHARACTER.features || []).forEach(f => {
+    // Emit a header when we hit a new group (consecutive grouped features
+    // cluster under one header)
+    if (f.group && f.group !== lastGroup) {
+      const header = document.createElement('li');
+      header.className = 'feat-group-header';
+      header.textContent = f.group + ':';
+      ul.appendChild(header);
+    }
+    lastGroup = f.group || null;
+
     const li = document.createElement('li');
-    if (f.upcoming) li.className = 'upcoming';
+    const classes = [];
+    if (f.upcoming) classes.push('upcoming');
+    if (f.group) classes.push('feat-grouped');
+    if (classes.length) li.className = classes.join(' ');
+
     const featName = document.createElement('span');
     featName.className = 'feat-name';
     featName.appendChild(linkifyName(f.name, f));

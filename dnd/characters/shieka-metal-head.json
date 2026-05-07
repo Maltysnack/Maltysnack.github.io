@@ -99,8 +99,8 @@
     { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "drop hostile to 0 HP: temp HP = CHA mod + lvl (5)" },
     { "name": "Pact Magic",          "tag": "warlock",      "desc": "short-rest slots, all cast at highest level (3rd)" },
     { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "summon magic weapon as action" },
-    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "+CHA mod dmg per EB beam (+0)" },
-    { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Mage Armor at-will, no slot" },
+    { "name": "Agonizing Blast",     "group": "Invocations", "desc": "+CHA mod dmg per EB beam (+0)" },
+    { "name": "Armor of Shadows",    "group": "Invocations", "desc": "Mage Armor at-will, no slot" },
     { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: free lodging + food when performing" },
     { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6",  "desc": "1/short rest: +1d10 to a failed check or save", "upcoming": true },
     { "name": "Mystic Arcanum",      "tag": "lvl 11+",      "desc": "6th-lvl spell 1/long, no slot", "upcoming": true }

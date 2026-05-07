@@ -68,7 +68,7 @@
   "resources": [
     { "key": "secondWind",  "name": "Second Wind",  "type": "toggle", "restoresOn": "short" },
     { "key": "actionSurge", "name": "Action Surge", "type": "pip",  "max": 1, "restoresOn": "short" },
-    { "key": "supDice",     "name": "Sup. Dice d8", "type": "counter", "max": 4, "restoresOn": "short" }
+    { "key": "supDice",     "name": "Sup. Dice d8", "type": "pip", "max": 4, "restoresOn": "short" }
   ],
   "spellSource": "",
   "spells": [],
@@ -86,9 +86,9 @@
     { "name": "Action Surge",           "tag": "1/short",      "desc": "extra action this turn" },
     { "name": "Extra Attack",           "tag": "lvl 5",        "desc": "2 atks per Attack action" },
     { "name": "Combat Superiority",     "tag": "Battle Master","desc": "4 d8 sup dice, expend on maneuvers, restore on short" },
-    { "name": "Brace",                  "tag": "maneuver",     "desc": "RX: when creature enters reach, atk + sup die dmg" },
-    { "name": "Grappling Strike",       "tag": "maneuver, hb", "desc": "BA after weapon hit: +sup die dmg + grapple check (homebrew, not standard)" },
-    { "name": "Rally",                  "tag": "maneuver",     "desc": "BA: ally w/in 30 ft = sup die + CHA mod temp HP" },
+    { "name": "Brace",                  "group": "Maneuvers", "desc": "RX: creature enters reach, atk + sup die dmg" },
+    { "name": "Grappling Strike",       "group": "Maneuvers", "tag": "homebrew", "desc": "BA after weapon hit: +sup die dmg + grapple check" },
+    { "name": "Rally",                  "group": "Maneuvers", "desc": "BA: ally w/in 30 ft = sup die + CHA mod temp HP" },
     { "name": "Student of War",         "tag": "Battle Master","desc": "prof in 1 artisan tool (smith's by default)" },
     { "name": "Sentinel",               "tag": "feat",         "desc": "OAs at adv don't need; OA hit halts target; RX atk a creature in 5 ft attacking ally" },
     { "name": "Magic Shield Pushback",  "tag": "magic shield", "desc": "RX block (atk misses): push attacker 5 ft (homebrew)" },
