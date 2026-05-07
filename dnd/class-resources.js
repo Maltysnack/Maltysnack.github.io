@@ -69,6 +69,11 @@
   function abilityMod(score) { return Math.floor(((score || 10) - 10) / 2); }
   function profBonus(level) { return Math.floor((level - 1) / 4) + 2; }
 
+  // Small-N resources show as pips (≤ 8 max). Bigger pools (Lay on Hands 25,
+  // high-level Ki, high-level Sorcery Points) stay as counters since 17 pips
+  // in a row is unusable.
+  function dieType(max) { return max <= 8 ? 'pip' : 'counter'; }
+
   const BUILDERS = {
     barbarian(level) {
       const rages = level >= 17 ? 'unlimited' : level >= 12 ? 5 : level >= 6 ? 4 : level >= 3 ? 3 : 2;
@@ -119,7 +124,7 @@
       return {
         spellSlots: {},
         resources: [
-          { key: 'ki', name: 'Ki', type: 'counter', max: level, restoresOn: 'short' },
+          { key: 'ki', name: 'Ki', type: dieType(level), max: level, restoresOn: 'short' },
         ].filter(() => level >= 2),
       };
     },
@@ -156,7 +161,7 @@
       return {
         spellSlots: FULL_CASTER_SLOTS[level] || {},
         resources: [
-          ...(level >= 2 ? [{ key: 'sp', name: 'Sorcery Pts', type: 'counter', max: level, restoresOn: 'long' }] : []),
+          ...(level >= 2 ? [{ key: 'sp', name: 'Sorcery Pts', type: dieType(level), max: level, restoresOn: 'long' }] : []),
         ],
       };
     },
@@ -176,10 +181,11 @@
       };
     },
     artificer(level) {
+      const infusions = Math.min(6, Math.floor((level + 4) / 4) * 2);
       return {
         spellSlots: HALF_CASTER_SLOTS[Math.max(1, Math.ceil(level / 2) * 2)] || {}, // artificer is half-caster but rounds up
         resources: [
-          { key: 'infusions', name: 'Infusions', type: 'counter', max: Math.min(6, Math.floor((level + 4) / 4) * 2), restoresOn: 'long' },
+          { key: 'infusions', name: 'Infusions', type: dieType(infusions), max: infusions, restoresOn: 'long' },
         ].filter(() => level >= 2),
       };
     },

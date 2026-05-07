@@ -58,10 +58,14 @@ Examples:
 - Paladin lvl 3+: Lay on Hands (counter, max=lvl*5, long), Channel Divinity (pip, 1, short), Divine Sense (pip, 1+CHA mod, long)
 - Warlock 5: spell slots `{ "3": 2 }` with `spellSlotsRestoresOn: "short"`
 - Fighter 2+: Second Wind (toggle, short), Action Surge (pip, 1 or 2, short), Indomitable (pip, lvl-scaled, long) at 9+
-- Monk 2+: Ki (counter, max=lvl, short)
+- Monk 2+: Ki (pip if max ≤ 8, counter otherwise, short)
 - Bard 5+: Bardic Inspiration (pip, max=CHA mod, short)
+- Sorcerer 2+: Sorcery Pts (pip if ≤ 8, counter otherwise, long)
+- Battle Master Fighter 3+: Sup. Dice d8 (pip, 4-6 max, short)
 
 Add subclass-specific resources (Hexblade's Curse 1/short, Sorcerer metamagic via SP, Battle Master superiority dice, etc.) on top.
+
+**Pip vs counter rule**: max ≤ 8 → `type: "pip"` (clickable circle per use). max > 8 → `type: "counter"` (current/max integer). Lay on Hands is the standard counter case (25 pool); Sorcery Points / Ki / Infusions cross into counter at high levels but stay pips for most-played levels (1–10). The `dieType()` helper in class-resources.js picks automatically.
 
 ## Step 6: Attacks
 
