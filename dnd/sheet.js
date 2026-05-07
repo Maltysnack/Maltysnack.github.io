@@ -17,6 +17,41 @@ const STORAGE_KEY = () => `sheet-${SLUG}-v1`;
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
+/* Scans an entry for the word "homebrew" / "hb" anywhere in its strings. */
+function isHomebrew(entry) {
+  if (!entry) return false;
+  const fields = [entry.name, entry.tag, entry.notes, entry.extra, entry.desc, entry.meta];
+  if (Array.isArray(entry.tags)) fields.push(...entry.tags);
+  const hay = fields.filter(Boolean).join(' ').toLowerCase();
+  return /\bhomebrew\b|\bhb\b/.test(hay);
+}
+
+/* Build a Google search URL restricted to dnd5e.wikidot.com. Reliable
+   landing for feats, items, features, classes, racial traits, etc.
+   without us needing a per-category URL pattern. */
+function wikiSearch(name) {
+  return 'https://www.google.com/search?q=' + encodeURIComponent(`site:dnd5e.wikidot.com ${name}`);
+}
+
+/* Wraps `name` in an <a> linking to the wiki, unless it's homebrew. */
+function linkifyName(name, entry) {
+  if (!name) return document.createTextNode('');
+  if (isHomebrew(entry)) {
+    const span = document.createElement('span');
+    span.className = 'wiki-no-link';
+    span.textContent = name;
+    return span;
+  }
+  const a = document.createElement('a');
+  a.className = 'wiki-link';
+  a.href = wikiSearch(name);
+  a.target = '_blank';
+  a.rel = 'noopener';
+  a.textContent = name;
+  a.addEventListener('click', e => e.stopPropagation());
+  return a;
+}
+
 /* =====================================================================
    Derived helpers
    ===================================================================== */
@@ -346,7 +381,11 @@ function renderHero() {
   set('hero-pp', C.passiveWis());
   set('hd-max', CHARACTER.combat.hitDiceMax);
   if (CHARACTER.reaction) {
-    set('reaction-title', CHARACTER.reaction.title);
+    const t = document.getElementById('reaction-title');
+    if (t) {
+      t.innerHTML = '';
+      t.appendChild(linkifyName(CHARACTER.reaction.title, CHARACTER.reaction));
+    }
     set('reaction-desc', CHARACTER.reaction.desc);
   }
 }
@@ -560,13 +599,22 @@ function buildSpellRow({ lvlLabel, name, slug, tags = [], used, onClickRow, extr
 
   const nameEl = document.createElement('span');
   nameEl.className = 'name';
-  const link = document.createElement('a');
-  link.href = WIKI_BASE + slug;
-  link.target = '_blank';
-  link.rel = 'noopener';
-  link.textContent = name;
-  link.addEventListener('click', e => e.stopPropagation());
-  nameEl.appendChild(link);
+  const homebrew = (tags || []).map(t => String(t).toLowerCase()).includes('homebrew');
+  if (homebrew) {
+    const span = document.createElement('span');
+    span.className = 'wiki-no-link spell-name';
+    span.textContent = name;
+    nameEl.appendChild(span);
+  } else {
+    const link = document.createElement('a');
+    link.className = 'spell-name';
+    link.href = WIKI_BASE + slug;
+    link.target = '_blank';
+    link.rel = 'noopener';
+    link.textContent = name;
+    link.addEventListener('click', e => e.stopPropagation());
+    nameEl.appendChild(link);
+  }
   if (desc) {
     const d = document.createElement('span');
     d.className = 'spell-desc muted';
@@ -679,7 +727,7 @@ function renderLimitedSpells() {
         traits.forEach(t => {
           const li = document.createElement('li');
           li.innerHTML = `<span class="rt-name"></span><span class="rt-desc"></span>`;
-          li.querySelector('.rt-name').textContent = t.name;
+          li.querySelector('.rt-name').appendChild(linkifyName(t.name, t));
           li.querySelector('.rt-desc').textContent = t.desc || '';
           tul.appendChild(li);
         });
@@ -732,11 +780,17 @@ function renderAttacks() {
   tbody.innerHTML = '';
   (CHARACTER.attacks || []).forEach(a => {
     const tr = document.createElement('tr');
-    const extra = a.extra ? ` <em class="muted">- ${a.extra}</em>` : '';
     tr.innerHTML = `<td></td><td></td><td></td>`;
-    tr.children[0].textContent = a.name;
+    tr.children[0].appendChild(linkifyName(a.name, a));
     tr.children[1].textContent = a.atk;
-    tr.children[2].innerHTML = a.notes + extra;
+    const notesCell = tr.children[2];
+    notesCell.textContent = a.notes || '';
+    if (a.extra) {
+      const em = document.createElement('em');
+      em.className = 'muted';
+      em.textContent = ' - ' + a.extra;
+      notesCell.appendChild(em);
+    }
     tbody.appendChild(tr);
   });
 }
@@ -747,8 +801,20 @@ function renderFeatures() {
   (CHARACTER.features || []).forEach(f => {
     const li = document.createElement('li');
     if (f.upcoming) li.className = 'upcoming';
-    const tag = f.tag ? ` <span class="muted">(${f.tag})</span>` : '';
-    li.innerHTML = `<span class="feat-name">${f.name}${tag}</span><span class="feat-desc">${f.desc}</span>`;
+    const featName = document.createElement('span');
+    featName.className = 'feat-name';
+    featName.appendChild(linkifyName(f.name, f));
+    if (f.tag) {
+      const tag = document.createElement('span');
+      tag.className = 'muted';
+      tag.textContent = ' (' + f.tag + ')';
+      featName.appendChild(tag);
+    }
+    const desc = document.createElement('span');
+    desc.className = 'feat-desc';
+    desc.textContent = f.desc || '';
+    li.appendChild(featName);
+    li.appendChild(desc);
     ul.appendChild(li);
   });
 }
@@ -791,7 +857,7 @@ function renderInventory() {
       <span class="inv-notes"></span>
       <button class="remove-btn" title="remove">&times;</button>
     `;
-    li.querySelector('.inv-name').textContent = item.name;
+    li.querySelector('.inv-name').appendChild(linkifyName(item.name, item));
     li.querySelector('.inv-notes').textContent = item.notes || '';
     li.querySelector('.remove-btn').addEventListener('click', () => { state.inventory.splice(i, 1); render(); });
     ul.appendChild(li);

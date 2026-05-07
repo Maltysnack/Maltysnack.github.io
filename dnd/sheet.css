@@ -284,6 +284,17 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .spell-row .name a { text-decoration: none; border-bottom: 1px dotted var(--faint); font-weight: 600; }
 .spell-row .name a:hover { border-bottom-color: var(--text); }
 
+/* Wiki link applied to attacks, features, inventory, racial traits, reaction title.
+   Subtle dotted underline to indicate clickable without shouting. Homebrew terms
+   keep the same weight but get no underline. */
+.wiki-link {
+  color: inherit;
+  text-decoration: none;
+  border-bottom: 1px dotted var(--faint);
+}
+.wiki-link:hover { border-bottom-color: var(--text); }
+.wiki-no-link { color: inherit; }
+
 .spell-desc { font-size: 10px; margin-left: 6px; }
 .spell-list.compact .spell-desc { font-size: 9px; }
 
