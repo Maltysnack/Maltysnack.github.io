@@ -343,18 +343,11 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .feat-list li.upcoming { opacity: 0.6; font-style: italic; }
 
 .feat-list li.feat-group-header {
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--muted);
+  font-size: 11px;
   font-weight: 600;
-  border-bottom: none;
-  padding: 4px 0 2px;
-  margin-top: 2px;
+  color: var(--text);
 }
 .feat-list li.feat-grouped { padding-left: 12px; }
-.feat-list li.feat-grouped .feat-name { font-size: 10px; }
-.feat-list li.feat-grouped .feat-desc { font-size: 9px; }
 
 /* Concentration row inside the Active Buffs block */
 .conc-row {

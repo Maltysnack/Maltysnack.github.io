@@ -800,11 +800,14 @@ function renderFeatures() {
   let lastGroup = null;
   (CHARACTER.features || []).forEach(f => {
     // Emit a header when we hit a new group (consecutive grouped features
-    // cluster under one header)
+    // cluster under one header). Header is a wiki link to the group name
+    // ("Invocations", "Maneuvers", "Metamagic", etc.) so click jumps to the
+    // wiki list page.
     if (f.group && f.group !== lastGroup) {
       const header = document.createElement('li');
       header.className = 'feat-group-header';
-      header.textContent = f.group + ':';
+      header.appendChild(linkifyName(f.group));
+      header.appendChild(document.createTextNode(':'));
       ul.appendChild(header);
     }
     lastGroup = f.group || null;
