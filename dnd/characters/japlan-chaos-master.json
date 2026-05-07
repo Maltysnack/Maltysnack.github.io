@@ -1,0 +1,223 @@
+{
+  "schemaVersion": 1,
+  "id": "japlan-chaos-master",
+  "descriptors": [
+    "chaos",
+    "master"
+  ],
+  "identity": {
+    "name": "japlan",
+    "classLine": "wizard 5",
+    "background": "soldier",
+    "speedLine": "Speed 30",
+    "languages": "",
+    "otherProficiencies": ""
+  },
+  "class": "wizard",
+  "level": 5,
+  "profBonus": 2,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 10,
+    "hpMax": 10,
+    "hitDiceMax": 1,
+    "hitDiceType": "d6"
+  },
+  "startingGold": 0,
+  "abilities": [
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 11
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 13
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": 13
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 14
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 12
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 11
+    }
+  ],
+  "saves": [
+    {
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "ability": "con",
+      "proficient": false
+    },
+    {
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "ability": "cha",
+      "proficient": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Arcana",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Athletics",
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "name": "Deception",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "History",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Insight",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Intimidation",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Investigation",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Medicine",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Nature",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Perception",
+      "ability": "wis",
+      "proficient": false
+    },
+    {
+      "name": "Performance",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Persuasion",
+      "ability": "cha",
+      "proficient": false
+    },
+    {
+      "name": "Religion",
+      "ability": "int",
+      "proficient": false
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Stealth",
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "name": "Survival",
+      "ability": "wis",
+      "proficient": false
+    }
+  ],
+  "attacks": [],
+  "spellSlots": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+  },
+  "resources": [
+    {
+      "key": "arcRec",
+      "name": "Arcane Recovery",
+      "type": "toggle",
+      "restoresOn": "long"
+    }
+  ],
+  "spells": [],
+  "limitedSpells": [],
+  "features": [
+    {
+      "name": "empowered spell",
+      "tag": "",
+      "desc": "quickened spell war caster magical guidance draconic bloodline brass"
+    }
+  ],
+  "defaultInventory": [
+    {
+      "name": "+ 1 atk magic wand to cantrips",
+      "notes": ""
+    },
+    {
+      "name": "furry slippers cold resist",
+      "notes": ""
+    },
+    {
+      "name": "robes of chain - same stats as chainmail but no profriency requirement",
+      "notes": ""
+    },
+    {
+      "name": "dagger",
+      "notes": ""
+    },
+    {
+      "name": "light crossbow",
+      "notes": ""
+    }
+  ],
+  "homebrew": "RAW PDF FIELDS (parser did not structure these, polish step please interpret):\n  Spells 1014: booming blade\n  Spells 1015: earth tremor\n  Spells 1016: fire bolt\n  Spells 1017: light\n  Spells 1018: mage hand\n  Spells 1023: shield\n  Spells 1034: web\n  Spells 1046: shadow blade\n  Spells 1047: tidal wave\n  Spells 1048: fireball"
+}
