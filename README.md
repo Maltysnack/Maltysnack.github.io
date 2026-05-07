@@ -8,26 +8,44 @@
 
 ### Films
 
-- **Filmclub** ([`/films/filmclub.html`](/films/filmclub.html)): A mobile app for groups to agree on a film. Live at filmclub.watch.
+**Filmclub:**
+A mobile app for groups to agree on a film. Live at filmclub.watch.
 
 ### Projects
 
-- **Saltysnacks** ([`/projects/saltysnacks.html`](/projects/saltysnacks.html)): Saltysnacks: a Chrome extension that strips recipe pages down to ingredients and method.
-- **FPL Predicted XI** ([`/projects/fantasyfootball.html`](/projects/fantasyfootball.html)): Premier League fantasy predictions for the upcoming gameweek, refreshed daily from the public FPL API.
-- **Happy Hour** ([`/projects/happyhour.html`](/projects/happyhour.html)): It's happy hour somewhere.
-- **World Cup 2026** ([`/projects/worldcup.html`](/projects/worldcup.html)): A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
-- **Flox** ([`/projects/flox/index.html`](/projects/flox/index.html)): Flox: a small language for describing flow networks.
+**Saltysnacks:**
+A Chrome extension that strips recipe pages down to ingredients and method.
+
+**FPL Predicted XI:**
+Premier League fantasy predictions for the upcoming gameweek, refreshed daily from the public FPL API.
+
+**Happy Hour:**
+It's happy hour somewhere.
+
+**World Cup 2026:**
+A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
+
+**Flox:**
+A small language for describing flow networks.
 
 ### Games
 
-- **dnd** ([`/dnd/index.html`](/dnd/index.html)): Live D&D 5e character sheets for an ongoing campaign.
-- **Duoclue** ([`/projects/duoclue/index.html`](/projects/duoclue/index.html)): Describe the word using exactly two words. A party game for one phone.
-- **Magic** ([`/games/magic.html`](/games/magic.html)): Magic: The Gathering Standard meta explorer with deck pools, ban lists, and synergy scoring.
+**dnd:**
+Live D&D 5e character sheets for an ongoing campaign.
+
+**Duoclue:**
+Describe the word using exactly two words. A party game for one phone.
+
+**Magic:**
+A meta explorer for Magic: The Gathering Standard format. Deck pools, ban lists, synergy scoring.
 
 ### Wren
 
-- **Shelf** ([`/shelf/index.html`](/shelf/index.html)): A slowly growing collection of small things I find beautiful in code, kept by Wren.
-- **Negative Space** ([`/wren/negative-space.html`](/wren/negative-space.html)): An essay about things defined by what they aren't, kept by Wren.
+**Shelf:**
+A slowly growing collection of small things I find beautiful in code, kept by Wren.
+
+**Negative Space:**
+An essay about things defined by what they aren't, kept by Wren.
 
 <!-- END: pages -->
 
