@@ -146,7 +146,7 @@ function buildLayout() {
         <span class="h-big editable" id="hp-current" contenteditable="true"></span>
         <span class="muted">/ <span class="editable" id="hp-max" contenteditable="true"></span></span>
         <span class="muted h-sub">temp <span class="editable" id="hp-temp" contenteditable="true"></span></span>
-        <div class="h-bar"><div id="hp-fill" class="hp-fill"></div></div>
+        <span class="h-sub">dmg <input type="number" id="dmg-input" class="dmg-input" placeholder="0" /></span>
       </div>
       <div class="h-div"></div>
       <div class="h-item">
@@ -216,7 +216,10 @@ function buildLayout() {
         </div>
 
         <div class="block">
-          <h2>Prepared Spells <span class="hint">click to cast</span></h2>
+          <h2>
+            Prepared Spells <span class="hint">click to cast</span>
+            <span class="spell-source" id="spell-source"></span>
+          </h2>
           <ul class="spell-list" id="all-spells"></ul>
         </div>
 
@@ -256,7 +259,7 @@ function buildLayout() {
 
         <div class="block update-block">
           <h2>Update sheet <span class="hint">level-ups, loot, spell swaps</span></h2>
-          <textarea id="update-description" placeholder="leveled up to 6, took Sentinel feat, found a +1 longbow, picked up a magic missile scroll..."></textarea>
+          <textarea id="update-description"></textarea>
           <div class="update-row">
             <button id="update-submit" type="button">Submit changes</button>
             <span id="update-status" class="update-status muted"></span>
@@ -404,8 +407,6 @@ function renderHP() {
   set('hp-current', state.hp.current);
   set('hp-max', state.hp.max);
   set('hp-temp', state.hp.temp);
-  const pct = state.hp.current / state.hp.max;
-  document.getElementById('hp-fill').style.width = `${clamp(pct, 0, 1) * 100}%`;
 }
 
 function renderHD() { set('hd-current', state.hitDice); }
@@ -634,6 +635,8 @@ function renderSpells() {
   (CHARACTER.spells || []).forEach(s => {
     ul.appendChild(buildSpellRow({ ...s, onClickRow: () => castPreparedSpell(s) }));
   });
+  const src = document.getElementById('spell-source');
+  if (src) src.textContent = CHARACTER.spellSource || '';
 }
 
 function renderLimitedSpells() {
@@ -667,9 +670,27 @@ function renderLimitedSpells() {
     h2.textContent = g.name;
     block.appendChild(h2);
 
+    // Racials block: render passive racial traits ABOVE the spell list
+    if (g.name === 'Racials') {
+      const traits = CHARACTER.racialTraits || [];
+      if (traits.length) {
+        const tul = document.createElement('ul');
+        tul.className = 'racial-traits';
+        traits.forEach(t => {
+          const li = document.createElement('li');
+          li.innerHTML = `<span class="rt-name"></span><span class="rt-desc"></span>`;
+          li.querySelector('.rt-name').textContent = t.name;
+          li.querySelector('.rt-desc').textContent = t.desc || '';
+          tul.appendChild(li);
+        });
+        block.appendChild(tul);
+      }
+    }
+
     const ul = document.createElement('ul');
     ul.className = 'spell-list compact';
-    if (g.items.length === 0) {
+    const showEmpty = g.items.length === 0 && !(g.name === 'Racials' && (CHARACTER.racialTraits || []).length);
+    if (showEmpty) {
       const li = document.createElement('li');
       li.style.cssText = 'color:var(--faint);font-size:11px;font-style:italic;padding:4px 0;';
       li.textContent = 'none';
@@ -816,6 +837,34 @@ function wireEvents() {
   bindEditableNumber('hp-current', v => { state.hp.current = clamp(v, 0, state.hp.max); });
   bindEditableNumber('hp-max',     v => { state.hp.max = v; state.hp.current = Math.min(state.hp.current, v); });
   bindEditableNumber('hp-temp',    v => { state.hp.temp = v; });
+
+  // Damage input: applies to temp HP first, then HP. Negative values heal.
+  const dmgEl = document.getElementById('dmg-input');
+  if (dmgEl) {
+    const applyDmg = () => {
+      const raw = parseInt(dmgEl.value, 10);
+      if (!Number.isFinite(raw) || raw === 0) { dmgEl.value = ''; return; }
+      let dmg = raw;
+      if (dmg > 0) {
+        // damage: temp first, residual to HP
+        const fromTemp = Math.min(state.hp.temp, dmg);
+        state.hp.temp -= fromTemp;
+        dmg -= fromTemp;
+        state.hp.current = clamp(state.hp.current - dmg, 0, state.hp.max);
+      } else {
+        // negative dmg = healing, no temp interaction
+        state.hp.current = clamp(state.hp.current - dmg, 0, state.hp.max);
+      }
+      dmgEl.value = '';
+      render();
+    };
+    dmgEl.addEventListener('keydown', e => {
+      if (e.key === 'Enter') { e.preventDefault(); applyDmg(); }
+    });
+    dmgEl.addEventListener('blur', () => {
+      if (dmgEl.value.trim() !== '') applyDmg();
+    });
+  }
   bindEditableNumber('hd-current', v => { state.hitDice = clamp(v, 0, CHARACTER.combat.hitDiceMax); });
   bindEditableNumber('gold',       v => { state.gold = v; });
 

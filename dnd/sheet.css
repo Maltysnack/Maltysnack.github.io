@@ -52,14 +52,13 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 .hero {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 4px;
   padding: 6px 12px;
   margin-bottom: 6px;
   font-size: 12px;
-  flex-wrap: nowrap;
-  overflow-x: auto;
+  flex-wrap: wrap;
 }
 
 .h-item {
@@ -88,15 +87,21 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
 
 .h-sub { font-size: 10px; }
 
-.h-bar {
-  width: 50px;
-  height: 4px;
+.dmg-input {
+  width: 36px;
+  font: inherit;
+  font-size: 11px;
   border: 1px solid var(--border);
-  border-radius: 2px;
-  overflow: hidden;
+  border-radius: 3px;
+  padding: 1px 4px;
+  background: var(--bg);
+  color: var(--text);
+  text-align: center;
+  -moz-appearance: textfield;
 }
-
-.hp-fill { height: 100%; background: var(--text); transition: width 0.3s; }
+.dmg-input::-webkit-outer-spin-button,
+.dmg-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+.dmg-input:focus { outline: none; border-color: var(--text); background: var(--subtle); }
 
 .h-div { width: 1px; height: 24px; background: var(--rule); flex-shrink: 0; }
 
@@ -179,6 +184,16 @@ h1, h2, h3 { margin: 0; font-weight: 600; }
   text-transform: none;
   letter-spacing: 0;
   margin-left: 4px;
+  font-style: italic;
+}
+
+.spell-source {
+  float: right;
+  font-size: 9px;
+  color: var(--faint);
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
   font-style: italic;
 }
 
@@ -570,6 +585,28 @@ button.big { padding: 5px 14px; font-size: 12px; }
   line-height: 1.5;
   white-space: pre-wrap;
   color: var(--text);
+}
+
+/* Racial traits list inside Racials block */
+.racial-traits {
+  list-style: none;
+  margin: 0 0 4px;
+  padding: 0;
+  border-bottom: 1px dotted var(--rule);
+  padding-bottom: 4px;
+}
+.racial-traits li {
+  font-size: 11px;
+  line-height: 1.4;
+  padding: 2px 0;
+}
+.racial-traits .rt-name {
+  font-weight: 600;
+  margin-right: 4px;
+}
+.racial-traits .rt-desc {
+  color: var(--muted);
+  font-size: 10px;
 }
 
 /* Update sheet block */
