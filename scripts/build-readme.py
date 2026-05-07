@@ -75,7 +75,10 @@ def render() -> str:
         lines.append("")
         for href, label in pages:
             desc = read_description(href)
-            lines.append(f"**{label}:**")
+            # Markdown collapses single newlines into a space. <br> forces
+            # the description onto its own line under the title, in every
+            # markdown renderer, including GitHub.
+            lines.append(f"**{label}:**<br>")
             lines.append(desc)
             lines.append("")
     lines.append(END)
