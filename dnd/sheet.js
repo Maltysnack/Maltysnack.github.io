@@ -253,6 +253,15 @@ function buildLayout() {
           <h2>Notes</h2>
           <textarea id="notes" placeholder="session notes, NPCs, plot threads"></textarea>
         </div>
+
+        <div class="block update-block">
+          <h2>Update sheet <span class="hint">level-ups, loot, spell swaps</span></h2>
+          <textarea id="update-description" placeholder="leveled up to 6, took Sentinel feat, found a +1 longbow, picked up a magic missile scroll..."></textarea>
+          <div class="update-row">
+            <button id="update-submit" type="button">Submit changes</button>
+            <span id="update-status" class="update-status muted"></span>
+          </div>
+        </div>
       </section>
 
     </main>
@@ -835,6 +844,42 @@ function wireEvents() {
     document.getElementById('inv-name').value = '';
     document.getElementById('inv-notes').value = '';
     render();
+  });
+
+  document.getElementById('update-submit').addEventListener('click', async () => {
+    const desc = document.getElementById('update-description').value.trim();
+    const status = document.getElementById('update-status');
+    const btn = document.getElementById('update-submit');
+    if (desc.length < 5) {
+      status.textContent = 'Describe what changed (at least a few words).';
+      status.className = 'update-status warn';
+      return;
+    }
+    btn.disabled = true;
+    status.textContent = 'Submitting...';
+    status.className = 'update-status info';
+    try {
+      const res = await fetch('https://dnd-upload-maltysnacks-projects.vercel.app/api/update', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          slug: SLUG,
+          description: desc,
+          state,
+          website: '',
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
+      status.innerHTML = `Submitted &rarr; <a href="${data.prUrl}" target="_blank" rel="noopener">PR #${data.prNumber}</a>. Wren will polish, maltysnack merges.`;
+      status.className = 'update-status ok';
+      document.getElementById('update-description').value = '';
+    } catch (err) {
+      status.textContent = `Submit failed: ${err.message}`;
+      status.className = 'update-status error';
+    } finally {
+      btn.disabled = false;
+    }
   });
 
   document.getElementById('short-rest').addEventListener('click', () => {
