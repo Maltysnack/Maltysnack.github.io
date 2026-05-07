@@ -8,7 +8,7 @@
     "background": "Entertainer",
     "speedLine": "Speed 30",
     "languages": "Common, Giant",
-    "otherProficiencies": "light armor, simple weapons, pact weapon, disguise kit, one musical instrument"
+    "otherProficiencies": "light armor, simple weapons, pact weapon, disguise kit, instrument"
   },
   "class": "warlock",
   "level": 5,
@@ -58,57 +58,60 @@
     { "name": "Survival",        "ability": "wis", "proficient": false }
   ],
   "attacks": [
-    { "name": "Eldritch Blast","atk": "+3", "notes": "1d10 force per beam, 2 beams", "extra": "120 ft, +CHA dmg per beam via Agonizing Blast" },
-    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing", "extra": "longsword form, magic, summon as action" },
-    { "name": "Magic Wand",    "atk": "0",  "notes": "+5 dmg on hit, -3 to atk", "extra": "homebrew" },
-    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing, finesse", "extra": "thrown 20/60" }
+    { "name": "Eldritch Blast","atk": "+3", "notes": "1d10 force x2", "extra": "120 ft, +CHA dmg per beam" },
+    { "name": "Pact Weapon",   "atk": "+5", "notes": "1d8+2 slashing", "extra": "longsword, magic, summon as action" },
+    { "name": "Magic Wand",    "atk": "0",  "notes": "+5 dmg, -3 atk", "extra": "homebrew" },
+    { "name": "Dagger",        "atk": "+5", "notes": "1d4+2 piercing", "extra": "finesse, thrown 20/60" }
   ],
   "reaction": {
     "title": "Hellish Rebuke",
-    "desc": "1d10 fire when a creature damages you (2d10 if upcast 2nd, 4d10 at 3rd). Burns a slot."
+    "desc": "2d10 fire when hit, save half"
   },
   "spellSlots": { "3": 2 },
   "spellSlotsRestoresOn": "short",
   "resources": [
     { "key": "stoneEnd", "name": "Stone's End.", "type": "pip", "max": 1, "restoresOn": "short" }
   ],
+  "spellSource": "includes Fiend expanded list",
   "spells": [
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast", "slug": "eldritch-blast",  "tags": [],         "desc": "ranged spell atk, 1d10 force, 120 ft. +1 beam at 5/11/17" },
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Blade Ward",     "slug": "blade-ward",      "tags": [],         "desc": "resistance to bludgeon/pierce/slash from weapon attacks until end of next turn" },
-    { "lvl": 0, "lvlLabel": "Cant", "name": "Chill Touch",    "slug": "chill-touch",     "tags": [],         "desc": "1d8 necrotic, 120 ft, target can't regain HP, 1 round; dis on attacks vs you if undead" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Mage Armor",     "slug": "mage-armor",      "tags": ["BA"],     "desc": "AC 13 + DEX (free at-will via Armor of Shadows, no slot)" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Witch Bolt",     "slug": "witch-bolt",      "tags": ["conc"],   "desc": "1d12 lightning on hit, sustain to deal 1d12 each turn as action. 1 min conc" },
-    { "lvl": 1, "lvlLabel": "1st",  "name": "Hellish Rebuke", "slug": "hellish-rebuke",  "tags": ["RX"],     "desc": "reaction, 2d10 fire when damaged, save half. +1d10/slot" },
-    { "lvl": 2, "lvlLabel": "2nd",  "name": "Invisibility",   "slug": "invisibility",    "tags": ["conc"],   "desc": "target invisible 1 hr conc, ends if attacks/casts" },
-    { "lvl": 2, "lvlLabel": "2nd",  "name": "Scorching Ray",  "slug": "scorching-ray",   "tags": ["fiend"],  "desc": "3 rays of fire 2d6 each, +1 ray/slot. Free from Fiend bonus list" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Vampiric Touch", "slug": "vampiric-touch",  "tags": ["conc"],   "desc": "melee spell atk 3d6 necrotic, regain half as HP. 1 min conc, repeat as action" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Magic Circle",   "slug": "magic-circle",    "tags": [],         "desc": "10 ft cylinder, named creature type can't enter or charm/frighten. 1 hr cast, lasts 1 hr" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",       "slug": "fireball",        "tags": ["fiend"],  "desc": "8d6 fire 20 ft sphere, DEX save half, 150 ft. Free from Fiend bonus list" },
-    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls","slug": "fireball",       "tags": ["homebrew"],"desc": "8d6 fire 20 ft sphere, DEX save DC 11 for half. Slow flight gives targets advantage on save (DM ruling)" }
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Eldritch Blast", "slug": "eldritch-blast",  "tags": [],         "desc": "1d10 force, 120 ft" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Blade Ward",     "slug": "blade-ward",      "tags": [],         "desc": "resist b/p/s weapon dmg, 1 turn" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Chill Touch",    "slug": "chill-touch",     "tags": [],         "desc": "1d8 necrotic, no heal 1 round" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Mage Armor",     "slug": "mage-armor",      "tags": ["BA"],     "desc": "AC 13 + DEX, free at-will" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Witch Bolt",     "slug": "witch-bolt",      "tags": ["conc"],   "desc": "1d12 lightning, sustain 1d12/turn" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Hellish Rebuke", "slug": "hellish-rebuke",  "tags": ["RX"],     "desc": "2d10 fire when hit, save half" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Invisibility",   "slug": "invisibility",    "tags": ["conc"],   "desc": "invisible 1 hr, breaks on atk" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Scorching Ray",  "slug": "scorching-ray",   "tags": [],         "desc": "3 rays 2d6 fire each" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Vampiric Touch", "slug": "vampiric-touch",  "tags": ["conc"],   "desc": "3d6 necrotic, regain half" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Magic Circle",   "slug": "magic-circle",    "tags": [],         "desc": "10 ft cyl, type-locked, 1 hr" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",       "slug": "fireball",        "tags": [],         "desc": "8d6 fire 20 ft sphere, DEX save" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Exploding Skulls","slug": "fireball",       "tags": ["homebrew"],"desc": "8d6 fire 20 ft, DC 11, slow flight = adv on save" }
   ],
   "limitedSpells": [
-    { "group": "Scrolls", "key": "scrollJump", "name": "Jump", "slug": "jump", "count": 1, "restoresOn": "never", "meta": "1st", "tags": ["BA"], "desc": "target's jump distance x3 for 1 min. Bonus action." }
+    { "group": "Scrolls", "key": "scrollJump", "name": "Jump", "slug": "jump", "count": 1, "restoresOn": "never", "meta": "1st", "tags": ["BA"], "desc": "x3 jump, 1 min" }
+  ],
+  "racialTraits": [
+    { "name": "Powerful Build", "desc": "count as Large for carry" },
+    { "name": "Stone's Endurance", "desc": "1d12+CON resist 1 hit, 1/short" },
+    { "name": "Giant", "desc": "homebrew race, Goliath-style" }
   ],
   "features": [
-    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "Reduce a hostile to 0 HP: gain temp HP = CHA mod + warlock lvl (currently 5)." },
-    { "name": "Pact Magic",          "tag": "warlock core", "desc": "Slots restore on short rest. All slots cast at highest unlocked level (3rd at lvl 5)." },
-    { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "Summon a magical weapon as an action; counts as magic; change form when summoned." },
-    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "Add CHA mod to dmg of each Eldritch Blast beam. Currently +0 with the CHA hat (was -1)." },
-    { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Cast Mage Armor on yourself at will, no slot, no components." },
-    { "name": "Fiend Expanded Spells","tag": "always known","desc": "Burning Hands, Command, Blindness/Deafness, Scorching Ray, Fireball, Stinking Cloud. Don't count against spells known." },
-    { "name": "Hat of CHA +1",       "tag": "magic item",   "desc": "Homebrew. While worn, CHA increases by 1 (9 -> 10). Effects: spell DC 10 -> 11, spell atk +2 -> +3, CHA save +2 -> +3, Dark One's Blessing temp HP 4 -> 5, Agonizing Blast dmg -1 -> +0." },
-    { "name": "Giant",               "tag": "race, homebrew", "desc": "Homebrew race; statline assumed similar to Goliath: Powerful Build (count as Large for carry), Stone's Endurance (1d12+CON to a hit, 1/short)." },
-    { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: always find a place to perform for free lodging + food. +Acrobatics + Performance, disguise kit + instrument prof." },
-    { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6, upcoming", "desc": "1/short rest: +1d10 to a failed ability check or save. Unlocks at lvl 6.", "upcoming": true },
-    { "name": "Mystic Arcanum",      "tag": "lvl 11+, upcoming",     "desc": "Pick a 6th-lvl spell, cast 1/long without a slot. +7th/8th/9th at 13/15/17.", "upcoming": true }
+    { "name": "Dark One's Blessing", "tag": "Fiend lvl 1",  "desc": "drop hostile to 0 HP: temp HP = CHA mod + lvl (5)" },
+    { "name": "Pact Magic",          "tag": "warlock",      "desc": "short-rest slots, all cast at highest level (3rd)" },
+    { "name": "Pact of the Blade",   "tag": "lvl 3 boon",   "desc": "summon magic weapon as action" },
+    { "name": "Agonizing Blast",     "tag": "invocation",   "desc": "+CHA mod dmg per EB beam (+0)" },
+    { "name": "Armor of Shadows",    "tag": "invocation",   "desc": "Mage Armor at-will, no slot" },
+    { "name": "Entertainer",         "tag": "background",   "desc": "By Popular Demand: free lodging + food when performing" },
+    { "name": "Dark One's Own Luck", "tag": "Fiend lvl 6",  "desc": "1/short rest: +1d10 to a failed check or save", "upcoming": true },
+    { "name": "Mystic Arcanum",      "tag": "lvl 11+",      "desc": "6th-lvl spell 1/long, no slot", "upcoming": true }
   ],
   "defaultInventory": [
-    { "name": "Pact Weapon",        "notes": "summoned, current form: longsword" },
-    { "name": "Magic Wand",         "notes": "homebrew: +5 dmg, -3 atk" },
-    { "name": "Hat of CHA +1",      "notes": "homebrew, +1 CHA while worn" },
-    { "name": "Dagger",             "notes": "1d4 piercing, finesse, thrown 20/60" },
-    { "name": "Component Pouch",    "notes": "" },
-    { "name": "Scholar's Pack",     "notes": "books, ink, parchment, sand, knife" }
+    { "name": "Pact Weapon",     "notes": "longsword form" },
+    { "name": "Magic Wand",      "notes": "homebrew +5 dmg, -3 atk" },
+    { "name": "Hat of CHA +1",   "notes": "homebrew, +1 CHA while worn" },
+    { "name": "Dagger",          "notes": "1d4 piercing, finesse" },
+    { "name": "Component Pouch", "notes": "" },
+    { "name": "Scholar's Pack",  "notes": "books, ink, parchment" }
   ],
   "homebrew": ""
 }
