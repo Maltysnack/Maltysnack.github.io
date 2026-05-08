@@ -143,8 +143,18 @@ function parseSheet(fields) {
     homebrew: '',
   };
 
-  // Class + level
-  const cl = parseClassLine(getField(fields, 'ClassLevel'));
+  // Class + level. The PDF has a separate "Race " field (with trailing
+  // space) that the structured parser must explicitly read; otherwise the
+  // race info is silently dropped (this caused gnome/human races to be
+  // lost on early uploads). Prepend race to classLine if it's not already
+  // baked into ClassLevel.
+  const rawClassLevel = asText(getField(fields, 'ClassLevel'));
+  const raceField = asText(getField(fields, 'Race '));
+  let combinedClassLine = rawClassLevel;
+  if (raceField && !rawClassLevel.toLowerCase().includes(raceField.toLowerCase())) {
+    combinedClassLine = (raceField + ' ' + rawClassLevel).trim();
+  }
+  const cl = parseClassLine(combinedClassLine);
   character.identity.classLine = cl.classLine;
   character.level = cl.level || 1;
   character.class = (window.CLASS_RESOURCES?.derive(cl.classLine, cl.level, {})?.classKey) || '';

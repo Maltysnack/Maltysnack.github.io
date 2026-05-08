@@ -4,10 +4,10 @@
   "descriptors": ["chaos", "master"],
   "identity": {
     "name": "Japlan",
-    "classLine": "Sorcerer (Draconic, Brass) 5",
+    "classLine": "Human Sorcerer (Draconic, Brass) 5",
     "background": "Soldier",
     "speedLine": "Speed 30",
-    "languages": "Common, Draconic",
+    "languages": "Common, Draconic, Elvish",
     "otherProficiencies": "daggers, darts, slings, quarterstaffs, light crossbows; gaming set; vehicles (land)"
   },
   "class": "sorcerer",
@@ -15,19 +15,19 @@
   "profBonus": 3,
   "spellcastingAbility": "cha",
   "combat": {
-    "ac": 17,
-    "hpMax": 32,
+    "ac": 18,
+    "hpMax": 37,
     "hitDiceMax": 5,
     "hitDiceType": "d6"
   },
   "startingGold": 0,
   "abilities": [
-    { "key": "str", "name": "Strength",     "score": 11 },
-    { "key": "dex", "name": "Dexterity",    "score": 13 },
-    { "key": "con", "name": "Constitution", "score": 13 },
-    { "key": "int", "name": "Intelligence", "score": 14 },
-    { "key": "wis", "name": "Wisdom",       "score": 12 },
-    { "key": "cha", "name": "Charisma",     "score": 11 }
+    { "key": "str", "name": "Strength",     "score": 12 },
+    { "key": "dex", "name": "Dexterity",    "score": 14 },
+    { "key": "con", "name": "Constitution", "score": 14 },
+    { "key": "int", "name": "Intelligence", "score": 15 },
+    { "key": "wis", "name": "Wisdom",       "score": 13 },
+    { "key": "cha", "name": "Charisma",     "score": 12 }
   ],
   "saves": [
     { "ability": "str", "proficient": false },
@@ -46,22 +46,22 @@
     { "name": "History",         "ability": "int", "proficient": false },
     { "name": "Insight",         "ability": "wis", "proficient": false },
     { "name": "Intimidation",    "ability": "cha", "proficient": true  },
-    { "name": "Investigation",   "ability": "int", "proficient": false },
+    { "name": "Investigation",   "ability": "int", "proficient": true  },
     { "name": "Medicine",        "ability": "wis", "proficient": false },
     { "name": "Nature",          "ability": "int", "proficient": false },
     { "name": "Perception",      "ability": "wis", "proficient": false },
     { "name": "Performance",     "ability": "cha", "proficient": false },
-    { "name": "Persuasion",      "ability": "cha", "proficient": true  },
+    { "name": "Persuasion",      "ability": "cha", "proficient": false },
     { "name": "Religion",        "ability": "int", "proficient": false },
     { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
     { "name": "Stealth",         "ability": "dex", "proficient": false },
     { "name": "Survival",        "ability": "wis", "proficient": false }
   ],
   "attacks": [
-    { "name": "Fire Bolt",      "atk": "+4", "notes": "2d10 fire, 120 ft", "extra": "cantrip; +1 atk via wand" },
-    { "name": "Booming Blade",  "atk": "+5", "notes": "weapon dmg + 1d8 thunder if target moves", "extra": "melee cantrip + dagger; +1 atk via wand" },
-    { "name": "Dagger",         "atk": "+4", "notes": "1d4+1 piercing", "extra": "finesse, thrown 20/60" },
-    { "name": "Light Crossbow", "atk": "+4", "notes": "1d8+1 piercing, 80/320", "extra": "loading, 2H" }
+    { "name": "Fire Bolt",      "atk": "+5", "notes": "2d10 fire, 120 ft", "extra": "cantrip; +1 atk via wand" },
+    { "name": "Booming Blade",  "atk": "+6", "notes": "1d4+2 piercing + 1d8 thunder if target moves", "extra": "melee cantrip + dagger; +1 atk via wand" },
+    { "name": "Dagger",         "atk": "+5", "notes": "1d4+2 piercing", "extra": "finesse, thrown 20/60" },
+    { "name": "Light Crossbow", "atk": "+5", "notes": "1d8+2 piercing, 80/320", "extra": "loading, 2H" }
   ],
   "reaction": {
     "title": "Shield (cast)",
@@ -86,7 +86,9 @@
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Fireball",        "slug": "fireball",       "tags": [], "desc": "8d6 fire 20 ft sphere, DEX save half" }
   ],
   "limitedSpells": [],
-  "racialTraits": [],
+  "racialTraits": [
+    { "name": "Versatile", "desc": "Standard Human: +1 to all ability scores, +1 language (already baked in)" }
+  ],
   "features": [
     { "name": "Spellcasting",         "tag": "sorcerer",       "desc": "CHA-based, 6 spells known + 5 cantrips at lvl 5" },
     { "name": "Font of Magic",        "tag": "lvl 2",          "desc": "5 SP at lvl 5; convert SP <-> slots (2/3/5/6/7 SP per 1st-5th)" },
@@ -102,7 +104,7 @@
   ],
   "defaultInventory": [
     { "name": "Wand of Cantrip Atk +1", "notes": "homebrew, +1 atk on cantrips" },
-    { "name": "Robes of Chain",         "notes": "homebrew, AC 16 chainmail-equiv, no prof needed" },
+    { "name": "Robes of Chain",         "notes": "homebrew chainmail-equiv, AC 16 + DEX cap 2 (treated as medium-armor flexibility)" },
     { "name": "Furry Slippers",         "notes": "homebrew, cold resistance" },
     { "name": "Dagger",                 "notes": "1d4 piercing, finesse, thrown" },
     { "name": "Light Crossbow",         "notes": "1d8 piercing, 80/320" },

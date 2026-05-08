@@ -4,16 +4,16 @@
   "descriptors": ["shield", "wall"],
   "identity": {
     "name": "Jhotan",
-    "classLine": "Fighter (Battle Master) 5",
+    "classLine": "Forest Gnome Fighter (Battle Master) 5",
     "background": "Hermit",
-    "speedLine": "Speed 25 (climb 25)",
-    "languages": "Common",
+    "speedLine": "Speed 25 (climb 25 homebrew)",
+    "languages": "Common, Gnomish",
     "otherProficiencies": "all armor, shields, simple + martial weapons, herbalism kit"
   },
   "class": "fighter",
   "level": 5,
   "profBonus": 3,
-  "spellcastingAbility": "cha",
+  "spellcastingAbility": "int",
   "combat": {
     "ac": 22,
     "hpMax": 54,
@@ -23,9 +23,9 @@
   "startingGold": 0,
   "abilities": [
     { "key": "str", "name": "Strength",     "score": 16 },
-    { "key": "dex", "name": "Dexterity",    "score": 12 },
+    { "key": "dex", "name": "Dexterity",    "score": 13 },
     { "key": "con", "name": "Constitution", "score": 19 },
-    { "key": "int", "name": "Intelligence", "score": 11 },
+    { "key": "int", "name": "Intelligence", "score": 13 },
     { "key": "wis", "name": "Wisdom",       "score": 13 },
     { "key": "cha", "name": "Charisma",     "score": 12 }
   ],
@@ -71,14 +71,20 @@
     { "key": "supDice",     "name": "Sup. Dice d8", "type": "pip", "max": 4, "restoresOn": "short" }
   ],
   "spellSource": "",
-  "spells": [],
+  "spells": [
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Minor Illusion", "slug": "minor-illusion", "tags": [], "desc": "image or sound, 5 ft cube, 1 min. INT-based via Forest Gnome racial" }
+  ],
   "limitedSpells": [
     { "group": "Items",   "key": "broochMistyStep", "name": "Misty Step", "slug": "misty-step", "count": 2, "restoresOn": "long",  "tags": ["BA"], "meta": "brooch", "desc": "teleport 30 ft" },
     { "group": "Scrolls", "key": "scrollGoblinMayhem", "name": "Goblin Mayhem", "slug": "summon-fey", "count": 1, "restoresOn": "never", "tags": ["homebrew"], "meta": "scroll", "desc": "summon 5 hostile goblins, attack everyone" }
   ],
   "racialTraits": [
-    { "name": "Slow", "desc": "Speed 25 (homebrew)" },
-    { "name": "Climber", "desc": "climb 25" }
+    { "name": "Darkvision", "desc": "60 ft" },
+    { "name": "Gnome Cunning", "desc": "adv on INT/WIS/CHA saves vs magic" },
+    { "name": "Small", "desc": "Speed 25, can use Hide behind larger creatures" },
+    { "name": "Speak with Small Beasts", "desc": "communicate simple ideas to Tiny/Small beasts" },
+    { "name": "Natural Illusionist", "desc": "know Minor Illusion (INT-based)" },
+    { "name": "Climber", "desc": "climb 25 (homebrew)" }
   ],
   "features": [
     { "name": "Defense Fighting Style", "tag": "lvl 1",        "desc": "+1 AC while wearing armor" },
