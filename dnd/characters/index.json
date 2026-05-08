@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-07",
+  "generatedAt": "2026-05-08",
   "characters": [
     {
       "id": "grosh-chef-lifeguard",
@@ -21,7 +21,7 @@
         "chaos",
         "master"
       ],
-      "classLine": "Sorcerer (Draconic, Brass) 5",
+      "classLine": "Human Sorcerer (Draconic, Brass) 5",
       "class": "sorcerer",
       "level": 5,
       "background": "Soldier"
@@ -33,7 +33,7 @@
         "shield",
         "wall"
       ],
-      "classLine": "Fighter (Battle Master) 5",
+      "classLine": "Forest Gnome Fighter (Battle Master) 5",
       "class": "fighter",
       "level": 5,
       "background": "Hermit"
