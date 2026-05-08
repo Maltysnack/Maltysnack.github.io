@@ -87,6 +87,23 @@ const ATTACK_SLOTS = [
 function fmtMod(n) { return (n >= 0 ? '+' : '') + n; }
 function abilityMod(score) { return Math.floor((score - 10) / 2); }
 
+const CLASSES_5E = ['Barbarian', 'Bard', 'Cleric', 'Druid', 'Fighter', 'Monk', 'Paladin', 'Ranger', 'Rogue', 'Sorcerer', 'Warlock', 'Wizard', 'Artificer'];
+
+/* Walk the classLine to find the class name; treat anything before it as race.
+   "Triton Paladin (Ancients) 5" -> race "Triton"
+   "Sorcerer (Draconic, Brass) 5" -> race "" (class is first word)
+   "Giant Warlock (Fiend) 5" -> race "Giant" */
+function extractRace(classLine) {
+  if (!classLine) return '';
+  for (const cls of CLASSES_5E) {
+    const m = classLine.match(new RegExp(`\\b${cls}\\b`, 'i'));
+    if (m && m.index !== undefined) {
+      return classLine.substring(0, m.index).trim();
+    }
+  }
+  return '';
+}
+
 function safeSet(form, name, value) {
   try {
     const f = form.getTextField(name);
@@ -119,7 +136,7 @@ export async function fillCharacterPdf(character, state, templateBuffer, PDFDocu
   safeSet(form, 'CharacterName', c.identity.name);
   safeSet(form, 'ClassLevel',    c.identity.classLine);
   safeSet(form, 'Background',    c.identity.background);
-  safeSet(form, 'Race ',         c.identity.classLine?.split(/\s+/)[0] || '');
+  safeSet(form, 'Race ',         extractRace(c.identity.classLine));
   safeSet(form, 'Alignment',     s.alignment || '');
   safeSet(form, 'XP',            s.xp || '');
   safeSet(form, 'Speed',         (c.identity.speedLine || '').replace(/^Speed\s*/i, ''));
@@ -162,8 +179,9 @@ export async function fillCharacterPdf(character, state, templateBuffer, PDFDocu
   DEATH_SUCCESS.forEach((cb, i) => safeCheck(form, cb, !!s.deathSaves?.successes?.[i]));
   DEATH_FAILURE.forEach((cb, i) => safeCheck(form, cb, !!s.deathSaves?.failures?.[i]));
 
-  // Spell DC + atk
-  if (spellAbility && mods[spellAbility] !== undefined) {
+  // Spell DC + atk - only if the character actually casts (has slots OR spells)
+  const hasSpellcasting = Object.keys(c.spellSlots || {}).length > 0 || (c.spells || []).length > 0;
+  if (hasSpellcasting && spellAbility && mods[spellAbility] !== undefined) {
     safeSet(form, 'SpellSaveDC  2',   8 + profBonus + mods[spellAbility]);
     safeSet(form, 'SpellAtkBonus 2',  fmtMod(profBonus + mods[spellAbility]));
     safeSet(form, 'Spellcasting Class 2', c.identity.classLine);
@@ -270,8 +288,20 @@ export async function fillCharacterPdf(character, state, templateBuffer, PDFDocu
     safeSet(form, 'Treasure', c.homebrew);
   }
 
-  // Flatten? Keep editable so the player can hand-edit afterwards.
-  // form.flatten();
+  // Force the PDF reader to regenerate appearance streams using the values
+  // we just set. Without this, the WotC PDF's cached appearance streams
+  // override our values for some fields (we saw AC showing "1" instead of
+  // "17" because the cached appearance had a different rendering width).
+  // Keep the form editable (no flatten) so the player can hand-tweak after.
+  try {
+    form.updateFieldAppearances();
+  } catch (e) {
+    // Fallback: set NeedAppearances so the reader regenerates on display
+    try {
+      const { PDFName, PDFBool } = await import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm');
+      form.acroForm.dict.set(PDFName.of('NeedAppearances'), PDFBool.True);
+    } catch {}
+  }
 
   return await pdfDoc.save();
 }
