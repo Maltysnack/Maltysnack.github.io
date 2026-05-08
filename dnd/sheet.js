@@ -307,6 +307,7 @@ function buildLayout() {
       <button id="short-rest" class="big">Short Rest</button>
       <button id="long-rest" class="big primary">Long Rest</button>
       <span class="spacer"></span>
+      <button id="download-pdf-btn" class="big">Download PDF</button>
     </footer>
   `;
 }
@@ -1053,6 +1054,36 @@ function wireEvents() {
     render();
   });
 
+  document.getElementById('download-pdf-btn').addEventListener('click', downloadPdf);
+}
+
+/* Lazy-loads pdf-lib + pdf-export on click. First-page-load weight unchanged. */
+async function downloadPdf() {
+  const btn = document.getElementById('download-pdf-btn');
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = 'Building...';
+  try {
+    const [pdfLib, exporter] = await Promise.all([
+      import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm'),
+      import('/dnd/pdf-export.js'),
+    ]);
+    const tplBuf = await fetch('/dnd/assets/5E_CharacterSheet_Fillable.pdf').then(r => r.arrayBuffer());
+    const bytes = await exporter.fillCharacterPdf(CHARACTER, state, tplBuf, pdfLib.PDFDocument);
+    const blob = new Blob([bytes], { type: 'application/pdf' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${SLUG}-${new Date().toISOString().slice(0, 10)}.pdf`;
+    a.click();
+    URL.revokeObjectURL(url);
+  } catch (err) {
+    console.error(err);
+    alert('PDF generation failed: ' + err.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
 }
 
 /* =====================================================================

@@ -79,9 +79,9 @@ const SPELL_ROWS = {
 };
 
 const ATTACK_SLOTS = [
-  { name: 'Wpn Name',   atk: 'AtkBonus',   dmg: 'Damage 1' },
-  { name: 'Wpn Name 2', atk: 'AtkBonus ',  dmg: 'Damage 2' },
-  { name: 'Wpn Name 3', atk: 'AtkBonus  ', dmg: 'Damage 3' },
+  { name: 'Wpn Name',   atk: 'Wpn1 AtkBonus',   dmg: 'Wpn1 Damage' },
+  { name: 'Wpn Name 2', atk: 'Wpn2 AtkBonus ',  dmg: 'Wpn2 Damage ' },
+  { name: 'Wpn Name 3', atk: 'Wpn3 AtkBonus  ', dmg: 'Wpn3 Damage ' },
 ];
 
 function fmtMod(n) { return (n >= 0 ? '+' : '') + n; }
