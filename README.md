@@ -28,8 +28,8 @@ A simulation of the 2026 World Cup, predictions and bracket. Currently scaffoldi
 **Flox:**<br>
 A small language for describing flow networks.
 
-**Search:**<br>
-An interactive comparison of three classical search algorithms solving a sliding-tile puzzle.
+**Algorithms:**<br>
+Two small problems, three classical search algorithms, four heuristics, all running live in the browser.
 
 ### Games
 

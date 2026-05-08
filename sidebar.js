@@ -101,7 +101,7 @@
             <li><a href="/projects/happyhour.html" ${active('/projects/happyhour.html')}>Happy Hour</a></li>
             <li><a href="/projects/worldcup.html" ${active('/projects/worldcup.html')}>World Cup 2026</a></li>
             <li><a href="/projects/flox/" ${path.startsWith('/projects/flox') ? 'class="nav-active"' : ''}>Flox</a></li>
-            <li><a href="/projects/search.html" ${active('/projects/search.html')}>Search</a></li>
+            <li><a href="/projects/algorithms.html" ${active('/projects/algorithms.html')}>Algorithms</a></li>
           </ul>
         </div>
 

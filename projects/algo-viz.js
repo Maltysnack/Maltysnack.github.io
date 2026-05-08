@@ -1,0 +1,405 @@
+import { iterativeDeepening, aStar, beamSearch, bfs } from './algo-core.mjs';
+import { randomTileState, tileProblem, tileHeuristics } from './algo-tile.mjs';
+import { key, fromKey, gridProblem, gridHeuristics } from './algo-grid.mjs';
+
+const $ = (id) => document.getElementById(id);
+
+const TILE_FRAME_MS = 150;
+const GRID_FRAME_MS = 12;
+
+// ============================================================================
+// Tile puzzle
+// ============================================================================
+
+const COLORS = ['Y', 'B'];
+const tEls = {
+  algo: $('t-algo'), n: $('t-n'), nVal: $('t-nVal'),
+  heur: $('t-heur'), beam: $('t-beam'), beamVal: $('t-beamVal'),
+  run: $('t-run'), rand: $('t-rand'),
+  board: $('t-board'),
+  step: $('t-step'), totalSteps: $('t-totalSteps'), cost: $('t-cost'),
+  explored: $('t-explored'), generated: $('t-generated'),
+  pathLen: $('t-pathLen'), pathCost: $('t-pathCost'),
+  runtime: $('t-runtime'), status: $('t-status'),
+};
+
+let tileState = randomTileState(+tEls.n.value, COLORS);
+let tileTimer = null;
+
+function renderTile(state, movingIndex = -1) {
+  tEls.board.innerHTML = '';
+  for (let i = 0; i < state.length; i++) {
+    const ch = state[i];
+    const tile = document.createElement('div');
+    tile.className = 'al-tile';
+    if (ch === '_') {
+      tile.classList.add('blank');
+    } else if (ch === COLORS[0]) {
+      tile.classList.add('a');
+      tile.textContent = ch;
+    } else {
+      tile.classList.add('b');
+      tile.textContent = ch;
+    }
+    if (i === movingIndex) tile.classList.add('moving');
+    tEls.board.appendChild(tile);
+  }
+}
+
+function tileMoveCost(prev, next) {
+  return Math.abs(next.indexOf('_') - prev.indexOf('_'));
+}
+
+function tilePathCost(path) {
+  if (!path || path.length < 2) return 0;
+  let c = 0;
+  for (let i = 1; i < path.length; i++) c += tileMoveCost(path[i - 1], path[i]);
+  return c;
+}
+
+function tileSetStats({ explored = 0, generated = 0, pathLen = 0, pathCost = 0, runtime = 0 }) {
+  tEls.explored.textContent = explored.toLocaleString();
+  tEls.generated.textContent = generated.toLocaleString();
+  tEls.pathLen.textContent = pathLen;
+  tEls.pathCost.textContent = pathCost;
+  tEls.runtime.textContent = `${runtime.toFixed(1)} ms`;
+}
+
+function tileSetStep(i, total, cost) {
+  tEls.step.textContent = i;
+  tEls.totalSteps.textContent = total;
+  tEls.cost.textContent = cost;
+}
+
+function tileSetStatus(msg, isError = false) {
+  tEls.status.textContent = msg;
+  tEls.status.classList.toggle('error', isError);
+}
+
+function tileClearAnim() {
+  if (tileTimer) clearTimeout(tileTimer);
+  tileTimer = null;
+}
+
+function tileAnimate(path) {
+  tileClearAnim();
+  let i = 0, runningCost = 0;
+  const tick = () => {
+    if (i >= path.length) {
+      tileTimer = null;
+      tEls.run.disabled = false;
+      return;
+    }
+    if (i > 0) {
+      const prev = path[i - 1].indexOf('_');
+      runningCost += tileMoveCost(path[i - 1], path[i]);
+      renderTile(path[i], prev);
+    } else {
+      renderTile(path[i]);
+    }
+    tileSetStep(i, path.length - 1, runningCost);
+    i++;
+    tileTimer = setTimeout(tick, TILE_FRAME_MS);
+  };
+  tick();
+}
+
+function tilePickAlgo() {
+  const algo = tEls.algo.value;
+  const n = +tEls.n.value;
+  const heur = tEls.heur.value;
+  const beamWidth = +tEls.beam.value;
+  const problem = tileProblem(tileState, n, COLORS, heur);
+  if (algo === 'ids') return () => iterativeDeepening(problem, { maxExplored: 500_000 });
+  if (algo === 'astar') return () => aStar(problem);
+  if (algo === 'beam') return () => beamSearch(problem, { beamWidth });
+}
+
+function tileRun() {
+  tileClearAnim();
+  const algoFn = tilePickAlgo();
+  tileSetStatus('running...');
+  tEls.run.disabled = true;
+  setTimeout(() => {
+    let result;
+    try { result = algoFn(); }
+    catch (err) {
+      tileSetStatus(`error: ${err.message}`, true);
+      tEls.run.disabled = false;
+      return;
+    }
+    const { path, stats } = result;
+    if (!path) {
+      tileSetStats({ explored: stats.explored, generated: stats.generated, pathLen: 0, pathCost: 0, runtime: stats.time });
+      const reason = stats.hitBudget ? 'search budget exhausted before finding a goal.' : 'no solution found.';
+      tileSetStatus(reason, true);
+      tEls.run.disabled = false;
+      return;
+    }
+    tileSetStats({
+      explored: stats.explored, generated: stats.generated,
+      pathLen: path.length - 1, pathCost: tilePathCost(path), runtime: stats.time,
+    });
+    tileSetStatus(`solved in ${path.length - 1} moves, cost ${tilePathCost(path)}.`);
+    tileAnimate(path);
+  });
+}
+
+function tileRandomise() {
+  tileClearAnim();
+  tileState = randomTileState(+tEls.n.value, COLORS);
+  renderTile(tileState);
+  tileSetStep(0, 0, 0);
+  tileSetStats({});
+  tileSetStatus('');
+  tEls.run.disabled = false;
+}
+
+function tileUpdateVisibility() {
+  const algo = tEls.algo.value;
+  const scope = tEls.algo.closest('section, .panel, [data-section="tile"]') || document;
+  for (const label of scope.querySelectorAll('label[data-when]')) {
+    const allowed = label.dataset.when.split(',');
+    label.style.display = allowed.includes(algo) ? '' : 'none';
+  }
+}
+
+tEls.n.addEventListener('input', () => { tEls.nVal.textContent = tEls.n.value; tileRandomise(); });
+tEls.beam.addEventListener('input', () => { tEls.beamVal.textContent = tEls.beam.value; });
+tEls.algo.addEventListener('change', tileUpdateVisibility);
+tEls.run.addEventListener('click', tileRun);
+tEls.rand.addEventListener('click', tileRandomise);
+tEls.nVal.textContent = tEls.n.value;
+tEls.beamVal.textContent = tEls.beam.value;
+tileUpdateVisibility();
+renderTile(tileState);
+tileSetStep(0, 0, 0);
+
+// ============================================================================
+// Grid pathfinder
+// ============================================================================
+
+const ROWS = 16, COLS = 28;
+const START = key(Math.floor(ROWS / 2), 1);
+const GOAL  = key(Math.floor(ROWS / 2), COLS - 2);
+
+const gEls = {
+  algo: $('g-algo'), heur: $('g-heur'),
+  beam: $('g-beam'), beamVal: $('g-beamVal'),
+  run: $('g-run'), clear: $('g-clear'), randWalls: $('g-randWalls'),
+  grid: $('g-grid'),
+  explored: $('g-explored'), generated: $('g-generated'),
+  pathLen: $('g-pathLen'), runtime: $('g-runtime'),
+  status: $('g-status'),
+};
+
+let walls = new Set();
+let gridTimer = null;
+
+function buildGrid() {
+  gEls.grid.style.gridTemplateColumns = `repeat(${COLS}, 1fr)`;
+  gEls.grid.innerHTML = '';
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const cell = document.createElement('div');
+      cell.className = 'al-cell';
+      cell.dataset.k = key(r, c);
+      if (cell.dataset.k === START) { cell.classList.add('start'); cell.textContent = 'S'; }
+      else if (cell.dataset.k === GOAL) { cell.classList.add('goal'); cell.textContent = 'G'; }
+      gEls.grid.appendChild(cell);
+    }
+  }
+}
+
+function refreshWalls() {
+  for (const cell of gEls.grid.children) {
+    const k = cell.dataset.k;
+    if (k === START || k === GOAL) continue;
+    cell.classList.toggle('wall', walls.has(k));
+    cell.classList.remove('explored', 'path');
+  }
+}
+
+function clearTrace() {
+  for (const cell of gEls.grid.children) cell.classList.remove('explored', 'path');
+}
+
+function gridSetStats({ explored = 0, generated = 0, pathLen = 0, runtime = 0 }) {
+  gEls.explored.textContent = explored.toLocaleString();
+  gEls.generated.textContent = generated.toLocaleString();
+  gEls.pathLen.textContent = pathLen;
+  gEls.runtime.textContent = `${runtime.toFixed(1)} ms`;
+}
+
+function gridSetStatus(msg, isError = false) {
+  gEls.status.textContent = msg;
+  gEls.status.classList.toggle('error', isError);
+}
+
+function gridClearAnim() {
+  if (gridTimer) clearTimeout(gridTimer);
+  gridTimer = null;
+}
+
+let isPainting = false, paintMode = null;
+gEls.grid.addEventListener('mousedown', (e) => {
+  const cell = e.target.closest('.al-cell');
+  if (!cell) return;
+  const k = cell.dataset.k;
+  if (k === START || k === GOAL) return;
+  isPainting = true;
+  paintMode = walls.has(k) ? 'erase' : 'paint';
+  togglePaint(k, cell);
+});
+gEls.grid.addEventListener('mousemove', (e) => {
+  if (!isPainting) return;
+  const cell = e.target.closest('.al-cell');
+  if (!cell) return;
+  const k = cell.dataset.k;
+  if (k === START || k === GOAL) return;
+  togglePaint(k, cell);
+});
+window.addEventListener('mouseup', () => { isPainting = false; });
+
+function togglePaint(k, cell) {
+  if (paintMode === 'paint' && !walls.has(k)) {
+    walls.add(k);
+    cell.classList.add('wall');
+  } else if (paintMode === 'erase' && walls.has(k)) {
+    walls.delete(k);
+    cell.classList.remove('wall');
+  }
+}
+
+function getCell(k) {
+  return gEls.grid.querySelector(`[data-k="${CSS.escape(k)}"]`);
+}
+
+function gridPickAlgo() {
+  const algo = gEls.algo.value;
+  const heur = gEls.heur.value;
+  const beamWidth = +gEls.beam.value;
+  const grid = { rows: ROWS, cols: COLS, walls };
+  const problem = gridProblem(grid, START, GOAL, heur);
+  if (algo === 'bfs') return (onVisit) => bfs(problem, { onVisit });
+  if (algo === 'astar') return (onVisit) => aStar(problem, { onVisit });
+  if (algo === 'beam') return (onVisit) => beamSearch(problem, { beamWidth, onVisit });
+}
+
+function gridAnimateExploration(visited, path) {
+  gridClearAnim();
+  let i = 0;
+  const tick = () => {
+    if (i >= visited.length) {
+      // Then animate the final path
+      animatePath(path);
+      return;
+    }
+    const k = visited[i];
+    if (k !== START && k !== GOAL) {
+      const cell = getCell(k);
+      if (cell) cell.classList.add('explored');
+    }
+    i++;
+    gridTimer = setTimeout(tick, GRID_FRAME_MS);
+  };
+  tick();
+}
+
+function animatePath(path) {
+  if (!path) {
+    gridTimer = null;
+    gEls.run.disabled = false;
+    return;
+  }
+  let i = 0;
+  const tick = () => {
+    if (i >= path.length) {
+      gridTimer = null;
+      gEls.run.disabled = false;
+      return;
+    }
+    const k = path[i];
+    if (k !== START && k !== GOAL) {
+      const cell = getCell(k);
+      if (cell) cell.classList.add('path');
+    }
+    i++;
+    gridTimer = setTimeout(tick, GRID_FRAME_MS * 2);
+  };
+  tick();
+}
+
+function gridRun() {
+  gridClearAnim();
+  clearTrace();
+  const algoFn = gridPickAlgo();
+  gridSetStatus('running...');
+  gEls.run.disabled = true;
+  setTimeout(() => {
+    const visited = [];
+    let result;
+    try { result = algoFn((s) => visited.push(s)); }
+    catch (err) {
+      gridSetStatus(`error: ${err.message}`, true);
+      gEls.run.disabled = false;
+      return;
+    }
+    const { path, stats } = result;
+    if (!path) {
+      gridSetStats({ explored: stats.explored, generated: stats.generated, pathLen: 0, runtime: stats.time });
+      const reason = stats.hitBudget ? 'search budget exhausted.' : 'no path between S and G.';
+      gridSetStatus(reason, true);
+      gridAnimateExploration(visited, null);
+      return;
+    }
+    gridSetStats({
+      explored: stats.explored, generated: stats.generated,
+      pathLen: path.length - 1, runtime: stats.time,
+    });
+    gridSetStatus(`path of ${path.length - 1} steps after exploring ${stats.explored} cells.`);
+    gridAnimateExploration(visited, path);
+  });
+}
+
+function gridUpdateVisibility() {
+  const algo = gEls.algo.value;
+  const scope = gEls.algo.closest('section, .panel, [data-section="grid"]') || document;
+  for (const label of scope.querySelectorAll('label[data-when]')) {
+    const allowed = label.dataset.when.split(',');
+    label.style.display = allowed.includes(algo) ? '' : 'none';
+  }
+}
+
+function gridClearWalls() {
+  walls = new Set();
+  refreshWalls();
+  gridSetStats({});
+  gridSetStatus('');
+  gEls.run.disabled = false;
+}
+
+function gridRandomWalls() {
+  walls = new Set();
+  const density = 0.25;
+  for (let r = 0; r < ROWS; r++) {
+    for (let c = 0; c < COLS; c++) {
+      const k = key(r, c);
+      if (k === START || k === GOAL) continue;
+      if (Math.random() < density) walls.add(k);
+    }
+  }
+  refreshWalls();
+  gridSetStats({});
+  gridSetStatus('');
+  gEls.run.disabled = false;
+}
+
+gEls.beam.addEventListener('input', () => { gEls.beamVal.textContent = gEls.beam.value; });
+gEls.algo.addEventListener('change', gridUpdateVisibility);
+gEls.run.addEventListener('click', gridRun);
+gEls.clear.addEventListener('click', gridClearWalls);
+gEls.randWalls.addEventListener('click', gridRandomWalls);
+gEls.beamVal.textContent = gEls.beam.value;
+buildGrid();
+gridUpdateVisibility();

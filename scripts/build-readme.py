@@ -34,7 +34,7 @@ SECTIONS = [
         ("/projects/happyhour.html",    "Happy Hour"),
         ("/projects/worldcup.html",     "World Cup 2026"),
         ("/projects/flox/index.html",   "Flox"),
-        ("/projects/search.html",       "Search"),
+        ("/projects/algorithms.html",   "Algorithms"),
     ]),
     ("Games", [
         ("/dnd/index.html",             "dnd"),
