@@ -225,7 +225,7 @@
       <p class="gx-eyebrow"><a href="/projects/flox/">Flox</a><span class="sep">/</span><a href="/projects/flox/docs/">Docs</a><span class="sep">/</span>Grammar</p>
       <h1 class="page-title">Grammar Reference</h1>
       <p class="gx-meta">
-        <span>v0.1</span><span>06-05-2026</span>
+        <span>v0.2</span><span>08-05-2026</span>
       </p>
     </header>
 
@@ -235,7 +235,8 @@
         <li><a href="#lex">Lexical structure</a></li>
         <li><a href="#bnf">Grammar</a></li>
         <li><a href="#stmts">Statements</a></li>
-        <li><a href="#nodes">Node types</a></li>
+        <li><a href="#nodes">Node attributes</a></li>
+        <li><a href="#blocks">Block syntax</a></li>
         <li><a href="#ops">Operators</a></li>
         <li><a href="#sem">Semantics</a></li>
         <li><a href="#reserved">Reserved words</a></li>
@@ -244,31 +245,37 @@
 
     <section class="gx-section" id="lex">
       <h2><span class="num">01</span> Lexical structure</h2>
-      <p>Source is plain ASCII. Tokens are separated by whitespace (space, tab, newline). Whitespace is otherwise insignificant.</p>
+      <p>Source is plain ASCII. Whitespace separates tokens but is otherwise insignificant. Two comment forms are supported.</p>
 
       <h3>Identifiers</h3>
       <div class="gx-bnf">IDENTIFIER  &rarr;  [a-zA-Z][a-zA-Z0-9_]*</div>
-      <p>Used as river, dam, terminator, and system names. Case-sensitive.</p>
+      <p>Used as system, river, dam, and outlet names. Case-sensitive.</p>
 
       <h3>Numbers</h3>
       <div class="gx-bnf">NUMBER      &rarr;  [0-9]+ ( "." [0-9]+ )?</div>
       <p>Decimal literals, optional fractional part.</p>
+
+      <h3>Comments</h3>
+      <p><code>//</code> begins a line comment that runs to the next newline. <code>/* ... */</code> begins a block comment that may span multiple lines. Block comments do not nest.</p>
     </section>
 
     <section class="gx-section" id="bnf">
       <h2><span class="num">02</span> Grammar</h2>
       <div class="gx-bnf">program     &rarr;  statement* EOF
-statement   &rarr;  systemDecl | listStmt | mapStmt | printStmt | chainDecl
+statement   &rarr;  systemDecl | nodeDecl | chain
+            |  listStmt | mapStmt | printStmt | helpStmt
 systemDecl  &rarr;  "system" IDENTIFIER ";"
-chainDecl   &rarr;  node ( "-&gt;" node )* ";"
-node        &rarr;  river | dam | terminator
-river       &rarr;  IDENTIFIER "[" NUMBER "," NUMBER ( "," NUMBER )? "]"
-dam         &rarr;  IDENTIFIER "{" NUMBER "," percent "," NUMBER "," NUMBER "}"
-terminator  &rarr;  IDENTIFIER "[" "]"
-listStmt    &rarr;  "list" IDENTIFIER ";"
-mapStmt     &rarr;  "map" IDENTIFIER ";"
+nodeDecl    &rarr;  riverDecl | damDecl | outletDecl
+riverDecl   &rarr;  "river"  IDENTIFIER block ";"?
+damDecl     &rarr;  "dam"    IDENTIFIER block ";"?
+outletDecl  &rarr;  "outlet" IDENTIFIER block? ";"?
+block       &rarr;  "{" ( attr ( ","? attr )* )? "}"
+attr        &rarr;  IDENTIFIER ":" NUMBER "%"?
+chain       &rarr;  IDENTIFIER ( "-&gt;" IDENTIFIER )* ";"
+listStmt    &rarr;  "list"  IDENTIFIER ";"
+mapStmt     &rarr;  "map"   IDENTIFIER ";"
 printStmt   &rarr;  "print" IDENTIFIER NUMBER? ";"
-percent     &rarr;  NUMBER "%" | NUMBER</div>
+helpStmt    &rarr;  "help" ";"</div>
     </section>
 
     <section class="gx-section" id="stmts">
@@ -280,66 +287,94 @@ percent     &rarr;  NUMBER "%" | NUMBER</div>
         <tbody>
           <tr>
             <td>system <i>Name</i>;</td>
-            <td>Declares a named system. Subsequent chain declarations attach to the most recently declared system.</td>
+            <td>Declares a named system. Subsequent declarations and chains attach to the most recently declared system.</td>
+          </tr>
+          <tr>
+            <td>river <i>Name</i> { ... }</td>
+            <td>Declares a river node and its parameters.</td>
+          </tr>
+          <tr>
+            <td>dam <i>Name</i> { ... }</td>
+            <td>Declares a dam node and its parameters.</td>
+          </tr>
+          <tr>
+            <td>outlet <i>Name</i>;</td>
+            <td>Declares an outlet (zero-flow accumulator). Block is optional and must be empty.</td>
+          </tr>
+          <tr>
+            <td>A -&gt; B -&gt; C;</td>
+            <td>Connects nodes by name. Names must be declared somewhere in the same system. Source order does not matter.</td>
           </tr>
           <tr>
             <td>list <i>Name</i>;</td>
-            <td>Prints every river, dam, and terminator in the named system.</td>
+            <td>Lists every river, dam, and outlet in the named system.</td>
           </tr>
           <tr>
             <td>map <i>Name</i>;</td>
-            <td>Prints an ASCII diagram of the network for the named system.</td>
+            <td>Prints an ASCII diagram of the network.</td>
           </tr>
           <tr>
             <td>print <i>Name</i> [rainfall];</td>
             <td>Simulates the system over ten days at the given rainfall in millimetres (default <code>1.0</code>) and prints the per-day flow table and cumulative outlet volumes.</td>
           </tr>
-          <tr>
-            <td><i>chain</i>;</td>
-            <td>A connected sequence of nodes joined by <code>-&gt;</code>. Adds the nodes and edges to the current system.</td>
-          </tr>
         </tbody>
       </table>
+      <p>The interpreter runs in two passes. Pass 1 collects declarations and chains. A resolve step validates each chain reference against the per-system symbol table. Pass 2 executes <code>list</code>, <code>map</code>, and <code>print</code> in source order.</p>
     </section>
 
     <section class="gx-section" id="nodes">
-      <h2><span class="num">04</span> Node types</h2>
+      <h2><span class="num">04</span> Node attributes</h2>
 
       <h3>River</h3>
-      <div class="gx-bnf">Name[base, peak, decay?]</div>
       <table class="gx-table">
+        <thead><tr><th>Attribute</th><th>Required</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>base</td><td>Baseline flow in litres per second with no rainfall.</td></tr>
-          <tr><td>peak</td><td>Multiplier applied to rainfall (mm) to compute the peak surge.</td></tr>
-          <tr><td>decay</td><td>Fraction of the surge retained each subsequent day. Range 0 to 1.</td></tr>
+          <tr><td>base</td><td>yes</td><td>Baseline flow in litres per second with no rainfall.</td></tr>
+          <tr><td>peak</td><td>yes</td><td>Multiplier applied to rainfall (mm) to compute the peak surge.</td></tr>
+          <tr><td>decay</td><td>no</td><td>Fraction of the surge retained each subsequent day. Range 0 to 1. Default <code>0.7</code>.</td></tr>
         </tbody>
       </table>
 
       <h3>Dam</h3>
-      <div class="gx-bnf">Name{capacity, threshold, normalRate, openRate}</div>
       <table class="gx-table">
+        <thead><tr><th>Attribute</th><th>Required</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr><td>capacity</td><td>Maximum storage in megalitres.</td></tr>
-          <tr><td>threshold</td><td>Storage level at which the dam opens. Written as a percent (<code>80%</code>) or fraction (<code>0.8</code>).</td></tr>
-          <tr><td>normalRate</td><td>Outflow as a fraction of inflow when storage is below the threshold.</td></tr>
-          <tr><td>openRate</td><td>Outflow as a fraction of inflow when storage is at or above the threshold.</td></tr>
+          <tr><td>capacity</td><td>yes</td><td>Maximum storage in megalitres.</td></tr>
+          <tr><td>threshold</td><td>yes</td><td>Storage level at which the dam opens. Written as <code>80%</code> or <code>0.8</code>.</td></tr>
+          <tr><td>normalRate</td><td>yes</td><td>Outflow as a fraction of inflow when below threshold.</td></tr>
+          <tr><td>openRate</td><td>yes</td><td>Outflow as a fraction of inflow when at or above threshold.</td></tr>
         </tbody>
       </table>
 
-      <h3>Terminator</h3>
-      <div class="gx-bnf">Name[]</div>
-      <p>An outlet. Accumulates everything that flows into it.</p>
+      <h3>Outlet</h3>
+      <p>No attributes. An outlet accumulates everything that flows into it. An outlet may have outgoing connections, in which case it acts as a zero-flow passthrough.</p>
+    </section>
+
+    <section class="gx-section" id="blocks">
+      <h2><span class="num">05</span> Block syntax</h2>
+      <p>Attributes are written as <code>name: value</code>. Attributes may be separated by commas, whitespace, or both. Single-line and multi-line forms are both legal.</p>
+
+      <div class="gx-bnf">river Spring { base: 2, peak: 2.0, decay: 0.7 }
+
+river Spring {
+  base: 2
+  peak: 2.0
+  decay: 0.7
+}</div>
+
+      <p>The semicolon after a block is optional. After a bare <code>outlet Name</code> without a block, the semicolon is required.</p>
+      <p>Unknown, missing, or duplicate attributes are parse errors that point at the offending declaration.</p>
     </section>
 
     <section class="gx-section" id="ops">
-      <h2><span class="num">05</span> Operators</h2>
+      <h2><span class="num">06</span> Operators</h2>
       <h3>Flow arrow</h3>
       <div class="gx-bnf">A -&gt; B</div>
-      <p>Directed flow from <code>A</code> to <code>B</code>. A node may appear in multiple chains; its parameters must match across declarations. If a node has multiple outgoing edges, flow is split evenly between them.</p>
+      <p>Directed flow from <code>A</code> to <code>B</code>. A node may appear in any number of chains. If a node has multiple outgoing edges, flow is split evenly between them.</p>
     </section>
 
     <section class="gx-section" id="sem">
-      <h2><span class="num">06</span> Semantics</h2>
+      <h2><span class="num">07</span> Semantics</h2>
 
       <h3>River hydrograph</h3>
       <p>Given <code>r</code> millimetres of rainfall on day 0, river flow on day <i>n</i> is:</p>
@@ -351,21 +386,25 @@ percent     &rarr;  NUMBER "%" | NUMBER</div>
       <h3>Dam outflow</h3>
       <p>If current storage is below threshold, outflow is <code>inflow &times; normalRate</code>. Otherwise outflow is <code>inflow &times; openRate</code>. Storage is updated each day by <code>inflow &minus; outflow</code>.</p>
 
-      <h3>Terminator accumulation</h3>
-      <p>A terminator sums every unit of flow that arrives at it across the simulation. The total appears in the <code>print</code> output as the cumulative outlet volume.</p>
+      <h3>Outlet accumulation</h3>
+      <p>An outlet sums every unit of flow that arrives at it across the simulation. The total appears in the <code>print</code> output as the cumulative outlet volume.</p>
     </section>
 
     <section class="gx-section" id="reserved">
-      <h2><span class="num">07</span> Reserved words</h2>
+      <h2><span class="num">08</span> Reserved words</h2>
       <ul>
         <li><code>system</code></li>
+        <li><code>river</code></li>
+        <li><code>dam</code></li>
+        <li><code>outlet</code></li>
         <li><code>list</code></li>
         <li><code>map</code></li>
         <li><code>print</code></li>
+        <li><code>help</code></li>
       </ul>
     </section>
 
-    <p class="gx-foot">Flox grammar reference, version 0.1. Last updated 06-05-2026.</p>
+    <p class="gx-foot">Flox grammar reference, version 0.2. Last updated 08-05-2026.</p>
 
   </main>
 

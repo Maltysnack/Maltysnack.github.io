@@ -134,7 +134,7 @@
         A small language for describing flow networks. You write nodes and arrows; it simulates how stuff moves through them over time.
       </p>
       <p class="fx-meta">
-        <span>v0.1</span><span>Java</span><span>06-05-2026</span>
+        <span>v0.2</span><span>Java</span><span>08-05-2026</span>
       </p>
     </header>
 
@@ -145,14 +145,20 @@
 // Two upland creeks meet at a confluence and flow to an outlet.
 system Demo;
 
-/* River params: [baseFlow, peakMultiplier, decayRate]
-   baseFlow is L/s with no rainfall.
-   peakMultiplier scales the rainfall surge.
-   decayRate is the fraction of the surge retained each subsequent day. */
+// Chains: pure references, so the network shape reads at a glance.
+Spring    -&gt; Confluence -&gt; Outlet;
+Tributary -&gt; Confluence;
 
-Spring[2, 2.0, 0.7]    -&gt; Confluence[3, 1.8];   // upland creek
-Tributary[1, 1.5, 0.6] -&gt; Confluence[3, 1.8];   // smaller side branch
-Confluence[3, 1.8]     -&gt; Outlet[];             // empty brackets = outlet
+/* Declarations: rich blocks, order doesn't matter.
+   River params:
+     base  - baseline flow (L/s) with no rainfall
+     peak  - multiplier on rainfall (mm) for the peak surge
+     decay - fraction of the surge retained each subsequent day */
+
+river  Spring     { base: 2, peak: 2.0, decay: 0.7 }
+river  Tributary  { base: 1, peak: 1.5, decay: 0.6 }
+river  Confluence { base: 3, peak: 1.8 }
+outlet Outlet;
 
 map Demo;
 print Demo 5;   // simulate at 5mm of rainfall</pre>
@@ -175,15 +181,15 @@ Spring (source)
 Location            | Day  1 | Day  2 | Day  3 | Day  4 | Day  5 | Day  6 | Day  7 | Day  8 | Day  9 | Day 10 |
 --------------------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
 Spring              |    5.0 |   12.0 |    9.0 |    6.9 |    5.4 |    4.4 |    3.7 |    3.2 |    2.8 |    2.6 |
-Confluence          |   14.0 |   32.5 |   23.8 |   18.0 |   14.1 |   11.5 |    9.8 |    8.6 |    7.8 |    7.2 |
 Tributary           |    3.3 |    8.5 |    5.5 |    3.7 |    2.6 |    2.0 |    1.6 |    1.3 |    1.2 |    1.1 |
+Confluence          |   14.0 |   32.5 |   23.8 |   18.0 |   14.1 |   11.5 |    9.8 |    8.6 |    7.8 |    7.2 |
 --------------------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
 Cumulative Outlet (converted to actual volume):
 Outlet [OUTLET]     |  1.21ML|  4.01ML|  6.07ML|  7.63ML|  8.85ML|  9.84ML| 10.69ML| 11.43ML| 12.10ML| 12.73ML|
 
 Total water accumulated at outlet: 12.73 ML</pre>
       <p>
-        Square brackets are rivers (base flow, peak multiplier, decay). Curly brackets are dams. Empty brackets are outlets. <code>-&gt;</code> is directed flow. <code>print Demo 5</code> runs the simulation at 5mm of rainfall.
+        Chains list the network shape with bare names. Declarations follow as <code>river</code>, <code>dam</code>, or <code>outlet</code> blocks. <code>-&gt;</code> is directed flow. <code>print Demo 5</code> runs the simulation at 5mm of rainfall.
       </p>
     </section>
 
