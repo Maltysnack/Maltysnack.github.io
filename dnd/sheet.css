@@ -680,3 +680,49 @@ button.big { padding: 5px 14px; font-size: 12px; }
 .update-status.error { color: #cf222e; }
 .update-status.ok { color: #1a7f37; }
 .update-status a { color: inherit; }
+
+/* =====================================================================
+   Print styles. Triggered when the user clicks Print or hits Cmd/Ctrl+P.
+   Hides interactive bits (forms, rest buttons, the update-sheet block,
+   conc drop button) and tightens spacing so the sheet fits on a page or
+   two. Wiki link underlines stay so the printed PDF retains URLs.
+   ===================================================================== */
+@media print {
+  body {
+    max-width: none;
+    padding: 0;
+    background: #fff !important;
+    color: #000 !important;
+  }
+  /* Hide interactive forms */
+  .add-form,
+  .update-block,
+  .footer,
+  .remove-btn,
+  #conc-clear,
+  .dmg-input { display: none !important; }
+  /* Hide buffs section header inputs but keep the list */
+  #buff-form, #inv-form { display: none !important; }
+  /* Compact spacing for paper */
+  .three-col { gap: 6px; }
+  .block { padding: 4px 6px; break-inside: avoid; page-break-inside: avoid; }
+  .block h2 { font-size: 9px; }
+  .hero, .slots-bar { break-inside: avoid; page-break-inside: avoid; }
+  /* Force light background even when user OS is dark */
+  :root {
+    --bg: #fff !important;
+    --text: #000 !important;
+    --muted: #444 !important;
+    --faint: #777 !important;
+    --border: #888 !important;
+    --rule: #bbb !important;
+    --subtle: #f0f0f0 !important;
+    --used: #888 !important;
+    --highlight: #f0f0f0 !important;
+  }
+  /* Pip toggles + slot pips render fine in print, leave them */
+  /* Wiki link underlines stay so URLs are preserved by the PDF printer */
+  a.wiki-link, .spell-row .name a {
+    border-bottom: 1px dotted #888 !important;
+  }
+}

@@ -307,7 +307,8 @@ function buildLayout() {
       <button id="short-rest" class="big">Short Rest</button>
       <button id="long-rest" class="big primary">Long Rest</button>
       <span class="spacer"></span>
-      <button id="download-pdf-btn" class="big">Download PDF</button>
+      <button id="print-btn" class="big">Print</button>
+      <button id="download-pdf-btn" class="big">Sheet PDF</button>
     </footer>
   `;
 }
@@ -1055,6 +1056,7 @@ function wireEvents() {
   });
 
   document.getElementById('download-pdf-btn').addEventListener('click', downloadPdf);
+  document.getElementById('print-btn').addEventListener('click', () => window.print());
 }
 
 /* Lazy-loads pdf-lib + pdf-export on click. First-page-load weight unchanged. */
