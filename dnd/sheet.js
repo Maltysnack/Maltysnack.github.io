@@ -307,12 +307,6 @@ function buildLayout() {
       <button id="short-rest" class="big">Short Rest</button>
       <button id="long-rest" class="big primary">Long Rest</button>
       <span class="spacer"></span>
-      <button id="export-btn" class="ghost">Export</button>
-      <label class="ghost btn-label">
-        Import
-        <input type="file" id="import-input" accept="application/json" hidden>
-      </label>
-      <button id="reset-btn" class="ghost danger">Reset</button>
     </footer>
   `;
 }
@@ -1055,38 +1049,10 @@ function wireEvents() {
     });
     state.deathSaves = { successes: [false, false, false], failures: [false, false, false] };
     state.concentration = null;
+    state.buffs = []; // most buffs (Bless, Hex, Hellish Rebuke, etc.) end before 8 hours pass
     render();
   });
 
-  document.getElementById('export-btn').addEventListener('click', () => {
-    const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${SLUG}-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    URL.revokeObjectURL(url);
-  });
-
-  document.getElementById('import-input').addEventListener('change', e => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => {
-      try {
-        const def = makeDefaultState();
-        state = { ...def, ...JSON.parse(reader.result) };
-        render();
-      } catch { alert('Could not parse JSON file.'); }
-    };
-    reader.readAsText(file);
-  });
-
-  document.getElementById('reset-btn').addEventListener('click', () => {
-    if (!confirm('Reset to defaults? Wipes all current state.')) return;
-    state = makeDefaultState();
-    render();
-  });
 }
 
 /* =====================================================================
