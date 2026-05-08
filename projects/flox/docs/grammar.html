@@ -274,7 +274,8 @@ attr        &rarr;  IDENTIFIER ":" NUMBER "%"?
 chain       &rarr;  IDENTIFIER ( "-&gt;" IDENTIFIER )* ";"
 listStmt    &rarr;  "list"  IDENTIFIER ";"
 mapStmt     &rarr;  "map"   IDENTIFIER ";"
-printStmt   &rarr;  "print" IDENTIFIER NUMBER? ";"
+printStmt   &rarr;  "print" IDENTIFIER ( NUMBER | series )? ";"
+series      &rarr;  "[" ( NUMBER ( "," NUMBER )* )? "]"
 helpStmt    &rarr;  "help" ";"</div>
     </section>
 
@@ -314,8 +315,16 @@ helpStmt    &rarr;  "help" ";"</div>
             <td>Prints an ASCII diagram of the network.</td>
           </tr>
           <tr>
-            <td>print <i>Name</i> [rainfall];</td>
-            <td>Simulates the system over ten days at the given rainfall in millimetres (default <code>1.0</code>) and prints the per-day flow table and cumulative outlet volumes.</td>
+            <td>print <i>Name</i>;</td>
+            <td>Simulates the system over ten days at <code>1.0</code> mm rainfall on day 1, dry thereafter. Prints the per-day flow table and cumulative outlet volumes.</td>
+          </tr>
+          <tr>
+            <td>print <i>Name</i> <i>r</i>;</td>
+            <td>Simulates with a single <i>r</i> mm rainfall event on day 1.</td>
+          </tr>
+          <tr>
+            <td>print <i>Name</i> [r<sub>1</sub>, r<sub>2</sub>, ...];</td>
+            <td>Simulates with a per-day rainfall series in millimetres. Each non-zero entry kicks off its own hydrograph; flow on day <i>n</i> is the superposition of every event so far. Series shorter than ten days is padded with zeros.</td>
           </tr>
         </tbody>
       </table>
