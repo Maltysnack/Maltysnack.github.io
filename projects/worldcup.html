@@ -55,8 +55,23 @@
       padding: 0.15rem 0;
       color: var(--text-muted);
       display: flex;
-      justify-content: space-between;
-      gap: 0.5rem;
+      align-items: center;
+      gap: 0.45rem;
+    }
+    .wc-flag {
+      width: 18px;
+      height: 13px;
+      object-fit: cover;
+      border-radius: 1px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(128,128,128,0.15);
+    }
+    .wc-team-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .wc-team.winner {
       color: var(--text-body, inherit);
@@ -66,7 +81,9 @@
       border-color: rgba(180,150,80,0.6);
     }
     .wc-champion-banner {
-      display: inline-block;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
       padding: 0.3rem 0.7rem;
       border: 1px solid rgba(180,150,80,0.6);
       border-radius: 3px;
@@ -74,6 +91,10 @@
       font-weight: 600;
       letter-spacing: 0.04em;
       margin-top: 0.5rem;
+    }
+    .wc-champion-banner .wc-flag {
+      width: 22px;
+      height: 16px;
     }
 
     /* Group stage cards */
@@ -97,9 +118,22 @@
     }
     .wc-group-row {
       display: flex;
-      justify-content: space-between;
+      align-items: center;
+      gap: 0.4rem;
       padding: 0.12rem 0;
       color: var(--text-muted);
+    }
+    .wc-group-row .team-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-group-row .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
     .wc-group-row.advancing {
       color: var(--text-body, inherit);
@@ -119,7 +153,7 @@
 
   <aside class="sidebar"></aside>
 
-  <main class="main">
+  <main class="main" data-layout="wide">
 
     <section class="intro">
       <h1 class="intro-heading">World Cup 2026.</h1>
@@ -175,6 +209,7 @@
         <li><span style="color:var(--text-muted);">02 May</span> &nbsp; project started, plan sketched, placeholder up</li>
         <li><span style="color:var(--text-muted);">07 May</span> &nbsp; repo live, 49,328 historical international matches loaded into local DuckDB (1872 to present, 2026 fixtures included)</li>
         <li><span style="color:var(--text-muted);">08 May</span> &nbsp; first Elo model built (tier-weighted K, home advantage, 1990+ training data). Pre-tournament bracket published, current pick: Spain</li>
+        <li><span style="color:var(--text-muted);">08 May</span> &nbsp; bracket switched to the official FIFA 2026 structure, flags added, page widened</li>
       </ul>
     </section>
 
@@ -193,9 +228,22 @@
           console.error(err);
         });
 
+      const FLAGS = {};
+      function flagSrc(team) {
+        const code = FLAGS[team];
+        return code ? `https://flagcdn.com/w20/${code}.png` : null;
+      }
+      function flagImg(team) {
+        const src = flagSrc(team);
+        if (!src) return '';
+        return `<img class="wc-flag" src="${src}" alt="" loading="lazy" />`;
+      }
+
       function render(data) {
+        Object.assign(FLAGS, data.flags || {});
         document.getElementById('wc-model').textContent = data.model_version;
-        document.getElementById('wc-champion').textContent = data.knockout.champion;
+        const champ = document.getElementById('wc-champion');
+        champ.innerHTML = `${flagImg(data.knockout.champion)} <span>${data.knockout.champion}</span>`;
         renderBracket(data.knockout);
         renderGroups(data.groups);
       }
@@ -222,10 +270,12 @@
             card.className = 'wc-match';
             card.innerHTML = `
               <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
-                <span>${m.team_a}</span>
+                ${flagImg(m.team_a)}
+                <span class="wc-team-name">${m.team_a}</span>
               </div>
               <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
-                <span>${m.team_b}</span>
+                ${flagImg(m.team_b)}
+                <span class="wc-team-name">${m.team_b}</span>
               </div>
             `;
             col.appendChild(card);
@@ -246,7 +296,11 @@
               : 'advancing';
             return `
               <div class="wc-group-row ${cls}">
-                <span><span class="pos">${s.position}.</span>${s.team}</span>
+                <span class="team-block">
+                  <span class="pos">${s.position}.</span>
+                  ${flagImg(s.team)}
+                  <span class="team-name">${s.team}</span>
+                </span>
                 <span>${s.predicted_points}</span>
               </div>`;
           }).join('');
