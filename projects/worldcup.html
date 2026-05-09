@@ -87,9 +87,8 @@
       padding: 0.3rem 0.7rem;
       border: 1px solid rgba(180,150,80,0.6);
       border-radius: 3px;
-      font-family: 'Playfair Display', serif;
       font-weight: 600;
-      letter-spacing: 0.04em;
+      letter-spacing: -0.01em;
       margin-top: 0.5rem;
     }
     .wc-champion-banner .wc-flag {
@@ -111,10 +110,10 @@
       font-size: 0.85rem;
     }
     .wc-group h4 {
-      font-family: 'Playfair Display', serif;
       font-weight: 600;
       font-size: 1rem;
       margin: 0 0 0.4rem 0;
+      letter-spacing: -0.01em;
     }
     .wc-group-row {
       display: flex;
@@ -185,10 +184,13 @@
 
     .wc-paths {
       display: grid;
-      grid-template-columns: minmax(110px, 0.8fr) repeat(5, 1fr);
+      grid-template-columns: minmax(190px, 1.6fr) repeat(5, 1fr);
       gap: 0.4rem 0.6rem;
       font-size: 0.85rem;
       margin-top: 1rem;
+    }
+    .wc-paths .name {
+      min-width: 0; /* let the row truncate cleanly */
     }
     .wc-paths .header {
       color: var(--text-muted);
@@ -217,14 +219,92 @@
     }
     .wc-darkhorse-tag {
       display: inline-block;
-      font-size: 0.65rem;
-      padding: 0.05rem 0.35rem;
+      flex-shrink: 0;
+      font-size: 0.6rem;
+      padding: 0.05rem 0.3rem;
       margin-left: 0.35rem;
       border: 1px solid rgba(180,150,80,0.5);
       border-radius: 2px;
       color: rgba(180,150,80,0.9);
       letter-spacing: 0.05em;
       text-transform: uppercase;
+      line-height: 1.4;
+    }
+
+    /* Search input shared between the two probability tables */
+    .wc-search {
+      width: 100%;
+      max-width: 280px;
+      margin-top: 0.6rem;
+      padding: 0.35rem 0.55rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: transparent;
+      color: inherit;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .wc-search:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-hidden { display: none !important; }
+
+    /* Next match hero card */
+    .wc-next-wrap {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 4px;
+    }
+    .wc-next-meta {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+    .wc-next-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+    .wc-next-team {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .wc-next-team.right { justify-content: flex-end; }
+    .wc-next-team .wc-flag { width: 28px; height: 20px; }
+    .wc-next-score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--text-strong, inherit);
+      letter-spacing: -0.02em;
+    }
+    .wc-next-bar {
+      display: grid;
+      grid-template-columns: var(--ph, 33%) var(--pd, 34%) var(--pa, 33%);
+      height: 10px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.85rem;
+    }
+    .wc-next-bar > span { display: block; }
+    .wc-next-bar .ph { background: rgba(180,150,80,0.65); }
+    .wc-next-bar .pd { background: rgba(128,128,128,0.4); }
+    .wc-next-bar .pa { background: rgba(120,140,180,0.6); }
+    .wc-next-pct {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-variant-numeric: tabular-nums;
     }
   </style>
 </head>
@@ -250,7 +330,22 @@
     <div class="divider"></div>
 
     <section class="intro">
-      <h2 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;">
+      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+        Next match
+      </h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+        The first unplayed fixture. Win/draw/loss probabilities and the
+        most likely scoreline. Updates as the tournament progresses.
+      </p>
+      <div class="wc-next-wrap" id="wc-next">
+        <div class="wc-next-meta">Loading...</div>
+      </div>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="intro">
+      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
         Pre-tournament prediction
       </h2>
       <p style="color:var(--text-muted);font-size:0.9rem;">
@@ -268,7 +363,7 @@
     </div>
 
     <section class="intro" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
+      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
         Championship odds
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
@@ -277,11 +372,12 @@
         bracket above just shows who would win if every match went to the
         favourite.
       </p>
+      <input type="search" class="wc-search" id="wc-odds-search" placeholder="Filter teams..." autocomplete="off" />
       <div class="wc-odds" id="wc-odds"></div>
     </section>
 
     <section class="intro" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
+      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
         How far each team is likely to go
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
@@ -290,11 +386,12 @@
         are outside the top eight by raw rating but reach the semis in
         more than 8&#37; of simulations.
       </p>
+      <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
       <div class="wc-paths" id="wc-paths"></div>
     </section>
 
     <section class="intro" style="margin-top:2.5rem;">
-      <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
+      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
         Group stage
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
@@ -302,21 +399,6 @@
         eight best third-placed teams advance.
       </p>
       <div class="wc-groups" id="wc-groups"></div>
-    </section>
-
-    <div class="divider"></div>
-
-    <section class="intro">
-      <h2 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.4rem;margin-bottom:0.75rem;">
-        Progress
-      </h2>
-      <ul style="list-style:none;padding:0;margin:0;font-size:0.95rem;line-height:1.7;">
-        <li><span style="color:var(--text-muted);">02 May</span> &nbsp; project started, plan sketched, placeholder up</li>
-        <li><span style="color:var(--text-muted);">07 May</span> &nbsp; repo live, 49,328 historical international matches loaded into local DuckDB (1872 to present, 2026 fixtures included)</li>
-        <li><span style="color:var(--text-muted);">08 May</span> &nbsp; first Elo model built (tier-weighted K, home advantage, 1990+ training data). Pre-tournament bracket published, current pick: Spain</li>
-        <li><span style="color:var(--text-muted);">08 May</span> &nbsp; bracket switched to the official FIFA 2026 structure, flags added, page widened</li>
-        <li><span style="color:var(--text-muted);">09 May</span> &nbsp; Monte Carlo simulator (10k tournaments, Poisson goals model calibrated from 15k historical matches) and squad-value blend added. Championship odds and dark-horse paths now on the page</li>
-      </ul>
     </section>
 
   </main>
@@ -331,8 +413,10 @@
       ])
         .then(([bracket, sim]) => {
           render(bracket);
+          renderNext(sim);
           renderOdds(sim);
           renderPaths(sim);
+          wireSearch();
         })
         .catch(err => {
           document.getElementById('wc-bracket').innerHTML =
@@ -421,6 +505,50 @@
         });
       }
 
+      function renderNext(sim) {
+        Object.assign(FLAGS, sim.flags || {});
+        const upcoming = (sim.match_predictions || []).filter(
+          m => !m.played
+        );
+        if (!upcoming.length) {
+          document.getElementById('wc-next').innerHTML =
+            '<div class="wc-next-meta">No upcoming fixtures</div>';
+          return;
+        }
+        const m = upcoming[0];
+        const dateStr = new Date(m.match_date + 'T12:00:00').toLocaleDateString(
+          'en-GB', { weekday: 'short', day: 'numeric', month: 'long' }
+        );
+        const ph = (m.p_home_win * 100).toFixed(0);
+        const pd = (m.p_draw * 100).toFixed(0);
+        const pa = (m.p_away_win * 100).toFixed(0);
+        const venueLabel = m.neutral ? 'neutral venue' : `${m.home_team} at home`;
+        document.getElementById('wc-next').innerHTML = `
+          <div class="wc-next-meta">${dateStr} &middot; ${venueLabel}</div>
+          <div class="wc-next-row">
+            <div class="wc-next-team">
+              ${flagImg(m.home_team)}
+              <span>${m.home_team}</span>
+            </div>
+            <div class="wc-next-score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</div>
+            <div class="wc-next-team right">
+              <span>${m.away_team}</span>
+              ${flagImg(m.away_team)}
+            </div>
+          </div>
+          <div class="wc-next-bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+            <span class="ph"></span>
+            <span class="pd"></span>
+            <span class="pa"></span>
+          </div>
+          <div class="wc-next-pct">
+            <span>${m.home_team} win ${ph}%</span>
+            <span>Draw ${pd}%</span>
+            <span>${m.away_team} win ${pa}%</span>
+          </div>
+        `;
+      }
+
       function renderOdds(sim) {
         Object.assign(FLAGS, sim.flags || {});
         document.getElementById('wc-nsims').textContent =
@@ -428,12 +556,14 @@
 
         const container = document.getElementById('wc-odds');
         container.innerHTML = '';
-        const top = sim.team_stats.slice(0, 16);
-        const max = top[0].p_champion || 1;
-        top.forEach((s, i) => {
+        // Show all teams; keep ranks based on full sort
+        const all = sim.team_stats;
+        const max = all[0].p_champion || 1;
+        all.forEach((s, i) => {
           const widthPct = (100 * s.p_champion / max).toFixed(1);
           const row = document.createElement('div');
           row.className = 'wc-odds-row';
+          row.dataset.team = s.team.toLowerCase();
           row.innerHTML = `
             <span class="pos">${i + 1}</span>
             ${flagImg(s.team)}
@@ -451,15 +581,6 @@
         const byRating = [...sim.team_stats].sort((a, b) => b.rating - a.rating);
         const top8Ratings = new Set(byRating.slice(0, 8).map(s => s.team));
 
-        // Show all teams that either: top 12 by championship odds,
-        // OR are flagged as dark horses
-        const top12 = sim.team_stats.slice(0, 12).map(s => s.team);
-        const darkHorses = sim.team_stats
-          .filter(s => !top8Ratings.has(s.team) && s.p_semis > 8)
-          .map(s => s.team);
-        const display = [...new Set([...top12, ...darkHorses])];
-        const rows = sim.team_stats.filter(s => display.includes(s.team));
-
         const container = document.getElementById('wc-paths');
         container.innerHTML = `
           <div class="header">Team</div>
@@ -469,23 +590,49 @@
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
         `;
-        rows.forEach(s => {
+        // All 48 teams; the search input filters
+        sim.team_stats.forEach(s => {
           const isDH = !top8Ratings.has(s.team) && s.p_semis > 8;
           const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           const cell = document.createElement('div');
-          cell.className = 'name';
+          cell.className = 'name wc-paths-row';
+          cell.dataset.team = s.team.toLowerCase();
           cell.innerHTML = `
             ${flagImg(s.team)}
             <span class="team-name">${s.team}</span>
-            ${isDH ? '<span class="wc-darkhorse-tag">dark horse</span>' : ''}
+            ${isDH ? '<span class="wc-darkhorse-tag">DH</span>' : ''}
           `;
           container.appendChild(cell);
           ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
             const c = document.createElement('div');
+            c.dataset.team = s.team.toLowerCase();
+            c.className = 'wc-paths-row';
             c.innerHTML = fmt(s[k]);
-            container.appendChild(c.firstElementChild);
+            container.appendChild(c);
           });
         });
+      }
+
+      function wireSearch() {
+        function filterRows(query, selector) {
+          const q = query.trim().toLowerCase();
+          document.querySelectorAll(selector).forEach(el => {
+            const team = el.dataset.team || '';
+            el.classList.toggle('wc-hidden', q.length > 0 && !team.includes(q));
+          });
+        }
+        const oddsInput = document.getElementById('wc-odds-search');
+        const pathsInput = document.getElementById('wc-paths-search');
+        if (oddsInput) {
+          oddsInput.addEventListener('input', e =>
+            filterRows(e.target.value, '#wc-odds .wc-odds-row')
+          );
+        }
+        if (pathsInput) {
+          pathsInput.addEventListener('input', e =>
+            filterRows(e.target.value, '#wc-paths .wc-paths-row')
+          );
+        }
       }
     })();
   </script>
