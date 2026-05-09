@@ -336,57 +336,75 @@
     .wc-next-pct > .pd { text-align: center; }
     .wc-next-pct > .pa { text-align: right; }
 
-    /* Sandbox controls */
-    .wc-sandbox-controls {
+    /* Customise panel: live, square-pill team-adjustment rows */
+    .wc-customise {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.5rem;
-      margin-top: 0.8rem;
       align-items: center;
+      gap: 0.4rem;
+      margin-top: 0.5rem;
+      /* Reserve a bit of space so toggling Custom doesn't bounce
+         the bracket; growing further is still allowed. */
+      min-height: 2.1rem;
     }
-    .wc-sandbox-controls input,
-    .wc-sandbox-controls button {
+    .wc-customise[hidden] { display: none; }
+    .wc-customise input.wc-team-add {
       font: inherit;
-      font-size: 0.9rem;
-      padding: 0.35rem 0.6rem;
-      border: 1px solid rgba(128,128,128,0.35);
+      font-size: 0.82rem;
+      font-family: inherit;
+      padding: 0.3rem 0.5rem;
+      border: 1px solid rgba(128,128,128,0.3);
       border-radius: 3px;
       background: transparent;
       color: inherit;
-      font-family: inherit;
+      min-width: 170px;
     }
-    .wc-sandbox-controls input { min-width: 140px; }
-    .wc-sandbox-controls input[type=number] { width: 100px; }
-    .wc-sandbox-controls button { cursor: pointer; }
-    .wc-sandbox-controls button:hover { background: rgba(180,150,80,0.1); }
-    .wc-sandbox-controls input:focus,
-    .wc-sandbox-controls button:focus {
+    .wc-customise input.wc-team-add:focus {
       outline: none;
       border-color: rgba(180,150,80,0.8);
     }
-    .wc-sandbox-active {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-      margin-top: 0.8rem;
-    }
-    .wc-sandbox-pill {
+    .wc-adjust {
       display: inline-flex;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.2rem 0.55rem;
-      border: 1px solid rgba(180,150,80,0.55);
-      border-radius: 999px;
-      font-size: 0.8rem;
+      padding: 0.25rem 0.4rem 0.25rem 0.5rem;
+      border: 1px solid rgba(180,150,80,0.45);
+      border-radius: 3px;
+      font-size: 0.78rem;
       font-variant-numeric: tabular-nums;
     }
-    .wc-sandbox-pill .wc-flag { width: 14px; height: 10px; }
-    .wc-sandbox-pill .x {
+    .wc-adjust .wc-flag { width: 14px; height: 10px; }
+    .wc-adjust .name { color: var(--text-body, inherit); }
+    .wc-adjust .rating { color: var(--text-muted); margin-left: 0.15rem; }
+    .wc-adjust input.boost {
+      width: 56px;
+      padding: 0.1rem 0.3rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 2px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 0.78rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-adjust input.boost:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-adjust .x {
       cursor: pointer;
       color: var(--text-muted);
-      padding-left: 0.2rem;
+      padding: 0 0.15rem;
+      font-size: 0.95rem;
+      line-height: 1;
     }
-    .wc-sandbox-pill .x:hover { color: inherit; }
+    .wc-adjust .x:hover { color: inherit; }
+    .wc-customise-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
 
     /* Tournament view controls: separated square-ish buttons */
     .wc-tournament-bar {
@@ -505,14 +523,12 @@
 
       <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
 
-      <div class="wc-sandbox-controls" id="wc-sandbox-panel" hidden>
-        <input list="wc-team-list" id="wc-sandbox-team" placeholder="Pick a team" autocomplete="off" />
+      <div class="wc-customise" id="wc-customise" hidden>
+        <input list="wc-team-list" id="wc-add-team" type="search"
+               class="wc-team-add" placeholder="Add a team to adjust..." autocomplete="off" />
         <datalist id="wc-team-list"></datalist>
-        <input type="number" id="wc-sandbox-boost" placeholder="Elo boost" step="25" />
-        <button id="wc-sandbox-add" type="button">Apply</button>
-        <button id="wc-sandbox-reset" type="button">Reset</button>
+        <span id="wc-adjustments" style="display:contents"></span>
       </div>
-      <div class="wc-sandbox-active" id="wc-sandbox-active" hidden></div>
     </section>
 
     <!-- Tournament view: holds either the bracket or the group cards -->
@@ -929,10 +945,11 @@
         });
       }
 
-      // Custom is only "active" once the user actually applies a boost.
-      // With zero boosts, Custom should look identical to Latest.
+      // Custom is "active" once any boost has a non-zero value. Adding a
+      // team with boost 0 is a no-op until the user actually changes it.
       function customActive() {
-        return STATE.source === 'custom' && Object.keys(STATE.bumps).length > 0;
+        return STATE.source === 'custom' &&
+               Object.values(STATE.bumps).some(v => v !== 0);
       }
 
       // Pick the data source to render.
@@ -1075,16 +1092,13 @@
           b.classList.toggle('active', b.dataset.source === STATE.source);
         });
         // New button: visible whenever there's randomness to re-sample.
-        // Hidden in (Latest + Average) and (Custom + Average + no boosts)
-        // because those are deterministic.
+        // Hidden in (Latest + Average) and (Custom + Average + no boosts).
         const rollBtn = document.getElementById('wc-roll-btn');
         const rollable = STATE.mode === 'single' ||
                          (STATE.mode === 'average' && customActive());
         rollBtn.hidden = !rollable;
-        // Sandbox controls only when source = custom
-        document.getElementById('wc-sandbox-panel').hidden = STATE.source !== 'custom';
-        document.getElementById('wc-sandbox-active').hidden =
-          STATE.source !== 'custom' || Object.keys(STATE.bumps).length === 0;
+        // The customise panel is only visible when Custom is selected.
+        document.getElementById('wc-customise').hidden = STATE.source !== 'custom';
       }
 
       function renderMeta() {
@@ -1119,79 +1133,91 @@
 
       function recomputeCustomAggregate() {
         const meta = document.getElementById('wc-tournament-meta');
-        meta.innerHTML = `<span class="wc-sandbox-loading">Running ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} simulations...</span>`;
+        meta.innerHTML = `<span class="wc-customise-hint">Running ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} simulations...</span>`;
         // Yield to the browser so the loading text actually renders
         setTimeout(() => {
           STATE.customAggregate = aggregateCustom(getRatings(), CUSTOM_AVG_SIMS);
           renderMeta();
+          renderTournamentView();
           renderPaths();
         }, 30);
       }
 
-      function applyBoost() {
-        const teamInput = document.getElementById('wc-sandbox-team');
-        const boostInput = document.getElementById('wc-sandbox-boost');
-        const team = teamInput.value.trim();
-        const boost = parseFloat(boostInput.value);
-        if (!team || !SANDBOX.baseRatings.hasOwnProperty(team) || isNaN(boost) || boost === 0) return;
-        STATE.bumps[team] = (STATE.bumps[team] || 0) + boost;
-        if (STATE.bumps[team] === 0) delete STATE.bumps[team];
-        teamInput.value = '';
-        boostInput.value = '';
-        renderActiveBumps();
-        renderControls();
-        renderMeta();
-        rollSimulation();
-        teamInput.focus();
+      // Add a team to the active customise list (boost defaults to 0
+      // so it's a no-op until the user types a number).
+      function addCustomiseTeam(team) {
+        if (!team || !SANDBOX.baseRatings.hasOwnProperty(team)) return;
+        if (STATE.bumps.hasOwnProperty(team)) return; // already in list
+        STATE.bumps[team] = 0;
+        renderAdjustments();
       }
 
-      function resetBoosts() {
-        STATE.bumps = {};
-        STATE.customAggregate = null;  // no customizations, no aggregate
-        renderActiveBumps();
+      // Set/update a team's boost. Live: triggers an immediate recompute.
+      function setBoost(team, value) {
+        STATE.bumps[team] = value;
+        scheduleRecompute();
         renderControls();
         renderMeta();
-        // Now equivalent to Latest; just re-render with the prebuilt data.
-        renderTournamentView();
-        renderPaths();
       }
 
-      function renderActiveBumps() {
-        const wrap = document.getElementById('wc-sandbox-active');
+      function removeCustomiseTeam(team) {
+        delete STATE.bumps[team];
+        renderAdjustments();
+        scheduleRecompute();
+        renderControls();
+        renderMeta();
+      }
+
+      function renderAdjustments() {
+        const wrap = document.getElementById('wc-adjustments');
         wrap.innerHTML = '';
         Object.entries(STATE.bumps).forEach(([team, bump]) => {
-          if (!bump) return;
           const pill = document.createElement('span');
-          pill.className = 'wc-sandbox-pill';
-          const sign = bump > 0 ? '+' : '';
+          pill.className = 'wc-adjust';
+          const baseRating = Math.round(SANDBOX.baseRatings[team] || 1500);
           pill.innerHTML = `
             ${flagImg(team)}
-            <span>${team} ${sign}${bump}</span>
+            <span class="name">${team}</span>
+            <span class="rating">${baseRating}</span>
+            <input class="boost" type="number" step="25" value="${bump}" data-team="${team}" />
             <span class="x" data-team="${team}" title="Remove">&times;</span>
           `;
           wrap.appendChild(pill);
         });
-        wrap.querySelectorAll('.x').forEach(el => {
-          el.addEventListener('click', e => {
+        // Wire input + remove handlers
+        wrap.querySelectorAll('input.boost').forEach(el => {
+          el.addEventListener('input', e => {
             const t = e.currentTarget.dataset.team;
-            delete STATE.bumps[t];
-            // If removing the last boost, clear cached aggregate so we
-            // fall back to the Latest data on next render.
-            if (Object.keys(STATE.bumps).length === 0) {
-              STATE.customAggregate = null;
-              STATE.currentSim = null;
-            }
-            renderActiveBumps();
-            renderControls();
-            renderMeta();
-            if (customActive()) {
-              rollSimulation();
-            } else {
-              renderTournamentView();
-              renderPaths();
-            }
+            const v = parseFloat(e.currentTarget.value);
+            setBoost(t, isNaN(v) ? 0 : v);
           });
         });
+        wrap.querySelectorAll('.x').forEach(el => {
+          el.addEventListener('click', e => removeCustomiseTeam(e.currentTarget.dataset.team));
+        });
+      }
+
+      // Throttle: collapse a burst of boost changes into one recompute.
+      let _recomputeTimer = null;
+      function scheduleRecompute() {
+        if (_recomputeTimer) clearTimeout(_recomputeTimer);
+        _recomputeTimer = setTimeout(() => {
+          _recomputeTimer = null;
+          if (customActive()) {
+            // Roll a fresh single sim immediately and re-render so the
+            // bracket/groups feel responsive; recompute the 2k-sim
+            // aggregate after, which updates the table.
+            STATE.currentSim = simulateOnce(getRatings());
+            renderTournamentView();
+            recomputeCustomAggregate();
+          } else {
+            // No customisation in effect -> fall back to Latest data
+            STATE.currentSim = null;
+            STATE.customAggregate = null;
+            renderTournamentView();
+            renderPaths();
+          }
+        }, 220);
       }
 
       function wireControls() {
@@ -1229,15 +1255,29 @@
           });
         });
         document.getElementById('wc-roll-btn').addEventListener('click', rollSimulation);
-        document.getElementById('wc-sandbox-add').addEventListener('click', applyBoost);
-        document.getElementById('wc-sandbox-reset').addEventListener('click', resetBoosts);
-        const teamInput = document.getElementById('wc-sandbox-team');
-        const boostInput = document.getElementById('wc-sandbox-boost');
-        boostInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyBoost(); });
-        teamInput.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && boostInput.value) applyBoost();
-          else if (e.key === 'Enter') boostInput.focus();
+
+        // Customise: type or pick a team in the datalist input to add it
+        // to the adjustment list. Boost defaults to 0; user adjusts inline.
+        const addInput = document.getElementById('wc-add-team');
+        const handleAdd = () => {
+          const team = addInput.value.trim();
+          if (SANDBOX.baseRatings.hasOwnProperty(team)) {
+            // Auto-switch to Custom source so the user sees their changes
+            if (STATE.source !== 'custom') {
+              STATE.source = 'custom';
+              renderControls();
+              renderMeta();
+            }
+            addCustomiseTeam(team);
+            addInput.value = '';
+            addInput.focus();
+          }
+        };
+        addInput.addEventListener('change', handleAdd);
+        addInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') handleAdd();
         });
+
         document.getElementById('wc-paths-search').addEventListener('input', e =>
           applyPathsFilter(e.target.value)
         );
