@@ -34,11 +34,9 @@
     .pg-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
 
     .pg-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+      display: flex;
+      flex-direction: column;
       gap: 16px;
-      height: calc(100vh - 240px);
-      min-height: 480px;
     }
     .pg-pane {
       display: flex;
@@ -48,6 +46,8 @@
       overflow: hidden;
       background: var(--bg);
     }
+    .pg-pane.pg-pane-editor { height: 360px; }
+    .pg-pane.pg-pane-output { min-height: 280px; }
     .pg-pane-header {
       font-size: var(--text-xs);
       font-weight: 600;
@@ -91,12 +91,8 @@
       color: var(--accent-red);
     }
 
-    @media (max-width: 900px) {
-      .pg-grid {
-        grid-template-columns: 1fr;
-        height: auto;
-      }
-      .pg-pane { height: 480px; }
+    @media (max-width: 640px) {
+      .pg-pane.pg-pane-editor { height: 300px; }
     }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
@@ -121,14 +117,14 @@
     </header>
 
     <div class="pg-grid">
-      <div class="pg-pane">
+      <div class="pg-pane pg-pane-editor">
         <div class="pg-pane-header">
           <span>Program</span>
           <span class="pg-status" id="pg-status">ready</span>
         </div>
         <div id="pg-editor"></div>
       </div>
-      <div class="pg-pane">
+      <div class="pg-pane pg-pane-output">
         <div class="pg-pane-header">
           <span>Output</span>
         </div>
