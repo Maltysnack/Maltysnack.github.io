@@ -31,7 +31,9 @@
     .wc-round {
       display: flex;
       flex-direction: column;
-      min-width: 130px;
+      width: 145px;
+      flex-shrink: 0;
+      flex-grow: 0;
     }
     .wc-round-label {
       font-size: 0.65rem;
@@ -591,6 +593,18 @@
         const src = flagSrc(team);
         return src ? `<img class="wc-flag" src="${src}" alt="" loading="lazy" />` : '';
       }
+      // Display names compressed for the narrow bracket cards. The
+      // probability table and group cards use the full names.
+      const TEAM_SHORT = {
+        "Bosnia and Herzegovina": "Bosnia",
+        "United States": "USA",
+        "South Korea": "S. Korea",
+        "South Africa": "S. Africa",
+        "Czech Republic": "Czechia",
+        "New Zealand": "N. Zealand",
+        "Saudi Arabia": "S. Arabia",
+      };
+      function shortName(team) { return TEAM_SHORT[team] || team; }
       function poisson(lambda) {
         const L = Math.exp(-lambda);
         let k = 0, p = 1;
@@ -865,14 +879,14 @@
             const scoreA = showScores ? `<span class="wc-score">${m.score_a}${penA}</span>` : '';
             const scoreB = showScores ? `<span class="wc-score">${m.score_b}${penB}</span>` : '';
             card.innerHTML = `
-              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
+              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${m.team_a}">
                 ${flagImg(m.team_a)}
-                <span class="wc-team-name">${m.team_a}</span>
+                <span class="wc-team-name">${shortName(m.team_a)}</span>
                 ${scoreA}
               </div>
-              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
+              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}" title="${m.team_b}">
                 ${flagImg(m.team_b)}
-                <span class="wc-team-name">${m.team_b}</span>
+                <span class="wc-team-name">${shortName(m.team_b)}</span>
                 ${scoreB}
               </div>
             `;
@@ -908,24 +922,27 @@
         });
       }
 
-      // Pick the data source to render. Returns { knockout, groups, label }
+      // Custom is only "active" once the user actually applies a boost.
+      // With zero boosts, Custom should look identical to Latest.
+      function customActive() {
+        return STATE.source === 'custom' && Object.keys(STATE.bumps).length > 0;
+      }
+
+      // Pick the data source to render.
       function activeDataset() {
-        if (STATE.source === 'latest' && STATE.mode === 'average') {
-          return { knockout: DATA.bracket.knockout, groups: DATA.bracket.groups,
-                   decimal: true, withScores: false };
-        }
-        if (STATE.source === 'custom' && STATE.mode === 'average') {
-          // Decimal-points group view computed from currentSim's group_stage too;
-          // we just need ANY single sim to show standings shape, but the bracket
-          // we want is "average winner per match"; for simplicity, reuse
-          // currentSim (which was rolled with custom ratings) as the visual.
-          // The probabilities table below uses the proper N-sim aggregate.
+        if (STATE.mode === 'average') {
+          // Average view: show pre-built data unless the user has actually
+          // applied boosts under Custom.
+          if (!customActive()) {
+            return { knockout: DATA.bracket.knockout, groups: DATA.bracket.groups,
+                     decimal: true, withScores: false };
+          }
           if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
           return { knockout: STATE.currentSim.knockout,
                    groups: STATE.currentSim.groups,
                    decimal: false, withScores: false };
         }
-        // Single sim (latest or custom)
+        // Single-sim view: always one rolled sample
         if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
         return { knockout: STATE.currentSim.knockout,
                  groups: STATE.currentSim.groups,
@@ -955,7 +972,7 @@
 
       // ── Renderers: paths table ──────────────────────────────────
       function activeStats() {
-        if (STATE.source === 'latest') return DATA.sim;
+        if (!customActive()) return DATA.sim;
         return STATE.customAggregate || DATA.sim;
       }
       function renderPaths() {
@@ -964,6 +981,29 @@
         const byRating = [...stats].sort((a, b) => b.rating - a.rating);
         const ratingRank = new Map();
         byRating.forEach((s, i) => ratingRank.set(s.team, i + 1));
+
+        // Dark-horse selection: deliberately sparse. We score every team
+        // outside the top 8 by how much they outperform their rank-implied
+        // ceiling, then take only the top 5. The score weights the teams'
+        // probability of going deep (QF and SF) by how far down the ranking
+        // they sit. A team ranked 22nd reaching the QF in 15% of sims
+        // beats a team ranked 9th doing the same.
+        function darkHorseScore(s) {
+          const rank = ratingRank.get(s.team);
+          if (rank <= 8) return -1;
+          const rankWeight = Math.max(0, rank - 6);  // rank 9 -> 3, 16 -> 10
+          // p_semis is rarer and more impressive than p_quarters; weight it
+          return rankWeight * (s.p_quarters + 2 * s.p_semis + 3 * s.p_final);
+        }
+        const darkHorseSet = new Set(
+          [...stats]
+            .filter(s => ratingRank.get(s.team) > 8)
+            .map(s => ({ s, score: darkHorseScore(s) }))
+            .filter(x => x.score > 25)  // floor: ignore truly unimpressive
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 5)
+            .map(x => x.s.team)
+        );
 
         const container = document.getElementById('wc-paths');
         container.innerHTML = `
@@ -974,28 +1014,15 @@
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
         `;
-        // Dark-horse criteria: outside top 8 by rating AND meaningfully exceeds
-        // their rank-implied ceiling. We use cumulative round probabilities;
-        // a team flagged here is genuinely punching above their seed.
-        function isDarkHorse(s) {
-          const rank = ratingRank.get(s.team);
-          if (rank <= 8) return false;
-          // outperformance thresholds
-          if (s.p_quarters >= 15) return true;     // mid-tier QF threat
-          if (s.p_semis    >= 5)  return true;     // SF darling
-          if (s.p_final    >= 3)  return true;     // shock finalist
-          if (s.p_champion >= 1.5) return true;    // longshot champ
-          // very low rated team that even sneaks past R16 is interesting
-          if (rank > 16 && s.p_round_of_16 >= 35) return true;
-          return false;
-        }
 
         stats.forEach((s, i) => {
-          const dh = isDarkHorse(s);
+          const dh = darkHorseSet.has(s.team);
           const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
+          // dataset.team includes "dark horse" so the search input matches it
+          const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
           const cell = document.createElement('div');
           cell.className = 'name wc-paths-row';
-          cell.dataset.team = s.team.toLowerCase();
+          cell.dataset.team = searchKey;
           cell.dataset.rank = String(i);
           cell.innerHTML = `
             ${flagImg(s.team)}
@@ -1005,7 +1032,7 @@
           container.appendChild(cell);
           ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
             const c = document.createElement('div');
-            c.dataset.team = s.team.toLowerCase();
+            c.dataset.team = searchKey;
             c.dataset.rank = String(i);
             c.className = 'wc-paths-row cell-num';
             c.innerHTML = fmt(s[k]);
@@ -1035,10 +1062,12 @@
         document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
           b.classList.toggle('active', b.dataset.source === STATE.source);
         });
-        // New button: visible whenever there's randomness involved
+        // New button: visible whenever there's randomness to re-sample.
+        // Hidden in (Latest + Average) and (Custom + Average + no boosts)
+        // because those are deterministic.
         const rollBtn = document.getElementById('wc-roll-btn');
         const rollable = STATE.mode === 'single' ||
-                         (STATE.source === 'custom' && STATE.mode === 'average');
+                         (STATE.mode === 'average' && customActive());
         rollBtn.hidden = !rollable;
         // Sandbox controls only when source = custom
         document.getElementById('wc-sandbox-panel').hidden = STATE.source !== 'custom';
@@ -1050,23 +1079,26 @@
         const meta = document.getElementById('wc-tournament-meta');
         const n = (DATA.sim.n_simulations || 10000).toLocaleString('en-US');
         const boostCount = Object.keys(STATE.bumps).length;
-        if (STATE.source === 'latest') {
-          meta.textContent = STATE.mode === 'average'
-            ? `Showing average across ${n} simulations of the latest model.`
-            : 'Showing one random simulation. Click New for another.';
-        } else {
-          const boostNote = boostCount
-            ? `${boostCount} active boost${boostCount === 1 ? '' : 's'}`
-            : 'no boosts yet';
-          meta.textContent = STATE.mode === 'average'
-            ? `Custom model (${boostNote}). Averaging ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} sims when you Apply / Reset / click New.`
-            : `Custom model (${boostNote}). One sim per New.`;
+        if (!customActive()) {
+          // Either Latest, or Custom with no boosts (effectively Latest)
+          if (STATE.mode === 'average') {
+            meta.textContent = STATE.source === 'custom'
+              ? 'No boosts yet. Identical to the latest model until you apply one.'
+              : `Showing average across ${n} simulations of the latest model.`;
+          } else {
+            meta.textContent = 'Showing one random simulation. Click New for another.';
+          }
+          return;
         }
+        const boostNote = `${boostCount} active boost${boostCount === 1 ? '' : 's'}`;
+        meta.textContent = STATE.mode === 'average'
+          ? `Custom model with ${boostNote}. Averaged across ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} client-side sims; click New to resample.`
+          : `Custom model with ${boostNote}. One sim per New.`;
       }
 
       function rollSimulation() {
         STATE.currentSim = simulateOnce(getRatings());
-        if (STATE.source === 'custom' && STATE.mode === 'average') {
+        if (customActive() && STATE.mode === 'average') {
           recomputeCustomAggregate();
         }
         renderTournamentView();
@@ -1103,10 +1135,13 @@
 
       function resetBoosts() {
         STATE.bumps = {};
+        STATE.customAggregate = null;  // no customizations, no aggregate
         renderActiveBumps();
         renderControls();
         renderMeta();
-        rollSimulation();
+        // Now equivalent to Latest; just re-render with the prebuilt data.
+        renderTournamentView();
+        renderPaths();
       }
 
       function renderActiveBumps() {
@@ -1128,10 +1163,21 @@
           el.addEventListener('click', e => {
             const t = e.currentTarget.dataset.team;
             delete STATE.bumps[t];
+            // If removing the last boost, clear cached aggregate so we
+            // fall back to the Latest data on next render.
+            if (Object.keys(STATE.bumps).length === 0) {
+              STATE.customAggregate = null;
+              STATE.currentSim = null;
+            }
             renderActiveBumps();
             renderControls();
             renderMeta();
-            rollSimulation();
+            if (customActive()) {
+              rollSimulation();
+            } else {
+              renderTournamentView();
+              renderPaths();
+            }
           });
         });
       }
@@ -1158,15 +1204,16 @@
         document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
           b.addEventListener('click', () => {
             STATE.source = b.dataset.source;
-            // When switching source, drop cached sim so it rolls fresh
-            STATE.currentSim = null;
-            STATE.customAggregate = null;
             renderControls();
             renderMeta();
-            if (STATE.source === 'custom' && STATE.mode === 'average') {
+            // Switching source with no active boosts is a UI-only change;
+            // keep using the cached Latest data. Only re-run anything when
+            // there are actual customizations to apply.
+            if (customActive() && STATE.mode === 'average' && !STATE.customAggregate) {
               recomputeCustomAggregate();
             }
-            rollSimulation();
+            renderTournamentView();
+            renderPaths();
           });
         });
         document.getElementById('wc-roll-btn').addEventListener('click', rollSimulation);
