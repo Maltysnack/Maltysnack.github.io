@@ -31,10 +31,10 @@
     .wc-round {
       display: flex;
       flex-direction: column;
-      min-width: 145px;
+      min-width: 130px;
     }
     .wc-round-label {
-      font-size: 0.7rem;
+      font-size: 0.65rem;
       text-transform: uppercase;
       letter-spacing: 0.1em;
       color: var(--text-muted);
@@ -50,24 +50,24 @@
     }
     .wc-match {
       border: 1px solid currentColor;
-      border-color: rgba(128,128,128,0.3);
+      border-color: rgba(128,128,128,0.28);
       border-radius: 3px;
-      padding: 0.35rem 0.55rem;
-      font-size: 0.85rem;
+      padding: 0.25rem 0.45rem;
+      font-size: 0.78rem;
       background: transparent;
       align-self: center;
       width: 100%;
     }
     .wc-team {
-      padding: 0.15rem 0;
+      padding: 0.1rem 0;
       color: var(--text-muted);
       display: flex;
       align-items: center;
-      gap: 0.45rem;
+      gap: 0.4rem;
     }
     .wc-flag {
-      width: 18px;
-      height: 13px;
+      width: 16px;
+      height: 12px;
       object-fit: cover;
       border-radius: 1px;
       flex-shrink: 0;
@@ -323,13 +323,16 @@
     .wc-next-bar .pd { background: rgba(128,128,128,0.4); }
     .wc-next-bar .pa { background: rgba(120,140,180,0.6); }
     .wc-next-pct {
-      display: flex;
-      justify-content: space-between;
+      display: grid;
+      grid-template-columns: var(--ph, 33%) var(--pd, 34%) var(--pa, 33%);
       font-size: 0.75rem;
       color: var(--text-muted);
       margin-top: 0.3rem;
       font-variant-numeric: tabular-nums;
     }
+    .wc-next-pct > .ph { text-align: left; }
+    .wc-next-pct > .pd { text-align: center; }
+    .wc-next-pct > .pa { text-align: right; }
 
     /* Sandbox controls */
     .wc-sandbox-controls {
@@ -383,59 +386,54 @@
     }
     .wc-sandbox-pill .x:hover { color: inherit; }
 
-    /* Tournament view: tabs + mode toggle + sandbox panel */
+    /* Tournament view controls: separated square-ish buttons */
     .wc-tournament-bar {
       display: flex;
       flex-wrap: wrap;
-      gap: 0.6rem 1.2rem;
+      gap: 0.5rem 0.7rem;
       align-items: center;
       margin-top: 1rem;
       padding-bottom: 0.7rem;
-      border-bottom: 1px solid rgba(128,128,128,0.2);
+      border-bottom: 1px solid rgba(128,128,128,0.18);
     }
     .wc-toggle {
       display: inline-flex;
-      border: 1px solid rgba(128,128,128,0.35);
-      border-radius: 999px;
-      overflow: hidden;
+      gap: 0.3rem;
     }
-    .wc-toggle button {
+    .wc-toggle.right { margin-left: auto; }
+    .wc-btn {
       font: inherit;
-      font-size: 0.85rem;
+      font-size: 0.82rem;
       font-family: inherit;
-      padding: 0.32rem 0.85rem;
-      border: none;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
       background: transparent;
       color: var(--text-muted);
       cursor: pointer;
     }
-    .wc-toggle button + button {
-      border-left: 1px solid rgba(128,128,128,0.3);
-    }
-    .wc-toggle button:hover { background: rgba(180,150,80,0.08); }
-    .wc-toggle button.active {
-      background: rgba(180,150,80,0.18);
+    .wc-btn:hover { background: rgba(180,150,80,0.08); }
+    .wc-btn.active {
+      background: rgba(180,150,80,0.14);
+      border-color: rgba(180,150,80,0.55);
       color: var(--text-body, inherit);
       font-weight: 500;
     }
-    .wc-roll {
-      font: inherit;
-      font-size: 0.85rem;
-      font-family: inherit;
-      padding: 0.3rem 0.85rem;
-      border: 1px solid rgba(180,150,80,0.55);
-      border-radius: 999px;
-      background: transparent;
-      color: inherit;
-      cursor: pointer;
-    }
-    .wc-roll:hover { background: rgba(180,150,80,0.12); }
-    .wc-roll[hidden] { display: none; }
+    .wc-btn[hidden] { display: none; }
     .wc-tournament-meta {
-      font-size: 0.8rem;
+      font-size: 0.78rem;
       color: var(--text-muted);
       margin-top: 0.4rem;
       min-height: 1.1em;
+    }
+    /* Force the sandbox panel to actually hide when [hidden]; the
+       earlier display:flex was overriding the attribute. */
+    .wc-sandbox-controls[hidden],
+    .wc-sandbox-active[hidden] { display: none !important; }
+    .wc-sandbox-loading {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
     }
   </style>
 </head>
@@ -489,15 +487,18 @@
 
       <div class="wc-tournament-bar">
         <div class="wc-toggle" role="tablist" aria-label="View">
-          <button data-tab="knockouts" class="active" type="button">Knockouts</button>
-          <button data-tab="groups" type="button">Group stage</button>
+          <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
+          <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
         </div>
         <div class="wc-toggle" role="tablist" aria-label="Mode">
-          <button data-mode="average" class="active" type="button">Model average</button>
-          <button data-mode="single" type="button">Single sim</button>
-          <button data-mode="sandbox" type="button">Sandbox</button>
+          <button class="wc-btn active" data-mode="average" type="button">Average</button>
+          <button class="wc-btn" data-mode="single" type="button">Single sim</button>
         </div>
-        <button class="wc-roll" id="wc-roll-btn" type="button" hidden>Roll</button>
+        <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
+        <div class="wc-toggle right" role="tablist" aria-label="Model">
+          <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
+          <button class="wc-btn" data-source="custom" type="button">Custom model</button>
+        </div>
       </div>
 
       <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
@@ -505,11 +506,11 @@
       <div class="wc-sandbox-controls" id="wc-sandbox-panel" hidden>
         <input list="wc-team-list" id="wc-sandbox-team" placeholder="Pick a team" autocomplete="off" />
         <datalist id="wc-team-list"></datalist>
-        <input type="number" id="wc-sandbox-boost" placeholder="Boost" step="25" />
+        <input type="number" id="wc-sandbox-boost" placeholder="Elo boost" step="25" />
         <button id="wc-sandbox-add" type="button">Apply</button>
         <button id="wc-sandbox-reset" type="button">Reset</button>
       </div>
-      <div class="wc-sandbox-active" id="wc-sandbox-active"></div>
+      <div class="wc-sandbox-active" id="wc-sandbox-active" hidden></div>
     </section>
 
     <!-- Tournament view: holds either the bracket or the group cards -->
@@ -540,19 +541,15 @@
     (function () {
       // ── Constants ────────────────────────────────────────────────
       const FLAGS = {};
-      const N_VISIBLE = 24;
+      const N_VISIBLE_TABLE = 24;
+      const CUSTOM_AVG_SIMS = 2000;   // sims to average for Custom + Average view
 
-      // Calibration constants mirror src/worldcup/calibration.py
       const CAL = {
-        LAMBDA_HOME: 1.41,
-        LAMBDA_AWAY: 1.07,
-        SLOPE_HOME: 0.00204,
-        SLOPE_AWAY: -0.00255,
-        HOME_ADV: 50,
-        PEN_DIVISOR: 600,
+        LAMBDA_HOME: 1.41, LAMBDA_AWAY: 1.07,
+        SLOPE_HOME: 0.00204, SLOPE_AWAY: -0.00255,
+        HOME_ADV: 50, PEN_DIVISOR: 600,
       };
 
-      // Bracket structure (matches src/worldcup/bracket.py)
       const R32_PAIRINGS_JS = [
         [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
         [['W','F'],['R','C']],   [['W','C'],['R','F']],
@@ -576,9 +573,11 @@
       // ── State ────────────────────────────────────────────────────
       const STATE = {
         tab: 'knockouts',     // 'knockouts' | 'groups'
-        mode: 'average',      // 'average' | 'single' | 'sandbox'
-        bumps: {},            // team -> elo bump (sandbox only)
-        currentSim: null,     // { groups, knockout } cached single sample
+        mode: 'average',      // 'average' | 'single'
+        source: 'latest',     // 'latest' | 'custom'
+        bumps: {},
+        currentSim: null,     // last single-sim sample, for current source
+        customAggregate: null,// aggregated stats when source=custom
       };
       const DATA = { bracket: null, sim: null };
       const SANDBOX = { groups: {}, baseRatings: {}, fixtures: [] };
@@ -615,11 +614,9 @@
         const pA = 1 / (1 + Math.pow(10, (rB - effA) / CAL.PEN_DIVISOR));
         return { sa, sb, win: Math.random() < pA ? 0 : 1, pens: true };
       }
-
-      // Effective rating: base + boost (for sandbox)
       function getRatings() {
         const r = { ...SANDBOX.baseRatings };
-        if (STATE.mode === 'sandbox') {
+        if (STATE.source === 'custom') {
           Object.entries(STATE.bumps).forEach(([t, b]) => {
             r[t] = (r[t] || 1500) + b;
           });
@@ -627,19 +624,17 @@
         return r;
       }
 
-      // ── Single Monte Carlo sample ────────────────────────────────
+      // ── Single sample ────────────────────────────────────────────
       function simulateOnce(ratings) {
-        // Group stage
         const groupStandings = [];
-        const winners = {};
-        const runners = {};
-        const thirdsByGroup = {};
+        const winners = {}, runners = {}, thirdsByGroup = {};
+        const teamRound = {};
 
         Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
           const members = new Set(teams);
           const pts = Object.fromEntries(teams.map(t => [t, 0]));
-          const gd = Object.fromEntries(teams.map(t => [t, 0]));
-          const gf = Object.fromEntries(teams.map(t => [t, 0]));
+          const gd  = Object.fromEntries(teams.map(t => [t, 0]));
+          const gf  = Object.fromEntries(teams.map(t => [t, 0]));
           SANDBOX.fixtures.forEach(f => {
             if (!members.has(f.home_team) || !members.has(f.away_team)) return;
             const r = simMatch(
@@ -668,25 +663,25 @@
           thirdsByGroup[letter] = standings[2];
         });
 
-        // 8 best 3rds by FIFA tiebreakers
         const thirdsRanked = Object.entries(thirdsByGroup)
           .sort(([, a], [, b]) =>
             (b.points - a.points) || (b.gd - a.gd) || (b.gf - a.gf)
           );
         const advancingThirds = new Set(thirdsRanked.slice(0, 8).map(([l]) => l));
 
-        // Mark qualifies_as on standings
         groupStandings.forEach(g => {
           g.standings.forEach(s => {
             if (s.position === 1) s.qualifies_as = 'winner';
             else if (s.position === 2) s.qualifies_as = 'runner_up';
             else if (s.position === 3 && advancingThirds.has(g.name)) s.qualifies_as = 'best_third';
             else s.qualifies_as = 'eliminated';
-            s.predicted_points = s.points;  // for unified rendering
+            s.predicted_points = s.points;
+            // initialize team_round
+            if (s.qualifies_as === 'eliminated') teamRound[s.team] = 'group_stage';
+            else teamRound[s.team] = 'round_of_32';
           });
         });
 
-        // Assign 3rds to R32 slots
         const used = new Set();
         const thirdAssignments = {};
         R32_PAIRINGS_JS.forEach(([a, b], i) => {
@@ -715,41 +710,40 @@
           return thirdAssignments[matchNo];
         }
 
-        // Knockouts (neutral venue, ko=true)
         const ko = {};
-        R32_PAIRINGS_JS.forEach(([a, b], i) => {
-          const matchNo = 73 + i;
-          const ta = resolve(a, matchNo);
-          const tb = resolve(b, matchNo);
+        function playMatch(matchNo, ta, tb) {
           const r = simMatch(ratings[ta] || 1500, ratings[tb] || 1500, true, true);
+          const winner = r.win === 0 ? ta : tb;
+          const loser = r.win === 0 ? tb : ta;
           ko[matchNo] = {
             team_a: ta, team_b: tb,
             score_a: r.sa, score_b: r.sb,
-            winner: r.win === 0 ? ta : tb,
-            pens: r.pens,
+            winner, pens: r.pens,
           };
+          return { winner, loser };
+        }
+
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          const ta = resolve(a, matchNo), tb = resolve(b, matchNo);
+          const { loser } = playMatch(matchNo, ta, tb);
+          teamRound[loser] = 'round_of_32';
         });
-        [R16_FEEDS_JS, QF_FEEDS_JS, SF_FEEDS_JS].forEach(feeds => {
+        function playFeeds(feeds, loserLabel) {
           feeds.forEach(([m, fa, fb]) => {
             const ta = ko[fa].winner, tb = ko[fb].winner;
-            const r = simMatch(ratings[ta] || 1500, ratings[tb] || 1500, true, true);
-            ko[m] = {
-              team_a: ta, team_b: tb,
-              score_a: r.sa, score_b: r.sb,
-              winner: r.win === 0 ? ta : tb,
-              pens: r.pens,
-            };
+            const { loser } = playMatch(m, ta, tb);
+            teamRound[loser] = loserLabel;
           });
-        });
+        }
+        playFeeds(R16_FEEDS_JS, 'round_of_16');
+        playFeeds(QF_FEEDS_JS, 'quarter_finals');
+        playFeeds(SF_FEEDS_JS, 'semi_finals');
         const [fno, ffa, ffb] = FINAL_FEED_JS;
         const fa = ko[ffa].winner, fb = ko[ffb].winner;
-        const fr = simMatch(ratings[fa] || 1500, ratings[fb] || 1500, true, true);
-        ko[fno] = {
-          team_a: fa, team_b: fb,
-          score_a: fr.sa, score_b: fr.sb,
-          winner: fr.win === 0 ? fa : fb,
-          pens: fr.pens,
-        };
+        const { winner: champ, loser: ru } = playMatch(fno, fa, fb);
+        teamRound[champ] = 'champion';
+        teamRound[ru] = 'runner_up';
 
         return {
           groups: groupStandings,
@@ -761,7 +755,42 @@
             final: [ko[fno]],
             champion: ko[fno].winner,
           },
+          team_round: teamRound,
         };
+      }
+
+      // ── Custom-model aggregator: run N sims, build team_stats ────
+      function aggregateCustom(ratings, n) {
+        const allTeams = Object.keys(SANDBOX.baseRatings);
+        const counts = {};
+        allTeams.forEach(t => {
+          counts[t] = { group_stage: 0, round_of_32: 0, round_of_16: 0,
+                        quarter_finals: 0, semi_finals: 0, runner_up: 0, champion: 0 };
+        });
+        for (let i = 0; i < n; i++) {
+          const sim = simulateOnce(ratings);
+          Object.entries(sim.team_round).forEach(([t, r]) => {
+            if (counts[t]) counts[t][r]++;
+          });
+        }
+        // Convert to team_stats with cumulative probabilities
+        const team_stats = allTeams.map(t => {
+          const c = counts[t];
+          const total = Object.values(c).reduce((a, b) => a + b, 0) || 1;
+          const pct = (k) => 100 * c[k] / total;
+          const p_champion = pct('champion');
+          const p_final = p_champion + pct('runner_up');
+          const p_semis = p_final + pct('semi_finals');
+          const p_quarters = p_semis + pct('quarter_finals');
+          const p_round_of_16 = p_quarters + pct('round_of_16');
+          return {
+            team: t,
+            rating: Math.round(ratings[t] || 1500),
+            p_champion, p_final, p_semis, p_quarters, p_round_of_16,
+            p_advance_from_groups: 100 - pct('group_stage'),
+          };
+        }).sort((a, b) => b.p_champion - a.p_champion);
+        return { team_stats, n_simulations: n };
       }
 
       // ── Renderers: Next match ────────────────────────────────────
@@ -779,7 +808,10 @@
         const ph = (m.p_home_win * 100).toFixed(0);
         const pd = (m.p_draw * 100).toFixed(0);
         const pa = (m.p_away_win * 100).toFixed(0);
-        const venueLabel = m.neutral ? 'neutral venue' : `${m.home_team} at home`;
+        const venueParts = [m.city, m.country].filter(Boolean);
+        const venueLabel = venueParts.length
+          ? venueParts.join(', ')
+          : (m.neutral ? 'neutral venue' : `${m.home_team} at home`);
         document.getElementById('wc-next').innerHTML = `
           <div class="wc-next-meta">${dateStr} &middot; ${venueLabel}</div>
           <div class="wc-next-row">
@@ -796,10 +828,10 @@
           <div class="wc-next-bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
             <span class="ph"></span><span class="pd"></span><span class="pa"></span>
           </div>
-          <div class="wc-next-pct">
-            <span>${m.home_team} win ${ph}%</span>
-            <span>Draw ${pd}%</span>
-            <span>${m.away_team} win ${pa}%</span>
+          <div class="wc-next-pct" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+            <span class="ph">${m.home_team} win ${ph}%</span>
+            <span class="pd">Draw ${pd}%</span>
+            <span class="pa">${m.away_team} win ${pa}%</span>
           </div>
         `;
       }
@@ -851,14 +883,14 @@
         });
       }
 
-      function renderGroupsInto(container, groups, isAverage) {
+      function renderGroupsInto(container, groups, decimal) {
         container.innerHTML = '';
         groups.forEach(g => {
           const card = document.createElement('div');
           card.className = 'wc-group';
           const rows = g.standings.map(s => {
             const cls = s.qualifies_as === 'eliminated' ? 'eliminated' : 'advancing';
-            const ptsValue = isAverage
+            const ptsValue = decimal
               ? (s.predicted_points != null ? s.predicted_points.toFixed(1) : s.points)
               : s.points;
             return `
@@ -876,11 +908,34 @@
         });
       }
 
+      // Pick the data source to render. Returns { knockout, groups, label }
+      function activeDataset() {
+        if (STATE.source === 'latest' && STATE.mode === 'average') {
+          return { knockout: DATA.bracket.knockout, groups: DATA.bracket.groups,
+                   decimal: true, withScores: false };
+        }
+        if (STATE.source === 'custom' && STATE.mode === 'average') {
+          // Decimal-points group view computed from currentSim's group_stage too;
+          // we just need ANY single sim to show standings shape, but the bracket
+          // we want is "average winner per match"; for simplicity, reuse
+          // currentSim (which was rolled with custom ratings) as the visual.
+          // The probabilities table below uses the proper N-sim aggregate.
+          if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
+          return { knockout: STATE.currentSim.knockout,
+                   groups: STATE.currentSim.groups,
+                   decimal: false, withScores: false };
+        }
+        // Single sim (latest or custom)
+        if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
+        return { knockout: STATE.currentSim.knockout,
+                 groups: STATE.currentSim.groups,
+                 decimal: false, withScores: true };
+      }
+
       function renderTournamentView() {
         const root = document.getElementById('wc-tournament-view');
         root.innerHTML = '';
-        const isAverage = STATE.mode === 'average';
-
+        const { knockout, groups, decimal, withScores } = activeDataset();
         if (STATE.tab === 'knockouts') {
           const wrap = document.createElement('div');
           wrap.className = 'wc-bracket-wrap';
@@ -888,23 +943,28 @@
           inner.className = 'wc-bracket';
           wrap.appendChild(inner);
           root.appendChild(wrap);
-          const ko = isAverage ? DATA.bracket.knockout : STATE.currentSim.knockout;
-          renderBracketInto(inner, ko, !isAverage);
+          renderBracketInto(inner, knockout, withScores);
         } else {
           const groupsContainer = document.createElement('div');
           groupsContainer.className = 'wc-groups';
           groupsContainer.style.marginTop = '1rem';
           root.appendChild(groupsContainer);
-          const groups = isAverage ? DATA.bracket.groups : STATE.currentSim.groups;
-          renderGroupsInto(groupsContainer, groups, isAverage);
+          renderGroupsInto(groupsContainer, groups, decimal);
         }
       }
 
-      // ── Renderers: paths table (always model average) ───────────
+      // ── Renderers: paths table ──────────────────────────────────
+      function activeStats() {
+        if (STATE.source === 'latest') return DATA.sim;
+        return STATE.customAggregate || DATA.sim;
+      }
       function renderPaths() {
-        const sim = DATA.sim;
-        const byRating = [...sim.team_stats].sort((a, b) => b.rating - a.rating);
-        const top8Ratings = new Set(byRating.slice(0, 8).map(s => s.team));
+        const sim = activeStats();
+        const stats = sim.team_stats;
+        const byRating = [...stats].sort((a, b) => b.rating - a.rating);
+        const ratingRank = new Map();
+        byRating.forEach((s, i) => ratingRank.set(s.team, i + 1));
+
         const container = document.getElementById('wc-paths');
         container.innerHTML = `
           <div class="header">Team</div>
@@ -914,8 +974,24 @@
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
         `;
-        sim.team_stats.forEach((s, i) => {
-          const isDH = !top8Ratings.has(s.team) && s.p_semis > 8;
+        // Dark-horse criteria: outside top 8 by rating AND meaningfully exceeds
+        // their rank-implied ceiling. We use cumulative round probabilities;
+        // a team flagged here is genuinely punching above their seed.
+        function isDarkHorse(s) {
+          const rank = ratingRank.get(s.team);
+          if (rank <= 8) return false;
+          // outperformance thresholds
+          if (s.p_quarters >= 15) return true;     // mid-tier QF threat
+          if (s.p_semis    >= 5)  return true;     // SF darling
+          if (s.p_final    >= 3)  return true;     // shock finalist
+          if (s.p_champion >= 1.5) return true;    // longshot champ
+          // very low rated team that even sneaks past R16 is interesting
+          if (rank > 16 && s.p_round_of_16 >= 35) return true;
+          return false;
+        }
+
+        stats.forEach((s, i) => {
+          const dh = isDarkHorse(s);
           const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           const cell = document.createElement('div');
           cell.className = 'name wc-paths-row';
@@ -924,7 +1000,7 @@
           cell.innerHTML = `
             ${flagImg(s.team)}
             <span class="team-name">${s.team}</span>
-            ${isDH ? '<span class="wc-darkhorse-tag">DH</span>' : ''}
+            ${dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : ''}
           `;
           container.appendChild(cell);
           ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
@@ -943,7 +1019,7 @@
         document.querySelectorAll('#wc-paths .wc-paths-row').forEach(el => {
           const team = el.dataset.team || '';
           const rank = parseInt(el.dataset.rank || '0', 10);
-          const show = q.length === 0 ? rank < N_VISIBLE : team.includes(q);
+          const show = q.length === 0 ? rank < N_VISIBLE_TABLE : team.includes(q);
           el.classList.toggle('wc-hidden', !show);
         });
       }
@@ -956,31 +1032,56 @@
         document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
           b.classList.toggle('active', b.dataset.mode === STATE.mode);
         });
+        document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
+          b.classList.toggle('active', b.dataset.source === STATE.source);
+        });
+        // New button: visible whenever there's randomness involved
         const rollBtn = document.getElementById('wc-roll-btn');
-        rollBtn.hidden = STATE.mode === 'average';
-        const sbPanel = document.getElementById('wc-sandbox-panel');
-        sbPanel.hidden = STATE.mode !== 'sandbox';
-        const sbActive = document.getElementById('wc-sandbox-active');
-        sbActive.style.display = STATE.mode === 'sandbox' ? '' : 'none';
+        const rollable = STATE.mode === 'single' ||
+                         (STATE.source === 'custom' && STATE.mode === 'average');
+        rollBtn.hidden = !rollable;
+        // Sandbox controls only when source = custom
+        document.getElementById('wc-sandbox-panel').hidden = STATE.source !== 'custom';
+        document.getElementById('wc-sandbox-active').hidden =
+          STATE.source !== 'custom' || Object.keys(STATE.bumps).length === 0;
       }
 
       function renderMeta() {
         const meta = document.getElementById('wc-tournament-meta');
-        if (STATE.mode === 'average') {
-          meta.textContent = `Showing average across ${(DATA.sim.n_simulations || 10000).toLocaleString('en-US')} simulations.`;
-        } else if (STATE.mode === 'single') {
-          meta.textContent = 'Showing one random simulated tournament. Click Roll for another.';
+        const n = (DATA.sim.n_simulations || 10000).toLocaleString('en-US');
+        const boostCount = Object.keys(STATE.bumps).length;
+        if (STATE.source === 'latest') {
+          meta.textContent = STATE.mode === 'average'
+            ? `Showing average across ${n} simulations of the latest model.`
+            : 'Showing one random simulation. Click New for another.';
         } else {
-          const n = Object.keys(STATE.bumps).length;
-          meta.textContent = n
-            ? `Showing one simulation with ${n} active boost${n === 1 ? '' : 's'}. Click Roll for another sample.`
-            : 'Sandbox mode: add a boost below, or click Roll to sample with the current model.';
+          const boostNote = boostCount
+            ? `${boostCount} active boost${boostCount === 1 ? '' : 's'}`
+            : 'no boosts yet';
+          meta.textContent = STATE.mode === 'average'
+            ? `Custom model (${boostNote}). Averaging ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} sims when you Apply / Reset / click New.`
+            : `Custom model (${boostNote}). One sim per New.`;
         }
       }
 
       function rollSimulation() {
         STATE.currentSim = simulateOnce(getRatings());
+        if (STATE.source === 'custom' && STATE.mode === 'average') {
+          recomputeCustomAggregate();
+        }
         renderTournamentView();
+        renderPaths();
+      }
+
+      function recomputeCustomAggregate() {
+        const meta = document.getElementById('wc-tournament-meta');
+        meta.innerHTML = `<span class="wc-sandbox-loading">Running ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} simulations...</span>`;
+        // Yield to the browser so the loading text actually renders
+        setTimeout(() => {
+          STATE.customAggregate = aggregateCustom(getRatings(), CUSTOM_AVG_SIMS);
+          renderMeta();
+          renderPaths();
+        }, 30);
       }
 
       function applyBoost() {
@@ -994,6 +1095,7 @@
         teamInput.value = '';
         boostInput.value = '';
         renderActiveBumps();
+        renderControls();
         renderMeta();
         rollSimulation();
         teamInput.focus();
@@ -1002,6 +1104,7 @@
       function resetBoosts() {
         STATE.bumps = {};
         renderActiveBumps();
+        renderControls();
         renderMeta();
         rollSimulation();
       }
@@ -1026,6 +1129,7 @@
             const t = e.currentTarget.dataset.team;
             delete STATE.bumps[t];
             renderActiveBumps();
+            renderControls();
             renderMeta();
             rollSimulation();
           });
@@ -1043,13 +1147,26 @@
         document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
           b.addEventListener('click', () => {
             STATE.mode = b.dataset.mode;
-            // Lazy-roll if entering sim mode for the first time
-            if (STATE.mode !== 'average' && !STATE.currentSim) {
+            if (STATE.mode === 'single' && !STATE.currentSim) {
               STATE.currentSim = simulateOnce(getRatings());
             }
             renderControls();
             renderMeta();
             renderTournamentView();
+          });
+        });
+        document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.source = b.dataset.source;
+            // When switching source, drop cached sim so it rolls fresh
+            STATE.currentSim = null;
+            STATE.customAggregate = null;
+            renderControls();
+            renderMeta();
+            if (STATE.source === 'custom' && STATE.mode === 'average') {
+              recomputeCustomAggregate();
+            }
+            rollSimulation();
           });
         });
         document.getElementById('wc-roll-btn').addEventListener('click', rollSimulation);
