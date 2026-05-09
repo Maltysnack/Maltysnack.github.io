@@ -84,54 +84,76 @@ function printFlowTable(o, system, rainfall) {
     "=== FLOW SIMULATION: " + system.name + " (" + formatRainfall(rainfall) + ") ===\n"
   );
   o.println("(Flow values represent water volume per day in L/s)\n");
-  o.print(padRight("Location", 20));
-  for (let day = 1; day <= 10; day++) {
-    o.print("| Day " + padLeft(String(day), 2) + " ");
-  }
-  o.println("|");
-  o.print("--------------------|");
-  for (let i = 0; i < 10; i++) o.print("--------|");
-  o.println("");
   const finalOutlet = system.getFinalOutlet();
+  let valWidth = 5;
+  let locWidth = 8;
   for (const r of system.rivers.values()) {
     if (r.name === finalOutlet) continue;
-    o.print(padRight(r.name, 20));
+    if (r.name.length > locWidth) locWidth = r.name.length;
     for (let day = 0; day < 10; day++) {
-      o.print("|  " + padLeft(fmtFixed(r.dailyFlow[day], 1), 5) + " ");
+      const w = fmtFixed(r.dailyFlow[day], 1).length;
+      if (w > valWidth) valWidth = w;
+    }
+  }
+  for (const d of system.dams.values()) {
+    if (d.name.length > locWidth) locWidth = d.name.length;
+    for (let day = 0; day < 10; day++) {
+      const w = fmtFixed(d.dailyOutflow[day], 1).length;
+      if (w > valWidth) valWidth = w;
+    }
+  }
+  if (finalOutlet !== null) {
+    const outlet = system.rivers.get(finalOutlet);
+    if (outlet) {
+      const labelLen = (outlet.name + " [OUTLET]").length;
+      if (labelLen > locWidth) locWidth = labelLen;
+      let cumulative = 0;
+      for (let day = 0; day < 10; day++) {
+        cumulative += outlet.dailyFlow[day];
+        const w = formatCumulative(cumulative).length;
+        if (w > valWidth) valWidth = w;
+      }
+    }
+  }
+  const interior = valWidth + 3;
+  const dashes = "-".repeat(interior);
+  const locDashes = "-".repeat(locWidth);
+  o.print(padRight("Location", locWidth));
+  for (let day = 1; day <= 10; day++) {
+    const dayStr = "Day " + padLeft(String(day), 2);
+    o.print("|" + padCenter(dayStr, interior));
+  }
+  o.println("|");
+  o.print(locDashes + "|");
+  for (let i = 0; i < 10; i++) o.print(dashes + "|");
+  o.println("");
+  for (const r of system.rivers.values()) {
+    if (r.name === finalOutlet) continue;
+    o.print(padRight(r.name, locWidth));
+    for (let day = 0; day < 10; day++) {
+      o.print("|  " + padLeft(fmtFixed(r.dailyFlow[day], 1), valWidth) + " ");
     }
     o.println("|");
   }
   for (const d of system.dams.values()) {
-    o.print(padRight(d.name, 20));
+    o.print(padRight(d.name, locWidth));
     for (let day = 0; day < 10; day++) {
-      o.print("|  " + padLeft(fmtFixed(d.dailyOutflow[day], 1), 5) + " ");
+      o.print("|  " + padLeft(fmtFixed(d.dailyOutflow[day], 1), valWidth) + " ");
     }
     o.println("|");
   }
   if (finalOutlet !== null) {
     const outlet = system.rivers.get(finalOutlet);
     if (outlet) {
-      o.print("--------------------|");
-      for (let i = 0; i < 10; i++) o.print("--------|");
+      o.print(locDashes + "|");
+      for (let i = 0; i < 10; i++) o.print(dashes + "|");
       o.println("");
       o.println("Cumulative Outlet (converted to actual volume):");
-      o.print(padRight(outlet.name + " [OUTLET]", 20));
+      o.print(padRight(outlet.name + " [OUTLET]", locWidth));
       let cumulative = 0;
       for (let day = 0; day < 10; day++) {
         cumulative += outlet.dailyFlow[day];
-        const litersPerDay = cumulative * 86400;
-        const gigaliters = litersPerDay / 1e9;
-        if (gigaliters >= 1) {
-          o.print("| " + padLeft(fmtFixed(gigaliters, 2), 5) + "GL");
-        } else if (gigaliters >= 1e-3) {
-          const megaliters = litersPerDay / 1e6;
-          o.print("| " + padLeft(fmtFixed(megaliters, 2), 5) + "ML");
-        } else if (gigaliters >= 1e-6) {
-          const kiloliters = litersPerDay / 1e3;
-          o.print("| " + padLeft(fmtFixed(kiloliters, 2), 5) + "KL");
-        } else {
-          o.print("| " + padLeft(fmtFixed(litersPerDay, 1), 5) + "L ");
-        }
+        o.print("|  " + padLeft(formatCumulative(cumulative), valWidth) + " ");
       }
       o.println("|");
       const totalLitersPerDay = cumulative * 86400;
@@ -159,6 +181,21 @@ function printFlowTable(o, system, rainfall) {
     }
   }
   o.println("");
+}
+function formatCumulative(cumulativeFlowLps) {
+  const litersPerDay = cumulativeFlowLps * 86400;
+  const gigaliters = litersPerDay / 1e9;
+  if (gigaliters >= 1) return fmtFixed(gigaliters, 2) + "GL";
+  if (gigaliters >= 1e-3) return fmtFixed(litersPerDay / 1e6, 2) + "ML";
+  if (gigaliters >= 1e-6) return fmtFixed(litersPerDay / 1e3, 2) + "KL";
+  return fmtFixed(litersPerDay, 1) + "L";
+}
+function padCenter(s, n) {
+  if (s.length >= n) return s.slice(0, n);
+  const pad = n - s.length;
+  const left = Math.floor(pad / 2);
+  const right = pad - left;
+  return " ".repeat(left) + s + " ".repeat(right);
 }
 function formatRainfall(rainfall) {
   if (rainfall.length === 1) {
