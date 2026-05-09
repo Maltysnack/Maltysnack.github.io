@@ -315,6 +315,58 @@
       margin-top: 0.3rem;
       font-variant-numeric: tabular-nums;
     }
+
+    /* Sandbox controls */
+    .wc-sandbox-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.8rem;
+      align-items: center;
+    }
+    .wc-sandbox-controls input,
+    .wc-sandbox-controls button {
+      font: inherit;
+      font-size: 0.9rem;
+      padding: 0.35rem 0.6rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: transparent;
+      color: inherit;
+      font-family: inherit;
+    }
+    .wc-sandbox-controls input { min-width: 140px; }
+    .wc-sandbox-controls input[type=number] { width: 100px; }
+    .wc-sandbox-controls button { cursor: pointer; }
+    .wc-sandbox-controls button:hover { background: rgba(180,150,80,0.1); }
+    .wc-sandbox-controls input:focus,
+    .wc-sandbox-controls button:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-sandbox-active {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin-top: 0.8rem;
+    }
+    .wc-sandbox-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.2rem 0.55rem;
+      border: 1px solid rgba(180,150,80,0.55);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-sandbox-pill .wc-flag { width: 14px; height: 10px; }
+    .wc-sandbox-pill .x {
+      cursor: pointer;
+      color: var(--text-muted);
+      padding-left: 0.2rem;
+    }
+    .wc-sandbox-pill .x:hover { color: inherit; }
   </style>
 </head>
 <body>
@@ -385,6 +437,32 @@
       <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
       <div class="wc-paths" id="wc-paths"></div>
     </section>
+
+    <div class="divider"></div>
+
+    <section class="intro">
+      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+        Sandbox
+      </h2>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+        Boost or drop any team's effective rating and watch the bracket
+        rebuild. This is the deterministic version (higher rating wins
+        every match), separate from the real predictions above. For
+        messing about, not for betting.
+      </p>
+      <div class="wc-sandbox-controls">
+        <input list="wc-team-list" id="wc-sandbox-team" placeholder="Pick a team" autocomplete="off" />
+        <datalist id="wc-team-list"></datalist>
+        <input type="number" id="wc-sandbox-boost" placeholder="Boost" step="25" />
+        <button id="wc-sandbox-add" type="button">Apply</button>
+        <button id="wc-sandbox-reset" type="button">Reset</button>
+      </div>
+      <div class="wc-sandbox-active" id="wc-sandbox-active"></div>
+    </section>
+
+    <div class="wc-bracket-wrap">
+      <div class="wc-bracket" id="wc-sandbox-bracket"></div>
+    </div>
 
     <section class="intro" style="margin-top:2.5rem;">
       <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
@@ -615,18 +693,252 @@
       }
 
       function wireSearch() {
-        const oddsInput = document.getElementById('wc-odds-search');
         const pathsInput = document.getElementById('wc-paths-search');
-        if (oddsInput) {
-          oddsInput.addEventListener('input', e =>
-            applyFilter(e.target.value, '#wc-odds .wc-odds-row')
-          );
-        }
         if (pathsInput) {
           pathsInput.addEventListener('input', e =>
             applyFilter(e.target.value, '#wc-paths .wc-paths-row')
           );
         }
+      }
+
+      // ── Sandbox ──────────────────────────────────────────────────
+      // Mirror of the deterministic bracket logic in src/worldcup/bracket.py.
+      // Higher rating wins each match. Lets us play "what if England get a
+      // +200 boost" without re-running the Python pipeline.
+      const SANDBOX = { groups: {}, baseRatings: {}, bumps: {} };
+
+      const R32_PAIRINGS_JS = [
+        [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
+        [['W','F'],['R','C']],   [['W','C'],['R','F']],
+        [['W','I'],['3','CDFGH']], [['R','E'],['R','I']],
+        [['W','A'],['3','CEFHI']], [['W','L'],['3','EHIJK']],
+        [['W','D'],['3','BEFIJ']], [['W','G'],['3','AEHIJ']],
+        [['R','K'],['R','L']],   [['W','H'],['R','J']],
+        [['W','B'],['3','EFGIJ']], [['W','J'],['R','H']],
+        [['W','K'],['3','DEIJL']], [['R','D'],['R','G']],
+      ];
+      const R16_FEEDS_JS = [[89,74,77],[90,73,75],[91,76,78],[92,79,80],
+                            [93,83,84],[94,81,82],[95,86,88],[96,85,87]];
+      const QF_FEEDS_JS = [[97,89,90],[98,93,94],[99,91,92],[100,95,96]];
+      const SF_FEEDS_JS = [[101,97,98],[102,99,100]];
+      const FINAL_FEED_JS = [104,101,102];
+      const R32_VISUAL_ORDER_JS = [74,77,73,75,83,84,81,82,76,78,79,80,86,88,85,87];
+      const R16_VISUAL_ORDER_JS = [89,90,93,94,91,92,95,96];
+      const QF_VISUAL_ORDER_JS  = [97,98,99,100];
+      const SF_VISUAL_ORDER_JS  = [101,102];
+
+      function effRating(team) {
+        return (SANDBOX.baseRatings[team] || 1500) + (SANDBOX.bumps[team] || 0);
+      }
+
+      function rebuildBracket() {
+        // Group standings: deterministic (higher rating wins each pair-match)
+        const standings = {};
+        Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
+          const points = Object.fromEntries(teams.map(t => [t, 0]));
+          for (let i = 0; i < teams.length; i++) {
+            for (let j = i + 1; j < teams.length; j++) {
+              const winner = effRating(teams[i]) >= effRating(teams[j])
+                ? teams[i] : teams[j];
+              points[winner] += 3;
+            }
+          }
+          standings[letter] = [...teams].sort((a, b) =>
+            (points[b] - points[a]) || (effRating(b) - effRating(a))
+          );
+        });
+
+        const winners = Object.fromEntries(
+          Object.entries(standings).map(([l, s]) => [l, s[0]])
+        );
+        const runners = Object.fromEntries(
+          Object.entries(standings).map(([l, s]) => [l, s[1]])
+        );
+        const thirdsByGroup = Object.fromEntries(
+          Object.entries(standings).map(([l, s]) => [l, s[2]])
+        );
+
+        const advancingThirds = Object.keys(thirdsByGroup)
+          .sort((a, b) => effRating(thirdsByGroup[b]) - effRating(thirdsByGroup[a]))
+          .slice(0, 8);
+        const advancingSet = new Set(advancingThirds);
+
+        // Assign 3rd-placers to R32 slots that need them
+        const used = new Set();
+        const thirdAssignments = {};
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          [a, b].forEach(spec => {
+            if (spec[0] !== '3') return;
+            const allowed = new Set(spec[1].split(''));
+            let cands = [...advancingSet].filter(l => allowed.has(l) && !used.has(l));
+            if (cands.length === 0) {
+              cands = [...advancingSet].filter(l => !used.has(l));
+            }
+            const best = cands.reduce((p, q) =>
+              effRating(thirdsByGroup[p]) >= effRating(thirdsByGroup[q]) ? p : q
+            );
+            thirdAssignments[matchNo] = thirdsByGroup[best];
+            used.add(best);
+          });
+        });
+
+        function resolve(spec, matchNo) {
+          if (spec[0] === 'W') return winners[spec[1]];
+          if (spec[0] === 'R') return runners[spec[1]];
+          return thirdAssignments[matchNo];
+        }
+        function pick(a, b) {
+          return effRating(a) >= effRating(b) ? a : b;
+        }
+
+        const matches = {};
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          const ta = resolve(a, matchNo);
+          const tb = resolve(b, matchNo);
+          matches[matchNo] = { team_a: ta, team_b: tb, winner: pick(ta, tb) };
+        });
+        [R16_FEEDS_JS, QF_FEEDS_JS, SF_FEEDS_JS].forEach(feeds => {
+          feeds.forEach(([m, fa, fb]) => {
+            const ta = matches[fa].winner;
+            const tb = matches[fb].winner;
+            matches[m] = { team_a: ta, team_b: tb, winner: pick(ta, tb) };
+          });
+        });
+        const [fno, ffa, ffb] = FINAL_FEED_JS;
+        matches[fno] = {
+          team_a: matches[ffa].winner,
+          team_b: matches[ffb].winner,
+          winner: pick(matches[ffa].winner, matches[ffb].winner),
+        };
+
+        return {
+          round_of_32: R32_VISUAL_ORDER_JS.map(i => matches[i]),
+          round_of_16: R16_VISUAL_ORDER_JS.map(i => matches[i]),
+          quarter_finals: QF_VISUAL_ORDER_JS.map(i => matches[i]),
+          semi_finals: SF_VISUAL_ORDER_JS.map(i => matches[i]),
+          final: [matches[fno]],
+          champion: matches[fno].winner,
+        };
+      }
+
+      function renderSandboxBracket() {
+        const ko = rebuildBracket();
+        const rounds = [
+          ['Round of 32', ko.round_of_32],
+          ['Round of 16', ko.round_of_16],
+          ['Quarter-finals', ko.quarter_finals],
+          ['Semi-finals', ko.semi_finals],
+          ['Final', ko.final],
+        ];
+        const container = document.getElementById('wc-sandbox-bracket');
+        container.innerHTML = '';
+        rounds.forEach(([label, matches], i) => {
+          const col = document.createElement('div');
+          col.className = 'wc-round' + (i === 4 ? ' wc-final' : '');
+          const lbl = document.createElement('div');
+          lbl.className = 'wc-round-label';
+          lbl.textContent = label;
+          col.appendChild(lbl);
+          const wrap = document.createElement('div');
+          wrap.className = 'wc-round-matches';
+          wrap.style.setProperty('--n', matches.length);
+          matches.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'wc-match';
+            card.innerHTML = `
+              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
+                ${flagImg(m.team_a)}
+                <span class="wc-team-name">${m.team_a}</span>
+              </div>
+              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
+                ${flagImg(m.team_b)}
+                <span class="wc-team-name">${m.team_b}</span>
+              </div>
+            `;
+            wrap.appendChild(card);
+          });
+          col.appendChild(wrap);
+          container.appendChild(col);
+        });
+      }
+
+      function renderActiveBumps() {
+        const wrap = document.getElementById('wc-sandbox-active');
+        wrap.innerHTML = '';
+        Object.entries(SANDBOX.bumps).forEach(([team, bump]) => {
+          if (!bump) return;
+          const pill = document.createElement('span');
+          pill.className = 'wc-sandbox-pill';
+          const sign = bump > 0 ? '+' : '';
+          pill.innerHTML = `
+            ${flagImg(team)}
+            <span>${team} ${sign}${bump}</span>
+            <span class="x" data-team="${team}" title="Remove">&times;</span>
+          `;
+          wrap.appendChild(pill);
+        });
+        wrap.querySelectorAll('.x').forEach(el => {
+          el.addEventListener('click', e => {
+            const t = e.currentTarget.dataset.team;
+            delete SANDBOX.bumps[t];
+            renderActiveBumps();
+            renderSandboxBracket();
+          });
+        });
+      }
+
+      function initSandbox(bracket, sim) {
+        // Pull groups from bracket data and base ratings from sim data
+        bracket.groups.forEach(g => {
+          SANDBOX.groups[g.name] = g.standings.map(s => s.team);
+        });
+        sim.team_stats.forEach(s => {
+          SANDBOX.baseRatings[s.team] = s.rating;
+        });
+
+        // Populate datalist with team names + base rating in the suggestion
+        const datalist = document.getElementById('wc-team-list');
+        Object.keys(SANDBOX.baseRatings).sort().forEach(team => {
+          if (!Object.values(SANDBOX.groups).flat().includes(team)) return;
+          const opt = document.createElement('option');
+          opt.value = team;
+          opt.label = `${team} (${Math.round(SANDBOX.baseRatings[team])})`;
+          datalist.appendChild(opt);
+        });
+
+        const teamInput = document.getElementById('wc-sandbox-team');
+        const boostInput = document.getElementById('wc-sandbox-boost');
+        const addBtn = document.getElementById('wc-sandbox-add');
+        const resetBtn = document.getElementById('wc-sandbox-reset');
+
+        function apply() {
+          const team = teamInput.value.trim();
+          const boost = parseFloat(boostInput.value);
+          if (!team || !SANDBOX.baseRatings.hasOwnProperty(team) || isNaN(boost) || boost === 0) return;
+          SANDBOX.bumps[team] = (SANDBOX.bumps[team] || 0) + boost;
+          if (SANDBOX.bumps[team] === 0) delete SANDBOX.bumps[team];
+          teamInput.value = '';
+          boostInput.value = '';
+          renderActiveBumps();
+          renderSandboxBracket();
+          teamInput.focus();
+        }
+
+        addBtn.addEventListener('click', apply);
+        boostInput.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+        teamInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter' && boostInput.value) apply();
+          else if (e.key === 'Enter') boostInput.focus();
+        });
+        resetBtn.addEventListener('click', () => {
+          SANDBOX.bumps = {};
+          renderActiveBumps();
+          renderSandboxBracket();
+        });
+
+        renderSandboxBracket();
       }
     })();
   </script>
