@@ -80,6 +80,21 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .wc-score {
+      margin-left: auto;
+      padding-left: 0.4rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .wc-team.winner .wc-score { color: var(--text-body, inherit); }
+    .wc-pen-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(180,150,80,0.8);
+      margin-left: 0.3rem;
+    }
     .wc-team.winner {
       color: var(--text-body, inherit);
       font-weight: 600;
@@ -445,16 +460,17 @@
         Sandbox
       </h2>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Boost or drop any team's effective rating and watch the bracket
-        rebuild. This is the deterministic version (higher rating wins
-        every match), separate from the real predictions above. For
-        messing about, not for betting.
+        Boost or drop any team's effective rating, then roll the dice.
+        Each roll is one random tournament from our Monte Carlo, same
+        Poisson goals model used in the predictions above, with scores
+        and penalty shootouts. Roll again to see a different outcome.
       </p>
       <div class="wc-sandbox-controls">
         <input list="wc-team-list" id="wc-sandbox-team" placeholder="Pick a team" autocomplete="off" />
         <datalist id="wc-team-list"></datalist>
         <input type="number" id="wc-sandbox-boost" placeholder="Boost" step="25" />
         <button id="wc-sandbox-add" type="button">Apply</button>
+        <button id="wc-sandbox-roll" type="button">Roll</button>
         <button id="wc-sandbox-reset" type="button">Reset</button>
       </div>
       <div class="wc-sandbox-active" id="wc-sandbox-active"></div>
@@ -702,10 +718,20 @@
       }
 
       // ── Sandbox ──────────────────────────────────────────────────
-      // Mirror of the deterministic bracket logic in src/worldcup/bracket.py.
-      // Higher rating wins each match. Lets us play "what if England get a
-      // +200 boost" without re-running the Python pipeline.
-      const SANDBOX = { groups: {}, baseRatings: {}, bumps: {} };
+      // Mirror of the Monte Carlo simulator in src/worldcup/. Every match
+      // samples a Poisson scoreline using the same calibration constants
+      // (worldcup/calibration.py). One roll = one randomly drawn tournament.
+      // Lets us play "what if England get a +200 boost AND the dice are
+      // generous?" without re-running the Python pipeline.
+      const SANDBOX = { groups: {}, fixtures: [], baseRatings: {}, bumps: {} };
+      const CAL = {
+        LAMBDA_HOME: 1.41,
+        LAMBDA_AWAY: 1.07,
+        SLOPE_HOME: 0.00204,
+        SLOPE_AWAY: -0.00255,
+        HOME_ADV: 50,
+        PEN_DIVISOR: 600,
+      };
 
       const R32_PAIRINGS_JS = [
         [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
@@ -731,39 +757,90 @@
         return (SANDBOX.baseRatings[team] || 1500) + (SANDBOX.bumps[team] || 0);
       }
 
+      // Knuth's Poisson sampler. Fine for our small lambda values (0.3-3.5).
+      function poisson(lambda) {
+        const L = Math.exp(-lambda);
+        let k = 0, p = 1;
+        do { k++; p *= Math.random(); } while (p > L);
+        return k - 1;
+      }
+
+      function expectedGoals(effGap) {
+        return [
+          CAL.LAMBDA_HOME * Math.exp(CAL.SLOPE_HOME * effGap),
+          CAL.LAMBDA_AWAY * Math.exp(CAL.SLOPE_AWAY * effGap),
+        ];
+      }
+
+      // Sample one match. Returns {sa, sb, winnerIdx (0|1), pens}
+      function simMatch(rA, rB, neutral, ko) {
+        const effA = rA + (neutral ? 0 : CAL.HOME_ADV);
+        const effB = rB;
+        const [lh, la] = expectedGoals(effA - effB);
+        const sa = poisson(lh);
+        const sb = poisson(la);
+        if (sa > sb) return { sa, sb, win: 0, pens: false };
+        if (sb > sa) return { sa, sb, win: 1, pens: false };
+        if (!ko) return { sa, sb, win: -1, pens: false };
+        // Penalty shootout in knockouts
+        const pA = 1 / (1 + Math.pow(10, (effB - effA) / CAL.PEN_DIVISOR));
+        return { sa, sb, win: Math.random() < pA ? 0 : 1, pens: true };
+      }
+
       function rebuildBracket() {
-        // Group standings: deterministic (higher rating wins each pair-match)
+        // Group stage: sample each fixture, accumulate points + GD + GF
         const standings = {};
+        const groupMatches = {};
         Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
-          const points = Object.fromEntries(teams.map(t => [t, 0]));
-          for (let i = 0; i < teams.length; i++) {
-            for (let j = i + 1; j < teams.length; j++) {
-              const winner = effRating(teams[i]) >= effRating(teams[j])
-                ? teams[i] : teams[j];
-              points[winner] += 3;
-            }
-          }
-          standings[letter] = [...teams].sort((a, b) =>
-            (points[b] - points[a]) || (effRating(b) - effRating(a))
+          const members = new Set(teams);
+          const pts = Object.fromEntries(teams.map(t => [t, 0]));
+          const gd = Object.fromEntries(teams.map(t => [t, 0]));
+          const gf = Object.fromEntries(teams.map(t => [t, 0]));
+          const matches = [];
+          SANDBOX.fixtures.forEach(f => {
+            if (!members.has(f.home_team) || !members.has(f.away_team)) return;
+            const r = simMatch(
+              effRating(f.home_team), effRating(f.away_team),
+              f.neutral, false
+            );
+            if (r.win === 0) pts[f.home_team] += 3;
+            else if (r.win === 1) pts[f.away_team] += 3;
+            else { pts[f.home_team] += 1; pts[f.away_team] += 1; }
+            gd[f.home_team] += r.sa - r.sb;
+            gd[f.away_team] += r.sb - r.sa;
+            gf[f.home_team] += r.sa;
+            gf[f.away_team] += r.sb;
+            matches.push({ ...f, sa: r.sa, sb: r.sb });
+          });
+          const sorted = [...teams].sort((a, b) =>
+            (pts[b] - pts[a]) ||
+            (gd[b] - gd[a]) ||
+            (gf[b] - gf[a]) ||
+            (effRating(b) - effRating(a))
           );
+          standings[letter] = sorted.map((t, i) => ({
+            team: t, points: pts[t], gd: gd[t], gf: gf[t], position: i + 1,
+          }));
+          groupMatches[letter] = matches;
         });
 
-        const winners = Object.fromEntries(
-          Object.entries(standings).map(([l, s]) => [l, s[0]])
-        );
-        const runners = Object.fromEntries(
-          Object.entries(standings).map(([l, s]) => [l, s[1]])
-        );
-        const thirdsByGroup = Object.fromEntries(
-          Object.entries(standings).map(([l, s]) => [l, s[2]])
-        );
+        const winners = {};
+        const runners = {};
+        const thirdsByGroup = {};
+        Object.entries(standings).forEach(([l, s]) => {
+          winners[l] = s[0].team;
+          runners[l] = s[1].team;
+          thirdsByGroup[l] = s[2];
+        });
 
-        const advancingThirds = Object.keys(thirdsByGroup)
-          .sort((a, b) => effRating(thirdsByGroup[b]) - effRating(thirdsByGroup[a]))
-          .slice(0, 8);
-        const advancingSet = new Set(advancingThirds);
+        // Best 8 thirds by FIFA criteria (pts, GD, GF)
+        const thirdsRanked = Object.entries(thirdsByGroup)
+          .sort(([, a], [, b]) =>
+            (b.points - a.points) || (b.gd - a.gd) || (b.gf - a.gf)
+          );
+        const advancingSet = new Set(thirdsRanked.slice(0, 8).map(([l]) => l));
 
-        // Assign 3rd-placers to R32 slots that need them
+        // Assign best 3rds to R32 slots
         const used = new Set();
         const thirdAssignments = {};
         R32_PAIRINGS_JS.forEach(([a, b], i) => {
@@ -775,10 +852,13 @@
             if (cands.length === 0) {
               cands = [...advancingSet].filter(l => !used.has(l));
             }
-            const best = cands.reduce((p, q) =>
-              effRating(thirdsByGroup[p]) >= effRating(thirdsByGroup[q]) ? p : q
-            );
-            thirdAssignments[matchNo] = thirdsByGroup[best];
+            const best = cands.reduce((p, q) => {
+              const sp = thirdsByGroup[p], sq = thirdsByGroup[q];
+              if (sp.points !== sq.points) return sp.points > sq.points ? p : q;
+              if (sp.gd !== sq.gd) return sp.gd > sq.gd ? p : q;
+              return sp.gf >= sq.gf ? p : q;
+            });
+            thirdAssignments[matchNo] = thirdsByGroup[best].team;
             used.add(best);
           });
         });
@@ -788,38 +868,52 @@
           if (spec[0] === 'R') return runners[spec[1]];
           return thirdAssignments[matchNo];
         }
-        function pick(a, b) {
-          return effRating(a) >= effRating(b) ? a : b;
-        }
 
-        const matches = {};
+        // Knockout matches: sample at neutral venue, draws -> penalties
+        const koMatches = {};
         R32_PAIRINGS_JS.forEach(([a, b], i) => {
           const matchNo = 73 + i;
           const ta = resolve(a, matchNo);
           const tb = resolve(b, matchNo);
-          matches[matchNo] = { team_a: ta, team_b: tb, winner: pick(ta, tb) };
+          const r = simMatch(effRating(ta), effRating(tb), true, true);
+          koMatches[matchNo] = {
+            team_a: ta, team_b: tb,
+            score_a: r.sa, score_b: r.sb,
+            winner: r.win === 0 ? ta : tb,
+            pens: r.pens,
+          };
         });
         [R16_FEEDS_JS, QF_FEEDS_JS, SF_FEEDS_JS].forEach(feeds => {
           feeds.forEach(([m, fa, fb]) => {
-            const ta = matches[fa].winner;
-            const tb = matches[fb].winner;
-            matches[m] = { team_a: ta, team_b: tb, winner: pick(ta, tb) };
+            const ta = koMatches[fa].winner;
+            const tb = koMatches[fb].winner;
+            const r = simMatch(effRating(ta), effRating(tb), true, true);
+            koMatches[m] = {
+              team_a: ta, team_b: tb,
+              score_a: r.sa, score_b: r.sb,
+              winner: r.win === 0 ? ta : tb,
+              pens: r.pens,
+            };
           });
         });
         const [fno, ffa, ffb] = FINAL_FEED_JS;
-        matches[fno] = {
-          team_a: matches[ffa].winner,
-          team_b: matches[ffb].winner,
-          winner: pick(matches[ffa].winner, matches[ffb].winner),
+        const fa = koMatches[ffa].winner;
+        const fb = koMatches[ffb].winner;
+        const fr = simMatch(effRating(fa), effRating(fb), true, true);
+        koMatches[fno] = {
+          team_a: fa, team_b: fb,
+          score_a: fr.sa, score_b: fr.sb,
+          winner: fr.win === 0 ? fa : fb,
+          pens: fr.pens,
         };
 
         return {
-          round_of_32: R32_VISUAL_ORDER_JS.map(i => matches[i]),
-          round_of_16: R16_VISUAL_ORDER_JS.map(i => matches[i]),
-          quarter_finals: QF_VISUAL_ORDER_JS.map(i => matches[i]),
-          semi_finals: SF_VISUAL_ORDER_JS.map(i => matches[i]),
-          final: [matches[fno]],
-          champion: matches[fno].winner,
+          round_of_32: R32_VISUAL_ORDER_JS.map(i => koMatches[i]),
+          round_of_16: R16_VISUAL_ORDER_JS.map(i => koMatches[i]),
+          quarter_finals: QF_VISUAL_ORDER_JS.map(i => koMatches[i]),
+          semi_finals: SF_VISUAL_ORDER_JS.map(i => koMatches[i]),
+          final: [koMatches[fno]],
+          champion: koMatches[fno].winner,
         };
       }
 
@@ -847,14 +941,18 @@
           matches.forEach(m => {
             const card = document.createElement('div');
             card.className = 'wc-match';
+            const penA = m.pens && m.winner === m.team_a ? ' <span class="wc-pen-tag">pens</span>' : '';
+            const penB = m.pens && m.winner === m.team_b ? ' <span class="wc-pen-tag">pens</span>' : '';
             card.innerHTML = `
               <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
                 ${flagImg(m.team_a)}
                 <span class="wc-team-name">${m.team_a}</span>
+                <span class="wc-score">${m.score_a}${penA}</span>
               </div>
               <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
                 ${flagImg(m.team_b)}
                 <span class="wc-team-name">${m.team_b}</span>
+                <span class="wc-score">${m.score_b}${penB}</span>
               </div>
             `;
             wrap.appendChild(card);
@@ -897,6 +995,12 @@
         sim.team_stats.forEach(s => {
           SANDBOX.baseRatings[s.team] = s.rating;
         });
+        // Group fixtures (with home/away/neutral metadata) for MC sim
+        SANDBOX.fixtures = (sim.match_predictions || []).map(m => ({
+          home_team: m.home_team,
+          away_team: m.away_team,
+          neutral: m.neutral,
+        }));
 
         // Populate datalist with team names + base rating in the suggestion
         const datalist = document.getElementById('wc-team-list');
@@ -911,6 +1015,7 @@
         const teamInput = document.getElementById('wc-sandbox-team');
         const boostInput = document.getElementById('wc-sandbox-boost');
         const addBtn = document.getElementById('wc-sandbox-add');
+        const rollBtn = document.getElementById('wc-sandbox-roll');
         const resetBtn = document.getElementById('wc-sandbox-reset');
 
         function apply() {
@@ -927,6 +1032,7 @@
         }
 
         addBtn.addEventListener('click', apply);
+        rollBtn.addEventListener('click', renderSandboxBracket);
         boostInput.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
         teamInput.addEventListener('keydown', e => {
           if (e.key === 'Enter' && boostInput.value) apply();
