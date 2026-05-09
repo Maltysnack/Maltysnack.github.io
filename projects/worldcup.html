@@ -349,21 +349,14 @@
     .wc-next-pct > .pd { text-align: center; }
     .wc-next-pct > .pa { text-align: right; }
 
-    /* Tournament view + floating customise panel */
-    .wc-tournament-anchor {
-      position: relative;
-    }
+    /* Customise panel: sits right under the Custom toggle, right-aligned */
     .wc-customise {
-      position: absolute;
-      /* Sit below the round-of-32 / SF / Final labels so they stay visible */
-      top: 2.1rem;
-      right: 0.4rem;
       width: 210px;
+      margin-left: auto;
+      margin-top: 0.5rem;
       display: flex;
       flex-direction: column;
       gap: 0.35rem;
-      z-index: 5;
-      pointer-events: auto;
     }
     .wc-customise[hidden] { display: none; }
     .wc-customise input.wc-team-add {
@@ -560,21 +553,17 @@
         </div>
       </div>
 
-      <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
-    </section>
-
-    <!-- Tournament view: bracket or group cards. The customise panel
-         floats over its top-right corner so it doesn't push anything
-         around when the user toggles Custom on/off. -->
-    <div class="wc-tournament-anchor">
-      <div id="wc-tournament-view"></div>
       <div class="wc-customise" id="wc-customise" hidden>
         <input list="wc-team-list" id="wc-add-team" type="search"
                class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
         <datalist id="wc-team-list"></datalist>
         <div id="wc-adjustments" class="wc-adjustments"></div>
       </div>
-    </div>
+      <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
+    </section>
+
+    <!-- Tournament view: bracket or group cards. -->
+    <div id="wc-tournament-view"></div>
 
     <div class="divider"></div>
 
