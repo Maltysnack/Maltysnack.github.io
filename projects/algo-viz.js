@@ -1,9 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=3';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=3';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=3';
+} from './algo-core.mjs?v=4';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=4';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=4';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=4';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -496,3 +497,279 @@ gEls.beamVal.textContent = gEls.beam.value;
 buildGrid();
 gridUpdateVisibility();
 gridUpdateDescriptions();
+
+// ============================================================================
+// Tour planning (TSP)
+// ============================================================================
+
+const CANVAS_W = 1000, CANVAS_H = 600;
+const SVG_NS = 'http://www.w3.org/2000/svg';
+// Each tick runs as many steps as fit in this budget then yields to paint.
+// Robust to background-tab setTimeout throttling and to fast modern hardware.
+const TOUR_TICK_BUDGET_MS = 14;
+const TOUR_TICK_DELAY_MS = 0;
+const SPARK_W = 1000, SPARK_H = 90, SPARK_PAD = 14;
+
+const rEls = {
+  algo: $('r-algo'), n: $('r-n'), nVal: $('r-nVal'),
+  pop: $('r-pop'), popVal: $('r-popVal'),
+  mut: $('r-mut'), mutVal: $('r-mutVal'),
+  ants: $('r-ants'), antsVal: $('r-antsVal'),
+  evap: $('r-evap'), evapVal: $('r-evapVal'),
+  run: $('r-run'), stop: $('r-stop'), rand: $('r-rand'), clear: $('r-clear'),
+  canvas: $('r-canvas'), spark: $('r-spark'),
+  algoTag: $('r-algoTag'), algoDesc: $('r-algoDesc'),
+  iter: $('r-iter'), best: $('r-best'),
+  improve: $('r-improve'), rate: $('r-rate'),
+  status: $('r-status'),
+};
+
+let points = [];
+let tourAlgo = null;
+let tourTimer = null;
+let tourStartTime = 0;
+let tourInitialBest = 0;
+
+function rerollPoints(count) {
+  const margin = 30;
+  return Array.from({ length: count }, () => ({
+    x: margin + Math.random() * (CANVAS_W - 2 * margin),
+    y: margin + Math.random() * (CANVAS_H - 2 * margin),
+  }));
+}
+
+function drawPoints() {
+  // Wipe everything except already-rendered edges (we'll redraw them).
+  rEls.canvas.innerHTML = '';
+  for (let i = 0; i < points.length; i++) {
+    const c = document.createElementNS(SVG_NS, 'circle');
+    c.setAttribute('cx', points[i].x);
+    c.setAttribute('cy', points[i].y);
+    c.setAttribute('r', 5);
+    c.classList.add('al-point');
+    c.dataset.idx = i;
+    rEls.canvas.appendChild(c);
+  }
+}
+
+function drawTour(tour) {
+  // Remove previous edges, redraw fresh.
+  for (const el of [...rEls.canvas.querySelectorAll('.al-edge')]) el.remove();
+  if (!tour || tour.length < 2) { drawPoints(); return; }
+  let d = '';
+  for (let i = 0; i < tour.length; i++) {
+    const p = points[tour[i]];
+    d += (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y;
+  }
+  d += 'Z';
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', d);
+  path.classList.add('al-edge');
+  // Insert at the front so points stay on top.
+  rEls.canvas.insertBefore(path, rEls.canvas.firstChild);
+}
+
+function rebuildCanvas() {
+  drawPoints();
+  if (tourAlgo) drawTour(tourAlgo.best);
+}
+
+function drawSpark(history) {
+  rEls.spark.innerHTML = '';
+  if (!history || history.length < 2) return;
+  const min = Math.min(...history);
+  const max = Math.max(...history);
+  const range = max - min || 1;
+  const step = (SPARK_W - SPARK_PAD * 2) / (history.length - 1);
+  let d = '';
+  for (let i = 0; i < history.length; i++) {
+    const x = SPARK_PAD + i * step;
+    const y = SPARK_H - SPARK_PAD - ((history[i] - min) / range) * (SPARK_H - SPARK_PAD * 2);
+    d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
+  }
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', d);
+  path.classList.add('al-spark-curve');
+  rEls.spark.appendChild(path);
+
+  const label = document.createElementNS(SVG_NS, 'text');
+  label.setAttribute('x', SPARK_PAD);
+  label.setAttribute('y', SPARK_PAD);
+  label.classList.add('al-spark-label');
+  label.textContent = `min ${min.toFixed(0)}  /  max ${max.toFixed(0)}`;
+  rEls.spark.appendChild(label);
+}
+
+function tourClearAlgo() {
+  if (tourTimer) { clearTimeout(tourTimer); tourTimer = null; }
+  tourAlgo = null;
+}
+
+function tourSetStats() {
+  if (!tourAlgo) {
+    rEls.iter.textContent = '0';
+    rEls.best.textContent = '0';
+    rEls.improve.textContent = '0%';
+    rEls.rate.textContent = '0';
+    return;
+  }
+  rEls.iter.textContent = tourAlgo.iteration.toLocaleString();
+  rEls.best.textContent = tourAlgo.bestLength.toFixed(0);
+  const improvement = tourInitialBest
+    ? ((tourInitialBest - tourAlgo.bestLength) / tourInitialBest * 100)
+    : 0;
+  rEls.improve.textContent = `${improvement.toFixed(1)}%`;
+  const elapsed = (performance.now() - tourStartTime) / 1000;
+  rEls.rate.textContent = elapsed > 0 ? (tourAlgo.iteration / elapsed).toFixed(0) : '0';
+}
+
+function tourSetStatus(msg, isError = false) {
+  rEls.status.textContent = msg;
+  rEls.status.classList.toggle('error', isError);
+}
+
+function tourUpdateVisibility() {
+  const algo = rEls.algo.value;
+  for (const label of document.querySelectorAll('[data-section="tour"] label[data-when]')) {
+    const allowed = label.dataset.when.split(',');
+    label.style.display = allowed.includes(algo) ? '' : 'none';
+  }
+}
+
+function tourUpdateDescriptions() {
+  const algo = rEls.algo.value;
+  rEls.algoTag.textContent = tspAlgorithmLabels[algo] ?? '';
+  rEls.algoDesc.textContent = tspAlgorithmDescriptions[algo] ?? '';
+}
+
+function tourBuildAlgo() {
+  const algo = rEls.algo.value;
+  if (algo === 'ga') {
+    return createGA(points, {
+      populationSize: +rEls.pop.value,
+      mutationRate: +rEls.mut.value / 100,
+    });
+  }
+  return createACO(points, {
+    numAnts: +rEls.ants.value,
+    evaporation: +rEls.evap.value / 100,
+  });
+}
+
+function tourTick() {
+  if (!tourAlgo) return;
+  const t0 = performance.now();
+  do { tourAlgo.step(); } while (performance.now() - t0 < TOUR_TICK_BUDGET_MS);
+  drawTour(tourAlgo.best);
+  drawSpark(tourAlgo.history);
+  tourSetStats();
+  tourTimer = setTimeout(tourTick, TOUR_TICK_DELAY_MS);
+}
+
+function tourRun() {
+  if (points.length < 4) {
+    tourSetStatus('Need at least 4 points.', true);
+    return;
+  }
+  tourClearAlgo();
+  tourAlgo = tourBuildAlgo();
+  tourInitialBest = tourAlgo.bestLength;
+  tourStartTime = performance.now();
+  tourSetStatus('running...');
+  rEls.run.disabled = true;
+  rEls.stop.disabled = false;
+  drawTour(tourAlgo.best);
+  drawSpark(tourAlgo.history);
+  tourSetStats();
+  tourTick();
+}
+
+function tourStop() {
+  if (tourTimer) { clearTimeout(tourTimer); tourTimer = null; }
+  rEls.run.disabled = false;
+  rEls.stop.disabled = true;
+  if (tourAlgo) tourSetStatus(`stopped at iteration ${tourAlgo.iteration}, best length ${tourAlgo.bestLength.toFixed(0)}.`);
+  else tourSetStatus('');
+}
+
+function tourRandomise() {
+  tourStop();
+  tourClearAlgo();
+  points = rerollPoints(+rEls.n.value);
+  rebuildCanvas();
+  drawSpark([]);
+  tourSetStats();
+  tourSetStatus('');
+}
+
+function tourClear() {
+  tourStop();
+  tourClearAlgo();
+  points = [];
+  rebuildCanvas();
+  drawSpark([]);
+  tourSetStats();
+  tourSetStatus('Click in the canvas to place points.');
+  rEls.nVal.textContent = '0';
+}
+
+function svgPoint(evt) {
+  const rect = rEls.canvas.getBoundingClientRect();
+  const x = ((evt.clientX - rect.left) / rect.width) * CANVAS_W;
+  const y = ((evt.clientY - rect.top) / rect.height) * CANVAS_H;
+  return { x, y };
+}
+
+rEls.canvas.addEventListener('click', (e) => {
+  // Did we click on an existing point? Remove it.
+  const target = e.target;
+  if (target.classList.contains('al-point')) {
+    const idx = +target.dataset.idx;
+    points.splice(idx, 1);
+    if (tourAlgo) tourStop();
+    tourClearAlgo();
+    rebuildCanvas();
+    rEls.nVal.textContent = points.length;
+    rEls.n.value = Math.min(rEls.n.max, Math.max(rEls.n.min, points.length || rEls.n.min));
+    return;
+  }
+  const { x, y } = svgPoint(e);
+  points.push({ x, y });
+  if (tourAlgo) tourStop();
+  tourClearAlgo();
+  rebuildCanvas();
+  rEls.nVal.textContent = points.length;
+  rEls.n.value = Math.min(rEls.n.max, Math.max(rEls.n.min, points.length || rEls.n.min));
+  tourSetStatus('');
+});
+
+rEls.n.addEventListener('input', () => {
+  rEls.nVal.textContent = rEls.n.value;
+});
+rEls.n.addEventListener('change', () => {
+  // Only rebuild on commit (avoids thrashing while sliding).
+  tourRandomise();
+});
+rEls.pop.addEventListener('input', () => { rEls.popVal.textContent = rEls.pop.value; });
+rEls.mut.addEventListener('input', () => { rEls.mutVal.textContent = (+rEls.mut.value / 100).toFixed(2); });
+rEls.ants.addEventListener('input', () => { rEls.antsVal.textContent = rEls.ants.value; });
+rEls.evap.addEventListener('input', () => { rEls.evapVal.textContent = (+rEls.evap.value / 100).toFixed(2); });
+rEls.algo.addEventListener('change', () => { tourUpdateVisibility(); tourUpdateDescriptions(); });
+rEls.run.addEventListener('click', tourRun);
+rEls.stop.addEventListener('click', tourStop);
+rEls.rand.addEventListener('click', tourRandomise);
+rEls.clear.addEventListener('click', tourClear);
+
+// init
+rEls.nVal.textContent = rEls.n.value;
+rEls.popVal.textContent = rEls.pop.value;
+rEls.mutVal.textContent = (+rEls.mut.value / 100).toFixed(2);
+rEls.antsVal.textContent = rEls.ants.value;
+rEls.evapVal.textContent = (+rEls.evap.value / 100).toFixed(2);
+rEls.stop.disabled = true;
+points = rerollPoints(+rEls.n.value);
+rebuildCanvas();
+drawSpark([]);
+tourSetStats();
+tourUpdateVisibility();
+tourUpdateDescriptions();
