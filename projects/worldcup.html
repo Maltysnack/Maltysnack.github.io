@@ -31,7 +31,6 @@
     .wc-round {
       display: flex;
       flex-direction: column;
-      justify-content: space-around;
       min-width: 145px;
     }
     .wc-round-label {
@@ -41,6 +40,13 @@
       color: var(--text-muted);
       margin-bottom: 0.4rem;
       text-align: center;
+      flex-shrink: 0;
+    }
+    .wc-round-matches {
+      flex: 1;
+      display: grid;
+      align-items: center;
+      grid-template-rows: repeat(var(--n, 1), 1fr);
     }
     .wc-match {
       border: 1px solid currentColor;
@@ -48,8 +54,9 @@
       border-radius: 3px;
       padding: 0.35rem 0.55rem;
       font-size: 0.85rem;
-      margin: 0.25rem 0;
       background: transparent;
+      align-self: center;
+      width: 100%;
     }
     .wc-team {
       padding: 0.15rem 0;
@@ -206,9 +213,11 @@
       align-items: center;
       gap: 0.4rem;
     }
-    .wc-paths .v {
+    .wc-paths .cell-num {
       text-align: right;
       font-variant-numeric: tabular-nums;
+    }
+    .wc-paths .v {
       color: var(--text-muted);
     }
     .wc-paths .v.high { color: var(--text-body, inherit); }
@@ -461,6 +470,13 @@
           lbl.className = 'wc-round-label';
           lbl.textContent = label;
           col.appendChild(lbl);
+          // Matches container: CSS grid with N rows, so each match lands
+          // at the centroid of its slot. R16 lands midway between two R32
+          // matches automatically because the grids have proportional
+          // row counts (16, 8, 4, 2, 1).
+          const matchesWrap = document.createElement('div');
+          matchesWrap.className = 'wc-round-matches';
+          matchesWrap.style.setProperty('--n', matches.length);
           matches.forEach(m => {
             const card = document.createElement('div');
             card.className = 'wc-match';
@@ -474,8 +490,9 @@
                 <span class="wc-team-name">${m.team_b}</span>
               </div>
             `;
-            col.appendChild(card);
+            matchesWrap.appendChild(card);
           });
+          col.appendChild(matchesWrap);
           container.appendChild(col);
         });
       }
@@ -549,6 +566,8 @@
         `;
       }
 
+      const N_VISIBLE = 10;
+
       function renderOdds(sim) {
         Object.assign(FLAGS, sim.flags || {});
         document.getElementById('wc-nsims').textContent =
@@ -556,7 +575,6 @@
 
         const container = document.getElementById('wc-odds');
         container.innerHTML = '';
-        // Show all teams; keep ranks based on full sort
         const all = sim.team_stats;
         const max = all[0].p_champion || 1;
         all.forEach((s, i) => {
@@ -564,6 +582,7 @@
           const row = document.createElement('div');
           row.className = 'wc-odds-row';
           row.dataset.team = s.team.toLowerCase();
+          row.dataset.rank = String(i);
           row.innerHTML = `
             <span class="pos">${i + 1}</span>
             ${flagImg(s.team)}
@@ -573,6 +592,7 @@
           `;
           container.appendChild(row);
         });
+        applyFilter('', '#wc-odds .wc-odds-row');
       }
 
       function renderPaths(sim) {
@@ -590,13 +610,13 @@
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
         `;
-        // All 48 teams; the search input filters
-        sim.team_stats.forEach(s => {
+        sim.team_stats.forEach((s, i) => {
           const isDH = !top8Ratings.has(s.team) && s.p_semis > 8;
           const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           const cell = document.createElement('div');
           cell.className = 'name wc-paths-row';
           cell.dataset.team = s.team.toLowerCase();
+          cell.dataset.rank = String(i);
           cell.innerHTML = `
             ${flagImg(s.team)}
             <span class="team-name">${s.team}</span>
@@ -606,31 +626,42 @@
           ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
             const c = document.createElement('div');
             c.dataset.team = s.team.toLowerCase();
-            c.className = 'wc-paths-row';
+            c.dataset.rank = String(i);
+            c.className = 'wc-paths-row cell-num';
             c.innerHTML = fmt(s[k]);
             container.appendChild(c);
           });
         });
+        applyFilter('', '#wc-paths .wc-paths-row');
+      }
+
+      // Show top N by default; reveal everything when a search query is active.
+      function applyFilter(query, selector) {
+        const q = query.trim().toLowerCase();
+        document.querySelectorAll(selector).forEach(el => {
+          const team = el.dataset.team || '';
+          const rank = parseInt(el.dataset.rank || '0', 10);
+          let show;
+          if (q.length === 0) {
+            show = rank < N_VISIBLE;
+          } else {
+            show = team.includes(q);
+          }
+          el.classList.toggle('wc-hidden', !show);
+        });
       }
 
       function wireSearch() {
-        function filterRows(query, selector) {
-          const q = query.trim().toLowerCase();
-          document.querySelectorAll(selector).forEach(el => {
-            const team = el.dataset.team || '';
-            el.classList.toggle('wc-hidden', q.length > 0 && !team.includes(q));
-          });
-        }
         const oddsInput = document.getElementById('wc-odds-search');
         const pathsInput = document.getElementById('wc-paths-search');
         if (oddsInput) {
           oddsInput.addEventListener('input', e =>
-            filterRows(e.target.value, '#wc-odds .wc-odds-row')
+            applyFilter(e.target.value, '#wc-odds .wc-odds-row')
           );
         }
         if (pathsInput) {
           pathsInput.addEventListener('input', e =>
-            filterRows(e.target.value, '#wc-paths .wc-paths-row')
+            applyFilter(e.target.value, '#wc-paths .wc-paths-row')
           );
         }
       }
