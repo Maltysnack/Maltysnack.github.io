@@ -389,6 +389,126 @@ print Thames 25;
 `,
         },
         {
+          id: "nile",
+          label: "Nile: White and Blue Nile through the Aswan dam",
+          source: `// The Nile: two great sources meeting at Khartoum, flowing north
+// through the Aswan High Dam into the Mediterranean. The White Nile
+// drains the equatorial lakes via Lake Victoria; the Blue Nile carries
+// the Ethiopian highlands' summer monsoon and is the system's flashy
+// pulse.
+system Nile;
+
+// White Nile: lake-fed, very steady; gathers tributaries from the
+// Sudd swamps as it heads north.
+LakeVictoria -> WhiteNile;
+Sobat        -> WhiteNile;
+BahrElGhazal -> WhiteNile;
+
+// Confluence at Khartoum where the Blue Nile meets the White,
+// then the main Nile to the Aswan dam and through Egypt.
+BlueNile  -> Khartoum;
+WhiteNile -> Khartoum;
+Khartoum  -> Atbara -> AswanHighDam -> LowerNile -> Mediterranean;
+
+river LakeVictoria { base: 8, peak: 1.0, decay: 0.95 }
+river Sobat        { base: 3, peak: 2.0, decay: 0.7 }
+river BahrElGhazal { base: 2, peak: 1.5, decay: 0.8 }
+river BlueNile     { base: 6, peak: 4.0, decay: 0.5 }
+
+river WhiteNile { base: 12, peak: 1.2, decay: 0.85 }
+river Khartoum  { base: 18, peak: 2.5, decay: 0.7 }
+river Atbara    { base: 18, peak: 2.5, decay: 0.7 }
+river LowerNile { base: 20, peak: 1.8, decay: 0.8 }
+
+dam AswanHighDam { capacity: 30000, threshold: 70%, normalRate: 0.85, openRate: 1.4 }
+
+outlet Mediterranean;
+
+map Nile;
+print Nile [0, 5, 60, 40, 20, 10, 5];
+`,
+        },
+        {
+          id: "snowy",
+          label: "Snowy Mountains Scheme: hydroelectric diversion",
+          source: `// Snowy Mountains Scheme: the Australian hydroelectric and irrigation
+// project that diverts water from the Snowy River catchment inland to
+// the Murray and Murrumbidgee. Multiple dams, a diversion split, and
+// two outlets (one to Bass Strait via the much-reduced Snowy, one west
+// to the inland irrigation network).
+system SnowyMountains;
+
+// Snowy and Eucumbene rivers feed the scheme's largest reservoir.
+SnowyR     -> EucumbeneDam;
+EucumbeneR -> EucumbeneDam;
+
+// From Eucumbene the scheme splits two ways:
+//  - West, through the Tumut tunnel and Blowering Dam, into the
+//    Murrumbidgee (irrigation).
+//  - South, into Jindabyne, where a second split sends most water
+//    west into the Murray via the Murray 1 / 2 power stations and a
+//    much-reduced flow continues south as the Snowy's natural outlet.
+EucumbeneDam -> TumutR -> BloweringDam -> Murrumbidgee;
+EucumbeneDam -> JindabyneDam;
+JindabyneDam -> Murray1 -> UpperMurray;
+JindabyneDam -> SnowyOutflow;
+
+river SnowyR     { base: 4, peak: 3.0, decay: 0.6 }
+river EucumbeneR { base: 2, peak: 2.0, decay: 0.7 }
+
+river TumutR      { base: 3, peak: 2.0, decay: 0.7 }
+river Murray1     { base: 2, peak: 1.0, decay: 0.8 }
+river UpperMurray { base: 5, peak: 2.5, decay: 0.7 }
+
+dam EucumbeneDam { capacity: 4800, threshold: 75%, normalRate: 0.6, openRate: 1.3 }
+dam JindabyneDam { capacity: 700,  threshold: 80%, normalRate: 0.5, openRate: 1.5 }
+dam BloweringDam { capacity: 1600, threshold: 70%, normalRate: 0.8, openRate: 1.3 }
+
+outlet Murrumbidgee;
+outlet SnowyOutflow;
+
+map SnowyMountains;
+print SnowyMountains [2, 5, 30, 40, 20, 10, 5, 3, 2, 1];
+`,
+        },
+        {
+          id: "brisbane",
+          label: "Brisbane: 2011-style flood through Wivenhoe Dam",
+          source: `// Brisbane River with Wivenhoe Dam: the city's water supply and main
+// flood defence, famously stress-tested by the 2011 floods. Three
+// flashy headwater catchments converge upstream of Wivenhoe; two more
+// (Lockyer Creek, Bremer River) join below it; the lower river runs
+// tidal through the city to Moreton Bay.
+system Brisbane;
+
+// Upper catchment, dammed at Somerset and then Wivenhoe.
+StanleyR       -> SomersetDam -> WivenhoeDam;
+UpperBrisbaneR -> WivenhoeDam;
+
+// Tributaries that join below Wivenhoe go straight into the lower
+// river. They contribute to the flood peak that the dam can't see.
+LockyerCk -> LowerBrisbaneR;
+BremerR   -> LowerBrisbaneR;
+
+// Wivenhoe to the bay.
+WivenhoeDam -> LowerBrisbaneR -> MoretonBay;
+
+river StanleyR        { base: 1.5, peak: 3.0, decay: 0.6 }
+river UpperBrisbaneR  { base: 2,   peak: 2.5, decay: 0.65 }
+river LockyerCk       { base: 1,   peak: 4.0, decay: 0.5 }
+river BremerR         { base: 1,   peak: 3.0, decay: 0.6 }
+river LowerBrisbaneR  { base: 5,   peak: 1.5, decay: 0.8 }
+
+dam SomersetDam { capacity: 380,  threshold: 90%,  normalRate: 0.7, openRate: 1.5 }
+dam WivenhoeDam { capacity: 1165, threshold: 100%, normalRate: 0.4, openRate: 2.0 }
+
+outlet MoretonBay;
+
+map Brisbane;
+print Brisbane [10, 30, 80, 60, 40, 20, 10, 5];
+`,
+        },
+        {
           id: "storm",
           label: "Storm: 100mm event crosses a dam threshold",
           source: `// A 100mm storm on day 1 forces a small reservoir past its threshold.
