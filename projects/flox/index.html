@@ -21,6 +21,14 @@
       line-height: 1.6;
       margin-bottom: 10px;
     }
+    .fx-note {
+      font-size: var(--text-sm);
+      color: var(--text-dim);
+      font-style: italic;
+      line-height: 1.5;
+      margin-bottom: 18px;
+      max-width: 620px;
+    }
     .fx-meta {
       font-size: var(--text-xs);
       color: var(--text-dim);
@@ -151,6 +159,9 @@
       <p class="fx-lede">
         A small language for describing flow networks. You write nodes and arrows; it simulates how stuff moves through them over time.
       </p>
+      <p class="fx-note">
+        Flox is a stylized model, not a hydrology engine. Good for sketching the shape of a system, not for forecasting.
+      </p>
       <p class="fx-meta">
         <span>v0.2</span><span>Java</span><span>08-05-2026</span>
       </p>
@@ -232,25 +243,6 @@ print SeriesDemo [0, 1, 30, 10, 0, 0, 0];   // dry, light rain, storm, light, dr
 Location            | Day  1 | Day  2 | Day  3 | Day  4 | Day  5 | Day  6 | Day  7 | Day  8 | Day  9 | Day 10 |
 --------------------|--------|--------|--------|--------|--------|--------|--------|--------|--------|--------|
 Spring              |    2.0 |    2.6 |   22.0 |   69.4 |   65.0 |   46.1 |   32.9 |   23.6 |   17.1 |   12.6 |</pre>
-    </section>
-
-    <section class="fx-section">
-      <h2>Status</h2>
-      <div class="fx-status"><b>Engine</b><span>Scanner, parser, AST, two-pass tree-walking interpreter in Java.</span></div>
-      <div class="fx-status"><b>Modelling</b><span>River hydrograph simulation, dam thresholds, per-day rainfall series.</span></div>
-      <div class="fx-status"><b>Output</b><span>Network map and multi-day flow tables in L/s, with cumulative outlet volume converted to KL/ML/GL.</span></div>
-      <div class="fx-status"><b>Tests</b><span>Golden-file runner covering every example plus targeted error and edge cases.</span></div>
-    </section>
-
-    <section class="fx-section">
-      <h2>The fine print</h2>
-      <p>
-        Flox is a stylized model. Useful for sketching the <em>shape</em> of a flow network and how it responds to a weather pattern. Not a hydrology engine. Some simplifications worth being honest about:
-      </p>
-      <div class="fx-status"><b>No losses</b><span>Every millimetre of rainfall converts into river flow scaled by the river's <code>peak</code>. Real catchments lose water to evaporation, infiltration into soil, plant uptake, and groundwater recharge. None of that is modelled here.</span></div>
-      <div class="fx-status"><b>Dam model</b><span>A dam is a rate switch. Outflow is a fraction of inflow, with the fraction depending on whether storage is above or below threshold. Real dams typically release a constant volume per day. Tracked as a future change.</span></div>
-      <div class="fx-status"><b>One-way flow</b><span>Edges are strictly downstream. No backflow, no tidal effects, no reservoir spillback. Multiple downstream edges split flow evenly.</span></div>
-      <div class="fx-status"><b>Fixed timestep</b><span>The simulation runs ten one-day steps. No way to vary the horizon yet.</span></div>
     </section>
 
     <section class="fx-section">

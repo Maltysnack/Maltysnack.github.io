@@ -326,6 +326,10 @@ helpStmt    &rarr;  "help" ";"</div>
             <td>print <i>Name</i> [r<sub>1</sub>, r<sub>2</sub>, ...];</td>
             <td>Simulates with a per-day rainfall series in millimetres. Each non-zero entry kicks off its own hydrograph; flow on day <i>n</i> is the superposition of every event so far. Series shorter than ten days is padded with zeros.</td>
           </tr>
+          <tr>
+            <td>help;</td>
+            <td>Prints a short syntax reference covering declarations, chains, and the print forms. Useful at the CLI; the playground duplicates most of it in the Blank template.</td>
+          </tr>
         </tbody>
       </table>
       <p>The interpreter runs in two passes. Pass 1 collects declarations and chains. A resolve step validates each chain reference against the per-system symbol table. Pass 2 executes <code>list</code>, <code>map</code>, and <code>print</code> in source order.</p>
