@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=4';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=4';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=4';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=4';
+} from './algo-core.mjs?v=5';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=5';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=5';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=5';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -504,10 +504,9 @@ gridUpdateDescriptions();
 
 const CANVAS_W = 1000, CANVAS_H = 600;
 const SVG_NS = 'http://www.w3.org/2000/svg';
-// Each tick runs as many steps as fit in this budget then yields to paint.
-// Robust to background-tab setTimeout throttling and to fast modern hardware.
-const TOUR_TICK_BUDGET_MS = 14;
-const TOUR_TICK_DELAY_MS = 0;
+// Target one iteration every ~80 ms so the population/pheromone changes are
+// visible to a human eye instead of blurring through 200 iters/sec.
+const TOUR_TARGET_TICK_MS = 80;
 const SPARK_W = 1000, SPARK_H = 90, SPARK_PAD = 14;
 
 const rEls = {
@@ -519,9 +518,15 @@ const rEls = {
   run: $('r-run'), stop: $('r-stop'), rand: $('r-rand'), clear: $('r-clear'),
   canvas: $('r-canvas'), spark: $('r-spark'),
   algoTag: $('r-algoTag'), algoDesc: $('r-algoDesc'),
+  vizTag: $('r-vizTag'), vizDesc: $('r-vizDesc'),
   iter: $('r-iter'), best: $('r-best'),
   improve: $('r-improve'), rate: $('r-rate'),
   status: $('r-status'),
+};
+
+const VIZ_DESC = {
+  ga: 'Each thin line is one tour from the current generation, all 50 of them overlaid. The bold red overlay is the best tour found so far. As selection and mutation do their work, the cloud tightens around the best.',
+  aco: 'Edge darkness shows how much pheromone has accumulated on that edge: the more ants have laid trail along it, the bolder it gets. The bold red overlay is the best tour found so far.',
 };
 
 let points = [];
@@ -538,9 +543,22 @@ function rerollPoints(count) {
   }));
 }
 
-function drawPoints() {
-  // Wipe everything except already-rendered edges (we'll redraw them).
+function tourPath(tour) {
+  if (!tour || tour.length < 2) return '';
+  let d = '';
+  for (let i = 0; i < tour.length; i++) {
+    const p = points[tour[i]];
+    d += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
+  }
+  return d + 'Z';
+}
+
+function drawPointsOnly() {
   rEls.canvas.innerHTML = '';
+  appendPoints();
+}
+
+function appendPoints() {
   for (let i = 0; i < points.length; i++) {
     const c = document.createElementNS(SVG_NS, 'circle');
     c.setAttribute('cx', points[i].x);
@@ -552,26 +570,65 @@ function drawPoints() {
   }
 }
 
-function drawTour(tour) {
-  // Remove previous edges, redraw fresh.
-  for (const el of [...rEls.canvas.querySelectorAll('.al-edge')]) el.remove();
-  if (!tour || tour.length < 2) { drawPoints(); return; }
-  let d = '';
-  for (let i = 0; i < tour.length; i++) {
-    const p = points[tour[i]];
-    d += (i === 0 ? 'M' : 'L') + p.x + ' ' + p.y;
+// Render the full algorithm state: ghost layer (population or pheromone) +
+// best tour + points, in that draw order so points sit on top.
+function drawAlgoState() {
+  rEls.canvas.innerHTML = '';
+  if (!tourAlgo) { appendPoints(); return; }
+
+  if (rEls.algo.value === 'ga') {
+    const pop = tourAlgo.population;
+    if (pop) {
+      for (const tour of pop) {
+        const p = document.createElementNS(SVG_NS, 'path');
+        p.setAttribute('d', tourPath(tour));
+        p.setAttribute('opacity', '0.07');
+        p.classList.add('al-ghost');
+        rEls.canvas.appendChild(p);
+      }
+    }
+  } else {
+    const tau = tourAlgo.pheromone;
+    if (tau) {
+      let max = 0;
+      for (let i = 0; i < tau.length; i++) {
+        for (let j = i + 1; j < tau.length; j++) if (tau[i][j] > max) max = tau[i][j];
+      }
+      if (max > 0) {
+        for (let i = 0; i < tau.length; i++) {
+          for (let j = i + 1; j < tau.length; j++) {
+            const ratio = tau[i][j] / max;
+            if (ratio < 0.08) continue;
+            const opacity = Math.min(0.7, ratio);
+            const width = (0.4 + ratio * 1.8).toFixed(2);
+            const line = document.createElementNS(SVG_NS, 'line');
+            line.setAttribute('x1', points[i].x);
+            line.setAttribute('y1', points[i].y);
+            line.setAttribute('x2', points[j].x);
+            line.setAttribute('y2', points[j].y);
+            line.setAttribute('opacity', opacity.toFixed(2));
+            line.setAttribute('stroke-width', width);
+            line.classList.add('al-pheromone');
+            rEls.canvas.appendChild(line);
+          }
+        }
+      }
+    }
   }
-  d += 'Z';
-  const path = document.createElementNS(SVG_NS, 'path');
-  path.setAttribute('d', d);
-  path.classList.add('al-edge');
-  // Insert at the front so points stay on top.
-  rEls.canvas.insertBefore(path, rEls.canvas.firstChild);
+
+  if (tourAlgo.best && tourAlgo.best.length > 1) {
+    const path = document.createElementNS(SVG_NS, 'path');
+    path.setAttribute('d', tourPath(tourAlgo.best));
+    path.classList.add('al-edge');
+    rEls.canvas.appendChild(path);
+  }
+
+  appendPoints();
 }
 
 function rebuildCanvas() {
-  drawPoints();
-  if (tourAlgo) drawTour(tourAlgo.best);
+  if (tourAlgo) drawAlgoState();
+  else drawPointsOnly();
 }
 
 function drawSpark(history) {
@@ -589,13 +646,13 @@ function drawSpark(history) {
   }
   const path = document.createElementNS(SVG_NS, 'path');
   path.setAttribute('d', d);
-  path.classList.add('al-spark-curve');
+  path.classList.add('curve');
   rEls.spark.appendChild(path);
 
   const label = document.createElementNS(SVG_NS, 'text');
   label.setAttribute('x', SPARK_PAD);
   label.setAttribute('y', SPARK_PAD);
-  label.classList.add('al-spark-label');
+  label.classList.add('label');
   label.textContent = `min ${min.toFixed(0)}  /  max ${max.toFixed(0)}`;
   rEls.spark.appendChild(label);
 }
@@ -640,6 +697,8 @@ function tourUpdateDescriptions() {
   const algo = rEls.algo.value;
   rEls.algoTag.textContent = tspAlgorithmLabels[algo] ?? '';
   rEls.algoDesc.textContent = tspAlgorithmDescriptions[algo] ?? '';
+  rEls.vizTag.textContent = algo === 'ga' ? 'Population' : 'Pheromone';
+  rEls.vizDesc.textContent = VIZ_DESC[algo] ?? '';
 }
 
 function tourBuildAlgo() {
@@ -659,11 +718,13 @@ function tourBuildAlgo() {
 function tourTick() {
   if (!tourAlgo) return;
   const t0 = performance.now();
-  do { tourAlgo.step(); } while (performance.now() - t0 < TOUR_TICK_BUDGET_MS);
-  drawTour(tourAlgo.best);
+  tourAlgo.step();
+  drawAlgoState();
   drawSpark(tourAlgo.history);
   tourSetStats();
-  tourTimer = setTimeout(tourTick, TOUR_TICK_DELAY_MS);
+  const elapsed = performance.now() - t0;
+  const delay = Math.max(0, TOUR_TARGET_TICK_MS - elapsed);
+  tourTimer = setTimeout(tourTick, delay);
 }
 
 function tourRun() {
@@ -678,7 +739,7 @@ function tourRun() {
   tourSetStatus('running...');
   rEls.run.disabled = true;
   rEls.stop.disabled = false;
-  drawTour(tourAlgo.best);
+  drawAlgoState();
   drawSpark(tourAlgo.history);
   tourSetStats();
   tourTick();
@@ -768,7 +829,7 @@ rEls.antsVal.textContent = rEls.ants.value;
 rEls.evapVal.textContent = (+rEls.evap.value / 100).toFixed(2);
 rEls.stop.disabled = true;
 points = rerollPoints(+rEls.n.value);
-rebuildCanvas();
+drawPointsOnly();
 drawSpark([]);
 tourSetStats();
 tourUpdateVisibility();

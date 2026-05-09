@@ -270,8 +270,8 @@ function meanDistance(d) {
 }
 
 export const tspAlgorithmDescriptions = {
-  ga: 'Maintains a population of candidate tours. Each generation, parents are picked weighted by fitness, recombined with order-crossover, and a few are mutated. Larger populations explore more, smaller ones converge faster.',
-  aco: 'Simulated ants construct tours, biased by edge length and accumulated pheromone. After each round, pheromone evaporates and the best tours reinforce their edges. More ants explore more; faster evaporation forgets old solutions sooner.',
+  ga: 'Maintains a population of candidate tours. Each generation, parents are picked weighted by fitness, recombined with order-crossover, and a few are mutated. The two best tours carry over unchanged so the algorithm never loses ground.',
+  aco: 'Simulated ants construct tours, biased by edge length and accumulated pheromone. After each round, pheromone evaporates and ants lay fresh trail along the tours they built. Edges that consistently appear in good tours get reinforced; bad ones fade.',
 };
 
 export const tspAlgorithmLabels = {
