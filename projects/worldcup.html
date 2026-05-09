@@ -147,6 +147,85 @@
     .wc-group-row.eliminated {
       opacity: 0.55;
     }
+
+    /* Championship odds + dark horse table */
+    .wc-odds {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      margin-top: 1rem;
+    }
+    .wc-odds-row {
+      display: grid;
+      grid-template-columns: 1.6em 24px minmax(110px, 0.8fr) 1fr 4em;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .wc-odds-row .pos {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .wc-odds-row .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-odds-bar {
+      height: 14px;
+      border-radius: 2px;
+      background: rgba(180,150,80,0.45);
+    }
+    .wc-odds-row .pct {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    .wc-paths {
+      display: grid;
+      grid-template-columns: minmax(110px, 0.8fr) repeat(5, 1fr);
+      gap: 0.4rem 0.6rem;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .wc-paths .header {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    .wc-paths .header.right { text-align: right; }
+    .wc-paths .name {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .wc-paths .v {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+    .wc-paths .v.high { color: var(--text-body, inherit); }
+    .wc-paths .name .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-darkhorse-tag {
+      display: inline-block;
+      font-size: 0.65rem;
+      padding: 0.05rem 0.35rem;
+      margin-left: 0.35rem;
+      border: 1px solid rgba(180,150,80,0.5);
+      border-radius: 2px;
+      color: rgba(180,150,80,0.9);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+    }
   </style>
 </head>
 <body>
@@ -190,6 +269,32 @@
 
     <section class="intro" style="margin-top:2.5rem;">
       <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
+        Championship odds
+      </h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+        How often each team wins the cup across <span id="wc-nsims">10,000</span>
+        simulated tournaments. Probabilities are real, the deterministic
+        bracket above just shows who would win if every match went to the
+        favourite.
+      </p>
+      <div class="wc-odds" id="wc-odds"></div>
+    </section>
+
+    <section class="intro" style="margin-top:2.5rem;">
+      <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
+        How far each team is likely to go
+      </h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+        Probability each team reaches a given round. Teams flagged
+        <span class="wc-darkhorse-tag">dark horse</span>
+        are outside the top eight by raw rating but reach the semis in
+        more than 8&#37; of simulations.
+      </p>
+      <div class="wc-paths" id="wc-paths"></div>
+    </section>
+
+    <section class="intro" style="margin-top:2.5rem;">
+      <h3 style="font-family:'Playfair Display',serif;font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;">
         Group stage
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
@@ -210,6 +315,7 @@
         <li><span style="color:var(--text-muted);">07 May</span> &nbsp; repo live, 49,328 historical international matches loaded into local DuckDB (1872 to present, 2026 fixtures included)</li>
         <li><span style="color:var(--text-muted);">08 May</span> &nbsp; first Elo model built (tier-weighted K, home advantage, 1990+ training data). Pre-tournament bracket published, current pick: Spain</li>
         <li><span style="color:var(--text-muted);">08 May</span> &nbsp; bracket switched to the official FIFA 2026 structure, flags added, page widened</li>
+        <li><span style="color:var(--text-muted);">09 May</span> &nbsp; Monte Carlo simulator (10k tournaments, Poisson goals model calibrated from 15k historical matches) and squad-value blend added. Championship odds and dark-horse paths now on the page</li>
       </ul>
     </section>
 
@@ -219,9 +325,15 @@
 
   <script>
     (function () {
-      fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' })
-        .then(r => r.json())
-        .then(render)
+      Promise.all([
+        fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
+      ])
+        .then(([bracket, sim]) => {
+          render(bracket);
+          renderOdds(sim);
+          renderPaths(sim);
+        })
         .catch(err => {
           document.getElementById('wc-bracket').innerHTML =
             '<p style="color:var(--text-muted)">Bracket data not available.</p>';
@@ -306,6 +418,73 @@
           }).join('');
           card.innerHTML = `<h4>Group ${g.name}</h4>${rows}`;
           container.appendChild(card);
+        });
+      }
+
+      function renderOdds(sim) {
+        Object.assign(FLAGS, sim.flags || {});
+        document.getElementById('wc-nsims').textContent =
+          (sim.n_simulations || 10000).toLocaleString('en-US');
+
+        const container = document.getElementById('wc-odds');
+        container.innerHTML = '';
+        const top = sim.team_stats.slice(0, 16);
+        const max = top[0].p_champion || 1;
+        top.forEach((s, i) => {
+          const widthPct = (100 * s.p_champion / max).toFixed(1);
+          const row = document.createElement('div');
+          row.className = 'wc-odds-row';
+          row.innerHTML = `
+            <span class="pos">${i + 1}</span>
+            ${flagImg(s.team)}
+            <span class="name">${s.team}</span>
+            <div class="wc-odds-bar" style="width:${widthPct}%"></div>
+            <span class="pct">${s.p_champion.toFixed(1)}%</span>
+          `;
+          container.appendChild(row);
+        });
+      }
+
+      function renderPaths(sim) {
+        // "Dark horse" = outside top 8 by rating, but reaches the SF
+        // in more than 8% of simulations.
+        const byRating = [...sim.team_stats].sort((a, b) => b.rating - a.rating);
+        const top8Ratings = new Set(byRating.slice(0, 8).map(s => s.team));
+
+        // Show all teams that either: top 12 by championship odds,
+        // OR are flagged as dark horses
+        const top12 = sim.team_stats.slice(0, 12).map(s => s.team);
+        const darkHorses = sim.team_stats
+          .filter(s => !top8Ratings.has(s.team) && s.p_semis > 8)
+          .map(s => s.team);
+        const display = [...new Set([...top12, ...darkHorses])];
+        const rows = sim.team_stats.filter(s => display.includes(s.team));
+
+        const container = document.getElementById('wc-paths');
+        container.innerHTML = `
+          <div class="header">Team</div>
+          <div class="header right">R16</div>
+          <div class="header right">QF</div>
+          <div class="header right">SF</div>
+          <div class="header right">Final</div>
+          <div class="header right">Champion</div>
+        `;
+        rows.forEach(s => {
+          const isDH = !top8Ratings.has(s.team) && s.p_semis > 8;
+          const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
+          const cell = document.createElement('div');
+          cell.className = 'name';
+          cell.innerHTML = `
+            ${flagImg(s.team)}
+            <span class="team-name">${s.team}</span>
+            ${isDH ? '<span class="wc-darkhorse-tag">dark horse</span>' : ''}
+          `;
+          container.appendChild(cell);
+          ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
+            const c = document.createElement('div');
+            c.innerHTML = fmt(s[k]);
+            container.appendChild(c.firstElementChild);
+          });
         });
       }
     })();
