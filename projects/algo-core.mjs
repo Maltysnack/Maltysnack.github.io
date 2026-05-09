@@ -17,6 +17,14 @@
 
 const DEFAULT_MAX_EXPLORED = 200_000;
 
+export const algorithmDescriptions = {
+  ids: 'Repeats a depth-limited DFS at increasing depths until a goal turns up. Finds the fewest-move path but the work doubles with every layer, so it falls over fast on big problems.',
+  astar: 'Expands states by f = g + h, balancing path cost so far against estimated cost ahead. Returns the optimal-cost path whenever the heuristic is admissible.',
+  greedy: 'Expands by h alone, ignoring cost so far. Often races toward the goal in a few steps, but it commits to bad detours and cannot back out, so the path it returns is rarely optimal.',
+  beam: 'Like A*, but only the best k states from each layer survive into the next. Cheap on memory, often suboptimal, can fail outright when the right state gets pruned.',
+  bfs: 'Expands states in waves of equal depth from the start. Returns the shortest path in steps when every step has the same cost.',
+};
+
 // ---------- min-heap for A* ----------
 
 class MinHeap {

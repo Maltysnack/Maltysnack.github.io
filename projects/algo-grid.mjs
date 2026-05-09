@@ -54,8 +54,8 @@ export const gridHeuristics = {
 };
 
 export const gridHeuristicDescriptions = {
-  manhattan: 'Horizontal plus vertical distance to the goal. Exact for a 4-connected grid with no diagonals.',
-  euclidean: 'Straight-line distance. Slightly looser than Manhattan on a grid without diagonals.',
+  manhattan: 'Horizontal plus vertical distance from the cell to the goal. Exact on a 4-connected grid: any unobstructed route is at least this long.',
+  euclidean: 'Straight-line distance. Always shorter than the actual route since you cannot cut diagonals on this grid, so it is admissible but a weaker guide than Manhattan.',
 };
 
 export function gridProblem(grid, start, goal, heuristicName = 'manhattan') {

@@ -1,6 +1,29 @@
-import { iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst } from './algo-core.mjs?v=2';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=2';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=2';
+import {
+  iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
+  algorithmDescriptions,
+} from './algo-core.mjs?v=3';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=3';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=3';
+
+const ALGO_LABELS = {
+  ids: 'Iterative deepening',
+  astar: 'A*',
+  greedy: 'Greedy best-first',
+  beam: 'Beam',
+  bfs: 'Breadth-first',
+};
+
+const TILE_HEUR_LABELS = {
+  misplaced: 'Misplaced',
+  manhattan: 'Manhattan',
+  inversions: 'Inversions',
+  blocks: 'Blocks',
+};
+
+const GRID_HEUR_LABELS = {
+  manhattan: 'Manhattan',
+  euclidean: 'Euclidean',
+};
 
 const $ = (id) => document.getElementById(id);
 
@@ -18,7 +41,9 @@ const GRID_MIN_PER_CELL_MS = 4;
 const COLORS = ['Y', 'B'];
 const tEls = {
   algo: $('t-algo'), n: $('t-n'), nVal: $('t-nVal'),
-  heur: $('t-heur'), heurDesc: $('t-heurDesc'),
+  heur: $('t-heur'),
+  algoTag: $('t-algoTag'), algoDesc: $('t-algoDesc'),
+  heurTag: $('t-heurTag'), heurDesc: $('t-heurDesc'),
   beam: $('t-beam'), beamVal: $('t-beamVal'),
   run: $('t-run'), rand: $('t-rand'),
   board: $('t-board'),
@@ -121,17 +146,16 @@ function tilePickAlgo() {
   if (algo === 'beam') return () => beamSearch(problem, { beamWidth });
 }
 
-function tileUpdateHeurDesc() {
-  if (!tEls.heurDesc) return;
+function tileUpdateDescriptions() {
   const algo = tEls.algo.value;
+  if (tEls.algoTag) tEls.algoTag.textContent = ALGO_LABELS[algo] ?? '';
+  if (tEls.algoDesc) tEls.algoDesc.textContent = algorithmDescriptions[algo] ?? '';
   const showHeur = ['astar', 'greedy', 'beam'].includes(algo);
-  if (!showHeur) {
-    tEls.heurDesc.textContent = '';
-    tEls.heurDesc.style.display = 'none';
-    return;
-  }
-  tEls.heurDesc.style.display = '';
-  tEls.heurDesc.textContent = tileHeuristicDescriptions[tEls.heur.value] ?? '';
+  const heurLine = tEls.heurTag?.parentElement;
+  if (heurLine) heurLine.style.display = showHeur ? '' : 'none';
+  if (!showHeur) return;
+  if (tEls.heurTag) tEls.heurTag.textContent = TILE_HEUR_LABELS[tEls.heur.value] ?? '';
+  if (tEls.heurDesc) tEls.heurDesc.textContent = tileHeuristicDescriptions[tEls.heur.value] ?? '';
 }
 
 function tileRun() {
@@ -185,14 +209,14 @@ function tileUpdateVisibility() {
 
 tEls.n.addEventListener('input', () => { tEls.nVal.textContent = tEls.n.value; tileRandomise(); });
 tEls.beam.addEventListener('input', () => { tEls.beamVal.textContent = tEls.beam.value; });
-tEls.algo.addEventListener('change', () => { tileUpdateVisibility(); tileUpdateHeurDesc(); });
-tEls.heur.addEventListener('change', tileUpdateHeurDesc);
+tEls.algo.addEventListener('change', () => { tileUpdateVisibility(); tileUpdateDescriptions(); });
+tEls.heur.addEventListener('change', tileUpdateDescriptions);
 tEls.run.addEventListener('click', tileRun);
 tEls.rand.addEventListener('click', tileRandomise);
 tEls.nVal.textContent = tEls.n.value;
 tEls.beamVal.textContent = tEls.beam.value;
 tileUpdateVisibility();
-tileUpdateHeurDesc();
+tileUpdateDescriptions();
 renderTile(tileState);
 tileSetStep(0, 0, 0);
 
@@ -205,7 +229,9 @@ const START = key(Math.floor(ROWS / 2), 2);
 const GOAL  = key(Math.floor(ROWS / 2), COLS - 3);
 
 const gEls = {
-  algo: $('g-algo'), heur: $('g-heur'), heurDesc: $('g-heurDesc'),
+  algo: $('g-algo'), heur: $('g-heur'),
+  algoTag: $('g-algoTag'), algoDesc: $('g-algoDesc'),
+  heurTag: $('g-heurTag'), heurDesc: $('g-heurDesc'),
   beam: $('g-beam'), beamVal: $('g-beamVal'),
   run: $('g-run'), clear: $('g-clear'), randWalls: $('g-randWalls'),
   grid: $('g-grid'),
@@ -333,17 +359,16 @@ function gridPickAlgo() {
   if (algo === 'beam') return (onVisit) => beamSearch(problem, { beamWidth, onVisit });
 }
 
-function gridUpdateHeurDesc() {
-  if (!gEls.heurDesc) return;
+function gridUpdateDescriptions() {
   const algo = gEls.algo.value;
+  if (gEls.algoTag) gEls.algoTag.textContent = ALGO_LABELS[algo] ?? '';
+  if (gEls.algoDesc) gEls.algoDesc.textContent = algorithmDescriptions[algo] ?? '';
   const showHeur = ['astar', 'greedy', 'beam'].includes(algo);
-  if (!showHeur) {
-    gEls.heurDesc.textContent = '';
-    gEls.heurDesc.style.display = 'none';
-    return;
-  }
-  gEls.heurDesc.style.display = '';
-  gEls.heurDesc.textContent = gridHeuristicDescriptions[gEls.heur.value] ?? '';
+  const heurLine = gEls.heurTag?.parentElement;
+  if (heurLine) heurLine.style.display = showHeur ? '' : 'none';
+  if (!showHeur) return;
+  if (gEls.heurTag) gEls.heurTag.textContent = GRID_HEUR_LABELS[gEls.heur.value] ?? '';
+  if (gEls.heurDesc) gEls.heurDesc.textContent = gridHeuristicDescriptions[gEls.heur.value] ?? '';
 }
 
 function gridAnimateExploration(visited, path) {
@@ -462,12 +487,12 @@ function gridRandomWalls() {
 }
 
 gEls.beam.addEventListener('input', () => { gEls.beamVal.textContent = gEls.beam.value; });
-gEls.algo.addEventListener('change', () => { gridUpdateVisibility(); gridUpdateHeurDesc(); });
-gEls.heur.addEventListener('change', gridUpdateHeurDesc);
+gEls.algo.addEventListener('change', () => { gridUpdateVisibility(); gridUpdateDescriptions(); });
+gEls.heur.addEventListener('change', gridUpdateDescriptions);
 gEls.run.addEventListener('click', gridRun);
 gEls.clear.addEventListener('click', gridClearWalls);
 gEls.randWalls.addEventListener('click', gridRandomWalls);
 gEls.beamVal.textContent = gEls.beam.value;
 buildGrid();
 gridUpdateVisibility();
-gridUpdateHeurDesc();
+gridUpdateDescriptions();

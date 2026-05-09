@@ -268,15 +268,30 @@
     }
     .al-status.error { color: var(--accent-red); }
 
-    .al-heur-desc {
+    .al-desc {
+      margin: -16px 0 28px;
+      padding: 14px 18px;
+      background: var(--bg-soft);
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      max-width: 760px;
+    }
+    .al-desc-line {
       font-family: var(--font-mono);
       font-size: var(--text-xs);
       color: var(--text-dim);
-      margin: -16px 0 28px;
-      padding: 0 4px;
-      line-height: 1.5;
-      max-width: 720px;
-      min-height: 1em;
+      line-height: 1.55;
+      margin: 0;
+    }
+    .al-desc-line + .al-desc-line { margin-top: 8px; }
+    .al-desc-tag {
+      display: inline-block;
+      font-weight: 700;
+      color: var(--text);
+      margin-right: 8px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      font-size: 11px;
     }
 
     @media (max-width: 600px) {
@@ -302,7 +317,7 @@
       <span class="al-eyebrow">Project</span>
       <h1 class="page-title">Algorithms</h1>
       <p class="al-lede">
-        Two small problems, three classical search algorithms, four heuristics. Same algorithm core, different problem.
+        Classical search and optimisation algorithms running live on small problems. Same algorithm core, different problems. Watch them work, see what they trade off.
       </p>
       <p class="al-meta">
         <span>vanilla JS</span><span>ES module</span><span>08-05-2026</span>
@@ -322,7 +337,7 @@
         <li><span class="al-move-tag">Hop two</span><span class="al-move-cost">cost 3</span><span class="al-move-desc">a tile jumps over two tiles to land in the blank</span></li>
       </ul>
       <p class="prose">
-        The goal is to put every tile of the first colour to the left of every tile of the second. The blank can finish anywhere.
+        Put every tile of the first colour to the left of every tile of the second. The blank can finish anywhere. The cost-aware algorithms (A*, Greedy, Beam) minimise total cost; iterative deepening treats every move as one and minimises step count.
       </p>
 
       <div class="al-controls">
@@ -358,7 +373,10 @@
         </div>
       </div>
 
-      <p class="al-heur-desc" id="t-heurDesc"></p>
+      <div class="al-desc">
+        <p class="al-desc-line"><span class="al-desc-tag" id="t-algoTag"></span><span id="t-algoDesc"></span></p>
+        <p class="al-desc-line"><span class="al-desc-tag" id="t-heurTag"></span><span id="t-heurDesc"></span></p>
+      </div>
 
       <div class="al-board" id="t-board"></div>
       <div class="al-step-meta">
@@ -413,7 +431,10 @@
         </div>
       </div>
 
-      <p class="al-heur-desc" id="g-heurDesc"></p>
+      <div class="al-desc">
+        <p class="al-desc-line"><span class="al-desc-tag" id="g-algoTag"></span><span id="g-algoDesc"></span></p>
+        <p class="al-desc-line"><span class="al-desc-tag" id="g-heurTag"></span><span id="g-heurDesc"></span></p>
+      </div>
 
       <div class="al-grid-wrap">
         <div class="al-grid" id="g-grid"></div>
@@ -431,7 +452,7 @@
 
   </main>
 
-  <script type="module" src="/projects/algo-viz.js?v=2"></script>
+  <script type="module" src="/projects/algo-viz.js?v=3"></script>
   <script src="/sidebar.js"></script>
 </body>
 </html>

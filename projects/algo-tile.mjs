@@ -88,10 +88,10 @@ export const tileHeuristics = {
 };
 
 export const tileHeuristicDescriptions = {
-  misplaced: 'Counts tiles not at their goal position. Cheap to compute, loose lower bound.',
-  manhattan: 'Sum of how far each misplaced tile is from a valid goal slot. Tight and admissible.',
-  inversions: 'Counts (second-colour, first-colour) pairs that are out of order. Each inversion needs at least one move.',
-  blocks: 'Excess number of contiguous colour runs over two. Cheap, intuitive, weak.',
+  misplaced: 'Number of tiles in the wrong colour group. Each misplaced tile needs at least one move, so it never overestimates. Loose, since one move can fix several tiles at once.',
+  manhattan: 'For each misplaced tile, the shortest distance to any valid goal slot. Tighter than misplaced because it accounts for how far a tile is, not just whether it is wrong.',
+  inversions: 'Pairs where a second-colour tile sits left of a first-colour tile. Specific to this puzzle: every inversion requires at least one move to resolve.',
+  blocks: 'Number of contiguous colour runs minus the two the goal allows. Sees that the colours need to coalesce, not how, so it offers weak guidance compared to Manhattan.',
 };
 
 // Build a problem object from a tile-puzzle initial state.
