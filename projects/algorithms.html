@@ -354,6 +354,26 @@
       font-size: 10px;
       fill: var(--text-dim);
     }
+    .al-ant-trail {
+      stroke: var(--accent-red);
+      stroke-width: 2.5;
+      fill: none;
+      stroke-linecap: round;
+      pointer-events: none;
+      opacity: 0.85;
+    }
+    .al-ant-marker {
+      fill: var(--accent-red);
+      stroke: var(--bg);
+      stroke-width: 2;
+      pointer-events: none;
+    }
+    .al-ant-start {
+      fill: none;
+      stroke: var(--accent-red);
+      stroke-width: 2;
+      pointer-events: none;
+    }
 
     @media (max-width: 600px) {
       .al-tile { width: 44px; height: 44px; font-size: var(--text-sm); }
@@ -531,24 +551,24 @@
           </select>
         </label>
         <label title="How many points to scatter in the canvas. The TSP problem grows factorially with this number.">
-          <span>Points <span class="val" id="r-nVal">25</span></span>
-          <input id="r-n" type="range" min="6" max="60" value="25" />
+          <span>Points <span class="val" id="r-nVal">12</span></span>
+          <input id="r-n" type="range" min="5" max="20" value="12" />
         </label>
         <label data-when="ga" title="Number of candidate tours kept each generation. Larger populations explore more of the search space at the cost of slower per-step progress.">
-          <span>Population <span class="val" id="r-popVal">50</span></span>
-          <input id="r-pop" type="range" min="20" max="120" value="50" />
+          <span>Population <span class="val" id="r-popVal">30</span></span>
+          <input id="r-pop" type="range" min="10" max="80" value="30" />
         </label>
         <label data-when="ga" title="Probability that a child tour gets two cities swapped after crossover. Too low and the search stagnates; too high and good solutions get scrambled.">
           <span>Mutation rate <span class="val" id="r-mutVal">0.20</span></span>
           <input id="r-mut" type="range" min="1" max="60" value="20" />
         </label>
-        <label data-when="aco" title="Number of ants per iteration. Each ant constructs one tour. More ants explore more, but each iteration takes longer.">
-          <span>Ants <span class="val" id="r-antsVal">30</span></span>
-          <input id="r-ants" type="range" min="10" max="80" value="30" />
+        <label data-when="aco" title="Number of ants per iteration. Each ant constructs one tour. More ants explore more and reinforce good edges faster.">
+          <span>Ants <span class="val" id="r-antsVal">10</span></span>
+          <input id="r-ants" type="range" min="3" max="30" value="10" />
         </label>
         <label data-when="aco" title="How much pheromone evaporates each iteration. Higher means the colony forgets old solutions faster and keeps exploring; lower means it commits sooner.">
-          <span>Evaporation <span class="val" id="r-evapVal">0.10</span></span>
-          <input id="r-evap" type="range" min="1" max="60" value="10" />
+          <span>Evaporation <span class="val" id="r-evapVal">0.20</span></span>
+          <input id="r-evap" type="range" min="1" max="80" value="20" />
         </label>
         <div class="al-buttons al-buttons-row">
           <button id="r-run" class="al-btn primary">Run</button>
@@ -583,7 +603,7 @@
 
   </main>
 
-  <script type="module" src="/projects/algo-viz.js?v=5"></script>
+  <script type="module" src="/projects/algo-viz.js?v=6"></script>
   <script src="/sidebar.js"></script>
 </body>
 </html>

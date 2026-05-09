@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=5';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=5';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=5';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=5';
+} from './algo-core.mjs?v=6';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=6';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=6';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=6';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -504,9 +504,13 @@ gridUpdateDescriptions();
 
 const CANVAS_W = 1000, CANVAS_H = 600;
 const SVG_NS = 'http://www.w3.org/2000/svg';
-// Target one iteration every ~80 ms so the population/pheromone changes are
-// visible to a human eye instead of blurring through 200 iters/sec.
-const TOUR_TARGET_TICK_MS = 80;
+// Target tick rates picked so a viewer can see what's happening on each iteration.
+// GA: one generation per 220ms (~5 gens/sec). Population shifts visibly.
+// ACO: each iteration includes an animated walk of one sample ant through its
+// constructed tour, then a brief pause so pheromone changes register.
+const GA_TARGET_TICK_MS = 220;
+const ACO_ANT_STEP_MS = 110;
+const ACO_PAUSE_AFTER_MS = 280;
 const SPARK_W = 1000, SPARK_H = 90, SPARK_PAD = 14;
 
 const rEls = {
@@ -525,8 +529,8 @@ const rEls = {
 };
 
 const VIZ_DESC = {
-  ga: 'Each thin line is one tour from the current generation, all 50 of them overlaid. The bold red overlay is the best tour found so far. As selection and mutation do their work, the cloud tightens around the best.',
-  aco: 'Edge darkness shows how much pheromone has accumulated on that edge: the more ants have laid trail along it, the bolder it gets. The bold red overlay is the best tour found so far.',
+  ga: 'Each thin line is one tour from the current generation, all of them overlaid. The bold red tour is the best found so far. As selection and mutation do their work, the cloud tightens around the best.',
+  aco: 'Each iteration, one sample ant traces its tour live so you can see how it picks each next city. Edge darkness shows accumulated pheromone: the more often ants run an edge, the bolder it gets. The bold red overlay is the best tour found so far.',
 };
 
 let points = [];
@@ -652,7 +656,7 @@ function drawSpark(history) {
   const label = document.createElementNS(SVG_NS, 'text');
   label.setAttribute('x', SPARK_PAD);
   label.setAttribute('y', SPARK_PAD);
-  label.classList.add('label');
+  label.classList.add('al-spark-label');
   label.textContent = `min ${min.toFixed(0)}  /  max ${max.toFixed(0)}`;
   rEls.spark.appendChild(label);
 }
@@ -715,7 +719,12 @@ function tourBuildAlgo() {
   });
 }
 
-function tourTick() {
+// Generic next-tick scheduler. Stoppable via tourClearAlgo.
+function scheduleNext(fn, delay) {
+  tourTimer = setTimeout(fn, delay);
+}
+
+function gaTick() {
   if (!tourAlgo) return;
   const t0 = performance.now();
   tourAlgo.step();
@@ -723,8 +732,88 @@ function tourTick() {
   drawSpark(tourAlgo.history);
   tourSetStats();
   const elapsed = performance.now() - t0;
-  const delay = Math.max(0, TOUR_TARGET_TICK_MS - elapsed);
-  tourTimer = setTimeout(tourTick, delay);
+  scheduleNext(gaTick, Math.max(0, GA_TARGET_TICK_MS - elapsed));
+}
+
+// ACO: step internally, pick a sample ant, animate it crossing city by city,
+// then redraw the full state (pheromone + best) and pause briefly. The user
+// sees one ant trace its tour out from a starting node every iteration.
+function acoTick() {
+  if (!tourAlgo) return;
+  tourAlgo.step();
+  drawSpark(tourAlgo.history);
+  tourSetStats();
+
+  const tours = tourAlgo.lastTours;
+  const sampleAnt = tours && tours.length ? tours[Math.floor(Math.random() * tours.length)] : null;
+  if (!sampleAnt || sampleAnt.length < 2) {
+    drawAlgoState();
+    scheduleNext(acoTick, ACO_PAUSE_AFTER_MS);
+    return;
+  }
+  acoAnimateAnt(sampleAnt, () => {
+    drawAlgoState();
+    scheduleNext(acoTick, ACO_PAUSE_AFTER_MS);
+  });
+}
+
+function acoAnimateAnt(tour, onComplete) {
+  let stepIdx = 0;
+  function tick() {
+    if (!tourAlgo) return;          // stopped while animating
+    drawAcoFrame(tour, stepIdx);
+    if (stepIdx >= tour.length) {
+      onComplete();
+      return;
+    }
+    stepIdx++;
+    tourTimer = setTimeout(tick, ACO_ANT_STEP_MS);
+  }
+  tick();
+}
+
+// Draw the full state but with one ant's partial tour highlighted up to step idx.
+function drawAcoFrame(tour, idx) {
+  drawAlgoState();
+  if (!tour || tour.length < 2 || idx <= 0) return;
+
+  // Ant's traversed-so-far path
+  let d = '';
+  for (let i = 0; i <= Math.min(idx, tour.length - 1); i++) {
+    const p = points[tour[i]];
+    d += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
+  }
+  // Close back to start once the tour is complete
+  if (idx >= tour.length) {
+    const p = points[tour[0]];
+    d += 'L' + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
+  }
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.setAttribute('d', d);
+  path.classList.add('al-ant-trail');
+  // Insert before the points so they sit on top
+  const firstPoint = rEls.canvas.querySelector('.al-point');
+  rEls.canvas.insertBefore(path, firstPoint);
+
+  // Ring around the starting city to show "this ant started here"
+  const start = points[tour[0]];
+  const ring = document.createElementNS(SVG_NS, 'circle');
+  ring.setAttribute('cx', start.x);
+  ring.setAttribute('cy', start.y);
+  ring.setAttribute('r', 9);
+  ring.classList.add('al-ant-start');
+  rEls.canvas.insertBefore(ring, firstPoint);
+
+  // Marker at the ant's current position
+  if (idx < tour.length) {
+    const cur = points[tour[idx] !== undefined ? tour[idx] : tour[tour.length - 1]];
+    const marker = document.createElementNS(SVG_NS, 'circle');
+    marker.setAttribute('cx', cur.x);
+    marker.setAttribute('cy', cur.y);
+    marker.setAttribute('r', 6);
+    marker.classList.add('al-ant-marker');
+    rEls.canvas.appendChild(marker);
+  }
 }
 
 function tourRun() {
@@ -742,7 +831,8 @@ function tourRun() {
   drawAlgoState();
   drawSpark(tourAlgo.history);
   tourSetStats();
-  tourTick();
+  if (rEls.algo.value === 'aco') acoTick();
+  else gaTick();
 }
 
 function tourStop() {
