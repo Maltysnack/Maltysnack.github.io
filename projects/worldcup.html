@@ -373,27 +373,14 @@
 
     <section class="intro" style="margin-top:2.5rem;">
       <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-        Championship odds
-      </h3>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        How often each team wins the cup across <span id="wc-nsims">10,000</span>
-        simulated tournaments. Probabilities are real, the deterministic
-        bracket above just shows who would win if every match went to the
-        favourite.
-      </p>
-      <input type="search" class="wc-search" id="wc-odds-search" placeholder="Filter teams..." autocomplete="off" />
-      <div class="wc-odds" id="wc-odds"></div>
-    </section>
-
-    <section class="intro" style="margin-top:2.5rem;">
-      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
         How far each team is likely to go
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Probability each team reaches a given round. Teams flagged
-        <span class="wc-darkhorse-tag">dark horse</span>
+        Probability each team reaches a given round across
+        <span id="wc-nsims">10,000</span> simulated tournaments.
+        Teams flagged <span class="wc-darkhorse-tag">dark horse</span>
         are outside the top eight by raw rating but reach the semis in
-        more than 8&#37; of simulations.
+        more than 8&#37; of simulations. Showing top 24, search to find more.
       </p>
       <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
       <div class="wc-paths" id="wc-paths"></div>
@@ -421,11 +408,14 @@
         fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
       ])
         .then(([bracket, sim]) => {
+          Object.assign(FLAGS, sim.flags || {});
+          document.getElementById('wc-nsims').textContent =
+            (sim.n_simulations || 10000).toLocaleString('en-US');
           render(bracket);
           renderNext(sim);
-          renderOdds(sim);
           renderPaths(sim);
           wireSearch();
+          initSandbox(bracket, sim);
         })
         .catch(err => {
           document.getElementById('wc-bracket').innerHTML =
@@ -566,34 +556,7 @@
         `;
       }
 
-      const N_VISIBLE = 10;
-
-      function renderOdds(sim) {
-        Object.assign(FLAGS, sim.flags || {});
-        document.getElementById('wc-nsims').textContent =
-          (sim.n_simulations || 10000).toLocaleString('en-US');
-
-        const container = document.getElementById('wc-odds');
-        container.innerHTML = '';
-        const all = sim.team_stats;
-        const max = all[0].p_champion || 1;
-        all.forEach((s, i) => {
-          const widthPct = (100 * s.p_champion / max).toFixed(1);
-          const row = document.createElement('div');
-          row.className = 'wc-odds-row';
-          row.dataset.team = s.team.toLowerCase();
-          row.dataset.rank = String(i);
-          row.innerHTML = `
-            <span class="pos">${i + 1}</span>
-            ${flagImg(s.team)}
-            <span class="name">${s.team}</span>
-            <div class="wc-odds-bar" style="width:${widthPct}%"></div>
-            <span class="pct">${s.p_champion.toFixed(1)}%</span>
-          `;
-          container.appendChild(row);
-        });
-        applyFilter('', '#wc-odds .wc-odds-row');
-      }
+      const N_VISIBLE = 24;
 
       function renderPaths(sim) {
         // "Dark horse" = outside top 8 by rating, but reaches the SF

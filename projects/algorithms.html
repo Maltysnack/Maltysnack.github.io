@@ -313,65 +313,28 @@
     .al-point:hover { fill: var(--accent-red); }
     .al-edge {
       stroke: var(--accent-red);
-      stroke-width: 3.5;
+      stroke-width: 3;
       fill: none;
       stroke-linecap: round;
-      pointer-events: none;
-      filter: drop-shadow(0 0 1px rgba(179, 64, 47, 0.5));
-    }
-    .al-ghost {
-      stroke: var(--text-muted);
-      stroke-width: 1;
-      fill: none;
-      stroke-linecap: round;
-      pointer-events: none;
-    }
-    .al-pheromone {
-      stroke: var(--text);
-      stroke-linecap: round;
-      fill: none;
+      stroke-linejoin: round;
       pointer-events: none;
     }
     .al-buttons-row {
       grid-column: 1 / -1;
       flex-wrap: nowrap;
     }
-    .al-route-spark {
-      width: 100%;
-      height: 90px;
-      background: var(--bg-soft);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      display: block;
-    }
-    .al-spark-curve {
-      stroke: var(--accent-red);
-      stroke-width: 1.5;
-      fill: none;
-    }
-    .al-spark-label {
-      font-family: var(--font-mono);
-      font-size: 10px;
-      fill: var(--text-dim);
-    }
-    .al-ant-trail {
-      stroke: var(--accent-red);
-      stroke-width: 2.5;
-      fill: none;
-      stroke-linecap: round;
-      pointer-events: none;
-      opacity: 0.85;
-    }
-    .al-ant-marker {
+    .al-start-marker {
       fill: var(--accent-red);
       stroke: var(--bg);
       stroke-width: 2;
       pointer-events: none;
     }
-    .al-ant-start {
-      fill: none;
-      stroke: var(--accent-red);
-      stroke-width: 2;
+    .al-start-label {
+      fill: var(--accent-red);
+      font-family: var(--font-mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.1em;
       pointer-events: none;
     }
 
@@ -536,10 +499,10 @@
       <h2>Tour planning</h2>
 
       <p class="prose">
-        Visit every point and return to where you started, with the shortest total tour. With many points, exact search is impossible (50 points means more permutations than atoms in the room). These two algorithms don't guarantee the best tour, but they find a very good one fast and keep improving as long as you let them run.
+        Visit every point and return to where you started, with the shortest total tour. Even at 12 points, that's 240 million possible orderings, far too many to check exhaustively. Both algorithms below sample many candidate tours and keep improving the best one they find.
       </p>
       <p class="prose">
-        Click anywhere in the canvas to add a point, click an existing one to remove it. The current best tour redraws every iteration. The sparkline tracks tour length over time.
+        Click in the canvas to add a point, click an existing one to remove it. Hit Run: the algorithm searches for ~100 iterations, then draws its best tour starting from the marked node, one edge at a time.
       </p>
 
       <div class="al-controls">
@@ -582,20 +545,14 @@
         <svg id="r-canvas" class="al-route-canvas" viewBox="0 0 1000 600" preserveAspectRatio="xMidYMid meet"></svg>
       </div>
 
-      <div class="al-canvas-wrap">
-        <svg id="r-spark" class="al-route-spark" viewBox="0 0 1000 90" preserveAspectRatio="none"></svg>
-      </div>
-
       <div class="al-desc">
         <p class="al-desc-line"><span class="al-desc-tag" id="r-algoTag"></span><span id="r-algoDesc"></span></p>
-        <p class="al-desc-line"><span class="al-desc-tag" id="r-vizTag"></span><span id="r-vizDesc"></span></p>
       </div>
 
       <div class="al-stats">
-        <div class="al-stat"><span class="al-stat-label">Iteration</span><span class="al-stat-value" id="r-iter">0</span></div>
-        <div class="al-stat"><span class="al-stat-label">Best length</span><span class="al-stat-value" id="r-best">0</span></div>
-        <div class="al-stat"><span class="al-stat-label">Improvement</span><span class="al-stat-value" id="r-improve">0%</span></div>
-        <div class="al-stat"><span class="al-stat-label">Iter/sec</span><span class="al-stat-value" id="r-rate">0</span></div>
+        <div class="al-stat"><span class="al-stat-label">Iterations</span><span class="al-stat-value" id="r-iter">0</span></div>
+        <div class="al-stat"><span class="al-stat-label">Best tour length</span><span class="al-stat-value" id="r-best">0</span></div>
+        <div class="al-stat"><span class="al-stat-label">Improvement vs random</span><span class="al-stat-value" id="r-improve">0%</span></div>
       </div>
 
       <p class="al-status" id="r-status"></p>
@@ -603,7 +560,7 @@
 
   </main>
 
-  <script type="module" src="/projects/algo-viz.js?v=6"></script>
+  <script type="module" src="/projects/algo-viz.js?v=7"></script>
   <script src="/sidebar.js"></script>
 </body>
 </html>

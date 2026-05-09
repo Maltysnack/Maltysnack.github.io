@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=6';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=6';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=6';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=6';
+} from './algo-core.mjs?v=7';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=7';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=7';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=7';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -504,14 +504,13 @@ gridUpdateDescriptions();
 
 const CANVAS_W = 1000, CANVAS_H = 600;
 const SVG_NS = 'http://www.w3.org/2000/svg';
-// Target tick rates picked so a viewer can see what's happening on each iteration.
-// GA: one generation per 220ms (~5 gens/sec). Population shifts visibly.
-// ACO: each iteration includes an animated walk of one sample ant through its
-// constructed tour, then a brief pause so pheromone changes register.
-const GA_TARGET_TICK_MS = 220;
-const ACO_ANT_STEP_MS = 110;
-const ACO_PAUSE_AFTER_MS = 280;
-const SPARK_W = 1000, SPARK_H = 90, SPARK_PAD = 14;
+// New flow: run K iterations rapidly in the background, then reveal the best
+// tour edge-by-edge from a fixed starting city. The user sees one clear
+// answer being constructed, the way the grid pathfinder reveals its path.
+const ITERATIONS_PER_RUN = { ga: 200, aco: 80 };
+const COMPUTE_BUDGET_MS = 12;
+const REVEAL_EDGE_MS = 320;
+const REVEAL_INITIAL_PAUSE_MS = 500;
 
 const rEls = {
   algo: $('r-algo'), n: $('r-n'), nVal: $('r-nVal'),
@@ -520,17 +519,11 @@ const rEls = {
   ants: $('r-ants'), antsVal: $('r-antsVal'),
   evap: $('r-evap'), evapVal: $('r-evapVal'),
   run: $('r-run'), stop: $('r-stop'), rand: $('r-rand'), clear: $('r-clear'),
-  canvas: $('r-canvas'), spark: $('r-spark'),
+  canvas: $('r-canvas'),
   algoTag: $('r-algoTag'), algoDesc: $('r-algoDesc'),
-  vizTag: $('r-vizTag'), vizDesc: $('r-vizDesc'),
   iter: $('r-iter'), best: $('r-best'),
-  improve: $('r-improve'), rate: $('r-rate'),
+  improve: $('r-improve'),
   status: $('r-status'),
-};
-
-const VIZ_DESC = {
-  ga: 'Each thin line is one tour from the current generation, all of them overlaid. The bold red tour is the best found so far. As selection and mutation do their work, the cloud tightens around the best.',
-  aco: 'Each iteration, one sample ant traces its tour live so you can see how it picks each next city. Edge darkness shows accumulated pheromone: the more often ants run an edge, the bolder it gets. The bold red overlay is the best tour found so far.',
 };
 
 let points = [];
@@ -574,91 +567,8 @@ function appendPoints() {
   }
 }
 
-// Render the full algorithm state: ghost layer (population or pheromone) +
-// best tour + points, in that draw order so points sit on top.
-function drawAlgoState() {
-  rEls.canvas.innerHTML = '';
-  if (!tourAlgo) { appendPoints(); return; }
-
-  if (rEls.algo.value === 'ga') {
-    const pop = tourAlgo.population;
-    if (pop) {
-      for (const tour of pop) {
-        const p = document.createElementNS(SVG_NS, 'path');
-        p.setAttribute('d', tourPath(tour));
-        p.setAttribute('opacity', '0.07');
-        p.classList.add('al-ghost');
-        rEls.canvas.appendChild(p);
-      }
-    }
-  } else {
-    const tau = tourAlgo.pheromone;
-    if (tau) {
-      let max = 0;
-      for (let i = 0; i < tau.length; i++) {
-        for (let j = i + 1; j < tau.length; j++) if (tau[i][j] > max) max = tau[i][j];
-      }
-      if (max > 0) {
-        for (let i = 0; i < tau.length; i++) {
-          for (let j = i + 1; j < tau.length; j++) {
-            const ratio = tau[i][j] / max;
-            if (ratio < 0.08) continue;
-            const opacity = Math.min(0.7, ratio);
-            const width = (0.4 + ratio * 1.8).toFixed(2);
-            const line = document.createElementNS(SVG_NS, 'line');
-            line.setAttribute('x1', points[i].x);
-            line.setAttribute('y1', points[i].y);
-            line.setAttribute('x2', points[j].x);
-            line.setAttribute('y2', points[j].y);
-            line.setAttribute('opacity', opacity.toFixed(2));
-            line.setAttribute('stroke-width', width);
-            line.classList.add('al-pheromone');
-            rEls.canvas.appendChild(line);
-          }
-        }
-      }
-    }
-  }
-
-  if (tourAlgo.best && tourAlgo.best.length > 1) {
-    const path = document.createElementNS(SVG_NS, 'path');
-    path.setAttribute('d', tourPath(tourAlgo.best));
-    path.classList.add('al-edge');
-    rEls.canvas.appendChild(path);
-  }
-
-  appendPoints();
-}
-
 function rebuildCanvas() {
-  if (tourAlgo) drawAlgoState();
-  else drawPointsOnly();
-}
-
-function drawSpark(history) {
-  rEls.spark.innerHTML = '';
-  if (!history || history.length < 2) return;
-  const min = Math.min(...history);
-  const max = Math.max(...history);
-  const range = max - min || 1;
-  const step = (SPARK_W - SPARK_PAD * 2) / (history.length - 1);
-  let d = '';
-  for (let i = 0; i < history.length; i++) {
-    const x = SPARK_PAD + i * step;
-    const y = SPARK_H - SPARK_PAD - ((history[i] - min) / range) * (SPARK_H - SPARK_PAD * 2);
-    d += (i === 0 ? 'M' : 'L') + x.toFixed(1) + ' ' + y.toFixed(1);
-  }
-  const path = document.createElementNS(SVG_NS, 'path');
-  path.setAttribute('d', d);
-  path.classList.add('curve');
-  rEls.spark.appendChild(path);
-
-  const label = document.createElementNS(SVG_NS, 'text');
-  label.setAttribute('x', SPARK_PAD);
-  label.setAttribute('y', SPARK_PAD);
-  label.classList.add('al-spark-label');
-  label.textContent = `min ${min.toFixed(0)}  /  max ${max.toFixed(0)}`;
-  rEls.spark.appendChild(label);
+  drawPointsOnly();
 }
 
 function tourClearAlgo() {
@@ -671,7 +581,6 @@ function tourSetStats() {
     rEls.iter.textContent = '0';
     rEls.best.textContent = '0';
     rEls.improve.textContent = '0%';
-    rEls.rate.textContent = '0';
     return;
   }
   rEls.iter.textContent = tourAlgo.iteration.toLocaleString();
@@ -680,8 +589,6 @@ function tourSetStats() {
     ? ((tourInitialBest - tourAlgo.bestLength) / tourInitialBest * 100)
     : 0;
   rEls.improve.textContent = `${improvement.toFixed(1)}%`;
-  const elapsed = (performance.now() - tourStartTime) / 1000;
-  rEls.rate.textContent = elapsed > 0 ? (tourAlgo.iteration / elapsed).toFixed(0) : '0';
 }
 
 function tourSetStatus(msg, isError = false) {
@@ -701,8 +608,6 @@ function tourUpdateDescriptions() {
   const algo = rEls.algo.value;
   rEls.algoTag.textContent = tspAlgorithmLabels[algo] ?? '';
   rEls.algoDesc.textContent = tspAlgorithmDescriptions[algo] ?? '';
-  rEls.vizTag.textContent = algo === 'ga' ? 'Population' : 'Pheromone';
-  rEls.vizDesc.textContent = VIZ_DESC[algo] ?? '';
 }
 
 function tourBuildAlgo() {
@@ -719,101 +624,93 @@ function tourBuildAlgo() {
   });
 }
 
-// Generic next-tick scheduler. Stoppable via tourClearAlgo.
-function scheduleNext(fn, delay) {
-  tourTimer = setTimeout(fn, delay);
-}
-
-function gaTick() {
-  if (!tourAlgo) return;
-  const t0 = performance.now();
-  tourAlgo.step();
-  drawAlgoState();
-  drawSpark(tourAlgo.history);
-  tourSetStats();
-  const elapsed = performance.now() - t0;
-  scheduleNext(gaTick, Math.max(0, GA_TARGET_TICK_MS - elapsed));
-}
-
-// ACO: step internally, pick a sample ant, animate it crossing city by city,
-// then redraw the full state (pheromone + best) and pause briefly. The user
-// sees one ant trace its tour out from a starting node every iteration.
-function acoTick() {
-  if (!tourAlgo) return;
-  tourAlgo.step();
-  drawSpark(tourAlgo.history);
-  tourSetStats();
-
-  const tours = tourAlgo.lastTours;
-  const sampleAnt = tours && tours.length ? tours[Math.floor(Math.random() * tours.length)] : null;
-  if (!sampleAnt || sampleAnt.length < 2) {
-    drawAlgoState();
-    scheduleNext(acoTick, ACO_PAUSE_AFTER_MS);
-    return;
+// Pick a consistent starting city for the reveal: the leftmost point. Stable
+// regardless of which ordering the algorithm picked internally.
+function pickStartCity() {
+  let best = 0;
+  for (let i = 1; i < points.length; i++) {
+    if (points[i].x < points[best].x) best = i;
+    else if (points[i].x === points[best].x && points[i].y < points[best].y) best = i;
   }
-  acoAnimateAnt(sampleAnt, () => {
-    drawAlgoState();
-    scheduleNext(acoTick, ACO_PAUSE_AFTER_MS);
-  });
+  return best;
 }
 
-function acoAnimateAnt(tour, onComplete) {
-  let stepIdx = 0;
+function rotateTourToStart(tour, startCity) {
+  const i = tour.indexOf(startCity);
+  if (i <= 0) return tour;
+  return [...tour.slice(i), ...tour.slice(0, i)];
+}
+
+// Phase 1: run the algorithm in time-budgeted chunks, yielding to the UI
+// between chunks so the iteration counter ticks up smoothly.
+function runIterations(target, onDone) {
   function tick() {
-    if (!tourAlgo) return;          // stopped while animating
-    drawAcoFrame(tour, stepIdx);
-    if (stepIdx >= tour.length) {
-      onComplete();
-      return;
+    if (!tourAlgo) return;                // stopped
+    if (tourAlgo.iteration >= target) { onDone(); return; }
+    const t0 = performance.now();
+    while (tourAlgo.iteration < target && performance.now() - t0 < COMPUTE_BUDGET_MS) {
+      tourAlgo.step();
     }
-    stepIdx++;
-    tourTimer = setTimeout(tick, ACO_ANT_STEP_MS);
+    tourSetStats();
+    tourSetStatus(`searching... iteration ${tourAlgo.iteration} / ${target}`);
+    tourTimer = setTimeout(tick, 0);
   }
   tick();
 }
 
-// Draw the full state but with one ant's partial tour highlighted up to step idx.
-function drawAcoFrame(tour, idx) {
-  drawAlgoState();
-  if (!tour || tour.length < 2 || idx <= 0) return;
+// Phase 2: draw the best tour edge-by-edge from the chosen starting city.
+function revealTour(tour, onDone) {
+  const startCity = pickStartCity();
+  const ordered = rotateTourToStart(tour, startCity);
+  // Append the start at the end so we close the loop visually.
+  const visit = [...ordered, ordered[0]];
+  let edgeIdx = 0;
 
-  // Ant's traversed-so-far path
-  let d = '';
-  for (let i = 0; i <= Math.min(idx, tour.length - 1); i++) {
-    const p = points[tour[i]];
-    d += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
-  }
-  // Close back to start once the tour is complete
-  if (idx >= tour.length) {
-    const p = points[tour[0]];
-    d += 'L' + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
-  }
-  const path = document.createElementNS(SVG_NS, 'path');
-  path.setAttribute('d', d);
-  path.classList.add('al-ant-trail');
-  // Insert before the points so they sit on top
-  const firstPoint = rEls.canvas.querySelector('.al-point');
-  rEls.canvas.insertBefore(path, firstPoint);
+  function drawFrame() {
+    drawPointsOnly();
+    // Mark the start city
+    const sp = points[startCity];
+    const ring = document.createElementNS(SVG_NS, 'circle');
+    ring.setAttribute('cx', sp.x);
+    ring.setAttribute('cy', sp.y);
+    ring.setAttribute('r', 11);
+    ring.classList.add('al-start-marker');
+    rEls.canvas.insertBefore(ring, rEls.canvas.firstChild);
+    const label = document.createElementNS(SVG_NS, 'text');
+    label.setAttribute('x', sp.x);
+    label.setAttribute('y', sp.y - 16);
+    label.setAttribute('text-anchor', 'middle');
+    label.classList.add('al-start-label');
+    label.textContent = 'START';
+    rEls.canvas.appendChild(label);
 
-  // Ring around the starting city to show "this ant started here"
-  const start = points[tour[0]];
-  const ring = document.createElementNS(SVG_NS, 'circle');
-  ring.setAttribute('cx', start.x);
-  ring.setAttribute('cy', start.y);
-  ring.setAttribute('r', 9);
-  ring.classList.add('al-ant-start');
-  rEls.canvas.insertBefore(ring, firstPoint);
-
-  // Marker at the ant's current position
-  if (idx < tour.length) {
-    const cur = points[tour[idx] !== undefined ? tour[idx] : tour[tour.length - 1]];
-    const marker = document.createElementNS(SVG_NS, 'circle');
-    marker.setAttribute('cx', cur.x);
-    marker.setAttribute('cy', cur.y);
-    marker.setAttribute('r', 6);
-    marker.classList.add('al-ant-marker');
-    rEls.canvas.appendChild(marker);
+    // Draw edges up to edgeIdx
+    if (edgeIdx > 0) {
+      let d = '';
+      for (let i = 0; i <= edgeIdx; i++) {
+        const p = points[visit[i]];
+        d += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
+      }
+      const path = document.createElementNS(SVG_NS, 'path');
+      path.setAttribute('d', d);
+      path.classList.add('al-edge');
+      rEls.canvas.insertBefore(path, rEls.canvas.firstChild.nextSibling);
+    }
   }
+
+  function tick() {
+    if (!tourAlgo) return;
+    drawFrame();
+    if (edgeIdx >= visit.length - 1) { onDone(); return; }
+    edgeIdx++;
+    tourSetStatus(`drawing tour: ${edgeIdx} / ${visit.length - 1} edges`);
+    tourTimer = setTimeout(tick, REVEAL_EDGE_MS);
+  }
+
+  // Brief pause showing just the start marker before the first edge appears.
+  drawFrame();
+  tourSetStatus('drawing tour from START...');
+  tourTimer = setTimeout(tick, REVEAL_INITIAL_PAUSE_MS);
 }
 
 function tourRun() {
@@ -825,14 +722,23 @@ function tourRun() {
   tourAlgo = tourBuildAlgo();
   tourInitialBest = tourAlgo.bestLength;
   tourStartTime = performance.now();
-  tourSetStatus('running...');
   rEls.run.disabled = true;
   rEls.stop.disabled = false;
-  drawAlgoState();
-  drawSpark(tourAlgo.history);
+  drawPointsOnly();
   tourSetStats();
-  if (rEls.algo.value === 'aco') acoTick();
-  else gaTick();
+  tourSetStatus('starting search...');
+
+  const target = ITERATIONS_PER_RUN[rEls.algo.value] ?? 100;
+  runIterations(target, () => {
+    if (!tourAlgo) return;
+    revealTour(tourAlgo.best, () => {
+      const length = tourAlgo.bestLength.toFixed(0);
+      const improvement = ((tourInitialBest - tourAlgo.bestLength) / tourInitialBest * 100).toFixed(1);
+      tourSetStatus(`done. best tour length ${length}, ${improvement}% better than the random starting tour.`);
+      rEls.run.disabled = false;
+      rEls.stop.disabled = true;
+    });
+  });
 }
 
 function tourStop() {
@@ -848,7 +754,7 @@ function tourRandomise() {
   tourClearAlgo();
   points = rerollPoints(+rEls.n.value);
   rebuildCanvas();
-  drawSpark([]);
+
   tourSetStats();
   tourSetStatus('');
 }
@@ -858,7 +764,7 @@ function tourClear() {
   tourClearAlgo();
   points = [];
   rebuildCanvas();
-  drawSpark([]);
+
   tourSetStats();
   tourSetStatus('Click in the canvas to place points.');
   rEls.nVal.textContent = '0';
@@ -920,7 +826,7 @@ rEls.evapVal.textContent = (+rEls.evap.value / 100).toFixed(2);
 rEls.stop.disabled = true;
 points = rerollPoints(+rEls.n.value);
 drawPointsOnly();
-drawSpark([]);
+
 tourSetStats();
 tourUpdateVisibility();
 tourUpdateDescriptions();
