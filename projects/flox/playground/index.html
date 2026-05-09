@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flox Playground - maltysnack</title>
+  <meta name="description" content="Flox playground: write a flow-network program and see it run live in the browser." />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+
+    .pg-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .pg-eyebrow a {
+      color: var(--text-dim);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .pg-eyebrow a:hover { color: var(--text); border-bottom-color: var(--text-dim); }
+    .pg-eyebrow .sep { padding: 0 8px; opacity: 0.5; }
+
+    .pg-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+    }
+    .pg-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .pg-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      height: calc(100vh - 240px);
+      min-height: 480px;
+    }
+    .pg-pane {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    .pg-pane-header {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .pg-pane-header .pg-status {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+    .pg-pane-header .pg-status.pg-status-error { color: var(--accent-red); }
+    .pg-pane-header .pg-status.pg-status-ok    { color: var(--text-muted); }
+
+    #pg-editor {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    #pg-output {
+      flex: 1 1 auto;
+      margin: 0;
+      padding: 14px 16px;
+      overflow: auto;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.82em;
+      line-height: 1.55;
+      color: var(--text);
+      white-space: pre;
+      tab-size: 2;
+    }
+    #pg-output .pg-err {
+      color: var(--accent-red);
+    }
+
+    @media (max-width: 900px) {
+      .pg-grid {
+        grid-template-columns: 1fr;
+        height: auto;
+      }
+      .pg-pane { height: 480px; }
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="full">
+
+    <header class="page-header">
+      <p class="pg-eyebrow"><a href="/projects/flox/">Flox</a><span class="sep">/</span>Playground</p>
+      <h1 class="page-title">Playground</h1>
+      <p class="pg-meta">
+        <span>v0.2</span><span>auto-runs as you type</span>
+      </p>
+    </header>
+
+    <div class="pg-grid">
+      <div class="pg-pane">
+        <div class="pg-pane-header">
+          <span>Program</span>
+          <span class="pg-status" id="pg-status">ready</span>
+        </div>
+        <div id="pg-editor"></div>
+      </div>
+      <div class="pg-pane">
+        <div class="pg-pane-header">
+          <span>Output</span>
+        </div>
+        <pre id="pg-output"></pre>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+
+  <!-- Monaco loader (AMD) from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs/loader.js"></script>
+  <script>
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs' } });
+    require(['vs/editor/editor.main'], async () => {
+      const { interpret } = await import('./flox.js');
+
+      // Flox language definition (Monarch tokenizer)
+      monaco.languages.register({ id: 'flox' });
+      monaco.languages.setLanguageConfiguration('flox', {
+        comments: { lineComment: '//', blockComment: ['/*', '*/'] },
+        brackets: [['{', '}'], ['[', ']']],
+        autoClosingPairs: [
+          { open: '{', close: '}' },
+          { open: '[', close: ']' },
+          { open: '/*', close: '*/' },
+        ],
+      });
+      monaco.languages.setMonarchTokensProvider('flox', {
+        keywords: ['system', 'river', 'dam', 'outlet', 'list', 'map', 'print', 'help'],
+        tokenizer: {
+          root: [
+            [/\/\/.*$/, 'comment'],
+            [/\/\*/, { token: 'comment', next: '@blockcomment' }],
+            [/[a-zA-Z][a-zA-Z0-9_]*/, {
+              cases: { '@keywords': 'keyword', '@default': 'identifier' },
+            }],
+            [/\d+(\.\d+)?/, 'number'],
+            [/->/, 'operator'],
+            [/[:;,%]/, 'delimiter'],
+            [/[{}[\]]/, '@brackets'],
+            [/\s+/, 'white'],
+          ],
+          blockcomment: [
+            [/\*\//, { token: 'comment', next: '@pop' }],
+            [/[^*]+/, 'comment'],
+            [/./, 'comment'],
+          ],
+        },
+      });
+
+      // Pick a Monaco theme that matches the site's current data-theme.
+      function syncTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        monaco.editor.setTheme(isLight ? 'vs' : 'vs-dark');
+      }
+      // Re-sync if the user toggles the site theme.
+      const obs = new MutationObserver(syncTheme);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      syncTheme();
+
+      const DEFAULT_PROGRAM = `// Edit me. The output panel updates as you type.
+system Demo;
+
+Spring    -> Confluence -> Outlet;
+Tributary -> Confluence;
+
+river  Spring     { base: 2, peak: 2.0, decay: 0.7 }
+river  Tributary  { base: 1, peak: 1.5, decay: 0.6 }
+river  Confluence { base: 3, peak: 1.8 }
+outlet Outlet;
+
+map Demo;
+print Demo 5;
+`;
+
+      const editor = monaco.editor.create(document.getElementById('pg-editor'), {
+        value: DEFAULT_PROGRAM,
+        language: 'flox',
+        fontFamily: 'JetBrains Mono, monospace',
+        fontSize: 13,
+        lineNumbers: 'on',
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        renderLineHighlight: 'all',
+        scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+      });
+
+      const outputEl = document.getElementById('pg-output');
+      const statusEl = document.getElementById('pg-status');
+
+      let timer = null;
+      function run() {
+        try {
+          const result = interpret(editor.getValue());
+          if (result.hadError) {
+            outputEl.innerHTML = '';
+            const errSpan = document.createElement('span');
+            errSpan.className = 'pg-err';
+            errSpan.textContent = result.stderr;
+            outputEl.appendChild(errSpan);
+            if (result.stdout) {
+              outputEl.appendChild(document.createTextNode('\n' + result.stdout));
+            }
+            statusEl.textContent = 'error';
+            statusEl.className = 'pg-status pg-status-error';
+          } else {
+            outputEl.textContent = result.stdout;
+            statusEl.textContent = 'ok';
+            statusEl.className = 'pg-status pg-status-ok';
+          }
+        } catch (e) {
+          outputEl.textContent = String(e);
+          statusEl.textContent = 'crash';
+          statusEl.className = 'pg-status pg-status-error';
+        }
+      }
+
+      editor.onDidChangeModelContent(() => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(run, 200);
+      });
+
+      run();
+    });
+  </script>
+</body>
+</html>
