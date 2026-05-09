@@ -382,6 +382,61 @@
       padding-left: 0.2rem;
     }
     .wc-sandbox-pill .x:hover { color: inherit; }
+
+    /* Tournament view: tabs + mode toggle + sandbox panel */
+    .wc-tournament-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem 1.2rem;
+      align-items: center;
+      margin-top: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    .wc-toggle {
+      display: inline-flex;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+    .wc-toggle button {
+      font: inherit;
+      font-size: 0.85rem;
+      font-family: inherit;
+      padding: 0.32rem 0.85rem;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wc-toggle button + button {
+      border-left: 1px solid rgba(128,128,128,0.3);
+    }
+    .wc-toggle button:hover { background: rgba(180,150,80,0.08); }
+    .wc-toggle button.active {
+      background: rgba(180,150,80,0.18);
+      color: var(--text-body, inherit);
+      font-weight: 500;
+    }
+    .wc-roll {
+      font: inherit;
+      font-size: 0.85rem;
+      font-family: inherit;
+      padding: 0.3rem 0.85rem;
+      border: 1px solid rgba(180,150,80,0.55);
+      border-radius: 999px;
+      background: transparent;
+      color: inherit;
+      cursor: pointer;
+    }
+    .wc-roll:hover { background: rgba(180,150,80,0.12); }
+    .wc-roll[hidden] { display: none; }
+    .wc-tournament-meta {
+      font-size: 0.8rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      min-height: 1.1em;
+    }
   </style>
 </head>
 <body>
@@ -422,73 +477,59 @@
 
     <section class="intro">
       <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Pre-tournament prediction
+        Tournament
       </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;">
-        Bracket predicted from current Elo ratings (model
-        <code id="wc-model">...</code>). Refreshes when the model improves.
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+        Switch between knockout bracket and group stage. The default view
+        shows averaged predictions from <span id="wc-nsims">10,000</span>
+        Monte Carlo runs. Single sim rolls one random tournament with
+        scores. Sandbox lets you adjust any team's rating and roll
+        scenarios from there.
       </p>
-      <div>
-        Predicted champion:
-        <span class="wc-champion-banner" id="wc-champion">...</span>
+
+      <div class="wc-tournament-bar">
+        <div class="wc-toggle" role="tablist" aria-label="View">
+          <button data-tab="knockouts" class="active" type="button">Knockouts</button>
+          <button data-tab="groups" type="button">Group stage</button>
+        </div>
+        <div class="wc-toggle" role="tablist" aria-label="Mode">
+          <button data-mode="average" class="active" type="button">Model average</button>
+          <button data-mode="single" type="button">Single sim</button>
+          <button data-mode="sandbox" type="button">Sandbox</button>
+        </div>
+        <button class="wc-roll" id="wc-roll-btn" type="button" hidden>Roll</button>
       </div>
-    </section>
 
-    <div class="wc-bracket-wrap">
-      <div class="wc-bracket" id="wc-bracket"></div>
-    </div>
+      <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
 
-    <section class="intro" style="margin-top:2.5rem;">
-      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-        How far each team is likely to go
-      </h3>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Probability each team reaches a given round across
-        <span id="wc-nsims">10,000</span> simulated tournaments.
-        Teams flagged <span class="wc-darkhorse-tag">dark horse</span>
-        are outside the top eight by raw rating but reach the semis in
-        more than 8&#37; of simulations. Showing top 24, search to find more.
-      </p>
-      <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
-      <div class="wc-paths" id="wc-paths"></div>
-    </section>
-
-    <div class="divider"></div>
-
-    <section class="intro">
-      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Sandbox
-      </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Boost or drop any team's effective rating, then roll the dice.
-        Each roll is one random tournament from our Monte Carlo, same
-        Poisson goals model used in the predictions above, with scores
-        and penalty shootouts. Roll again to see a different outcome.
-      </p>
-      <div class="wc-sandbox-controls">
+      <div class="wc-sandbox-controls" id="wc-sandbox-panel" hidden>
         <input list="wc-team-list" id="wc-sandbox-team" placeholder="Pick a team" autocomplete="off" />
         <datalist id="wc-team-list"></datalist>
         <input type="number" id="wc-sandbox-boost" placeholder="Boost" step="25" />
         <button id="wc-sandbox-add" type="button">Apply</button>
-        <button id="wc-sandbox-roll" type="button">Roll</button>
         <button id="wc-sandbox-reset" type="button">Reset</button>
       </div>
       <div class="wc-sandbox-active" id="wc-sandbox-active"></div>
     </section>
 
-    <div class="wc-bracket-wrap">
-      <div class="wc-bracket" id="wc-sandbox-bracket"></div>
-    </div>
+    <!-- Tournament view: holds either the bracket or the group cards -->
+    <div id="wc-tournament-view"></div>
 
-    <section class="intro" style="margin-top:2.5rem;">
+    <div class="divider"></div>
+
+    <section class="intro" style="margin-top:1rem;">
       <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-        Group stage
+        How far each team is likely to go
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Predicted final standings. Top two from each group plus the
-        eight best third-placed teams advance.
+        Probability each team reaches a given round, averaged across all
+        Monte Carlo runs (does not change with the toggles above). Teams
+        flagged <span class="wc-darkhorse-tag">dark horse</span> are
+        outside the top eight by raw rating but reach the semis in more
+        than 8&#37; of simulations. Showing top 24, search to find more.
       </p>
-      <div class="wc-groups" id="wc-groups"></div>
+      <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
+      <div class="wc-paths" id="wc-paths"></div>
     </section>
 
   </main>
@@ -497,120 +538,235 @@
 
   <script>
     (function () {
-      Promise.all([
-        fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' }).then(r => r.json()),
-        fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
-      ])
-        .then(([bracket, sim]) => {
-          Object.assign(FLAGS, sim.flags || {});
-          document.getElementById('wc-nsims').textContent =
-            (sim.n_simulations || 10000).toLocaleString('en-US');
-          render(bracket);
-          renderNext(sim);
-          renderPaths(sim);
-          wireSearch();
-          initSandbox(bracket, sim);
-        })
-        .catch(err => {
-          document.getElementById('wc-bracket').innerHTML =
-            '<p style="color:var(--text-muted)">Bracket data not available.</p>';
-          console.error(err);
-        });
-
+      // ── Constants ────────────────────────────────────────────────
       const FLAGS = {};
+      const N_VISIBLE = 24;
+
+      // Calibration constants mirror src/worldcup/calibration.py
+      const CAL = {
+        LAMBDA_HOME: 1.41,
+        LAMBDA_AWAY: 1.07,
+        SLOPE_HOME: 0.00204,
+        SLOPE_AWAY: -0.00255,
+        HOME_ADV: 50,
+        PEN_DIVISOR: 600,
+      };
+
+      // Bracket structure (matches src/worldcup/bracket.py)
+      const R32_PAIRINGS_JS = [
+        [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
+        [['W','F'],['R','C']],   [['W','C'],['R','F']],
+        [['W','I'],['3','CDFGH']], [['R','E'],['R','I']],
+        [['W','A'],['3','CEFHI']], [['W','L'],['3','EHIJK']],
+        [['W','D'],['3','BEFIJ']], [['W','G'],['3','AEHIJ']],
+        [['R','K'],['R','L']],   [['W','H'],['R','J']],
+        [['W','B'],['3','EFGIJ']], [['W','J'],['R','H']],
+        [['W','K'],['3','DEIJL']], [['R','D'],['R','G']],
+      ];
+      const R16_FEEDS_JS = [[89,74,77],[90,73,75],[91,76,78],[92,79,80],
+                            [93,83,84],[94,81,82],[95,86,88],[96,85,87]];
+      const QF_FEEDS_JS = [[97,89,90],[98,93,94],[99,91,92],[100,95,96]];
+      const SF_FEEDS_JS = [[101,97,98],[102,99,100]];
+      const FINAL_FEED_JS = [104,101,102];
+      const R32_VISUAL_ORDER_JS = [74,77,73,75,83,84,81,82,76,78,79,80,86,88,85,87];
+      const R16_VISUAL_ORDER_JS = [89,90,93,94,91,92,95,96];
+      const QF_VISUAL_ORDER_JS  = [97,98,99,100];
+      const SF_VISUAL_ORDER_JS  = [101,102];
+
+      // ── State ────────────────────────────────────────────────────
+      const STATE = {
+        tab: 'knockouts',     // 'knockouts' | 'groups'
+        mode: 'average',      // 'average' | 'single' | 'sandbox'
+        bumps: {},            // team -> elo bump (sandbox only)
+        currentSim: null,     // { groups, knockout } cached single sample
+      };
+      const DATA = { bracket: null, sim: null };
+      const SANDBOX = { groups: {}, baseRatings: {}, fixtures: [] };
+
+      // ── Helpers ──────────────────────────────────────────────────
       function flagSrc(team) {
         const code = FLAGS[team];
         return code ? `https://flagcdn.com/w20/${code}.png` : null;
       }
       function flagImg(team) {
         const src = flagSrc(team);
-        if (!src) return '';
-        return `<img class="wc-flag" src="${src}" alt="" loading="lazy" />`;
+        return src ? `<img class="wc-flag" src="${src}" alt="" loading="lazy" />` : '';
       }
-
-      function render(data) {
-        Object.assign(FLAGS, data.flags || {});
-        document.getElementById('wc-model').textContent = data.model_version;
-        const champ = document.getElementById('wc-champion');
-        champ.innerHTML = `${flagImg(data.knockout.champion)} <span>${data.knockout.champion}</span>`;
-        renderBracket(data.knockout);
-        renderGroups(data.groups);
+      function poisson(lambda) {
+        const L = Math.exp(-lambda);
+        let k = 0, p = 1;
+        do { k++; p *= Math.random(); } while (p > L);
+        return k - 1;
       }
-
-      function renderBracket(ko) {
-        const rounds = [
-          ['Round of 32', ko.round_of_32, false],
-          ['Round of 16', ko.round_of_16, false],
-          ['Quarter-finals', ko.quarter_finals, false],
-          ['Semi-finals', ko.semi_finals, false],
-          ['Final', ko.final, true],
+      function expectedGoals(effGap) {
+        return [
+          CAL.LAMBDA_HOME * Math.exp(CAL.SLOPE_HOME * effGap),
+          CAL.LAMBDA_AWAY * Math.exp(CAL.SLOPE_AWAY * effGap),
         ];
-        const container = document.getElementById('wc-bracket');
-        container.innerHTML = '';
-        rounds.forEach(([label, matches, isFinal]) => {
-          const col = document.createElement('div');
-          col.className = 'wc-round' + (isFinal ? ' wc-final' : '');
-          const lbl = document.createElement('div');
-          lbl.className = 'wc-round-label';
-          lbl.textContent = label;
-          col.appendChild(lbl);
-          // Matches container: CSS grid with N rows, so each match lands
-          // at the centroid of its slot. R16 lands midway between two R32
-          // matches automatically because the grids have proportional
-          // row counts (16, 8, 4, 2, 1).
-          const matchesWrap = document.createElement('div');
-          matchesWrap.className = 'wc-round-matches';
-          matchesWrap.style.setProperty('--n', matches.length);
-          matches.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'wc-match';
-            card.innerHTML = `
-              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
-                ${flagImg(m.team_a)}
-                <span class="wc-team-name">${m.team_a}</span>
-              </div>
-              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
-                ${flagImg(m.team_b)}
-                <span class="wc-team-name">${m.team_b}</span>
-              </div>
-            `;
-            matchesWrap.appendChild(card);
+      }
+      function simMatch(rA, rB, neutral, ko) {
+        const effA = rA + (neutral ? 0 : CAL.HOME_ADV);
+        const [lh, la] = expectedGoals(effA - rB);
+        const sa = poisson(lh);
+        const sb = poisson(la);
+        if (sa > sb) return { sa, sb, win: 0, pens: false };
+        if (sb > sa) return { sa, sb, win: 1, pens: false };
+        if (!ko) return { sa, sb, win: -1, pens: false };
+        const pA = 1 / (1 + Math.pow(10, (rB - effA) / CAL.PEN_DIVISOR));
+        return { sa, sb, win: Math.random() < pA ? 0 : 1, pens: true };
+      }
+
+      // Effective rating: base + boost (for sandbox)
+      function getRatings() {
+        const r = { ...SANDBOX.baseRatings };
+        if (STATE.mode === 'sandbox') {
+          Object.entries(STATE.bumps).forEach(([t, b]) => {
+            r[t] = (r[t] || 1500) + b;
           });
-          col.appendChild(matchesWrap);
-          container.appendChild(col);
-        });
+        }
+        return r;
       }
 
-      function renderGroups(groups) {
-        const container = document.getElementById('wc-groups');
-        container.innerHTML = '';
-        groups.forEach(g => {
-          const card = document.createElement('div');
-          card.className = 'wc-group';
-          const rows = g.standings.map(s => {
-            const cls = s.qualifies_as === 'eliminated'
-              ? 'eliminated'
-              : 'advancing';
-            return `
-              <div class="wc-group-row ${cls}">
-                <span class="team-block">
-                  <span class="pos">${s.position}.</span>
-                  ${flagImg(s.team)}
-                  <span class="team-name">${s.team}</span>
-                </span>
-                <span>${s.predicted_points}</span>
-              </div>`;
-          }).join('');
-          card.innerHTML = `<h4>Group ${g.name}</h4>${rows}`;
-          container.appendChild(card);
+      // ── Single Monte Carlo sample ────────────────────────────────
+      function simulateOnce(ratings) {
+        // Group stage
+        const groupStandings = [];
+        const winners = {};
+        const runners = {};
+        const thirdsByGroup = {};
+
+        Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
+          const members = new Set(teams);
+          const pts = Object.fromEntries(teams.map(t => [t, 0]));
+          const gd = Object.fromEntries(teams.map(t => [t, 0]));
+          const gf = Object.fromEntries(teams.map(t => [t, 0]));
+          SANDBOX.fixtures.forEach(f => {
+            if (!members.has(f.home_team) || !members.has(f.away_team)) return;
+            const r = simMatch(
+              ratings[f.home_team] || 1500,
+              ratings[f.away_team] || 1500,
+              f.neutral, false
+            );
+            if (r.win === 0) pts[f.home_team] += 3;
+            else if (r.win === 1) pts[f.away_team] += 3;
+            else { pts[f.home_team] += 1; pts[f.away_team] += 1; }
+            gd[f.home_team] += r.sa - r.sb;
+            gd[f.away_team] += r.sb - r.sa;
+            gf[f.home_team] += r.sa;
+            gf[f.away_team] += r.sb;
+          });
+          const sorted = [...teams].sort((a, b) =>
+            (pts[b] - pts[a]) || (gd[b] - gd[a]) || (gf[b] - gf[a]) ||
+            ((ratings[b] || 1500) - (ratings[a] || 1500))
+          );
+          const standings = sorted.map((t, i) => ({
+            team: t, points: pts[t], gd: gd[t], gf: gf[t], position: i + 1,
+          }));
+          groupStandings.push({ name: letter, standings });
+          winners[letter] = sorted[0];
+          runners[letter] = sorted[1];
+          thirdsByGroup[letter] = standings[2];
         });
+
+        // 8 best 3rds by FIFA tiebreakers
+        const thirdsRanked = Object.entries(thirdsByGroup)
+          .sort(([, a], [, b]) =>
+            (b.points - a.points) || (b.gd - a.gd) || (b.gf - a.gf)
+          );
+        const advancingThirds = new Set(thirdsRanked.slice(0, 8).map(([l]) => l));
+
+        // Mark qualifies_as on standings
+        groupStandings.forEach(g => {
+          g.standings.forEach(s => {
+            if (s.position === 1) s.qualifies_as = 'winner';
+            else if (s.position === 2) s.qualifies_as = 'runner_up';
+            else if (s.position === 3 && advancingThirds.has(g.name)) s.qualifies_as = 'best_third';
+            else s.qualifies_as = 'eliminated';
+            s.predicted_points = s.points;  // for unified rendering
+          });
+        });
+
+        // Assign 3rds to R32 slots
+        const used = new Set();
+        const thirdAssignments = {};
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          [a, b].forEach(spec => {
+            if (spec[0] !== '3') return;
+            const allowed = new Set(spec[1].split(''));
+            let cands = [...advancingThirds].filter(l => allowed.has(l) && !used.has(l));
+            if (cands.length === 0) {
+              cands = [...advancingThirds].filter(l => !used.has(l));
+            }
+            const best = cands.reduce((p, q) => {
+              const sp = thirdsByGroup[p], sq = thirdsByGroup[q];
+              if (sp.points !== sq.points) return sp.points > sq.points ? p : q;
+              if (sp.gd !== sq.gd) return sp.gd > sq.gd ? p : q;
+              return sp.gf >= sq.gf ? p : q;
+            });
+            thirdAssignments[matchNo] = thirdsByGroup[best].team;
+            used.add(best);
+          });
+        });
+
+        function resolve(spec, matchNo) {
+          if (spec[0] === 'W') return winners[spec[1]];
+          if (spec[0] === 'R') return runners[spec[1]];
+          return thirdAssignments[matchNo];
+        }
+
+        // Knockouts (neutral venue, ko=true)
+        const ko = {};
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          const ta = resolve(a, matchNo);
+          const tb = resolve(b, matchNo);
+          const r = simMatch(ratings[ta] || 1500, ratings[tb] || 1500, true, true);
+          ko[matchNo] = {
+            team_a: ta, team_b: tb,
+            score_a: r.sa, score_b: r.sb,
+            winner: r.win === 0 ? ta : tb,
+            pens: r.pens,
+          };
+        });
+        [R16_FEEDS_JS, QF_FEEDS_JS, SF_FEEDS_JS].forEach(feeds => {
+          feeds.forEach(([m, fa, fb]) => {
+            const ta = ko[fa].winner, tb = ko[fb].winner;
+            const r = simMatch(ratings[ta] || 1500, ratings[tb] || 1500, true, true);
+            ko[m] = {
+              team_a: ta, team_b: tb,
+              score_a: r.sa, score_b: r.sb,
+              winner: r.win === 0 ? ta : tb,
+              pens: r.pens,
+            };
+          });
+        });
+        const [fno, ffa, ffb] = FINAL_FEED_JS;
+        const fa = ko[ffa].winner, fb = ko[ffb].winner;
+        const fr = simMatch(ratings[fa] || 1500, ratings[fb] || 1500, true, true);
+        ko[fno] = {
+          team_a: fa, team_b: fb,
+          score_a: fr.sa, score_b: fr.sb,
+          winner: fr.win === 0 ? fa : fb,
+          pens: fr.pens,
+        };
+
+        return {
+          groups: groupStandings,
+          knockout: {
+            round_of_32: R32_VISUAL_ORDER_JS.map(i => ko[i]),
+            round_of_16: R16_VISUAL_ORDER_JS.map(i => ko[i]),
+            quarter_finals: QF_VISUAL_ORDER_JS.map(i => ko[i]),
+            semi_finals: SF_VISUAL_ORDER_JS.map(i => ko[i]),
+            final: [ko[fno]],
+            champion: ko[fno].winner,
+          },
+        };
       }
 
-      function renderNext(sim) {
-        Object.assign(FLAGS, sim.flags || {});
-        const upcoming = (sim.match_predictions || []).filter(
-          m => !m.played
-        );
+      // ── Renderers: Next match ────────────────────────────────────
+      function renderNext() {
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
         if (!upcoming.length) {
           document.getElementById('wc-next').innerHTML =
             '<div class="wc-next-meta">No upcoming fixtures</div>';
@@ -638,9 +794,7 @@
             </div>
           </div>
           <div class="wc-next-bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
-            <span class="ph"></span>
-            <span class="pd"></span>
-            <span class="pa"></span>
+            <span class="ph"></span><span class="pd"></span><span class="pa"></span>
           </div>
           <div class="wc-next-pct">
             <span>${m.home_team} win ${ph}%</span>
@@ -650,14 +804,107 @@
         `;
       }
 
-      const N_VISIBLE = 24;
+      // ── Renderers: Tournament view ───────────────────────────────
+      function renderBracketInto(container, ko, withScores) {
+        container.innerHTML = '';
+        const rounds = [
+          ['Round of 32', ko.round_of_32, false],
+          ['Round of 16', ko.round_of_16, false],
+          ['Quarter-finals', ko.quarter_finals, false],
+          ['Semi-finals', ko.semi_finals, false],
+          ['Final', ko.final, true],
+        ];
+        rounds.forEach(([label, matches, isFinal]) => {
+          const col = document.createElement('div');
+          col.className = 'wc-round' + (isFinal ? ' wc-final' : '');
+          const lbl = document.createElement('div');
+          lbl.className = 'wc-round-label';
+          lbl.textContent = label;
+          col.appendChild(lbl);
+          const wrap = document.createElement('div');
+          wrap.className = 'wc-round-matches';
+          wrap.style.setProperty('--n', matches.length);
+          matches.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'wc-match';
+            const showScores = withScores && m.score_a != null;
+            const penA = m.pens && m.winner === m.team_a ? ' <span class="wc-pen-tag">pens</span>' : '';
+            const penB = m.pens && m.winner === m.team_b ? ' <span class="wc-pen-tag">pens</span>' : '';
+            const scoreA = showScores ? `<span class="wc-score">${m.score_a}${penA}</span>` : '';
+            const scoreB = showScores ? `<span class="wc-score">${m.score_b}${penB}</span>` : '';
+            card.innerHTML = `
+              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
+                ${flagImg(m.team_a)}
+                <span class="wc-team-name">${m.team_a}</span>
+                ${scoreA}
+              </div>
+              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
+                ${flagImg(m.team_b)}
+                <span class="wc-team-name">${m.team_b}</span>
+                ${scoreB}
+              </div>
+            `;
+            wrap.appendChild(card);
+          });
+          col.appendChild(wrap);
+          container.appendChild(col);
+        });
+      }
 
-      function renderPaths(sim) {
-        // "Dark horse" = outside top 8 by rating, but reaches the SF
-        // in more than 8% of simulations.
+      function renderGroupsInto(container, groups, isAverage) {
+        container.innerHTML = '';
+        groups.forEach(g => {
+          const card = document.createElement('div');
+          card.className = 'wc-group';
+          const rows = g.standings.map(s => {
+            const cls = s.qualifies_as === 'eliminated' ? 'eliminated' : 'advancing';
+            const ptsValue = isAverage
+              ? (s.predicted_points != null ? s.predicted_points.toFixed(1) : s.points)
+              : s.points;
+            return `
+              <div class="wc-group-row ${cls}">
+                <span class="team-block">
+                  <span class="pos">${s.position}.</span>
+                  ${flagImg(s.team)}
+                  <span class="team-name">${s.team}</span>
+                </span>
+                <span>${ptsValue}</span>
+              </div>`;
+          }).join('');
+          card.innerHTML = `<h4>Group ${g.name}</h4>${rows}`;
+          container.appendChild(card);
+        });
+      }
+
+      function renderTournamentView() {
+        const root = document.getElementById('wc-tournament-view');
+        root.innerHTML = '';
+        const isAverage = STATE.mode === 'average';
+
+        if (STATE.tab === 'knockouts') {
+          const wrap = document.createElement('div');
+          wrap.className = 'wc-bracket-wrap';
+          const inner = document.createElement('div');
+          inner.className = 'wc-bracket';
+          wrap.appendChild(inner);
+          root.appendChild(wrap);
+          const ko = isAverage ? DATA.bracket.knockout : STATE.currentSim.knockout;
+          renderBracketInto(inner, ko, !isAverage);
+        } else {
+          const groupsContainer = document.createElement('div');
+          groupsContainer.className = 'wc-groups';
+          groupsContainer.style.marginTop = '1rem';
+          root.appendChild(groupsContainer);
+          const groups = isAverage ? DATA.bracket.groups : STATE.currentSim.groups;
+          renderGroupsInto(groupsContainer, groups, isAverage);
+        }
+      }
+
+      // ── Renderers: paths table (always model average) ───────────
+      function renderPaths() {
+        const sim = DATA.sim;
         const byRating = [...sim.team_stats].sort((a, b) => b.rating - a.rating);
         const top8Ratings = new Set(byRating.slice(0, 8).map(s => s.team));
-
         const container = document.getElementById('wc-paths');
         container.innerHTML = `
           <div class="header">Team</div>
@@ -689,283 +936,80 @@
             container.appendChild(c);
           });
         });
-        applyFilter('', '#wc-paths .wc-paths-row');
+        applyPathsFilter('');
       }
-
-      // Show top N by default; reveal everything when a search query is active.
-      function applyFilter(query, selector) {
+      function applyPathsFilter(query) {
         const q = query.trim().toLowerCase();
-        document.querySelectorAll(selector).forEach(el => {
+        document.querySelectorAll('#wc-paths .wc-paths-row').forEach(el => {
           const team = el.dataset.team || '';
           const rank = parseInt(el.dataset.rank || '0', 10);
-          let show;
-          if (q.length === 0) {
-            show = rank < N_VISIBLE;
-          } else {
-            show = team.includes(q);
-          }
+          const show = q.length === 0 ? rank < N_VISIBLE : team.includes(q);
           el.classList.toggle('wc-hidden', !show);
         });
       }
 
-      function wireSearch() {
-        const pathsInput = document.getElementById('wc-paths-search');
-        if (pathsInput) {
-          pathsInput.addEventListener('input', e =>
-            applyFilter(e.target.value, '#wc-paths .wc-paths-row')
-          );
+      // ── Controls ─────────────────────────────────────────────────
+      function renderControls() {
+        document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
+          b.classList.toggle('active', b.dataset.tab === STATE.tab);
+        });
+        document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === STATE.mode);
+        });
+        const rollBtn = document.getElementById('wc-roll-btn');
+        rollBtn.hidden = STATE.mode === 'average';
+        const sbPanel = document.getElementById('wc-sandbox-panel');
+        sbPanel.hidden = STATE.mode !== 'sandbox';
+        const sbActive = document.getElementById('wc-sandbox-active');
+        sbActive.style.display = STATE.mode === 'sandbox' ? '' : 'none';
+      }
+
+      function renderMeta() {
+        const meta = document.getElementById('wc-tournament-meta');
+        if (STATE.mode === 'average') {
+          meta.textContent = `Showing average across ${(DATA.sim.n_simulations || 10000).toLocaleString('en-US')} simulations.`;
+        } else if (STATE.mode === 'single') {
+          meta.textContent = 'Showing one random simulated tournament. Click Roll for another.';
+        } else {
+          const n = Object.keys(STATE.bumps).length;
+          meta.textContent = n
+            ? `Showing one simulation with ${n} active boost${n === 1 ? '' : 's'}. Click Roll for another sample.`
+            : 'Sandbox mode: add a boost below, or click Roll to sample with the current model.';
         }
       }
 
-      // ── Sandbox ──────────────────────────────────────────────────
-      // Mirror of the Monte Carlo simulator in src/worldcup/. Every match
-      // samples a Poisson scoreline using the same calibration constants
-      // (worldcup/calibration.py). One roll = one randomly drawn tournament.
-      // Lets us play "what if England get a +200 boost AND the dice are
-      // generous?" without re-running the Python pipeline.
-      const SANDBOX = { groups: {}, fixtures: [], baseRatings: {}, bumps: {} };
-      const CAL = {
-        LAMBDA_HOME: 1.41,
-        LAMBDA_AWAY: 1.07,
-        SLOPE_HOME: 0.00204,
-        SLOPE_AWAY: -0.00255,
-        HOME_ADV: 50,
-        PEN_DIVISOR: 600,
-      };
-
-      const R32_PAIRINGS_JS = [
-        [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
-        [['W','F'],['R','C']],   [['W','C'],['R','F']],
-        [['W','I'],['3','CDFGH']], [['R','E'],['R','I']],
-        [['W','A'],['3','CEFHI']], [['W','L'],['3','EHIJK']],
-        [['W','D'],['3','BEFIJ']], [['W','G'],['3','AEHIJ']],
-        [['R','K'],['R','L']],   [['W','H'],['R','J']],
-        [['W','B'],['3','EFGIJ']], [['W','J'],['R','H']],
-        [['W','K'],['3','DEIJL']], [['R','D'],['R','G']],
-      ];
-      const R16_FEEDS_JS = [[89,74,77],[90,73,75],[91,76,78],[92,79,80],
-                            [93,83,84],[94,81,82],[95,86,88],[96,85,87]];
-      const QF_FEEDS_JS = [[97,89,90],[98,93,94],[99,91,92],[100,95,96]];
-      const SF_FEEDS_JS = [[101,97,98],[102,99,100]];
-      const FINAL_FEED_JS = [104,101,102];
-      const R32_VISUAL_ORDER_JS = [74,77,73,75,83,84,81,82,76,78,79,80,86,88,85,87];
-      const R16_VISUAL_ORDER_JS = [89,90,93,94,91,92,95,96];
-      const QF_VISUAL_ORDER_JS  = [97,98,99,100];
-      const SF_VISUAL_ORDER_JS  = [101,102];
-
-      function effRating(team) {
-        return (SANDBOX.baseRatings[team] || 1500) + (SANDBOX.bumps[team] || 0);
+      function rollSimulation() {
+        STATE.currentSim = simulateOnce(getRatings());
+        renderTournamentView();
       }
 
-      // Knuth's Poisson sampler. Fine for our small lambda values (0.3-3.5).
-      function poisson(lambda) {
-        const L = Math.exp(-lambda);
-        let k = 0, p = 1;
-        do { k++; p *= Math.random(); } while (p > L);
-        return k - 1;
+      function applyBoost() {
+        const teamInput = document.getElementById('wc-sandbox-team');
+        const boostInput = document.getElementById('wc-sandbox-boost');
+        const team = teamInput.value.trim();
+        const boost = parseFloat(boostInput.value);
+        if (!team || !SANDBOX.baseRatings.hasOwnProperty(team) || isNaN(boost) || boost === 0) return;
+        STATE.bumps[team] = (STATE.bumps[team] || 0) + boost;
+        if (STATE.bumps[team] === 0) delete STATE.bumps[team];
+        teamInput.value = '';
+        boostInput.value = '';
+        renderActiveBumps();
+        renderMeta();
+        rollSimulation();
+        teamInput.focus();
       }
 
-      function expectedGoals(effGap) {
-        return [
-          CAL.LAMBDA_HOME * Math.exp(CAL.SLOPE_HOME * effGap),
-          CAL.LAMBDA_AWAY * Math.exp(CAL.SLOPE_AWAY * effGap),
-        ];
-      }
-
-      // Sample one match. Returns {sa, sb, winnerIdx (0|1), pens}
-      function simMatch(rA, rB, neutral, ko) {
-        const effA = rA + (neutral ? 0 : CAL.HOME_ADV);
-        const effB = rB;
-        const [lh, la] = expectedGoals(effA - effB);
-        const sa = poisson(lh);
-        const sb = poisson(la);
-        if (sa > sb) return { sa, sb, win: 0, pens: false };
-        if (sb > sa) return { sa, sb, win: 1, pens: false };
-        if (!ko) return { sa, sb, win: -1, pens: false };
-        // Penalty shootout in knockouts
-        const pA = 1 / (1 + Math.pow(10, (effB - effA) / CAL.PEN_DIVISOR));
-        return { sa, sb, win: Math.random() < pA ? 0 : 1, pens: true };
-      }
-
-      function rebuildBracket() {
-        // Group stage: sample each fixture, accumulate points + GD + GF
-        const standings = {};
-        const groupMatches = {};
-        Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
-          const members = new Set(teams);
-          const pts = Object.fromEntries(teams.map(t => [t, 0]));
-          const gd = Object.fromEntries(teams.map(t => [t, 0]));
-          const gf = Object.fromEntries(teams.map(t => [t, 0]));
-          const matches = [];
-          SANDBOX.fixtures.forEach(f => {
-            if (!members.has(f.home_team) || !members.has(f.away_team)) return;
-            const r = simMatch(
-              effRating(f.home_team), effRating(f.away_team),
-              f.neutral, false
-            );
-            if (r.win === 0) pts[f.home_team] += 3;
-            else if (r.win === 1) pts[f.away_team] += 3;
-            else { pts[f.home_team] += 1; pts[f.away_team] += 1; }
-            gd[f.home_team] += r.sa - r.sb;
-            gd[f.away_team] += r.sb - r.sa;
-            gf[f.home_team] += r.sa;
-            gf[f.away_team] += r.sb;
-            matches.push({ ...f, sa: r.sa, sb: r.sb });
-          });
-          const sorted = [...teams].sort((a, b) =>
-            (pts[b] - pts[a]) ||
-            (gd[b] - gd[a]) ||
-            (gf[b] - gf[a]) ||
-            (effRating(b) - effRating(a))
-          );
-          standings[letter] = sorted.map((t, i) => ({
-            team: t, points: pts[t], gd: gd[t], gf: gf[t], position: i + 1,
-          }));
-          groupMatches[letter] = matches;
-        });
-
-        const winners = {};
-        const runners = {};
-        const thirdsByGroup = {};
-        Object.entries(standings).forEach(([l, s]) => {
-          winners[l] = s[0].team;
-          runners[l] = s[1].team;
-          thirdsByGroup[l] = s[2];
-        });
-
-        // Best 8 thirds by FIFA criteria (pts, GD, GF)
-        const thirdsRanked = Object.entries(thirdsByGroup)
-          .sort(([, a], [, b]) =>
-            (b.points - a.points) || (b.gd - a.gd) || (b.gf - a.gf)
-          );
-        const advancingSet = new Set(thirdsRanked.slice(0, 8).map(([l]) => l));
-
-        // Assign best 3rds to R32 slots
-        const used = new Set();
-        const thirdAssignments = {};
-        R32_PAIRINGS_JS.forEach(([a, b], i) => {
-          const matchNo = 73 + i;
-          [a, b].forEach(spec => {
-            if (spec[0] !== '3') return;
-            const allowed = new Set(spec[1].split(''));
-            let cands = [...advancingSet].filter(l => allowed.has(l) && !used.has(l));
-            if (cands.length === 0) {
-              cands = [...advancingSet].filter(l => !used.has(l));
-            }
-            const best = cands.reduce((p, q) => {
-              const sp = thirdsByGroup[p], sq = thirdsByGroup[q];
-              if (sp.points !== sq.points) return sp.points > sq.points ? p : q;
-              if (sp.gd !== sq.gd) return sp.gd > sq.gd ? p : q;
-              return sp.gf >= sq.gf ? p : q;
-            });
-            thirdAssignments[matchNo] = thirdsByGroup[best].team;
-            used.add(best);
-          });
-        });
-
-        function resolve(spec, matchNo) {
-          if (spec[0] === 'W') return winners[spec[1]];
-          if (spec[0] === 'R') return runners[spec[1]];
-          return thirdAssignments[matchNo];
-        }
-
-        // Knockout matches: sample at neutral venue, draws -> penalties
-        const koMatches = {};
-        R32_PAIRINGS_JS.forEach(([a, b], i) => {
-          const matchNo = 73 + i;
-          const ta = resolve(a, matchNo);
-          const tb = resolve(b, matchNo);
-          const r = simMatch(effRating(ta), effRating(tb), true, true);
-          koMatches[matchNo] = {
-            team_a: ta, team_b: tb,
-            score_a: r.sa, score_b: r.sb,
-            winner: r.win === 0 ? ta : tb,
-            pens: r.pens,
-          };
-        });
-        [R16_FEEDS_JS, QF_FEEDS_JS, SF_FEEDS_JS].forEach(feeds => {
-          feeds.forEach(([m, fa, fb]) => {
-            const ta = koMatches[fa].winner;
-            const tb = koMatches[fb].winner;
-            const r = simMatch(effRating(ta), effRating(tb), true, true);
-            koMatches[m] = {
-              team_a: ta, team_b: tb,
-              score_a: r.sa, score_b: r.sb,
-              winner: r.win === 0 ? ta : tb,
-              pens: r.pens,
-            };
-          });
-        });
-        const [fno, ffa, ffb] = FINAL_FEED_JS;
-        const fa = koMatches[ffa].winner;
-        const fb = koMatches[ffb].winner;
-        const fr = simMatch(effRating(fa), effRating(fb), true, true);
-        koMatches[fno] = {
-          team_a: fa, team_b: fb,
-          score_a: fr.sa, score_b: fr.sb,
-          winner: fr.win === 0 ? fa : fb,
-          pens: fr.pens,
-        };
-
-        return {
-          round_of_32: R32_VISUAL_ORDER_JS.map(i => koMatches[i]),
-          round_of_16: R16_VISUAL_ORDER_JS.map(i => koMatches[i]),
-          quarter_finals: QF_VISUAL_ORDER_JS.map(i => koMatches[i]),
-          semi_finals: SF_VISUAL_ORDER_JS.map(i => koMatches[i]),
-          final: [koMatches[fno]],
-          champion: koMatches[fno].winner,
-        };
-      }
-
-      function renderSandboxBracket() {
-        const ko = rebuildBracket();
-        const rounds = [
-          ['Round of 32', ko.round_of_32],
-          ['Round of 16', ko.round_of_16],
-          ['Quarter-finals', ko.quarter_finals],
-          ['Semi-finals', ko.semi_finals],
-          ['Final', ko.final],
-        ];
-        const container = document.getElementById('wc-sandbox-bracket');
-        container.innerHTML = '';
-        rounds.forEach(([label, matches], i) => {
-          const col = document.createElement('div');
-          col.className = 'wc-round' + (i === 4 ? ' wc-final' : '');
-          const lbl = document.createElement('div');
-          lbl.className = 'wc-round-label';
-          lbl.textContent = label;
-          col.appendChild(lbl);
-          const wrap = document.createElement('div');
-          wrap.className = 'wc-round-matches';
-          wrap.style.setProperty('--n', matches.length);
-          matches.forEach(m => {
-            const card = document.createElement('div');
-            card.className = 'wc-match';
-            const penA = m.pens && m.winner === m.team_a ? ' <span class="wc-pen-tag">pens</span>' : '';
-            const penB = m.pens && m.winner === m.team_b ? ' <span class="wc-pen-tag">pens</span>' : '';
-            card.innerHTML = `
-              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}">
-                ${flagImg(m.team_a)}
-                <span class="wc-team-name">${m.team_a}</span>
-                <span class="wc-score">${m.score_a}${penA}</span>
-              </div>
-              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}">
-                ${flagImg(m.team_b)}
-                <span class="wc-team-name">${m.team_b}</span>
-                <span class="wc-score">${m.score_b}${penB}</span>
-              </div>
-            `;
-            wrap.appendChild(card);
-          });
-          col.appendChild(wrap);
-          container.appendChild(col);
-        });
+      function resetBoosts() {
+        STATE.bumps = {};
+        renderActiveBumps();
+        renderMeta();
+        rollSimulation();
       }
 
       function renderActiveBumps() {
         const wrap = document.getElementById('wc-sandbox-active');
         wrap.innerHTML = '';
-        Object.entries(SANDBOX.bumps).forEach(([team, bump]) => {
+        Object.entries(STATE.bumps).forEach(([team, bump]) => {
           if (!bump) return;
           const pill = document.createElement('span');
           pill.className = 'wc-sandbox-pill';
@@ -980,72 +1024,95 @@
         wrap.querySelectorAll('.x').forEach(el => {
           el.addEventListener('click', e => {
             const t = e.currentTarget.dataset.team;
-            delete SANDBOX.bumps[t];
+            delete STATE.bumps[t];
             renderActiveBumps();
-            renderSandboxBracket();
+            renderMeta();
+            rollSimulation();
           });
         });
       }
 
-      function initSandbox(bracket, sim) {
-        // Pull groups from bracket data and base ratings from sim data
-        bracket.groups.forEach(g => {
-          SANDBOX.groups[g.name] = g.standings.map(s => s.team);
+      function wireControls() {
+        document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.tab = b.dataset.tab;
+            renderControls();
+            renderTournamentView();
+          });
         });
-        sim.team_stats.forEach(s => {
-          SANDBOX.baseRatings[s.team] = s.rating;
+        document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.mode = b.dataset.mode;
+            // Lazy-roll if entering sim mode for the first time
+            if (STATE.mode !== 'average' && !STATE.currentSim) {
+              STATE.currentSim = simulateOnce(getRatings());
+            }
+            renderControls();
+            renderMeta();
+            renderTournamentView();
+          });
         });
-        // Group fixtures (with home/away/neutral metadata) for MC sim
-        SANDBOX.fixtures = (sim.match_predictions || []).map(m => ({
-          home_team: m.home_team,
-          away_team: m.away_team,
-          neutral: m.neutral,
-        }));
-
-        // Populate datalist with team names + base rating in the suggestion
-        const datalist = document.getElementById('wc-team-list');
-        Object.keys(SANDBOX.baseRatings).sort().forEach(team => {
-          if (!Object.values(SANDBOX.groups).flat().includes(team)) return;
-          const opt = document.createElement('option');
-          opt.value = team;
-          opt.label = `${team} (${Math.round(SANDBOX.baseRatings[team])})`;
-          datalist.appendChild(opt);
-        });
-
+        document.getElementById('wc-roll-btn').addEventListener('click', rollSimulation);
+        document.getElementById('wc-sandbox-add').addEventListener('click', applyBoost);
+        document.getElementById('wc-sandbox-reset').addEventListener('click', resetBoosts);
         const teamInput = document.getElementById('wc-sandbox-team');
         const boostInput = document.getElementById('wc-sandbox-boost');
-        const addBtn = document.getElementById('wc-sandbox-add');
-        const rollBtn = document.getElementById('wc-sandbox-roll');
-        const resetBtn = document.getElementById('wc-sandbox-reset');
-
-        function apply() {
-          const team = teamInput.value.trim();
-          const boost = parseFloat(boostInput.value);
-          if (!team || !SANDBOX.baseRatings.hasOwnProperty(team) || isNaN(boost) || boost === 0) return;
-          SANDBOX.bumps[team] = (SANDBOX.bumps[team] || 0) + boost;
-          if (SANDBOX.bumps[team] === 0) delete SANDBOX.bumps[team];
-          teamInput.value = '';
-          boostInput.value = '';
-          renderActiveBumps();
-          renderSandboxBracket();
-          teamInput.focus();
-        }
-
-        addBtn.addEventListener('click', apply);
-        rollBtn.addEventListener('click', renderSandboxBracket);
-        boostInput.addEventListener('keydown', e => { if (e.key === 'Enter') apply(); });
+        boostInput.addEventListener('keydown', e => { if (e.key === 'Enter') applyBoost(); });
         teamInput.addEventListener('keydown', e => {
-          if (e.key === 'Enter' && boostInput.value) apply();
+          if (e.key === 'Enter' && boostInput.value) applyBoost();
           else if (e.key === 'Enter') boostInput.focus();
         });
-        resetBtn.addEventListener('click', () => {
-          SANDBOX.bumps = {};
-          renderActiveBumps();
-          renderSandboxBracket();
-        });
-
-        renderSandboxBracket();
+        document.getElementById('wc-paths-search').addEventListener('input', e =>
+          applyPathsFilter(e.target.value)
+        );
       }
+
+      // ── Init ─────────────────────────────────────────────────────
+      Promise.all([
+        fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
+      ])
+        .then(([bracket, sim]) => {
+          DATA.bracket = bracket;
+          DATA.sim = sim;
+          Object.assign(FLAGS, sim.flags || {});
+
+          bracket.groups.forEach(g => {
+            SANDBOX.groups[g.name] = g.standings.map(s => s.team);
+          });
+          sim.team_stats.forEach(s => {
+            SANDBOX.baseRatings[s.team] = s.rating;
+          });
+          SANDBOX.fixtures = (sim.match_predictions || []).map(m => ({
+            home_team: m.home_team,
+            away_team: m.away_team,
+            neutral: m.neutral,
+          }));
+
+          document.getElementById('wc-nsims').textContent =
+            (sim.n_simulations || 10000).toLocaleString('en-US');
+
+          const datalist = document.getElementById('wc-team-list');
+          const wcTeams = new Set(Object.values(SANDBOX.groups).flat());
+          [...wcTeams].sort().forEach(team => {
+            const opt = document.createElement('option');
+            opt.value = team;
+            opt.label = `${team} (${Math.round(SANDBOX.baseRatings[team] || 1500)})`;
+            datalist.appendChild(opt);
+          });
+
+          wireControls();
+          renderNext();
+          renderPaths();
+          renderControls();
+          renderMeta();
+          renderTournamentView();
+        })
+        .catch(err => {
+          document.getElementById('wc-tournament-view').innerHTML =
+            '<p style="color:var(--text-muted)">Tournament data not available.</p>';
+          console.error(err);
+        });
     })();
   </script>
 </body>
