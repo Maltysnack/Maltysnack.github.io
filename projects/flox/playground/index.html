@@ -59,7 +59,29 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 14px;
     }
+    .pg-pane-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+    .pg-pane-header select {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: var(--text-xs);
+      letter-spacing: 0.06em;
+      text-transform: none;
+      font-weight: 500;
+      background: var(--border-light);
+      color: var(--text);
+      border: 1px solid var(--border-light);
+      border-radius: 3px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    .pg-pane-header select:hover { border-color: var(--text-dim); }
+    .pg-pane-header select:focus { outline: 2px solid var(--accent-red); outline-offset: 1px; }
     .pg-pane-header .pg-status {
       font-family: var(--font-mono, JetBrains Mono, monospace);
       letter-spacing: 0.04em;
@@ -119,7 +141,12 @@
     <div class="pg-grid">
       <div class="pg-pane pg-pane-editor">
         <div class="pg-pane-header">
-          <span>Program</span>
+          <div class="pg-pane-header-left">
+            <span>Program</span>
+            <select id="pg-loader" aria-label="Load example">
+              <option value="" disabled selected>Load example...</option>
+            </select>
+          </div>
           <span class="pg-status" id="pg-status">ready</span>
         </div>
         <div id="pg-editor"></div>
@@ -187,11 +214,58 @@
       obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
       syncTheme();
 
-      const DEFAULT_PROGRAM = `// Edit me. The output panel updates as you type.
+      // Example programs available from the dropdown.
+      // The first entry (id: "blank") is also the new-program template.
+      const EXAMPLES = [
+        {
+          id: "blank",
+          label: "Blank template",
+          source: `// Flox: a small language for describing flow networks.
+//
+// Quick reference:
+//
+//   system Name;                                       declare a network
+//   river  Name { base: N, peak: N, decay: N }         decay optional, default 0.7
+//   dam    Name { capacity: N, threshold: N%,
+//                 normalRate: N, openRate: N }
+//   outlet Name;                                       zero-flow accumulator
+//   A -> B -> C;                                       connect nodes (chain)
+//
+//   list  Name;                                        print connections
+//   map   Name;                                        print ASCII diagram
+//   print Name;                                        simulate, 1mm rainfall on day 1
+//   print Name N;                                      simulate at N mm on day 1
+//   print Name [r1, r2, r3, ...];                      per-day rainfall series
+
+system Untitled;
+
+// Add chains (the network shape), e.g.:
+// Source -> Outlet;
+
+// Add declarations (bare names referenced above), e.g.:
+// river  Source { base: 1, peak: 1.0 }
+// outlet Outlet;
+
+// map   Untitled;
+// print Untitled 5;
+`,
+        },
+        {
+          id: "demo",
+          label: "Demo: two sources, a confluence, an outlet",
+          source: `// A small two-source demo system.
+// Two upland creeks meet at a confluence and flow to an outlet.
 system Demo;
 
+// Chains: pure references, so the network shape reads at a glance.
 Spring    -> Confluence -> Outlet;
 Tributary -> Confluence;
+
+/* Declarations: rich blocks, order doesn't matter.
+   River params:
+     base  - baseline flow (L/s) with no rainfall
+     peak  - multiplier on rainfall (mm) for the peak surge
+     decay - fraction of the surge retained each subsequent day */
 
 river  Spring     { base: 2, peak: 2.0, decay: 0.7 }
 river  Tributary  { base: 1, peak: 1.5, decay: 0.6 }
@@ -199,8 +273,158 @@ river  Confluence { base: 3, peak: 1.8 }
 outlet Outlet;
 
 map Demo;
-print Demo 5;
-`;
+print Demo 5;   // simulate at 5mm of rainfall
+`,
+        },
+        {
+          id: "devlins",
+          label: "Devlins: small real catchment",
+          source: `// Devlins Creek catchment: two tributaries meeting Joes, then the outlet.
+system Devlins;
+
+Mahers -> Joes -> DevlinsCreek;
+Bens   -> DevlinsCreek;
+
+river Mahers { base: 2, peak: 5 }
+river Joes   { base: 3, peak: 5 }
+river Bens   { base: 1, peak: 1 }
+outlet DevlinsCreek;
+
+list Devlins;
+map Devlins;
+print Devlins;
+`,
+        },
+        {
+          id: "canberra",
+          label: "Canberra: three rivers, two dams",
+          source: `// Canberra and surrounds: Googong, Queanbeyan, Molonglo, Burley Griffin.
+system Canberra;
+
+// Network: chains read top to bottom like a map.
+Googong       -> googongDam       -> Queanbeyan -> centralMongolo;
+upperMongolo  -> Queanbeyan;
+jerrabombarra -> centralMongolo;
+centralMongolo -> burleyGriffinDam -> lowerMongolo;
+
+// Sources
+river Googong       { base: 2, peak: 2.0, decay: 0.7 }
+river upperMongolo  { base: 3, peak: 1.8, decay: 0.6 }
+river jerrabombarra { base: 2, peak: 2.0 }
+
+// Mid-network rivers
+river Queanbeyan { base: 3, peak: 1.5 }
+
+// Dams
+dam googongDam       { capacity: 1000, threshold: 80%, normalRate: 0.8, openRate: 1.2 }
+dam burleyGriffinDam { capacity: 5000, threshold: 60%, normalRate: 0.9, openRate: 1.5 }
+
+// Outlets
+outlet centralMongolo;
+outlet lowerMongolo;
+
+list Canberra;
+map  Canberra;
+
+print Canberra;
+print Canberra 5;
+print Canberra 10;
+`,
+        },
+        {
+          id: "murray",
+          label: "Murray-Darling: large basin",
+          source: `// Murray-Darling: three major tributaries feeding the Murray, then the mouth.
+system MurrayDarling;
+
+UpperMurray  -> HumeDam       -> Murray;
+Murrumbidgee -> BurrinjuckDam -> MurrumbidgeeDownstream -> Murray;
+Darling      -> Murray;
+Murray       -> LowerMurray   -> MurrayMouth;
+
+river UpperMurray            { base: 5, peak: 3.0, decay: 0.8 }
+river Murrumbidgee           { base: 4, peak: 2.8, decay: 0.75 }
+river MurrumbidgeeDownstream { base: 3, peak: 2.0 }
+river Darling                { base: 6, peak: 3.5, decay: 0.7 }
+river Murray                 { base: 8, peak: 2.5 }
+river LowerMurray            { base: 4, peak: 1.5 }
+
+dam HumeDam       { capacity: 4500000, threshold: 75%, normalRate: 0.85, openRate: 1.3 }
+dam BurrinjuckDam { capacity: 1026000, threshold: 70%, normalRate: 0.8,  openRate: 1.2 }
+
+outlet MurrayMouth;
+
+map MurrayDarling;
+print MurrayDarling 5;
+print MurrayDarling 15;
+print MurrayDarling 30;
+`,
+        },
+        {
+          id: "thames",
+          label: "Thames: four headwaters into one estuary",
+          source: `// Thames: four headwaters into the Upper Thames, joined by the Kennet,
+// then through the Middle and Lower reaches to the estuary.
+system Thames;
+
+Churn    -> UpperThames -> MiddleThames -> LowerThames -> ThamesEstuary;
+Coln     -> UpperThames;
+Cherwell -> UpperThames;
+Kennet   -> MiddleThames;
+
+river Churn        { base: 2,   peak: 2.5, decay: 0.8 }
+river Coln         { base: 1.5, peak: 2.0, decay: 0.75 }
+river Cherwell     { base: 2.5, peak: 2.2 }
+river Kennet       { base: 2,   peak: 1.8 }
+river UpperThames  { base: 3,   peak: 2.0 }
+river MiddleThames { base: 4,   peak: 1.8 }
+river LowerThames  { base: 3,   peak: 1.5 }
+
+outlet ThamesEstuary;
+
+list Thames;
+map Thames;
+print Thames 10;
+print Thames 25;
+`,
+        },
+        {
+          id: "storm",
+          label: "Storm: 100mm event crosses a dam threshold",
+          source: `// A 100mm storm on day 1 forces a small reservoir past its threshold.
+// Outflow switches from normalRate to openRate as storage fills,
+// then back to normalRate as it drains.
+system Storm;
+
+bigRain -> reservoir -> sea;
+
+river  bigRain   { base: 5, peak: 10.0, decay: 0.5 }
+dam    reservoir { capacity: 50, threshold: 80%, normalRate: 0.5, openRate: 2.0 }
+outlet sea;
+
+print Storm 100;
+`,
+        },
+        {
+          id: "series",
+          label: "Series: per-day rainfall pattern",
+          source: `// A rainfall series: dry day, light rain, big storm, light again.
+// Each non-zero day kicks off its own hydrograph; flow is the
+// superposition of every event so far.
+system SeriesDemo;
+
+Spring -> Outlet;
+
+river  Spring { base: 2, peak: 2.0, decay: 0.7 }
+outlet Outlet;
+
+print SeriesDemo [0, 1, 30, 10, 0, 0, 0];
+`,
+        },
+      ];
+
+      // Default landing program: the demo (named in EXAMPLES above).
+      const DEFAULT_PROGRAM = EXAMPLES.find((e) => e.id === "demo").source;
 
       const editor = monaco.editor.create(document.getElementById('pg-editor'), {
         value: DEFAULT_PROGRAM,
@@ -248,6 +472,26 @@ print Demo 5;
       editor.onDidChangeModelContent(() => {
         if (timer) clearTimeout(timer);
         timer = setTimeout(run, 200);
+      });
+
+      // Populate the loader dropdown and wire its change handler.
+      const loader = document.getElementById('pg-loader');
+      for (const ex of EXAMPLES) {
+        const opt = document.createElement('option');
+        opt.value = ex.id;
+        opt.textContent = ex.label;
+        loader.appendChild(opt);
+      }
+      loader.addEventListener('change', (e) => {
+        const id = e.target.value;
+        const ex = EXAMPLES.find((x) => x.id === id);
+        if (!ex) return;
+        editor.setValue(ex.source);
+        editor.setPosition({ lineNumber: 1, column: 1 });
+        editor.revealLine(1);
+        // Reset the dropdown back to its placeholder so picking the same
+        // example twice in a row still works.
+        loader.value = '';
       });
 
       run();
