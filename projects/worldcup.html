@@ -243,6 +243,15 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
+    .wc-paths .team-rating {
+      font-size: 0.7rem;
+      font-style: italic;
+      color: var(--text-muted);
+      margin-left: 0.35rem;
+      opacity: 0.7;
+      flex-shrink: 0;
+      font-variant-numeric: tabular-nums;
+    }
     .wc-darkhorse-tag {
       display: inline-block;
       flex-shrink: 0;
@@ -1056,6 +1065,7 @@
           cell.innerHTML = `
             ${flagImg(s.team)}
             <span class="team-name">${s.team}</span>
+            <span class="team-rating">${s.rating}</span>
             ${dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : ''}
           `;
           container.appendChild(cell);
