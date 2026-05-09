@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=7';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=7';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=7';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=7';
+} from './algo-core.mjs?v=9';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=9';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=9';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=9';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -509,7 +509,7 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 // answer being constructed, the way the grid pathfinder reveals its path.
 const ITERATIONS_PER_RUN = { ga: 200, aco: 80 };
 const COMPUTE_BUDGET_MS = 12;
-const REVEAL_EDGE_MS = 320;
+const REVEAL_EDGE_MS = 280;       // ms per segment when interpolating
 const REVEAL_INITIAL_PAUSE_MS = 500;
 
 const rEls = {
@@ -659,58 +659,77 @@ function runIterations(target, onDone) {
 }
 
 // Phase 2: draw the best tour edge-by-edge from the chosen starting city.
+// Continuous reveal: a single growing path. Each segment interpolates from
+// the last city to the next over REVEAL_EDGE_MS, so the line keeps moving
+// instead of snapping then pausing.
 function revealTour(tour, onDone) {
   const startCity = pickStartCity();
   const ordered = rotateTourToStart(tour, startCity);
-  // Append the start at the end so we close the loop visually.
   const visit = [...ordered, ordered[0]];
-  let edgeIdx = 0;
 
-  function drawFrame() {
-    drawPointsOnly();
-    // Mark the start city
-    const sp = points[startCity];
-    const ring = document.createElementNS(SVG_NS, 'circle');
-    ring.setAttribute('cx', sp.x);
-    ring.setAttribute('cy', sp.y);
-    ring.setAttribute('r', 11);
-    ring.classList.add('al-start-marker');
-    rEls.canvas.insertBefore(ring, rEls.canvas.firstChild);
-    const label = document.createElementNS(SVG_NS, 'text');
-    label.setAttribute('x', sp.x);
-    label.setAttribute('y', sp.y - 16);
-    label.setAttribute('text-anchor', 'middle');
-    label.classList.add('al-start-label');
-    label.textContent = 'START';
-    rEls.canvas.appendChild(label);
+  // Draw start marker once and a single path element we mutate in place.
+  drawPointsOnly();
+  const sp = points[startCity];
+  const ring = document.createElementNS(SVG_NS, 'circle');
+  ring.setAttribute('cx', sp.x);
+  ring.setAttribute('cy', sp.y);
+  ring.setAttribute('r', 11);
+  ring.classList.add('al-start-marker');
+  rEls.canvas.insertBefore(ring, rEls.canvas.firstChild);
 
-    // Draw edges up to edgeIdx
-    if (edgeIdx > 0) {
-      let d = '';
-      for (let i = 0; i <= edgeIdx; i++) {
-        const p = points[visit[i]];
-        d += (i === 0 ? 'M' : 'L') + p.x.toFixed(1) + ' ' + p.y.toFixed(1);
-      }
-      const path = document.createElementNS(SVG_NS, 'path');
-      path.setAttribute('d', d);
-      path.classList.add('al-edge');
-      rEls.canvas.insertBefore(path, rEls.canvas.firstChild.nextSibling);
-    }
+  const label = document.createElementNS(SVG_NS, 'text');
+  label.setAttribute('x', sp.x);
+  label.setAttribute('y', sp.y - 16);
+  label.setAttribute('text-anchor', 'middle');
+  label.classList.add('al-start-label');
+  label.textContent = 'START';
+  rEls.canvas.appendChild(label);
+
+  const path = document.createElementNS(SVG_NS, 'path');
+  path.classList.add('al-edge');
+  // Insert after start ring, before points.
+  rEls.canvas.insertBefore(path, ring.nextSibling);
+
+  // Pre-build the prefix string up to (but not including) the current
+  // segment so each frame only appends one interpolated L-command.
+  const prefixes = [`M${points[visit[0]].x.toFixed(1)} ${points[visit[0]].y.toFixed(1)}`];
+  for (let i = 1; i < visit.length; i++) {
+    const p = points[visit[i]];
+    prefixes.push(prefixes[i - 1] + `L${p.x.toFixed(1)} ${p.y.toFixed(1)}`);
   }
 
-  function tick() {
+  let segIdx = 0;            // index of the segment currently being drawn (visit[segIdx] -> visit[segIdx+1])
+  let segStart = 0;          // timestamp when current segment began
+  let started = false;
+
+  function frame(now) {
     if (!tourAlgo) return;
-    drawFrame();
-    if (edgeIdx >= visit.length - 1) { onDone(); return; }
-    edgeIdx++;
-    tourSetStatus(`drawing tour: ${edgeIdx} / ${visit.length - 1} edges`);
-    tourTimer = setTimeout(tick, REVEAL_EDGE_MS);
+    if (!started) { segStart = now; started = true; }
+
+    const a = points[visit[segIdx]];
+    const b = points[visit[segIdx + 1]];
+    const t = Math.min(1, (now - segStart) / REVEAL_EDGE_MS);
+    const x = a.x + (b.x - a.x) * t;
+    const y = a.y + (b.y - a.y) * t;
+    path.setAttribute('d', prefixes[segIdx] + `L${x.toFixed(1)} ${y.toFixed(1)}`);
+
+    if (t >= 1) {
+      segIdx++;
+      if (segIdx >= visit.length - 1) {
+        // Tour complete: snap to final closed path and finish.
+        path.setAttribute('d', prefixes[visit.length - 1]);
+        onDone();
+        return;
+      }
+      tourSetStatus(`drawing tour: ${segIdx} / ${visit.length - 1} edges`);
+      segStart = now;
+    }
+    tourTimer = setTimeout(() => frame(performance.now()), 16);
   }
 
-  // Brief pause showing just the start marker before the first edge appears.
-  drawFrame();
   tourSetStatus('drawing tour from START...');
-  tourTimer = setTimeout(tick, REVEAL_INITIAL_PAUSE_MS);
+  // Pause briefly with just the start marker showing, then begin animation.
+  tourTimer = setTimeout(() => frame(performance.now()), REVEAL_INITIAL_PAUSE_MS);
 }
 
 function tourRun() {
