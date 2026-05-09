@@ -202,11 +202,11 @@
     .al-cell {
       aspect-ratio: 1;
       background: var(--bg);
-      border-radius: 2px;
+      border-radius: 1px;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
       font-family: var(--font-mono);
-      font-size: 11px;
+      font-size: 9px;
       font-weight: 700;
       color: var(--text-dim);
       transition: background 0.08s ease;
@@ -268,6 +268,17 @@
     }
     .al-status.error { color: var(--accent-red); }
 
+    .al-heur-desc {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      margin: -16px 0 28px;
+      padding: 0 4px;
+      line-height: 1.5;
+      max-width: 720px;
+      min-height: 1em;
+    }
+
     @media (max-width: 600px) {
       .al-tile { width: 44px; height: 44px; font-size: var(--text-sm); }
       .al-stat { border-right: none; border-bottom: 1px solid var(--border-light); }
@@ -320,14 +331,15 @@
           <select id="t-algo">
             <option value="ids">Iterative deepening</option>
             <option value="astar" selected>A*</option>
+            <option value="greedy">Greedy best-first</option>
             <option value="beam">Beam</option>
           </select>
         </label>
         <label>
           <span>n (per colour) <span class="val" id="t-nVal">4</span></span>
-          <input id="t-n" type="range" min="2" max="6" value="4" />
+          <input id="t-n" type="range" min="2" max="8" value="4" />
         </label>
-        <label data-when="astar,beam">
+        <label data-when="astar,greedy,beam">
           <span>Heuristic</span>
           <select id="t-heur">
             <option value="misplaced">Misplaced</option>
@@ -337,14 +349,16 @@
           </select>
         </label>
         <label data-when="beam">
-          <span>Beam width <span class="val" id="t-beamVal">10</span></span>
-          <input id="t-beam" type="range" min="1" max="50" value="10" />
+          <span>Beam width <span class="val" id="t-beamVal">5</span></span>
+          <input id="t-beam" type="range" min="1" max="20" value="5" />
         </label>
         <div class="al-buttons">
           <button id="t-run" class="al-btn primary">Run</button>
           <button id="t-rand" class="al-btn">Randomise</button>
         </div>
       </div>
+
+      <p class="al-heur-desc" id="t-heurDesc"></p>
 
       <div class="al-board" id="t-board"></div>
       <div class="al-step-meta">
@@ -368,7 +382,7 @@
       <h2>Grid pathfinder</h2>
 
       <p class="prose">
-        Same algorithms, a different problem. Find a route from <strong>S</strong> to <strong>G</strong> on a grid. Click and drag any cell to toggle a wall. Cells the algorithm visits light up in order, and the final path overlays in red.
+        Same algorithms, a different problem. Find a route from <strong>S</strong> to <strong>G</strong> on a grid. Click and drag across cells to paint walls (or to erase them, when starting on a wall). Cells the algorithm visits light up in order, and the final path overlays in red.
       </p>
 
       <div class="al-controls">
@@ -377,20 +391,20 @@
           <select id="g-algo">
             <option value="bfs">Breadth-first</option>
             <option value="astar" selected>A*</option>
+            <option value="greedy">Greedy best-first</option>
             <option value="beam">Beam</option>
           </select>
         </label>
-        <label data-when="astar,beam">
+        <label data-when="astar,greedy,beam">
           <span>Heuristic</span>
           <select id="g-heur">
             <option value="manhattan" selected>Manhattan</option>
             <option value="euclidean">Euclidean</option>
-            <option value="none">None (= BFS)</option>
           </select>
         </label>
         <label data-when="beam">
-          <span>Beam width <span class="val" id="g-beamVal">10</span></span>
-          <input id="g-beam" type="range" min="1" max="40" value="10" />
+          <span>Beam width <span class="val" id="g-beamVal">5</span></span>
+          <input id="g-beam" type="range" min="1" max="20" value="5" />
         </label>
         <div class="al-buttons">
           <button id="g-run" class="al-btn primary">Run</button>
@@ -398,6 +412,8 @@
           <button id="g-randWalls" class="al-btn">Random walls</button>
         </div>
       </div>
+
+      <p class="al-heur-desc" id="g-heurDesc"></p>
 
       <div class="al-grid-wrap">
         <div class="al-grid" id="g-grid"></div>
@@ -415,7 +431,7 @@
 
   </main>
 
-  <script type="module" src="/projects/algo-viz.js"></script>
+  <script type="module" src="/projects/algo-viz.js?v=2"></script>
   <script src="/sidebar.js"></script>
 </body>
 </html>

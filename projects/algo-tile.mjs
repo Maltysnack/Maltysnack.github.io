@@ -87,6 +87,13 @@ export const tileHeuristics = {
   blocks: tileBlocks,
 };
 
+export const tileHeuristicDescriptions = {
+  misplaced: 'Counts tiles not at their goal position. Cheap to compute, loose lower bound.',
+  manhattan: 'Sum of how far each misplaced tile is from a valid goal slot. Tight and admissible.',
+  inversions: 'Counts (second-colour, first-colour) pairs that are out of order. Each inversion needs at least one move.',
+  blocks: 'Excess number of contiguous colour runs over two. Cheap, intuitive, weak.',
+};
+
 // Build a problem object from a tile-puzzle initial state.
 export function tileProblem(initial, n, colors, heuristicName = 'manhattan') {
   const heur = tileHeuristics[heuristicName];

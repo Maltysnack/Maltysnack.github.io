@@ -196,6 +196,45 @@ export function beamSearch({ initial, isGoal, successors, heuristic }, opts = {}
   return { path: null, stats };
 }
 
+// ---------- greedy best-first ----------
+// Like A*, but the priority is just h(n), ignoring g(n). Fast, but it can
+// commit to a bad path and not back out, so paths are not always optimal.
+
+export function greedyBestFirst({ initial, isGoal, successors, heuristic }, opts = {}) {
+  const maxExplored = opts.maxExplored ?? DEFAULT_MAX_EXPLORED;
+  const onVisit = opts.onVisit;
+  const stats = { explored: 0, generated: 0, time: 0, hitBudget: false };
+  const start = performance.now();
+  const frontier = new MinHeap();
+  const seen = new Set([initial]);
+  const parent = new Map([[initial, null]]);
+  let counter = 0;
+  frontier.push([heuristic(initial), counter++, initial]);
+
+  while (frontier.size) {
+    const [, , current] = frontier.pop();
+    stats.explored++;
+    if (onVisit) onVisit(current);
+    if (stats.explored > maxExplored) {
+      stats.hitBudget = true;
+      break;
+    }
+    if (isGoal(current)) {
+      stats.time = performance.now() - start;
+      return { path: reconstruct(parent, current), stats };
+    }
+    for (const { state: next } of successors(current)) {
+      if (seen.has(next)) continue;
+      seen.add(next);
+      parent.set(next, current);
+      frontier.push([heuristic(next), counter++, next]);
+      stats.generated++;
+    }
+  }
+  stats.time = performance.now() - start;
+  return { path: null, stats };
+}
+
 // ---------- breadth-first (Dijkstra with h=0, useful as a baseline) ----------
 
 export function bfs({ initial, isGoal, successors }, opts = {}) {

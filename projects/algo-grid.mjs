@@ -51,7 +51,11 @@ export function gridZero() {
 export const gridHeuristics = {
   manhattan: gridManhattan,
   euclidean: gridEuclidean,
-  none: gridZero,
+};
+
+export const gridHeuristicDescriptions = {
+  manhattan: 'Horizontal plus vertical distance to the goal. Exact for a 4-connected grid with no diagonals.',
+  euclidean: 'Straight-line distance. Slightly looser than Manhattan on a grid without diagonals.',
 };
 
 export function gridProblem(grid, start, goal, heuristicName = 'manhattan') {

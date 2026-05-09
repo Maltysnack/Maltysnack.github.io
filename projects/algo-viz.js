@@ -1,11 +1,15 @@
-import { iterativeDeepening, aStar, beamSearch, bfs } from './algo-core.mjs';
-import { randomTileState, tileProblem, tileHeuristics } from './algo-tile.mjs';
-import { key, fromKey, gridProblem, gridHeuristics } from './algo-grid.mjs';
+import { iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst } from './algo-core.mjs?v=2';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=2';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=2';
 
 const $ = (id) => document.getElementById(id);
 
 const TILE_FRAME_MS = 150;
-const GRID_FRAME_MS = 12;
+// Grid animation targets a roughly fixed total time; per-cell delay is
+// computed from the visited count so big searches don't take forever.
+const GRID_TARGET_TOTAL_MS = 3000;
+const GRID_FRAME_MS = 16;
+const GRID_MIN_PER_CELL_MS = 4;
 
 // ============================================================================
 // Tile puzzle
@@ -14,7 +18,8 @@ const GRID_FRAME_MS = 12;
 const COLORS = ['Y', 'B'];
 const tEls = {
   algo: $('t-algo'), n: $('t-n'), nVal: $('t-nVal'),
-  heur: $('t-heur'), beam: $('t-beam'), beamVal: $('t-beamVal'),
+  heur: $('t-heur'), heurDesc: $('t-heurDesc'),
+  beam: $('t-beam'), beamVal: $('t-beamVal'),
   run: $('t-run'), rand: $('t-rand'),
   board: $('t-board'),
   step: $('t-step'), totalSteps: $('t-totalSteps'), cost: $('t-cost'),
@@ -112,7 +117,21 @@ function tilePickAlgo() {
   const problem = tileProblem(tileState, n, COLORS, heur);
   if (algo === 'ids') return () => iterativeDeepening(problem, { maxExplored: 500_000 });
   if (algo === 'astar') return () => aStar(problem);
+  if (algo === 'greedy') return () => greedyBestFirst(problem);
   if (algo === 'beam') return () => beamSearch(problem, { beamWidth });
+}
+
+function tileUpdateHeurDesc() {
+  if (!tEls.heurDesc) return;
+  const algo = tEls.algo.value;
+  const showHeur = ['astar', 'greedy', 'beam'].includes(algo);
+  if (!showHeur) {
+    tEls.heurDesc.textContent = '';
+    tEls.heurDesc.style.display = 'none';
+    return;
+  }
+  tEls.heurDesc.style.display = '';
+  tEls.heurDesc.textContent = tileHeuristicDescriptions[tEls.heur.value] ?? '';
 }
 
 function tileRun() {
@@ -166,12 +185,14 @@ function tileUpdateVisibility() {
 
 tEls.n.addEventListener('input', () => { tEls.nVal.textContent = tEls.n.value; tileRandomise(); });
 tEls.beam.addEventListener('input', () => { tEls.beamVal.textContent = tEls.beam.value; });
-tEls.algo.addEventListener('change', tileUpdateVisibility);
+tEls.algo.addEventListener('change', () => { tileUpdateVisibility(); tileUpdateHeurDesc(); });
+tEls.heur.addEventListener('change', tileUpdateHeurDesc);
 tEls.run.addEventListener('click', tileRun);
 tEls.rand.addEventListener('click', tileRandomise);
 tEls.nVal.textContent = tEls.n.value;
 tEls.beamVal.textContent = tEls.beam.value;
 tileUpdateVisibility();
+tileUpdateHeurDesc();
 renderTile(tileState);
 tileSetStep(0, 0, 0);
 
@@ -179,12 +200,12 @@ tileSetStep(0, 0, 0);
 // Grid pathfinder
 // ============================================================================
 
-const ROWS = 16, COLS = 28;
-const START = key(Math.floor(ROWS / 2), 1);
-const GOAL  = key(Math.floor(ROWS / 2), COLS - 2);
+const ROWS = 32, COLS = 64;
+const START = key(Math.floor(ROWS / 2), 2);
+const GOAL  = key(Math.floor(ROWS / 2), COLS - 3);
 
 const gEls = {
-  algo: $('g-algo'), heur: $('g-heur'),
+  algo: $('g-algo'), heur: $('g-heur'), heurDesc: $('g-heurDesc'),
   beam: $('g-beam'), beamVal: $('g-beamVal'),
   run: $('g-run'), clear: $('g-clear'), randWalls: $('g-randWalls'),
   grid: $('g-grid'),
@@ -242,24 +263,49 @@ function gridClearAnim() {
 }
 
 let isPainting = false, paintMode = null;
-gEls.grid.addEventListener('mousedown', (e) => {
-  const cell = e.target.closest('.al-cell');
+
+function paintAtPoint(clientX, clientY) {
+  const elem = document.elementFromPoint(clientX, clientY);
+  if (!elem) return;
+  const cell = elem.closest('.al-cell');
   if (!cell) return;
   const k = cell.dataset.k;
   if (k === START || k === GOAL) return;
+  togglePaint(k, cell);
+}
+
+function startPaint(target) {
+  const cell = target.closest('.al-cell');
+  if (!cell) return false;
+  const k = cell.dataset.k;
+  if (k === START || k === GOAL) return false;
   isPainting = true;
   paintMode = walls.has(k) ? 'erase' : 'paint';
   togglePaint(k, cell);
-});
+  return true;
+}
+
+gEls.grid.addEventListener('mousedown', (e) => { startPaint(e.target); });
 gEls.grid.addEventListener('mousemove', (e) => {
   if (!isPainting) return;
-  const cell = e.target.closest('.al-cell');
-  if (!cell) return;
-  const k = cell.dataset.k;
-  if (k === START || k === GOAL) return;
-  togglePaint(k, cell);
+  paintAtPoint(e.clientX, e.clientY);
 });
 window.addEventListener('mouseup', () => { isPainting = false; });
+
+// Touch support: prevent scroll-while-painting and route touches to the paint logic.
+gEls.grid.addEventListener('touchstart', (e) => {
+  const touch = e.touches[0];
+  if (!touch) return;
+  if (startPaint(document.elementFromPoint(touch.clientX, touch.clientY))) e.preventDefault();
+}, { passive: false });
+gEls.grid.addEventListener('touchmove', (e) => {
+  if (!isPainting) return;
+  e.preventDefault();
+  const touch = e.touches[0];
+  if (!touch) return;
+  paintAtPoint(touch.clientX, touch.clientY);
+}, { passive: false });
+window.addEventListener('touchend', () => { isPainting = false; });
 
 function togglePaint(k, cell) {
   if (paintMode === 'paint' && !walls.has(k)) {
@@ -283,25 +329,44 @@ function gridPickAlgo() {
   const problem = gridProblem(grid, START, GOAL, heur);
   if (algo === 'bfs') return (onVisit) => bfs(problem, { onVisit });
   if (algo === 'astar') return (onVisit) => aStar(problem, { onVisit });
+  if (algo === 'greedy') return (onVisit) => greedyBestFirst(problem, { onVisit });
   if (algo === 'beam') return (onVisit) => beamSearch(problem, { beamWidth, onVisit });
+}
+
+function gridUpdateHeurDesc() {
+  if (!gEls.heurDesc) return;
+  const algo = gEls.algo.value;
+  const showHeur = ['astar', 'greedy', 'beam'].includes(algo);
+  if (!showHeur) {
+    gEls.heurDesc.textContent = '';
+    gEls.heurDesc.style.display = 'none';
+    return;
+  }
+  gEls.heurDesc.style.display = '';
+  gEls.heurDesc.textContent = gridHeuristicDescriptions[gEls.heur.value] ?? '';
 }
 
 function gridAnimateExploration(visited, path) {
   gridClearAnim();
+  // Either delay-per-cell at min rate, or batch many cells per frame on big runs.
+  const idealDelay = visited.length ? GRID_TARGET_TOTAL_MS / visited.length : GRID_FRAME_MS;
+  const cellsPerFrame = Math.max(1, Math.ceil(GRID_FRAME_MS / Math.max(idealDelay, GRID_MIN_PER_CELL_MS)));
+  const frameDelay = Math.max(GRID_MIN_PER_CELL_MS, Math.min(GRID_FRAME_MS, idealDelay));
   let i = 0;
   const tick = () => {
     if (i >= visited.length) {
-      // Then animate the final path
       animatePath(path);
       return;
     }
-    const k = visited[i];
-    if (k !== START && k !== GOAL) {
-      const cell = getCell(k);
-      if (cell) cell.classList.add('explored');
+    const stop = Math.min(visited.length, i + cellsPerFrame);
+    for (; i < stop; i++) {
+      const k = visited[i];
+      if (k !== START && k !== GOAL) {
+        const cell = getCell(k);
+        if (cell) cell.classList.add('explored');
+      }
     }
-    i++;
-    gridTimer = setTimeout(tick, GRID_FRAME_MS);
+    gridTimer = setTimeout(tick, frameDelay);
   };
   tick();
 }
@@ -313,6 +378,7 @@ function animatePath(path) {
     return;
   }
   let i = 0;
+  const delay = Math.max(GRID_MIN_PER_CELL_MS, Math.min(40, 1500 / Math.max(path.length, 1)));
   const tick = () => {
     if (i >= path.length) {
       gridTimer = null;
@@ -325,7 +391,7 @@ function animatePath(path) {
       if (cell) cell.classList.add('path');
     }
     i++;
-    gridTimer = setTimeout(tick, GRID_FRAME_MS * 2);
+    gridTimer = setTimeout(tick, delay);
   };
   tick();
 }
@@ -396,10 +462,12 @@ function gridRandomWalls() {
 }
 
 gEls.beam.addEventListener('input', () => { gEls.beamVal.textContent = gEls.beam.value; });
-gEls.algo.addEventListener('change', gridUpdateVisibility);
+gEls.algo.addEventListener('change', () => { gridUpdateVisibility(); gridUpdateHeurDesc(); });
+gEls.heur.addEventListener('change', gridUpdateHeurDesc);
 gEls.run.addEventListener('click', gridRun);
 gEls.clear.addEventListener('click', gridClearWalls);
 gEls.randWalls.addEventListener('click', gridRandomWalls);
 gEls.beamVal.textContent = gEls.beam.value;
 buildGrid();
 gridUpdateVisibility();
+gridUpdateHeurDesc();
