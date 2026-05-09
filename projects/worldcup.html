@@ -354,7 +354,8 @@
     }
     .wc-customise {
       position: absolute;
-      top: 0.4rem;
+      /* Sit below the round-of-32 / SF / Final labels so they stay visible */
+      top: 2.1rem;
       right: 0.4rem;
       width: 210px;
       display: flex;
@@ -647,7 +648,9 @@
       // ── Helpers ──────────────────────────────────────────────────
       function flagSrc(team) {
         const code = FLAGS[team];
-        return code ? `https://flagcdn.com/w20/${code}.png` : null;
+        // Request a larger source so flags stay sharp on retina displays
+        // (we display at 14-28px, so 80px source = comfortable 2-5x).
+        return code ? `https://flagcdn.com/w80/${code}.png` : null;
       }
       function flagImg(team) {
         const src = flagSrc(team);
@@ -1211,28 +1214,35 @@
         renderMeta();
       }
 
+      function effectiveLabel(team, bump) {
+        return Math.round((SANDBOX.baseRatings[team] || 1500) + bump);
+      }
+
       function renderAdjustments() {
         const wrap = document.getElementById('wc-adjustments');
         wrap.innerHTML = '';
         Object.entries(STATE.bumps).forEach(([team, bump]) => {
           const pill = document.createElement('span');
           pill.className = 'wc-adjust';
-          const baseRating = Math.round(SANDBOX.baseRatings[team] || 1500);
           pill.innerHTML = `
             ${flagImg(team)}
             <span class="name">${team}</span>
-            <span class="rating">${baseRating}</span>
+            <span class="rating" data-team="${team}">${effectiveLabel(team, bump)}</span>
             <input class="boost" type="number" step="25" value="${bump}" data-team="${team}" />
             <span class="x" data-team="${team}" title="Remove">&times;</span>
           `;
           wrap.appendChild(pill);
         });
-        // Wire input + remove handlers
+        // Wire input + remove handlers. The rating span next to each input
+        // updates live so the user sees the effective rating they're moving.
         wrap.querySelectorAll('input.boost').forEach(el => {
           el.addEventListener('input', e => {
             const t = e.currentTarget.dataset.team;
             const v = parseFloat(e.currentTarget.value);
-            setBoost(t, isNaN(v) ? 0 : v);
+            const bump = isNaN(v) ? 0 : v;
+            setBoost(t, bump);
+            const ratingEl = e.currentTarget.parentElement.querySelector('.rating');
+            if (ratingEl) ratingEl.textContent = effectiveLabel(t, bump);
           });
         });
         wrap.querySelectorAll('.x').forEach(el => {
