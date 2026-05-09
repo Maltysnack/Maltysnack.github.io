@@ -348,57 +348,82 @@
     .wc-next-pct > .pd { text-align: center; }
     .wc-next-pct > .pa { text-align: right; }
 
-    /* Customise panel: live, square-pill team-adjustment rows */
+    /* Tournament view + floating customise panel */
+    .wc-tournament-anchor {
+      position: relative;
+    }
     .wc-customise {
+      position: absolute;
+      top: 0.4rem;
+      right: 0.4rem;
+      width: 210px;
       display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 0.4rem;
-      margin-top: 0.5rem;
-      /* Reserve a bit of space so toggling Custom doesn't bounce
-         the bracket; growing further is still allowed. */
-      min-height: 2.1rem;
+      flex-direction: column;
+      gap: 0.35rem;
+      z-index: 5;
+      pointer-events: auto;
     }
     .wc-customise[hidden] { display: none; }
     .wc-customise input.wc-team-add {
       font: inherit;
-      font-size: 0.82rem;
+      font-size: 0.78rem;
       font-family: inherit;
-      padding: 0.3rem 0.5rem;
-      border: 1px solid rgba(128,128,128,0.3);
+      padding: 0.28rem 0.45rem;
+      border: 1px solid rgba(128,128,128,0.35);
       border-radius: 3px;
-      background: transparent;
+      background: var(--bg, rgba(255,255,255,0.6));
       color: inherit;
-      min-width: 170px;
+      width: 100%;
+      box-sizing: border-box;
+      backdrop-filter: blur(2px);
     }
     .wc-customise input.wc-team-add:focus {
       outline: none;
       border-color: rgba(180,150,80,0.8);
     }
+    .wc-adjustments {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
     .wc-adjust {
-      display: inline-flex;
+      display: grid;
+      grid-template-columns: 16px 1fr 3em 56px 1em;
       align-items: center;
       gap: 0.35rem;
-      padding: 0.25rem 0.4rem 0.25rem 0.5rem;
-      border: 1px solid rgba(180,150,80,0.45);
+      padding: 0.22rem 0.4rem;
+      border: 1px solid rgba(180,150,80,0.5);
       border-radius: 3px;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       font-variant-numeric: tabular-nums;
+      background: var(--bg, rgba(255,255,255,0.7));
+      backdrop-filter: blur(2px);
     }
     .wc-adjust .wc-flag { width: 14px; height: 10px; }
-    .wc-adjust .name { color: var(--text-body, inherit); }
-    .wc-adjust .rating { color: var(--text-muted); margin-left: 0.15rem; }
+    .wc-adjust .name {
+      color: var(--text-body, inherit);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-adjust .rating {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-style: italic;
+      text-align: right;
+    }
     .wc-adjust input.boost {
-      width: 56px;
-      padding: 0.1rem 0.3rem;
+      width: 100%;
+      padding: 0.08rem 0.25rem;
       border: 1px solid rgba(128,128,128,0.35);
       border-radius: 2px;
       background: transparent;
       color: inherit;
       font: inherit;
-      font-size: 0.78rem;
+      font-size: 0.75rem;
       text-align: right;
       font-variant-numeric: tabular-nums;
+      box-sizing: border-box;
     }
     .wc-adjust input.boost:focus {
       outline: none;
@@ -407,9 +432,9 @@
     .wc-adjust .x {
       cursor: pointer;
       color: var(--text-muted);
-      padding: 0 0.15rem;
-      font-size: 0.95rem;
+      font-size: 0.9rem;
       line-height: 1;
+      text-align: center;
     }
     .wc-adjust .x:hover { color: inherit; }
     .wc-customise-hint {
@@ -534,17 +559,20 @@
       </div>
 
       <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
-
-      <div class="wc-customise" id="wc-customise" hidden>
-        <input list="wc-team-list" id="wc-add-team" type="search"
-               class="wc-team-add" placeholder="Add a team to adjust..." autocomplete="off" />
-        <datalist id="wc-team-list"></datalist>
-        <span id="wc-adjustments" style="display:contents"></span>
-      </div>
     </section>
 
-    <!-- Tournament view: holds either the bracket or the group cards -->
-    <div id="wc-tournament-view"></div>
+    <!-- Tournament view: bracket or group cards. The customise panel
+         floats over its top-right corner so it doesn't push anything
+         around when the user toggles Custom on/off. -->
+    <div class="wc-tournament-anchor">
+      <div id="wc-tournament-view"></div>
+      <div class="wc-customise" id="wc-customise" hidden>
+        <input list="wc-team-list" id="wc-add-team" type="search"
+               class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
+        <datalist id="wc-team-list"></datalist>
+        <div id="wc-adjustments" class="wc-adjustments"></div>
+      </div>
+    </div>
 
     <div class="divider"></div>
 
