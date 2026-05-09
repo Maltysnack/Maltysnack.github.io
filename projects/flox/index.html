@@ -88,8 +88,26 @@
       text-transform: uppercase;
       color: var(--text-dim);
       margin: 18px 0 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 16px;
     }
     .fx-codetitle:first-of-type { margin-top: 0; }
+    .fx-codetitle .fx-cta {
+      font-size: var(--text-xs);
+      font-weight: 500;
+      letter-spacing: 0.06em;
+      text-transform: none;
+      color: var(--accent-red);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .fx-codetitle .fx-cta:hover { border-bottom-color: var(--accent-red); }
+    .fx-codetitle .fx-cta::after {
+      content: " \2192";
+      letter-spacing: 0;
+    }
 
     .fx-status {
       display: grid;
@@ -140,7 +158,10 @@
 
     <section class="fx-section">
       <h2>Example</h2>
-      <p class="fx-codetitle">Program</p>
+      <div class="fx-codetitle">
+        <span>Program</span>
+        <a class="fx-cta" href="/projects/flox/playground/">Try it yourself in the playground</a>
+      </div>
       <pre class="fx-code">// A small two-source demo system.
 // Two upland creeks meet at a confluence and flow to an outlet.
 system Demo;
@@ -230,13 +251,6 @@ Spring              |    2.0 |    2.6 |   22.0 |   69.4 |   65.0 |   46.1 |   32
       <div class="fx-status"><b>Dam model</b><span>A dam is a rate switch. Outflow is a fraction of inflow, with the fraction depending on whether storage is above or below threshold. Real dams typically release a constant volume per day. Tracked as a future change.</span></div>
       <div class="fx-status"><b>One-way flow</b><span>Edges are strictly downstream. No backflow, no tidal effects, no reservoir spillback. Multiple downstream edges split flow evenly.</span></div>
       <div class="fx-status"><b>Fixed timestep</b><span>The simulation runs ten one-day steps. No way to vary the horizon yet.</span></div>
-    </section>
-
-    <section class="fx-section">
-      <h2>Try it</h2>
-      <ul>
-        <li><a class="fx-link" href="/projects/flox/playground/">Open the playground</a>. Live editor in the browser, output updates as you type.</li>
-      </ul>
     </section>
 
     <section class="fx-section">
