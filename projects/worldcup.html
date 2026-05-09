@@ -583,6 +583,10 @@
       };
       const DATA = { bracket: null, sim: null };
       const SANDBOX = { groups: {}, baseRatings: {}, fixtures: [] };
+      // Raw Elo per team (before our squad-value and form blends).
+      // We rank teams by this for dark-horse selection so we don't
+      // double-count corrections we already applied.
+      const RAW_RATINGS = {};
 
       // ── Helpers ──────────────────────────────────────────────────
       function flagSrc(team) {
@@ -800,6 +804,9 @@
           return {
             team: t,
             rating: Math.round(ratings[t] || 1500),
+            // raw rating + boost: this is what we rank by for dark horse,
+            // so the user's boost moves the team's "expected" position.
+            raw_rating: Math.round((RAW_RATINGS[t] || 1500) + (STATE.bumps[t] || 0)),
             p_champion, p_final, p_semis, p_quarters, p_round_of_16,
             p_advance_from_groups: 100 - pct('group_stage'),
           };
@@ -978,7 +985,12 @@
       function renderPaths() {
         const sim = activeStats();
         const stats = sim.team_stats;
-        const byRating = [...stats].sort((a, b) => b.rating - a.rating);
+        // Rank by RAW Elo (plus any active boost). Using raw avoids
+        // "double-counting" effects: a team whose effective rating we already
+        // pulled down via squad/form blends shouldn't then get credit
+        // for outperforming the suppressed rating.
+        const rawFor = (s) => (s.raw_rating != null ? s.raw_rating : s.rating);
+        const byRating = [...stats].sort((a, b) => rawFor(b) - rawFor(a));
         const ratingRank = new Map();
         byRating.forEach((s, i) => ratingRank.set(s.team, i + 1));
 
@@ -1246,6 +1258,7 @@
           });
           sim.team_stats.forEach(s => {
             SANDBOX.baseRatings[s.team] = s.rating;
+            RAW_RATINGS[s.team] = s.raw_rating != null ? s.raw_rating : s.rating;
           });
           SANDBOX.fixtures = (sim.match_predictions || []).map(m => ({
             home_team: m.home_team,
