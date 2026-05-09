@@ -208,8 +208,9 @@
 
     .wc-paths {
       display: grid;
-      grid-template-columns: minmax(190px, 1.6fr) repeat(5, 1fr);
-      gap: 0.4rem 0.6rem;
+      /* Team | Elo | dark-horse tag | R16 | QF | SF | Final | Champion */
+      grid-template-columns: minmax(160px, 1.4fr) 3em 5.5em repeat(5, 1fr);
+      gap: 0.4rem 0.5rem;
       font-size: 0.85rem;
       margin-top: 1rem;
     }
@@ -244,20 +245,22 @@
       white-space: nowrap;
     }
     .wc-paths .team-rating {
-      font-size: 0.7rem;
+      font-size: 0.72rem;
       font-style: italic;
       color: var(--text-muted);
-      margin-left: 0.35rem;
-      opacity: 0.7;
-      flex-shrink: 0;
+      opacity: 0.75;
       font-variant-numeric: tabular-nums;
+      text-align: right;
+      align-self: center;
+    }
+    .wc-paths .dh-cell {
+      align-self: center;
     }
     .wc-darkhorse-tag {
       display: inline-block;
       flex-shrink: 0;
       font-size: 0.6rem;
       padding: 0.05rem 0.3rem;
-      margin-left: 0.35rem;
       border: 1px solid rgba(180,150,80,0.5);
       border-radius: 2px;
       color: rgba(180,150,80,0.9);
@@ -1044,8 +1047,11 @@
         );
 
         const container = document.getElementById('wc-paths');
+        // 8 columns: team | rating | DH | R16 | QF | SF | Final | Champion
         container.innerHTML = `
           <div class="header">Team</div>
+          <div class="header right">Elo</div>
+          <div class="header"></div>
           <div class="header right">R16</div>
           <div class="header right">QF</div>
           <div class="header right">SF</div>
@@ -1058,24 +1064,23 @@
           const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           // dataset.team includes "dark horse" so the search input matches it
           const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
-          const cell = document.createElement('div');
-          cell.className = 'name wc-paths-row';
-          cell.dataset.team = searchKey;
-          cell.dataset.rank = String(i);
-          cell.innerHTML = `
-            ${flagImg(s.team)}
-            <span class="team-name">${s.team}</span>
-            <span class="team-rating">${s.rating}</span>
-            ${dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : ''}
-          `;
-          container.appendChild(cell);
-          ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
+          const meta = { 'data-team': searchKey, 'data-rank': String(i) };
+          const addCell = (className, html) => {
             const c = document.createElement('div');
-            c.dataset.team = searchKey;
-            c.dataset.rank = String(i);
-            c.className = 'wc-paths-row cell-num';
-            c.innerHTML = fmt(s[k]);
+            c.className = 'wc-paths-row ' + className;
+            for (const [k, v] of Object.entries(meta)) c.setAttribute(k, v);
+            c.innerHTML = html;
             container.appendChild(c);
+          };
+          // 1. Team (flag + name)
+          addCell('name', `${flagImg(s.team)}<span class="team-name">${s.team}</span>`);
+          // 2. Effective rating
+          addCell('team-rating', s.rating);
+          // 3. Dark horse tag (always renders the cell so the column lines up)
+          addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
+          // 4-8. Probabilities
+          ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
+            addCell('cell-num', fmt(s[k]));
           });
         });
         applyPathsFilter('');
