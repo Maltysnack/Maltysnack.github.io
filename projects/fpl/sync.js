@@ -14,7 +14,7 @@ const fs    = require('fs');
 const path  = require('path');
 
 const FPL = 'https://fantasy.premierleague.com/api/';
-const OUT  = path.join(__dirname, '..', 'projects', 'fpl-api-cache.json');
+const OUT  = path.join(__dirname, 'api-cache.json');
 
 function getOnce(url) {
   return new Promise((resolve, reject) => {

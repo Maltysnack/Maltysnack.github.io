@@ -30,7 +30,7 @@ SECTIONS = [
     ]),
     ("Projects", [
         ("/projects/saltysnacks.html",  "Saltysnacks"),
-        ("/projects/fantasyfootball.html", "FPL Predicted XI"),
+        ("/projects/fpl/index.html",     "FPL Predicted XI"),
         ("/projects/happyhour.html",    "Happy Hour"),
         ("/projects/worldcup.html",     "World Cup 2026"),
         ("/projects/flox/index.html",   "Flox"),

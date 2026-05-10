@@ -1227,7 +1227,7 @@
       statusEl.textContent = 'Loading FPL data...';
 
       // Load from static cache - no CORS proxy needed, same origin
-      const cacheRes = await fetch('/projects/fpl-api-cache.json?t=' + Date.now());
+      const cacheRes = await fetch('./api-cache.json?t=' + Date.now());
       if (!cacheRes.ok) throw new Error('Cache not found (HTTP ' + cacheRes.status + ')');
       const cache = await cacheRes.json();
 
@@ -1316,7 +1316,7 @@
 
   async function loadTracker() {
     try {
-      const res = await fetch('/projects/fpl-history.json?t=' + Date.now());
+      const res = await fetch('./history.json?t=' + Date.now());
       if (!res.ok) return;
       const data = await res.json();
       const weeks = (data.weeks || []).slice().sort((a, b) => a.gwId - b.gwId);
