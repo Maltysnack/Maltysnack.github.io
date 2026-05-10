@@ -9,11 +9,15 @@
 
   // ── Data state (lazy-loaded) ──
   let meta = null, explore = null, scryfall = null;
-  let cards = null, cardsByName = null, pairs = null;
+  let cards = null, cardsByName = null;
   let allNames = null;
   let dataReady = false;
-  let decks = null; // raw decks, lazy-loaded on first "view lists" action
+  let decks = null;       // raw decks, eager-loaded after initial render
   let listsOpen = false;
+  // Synergy scores are computed ad-hoc from raw decks against the current
+  // selection + bans, then cached. Cleared whenever selection or bans change.
+  let _scoresMap = null;
+  let _scoresKey = "";
 
   // ── Selection + Bans (mirrored to URL hash #sel=a,b&ban=x,y) ──
   let selection = parseHashList("sel");
@@ -37,20 +41,21 @@
   }
   // Backward compat shim: old name
   function writeSelectionToHash() { writeHash(); }
+  function invalidateScores() { _scoresMap = null; _scoresKey = ""; }
+
   function selectionAdd(name) {
     if (!name || selection.includes(name)) return;
     bans = bans.filter((n) => n !== name);   // adding to selection unbans
     selection = [...selection, name];
     listsOpen = false;
-    _adHocPairs = null;
+    invalidateScores();
     writeHash();
-    ensureDecksForBansIfNeeded();
     render();
   }
   function selectionRemove(name) {
     selection = selection.filter((n) => n !== name);
     if (!selection.length) listsOpen = false;
-    _adHocPairs = null;
+    invalidateScores();
     writeHash();
     render();
   }
@@ -62,35 +67,21 @@
     if (!name || bans.includes(name)) return;
     selection = selection.filter((n) => n !== name);  // banning removes from selection
     bans = [...bans, name];
-    _adHocPairs = null;
+    invalidateScores();
     writeHash();
-    ensureDecksForBansIfNeeded();
     render();
   }
   function banRemove(name) {
     bans = bans.filter((n) => n !== name);
-    _adHocPairs = null;
+    invalidateScores();
     writeHash();
     render();
   }
   function bansClear() {
     bans = [];
-    _adHocPairs = null;
+    invalidateScores();
     writeHash();
     render();
-  }
-
-  // When bans become active, we need decks_raw.json loaded so we can filter
-  // the deck pool. Lazy-fetches in the background if not already loaded.
-  async function ensureDecksForBansIfNeeded() {
-    if (!bans.length || decks) return;
-    try {
-      decks = await loadJson("decks_raw");
-      _adHocPairs = null;
-      render();
-    } catch {
-      // silent: recommendations fall back to precomputed pairs without ban filter
-    }
   }
 
   // ── Utilities ──
@@ -121,75 +112,128 @@
     return c && (c.tier === "defines" || c.tier === "driving");
   }
 
-  // ── Synergy Score (0-99, calibrated absolute) ──
+  // ── Synergy Score (computed ad-hoc from raw decks per selection state) ──
   //
-  // Three signals combined:
+  // Why ad-hoc rather than precomputed pairs?
+  // - Multi-card selection works correctly: we look at decks containing all
+  //   (or many) selected cards, not just the union of each card's top-N
+  //   companions. That fixes the case where adding a third card was silently
+  //   ignored because it wasn't in the other two's top-16.
+  // - Bans filter the deck pool exactly.
+  // - Cards below the analyze-time support floor still get a real signal if
+  //   any decks have them alongside the selection.
   //
-  //   1. STRENGTH: how much higher P(card | selection) is than the card's
-  //      baseline P(card). Normalized as (P(B|A) - P(B)) / (1 - P(B)). This
-  //      is the lift improvement over chance on a 0..1 scale. Doesn't blow up
-  //      for tiny denominators the way raw lift does.
+  // Coverage of partial-match decks via a quadratic weight: a deck with k of
+  // n selected cards contributes (k/n)^2 to the co-occurrence count. So
+  // exact-match decks dominate, partial matches contribute proportionally.
   //
-  //   2. ROBUSTNESS: sqrt(total co-occurrences / 200). At 200+ co decks it's
-  //      already 1, at 50 co it's 0.5, at 5 co it's 0.16. Stops fluke pairs
-  //      from looking strong.
-  //
-  //   3. NOVELTY: 1 / (1 + 5 * P(card)). Pushes obvious meta staples down so
-  //      the more interesting hits rise above them.
-  //
-  // Multiplied together, then by COVERAGE^0.6 (fraction of selection the pair
-  // has data for), then by SCORE_SCALE to land in 0-99 range. Standard-legal
-  // hard filter; semantic fallback (capped at 30) when no direct pair data.
-  //
-  // Why not raw lift? Because two rare cards trivially have lift 30+ but
-  // those big numbers are almost entirely an artifact of small denominators.
-  // Strength sidesteps that: P(B|A)=0.98 for a rare pair vs P(B|A)=0.67 for
-  // a tight popular pair gets compared directly, with the "improvement over
-  // baseline" framing taking out the rarity inflation.
+  // Three signals combined per candidate:
+  //   1. STRENGTH: (P(B | selection-weighted) - P(B in pool)) / (1 - P(B))
+  //   2. ROBUSTNESS: sqrt(weighted_co / 200), capped at 1
+  //   3. NOVELTY: 1 / (1 + 5 * P(B in pool))
+  // Multiplied, then mapped to 0-99 via 99 * (1 - exp(-4.5 * raw)).
   const NOVELTY_K = 5;
   const ROBUSTNESS_REF = 200;
-  const SEMANTIC_CAP = 30;
-  // Asymptotic mapping: score = 99 * (1 - exp(-CURVE_K * raw)). Approaches
-  // 99 but never reaches without an effectively perfect pairing. Reserves
-  // the very top of the scale for genuine outliers instead of clipping
-  // everything good to 99. CURVE_K tuned so a strong real-world pairing
-  // (raw ≈ 0.42) lands around 85, a perfect pairing (raw → 1) lands ~95+.
   const CURVE_K = 4.5;
+  const SEMANTIC_CAP = 30;
+  const COVERAGE_POWER = 2;      // partial-match weight = (k/n)^COVERAGE_POWER
 
+  // Compute the score map for the current selection + bans. Caches by key.
+  function computeScoreMap() {
+    if (!decks) return null;
+    const key = JSON.stringify({ s: selection, b: bans });
+    if (_scoresKey === key && _scoresMap) return _scoresMap;
+    _scoresKey = key;
+
+    const cutoff = (meta && meta.pair_window_first_week) || "";
+    const banSet = new Set(bans);
+    const selSet = new Set(selection);
+
+    // Pool: recent decks that don't contain any banned card
+    const pool = [];
+    for (const d of decks) {
+      if (cutoff && (d.week || "") < cutoff) continue;
+      const main = d.main || [];
+      let hasBan = false;
+      for (const c of main) {
+        if (banSet.has(c.name)) { hasBan = true; break; }
+      }
+      if (hasBan) continue;
+      pool.push(d);
+    }
+
+    // Baseline: weighted prevalence of each card in the (recent, ban-free) pool
+    const totalW = pool.reduce((s, d) => s + (d.weight || 1), 0);
+    const baseline = new Map();
+    for (const d of pool) {
+      const w = d.weight || 1;
+      for (const c of d.main || []) {
+        baseline.set(c.name, (baseline.get(c.name) || 0) + w);
+      }
+    }
+
+    const scores = new Map();
+    if (selection.length === 0) { _scoresMap = scores; return scores; }
+
+    // Selection-weighted co-occurrence: each deck contributes
+    // (matchedSelectionCards / |selection|)^COVERAGE_POWER × deckWeight
+    // to any candidate it contains. So decks that share more of the selection
+    // pull harder; decks sharing none contribute nothing.
+    const candidateCo = new Map();
+    let totalSelW = 0;  // total weighted "selection presence" across pool
+    const n = selection.length;
+
+    for (const d of pool) {
+      const main = d.main || [];
+      const names = new Set(main.map((c) => c.name));
+      let matched = 0;
+      for (const s of selection) if (names.has(s)) matched++;
+      if (matched === 0) continue;
+      const selFrac = matched / n;
+      const matchWeight = (d.weight || 1) * Math.pow(selFrac, COVERAGE_POWER);
+      totalSelW += matchWeight;
+      for (const c of main) {
+        if (selSet.has(c.name)) continue;     // don't recommend the selection itself
+        candidateCo.set(c.name, (candidateCo.get(c.name) || 0) + matchWeight);
+      }
+    }
+
+    if (totalSelW === 0) { _scoresMap = scores; return scores; }
+
+    for (const [name, coW] of candidateCo) {
+      if (banSet.has(name)) continue;
+      if (!isLegal(name)) continue;
+      const baseW = baseline.get(name) || 0;
+      if (baseW === 0) continue;
+      const pBase = baseW / totalW;
+      if (pBase >= 1) continue;
+      const pCondSel = coW / totalSelW;
+      const strength = (pCondSel - pBase) / (1 - pBase);
+      if (strength <= 0) continue;
+      const robustness = Math.min(Math.sqrt(coW / ROBUSTNESS_REF), 1);
+      const novelty = 1 / (1 + NOVELTY_K * pBase);
+      const raw = strength * robustness * novelty;
+      const score = Math.round(Math.min(99, Math.max(0, 99 * (1 - Math.exp(-CURVE_K * raw)))));
+      if (score > 0) scores.set(name, score);
+    }
+
+    _scoresMap = scores;
+    return scores;
+  }
+
+  // Sync lookup. If decks aren't loaded yet, returns null (renders skip the score).
   function synergyScore(name, sel) {
     if (!isLegal(name)) return null;
-    if (sel.includes(name)) return null;
+    if (selection.includes(name)) return null;
     if (bans.includes(name)) return null;
-    const activePairs = getActivePairs();
-    if (!activePairs) return null;
-
-    const card = cardData(name);
-    const recentPrev = card ? (card.recent_main_prevalence || 0) : 0;
-
-    // Direct pair signal: collect P(B|A) and co_decks against each selection card
-    const validSel = sel.filter((s) => activePairs[s]);
-    let pConds = [], cos = [];
-    for (const s of validSel) {
-      const r = (activePairs[s].companions || []).find((x) => x.name === name);
-      if (!r) continue;
-      pConds.push(r.p_b_given_a);
-      cos.push(r.co_decks);
-    }
-    if (pConds.length === 0) return semanticScore(name, sel);
-
-    const meanP = pConds.reduce((a, b) => a + b, 0) / pConds.length;
-    const strength = recentPrev < 1 ? (meanP - recentPrev) / (1 - recentPrev) : 0;
-    if (strength <= 0) return null;
-
-    const totalCo = cos.reduce((a, b) => a + b, 0);
-    const robustness = Math.min(Math.sqrt(totalCo / ROBUSTNESS_REF), 1);  // capped
-    const novelty = 1 / (1 + NOVELTY_K * recentPrev);
-    const coverage = pConds.length / Math.max(validSel.length, 1);
-
-    const raw = strength * robustness * novelty * Math.pow(coverage, 0.6);
-    // Asymptotic to 99, never quite reaching it. 99 means truly singular.
-    const score = 99 * (1 - Math.exp(-CURVE_K * raw));
-    return Math.round(Math.min(99, Math.max(0, score)));
+    if (!decks) return null;
+    const map = computeScoreMap();
+    if (!map) return null;
+    const direct = map.get(name);
+    if (direct !== undefined) return direct;
+    // No deck in the pool contains this candidate alongside any selection
+    // card. Fall back to semantic similarity.
+    return semanticScore(name, sel || selection);
   }
 
   // Semantic fallback: shared color identity + same primary type. Bounded low.
@@ -309,78 +353,6 @@
     prefix.sort((a, b) => rank(a) - rank(b));
     contains.sort((a, b) => rank(a) - rank(b));
     return [...exact, ...prefix, ...contains, ...fuzzNames].slice(0, 20);
-  }
-
-  // ── Recommendation: combined lift across selection ──
-  // For each candidate card, compute geometric mean of lifts to each selected card
-  // that has data. Cards already in selection are excluded from results.
-  function combinedRecommendations(sel, limit = 36) {
-    if (!sel.length || !pairs) return [];
-    const validSel = sel.filter((n) => pairs[n]);
-    if (!validSel.length) {
-      // Fallback: shared neighbors of selection in same color/type space
-      return secondOrderRecommendations(sel, limit);
-    }
-    const selSet = new Set(sel);
-
-    // Aggregate: for each candidate card, collect its lifts to each selected card
-    const agg = new Map(); // name -> { lifts: [..], sumPGivenA: ..., count }
-    for (const a of validSel) {
-      for (const r of pairs[a].companions) {
-        if (selSet.has(r.name)) continue;
-        let entry = agg.get(r.name);
-        if (!entry) { entry = { lifts: [], pGivenSel: [], count: 0 }; agg.set(r.name, entry); }
-        entry.lifts.push(r.lift);
-        entry.pGivenSel.push(r.p_b_given_a);
-        entry.count++;
-      }
-    }
-
-    // Score: geometric mean of lifts. Weight by count (cards present in more pin-lifts rank higher).
-    const scored = [];
-    for (const [name, entry] of agg) {
-      const product = entry.lifts.reduce((a, b) => a * b, 1);
-      const geomLift = Math.pow(product, 1 / entry.lifts.length);
-      const avgPGivenSel = entry.pGivenSel.reduce((a, b) => a + b, 0) / entry.pGivenSel.length;
-      const coverage = entry.count / validSel.length; // 1.0 = appears with all
-      // Composite score: stronger lift × higher coverage. Coverage bumps cards
-      // that play with everyone over cards that play with just one.
-      const score = geomLift * Math.pow(coverage, 0.7);
-      scored.push({ name, geomLift, avgPGivenSel, coverage, score });
-    }
-
-    scored.sort((a, b) => b.score - a.score);
-    return scored.slice(0, limit);
-  }
-
-  // Second-order: when selection has only data-light cards, find cards in the
-  // same color/type space whose synergy partners overlap with the selection.
-  function secondOrderRecommendations(sel, limit) {
-    const colors = new Set();
-    const types = new Set();
-    for (const n of sel) {
-      const sf = scryfall[n] || {};
-      (sf.colors || []).forEach((c) => colors.add(c));
-      const t = (sf.type_line || "").split(" ")[0];
-      if (t) types.add(t);
-    }
-    const candidates = [];
-    for (const c of cards || []) {
-      if (sel.includes(c.name)) continue;
-      const sf = scryfall[c.name] || {};
-      const cColors = sf.colors || [];
-      // Color overlap required (any shared color)
-      if (cColors.length && colors.size && !cColors.some((x) => colors.has(x))) continue;
-      candidates.push({
-        name: c.name,
-        geomLift: 1,
-        avgPGivenSel: 0,
-        coverage: 0,
-        score: c.centerpiece_decks * 2 + c.any_decks,
-      });
-    }
-    candidates.sort((a, b) => b.score - a.score);
-    return candidates.slice(0, limit);
   }
 
   // ── Render ──
@@ -558,93 +530,15 @@
     });
   }
 
-  // ── Ban-aware ad-hoc pair stats ──
-  // When bans are active we recompute pair stats in the browser, filtering
-  // out any deck containing a banned card. Cached until selection or bans change.
-  let _adHocPairs = null;
-
-  function getActivePairs() {
-    if (!bans.length) return pairs;            // no bans: use precomputed
-    if (!decks) return pairs;                  // not loaded yet: fall back gracefully
-    if (_adHocPairs) return _adHocPairs;       // cached for this state
-    const banSet = new Set(bans);
-    const cutoff = (meta && meta.pair_window_first_week) || "";
-    const filtered = decks.filter((d) => {
-      if (cutoff && (d.week || "") < cutoff) return false;
-      return !(d.main || []).some((c) => banSet.has(c.name));
-    });
-    _adHocPairs = computeAdHocPairs(filtered, selection);
-    return _adHocPairs;
-  }
-
-  function computeAdHocPairs(filteredDecks, sel) {
-    const totalW = filteredDecks.reduce((s, d) => s + (d.weight || 1), 0);
-    if (totalW === 0 || !sel.length) return {};
-    const cardW = new Map();
-    for (const d of filteredDecks) {
-      const w = d.weight || 1;
-      for (const c of d.main || []) {
-        cardW.set(c.name, (cardW.get(c.name) || 0) + w);
-      }
-    }
-    const result = {};
-    for (const a of sel) {
-      const decksWithA = filteredDecks.filter((d) => (d.main || []).some((c) => c.name === a));
-      const aW = decksWithA.reduce((s, d) => s + (d.weight || 1), 0);
-      if (aW === 0) continue;
-      const pA = aW / totalW;
-      const candCoW = new Map();
-      for (const d of decksWithA) {
-        const w = d.weight || 1;
-        for (const c of d.main || []) {
-          if (c.name === a) continue;
-          candCoW.set(c.name, (candCoW.get(c.name) || 0) + w);
-        }
-      }
-      const companions = [];
-      for (const [cand, coW] of candCoW) {
-        if (coW < 4) continue;  // noise floor
-        const candTotal = cardW.get(cand) || 0;
-        if (candTotal === 0) continue;
-        const pCand = candTotal / totalW;
-        const pCo = coW / totalW;
-        const lift = pCo / (pA * pCand);
-        companions.push({
-          name: cand,
-          lift,
-          co_decks: Math.round(coW),
-          p_b_given_a: coW / aW,
-          p_a_given_b: coW / candTotal,
-        });
-      }
-      companions.sort((a, b) => b.lift - a.lift);
-      result[a] = { companions };
-    }
-    return result;
-  }
-
   function renderRecommendations() {
     if (!dataReady) return `<div class="loading">loading…</div>`;
+    if (!decks) return `<div class="loading">loading the deck pool…</div>`;
 
-    // Score every viable candidate and rank
-    const activePairs = getActivePairs();
+    // The score map is the candidate set: every card that has any
+    // selection-weighted co-occurrence in the recent, ban-filtered pool.
+    const scoreMap = computeScoreMap();
     const scored = [];
-    const seen = new Set(selection);
-    const banSet = new Set(bans);
-    const candidates = new Set();
-    for (const s of selection) {
-      if (activePairs && activePairs[s]) for (const r of activePairs[s].companions) candidates.add(r.name);
-    }
-    // For sparse selections without pair data, also score the eligible card pool
-    if (candidates.size < 12) {
-      for (const c of cards || []) candidates.add(c.name);
-    }
-    // Hard filter banned cards
-    for (const b of banSet) candidates.delete(b);
-    for (const name of candidates) {
-      if (seen.has(name)) continue;
-      const score = synergyScore(name, selection);
-      if (score === null) continue;
+    for (const [name, score] of scoreMap) {
       scored.push({ name, score });
     }
     scored.sort((a, b) => b.score - a.score);
@@ -889,7 +783,7 @@
     const clr = $("#sel-clear");
     if (clr) clr.addEventListener("click", () => {
       selection = [];
-      _adHocPairs = null;
+      invalidateScores();
       writeHash();
       render();
     });
@@ -1027,7 +921,13 @@
   }
 
   async function loadFull() {
-    [cards, pairs] = await Promise.all([loadJson("cards"), loadJson("pairs")]);
+    // Eager-load cards.json AND decks_raw.json in parallel. Synergy scoring
+    // computes from raw decks now (path B), so we want the raw data ready
+    // before the user makes a selection. cards.json is still kept for
+    // tier badges and recent_main_prevalence in the search results.
+    const [c, d] = await Promise.all([loadJson("cards"), loadJson("decks_raw")]);
+    cards = c;
+    decks = d;
     cardsByName = Object.fromEntries(cards.map((c) => [c.name, c]));
     // Build the search index, deduping DFC name pairs. magic.gg's deck data
     // uses the front-face name ("Hearth Elemental") for most DFCs, but some
@@ -1064,15 +964,13 @@
   window.addEventListener("hashchange", () => {
     selection = parseHashList("sel");
     bans = parseHashList("ban");
-    _adHocPairs = null;
+    invalidateScores();
     render();
-    ensureDecksForBansIfNeeded();
   });
 
   loadInitial().then(() => {
     render();
     loadFull();
-    if (bans.length) ensureDecksForBansIfNeeded();
   }).catch((err) => {
     $(".magic-page").innerHTML = `<div class="error">couldn't load the dataset. ${escapeHtml(String(err))}</div>`;
   });
