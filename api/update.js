@@ -120,6 +120,12 @@ module.exports = async function handler(req, res) {
     }
     const newContent = Buffer.from(serialized, 'utf8').toString('base64');
 
+    // Explicit author/committer so commits land as `maltysnack`, not as
+    // whatever name the PAT owner's profile happens to have set.
+    const COMMIT_IDENTITY = {
+      name: 'maltysnack',
+      email: '39046911+Maltysnack@users.noreply.github.com',
+    };
     await gh(`/repos/${REPO}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`, token, {
       method: 'PUT',
       body: {
@@ -127,6 +133,8 @@ module.exports = async function handler(req, res) {
         content: newContent,
         branch: branchName,
         sha: existingSha,
+        committer: COMMIT_IDENTITY,
+        author: COMMIT_IDENTITY,
       },
     });
 

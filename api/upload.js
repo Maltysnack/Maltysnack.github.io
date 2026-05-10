@@ -79,7 +79,13 @@ module.exports = async function handler(req, res) {
       body: { ref: `refs/heads/${branchName}`, sha: baseSha },
     });
 
-    // 3. Add the character file on that branch
+    // 3. Add the character file on that branch.
+    //    Explicit author/committer so commits land as `maltysnack`,
+    //    not as whatever name the PAT owner's profile happens to have set.
+    const COMMIT_IDENTITY = {
+      name: 'maltysnack',
+      email: '39046911+Maltysnack@users.noreply.github.com',
+    };
     const path = `dnd/characters/${character.id}.json`;
     const content = Buffer.from(serialized, 'utf8').toString('base64');
     await gh(`/repos/${REPO}/contents/${encodeURIComponent(path).replace(/%2F/g, '/')}`, token, {
@@ -88,6 +94,8 @@ module.exports = async function handler(req, res) {
         message: `feat(dnd): add character ${character.identity.name}`,
         content,
         branch: branchName,
+        committer: COMMIT_IDENTITY,
+        author: COMMIT_IDENTITY,
       },
     });
 
