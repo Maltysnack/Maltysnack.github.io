@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bauhaus - maltysnack</title>
+  <meta name="description" content="Generative Bauhaus compositions in plain SVG. Rule-based, no model training, primary palette." />
+  <link rel="stylesheet" href="/style.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .bh-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .bh-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--accent-red);
+      display: inline-block;
+    }
+    .bh-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 640px;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+    .bh-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+      font-family: var(--font-mono);
+    }
+    .bh-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .bh-stage {
+      background: #F0EAD6;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin: 0 0 28px;
+    }
+    .bh-stage svg { display: block; width: 100%; height: auto; }
+
+    .bh-caption {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+    }
+
+    .bh-section { margin: 56px 0; }
+    .bh-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .bh-section .prose {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 640px;
+      margin: 0 0 14px;
+    }
+    .bh-section .prose strong { color: var(--text); font-weight: 600; }
+
+    .bh-plan { list-style: none; padding: 0; margin: 0; max-width: 640px; }
+    .bh-plan li {
+      display: grid;
+      grid-template-columns: 28px 1fr;
+      gap: 16px;
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border-light);
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.55;
+    }
+    .bh-plan li .step {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .bh-plan li.done .step { color: var(--accent-red); }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="wide">
+
+    <header class="page-header">
+      <span class="bh-eyebrow">Project</span>
+      <h1 class="page-title">Bauhaus</h1>
+      <p class="bh-lede">
+        Generative Bauhaus compositions, rendered live in SVG. No model training, just the school's own visual grammar: primary palette, geometric primitives, asymmetric balance on a grid.
+      </p>
+      <p class="bh-meta">
+        <span>vanilla JS</span><span>SVG</span><span>11-05-2026</span>
+      </p>
+    </header>
+
+    <section class="bh-section" data-section="stage">
+      <h2>Test composition</h2>
+      <div class="bh-stage">
+        <svg viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Bauhaus test composition: red square, blue circle, yellow triangle on a paper field with thin black bars.">
+          <rect x="0" y="0" width="800" height="560" fill="#F0EAD6"/>
+          <rect x="60" y="80" width="240" height="240" fill="#E32119"/>
+          <circle cx="540" cy="200" r="120" fill="#21409A"/>
+          <polygon points="200,520 460,520 330,300" fill="#F1B81E"/>
+          <rect x="60" y="430" width="680" height="6" fill="#1A1A1A"/>
+          <rect x="700" y="60" width="6" height="380" fill="#1A1A1A"/>
+          <circle cx="120" cy="500" r="14" fill="#1A1A1A"/>
+        </svg>
+      </div>
+      <p class="bh-caption">Static placeholder. The next step is a generator that places these primitives by rule on each page load.</p>
+    </section>
+
+    <section class="bh-section" data-section="path">
+      <h2>Path</h2>
+      <p class="prose">
+        Plan, in order. Each step is small and ships before the next begins.
+      </p>
+      <ol class="bh-plan">
+        <li class="done"><span class="step">01</span><span><strong>Page wiring.</strong> This page exists, sits in the sidebar, and renders correctly on GitHub Pages. Done.</span></li>
+        <li><span class="step">02</span><span><strong>First generator.</strong> A JS module that places a circle, square, triangle, and a few thin bars on a 12-column grid using a seedable random. Renders a fresh composition every load.</span></li>
+        <li><span class="step">03</span><span><strong>Composition rules.</strong> Add asymmetric balance (visual centre of mass within bounds), palette weighting (yellow rare, blue calm, red loud), and a grid that primitives must snap to.</span></li>
+        <li><span class="step">04</span><span><strong>Variations.</strong> A small set of named rule-sets, each one referencing a different studio mode: Itten colour study, Klee tile, Albers nested squares, Kandinsky overlap.</span></li>
+        <li><span class="step">05</span><span><strong>Permalink by seed.</strong> Every composition is reproducible from a short seed in the URL. No backend needed.</span></li>
+      </ol>
+    </section>
+
+    <section class="bh-section" data-section="notes">
+      <h2>Notes</h2>
+      <p class="prose">
+        <strong>No ML.</strong> The Bauhaus visual grammar is small and explicit. Rules give a faster, cleaner result than a trained model on this scale.
+      </p>
+      <p class="prose">
+        <strong>No build step.</strong> Plain HTML and ES modules, the same as the rest of the site. No Vite, no bundler.
+      </p>
+      <p class="prose">
+        <strong>No backend.</strong> Pure client-side SVG. GitHub Pages serves the whole thing. Supabase and Vercel are not needed unless we later want a saved gallery of seeds.
+      </p>
+    </section>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
