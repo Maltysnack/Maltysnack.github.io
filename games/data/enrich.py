@@ -88,10 +88,11 @@ def derive_tags(card: dict) :
     if is_planeswalker: tags.add("planeswalker")
 
     # ── Removal ──
-    if is_spell or is_creature or is_enchantment or is_artifact:
+    if is_spell or is_creature or is_enchantment or is_artifact or is_planeswalker:
         if any(p in text for p in [
             "destroy target", "exile target creature", "exile target nonland",
             "destroy each", "exile target permanent", "exile target nonland permanent",
+            "exile target tapped creature", "destroy target nonland",
         ]):
             tags.add("removal")
         if _DEALS_DAMAGE.search(text):
@@ -99,9 +100,17 @@ def derive_tags(card: dict) :
         # -N/-N effects (death by -N toughness)
         if re.search(r"target creature gets [-−]\d", text):
             tags.add("removal")
+        # Aura-style removal (cards like Pacifism)
+        if "enchant creature" in text and ("can't attack" in text or "can't block" in text or
+                                             "doesn't untap" in text or "is a 0/" in text):
+            tags.add("removal")
         # "fight" effects
         if "fights target creature" in text or "fights another target creature" in text:
             tags.add("removal")
+        # Bounce
+        if "return target creature to its owner's hand" in text or "return target nonland permanent" in text:
+            tags.add("removal")
+            tags.add("bounce")
 
     # ── Sweepers ──
     if _DEALS_EACH_CREATURE.search(text) or "destroy all creatures" in text \
@@ -163,7 +172,7 @@ def derive_tags(card: dict) :
                 or "card with mana value" in text or "card named" in text:
             tags.add("tutor")
 
-    # ── Finisher / big creature ──
+    # ── Finisher / wincon ──
     try:
         power_str = str(card.get("power", "") or "")
         cmc = card.get("cmc", 0) or 0
@@ -173,6 +182,12 @@ def derive_tags(card: dict) :
                 tags.add("finisher")
     except (AttributeError, ValueError):
         pass
+    # Non-creature wincons (planeswalkers, big enchantments, board states)
+    if is_planeswalker:
+        tags.add("finisher")
+    if "you win the game" in text or "target opponent loses the game" in text:
+        tags.add("alt-wincon")
+        tags.add("finisher")
 
     # ── Keyword tags from Scryfall's keywords array ──
     keywords = [k.lower() for k in (card.get("keywords") or [])]
@@ -342,7 +357,7 @@ def main():
     # We've changed printing-selection logic. Force-refresh every entry so we
     # pick the best printing under the new scoring rules. Marker key tracks
     # the schema version; bumping it triggers a full rebuild of the cache.
-    SCHEMA_VERSION = "v7-tagger-tags-improved"
+    SCHEMA_VERSION = "v8-tagger-extended"
     if cache.get("__schema__") != SCHEMA_VERSION:
         print(f"  schema bump: rebuilding entire cache ({len(cache)} entries)",
               file=sys.stderr)

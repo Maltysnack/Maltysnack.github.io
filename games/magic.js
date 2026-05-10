@@ -28,6 +28,8 @@
   let breakdownFor = null;   // which card has its score-breakdown popover open
   let inspectFor = null;     // which card has its inspect popover open
   let tagFilter = null;      // optional tag to filter recs to (e.g. "removal")
+  let tagBoosts = new Set(); // tags currently boosted (multi-select)
+  let tagInteractionMode = "boost"; // "boost" or "filter"
 
   function parseHashList(key) {
     const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
@@ -194,7 +196,7 @@
   // Returns Map(name -> { score, breakdown }).
   function computeScoreMap() {
     if (!decks) return null;
-    const key = JSON.stringify({ s: selection, b: bans, m: viewMode });
+    const key = JSON.stringify({ s: selection, b: bans, m: viewMode, t: [...tagBoosts] });
     if (_scoresKey === key && _scoresMap) return _scoresMap;
     _scoresKey = key;
 
@@ -290,6 +292,18 @@
 
       const tagMult = tagBalanceMultiplier(name, profile);
       raw *= tagMult;
+
+      // User-driven tag boost: cards with any boosted tag get a bump
+      if (tagBoosts.size) {
+        const cTags = new Set(tagsFor(name));
+        let matches = 0;
+        for (const t of tagBoosts) if (cTags.has(t)) matches++;
+        if (matches > 0) {
+          raw *= (1 + 0.5 * matches);  // each matching boosted tag = +50%
+        } else {
+          raw *= 0.85;                  // others slightly demoted (not removed)
+        }
+      }
 
       const score = Math.round(Math.min(99, Math.max(0, 99 * (1 - Math.exp(-CURVE_K * raw)))));
       if (score > 0) {
@@ -704,33 +718,112 @@
     `;
   }
 
-  // Shape widget: shows selection's tag distribution as clickable chips
-  // that filter recommendations. Sits between the search and the rec grid.
-  // The categories displayed are the BALANCE_TAGS plus a few extras the
-  // user might want to filter on.
-  const SHAPE_DISPLAY_TAGS = [
-    "creature", "removal", "card-draw", "ramp", "counterspell",
-    "sweeper", "tokens", "finisher", "tutor",
-  ];
+  // Shape widget: tag distribution as chips that boost (default) or filter
+  // recommendations. Color-aware: counterspells are only shown if the
+  // selection includes blue, ramp only if green is present, etc. Categories
+  // that don't apply to the current colors stay hidden so the widget isn't
+  // cluttered with irrelevant chips.
+  const SHAPE_TAG_COLOR_AFFINITY = {
+    "creature": null,        // null = always show
+    "removal": null,
+    "card-draw": ["U", "B", "R"],
+    "ramp": ["G", "W"],
+    "counterspell": ["U"],
+    "sweeper": ["W", "B", "R"],
+    "tokens": null,
+    "finisher": null,
+    "tutor": ["B", "G", "W"],
+    "lifegain": ["W", "B"],
+    "graveyard-matters": ["B", "U", "G"],
+    "spells-matter": ["U", "R"],
+    "counters-plus": ["G", "W"],
+  };
+
+  // Archetype hint: best-effort label based on color identity + tag distribution.
+  // Returns null if confidence is low. The hint is suggestive, not authoritative.
+  function archetypeHint() {
+    if (selection.length < 2) return null;
+    const profile = selectionTagProfile();
+    const colors = new Set();
+    for (const n of selection) {
+      const sf = scryfall[n];
+      if (sf && sf.colors) for (const c of sf.colors) colors.add(c);
+    }
+    const colorString = [...colors].sort().join("");
+    const colorName = {
+      "W": "Mono-White", "U": "Mono-Blue", "B": "Mono-Black", "R": "Mono-Red", "G": "Mono-Green",
+      "WU": "Azorius", "UB": "Dimir", "BR": "Rakdos", "RG": "Gruul", "GW": "Selesnya",
+      "WB": "Orzhov", "UR": "Izzet", "BG": "Golgari", "RW": "Boros", "GU": "Simic",
+      "WUB": "Esper", "UBR": "Grixis", "BRG": "Jund", "RGW": "Naya", "GWU": "Bant",
+      "WBG": "Abzan", "URW": "Jeskai", "BGU": "Sultai", "RWB": "Mardu", "GUR": "Temur",
+      "WUBR": "Yore-Tiller", "UBRG": "Glint-Eye", "BRGW": "Dune-Brood", "RGWU": "Ink-Treader", "GWUB": "Witch-Maw",
+    }[colorString];
+    if (!colorName) return null;
+
+    const total = selection.length;
+    const has = (t) => (profile.get(t) || 0) / total;
+    let archetype = null;
+    if (has("kw-landfall") >= 0.3) archetype = "Landfall";
+    else if (has("counterspell") + has("card-draw") >= 0.5) archetype = "Control";
+    else if (has("creature") >= 0.6 && has("ramp") >= 0.2) archetype = "Ramp";
+    else if (has("creature") >= 0.6 && has("counters-plus") >= 0.2) archetype = "Counters";
+    else if (has("removal") + has("counterspell") >= 0.4 && has("creature") < 0.4) archetype = "Tempo";
+    else if (has("creature") >= 0.7) archetype = "Aggro";
+    else if (has("spells-matter") >= 0.2) archetype = "Spells";
+    else if (has("tokens") >= 0.3) archetype = "Tokens";
+    else if (has("graveyard-matters") >= 0.3) archetype = "Graveyard";
+
+    if (!archetype) return colorName;
+    return `${colorName} ${archetype}`;
+  }
+
   function renderShapeWidget() {
     if (selection.length < 1) return "";
     const profile = selectionTagProfile();
     const total = selection.length;
-    const chips = SHAPE_DISPLAY_TAGS.map((t) => {
+    // What colors does the selection identify with?
+    const selColors = new Set();
+    for (const n of selection) {
+      const sf = scryfall[n];
+      if (sf && sf.colors) for (const c of sf.colors) selColors.add(c);
+    }
+    // Pick the tags relevant for this selection's color identity, plus any
+    // tag the selection actually contains (so it shows even if "off-color").
+    const relevant = [];
+    for (const [tag, affinity] of Object.entries(SHAPE_TAG_COLOR_AFFINITY)) {
+      const has = profile.get(tag) || 0;
+      if (has > 0) { relevant.push(tag); continue; }
+      if (affinity === null) { relevant.push(tag); continue; }
+      // Only show if at least one of the affinity colors is in the selection
+      if (affinity.some(c => selColors.has(c))) relevant.push(tag);
+    }
+    const chips = relevant.map((t) => {
       const count = profile.get(t) || 0;
       const fraction = count / total;
       const isLow = fraction === 0;
       const isFull = fraction >= 0.4;
-      const active = tagFilter === t;
+      const active = (tagInteractionMode === "filter" && tagFilter === t) ||
+                     (tagInteractionMode === "boost" && tagBoosts.has(t));
       const cls = "shape-chip" + (active ? " active" : "") + (isLow ? " shape-low" : "") + (isFull ? " shape-full" : "");
       return `<button class="${cls}" data-shape-tag="${escapeAttr(t)}" title="${count} of ${total} selected cards">
         <span class="shape-chip-name">${escapeHtml(t)}</span>
         <span class="shape-chip-count">${count}</span>
       </button>`;
     }).join("");
+    const modeBtn = `<button class="shape-mode" id="shape-mode-toggle" title="${tagInteractionMode === "filter" ? "filter mode: only show tagged cards" : "boost mode: rank tagged cards higher but still show others"}">
+      ${tagInteractionMode === "filter" ? "filter" : "boost"}
+    </button>`;
+    let hint = "";
+    if (tagInteractionMode === "filter" && tagFilter) {
+      hint = `<span class="shape-filter-hint">filtering: ${escapeHtml(tagFilter)} <button class="shape-clear" id="shape-clear">×</button></span>`;
+    } else if (tagInteractionMode === "boost" && tagBoosts.size) {
+      hint = `<span class="shape-filter-hint">boosting: ${escapeHtml([...tagBoosts].join(", "))} <button class="shape-clear" id="shape-clear">×</button></span>`;
+    }
+    const arch = archetypeHint();
+    const archHtml = arch ? `<span class="shape-arch">looks like <strong>${escapeHtml(arch)}</strong></span>` : "";
     return `
       <div class="shape-widget">
-        <div class="shape-label">Selection shape${tagFilter ? ` <span class="shape-filter-hint">filtering: ${escapeHtml(tagFilter)} <button class="shape-clear" id="shape-clear">×</button></span>` : ""}</div>
+        <div class="shape-label">Selection shape ${modeBtn} ${hint} ${archHtml}</div>
         <div class="shape-chips">${chips}</div>
       </div>
     `;
@@ -1022,7 +1115,8 @@
       };
       setTimeout(() => document.addEventListener("click", closeOnOutside, true), 0);
     }
-    // Inspect buttons on each thumb
+    // Inspect buttons on each thumb. After opening, set data-pop-edge based
+    // on the thumb's position so the popover stays in viewport.
     $$("[data-inspect]").forEach((el) => {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
@@ -1030,18 +1124,56 @@
         inspectFor = inspectFor === name ? null : name;
         breakdownFor = null;
         render();
+        // After re-render, position the popover relative to viewport
+        if (inspectFor === name) {
+          requestAnimationFrame(() => {
+            const thumb = document.querySelector(`.thumb[data-name="${CSS.escape(name)}"]`);
+            if (!thumb) return;
+            const rect = thumb.getBoundingClientRect();
+            const vw = window.innerWidth;
+            const popWidth = 280;
+            // If centered popover would clip right edge → anchor right
+            if (rect.left + rect.width / 2 + popWidth / 2 > vw - 12) {
+              thumb.dataset.popEdge = "right";
+            } else if (rect.left + rect.width / 2 - popWidth / 2 < 12) {
+              thumb.dataset.popEdge = "left";
+            } else {
+              delete thumb.dataset.popEdge;
+            }
+          });
+        }
       });
     });
     // Shape widget chips
     $$("[data-shape-tag]").forEach((el) => {
       el.addEventListener("click", () => {
         const t = el.dataset.shapeTag;
-        tagFilter = (tagFilter === t) ? null : t;
+        if (tagInteractionMode === "filter") {
+          tagFilter = (tagFilter === t) ? null : t;
+        } else {
+          if (tagBoosts.has(t)) tagBoosts.delete(t); else tagBoosts.add(t);
+        }
+        invalidateScores();
         render();
       });
     });
     const sclr = $("#shape-clear");
-    if (sclr) sclr.addEventListener("click", (e) => { e.stopPropagation(); tagFilter = null; render(); });
+    if (sclr) sclr.addEventListener("click", (e) => {
+      e.stopPropagation();
+      tagFilter = null;
+      tagBoosts.clear();
+      invalidateScores();
+      render();
+    });
+    const smode = $("#shape-mode-toggle");
+    if (smode) smode.addEventListener("click", () => {
+      tagInteractionMode = tagInteractionMode === "filter" ? "boost" : "filter";
+      // Clear cross-mode state to avoid confusing combined behaviors
+      tagFilter = null;
+      tagBoosts.clear();
+      invalidateScores();
+      render();
+    });
     // Selection / ban chip actions (top half = remove/unban, bottom half = ban/promote)
     $$(".chip-half").forEach((el) => {
       el.addEventListener("click", (e) => {

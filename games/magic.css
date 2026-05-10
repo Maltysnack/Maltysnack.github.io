@@ -351,6 +351,31 @@ body:has(.magic-page) .main {
   font-size: 13px;
   padding: 0 4px;
 }
+.shape-mode {
+  display: inline-block;
+  margin-left: 8px;
+  padding: 1px 8px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color var(--transition), border-color var(--transition);
+}
+.shape-mode:hover { color: var(--text-strong); border-color: var(--text-dim); }
+.shape-arch {
+  margin-left: 12px;
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+  letter-spacing: 0;
+  text-transform: none;
+  font-weight: 400;
+}
+.shape-arch strong { color: var(--accent-red); font-weight: 600; }
 .shape-chips { display: flex; gap: 6px; flex-wrap: wrap; }
 .shape-chip {
   display: inline-flex;
@@ -411,11 +436,14 @@ body:has(.magic-page) .main {
 .thumb-inspect:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
 .thumb.inspect-open .thumb-inspect { opacity: 1; background: var(--accent-red); color: #fff; }
 
+/* Inspect popover: anchored to the thumb, but uses translateX to keep on
+   screen near the right edge of the grid. The thumb itself can be small;
+   we want the popover to be wider and not clip. */
 .ip-popover {
   position: absolute;
   top: calc(100% + 8px);
-  left: 0;
-  right: 0;
+  left: 50%;
+  transform: translateX(-50%);
   width: 280px;
   max-width: 90vw;
   padding: 12px 14px;
@@ -429,6 +457,10 @@ body:has(.magic-page) .main {
   cursor: default;
   animation: bd-fade 120ms var(--ease);
 }
+/* On grids near the page edges, JS sets these data attrs to anchor the
+   popover so it stays in viewport. */
+.thumb[data-pop-edge="right"] .ip-popover { left: auto; right: 0; transform: none; }
+.thumb[data-pop-edge="left"] .ip-popover  { left: 0; right: auto; transform: none; }
 .ip-name { font-size: var(--text-md); font-weight: 600; color: var(--text-strong); margin-bottom: 4px; }
 .ip-type { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 8px; font-family: var(--font-mono); }
 .ip-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
