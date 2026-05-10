@@ -26,6 +26,8 @@
   let searchQuery = "";      // live search input value, drives results strip
   let viewMode = "fits";     // "fits" (top-fit recs) or "off-meta" (lift inversion)
   let breakdownFor = null;   // which card has its score-breakdown popover open
+  let inspectFor = null;     // which card has its inspect popover open
+  let tagFilter = null;      // optional tag to filter recs to (e.g. "removal")
 
   function parseHashList(key) {
     const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
@@ -51,6 +53,7 @@
     selection = [...selection, name];
     listsOpen = false;
     searchQuery = "";                         // clear the search so the user sees the new state
+    inspectFor = null;
     invalidateScores();
     writeHash();
     render();
@@ -158,10 +161,13 @@
     return counts;
   }
   // The "shape" tags we balance against. When selection lacks one of these,
-  // candidates with that tag get a small boost.
+  // candidates with that tag get a substantial boost so the deck shape
+  // actually nudges toward balance. The multiplier range is wide enough
+  // (0.6x to 1.8x) to genuinely shift recommendations when the selection
+  // is lopsided.
   const BALANCE_TAGS = ["removal", "card-draw", "ramp", "counterspell", "sweeper", "creature", "finisher"];
   function tagBalanceMultiplier(name, profile) {
-    if (!selection.length) return 1;
+    if (selection.length < 2) return 1;  // single-card selections don't have a "shape"
     const cTags = new Set(tagsFor(name));
     if (cTags.size === 0) return 1;
     let bonus = 0, malus = 0;
@@ -170,14 +176,18 @@
       if (!cTags.has(t)) continue;
       const have = profile.get(t) || 0;
       const fraction = have / selN;
-      // If the selection has 0 of this category, big boost
-      // If it's saturated (>50%), candidates with this tag get a small malus
-      if (fraction === 0) bonus += 0.15;
-      else if (fraction < 0.2) bonus += 0.07;
-      else if (fraction > 0.5) malus += 0.05;
+      // 0 of this category in selection: big boost (this card fills a real gap)
+      if (fraction === 0) bonus += 0.30;
+      // <20%: moderate boost
+      else if (fraction < 0.20) bonus += 0.15;
+      // 20-40%: neutral, no change
+      // 40-60%: getting saturated, mild malus
+      else if (fraction >= 0.4 && fraction < 0.6) malus += 0.10;
+      // >60%: very saturated, larger malus (don't pile on)
+      else if (fraction >= 0.6) malus += 0.25;
     }
     const mult = 1 + bonus - malus;
-    return Math.max(0.85, Math.min(1.3, mult));
+    return Math.max(0.6, Math.min(1.8, mult));
   }
 
   // Compute the score map for the current selection + bans. Caches by key.
@@ -323,26 +333,63 @@
     return { score: semScore, mode: "semantic", breakdown: null };
   }
 
-  // Semantic fallback: shared color identity + same primary type. Bounded low.
+  // Semantic fallback: tag overlap + color identity + type match.
+  // Used when a candidate has no direct co-occurrence with the selection in
+  // winning lists. With tagger tags this is now meaningfully informative:
+  // Doppelgang ('tokens', 'x-spell', 'sorcery') matches against other tokens
+  // / x-spell / sorcery cards even with zero pair data. Capped low so any
+  // empirical signal still beats it.
+  const STRUCTURAL_TAGS = new Set([
+    "removal", "card-draw", "ramp", "counterspell", "sweeper", "tutor", "recursion",
+    "tokens", "counters-plus", "lifegain", "drain", "discard", "finisher",
+    "graveyard-matters", "spells-matter", "noncreature-matters",
+    "treasure", "artifact-matters", "creature-buff", "x-spell", "scry",
+  ]);
   function semanticScore(name, sel) {
     const sf = scryfall && scryfall[name];
     if (!sf) return null;
-    let colorOverlap = 0, typeOverlap = 0;
     const myColors = new Set(sf.colors || []);
     const myType = (sf.type_line || "").split(" ")[0];
+    const myTags = new Set((sf.tags || []).filter(t => STRUCTURAL_TAGS.has(t)));
+
+    // Selection profile
+    const selColors = new Set();
+    const selTypes = new Set();
+    const selTagCounts = new Map();
     let n = 0;
     for (const s of sel) {
       const ssf = scryfall[s];
       if (!ssf) continue;
       n++;
-      const sColors = new Set(ssf.colors || []);
-      const shared = [...myColors].filter((c) => sColors.has(c)).length;
-      if (myColors.size && sColors.size) colorOverlap += shared / Math.max(myColors.size, sColors.size);
-      const sType = (ssf.type_line || "").split(" ")[0];
-      if (myType && myType === sType) typeOverlap += 1;
+      for (const c of ssf.colors || []) selColors.add(c);
+      const t = (ssf.type_line || "").split(" ")[0];
+      if (t) selTypes.add(t);
+      for (const tg of ssf.tags || []) {
+        if (STRUCTURAL_TAGS.has(tg)) selTagCounts.set(tg, (selTagCounts.get(tg) || 0) + 1);
+      }
     }
     if (n === 0) return null;
-    const score = Math.round(((colorOverlap / n) * 0.65 + (typeOverlap / n) * 0.35) * SEMANTIC_CAP);
+
+    // Color overlap (0-1)
+    let colorScore = 0;
+    if (myColors.size === 0) colorScore = 0.4;  // colorless: neutral
+    else {
+      const shared = [...myColors].filter((c) => selColors.has(c)).length;
+      colorScore = selColors.size ? shared / Math.max(myColors.size, selColors.size) : 0.5;
+    }
+    // Type overlap (0-1)
+    const typeScore = selTypes.has(myType) ? 1 : 0.3;
+    // Tag overlap (0-1+): for each shared structural tag, how present in selection
+    let tagScore = 0;
+    for (const t of myTags) {
+      if (selTagCounts.has(t)) tagScore += Math.min(selTagCounts.get(t) / Math.max(n, 1), 1);
+    }
+    // Cap tag score so a card with many tag matches doesn't blow up
+    tagScore = Math.min(tagScore, 1.5);
+
+    // Composite: tags weighted highest because they're the most semantic
+    const composite = (tagScore * 0.55) + (colorScore * 0.30) + (typeScore * 0.15);
+    const score = Math.round(composite * SEMANTIC_CAP);
     return score > 0 ? score : null;
   }
 
@@ -626,6 +673,11 @@
     const scoreMap = computeScoreMap();
     const scored = [];
     for (const [name, entry] of scoreMap) {
+      // Tag filter: only show cards with the selected structural tag
+      if (tagFilter) {
+        const t = scryfall[name] && scryfall[name].tags;
+        if (!t || !t.includes(tagFilter)) continue;
+      }
       scored.push({ name, score: entry.score });
     }
     scored.sort((a, b) => b.score - a.score);
@@ -644,9 +696,42 @@
     const title = viewMode === "off-meta" ? "Off the beaten path" : "Travels with";
 
     return `
+      ${renderShapeWidget()}
       <div class="stacked">
         ${sectionWithToggle(title, subtitle, renderGrid(items))}
         ${renderListsSection()}
+      </div>
+    `;
+  }
+
+  // Shape widget: shows selection's tag distribution as clickable chips
+  // that filter recommendations. Sits between the search and the rec grid.
+  // The categories displayed are the BALANCE_TAGS plus a few extras the
+  // user might want to filter on.
+  const SHAPE_DISPLAY_TAGS = [
+    "creature", "removal", "card-draw", "ramp", "counterspell",
+    "sweeper", "tokens", "finisher", "tutor",
+  ];
+  function renderShapeWidget() {
+    if (selection.length < 1) return "";
+    const profile = selectionTagProfile();
+    const total = selection.length;
+    const chips = SHAPE_DISPLAY_TAGS.map((t) => {
+      const count = profile.get(t) || 0;
+      const fraction = count / total;
+      const isLow = fraction === 0;
+      const isFull = fraction >= 0.4;
+      const active = tagFilter === t;
+      const cls = "shape-chip" + (active ? " active" : "") + (isLow ? " shape-low" : "") + (isFull ? " shape-full" : "");
+      return `<button class="${cls}" data-shape-tag="${escapeAttr(t)}" title="${count} of ${total} selected cards">
+        <span class="shape-chip-name">${escapeHtml(t)}</span>
+        <span class="shape-chip-count">${count}</span>
+      </button>`;
+    }).join("");
+    return `
+      <div class="shape-widget">
+        <div class="shape-label">Selection shape${tagFilter ? ` <span class="shape-filter-hint">filtering: ${escapeHtml(tagFilter)} <button class="shape-clear" id="shape-clear">×</button></span>` : ""}</div>
+        <div class="shape-chips">${chips}</div>
       </div>
     `;
   }
@@ -779,10 +864,38 @@
     const score = typeof item.score === "number" ? item.score : null;
     const cls = score !== null ? scoreColorClass(score) : "";
     const showBreakdown = breakdownFor === name;
-    return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
+    const showInspect = inspectFor === name;
+    return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}${showInspect ? " inspect-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
+      <button class="thumb-inspect" data-inspect="${escapeAttr(name)}" title="inspect card without adding" aria-label="inspect">i</button>
       ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="button" tabindex="0">${score}</span>` : ""}
       ${showBreakdown ? renderBreakdownPopover(name) : ""}
+      ${showInspect ? renderInspectPopover(name) : ""}
+    </div>`;
+  }
+
+  function renderInspectPopover(name) {
+    const sf = scryfall[name] || {};
+    const c = cardData(name);
+    const tags = (sf.tags || []).filter(t => t !== "spell" && !t.startsWith("kw-"));
+    const oracle = (sf.oracle_text || "").replace(/\n/g, "<br>");
+    let stats = "";
+    if (c) {
+      const parts = [];
+      if (c.recent_main_decks > 0) parts.push(`${c.recent_main_decks} winning decks (12wk)`);
+      if (c.tier) parts.push(`tier: ${c.tier}`);
+      if (parts.length) stats = `<div class="ip-stats">${parts.join(" · ")}</div>`;
+    } else if (sf.legal_standard) {
+      stats = `<div class="ip-stats">Standard-legal, no winning lists yet</div>`;
+    } else if (sf.released_at) {
+      stats = `<div class="ip-stats">not Standard-legal</div>`;
+    }
+    return `<div class="ip-popover" data-bd="1">
+      <div class="ip-name">${escapeHtml(name)}</div>
+      <div class="ip-type">${escapeHtml(sf.mana_cost || "")} ${escapeHtml(sf.type_line || "")}</div>
+      ${tags.length ? `<div class="ip-tags">${tags.slice(0,8).map(t => `<span class="bd-tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
+      ${oracle ? `<div class="ip-oracle">${oracle}</div>` : ""}
+      ${stats}
     </div>`;
   }
 
@@ -894,18 +1007,41 @@
         }
       });
     });
-    // Click outside any open breakdown popover closes it
-    if (breakdownFor) {
+    // Click outside any open breakdown / inspect popover closes it
+    if (breakdownFor || inspectFor) {
       const closeOnOutside = (e) => {
-        if (!e.target.closest(".bd-popover") && !e.target.closest("[data-score-link]")) {
+        if (!e.target.closest(".bd-popover") &&
+            !e.target.closest(".ip-popover") &&
+            !e.target.closest("[data-score-link]") &&
+            !e.target.closest("[data-inspect]")) {
           breakdownFor = null;
+          inspectFor = null;
           document.removeEventListener("click", closeOnOutside, true);
           render();
         }
       };
-      // Defer attachment so the click that opened the popover doesn't fire it
       setTimeout(() => document.addEventListener("click", closeOnOutside, true), 0);
     }
+    // Inspect buttons on each thumb
+    $$("[data-inspect]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const name = el.dataset.inspect;
+        inspectFor = inspectFor === name ? null : name;
+        breakdownFor = null;
+        render();
+      });
+    });
+    // Shape widget chips
+    $$("[data-shape-tag]").forEach((el) => {
+      el.addEventListener("click", () => {
+        const t = el.dataset.shapeTag;
+        tagFilter = (tagFilter === t) ? null : t;
+        render();
+      });
+    });
+    const sclr = $("#shape-clear");
+    if (sclr) sclr.addEventListener("click", (e) => { e.stopPropagation(); tagFilter = null; render(); });
     // Selection / ban chip actions (top half = remove/unban, bottom half = ban/promote)
     $$(".chip-half").forEach((el) => {
       el.addEventListener("click", (e) => {
