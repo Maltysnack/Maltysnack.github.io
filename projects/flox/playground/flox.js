@@ -239,6 +239,74 @@ function printMarkovDistribution(o, system) {
   o.println("Total mass: " + total.toFixed(4));
   o.println("");
 }
+function printGridMap(o, system) {
+  o.println("");
+  o.println("=== GRID: " + system.name + " ===\n");
+  let nameWidth = 4;
+  for (const n of system.rivers.keys()) {
+    if (n.length > nameWidth) nameWidth = n.length;
+  }
+  o.println("Nodes (" + system.rivers.size + "):");
+  for (const r of system.rivers.values()) {
+    let tag2;
+    if (r.supply > 0) tag2 = "generator  " + signedFmt(r.supply);
+    else if (r.supply < 0) tag2 = "load       " + signedFmt(r.supply);
+    else tag2 = "relay";
+    o.println("  " + padRight(r.name, nameWidth) + "  " + tag2);
+  }
+  o.println("");
+  const edgeC = /* @__PURE__ */ new Map();
+  const edgeEnds = /* @__PURE__ */ new Map();
+  for (const [from, edges] of system.connections) {
+    for (const e of edges) {
+      const key = from <= e.target ? `${from}|${e.target}` : `${e.target}|${from}`;
+      edgeC.set(key, (edgeC.get(key) ?? 0) + e.weight);
+      if (!edgeEnds.has(key)) edgeEnds.set(key, [from, e.target]);
+    }
+  }
+  o.println("Edges (" + edgeC.size + "):");
+  for (const [key, ends] of edgeEnds) {
+    const c = edgeC.get(key);
+    o.println(
+      "  " + padRight(ends[0], nameWidth) + " <-> " + padRight(ends[1], nameWidth) + "   c=" + formatWeight(c)
+    );
+  }
+  o.println("");
+  let sum = 0;
+  for (const r of system.rivers.values()) sum += r.supply;
+  const tag = Math.abs(sum) < 1e-6 ? " \u2713 (balanced)" : " \u2717 (unbalanced!)";
+  o.println("Net supply: " + formatWeight(sum) + tag);
+  o.println("");
+}
+function printGridState(o, system) {
+  const tickWord = system.gridTicksRun === 1 ? "tick" : "ticks";
+  const status = system.gridConverged ? ", converged" : ", not yet converged";
+  o.println("");
+  o.println(
+    "=== GRID STATE: " + system.name + " (" + system.gridTicksRun + " " + tickWord + status + ") ===\n"
+  );
+  let nameWidth = 5;
+  for (const n of system.gridLevel.keys()) {
+    if (n.length > nameWidth) nameWidth = n.length;
+  }
+  o.println("Levels:");
+  for (const [name, lvl] of system.gridLevel) {
+    o.println("  " + padRight(name, nameWidth) + "  " + signedFmt(lvl));
+  }
+  o.println("");
+  o.println("Flows (positive = first-to-second direction):");
+  for (const [key, flow] of system.gridFlow) {
+    const parts = key.split("->");
+    const label = padRight(parts[0], nameWidth) + " -> " + padRight(parts[1], nameWidth);
+    o.println("  " + label + "  " + signedFmt(flow));
+  }
+  o.println("");
+}
+function signedFmt(v) {
+  if (v > 0) return "+" + fmtFixed(v, 2);
+  if (v < 0) return fmtFixed(v, 2);
+  return " 0.00";
+}
 function formatWeight(w) {
   if (w === Math.floor(w)) return w.toFixed(1);
   let s = w.toFixed(3);
@@ -308,16 +376,18 @@ function padLeft(s, n) {
 
 // src/runtime.ts
 var River = class {
-  constructor(name, baseFlow, peakMultiplier, decayRate) {
+  constructor(name, baseFlow, peakMultiplier, decayRate, supply = 0) {
     this.name = name;
     this.baseFlow = baseFlow;
     this.peakMultiplier = peakMultiplier;
     this.decayRate = decayRate;
+    this.supply = supply;
   }
   name;
   baseFlow;
   peakMultiplier;
   decayRate;
+  supply;
   dailyFlow = new Array(10).fill(0);
   totalAccumulated = 0;
   // Flow on a given simulation day, given the full rainfall series so far.
@@ -396,6 +466,12 @@ var RiverSystem = class {
   markovHistory = /* @__PURE__ */ new Map();
   markovTicksRun = 0;
   markovConverged = false;
+  // Grid state
+  gridLevel = /* @__PURE__ */ new Map();
+  gridFlow = /* @__PURE__ */ new Map();
+  // "A->B" -> flow A→B
+  gridTicksRun = 0;
+  gridConverged = false;
   addRiver(river) {
     this.rivers.set(river.name, river);
   }
@@ -504,6 +580,60 @@ var RiverSystem = class {
       }
     }
   }
+  // Grid-mode simulation. Each undirected edge {A,B} with conductance c
+  // carries flow (level[A] - level[B]) * c. Each node has a 'supply'
+  // (positive = injects, negative = draws). Levels integrate
+  // (supply + net_inflow) over time with a damping factor dt.
+  simulateGrid(maxTicks) {
+    const EPSILON = 1e-7;
+    const DT = 0.1;
+    const nodes = [...this.rivers.keys(), ...this.dams.keys()];
+    const edgeC = /* @__PURE__ */ new Map();
+    const edgeEnds = /* @__PURE__ */ new Map();
+    for (const [from, edges] of this.connections) {
+      for (const e of edges) {
+        const key = from <= e.target ? `${from}|${e.target}` : `${e.target}|${from}`;
+        edgeC.set(key, (edgeC.get(key) ?? 0) + e.weight);
+        if (!edgeEnds.has(key)) edgeEnds.set(key, [from, e.target]);
+      }
+    }
+    this.gridLevel.clear();
+    for (const n of nodes) this.gridLevel.set(n, 0);
+    this.gridTicksRun = 0;
+    this.gridConverged = false;
+    for (let t = 1; t <= maxTicks; t++) {
+      const delta = /* @__PURE__ */ new Map();
+      for (const n of nodes) delta.set(n, 0);
+      for (const n of nodes) {
+        const r = this.rivers.get(n);
+        const supply = r ? r.supply : 0;
+        delta.set(n, delta.get(n) + supply);
+      }
+      for (const [key, ends] of edgeEnds) {
+        const c = edgeC.get(key);
+        const flow = (this.gridLevel.get(ends[0]) - this.gridLevel.get(ends[1])) * c;
+        delta.set(ends[0], delta.get(ends[0]) - flow);
+        delta.set(ends[1], delta.get(ends[1]) + flow);
+      }
+      let maxDiff = 0;
+      for (const n of nodes) {
+        const d = DT * delta.get(n);
+        maxDiff = Math.max(maxDiff, Math.abs(d));
+        this.gridLevel.set(n, this.gridLevel.get(n) + d);
+      }
+      this.gridTicksRun = t;
+      if (maxDiff < EPSILON) {
+        this.gridConverged = true;
+        break;
+      }
+    }
+    this.gridFlow.clear();
+    for (const [key, ends] of edgeEnds) {
+      const c = edgeC.get(key);
+      const flow = (this.gridLevel.get(ends[0]) - this.gridLevel.get(ends[1])) * c;
+      this.gridFlow.set(`${ends[0]}->${ends[1]}`, flow);
+    }
+  }
   getTopologicalOrder() {
     const order = [];
     const inDegree = /* @__PURE__ */ new Map();
@@ -561,6 +691,7 @@ var Interpreter = class {
       this.resolveChains();
       for (const s of this.systems.values()) {
         if (s.mode === "markov") this.validateMarkov(s);
+        if (s.mode === "grid") this.validateGrid(s);
       }
       for (const s of this.systems.values()) s.identifyRoots();
       this.phase = 1 /* EXECUTE */;
@@ -595,9 +726,10 @@ var Interpreter = class {
         const name = stmt.mode.lexeme;
         if (name === "river") this.fileMode = "river";
         else if (name === "markov") this.fileMode = "markov";
+        else if (name === "grid") this.fileMode = "grid";
         else {
           throw new Error(
-            `Unknown mode '${name}' (line ${stmt.mode.line}). Known modes: river, markov.`
+            `Unknown mode '${name}' (line ${stmt.mode.line}). Known modes: river, markov, grid.`
           );
         }
         return;
@@ -615,7 +747,8 @@ var Interpreter = class {
             stmt.name.lexeme,
             stmt.baseFlow,
             stmt.peakMultiplier,
-            stmt.decayRate
+            stmt.decayRate,
+            stmt.supply
           )
         );
         return;
@@ -672,6 +805,8 @@ var Interpreter = class {
         const sys = this.lookupSystem(stmt.systemName);
         if (sys.mode === "markov") {
           printMarkovMap(new Output(this.out), sys);
+        } else if (sys.mode === "grid") {
+          printGridMap(new Output(this.out), sys);
         } else {
           printMap(new Output(this.out), sys);
         }
@@ -693,6 +828,13 @@ var Interpreter = class {
           }
           sys.simulateMarkov(ticks);
           printMarkovDistribution(new Output(this.out), sys);
+        } else if (sys.mode === "grid") {
+          let ticks = 500;
+          if (stmt.rainfall != null && stmt.rainfall.length > 0) {
+            ticks = Math.max(1, Math.round(stmt.rainfall[0]));
+          }
+          sys.simulateGrid(ticks);
+          printGridState(new Output(this.out), sys);
         } else {
           const rainfall = stmt.rainfall ?? [1];
           sys.simulate(rainfall);
@@ -753,6 +895,24 @@ var Interpreter = class {
           `Markov system '${system.name}': outgoing weights from '${src}' sum to ${sum}, not 1.0.`
         );
       }
+    }
+  }
+  validateGrid(system) {
+    let total = 0;
+    let hasSupply = false;
+    for (const r of system.rivers.values()) {
+      total += r.supply;
+      if (r.supply !== 0) hasSupply = true;
+    }
+    if (!hasSupply) {
+      throw new Error(
+        `Grid system '${system.name}' has no supply set on any node. Use 'river X { base: 0, peak: 0, supply: N }' for generators (+) or loads (-).`
+      );
+    }
+    if (Math.abs(total) > 1e-6) {
+      throw new Error(
+        `Grid system '${system.name}': supplies do not balance (sum = ${total}). Generators (+) and loads (-) must sum to zero.`
+      );
     }
   }
   nodeDefined(system, name) {
@@ -891,13 +1051,14 @@ var Parser = class {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect river name.");
     const attrs = this.parseBlock(name);
     this.consumeOptional("SEMICOLON" /* SEMICOLON */);
-    this.validateAttrs(name, attrs, ["base", "peak"], ["decay"]);
+    this.validateAttrs(name, attrs, ["base", "peak"], ["decay", "supply"]);
     return {
       kind: "RiverDecl",
       name,
       baseFlow: attrs.get("base"),
       peakMultiplier: attrs.get("peak"),
-      decayRate: attrs.get("decay") ?? 0.7
+      decayRate: attrs.get("decay") ?? 0.7,
+      supply: attrs.get("supply") ?? 0
     };
   }
   damDeclaration() {
@@ -991,7 +1152,9 @@ var Parser = class {
         "COLON" /* COLON */,
         `Expect ':' after attribute name '${key.lexeme}'.`
       );
+      const negate = this.match("DASH" /* DASH */);
       let value = this.consumeNumber("Expect number after ':'.");
+      if (negate) value = -value;
       if (this.match("PERCENT" /* PERCENT */)) value = value / 100;
       if (attrs.has(key.lexeme)) {
         throw this.errorAt(key, `Duplicate attribute '${key.lexeme}'.`);

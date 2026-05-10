@@ -223,12 +223,13 @@
       const EXAMPLES = [
         {
           id: "blank",
+          category: "blank",
           label: "Blank template",
           source: `// Flox: a small language for describing flow networks.
 //
 // Quick reference:
 //
-//   mode river;     mode markov;    select the simulator (default: river)
+//   mode river;   mode markov;   mode grid;   (default: river)
 //
 //   system Name;                                       declare a network
 //   river  Name { base: N, peak: N, decay: N }         decay optional, default 0.7
@@ -263,6 +264,7 @@ system Untitled;
         },
         {
           id: "demo",
+          category: "river",
           label: "Demo: two sources, a confluence, an outlet",
           source: `// A small two-source demo system.
 // Two upland creeks meet at a confluence and flow to an outlet.
@@ -289,6 +291,7 @@ print Demo 5;   // simulate at 5mm of rainfall
         },
         {
           id: "devlins",
+          category: "river",
           label: "Devlins: small real catchment",
           source: `// Devlins Creek catchment: two tributaries meeting Joes, then the outlet.
 system Devlins;
@@ -308,6 +311,7 @@ print Devlins;
         },
         {
           id: "canberra",
+          category: "river",
           label: "Canberra: three rivers, two dams",
           source: `// Canberra and surrounds: Googong, Queanbeyan, Molonglo, Burley Griffin.
 system Canberra;
@@ -344,6 +348,7 @@ print Canberra 10;
         },
         {
           id: "murray",
+          category: "river",
           label: "Murray-Darling: large basin",
           source: `// Murray-Darling: three major tributaries feeding the Murray, then the mouth.
 system MurrayDarling;
@@ -373,6 +378,7 @@ print MurrayDarling 30;
         },
         {
           id: "thames",
+          category: "river",
           label: "Thames: four headwaters into one estuary",
           source: `// Thames: four headwaters into the Upper Thames, joined by the Kennet,
 // then through the Middle and Lower reaches to the estuary.
@@ -401,6 +407,7 @@ print Thames 25;
         },
         {
           id: "nile",
+          category: "river",
           label: "Nile: White and Blue Nile through the Aswan dam",
           source: `// The Nile: two great sources meeting at Khartoum, flowing north
 // through the Aswan High Dam into the Mediterranean. The White Nile
@@ -441,6 +448,7 @@ print Nile [0, 5, 60, 40, 20, 10, 5];
         },
         {
           id: "snowy",
+          category: "river",
           label: "Snowy Mountains Scheme: hydroelectric diversion",
           source: `// Snowy Mountains Scheme: the Australian hydroelectric and irrigation
 // project that diverts water from the Snowy River catchment inland to
@@ -484,28 +492,30 @@ print SnowyMountains [2, 5, 30, 40, 20, 10, 5, 3, 2, 1];
         },
         {
           id: "passes",
+          category: "markov",
           label: "Markov: pass-or-shoot decision (football)",
-          source: `// PassOrShoot: a footballer on the edge of the box.
-// Each "tick" the player either passes again (a quick one-two with a
-// teammate) or pulls the trigger. Once the shot is taken, ~25% of those
-// become goals; the rest miss. Goal and Miss are absorbing states, so
-// running the chain long enough lets all the mass settle there.
+          source: `// PassOrShoot: a footballer in the attacking third. Each "tick" the
+// player either passes again or pulls the trigger; once the shot is
+// taken, league-average conversion is roughly one goal per ten shots.
+//
+// Numbers are calibrated to common football-analytics figures:
+//   Pass-vs-shoot: ~15% of attacking-third actions become shots.
+//   Shot conversion: ~10% (Opta, StatsBomb league averages).
 mode markov;
 system PassOrShoot;
 
-Pass  -[0.7]-> Pass;     // 70% chance of another pass
-Pass  -[0.3]-> Shoot;    // 30% chance of shooting
+Pass  -[0.85]-> Pass;
+Pass  -[0.15]-> Shoot;
 
-Shoot -[0.25]-> Goal;
-Shoot -[0.75]-> Miss;
+Shoot -[0.10]-> Goal;
+Shoot -[0.90]-> Miss;
 
-// Absorbing: mass that arrives stays.
+// Absorbing states: mass that arrives stays.
 Goal -[1.0]-> Goal;
 Miss -[1.0]-> Miss;
 
 // Markov mode uses river declarations as plain "state" containers.
-// Numeric attributes are unused in markov mode but the declaration is
-// still required so the resolver knows the name.
+// The numeric attributes are unused but the declaration is required.
 river Pass  { base: 0, peak: 0 }
 river Shoot { base: 0, peak: 0 }
 river Goal  { base: 0, peak: 0 }
@@ -514,11 +524,80 @@ river Miss  { base: 0, peak: 0 }
 start Pass 1.0;
 
 map  PassOrShoot;
-print PassOrShoot 80;
+print PassOrShoot 200;   // converges around tick 118
+`,
+        },
+        {
+          id: "weather",
+          category: "markov",
+          label: "Markov: Sydney weather (sunny / cloudy / rainy)",
+          source: `// Sydney weather: a tiny three-state Markov chain. The textbook intro
+// to Markov chains since the 1960s. Transitions are calibrated to
+// Sydney's general pattern (BoM long-run averages: sunny days
+// dominate; rainy spells persist a couple of days when they arrive).
+//
+// The interesting question: in the long run, what fraction of days
+// are sunny / cloudy / rainy? The chain answers that as its
+// stationary distribution.
+mode markov;
+system Sydney;
+
+Sunny  -[0.75]-> Sunny;
+Sunny  -[0.20]-> Cloudy;
+Sunny  -[0.05]-> Rainy;
+
+Cloudy -[0.35]-> Sunny;
+Cloudy -[0.45]-> Cloudy;
+Cloudy -[0.20]-> Rainy;
+
+Rainy  -[0.30]-> Sunny;
+Rainy  -[0.30]-> Cloudy;
+Rainy  -[0.40]-> Rainy;
+
+river Sunny  { base: 0, peak: 0 }
+river Cloudy { base: 0, peak: 0 }
+river Rainy  { base: 0, peak: 0 }
+
+start Sunny 1.0;
+
+map  Sydney;
+print Sydney 200;
+`,
+        },
+        {
+          id: "powergrid",
+          category: "grid",
+          label: "Grid: tiny power grid (one plant, two cities, a tie line)",
+          source: `// MiniGrid: a tiny power network. One generator at the centre
+// supplies two cities through a hub, with a tie-line between the
+// cities for redundancy. "supply" is power injected (generator, +)
+// or consumed (load, -). Edge weights are conductances.
+//
+// In grid mode, arrow direction is ignored: every edge is
+// bidirectional and flow direction is determined by the levels that
+// emerge from the simulation.
+//
+// Total supply must balance to zero (generators = loads).
+mode grid;
+system MiniGrid;
+
+Plant     -[5]-> Hub;
+Hub       -[3]-> NorthCity;
+Hub       -[3]-> SouthCity;
+NorthCity -[1]-> SouthCity;
+
+river Plant     { base: 0, peak: 0, supply:  100 }
+river Hub       { base: 0, peak: 0 }
+river NorthCity { base: 0, peak: 0, supply:  -40 }
+river SouthCity { base: 0, peak: 0, supply:  -60 }
+
+map MiniGrid;
+print MiniGrid 500;
 `,
         },
         {
           id: "brisbane",
+          category: "river",
           label: "Brisbane: 2011-style flood through Wivenhoe Dam",
           source: `// Brisbane River with Wivenhoe Dam: the city's water supply and main
 // flood defence, famously stress-tested by the 2011 floods. Three
@@ -556,6 +635,7 @@ print Brisbane [10, 30, 80, 60, 40, 20, 10, 5];
         },
         {
           id: "storm",
+          category: "river",
           label: "Storm: 100mm event crosses a dam threshold",
           source: `// A 100mm storm on day 1 forces a small reservoir past its threshold.
 // Outflow switches from normalRate to openRate as storage fills,
@@ -573,6 +653,7 @@ print Storm 100;
         },
         {
           id: "series",
+          category: "river",
           label: "Series: per-day rainfall pattern",
           source: `// A rainfall series: dry day, light rain, big storm, light again.
 // Each non-zero day kicks off its own hydrograph; flow is the
@@ -640,13 +721,30 @@ print SeriesDemo [0, 1, 30, 10, 0, 0, 0];
         timer = setTimeout(run, 200);
       });
 
-      // Populate the loader dropdown and wire its change handler.
+      // Populate the loader dropdown, grouped by mode (river / markov /
+      // grid). The Blank template sits at the top, ungrouped, since it
+      // isn't a mode demo per se.
       const loader = document.getElementById('pg-loader');
-      for (const ex of EXAMPLES) {
-        const opt = document.createElement('option');
-        opt.value = ex.id;
-        opt.textContent = ex.label;
-        loader.appendChild(opt);
+      const groupOrder = ['blank', 'river', 'markov', 'grid'];
+      const groupLabels = {
+        blank: null,            // no optgroup; show inline
+        river:  'River mode',
+        markov: 'Markov mode',
+        grid:   'Grid mode',
+      };
+      for (const cat of groupOrder) {
+        const examples = EXAMPLES.filter((e) => e.category === cat);
+        if (examples.length === 0) continue;
+        const parent = groupLabels[cat]
+          ? Object.assign(document.createElement('optgroup'), { label: groupLabels[cat] })
+          : loader;
+        for (const ex of examples) {
+          const opt = document.createElement('option');
+          opt.value = ex.id;
+          opt.textContent = ex.label;
+          parent.appendChild(opt);
+        }
+        if (parent !== loader) loader.appendChild(parent);
       }
       loader.addEventListener('change', (e) => {
         const id = e.target.value;
