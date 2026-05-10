@@ -30,8 +30,8 @@ jobs:
 
       - name: Commit and push if changed
         run: |
-          git config user.name  "github-actions[bot]"
-          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git config user.name  "maltysnack"
+          git config user.email "39046911+Maltysnack@users.noreply.github.com"
           git add games/data/decks_raw.json games/data/cards.json games/data/pairs.json games/data/explore.json games/data/meta.json games/data/scryfall.json
           git diff --staged --quiet || git commit -m "magic: weekly dataset refresh"
           git push
