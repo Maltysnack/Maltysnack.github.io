@@ -11,6 +11,7 @@ Outputs:
 """
 
 import json
+import re
 import sys
 import time
 import urllib.parse
@@ -53,6 +54,159 @@ def http_bytes(url: str, attempts: int = 3) -> bytes:
     raise last_err
 
 
+_DEALS_DAMAGE = re.compile(r"deals \w+ damage to (any target|target creature|target opponent|target player|each (creature|opponent))")
+_DRAW_VARIANTS = re.compile(r"\b(draws?|put .+ into your hand|look at the top \w+ cards.+(into your hand|hand))\b")
+_PUT_INTO_HAND = re.compile(r"put .+ into (?:your |their )?hand")
+_DEALS_EACH_CREATURE = re.compile(r"deals \w+ damage to each (creature|opponent and each creature)")
+
+
+def derive_tags(card: dict) :
+    """Rule-based tagger. Derives semantic tags from type_line + oracle_text.
+    Not as rich as Scryfall's hand-curated tagger but free, deterministic, and
+    captures the categories that matter for deck composition.
+    """
+    text = (card.get("oracle_text", "") or "").lower()
+    type_line = (card.get("type_line", "") or "").lower()
+    tags = set()
+
+    is_creature = "creature" in type_line
+    is_instant = "instant" in type_line
+    is_sorcery = "sorcery" in type_line
+    is_spell = is_instant or is_sorcery
+    is_land = "land" in type_line
+    is_enchantment = "enchantment" in type_line
+    is_artifact = "artifact" in type_line
+    is_planeswalker = "planeswalker" in type_line
+
+    if is_creature: tags.add("creature")
+    if is_spell: tags.add("spell")
+    if is_instant: tags.add("instant")
+    if is_sorcery: tags.add("sorcery")
+    if is_land: tags.add("land")
+    if is_enchantment and not is_creature: tags.add("enchantment")
+    if is_artifact and not is_creature: tags.add("artifact")
+    if is_planeswalker: tags.add("planeswalker")
+
+    # ── Removal ──
+    if is_spell or is_creature or is_enchantment or is_artifact:
+        if any(p in text for p in [
+            "destroy target", "exile target creature", "exile target nonland",
+            "destroy each", "exile target permanent", "exile target nonland permanent",
+        ]):
+            tags.add("removal")
+        if _DEALS_DAMAGE.search(text):
+            tags.add("removal")
+        # -N/-N effects (death by -N toughness)
+        if re.search(r"target creature gets [-−]\d", text):
+            tags.add("removal")
+        # "fight" effects
+        if "fights target creature" in text or "fights another target creature" in text:
+            tags.add("removal")
+
+    # ── Sweepers ──
+    if _DEALS_EACH_CREATURE.search(text) or "destroy all creatures" in text \
+            or "exile all creatures" in text or "destroy all" in text:
+        tags.add("sweeper")
+
+    # ── Counterspells ──
+    if "counter target" in text and ("spell" in text or "ability" in text):
+        tags.add("counterspell")
+
+    # ── Card draw / hand-fill ──
+    if "draw a card" in text or "draw two cards" in text or "draw three cards" in text \
+            or "draws a card" in text or "draw cards equal" in text \
+            or _PUT_INTO_HAND.search(text):
+        tags.add("card-draw")
+
+    # ── Discard / hand attack ──
+    if "discard" in text and ("target player" in text or "opponent" in text or "each opponent" in text):
+        tags.add("discard")
+
+    # ── Ramp / mana ──
+    if is_creature and ("{t}: add" in text or "tap: add" in text):
+        tags.add("mana-creature")
+        tags.add("ramp")
+    if is_spell and "search your library" in text and "land" in text:
+        tags.add("ramp")
+    if "additional land" in text or "play an additional land" in text:
+        tags.add("ramp")
+    if is_land and ("{t}: add" in text or "tap: add" in text):
+        # Most lands. Distinguish utility lands by also having other text.
+        if len(text) > 80:  # has more than just basic mana ability
+            tags.add("utility-land")
+
+    # ── Tokens ──
+    if "create" in text and "token" in text:
+        tags.add("tokens")
+
+    # ── +1/+1 counters ──
+    if "+1/+1 counter" in text:
+        tags.add("counters-plus")
+
+    # ── Lifegain / drain ──
+    if "you gain" in text and "life" in text:
+        tags.add("lifegain")
+    if "loses" in text and "life" in text and "opponent" in text:
+        tags.add("drain")
+
+    # ── Recursion ──
+    if any(p in text for p in [
+        "return target creature card from your graveyard",
+        "return it to the battlefield",
+        "return target permanent card from your graveyard",
+    ]):
+        tags.add("recursion")
+
+    # ── Tutoring ──
+    if "search your library" in text and not is_land:
+        if "creature card" in text or "instant card" in text or "sorcery card" in text \
+                or "card with mana value" in text or "card named" in text:
+            tags.add("tutor")
+
+    # ── Finisher / big creature ──
+    try:
+        power_str = str(card.get("power", "") or "")
+        cmc = card.get("cmc", 0) or 0
+        if power_str.isdigit():
+            power = int(power_str)
+            if is_creature and power >= 5 and cmc >= 4:
+                tags.add("finisher")
+    except (AttributeError, ValueError):
+        pass
+
+    # ── Keyword tags from Scryfall's keywords array ──
+    keywords = [k.lower() for k in (card.get("keywords") or [])]
+    for kw in ["flying", "trample", "menace", "haste", "deathtouch", "lifelink",
+               "first strike", "double strike", "vigilance", "ward", "hexproof",
+               "indestructible", "flash", "reach", "defender", "scry", "prowess",
+               "convoke", "delve", "landfall", "kicker", "cycling", "flashback"]:
+        if kw in keywords:
+            tags.add("kw-" + kw.replace(" ", "-"))
+
+    # ── Archetype hooks ──
+    if "graveyard" in text:
+        tags.add("graveyard-matters")
+    if "instant or sorcery" in text:
+        tags.add("spells-matter")
+    if "noncreature" in text or "non-creature" in text:
+        tags.add("noncreature-matters")
+    if "treasure token" in text:
+        tags.add("treasure")
+    if "artifact" in text and not is_artifact:
+        if "create" in text or "another artifact" in text:
+            tags.add("artifact-matters")
+    if "creature you control" in text and is_spell:
+        tags.add("creature-buff")
+    if "scry" in text:
+        tags.add("scry")
+
+    # ── X-spell payoffs ──
+    if "{x}" in (card.get("mana_cost", "") or "").lower():
+        tags.add("x-spell")
+
+    return sorted(tags)
+
+
 def extract_meta(card: dict) -> dict:
     if "image_uris" in card:
         imgs = card["image_uris"]
@@ -73,6 +227,7 @@ def extract_meta(card: dict) -> dict:
         "mana_cost": mana,
         "cmc": card.get("cmc", 0),
         "type_line": card.get("type_line", ""),
+        "oracle_text": card.get("oracle_text", "") or "",
         "colors": card.get("color_identity", []),
         "set": (card.get("set", "") or "").upper(),
         "cn": card.get("collector_number", ""),
@@ -80,6 +235,7 @@ def extract_meta(card: dict) -> dict:
         "scryfall_uri": card.get("scryfall_uri", ""),
         "legal_standard": legalities.get("standard", "") == "legal",
         "keywords": card.get("keywords", []),
+        "tags": derive_tags(card),
     }
 
 
@@ -186,7 +342,7 @@ def main():
     # We've changed printing-selection logic. Force-refresh every entry so we
     # pick the best printing under the new scoring rules. Marker key tracks
     # the schema version; bumping it triggers a full rebuild of the cache.
-    SCHEMA_VERSION = "v5-marked-aliases"
+    SCHEMA_VERSION = "v7-tagger-tags-improved"
     if cache.get("__schema__") != SCHEMA_VERSION:
         print(f"  schema bump: rebuilding entire cache ({len(cache)} entries)",
               file=sys.stderr)

@@ -220,9 +220,14 @@ body:has(.magic-page) .main {
 .sec-search { margin-bottom: 0; }
 
 
-/* Lands toggle, right-aligned in the "What fits" header */
-.lands-toggle {
+/* Toggles in the "Travels with" header (mode + lands), right-aligned */
+.rec-toggles {
   margin-left: auto;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+}
+.rec-toggle, .lands-toggle {
   background: none;
   border: 1px solid var(--border);
   color: var(--text-muted);
@@ -231,9 +236,15 @@ body:has(.magic-page) .main {
   font-family: inherit;
   font-size: var(--text-xs);
   cursor: pointer;
-  transition: color var(--transition), border-color var(--transition);
+  transition: color var(--transition), border-color var(--transition), background var(--transition);
 }
-.lands-toggle:hover { color: var(--text-strong); border-color: var(--text-dim); }
+.rec-toggle:hover, .lands-toggle:hover { color: var(--text-strong); border-color: var(--text-dim); }
+.rec-toggle.active {
+  color: #fff;
+  background: var(--accent-red);
+  border-color: var(--accent-red);
+}
+.lands-toggle { margin-left: 6px; border-left-style: dashed; }
 
 
 /* ── Card grid ────────────────────────────────────────── */
@@ -308,8 +319,81 @@ body:has(.magic-page) .main {
 .thumb-score.score-50 { color: #b07a55; }
 .thumb-score.score-low { color: var(--text-dim); }
 
+/* Breakdown popover, anchored to the score badge. Replaces the old hover tip. */
+.bd-popover {
+  position: absolute;
+  bottom: calc(100% + 8px);
+  right: 0;
+  width: 240px;
+  padding: 12px 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.18);
+  z-index: 50;
+  font-family: var(--font-body);
+  font-weight: 400;
+  letter-spacing: 0;
+  text-transform: none;
+  text-align: left;
+  cursor: default;
+  animation: bd-fade 120ms var(--ease);
+}
+@keyframes bd-fade { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+.bd-row { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 4px; line-height: 1.4; }
+.bd-name { font-size: var(--text-sm); font-weight: 600; color: var(--text-strong); margin-bottom: 6px; }
+.bd-mode {
+  font-size: 9px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--accent-red);
+  font-weight: 600;
+  margin-bottom: 8px;
+}
+.bd-tags { display: flex; flex-wrap: wrap; gap: 3px; margin-bottom: 8px; }
+.bd-tag {
+  font-size: 10px;
+  font-family: var(--font-mono);
+  background: var(--bg-soft);
+  border: 1px solid var(--border-light);
+  padding: 1px 5px;
+  border-radius: 2px;
+  color: var(--text-muted);
+}
+.bd-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 12px;
+  margin: 8px 0 10px;
+}
+.bd-cell { display: flex; flex-direction: column; }
+.bd-label {
+  font-size: 9px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+.bd-val {
+  font-size: var(--text-sm);
+  font-family: var(--font-mono);
+  font-weight: 600;
+  color: var(--text-strong);
+  font-variant-numeric: tabular-nums;
+}
+.bd-note { font-size: var(--text-xs); color: var(--text-muted); margin: 6px 0; line-height: 1.4; font-style: italic; }
+.bd-link {
+  display: inline-block;
+  margin-top: 6px;
+  font-size: var(--text-xs);
+  color: var(--accent-red);
+  border-bottom: 1px dotted var(--accent-red);
+}
+.bd-link:hover { color: var(--accent-red); border-bottom-style: solid; }
+.thumb.breakdown-open .thumb-score { transform: scale(1.15); }
+
 .thumb-score::after {
-  content: "synergy score: how well this card fits with your selection. click to read the math.";
+  content: "synergy score. click for breakdown.";
   position: absolute;
   bottom: calc(100% + 6px);
   right: 0;
@@ -336,6 +420,8 @@ body:has(.magic-page) .main {
   transform: translateY(0);
   transition-delay: 320ms;
 }
+/* Hide the hover tooltip when the breakdown popover is open */
+.thumb.breakdown-open .thumb-score::after { display: none; }
 
 
 /* ── Matching lists ───────────────────────────────────── */

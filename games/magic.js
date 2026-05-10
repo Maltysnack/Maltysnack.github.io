@@ -24,6 +24,8 @@
   let bans = parseHashList("ban");
   let showLands = false;     // lands toggle near "what fits" header
   let searchQuery = "";      // live search input value, drives results strip
+  let viewMode = "fits";     // "fits" (top-fit recs) or "off-meta" (lift inversion)
+  let breakdownFor = null;   // which card has its score-breakdown popover open
 
   function parseHashList(key) {
     const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
@@ -48,6 +50,7 @@
     bans = bans.filter((n) => n !== name);   // adding to selection unbans
     selection = [...selection, name];
     listsOpen = false;
+    searchQuery = "";                         // clear the search so the user sees the new state
     invalidateScores();
     writeHash();
     render();
@@ -138,10 +141,50 @@
   const SEMANTIC_CAP = 30;
   const COVERAGE_POWER = 2;      // partial-match weight = (k/n)^COVERAGE_POWER
 
+  // ── Tag-aware deck-balance booster ──
+  // Compute the selection's tag distribution. A candidate's "tag fit" is how
+  // much it fills under-represented categories. Used as a small multiplier on
+  // the score (max ~1.3x, min ~0.85x), so it nudges without overwhelming the
+  // co-occurrence signal.
+  function tagsFor(name) {
+    const m = scryfall && scryfall[name];
+    return (m && m.tags) || [];
+  }
+  function selectionTagProfile() {
+    const counts = new Map();
+    for (const n of selection) {
+      for (const t of tagsFor(n)) counts.set(t, (counts.get(t) || 0) + 1);
+    }
+    return counts;
+  }
+  // The "shape" tags we balance against. When selection lacks one of these,
+  // candidates with that tag get a small boost.
+  const BALANCE_TAGS = ["removal", "card-draw", "ramp", "counterspell", "sweeper", "creature", "finisher"];
+  function tagBalanceMultiplier(name, profile) {
+    if (!selection.length) return 1;
+    const cTags = new Set(tagsFor(name));
+    if (cTags.size === 0) return 1;
+    let bonus = 0, malus = 0;
+    const selN = selection.length;
+    for (const t of BALANCE_TAGS) {
+      if (!cTags.has(t)) continue;
+      const have = profile.get(t) || 0;
+      const fraction = have / selN;
+      // If the selection has 0 of this category, big boost
+      // If it's saturated (>50%), candidates with this tag get a small malus
+      if (fraction === 0) bonus += 0.15;
+      else if (fraction < 0.2) bonus += 0.07;
+      else if (fraction > 0.5) malus += 0.05;
+    }
+    const mult = 1 + bonus - malus;
+    return Math.max(0.85, Math.min(1.3, mult));
+  }
+
   // Compute the score map for the current selection + bans. Caches by key.
+  // Returns Map(name -> { score, breakdown }).
   function computeScoreMap() {
     if (!decks) return null;
-    const key = JSON.stringify({ s: selection, b: bans });
+    const key = JSON.stringify({ s: selection, b: bans, m: viewMode });
     if (_scoresKey === key && _scoresMap) return _scoresMap;
     _scoresKey = key;
 
@@ -200,6 +243,8 @@
 
     if (totalSelW === 0) { _scoresMap = scores; return scores; }
 
+    const profile = selectionTagProfile();
+
     for (const [name, coW] of candidateCo) {
       if (banSet.has(name)) continue;
       if (!isLegal(name)) continue;
@@ -209,12 +254,47 @@
       if (pBase >= 1) continue;
       const pCondSel = coW / totalSelW;
       const strength = (pCondSel - pBase) / (1 - pBase);
-      if (strength <= 0) continue;
-      const robustness = Math.min(Math.sqrt(coW / ROBUSTNESS_REF), 1);
-      const novelty = 1 / (1 + NOVELTY_K * pBase);
-      const raw = strength * robustness * novelty;
+
+      let raw, label;
+      if (viewMode === "off-meta") {
+        // Off-meta: rank by middle-prevalence pairs that are below the obvious
+        // staples but above the noise floor. Boosts cards in 5-25% of the
+        // selection's decks, demotes both the always-included and the rare.
+        // pCondSel ∈ [0.05, 0.25] = sweet spot. Outside that range, dampen.
+        let mid = 0;
+        if (pCondSel >= 0.04 && pCondSel <= 0.30) {
+          mid = 1 - Math.abs(pCondSel - 0.15) / 0.15;  // peak at 15%
+        }
+        const robustness = Math.min(Math.sqrt(coW / 60), 1);  // lower ref since we're in mid-band
+        const novelty = 1 / (1 + (NOVELTY_K * 0.6) * pBase);  // softer novelty (mid-pop OK)
+        raw = mid * robustness * novelty;
+        label = "off-meta";
+      } else {
+        // Default "what fits" mode
+        if (strength <= 0) continue;
+        const robustness = Math.min(Math.sqrt(coW / ROBUSTNESS_REF), 1);
+        const novelty = 1 / (1 + NOVELTY_K * pBase);
+        raw = strength * robustness * novelty;
+        label = "fits";
+      }
+
+      const tagMult = tagBalanceMultiplier(name, profile);
+      raw *= tagMult;
+
       const score = Math.round(Math.min(99, Math.max(0, 99 * (1 - Math.exp(-CURVE_K * raw)))));
-      if (score > 0) scores.set(name, score);
+      if (score > 0) {
+        scores.set(name, {
+          score,
+          mode: label,
+          breakdown: {
+            strength: Math.round(strength * 100) / 100,
+            pCondSel: Math.round(pCondSel * 100) / 100,
+            pBase: Math.round(pBase * 1000) / 1000,
+            coW: Math.round(coW),
+            tagMult: Math.round(tagMult * 100) / 100,
+          },
+        });
+      }
     }
 
     _scoresMap = scores;
@@ -222,7 +302,12 @@
   }
 
   // Sync lookup. If decks aren't loaded yet, returns null (renders skip the score).
+  // Returns just the number; breakdown is fetched via synergyEntry().
   function synergyScore(name, sel) {
+    const entry = synergyEntry(name, sel);
+    return entry ? entry.score : null;
+  }
+  function synergyEntry(name, sel) {
     if (!isLegal(name)) return null;
     if (selection.includes(name)) return null;
     if (bans.includes(name)) return null;
@@ -232,8 +317,10 @@
     const direct = map.get(name);
     if (direct !== undefined) return direct;
     // No deck in the pool contains this candidate alongside any selection
-    // card. Fall back to semantic similarity.
-    return semanticScore(name, sel || selection);
+    // card. Fall back to semantic similarity (returns just a number, not an entry).
+    const semScore = semanticScore(name, sel || selection);
+    if (semScore == null) return null;
+    return { score: semScore, mode: "semantic", breakdown: null };
   }
 
   // Semantic fallback: shared color identity + same primary type. Bounded low.
@@ -538,8 +625,8 @@
     // selection-weighted co-occurrence in the recent, ban-filtered pool.
     const scoreMap = computeScoreMap();
     const scored = [];
-    for (const [name, score] of scoreMap) {
-      scored.push({ name, score });
+    for (const [name, entry] of scoreMap) {
+      scored.push({ name, score: entry.score });
     }
     scored.sort((a, b) => b.score - a.score);
 
@@ -547,28 +634,37 @@
     const lands = scored.filter((r) => isLand(r.name)).slice(0, 24);
     const items = showLands ? lands : spells;
 
-    const subtitle = selection.length === 1
-      ? `cards that go with ${escapeHtml(selection[0])}`
-      : `cards that go with all ${selection.length} of your team`;
+    const subtitle = viewMode === "off-meta"
+      ? (selection.length === 1
+          ? `mid-frequency partners of ${escapeHtml(selection[0])} (less obvious picks)`
+          : `mid-frequency partners across your ${selection.length} cards`)
+      : (selection.length === 1
+          ? `cards that travel with ${escapeHtml(selection[0])}`
+          : `cards that travel with all ${selection.length} of your selection`);
+    const title = viewMode === "off-meta" ? "Off the beaten path" : "Travels with";
 
     return `
       <div class="stacked">
-        ${sectionWithToggle("What fits", subtitle, renderGrid(items))}
+        ${sectionWithToggle(title, subtitle, renderGrid(items))}
         ${renderListsSection()}
       </div>
     `;
   }
 
-  // "What fits" section with a right-aligned lands toggle in the header.
+  // "What fits" / "Off-meta" section with right-aligned toggles in the header.
   function sectionWithToggle(title, sub, body) {
     return `
       <section class="sec sec-rec">
         <header class="sec-header">
           <h2 class="sec-title">${escapeHtml(title)}</h2>
           <span class="sec-sub">${escapeHtml(sub)}</span>
-          <button class="lands-toggle" id="lands-toggle" title="toggle between spell and land recommendations">
-            ${showLands ? "showing lands · click for spells" : "showing spells · click for lands"}
-          </button>
+          <div class="rec-toggles">
+            <button class="rec-toggle ${viewMode === "fits" ? "active" : ""}" id="mode-fits" title="rank by what fits the selection most tightly">what fits</button>
+            <button class="rec-toggle ${viewMode === "off-meta" ? "active" : ""}" id="mode-offmeta" title="rank by mid-prevalence partners that aren't obvious staples">off-meta</button>
+            <button class="lands-toggle" id="lands-toggle" title="toggle between spells and lands">
+              ${showLands ? "lands" : "spells"}
+            </button>
+          </div>
         </header>
         ${body}
       </section>
@@ -682,9 +778,47 @@
     const inSel = selection.includes(name);
     const score = typeof item.score === "number" ? item.score : null;
     const cls = score !== null ? scoreColorClass(score) : "";
-    return `<div class="thumb${inSel ? " in-sel" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
+    const showBreakdown = breakdownFor === name;
+    return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
-      ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="link" tabindex="0">${score}</span>` : ""}
+      ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="button" tabindex="0">${score}</span>` : ""}
+      ${showBreakdown ? renderBreakdownPopover(name) : ""}
+    </div>`;
+  }
+
+  function renderBreakdownPopover(name) {
+    const entry = synergyEntry(name);
+    if (!entry) return "";
+    const sf = scryfall[name] || {};
+    const tags = (sf.tags || []).filter((t) => t !== "spell" && t !== "creature" && !t.startsWith("kw-"));
+    const tagsHtml = tags.length ? `<div class="bd-tags">${tags.slice(0, 6).map(t => `<span class="bd-tag">${escapeHtml(t)}</span>`).join("")}</div>` : "";
+
+    if (!entry.breakdown) {
+      return `<div class="bd-popover" data-bd="1">
+        <div class="bd-row bd-name">${escapeHtml(name)}</div>
+        <div class="bd-row bd-mode">${entry.mode === "semantic" ? "semantic match" : entry.mode}</div>
+        ${tagsHtml}
+        <div class="bd-row bd-note">No direct co-occurrence with your selection in winning lists. Score reflects color and type overlap.</div>
+        <a class="bd-link" href="/games/synergy-score.html" data-bd-stop>read about synergy score →</a>
+      </div>`;
+    }
+
+    const b = entry.breakdown;
+    const pCondPct = Math.round(b.pCondSel * 100);
+    const pBasePct = Math.round(b.pBase * 1000) / 10;
+    const tagDelta = b.tagMult > 1.02 ? `+${Math.round((b.tagMult - 1) * 100)}% deck-balance bonus` :
+                     b.tagMult < 0.98 ? `−${Math.round((1 - b.tagMult) * 100)}% deck-balance malus` : "";
+    return `<div class="bd-popover" data-bd="1">
+      <div class="bd-row bd-name">${escapeHtml(name)}</div>
+      <div class="bd-row bd-mode">${entry.mode === "off-meta" ? "off-meta lens" : "what-fits lens"}</div>
+      ${tagsHtml}
+      <div class="bd-grid">
+        <div class="bd-cell"><span class="bd-label">in selection's decks</span><span class="bd-val">${pCondPct}%</span></div>
+        <div class="bd-cell"><span class="bd-label">vs pool baseline</span><span class="bd-val">${pBasePct}%</span></div>
+        <div class="bd-cell"><span class="bd-label">co-occurrence weight</span><span class="bd-val">${b.coW}</span></div>
+        ${tagDelta ? `<div class="bd-cell"><span class="bd-label">deck balance</span><span class="bd-val">${tagDelta}</span></div>` : ""}
+      </div>
+      <a class="bd-link" href="/games/synergy-score.html" data-bd-stop>read about synergy score →</a>
     </div>`;
   }
 
@@ -735,23 +869,43 @@
   }
 
   function wireCardClicks() {
-    // Grid thumbnails: click on art toggles selection, click on score navigates
+    // Grid thumbnails: click on art toggles selection; click on score opens an
+    // inline breakdown popover. Click the score badge again to close, or
+    // click outside the popover.
     $$(".thumb").forEach((el) => {
       el.addEventListener("click", (e) => {
+        if (e.target.closest("[data-bd-stop]")) return;          // let the read-more anchor work
+        if (e.target.closest("[data-bd]")) return;               // ignore clicks inside popover content
         if (e.target.closest("[data-score-link]")) {
-          window.location.href = "/games/synergy-score.html";
+          breakdownFor = breakdownFor === el.dataset.name ? null : el.dataset.name;
+          render();
           return;
         }
         selectionToggle(el.dataset.name);
       });
       el.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          if (e.target.matches("[data-score-link]")) window.location.href = "/games/synergy-score.html";
-          else selectionToggle(el.dataset.name);
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        if (e.target.matches("[data-score-link]")) {
+          breakdownFor = breakdownFor === el.dataset.name ? null : el.dataset.name;
+          render();
+        } else {
+          selectionToggle(el.dataset.name);
         }
       });
     });
+    // Click outside any open breakdown popover closes it
+    if (breakdownFor) {
+      const closeOnOutside = (e) => {
+        if (!e.target.closest(".bd-popover") && !e.target.closest("[data-score-link]")) {
+          breakdownFor = null;
+          document.removeEventListener("click", closeOnOutside, true);
+          render();
+        }
+      };
+      // Defer attachment so the click that opened the popover doesn't fire it
+      setTimeout(() => document.addEventListener("click", closeOnOutside, true), 0);
+    }
     // Selection / ban chip actions (top half = remove/unban, bottom half = ban/promote)
     $$(".chip-half").forEach((el) => {
       el.addEventListener("click", (e) => {
@@ -766,15 +920,9 @@
         else if (action === "promote") { banRemove(name); selectionAdd(name); }
       });
     });
-    // Manabase rows
+    // Manabase rows: just click to add (manabase doesn't show score badges)
     $$(".manabase-card").forEach((el) => {
-      el.addEventListener("click", (e) => {
-        if (e.target.closest("[data-score-link]")) {
-          window.location.href = "/games/synergy-score.html";
-          return;
-        }
-        selectionToggle(el.dataset.name);
-      });
+      el.addEventListener("click", () => selectionToggle(el.dataset.name));
     });
     // Export
     const exp = $("#sel-export");
@@ -807,6 +955,14 @@
     if (lt) lt.addEventListener("click", () => {
       showLands = !showLands;
       render();
+    });
+    const mFits = $("#mode-fits");
+    if (mFits) mFits.addEventListener("click", () => {
+      if (viewMode !== "fits") { viewMode = "fits"; invalidateScores(); render(); }
+    });
+    const mOff = $("#mode-offmeta");
+    if (mOff) mOff.addEventListener("click", () => {
+      if (viewMode !== "off-meta") { viewMode = "off-meta"; invalidateScores(); render(); }
     });
     // View matching lists toggle (in body)
     const ltog = $("#lists-toggle");
