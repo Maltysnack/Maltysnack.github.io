@@ -46,7 +46,10 @@
       overflow: hidden;
       background: var(--bg);
     }
-    .pg-pane.pg-pane-editor { height: 360px; }
+    /* Editor fills most of the visible viewport. Output flows below it;
+       since the table is usually too tall to fit anyway, the user
+       scrolls to read it. */
+    .pg-pane.pg-pane-editor { height: calc(100vh - 280px); min-height: 420px; }
     .pg-pane.pg-pane-output { min-height: 280px; }
     .pg-pane-header {
       font-size: var(--text-xs);
