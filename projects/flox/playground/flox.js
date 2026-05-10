@@ -32,10 +32,10 @@ function printList(o, system) {
   o.println("");
   o.println("=== RIVER SYSTEM: " + system.name + " ===\n");
   o.println("Connections:");
-  for (const [from, downstreams] of system.connections) {
-    for (const to of downstreams) {
+  for (const [from, edges] of system.connections) {
+    for (const e of edges) {
       const fromLabel = system.dams.has(from) ? `${from} [DAM]` : from;
-      const toLabel = system.dams.has(to) ? `${to} [DAM]` : to;
+      const toLabel = system.dams.has(e.target) ? `${e.target} [DAM]` : e.target;
       o.println("  " + padRight(fromLabel, 22) + " \u2192  " + toLabel);
     }
   }
@@ -57,7 +57,7 @@ function tracePath(system, node, path, finalOutlet) {
   if (node === finalOutlet) return;
   const downstream = system.connections.get(node);
   if (downstream && downstream.length > 0) {
-    tracePath(system, downstream[0], path, finalOutlet);
+    tracePath(system, downstream[0].target, path, finalOutlet);
   }
 }
 function printPath(o, system, path) {
@@ -181,6 +181,70 @@ function printFlowTable(o, system, rainfall) {
     }
   }
   o.println("");
+}
+function printMarkovMap(o, system) {
+  o.println("");
+  o.println("=== MARKOV CHAIN: " + system.name + " ===\n");
+  const states = [...system.rivers.keys(), ...system.dams.keys()];
+  o.println("States (" + states.length + "):");
+  o.println("  " + states.join(", "));
+  o.println("");
+  o.println("Transitions:");
+  for (const [src, outs] of system.connections) {
+    for (let i = 0; i < outs.length; i++) {
+      const e = outs[i];
+      const w = formatWeight(e.weight);
+      if (i === 0) {
+        o.println("  " + src + " \u2500[" + w + "]\u2500\u25B6 " + e.target);
+      } else {
+        const pad = " ".repeat(src.length + 2);
+        o.println(pad + "\u2514[" + w + "]\u2500\u25B6 " + e.target);
+      }
+    }
+  }
+  o.println("");
+  o.println("Outgoing weights per state:");
+  for (const src of states) {
+    const outs = system.connections.get(src);
+    if (!outs || outs.length === 0) {
+      o.println("  " + src + " absorbing");
+      continue;
+    }
+    let sum = 0;
+    for (const e of outs) sum += e.weight;
+    const mark = Math.abs(sum - 1) < 1e-6 ? "  \u2713" : "  \u2717";
+    o.println("  " + src + " \u2192 " + sum.toFixed(3) + mark);
+  }
+  o.println("");
+}
+function printMarkovDistribution(o, system) {
+  const tickWord = system.markovTicksRun === 1 ? "tick" : "ticks";
+  const status = system.markovConverged ? ", converged" : ", not yet converged";
+  o.println("");
+  o.println(
+    "=== MARKOV DISTRIBUTION: " + system.name + " (" + system.markovTicksRun + " " + tickWord + status + ") ===\n"
+  );
+  let locWidth = 5;
+  for (const s of system.markovHistory.keys()) {
+    if (s.length > locWidth) locWidth = s.length;
+  }
+  o.println("Final distribution:");
+  let total = 0;
+  for (const [state, hist] of system.markovHistory) {
+    const v = hist[system.markovTicksRun];
+    total += v;
+    o.println("  " + padRight(state, locWidth) + "  " + v.toFixed(4));
+  }
+  o.println("");
+  o.println("Total mass: " + total.toFixed(4));
+  o.println("");
+}
+function formatWeight(w) {
+  if (w === Math.floor(w)) return w.toFixed(1);
+  let s = w.toFixed(3);
+  while (s.endsWith("0")) s = s.slice(0, -1);
+  if (s.endsWith(".")) s += "0";
+  return s;
 }
 function formatCumulative(cumulativeFlowLps) {
   const litersPerDay = cumulativeFlowLps * 86400;
@@ -322,31 +386,35 @@ var RiverSystem = class {
     this.name = name;
   }
   name;
-  // Insertion-ordered, like Java's LinkedHashMap.
+  mode = "river";
   rivers = /* @__PURE__ */ new Map();
   dams = /* @__PURE__ */ new Map();
-  // name -> downstream names
   connections = /* @__PURE__ */ new Map();
   roots = [];
+  // Markov state
+  initialMass = /* @__PURE__ */ new Map();
+  markovHistory = /* @__PURE__ */ new Map();
+  markovTicksRun = 0;
+  markovConverged = false;
   addRiver(river) {
     this.rivers.set(river.name, river);
   }
   addDam(dam) {
     this.dams.set(dam.name, dam);
   }
-  addConnection(from, to) {
+  addConnection(from, to, weight) {
     let downstream = this.connections.get(from);
     if (!downstream) {
       downstream = [];
       this.connections.set(from, downstream);
     }
-    downstream.push(to);
+    downstream.push({ target: to, weight });
   }
   identifyRoots() {
     this.roots = [];
     const hasUpstream = /* @__PURE__ */ new Set();
-    for (const downstream of this.connections.values()) {
-      for (const n of downstream) hasUpstream.add(n);
+    for (const edges of this.connections.values()) {
+      for (const e of edges) hasUpstream.add(e.target);
     }
     for (const r of this.rivers.values()) {
       if (!hasUpstream.has(r.name) && !r.isTerminator()) {
@@ -370,9 +438,11 @@ var RiverSystem = class {
       const flowThisDay = /* @__PURE__ */ new Map();
       for (const node of this.getTopologicalOrder()) {
         let flow = 0;
-        for (const [from, downstream] of this.connections) {
-          if (downstream.includes(node)) {
-            flow += flowThisDay.get(from) ?? 0;
+        for (const [from, edges] of this.connections) {
+          for (const e of edges) {
+            if (e.target === node) {
+              flow += (flowThisDay.get(from) ?? 0) * e.weight;
+            }
           }
         }
         const river = this.rivers.get(node);
@@ -391,6 +461,49 @@ var RiverSystem = class {
       }
     }
   }
+  // Markov-mode simulation: row-stochastic transition matrix induced by
+  // edge weights, applied iteratively to the state vector. Halts at
+  // maxTicks or when the state stops changing within EPSILON.
+  simulateMarkov(maxTicks) {
+    const EPSILON = 1e-9;
+    const nodes = [...this.rivers.keys(), ...this.dams.keys()];
+    let mass = /* @__PURE__ */ new Map();
+    for (const n of nodes) mass.set(n, this.initialMass.get(n) ?? 0);
+    this.markovHistory.clear();
+    for (const n of nodes) {
+      const hist = new Array(maxTicks + 1).fill(0);
+      hist[0] = mass.get(n);
+      this.markovHistory.set(n, hist);
+    }
+    this.markovTicksRun = 0;
+    this.markovConverged = false;
+    for (let t = 1; t <= maxTicks; t++) {
+      const next = /* @__PURE__ */ new Map();
+      for (const n of nodes) next.set(n, 0);
+      for (const src of nodes) {
+        const outs = this.connections.get(src);
+        if (!outs || outs.length === 0) {
+          next.set(src, (next.get(src) ?? 0) + (mass.get(src) ?? 0));
+          continue;
+        }
+        for (const e of outs) {
+          if (!next.has(e.target)) continue;
+          next.set(e.target, (next.get(e.target) ?? 0) + (mass.get(src) ?? 0) * e.weight);
+        }
+      }
+      let maxDiff = 0;
+      for (const n of nodes) {
+        maxDiff = Math.max(maxDiff, Math.abs(next.get(n) - mass.get(n)));
+        this.markovHistory.get(n)[t] = next.get(n);
+      }
+      mass = next;
+      this.markovTicksRun = t;
+      if (maxDiff < EPSILON) {
+        this.markovConverged = true;
+        break;
+      }
+    }
+  }
   getTopologicalOrder() {
     const order = [];
     const inDegree = /* @__PURE__ */ new Map();
@@ -399,9 +512,9 @@ var RiverSystem = class {
       ...this.dams.keys()
     ]);
     for (const n of allNodes) inDegree.set(n, 0);
-    for (const downstream of this.connections.values()) {
-      for (const n of downstream) {
-        inDegree.set(n, (inDegree.get(n) ?? 0) + 1);
+    for (const edges of this.connections.values()) {
+      for (const e of edges) {
+        inDegree.set(e.target, (inDegree.get(e.target) ?? 0) + 1);
       }
     }
     const queue = [];
@@ -411,12 +524,12 @@ var RiverSystem = class {
     while (queue.length > 0) {
       const node = queue.shift();
       order.push(node);
-      const downstream = this.connections.get(node);
-      if (downstream) {
-        for (const next of downstream) {
-          const d = (inDegree.get(next) ?? 0) - 1;
-          inDegree.set(next, d);
-          if (d === 0) queue.push(next);
+      const edges = this.connections.get(node);
+      if (edges) {
+        for (const e of edges) {
+          const d = (inDegree.get(e.target) ?? 0) - 1;
+          inDegree.set(e.target, d);
+          if (d === 0) queue.push(e.target);
         }
       }
     }
@@ -433,10 +546,10 @@ var Interpreter = class {
   out;
   errs;
   systems = /* @__PURE__ */ new Map();
-  // Per-system pending chains, kept between phases.
   pendingChains = /* @__PURE__ */ new Map();
   currentSystem = null;
   phase = 0 /* COLLECT */;
+  fileMode = "river";
   interpret(statements) {
     try {
       this.phase = 0 /* COLLECT */;
@@ -444,7 +557,11 @@ var Interpreter = class {
       for (const stmt of statements) {
         if (stmt) this.execute(stmt);
       }
+      for (const s of this.systems.values()) s.mode = this.fileMode;
       this.resolveChains();
+      for (const s of this.systems.values()) {
+        if (s.mode === "markov") this.validateMarkov(s);
+      }
       for (const s of this.systems.values()) s.identifyRoots();
       this.phase = 1 /* EXECUTE */;
       this.currentSystem = null;
@@ -470,6 +587,18 @@ var Interpreter = class {
           this.currentSystem = s;
         } else {
           this.currentSystem = this.systems.get(name) ?? null;
+        }
+        return;
+      }
+      case "ModeDecl": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const name = stmt.mode.lexeme;
+        if (name === "river") this.fileMode = "river";
+        else if (name === "markov") this.fileMode = "markov";
+        else {
+          throw new Error(
+            `Unknown mode '${name}' (line ${stmt.mode.line}). Known modes: river, markov.`
+          );
         }
         return;
       }
@@ -526,14 +655,26 @@ var Interpreter = class {
         const sys = this.requireSystem(
           stmt.nodes.length > 0 ? stmt.nodes[0] : null
         );
-        const list = this.pendingChains.get(sys.name);
-        list.push(stmt.nodes);
+        this.pendingChains.get(sys.name).push(stmt);
+        return;
+      }
+      case "StartStmt": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const sys = this.requireSystem(stmt.node);
+        sys.initialMass.set(
+          stmt.node.lexeme,
+          (sys.initialMass.get(stmt.node.lexeme) ?? 0) + stmt.mass
+        );
         return;
       }
       case "MapStmt": {
         if (this.phase !== 1 /* EXECUTE */) return;
         const sys = this.lookupSystem(stmt.systemName);
-        printMap(new Output(this.out), sys);
+        if (sys.mode === "markov") {
+          printMarkovMap(new Output(this.out), sys);
+        } else {
+          printMap(new Output(this.out), sys);
+        }
         return;
       }
       case "ListStmt": {
@@ -545,9 +686,18 @@ var Interpreter = class {
       case "PrintStmt": {
         if (this.phase !== 1 /* EXECUTE */) return;
         const sys = this.lookupSystem(stmt.systemName);
-        const rainfall = stmt.rainfall ?? [1];
-        sys.simulate(rainfall);
-        printFlowTable(new Output(this.out), sys, rainfall);
+        if (sys.mode === "markov") {
+          let ticks = 30;
+          if (stmt.rainfall != null && stmt.rainfall.length > 0) {
+            ticks = Math.max(1, Math.round(stmt.rainfall[0]));
+          }
+          sys.simulateMarkov(ticks);
+          printMarkovDistribution(new Output(this.out), sys);
+        } else {
+          const rainfall = stmt.rainfall ?? [1];
+          sys.simulate(rainfall);
+          printFlowTable(new Output(this.out), sys, rainfall);
+        }
         return;
       }
       case "HelpStmt": {
@@ -561,16 +711,47 @@ var Interpreter = class {
     for (const [sysName, chains] of this.pendingChains) {
       const system = this.systems.get(sysName);
       for (const chain of chains) {
-        for (const name of chain) {
+        for (const name of chain.nodes) {
           if (!this.nodeDefined(system, name.lexeme)) {
             throw new Error(
               `Chain references undeclared node '${name.lexeme}' (line ${name.line}) in system '${system.name}'.`
             );
           }
         }
-        for (let i = 0; i + 1 < chain.length; i++) {
-          system.addConnection(chain[i].lexeme, chain[i + 1].lexeme);
+        for (let i = 0; i + 1 < chain.nodes.length; i++) {
+          const arrow = chain.arrows[i];
+          const a = chain.nodes[i];
+          const b = chain.nodes[i + 1];
+          const from = arrow.forward ? a : b;
+          const to = arrow.forward ? b : a;
+          const weight = arrow.weight != null ? arrow.weight : 1;
+          system.addConnection(from.lexeme, to.lexeme, weight);
         }
+      }
+    }
+  }
+  validateMarkov(system) {
+    for (const name of system.initialMass.keys()) {
+      if (!this.nodeDefined(system, name)) {
+        throw new Error(
+          `start references undeclared node '${name}' in system '${system.name}'.`
+        );
+      }
+    }
+    let totalInitial = 0;
+    for (const m of system.initialMass.values()) totalInitial += m;
+    if (totalInitial === 0) {
+      throw new Error(
+        `Markov system '${system.name}' has no initial mass. Use 'start NodeName 1.0;' to set one.`
+      );
+    }
+    for (const [src, edges] of system.connections) {
+      let sum = 0;
+      for (const e of edges) sum += e.weight;
+      if (Math.abs(sum - 1) > 1e-6) {
+        throw new Error(
+          `Markov system '${system.name}': outgoing weights from '${src}' sum to ${sum}, not 1.0.`
+        );
       }
     }
   }
@@ -633,10 +814,12 @@ var Parser = class {
   }
   declaration() {
     try {
+      if (this.match("MODE" /* MODE */)) return this.modeDeclaration();
       if (this.match("SYSTEM" /* SYSTEM */)) return this.systemDeclaration();
       if (this.match("RIVER" /* RIVER */)) return this.riverDeclaration();
       if (this.match("DAM" /* DAM */)) return this.damDeclaration();
       if (this.match("OUTLET" /* OUTLET */)) return this.outletDeclaration();
+      if (this.match("START" /* START */)) return this.startStatement();
       if (this.match("MAP" /* MAP */)) return this.mapStatement();
       if (this.match("LIST" /* LIST */)) return this.listStatement();
       if (this.match("PRINT" /* PRINT */)) return this.printStatement();
@@ -649,6 +832,17 @@ var Parser = class {
       }
       throw e;
     }
+  }
+  modeDeclaration() {
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect mode name (e.g. river, markov).");
+    this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after mode name.");
+    return { kind: "ModeDecl", mode: name };
+  }
+  startStatement() {
+    const node = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after 'start'.");
+    const mass = this.consumeNumber("Expect initial mass after node name in 'start'.");
+    this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after start statement.");
+    return { kind: "StartStmt", node, mass };
   }
   systemDeclaration() {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect system name.");
@@ -744,14 +938,46 @@ var Parser = class {
       throw this.errorAt(this.peek(), "Expect declaration or chain.");
     }
     const nodes = [];
+    const arrows = [];
     nodes.push(this.advance());
-    while (this.match("ARROW" /* ARROW */)) {
-      nodes.push(
-        this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after '->'.")
-      );
+    while (this.atArrowStart()) {
+      arrows.push(this.parseArrow());
+      nodes.push(this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after arrow."));
     }
     this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after chain.");
-    return { kind: "Chain", nodes };
+    return { kind: "Chain", nodes, arrows };
+  }
+  atArrowStart() {
+    if (this.check("ARROW" /* ARROW */)) return true;
+    if (this.check("LARROW" /* LARROW */)) return true;
+    if (this.check("DASH" /* DASH */) && this.peekAt(1, "LEFT_BRACKET" /* LEFT_BRACKET */)) return true;
+    return false;
+  }
+  parseArrow() {
+    if (this.match("ARROW" /* ARROW */)) {
+      return { forward: true, weight: null, op: this.previous() };
+    }
+    if (this.match("LARROW" /* LARROW */)) {
+      const op2 = this.previous();
+      if (this.match("LEFT_BRACKET" /* LEFT_BRACKET */)) {
+        const w2 = this.consumeNumber("Expect weight number inside arrow brackets.");
+        this.consume("RIGHT_BRACKET" /* RIGHT_BRACKET */, "Expect ']' after arrow weight.");
+        this.consume("DASH" /* DASH */, "Expect '-' to close '<-[w]-' arrow.");
+        return { forward: false, weight: w2, op: op2 };
+      }
+      return { forward: false, weight: null, op: op2 };
+    }
+    const op = this.consume("DASH" /* DASH */, "Expect arrow.");
+    this.consume("LEFT_BRACKET" /* LEFT_BRACKET */, "Expect '[' after '-' to start a weighted arrow.");
+    const w = this.consumeNumber("Expect weight number inside arrow brackets.");
+    this.consume("RIGHT_BRACKET" /* RIGHT_BRACKET */, "Expect ']' after arrow weight.");
+    this.consume("ARROW" /* ARROW */, "Expect '->' to close '-[w]->' arrow.");
+    return { forward: true, weight: w, op };
+  }
+  peekAt(offset, type) {
+    const idx = this.current + offset;
+    if (idx >= this.tokens.length) return false;
+    return this.tokens[idx].type === type;
   }
   parseBlock(declName) {
     this.consume(
@@ -850,10 +1076,12 @@ var Parser = class {
     while (!this.isAtEnd()) {
       if (this.previous().type === "SEMICOLON" /* SEMICOLON */) return;
       switch (this.peek().type) {
+        case "MODE" /* MODE */:
         case "SYSTEM" /* SYSTEM */:
         case "RIVER" /* RIVER */:
         case "DAM" /* DAM */:
         case "OUTLET" /* OUTLET */:
+        case "START" /* START */:
         case "MAP" /* MAP */:
         case "LIST" /* LIST */:
         case "PRINT" /* PRINT */:
@@ -873,7 +1101,9 @@ var KEYWORDS = {
   help: "HELP" /* HELP */,
   river: "RIVER" /* RIVER */,
   dam: "DAM" /* DAM */,
-  outlet: "OUTLET" /* OUTLET */
+  outlet: "OUTLET" /* OUTLET */,
+  mode: "MODE" /* MODE */,
+  start: "START" /* START */
 };
 var Scanner = class {
   constructor(source, errs) {
@@ -922,7 +1152,19 @@ var Scanner = class {
         this.addToken("COLON" /* COLON */);
         break;
       case "-":
-        if (this.match(">")) this.addToken("ARROW" /* ARROW */);
+        if (this.match(">")) {
+          this.addToken("ARROW" /* ARROW */);
+        } else {
+          this.addToken("DASH" /* DASH */);
+        }
+        break;
+      case "<":
+        if (this.match("-")) {
+          this.addToken("LARROW" /* LARROW */);
+        } else {
+          this.errs.push(`Unexpected character: < at line ${this.line}
+`);
+        }
         break;
       case "/":
         if (this.match("/")) {

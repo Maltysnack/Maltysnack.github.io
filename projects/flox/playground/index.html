@@ -182,7 +182,7 @@
         ],
       });
       monaco.languages.setMonarchTokensProvider('flox', {
-        keywords: ['system', 'river', 'dam', 'outlet', 'list', 'map', 'print', 'help'],
+        keywords: ['system', 'river', 'dam', 'outlet', 'list', 'map', 'print', 'help', 'mode', 'start'],
         tokenizer: {
           root: [
             [/\/\/.*$/, 'comment'],
@@ -191,8 +191,9 @@
               cases: { '@keywords': 'keyword', '@default': 'identifier' },
             }],
             [/\d+(\.\d+)?/, 'number'],
-            [/->/, 'operator'],
+            [/->|<-/, 'operator'],
             [/[:;,%]/, 'delimiter'],
+            [/-/, 'operator'],
             [/[{}[\]]/, '@brackets'],
             [/\s+/, 'white'],
           ],
@@ -224,18 +225,25 @@
 //
 // Quick reference:
 //
+//   mode river;     mode markov;    select the simulator (default: river)
+//
 //   system Name;                                       declare a network
 //   river  Name { base: N, peak: N, decay: N }         decay optional, default 0.7
 //   dam    Name { capacity: N, threshold: N%,
 //                 normalRate: N, openRate: N }
 //   outlet Name;                                       zero-flow accumulator
+//
 //   A -> B -> C;                                       connect nodes (chain)
+//   A -[w]-> B                                         weighted forward arrow
+//   A <- B          A <-[w]- B                         backward arrows
+//
+//   start NodeName 1.0;                                markov: initial mass
 //
 //   list  Name;                                        print connections
 //   map   Name;                                        print ASCII diagram
-//   print Name;                                        simulate, 1mm rainfall on day 1
-//   print Name N;                                      simulate at N mm on day 1
-//   print Name [r1, r2, r3, ...];                      per-day rainfall series
+//   print Name;                                        simulate (river: 1mm; markov: 30 ticks)
+//   print Name N;                                      simulate (river: N mm; markov: N ticks)
+//   print Name [r1, r2, r3, ...];                      river: per-day rainfall series
 
 system Untitled;
 
@@ -469,6 +477,41 @@ outlet SnowyOutflow;
 
 map SnowyMountains;
 print SnowyMountains [2, 5, 30, 40, 20, 10, 5, 3, 2, 1];
+`,
+        },
+        {
+          id: "passes",
+          label: "Markov: pass-or-shoot decision (football)",
+          source: `// PassOrShoot: a footballer on the edge of the box.
+// Each "tick" the player either passes again (a quick one-two with a
+// teammate) or pulls the trigger. Once the shot is taken, ~25% of those
+// become goals; the rest miss. Goal and Miss are absorbing states, so
+// running the chain long enough lets all the mass settle there.
+mode markov;
+system PassOrShoot;
+
+Pass  -[0.7]-> Pass;     // 70% chance of another pass
+Pass  -[0.3]-> Shoot;    // 30% chance of shooting
+
+Shoot -[0.25]-> Goal;
+Shoot -[0.75]-> Miss;
+
+// Absorbing: mass that arrives stays.
+Goal -[1.0]-> Goal;
+Miss -[1.0]-> Miss;
+
+// Markov mode uses river declarations as plain "state" containers.
+// Numeric attributes are unused in markov mode but the declaration is
+// still required so the resolver knows the name.
+river Pass  { base: 0, peak: 0 }
+river Shoot { base: 0, peak: 0 }
+river Goal  { base: 0, peak: 0 }
+river Miss  { base: 0, peak: 0 }
+
+start Pass 1.0;
+
+map  PassOrShoot;
+print PassOrShoot 80;
 `,
         },
         {
