@@ -349,6 +349,74 @@
     .wc-next-pct > .pd { text-align: center; }
     .wc-next-pct > .pa { text-align: right; }
 
+    /* Recent results: compact list of past matches with prediction vs actual */
+    .wc-recent {
+      display: grid;
+      gap: 0.4rem;
+      margin-top: 0.6rem;
+    }
+    .wc-recent-row {
+      display: grid;
+      grid-template-columns: 5em 1fr auto 1fr 4em 1.5em;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.4rem 0.6rem;
+      border: 1px solid rgba(128,128,128,0.25);
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .wc-recent-row .date {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-recent-row .team-h {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      justify-content: flex-end;
+      min-width: 0;
+    }
+    .wc-recent-row .team-a {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-recent-row .team-h .name,
+    .wc-recent-row .team-a .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-recent-row .winner { font-weight: 600; }
+    .wc-recent-row .non-winner { color: var(--text-muted); }
+    .wc-recent-row .score {
+      font-weight: 700;
+      font-variant-numeric: tabular-nums;
+      letter-spacing: -0.02em;
+    }
+    .wc-recent-row .pred {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .wc-recent-row .check {
+      text-align: center;
+      font-size: 0.95rem;
+    }
+    .wc-recent-row .check.ok { color: rgba(140,170,80,0.85); }
+    .wc-recent-row .check.no { color: rgba(180,80,80,0.7); }
+    @media (max-width: 600px) {
+      .wc-recent-row {
+        grid-template-columns: 1fr auto 1fr 1.5em;
+        gap: 0.4rem;
+      }
+      .wc-recent-row .date,
+      .wc-recent-row .pred { display: none; }
+    }
+
     /* Customise panel: sits right under the Custom toggle, right-aligned */
     .wc-customise {
       width: 210px;
@@ -561,6 +629,18 @@
       </div>
     </section>
 
+    <section class="intro" style="margin-top:1.5rem;">
+      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
+        Recent results
+      </h3>
+      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0.5rem;">
+        Recently played matches between WC 2026 teams, with the prediction
+        we would have made beforehand vs the actual result. A check means
+        our most-likely outcome (W/D/L) matched reality.
+      </p>
+      <div class="wc-recent" id="wc-recent"></div>
+    </section>
+
     <div class="divider"></div>
 
     <section class="intro">
@@ -611,10 +691,12 @@
       </h3>
       <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
         Probability each team reaches a given round, averaged across all
-        Monte Carlo runs (does not change with the toggles above). Teams
-        flagged <span class="wc-darkhorse-tag">dark horse</span> are
-        outside the top eight by raw rating but reach the semis in more
-        than 8&#37; of simulations. Showing top 24, search to find more.
+        Monte Carlo runs (does not change with the toggles above). The five
+        teams flagged <span class="wc-darkhorse-tag">dark horse</span> are
+        outside the top eight by raw rating but punch hardest above their
+        weight, ranked by a score that rewards both how lowly-rated they
+        are and how often they go deep (deeper rounds count more). Showing
+        top 24, search to find more.
       </p>
       <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
       <div class="wc-paths-wrap">
@@ -944,6 +1026,60 @@
             <span class="pa">${m.away_team} win ${pa}%</span>
           </div>
         `;
+      }
+
+      // ── Renderers: Recent results ────────────────────────────────
+      function renderRecent() {
+        const recent = (DATA.sim.recent_matches || []);
+        const container = document.getElementById('wc-recent');
+        if (!container) return;
+        if (!recent.length) {
+          container.innerHTML =
+            '<div style="color:var(--text-muted);font-size:0.85rem;">No recent matches between WC 2026 teams.</div>';
+          return;
+        }
+        const fmtDate = (d) =>
+          new Date(d + 'T12:00:00').toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
+        container.innerHTML = '';
+        recent.slice(0, 8).forEach(m => {
+          const row = document.createElement('div');
+          row.className = 'wc-recent-row';
+          const homeWin = m.actual_home_goals > m.actual_away_goals;
+          const awayWin = m.actual_home_goals < m.actual_away_goals;
+          const homeCls = homeWin ? 'winner' : (awayWin ? 'non-winner' : '');
+          const awayCls = awayWin ? 'winner' : (homeWin ? 'non-winner' : '');
+          // Predicted W/D/L probabilities, top pick highlighted
+          const ph = (m.p_home_win * 100).toFixed(0);
+          const pd = (m.p_draw * 100).toFixed(0);
+          const pa = (m.p_away_win * 100).toFixed(0);
+          const predLabel =
+            m.top_pick === 'home' ? `${m.home_team.slice(0, 3).toUpperCase()} ${ph}%` :
+            m.top_pick === 'away' ? `${m.away_team.slice(0, 3).toUpperCase()} ${pa}%` :
+            `Draw ${pd}%`;
+          row.innerHTML = `
+            <span class="date">${fmtDate(m.match_date)}</span>
+            <span class="team-h ${homeCls}">
+              <span class="name">${m.home_team}</span>
+              ${flagImg(m.home_team)}
+            </span>
+            <span class="score">${m.actual_home_goals}&ndash;${m.actual_away_goals}</span>
+            <span class="team-a ${awayCls}">
+              ${flagImg(m.away_team)}
+              <span class="name">${m.away_team}</span>
+            </span>
+            <span class="pred">pred ${predLabel}</span>
+            <span class="check ${m.top_pick_correct ? 'ok' : 'no'}">
+              ${m.top_pick_correct ? '&check;' : '&times;'}
+            </span>
+          `;
+          container.appendChild(row);
+        });
+        // Hit rate footer
+        const correct = recent.filter(m => m.top_pick_correct).length;
+        const footer = document.createElement('div');
+        footer.style.cssText = 'font-size:0.78rem;color:var(--text-muted);margin-top:0.5rem;font-style:italic;';
+        footer.textContent = `Top pick correct on ${correct}/${recent.length} of recent matches.`;
+        container.appendChild(footer);
       }
 
       // ── Renderers: Tournament view ───────────────────────────────
@@ -1403,6 +1539,7 @@
 
           wireControls();
           renderNext();
+          renderRecent();
           renderPaths();
           renderControls();
           renderMeta();
