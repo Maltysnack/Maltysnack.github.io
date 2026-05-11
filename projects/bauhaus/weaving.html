@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Weaving Workshop - Bauhaus - maltysnack</title>
+  <meta name="description" content="Chapter 06 of the Bauhaus exhibition. The Weaving Workshop under Stolzl and Anni Albers: loom mechanics, banded structure, earth palettes, the workshop the popular histories skipped." />
+  <link rel="stylesheet" href="/style.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .bh-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    a.bh-eyebrow:hover { color: var(--accent-red); }
+    .bh-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--accent-red);
+      display: inline-block;
+    }
+    .bh-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 640px;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+    .bh-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+      font-family: var(--font-mono);
+    }
+    .bh-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .bh-stage {
+      background: #E2D7BB; /* unbleached linen, the weaving ground */
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin: 0 0 28px;
+    }
+    .bh-stage svg { display: block; width: 100%; height: auto; }
+
+    .bh-caption {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 0;
+    }
+
+    .bh-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 56px;
+      flex-wrap: wrap;
+    }
+    .bh-btn {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+    .bh-btn:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
+    .bh-btn:active { transform: translateY(1px); }
+
+    .bh-prose {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 640px;
+      margin: 0 0 14px;
+    }
+    .bh-prose strong { color: var(--text); font-weight: 600; }
+
+    .bh-sources {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      max-width: 640px;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      line-height: 1.7;
+    }
+    .bh-sources li { padding: 4px 0; border-top: 1px solid var(--border-light); }
+    .bh-sources li:first-child { border-top: none; }
+    .bh-sources cite { font-style: italic; color: var(--text-muted); }
+
+    .bh-section { margin: 56px 0; }
+    .bh-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+
+    /* Palette swatches in the technique section, for visual reference. */
+    .bh-palette {
+      display: flex;
+      gap: 0;
+      margin: 14px 0 18px;
+      max-width: 640px;
+      border: 1px solid var(--border-light);
+    }
+    .bh-swatch {
+      flex: 1;
+      padding: 18px 8px;
+      text-align: center;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="wide">
+
+    <header class="page-header">
+      <a href="/projects/bauhaus.html" class="bh-eyebrow">Bauhaus / Chapter 06</a>
+      <h1 class="page-title">The Weaving Workshop</h1>
+      <p class="bh-lede">
+        Run by Gunta Stolzl from 1925, Anni Albers from 1931. The largest workshop by enrolment, almost entirely women, long dismissed and recently reappraised as one of the most rigorous abstract design programmes the school produced. Loom logic, banded structure, earth palettes.
+      </p>
+      <p class="bh-meta">
+        <span>1919 - 1933</span><span>generator</span><span>Stolzl / Albers / Berger</span>
+      </p>
+    </header>
+
+    <section class="bh-section" data-section="stage">
+      <div class="bh-stage">
+        <svg id="bh-weaving" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative Bauhaus weaving composition: non-uniform grid of cells in an earth palette."></svg>
+      </div>
+      <div class="bh-actions">
+        <p class="bh-caption">A non-uniform grid of cells; each column has a dominant colour and cells lean toward it. Occasional diamond motifs as accent.</p>
+        <button class="bh-btn" id="bh-weaving-new" type="button" aria-label="Generate a new weaving composition">New</button>
+      </div>
+    </section>
+
+    <section class="bh-section" data-section="technique">
+      <h2>Technique</h2>
+
+      <p class="bh-prose">
+        The weaving workshop was founded in Weimar in 1919 as a small adjunct, moved to Dessau with the rest of the school in 1925, and was led for most of its productive years by <strong>Gunta Stolzl</strong>, with <strong>Anni Albers</strong> taking over briefly from 1931 until the school's closure. It was the largest workshop by student enrolment, the most financially successful (it sold textiles to outside clients to keep the school running), and the most heavily female. <strong>Otti Berger</strong>, who was murdered in Auschwitz in 1944, ran the weaving research programme; her industrial fabric designs are now in major museum collections.
+      </p>
+      <p class="bh-prose">
+        Mid-century histories of the school largely skipped the workshop. The accepted story treated weaving as <em>craft</em> rather than <em>design</em>, the women's territory rather than the school's serious work. Scholarship from the 1990s onward has comprehensively reversed this; Anni Albers's MoMA retrospective (1949 originally, with later revivals) and recent monographs (T'ai Smith especially) treat the workshop as a parallel abstract programme to the painting workshops, not a lesser one.
+      </p>
+      <p class="bh-prose">
+        The visual logic comes from the loom itself. Warp threads run vertically, weft threads run horizontally, and the weave structure determines how they meet. The result is naturally banded and cellular: every weaving is a non-uniform grid before any decisions are made about colour. The workshop's masters built their abstract vocabulary on this scaffold: vertical columns of colour, horizontal divisions, gradient bands, occasional diamond or chevron motifs. The palette was earth, not primary: unbleached linen as the ground, with indigo, rust, ochre, charcoal, and muted greens as the working colours.
+      </p>
+      <p class="bh-prose">
+        The generator builds a non-uniform grid (six to ten columns, five to eight rows, snapped to 20-pixel units), assigns a dominant colour per column, and fills each cell with that dominant 70% of the time, with a weighted random from the palette otherwise. One or two small diamond motifs occasionally land in cells as accent. This captures the geometry. It does not capture the actual texture of woven fibre, which is the whole material reality of weaving; that absence is the chapter's honest limit.
+      </p>
+
+      <div class="bh-palette" role="img" aria-label="Weaving palette swatches: cream, indigo, rust, charcoal, ochre, sage.">
+        <div class="bh-swatch" style="background: #E2D7BB; color: #2B2B2B;">Cream</div>
+        <div class="bh-swatch" style="background: #1E2E5E; color: #E2D7BB;">Indigo</div>
+        <div class="bh-swatch" style="background: #A5523F; color: #E2D7BB;">Rust</div>
+        <div class="bh-swatch" style="background: #2B2B2B; color: #E2D7BB;">Charcoal</div>
+        <div class="bh-swatch" style="background: #BF8E2F; color: #2B2B2B;">Ochre</div>
+        <div class="bh-swatch" style="background: #6B7C5E; color: #E2D7BB;">Sage</div>
+      </div>
+
+      <ul class="bh-sources">
+        <li>Albers, A. <cite>On Weaving</cite>. 1965 (Princeton ed. 2017). (Anni Albers on weaving as design discipline.)</li>
+        <li>Smith, T'ai. <cite>Bauhaus Weaving Theory: From Feminine Craft to Mode of Design</cite>. 2014. (Reappraisal of the workshop's intellectual programme.)</li>
+        <li>Weltge, S. <cite>Bauhaus Textiles: Women Artists and the Weaving Workshop</cite>. 1993. (Survey of output and figures.)</li>
+        <li>Muller, U. <cite>Bauhaus Women: Art, Handicraft, Design</cite>. 2009. (Broader survey of the women of the school.)</li>
+      </ul>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+      var W = 800, H = 560;
+
+      var PALETTE = {
+        cream:    '#E2D7BB',
+        indigo:   '#1E2E5E',
+        rust:     '#A5523F',
+        charcoal: '#2B2B2B',
+        ochre:    '#BF8E2F',
+        sage:     '#6B7C5E'
+      };
+
+      // Cell-fill weighting: cream as ground, indigo strong, others descending, sage rare.
+      var CELL_WEIGHTS = [
+        { c: PALETTE.cream,    w: 35 },
+        { c: PALETTE.indigo,   w: 25 },
+        { c: PALETTE.rust,     w: 14 },
+        { c: PALETTE.ochre,    w: 11 },
+        { c: PALETTE.charcoal, w: 10 },
+        { c: PALETTE.sage,     w: 5  }
+      ];
+
+      // Column-dominant weighting: less cream-heavy (we want most columns to have character).
+      var COL_DOMINANT_WEIGHTS = [
+        { c: PALETTE.cream,    w: 20 },
+        { c: PALETTE.indigo,   w: 28 },
+        { c: PALETTE.rust,     w: 18 },
+        { c: PALETTE.ochre,    w: 14 },
+        { c: PALETTE.charcoal, w: 12 },
+        { c: PALETTE.sage,     w: 8  }
+      ];
+
+      function weightedPick(weighted) {
+        var total = 0;
+        for (var i = 0; i < weighted.length; i++) total += weighted[i].w;
+        var r = Math.random() * total;
+        var acc = 0;
+        for (var k = 0; k < weighted.length; k++) {
+          acc += weighted[k].w;
+          if (r < acc) return weighted[k].c;
+        }
+        return weighted[weighted.length - 1].c;
+      }
+
+      function el(name, attrs) {
+        var node = document.createElementNS(SVG_NS, name);
+        for (var k in attrs) node.setAttribute(k, attrs[k]);
+        return node;
+      }
+
+      function clear(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+
+      function irand(min, max) {
+        return min + Math.floor(Math.random() * (max - min + 1));
+      }
+
+      // Generate widths that sum to `total` (in units of `step` px), each between minSteps and maxSteps units.
+      function partition(total, step, n, minSteps, maxSteps) {
+        var totalSteps = total / step;
+        var widths = [];
+        var remaining = totalSteps;
+        for (var i = 0; i < n - 1; i++) {
+          var slotsLeft = n - i - 1;
+          var maxThis = Math.min(maxSteps, remaining - minSteps * slotsLeft);
+          var minThis = Math.max(minSteps, remaining - maxSteps * slotsLeft);
+          if (maxThis < minThis) maxThis = minThis;
+          var w = irand(minThis, maxThis);
+          widths.push(w * step);
+          remaining -= w;
+        }
+        widths.push(remaining * step);
+        return widths;
+      }
+
+      function placeMotif(svg, cols, rows) {
+        var ci = irand(0, cols.length - 1);
+        var ri = irand(0, rows.length - 1);
+        var x = 0; for (var i = 0; i < ci; i++) x += cols[i];
+        var y = 0; for (var j = 0; j < ri; j++) y += rows[j];
+        var cw = cols[ci], ch = rows[ri];
+        var s  = Math.min(cw, ch) * 0.5;
+        var cx = x + cw / 2;
+        var cy = y + ch / 2;
+        var fill = weightedPick(CELL_WEIGHTS);
+        // Diamond (rotated square)
+        var pts = cx + ',' + (cy - s / 2) + ' '
+                + (cx + s / 2) + ',' + cy + ' '
+                + cx + ',' + (cy + s / 2) + ' '
+                + (cx - s / 2) + ',' + cy;
+        svg.appendChild(el('polygon', { points: pts, fill: fill }));
+      }
+
+      function generate() {
+        var svg = document.getElementById('bh-weaving');
+        if (!svg) return;
+        clear(svg);
+
+        // Ground (visible only at fractional pixels where cells may not tile perfectly).
+        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PALETTE.cream }));
+
+        var numCols = irand(6, 10);
+        var numRows = irand(5, 8);
+        var cols = partition(W, 20, numCols, 2, 8);
+        var rows = partition(H, 20, numRows, 2, 6);
+
+        var dominants = cols.map(function () { return weightedPick(COL_DOMINANT_WEIGHTS); });
+
+        // Fill cells
+        var x = 0;
+        for (var c = 0; c < cols.length; c++) {
+          var y = 0;
+          for (var r = 0; r < rows.length; r++) {
+            var fill = Math.random() < 0.7 ? dominants[c] : weightedPick(CELL_WEIGHTS);
+            svg.appendChild(el('rect', {
+              x: x, y: y, width: cols[c], height: rows[r], fill: fill
+            }));
+            y += rows[r];
+          }
+          x += cols[c];
+        }
+
+        // 0-2 motifs
+        var motifCount = irand(0, 2);
+        for (var m = 0; m < motifCount; m++) placeMotif(svg, cols, rows);
+      }
+
+      generate();
+
+      var btn = document.getElementById('bh-weaving-new');
+      if (btn) btn.addEventListener('click', generate);
+    })();
+  </script>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
