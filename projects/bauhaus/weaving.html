@@ -145,6 +145,40 @@
       letter-spacing: 0.04em;
       text-transform: uppercase;
     }
+
+    /* Tabs (level switcher), mirroring the Dessau chapter. */
+    .bh-levels {
+      display: flex;
+      gap: 24px;
+      margin: 0 0 16px;
+      border-bottom: 1px solid var(--border-light);
+      flex-wrap: wrap;
+    }
+    .bh-level-tab {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: none;
+      color: var(--text-dim);
+      padding: 10px 2px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: -1px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.12s ease, border-color 0.12s ease;
+    }
+    .bh-level-tab:hover { color: var(--text); }
+    .bh-level-tab.active { color: var(--text); border-bottom-color: var(--accent-red); }
+    .bh-level-tab .lvl-num {
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      margin-right: 8px;
+      letter-spacing: 0.04em;
+    }
+    .bh-level-tab.active .lvl-num { color: var(--accent-red); }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
   <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
@@ -170,11 +204,12 @@
     </header>
 
     <section class="bh-section" data-section="stage">
+      <div class="bh-levels" id="bh-levels" role="tablist" aria-label="Weaving level"></div>
       <div class="bh-stage">
-        <svg id="bh-weaving" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative Bauhaus weaving composition: non-uniform grid of cells in an earth palette."></svg>
+        <svg id="bh-weaving" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative Bauhaus weaving composition."></svg>
       </div>
       <div class="bh-actions">
-        <p class="bh-caption">A non-uniform grid of cells; each column has a dominant colour and cells lean toward it. Occasional diamond motifs as accent.</p>
+        <p class="bh-caption" id="bh-caption">A non-uniform grid of cells; each column has a dominant colour and cells lean toward it.</p>
         <button class="bh-btn" id="bh-weaving-new" type="button" aria-label="Generate a new weaving composition">New</button>
       </div>
     </section>
@@ -191,9 +226,6 @@
       <p class="bh-prose">
         The visual logic comes from the loom itself. Warp threads run vertically, weft threads run horizontally, and the weave structure determines how they meet. The result is naturally banded and cellular: every weaving is a non-uniform grid before any decisions are made about colour. The workshop's masters built their abstract vocabulary on this scaffold: vertical columns of colour, horizontal divisions, gradient bands, occasional diamond or chevron motifs. The palette was earth, not primary: unbleached linen as the ground, with indigo, rust, ochre, charcoal, and muted greens as the working colours.
       </p>
-      <p class="bh-prose">
-        The generator builds a non-uniform grid (six to ten columns, five to eight rows, snapped to 20-pixel units), assigns a dominant colour per column, and fills each cell with that dominant 70% of the time, with a weighted random from the palette otherwise. One or two small diamond motifs occasionally land in cells as accent. This captures the geometry. It does not capture the actual texture of woven fibre, which is the whole material reality of weaving; that absence is the chapter's honest limit.
-      </p>
 
       <div class="bh-palette" role="img" aria-label="Weaving palette swatches: cream, indigo, rust, charcoal, ochre, sage.">
         <div class="bh-swatch" style="background: #E2D7BB; color: #2B2B2B;">Cream</div>
@@ -202,6 +234,24 @@
         <div class="bh-swatch" style="background: #2B2B2B; color: #E2D7BB;">Charcoal</div>
         <div class="bh-swatch" style="background: #BF8E2F; color: #2B2B2B;">Ochre</div>
         <div class="bh-swatch" style="background: #6B7C5E; color: #E2D7BB;">Sage</div>
+      </div>
+
+      <div class="bh-technique" data-level="1">
+        <p class="bh-prose">
+          <strong>Level 1: Grid.</strong> A non-uniform grid of six to ten columns by five to eight rows, snapped to 20-pixel units. Each column is assigned a dominant colour from the palette, and every cell within the column has a 70% chance of using that dominant (with a weighted random from the full palette otherwise). One or two small diamond motifs occasionally land as accent. This is the loom-as-grid mode, closest to Anni Albers's printed pictographic series and to Stolzl's gridded wall hangings.
+        </p>
+      </div>
+
+      <div class="bh-technique" data-level="2" hidden>
+        <p class="bh-prose">
+          <strong>Level 2: Stripes.</strong> Pure vertical bands. Six to twelve stripes of varied widths span the full height of the canvas, each in a single colour from the palette. No horizontal divisions, no cell structure; this is the loom showing only its warp. Occasionally a stripe is "interrupted" by a short horizontal weft band of contrasting colour, mimicking the way a weaver lays a feature thread across selected warps. Closer to Stolzl's mid-1920s stripe wall hangings and to Anni Albers's <cite>Wall Hanging (Black White Yellow)</cite>, 1926, in its mature, simplified form.
+        </p>
+      </div>
+
+      <div class="bh-technique" data-level="3" hidden>
+        <p class="bh-prose">
+          <strong>Level 3: Motifs.</strong> The grid from Level 1, but with motif density turned up significantly: four to nine motifs (diamonds, chevrons, crosses, small triangles) drawn inside randomly chosen cells, with a small chance of a row-aligned <em>chevron sequence</em> spanning multiple adjacent cells. This is the motif-heavy mode that shows up in Anatolian-influenced and Navajo-influenced exercises that some Bauhaus weavers explicitly studied: structure plus repeated geometric ornament.
+        </p>
       </div>
 
       <ul class="bh-sources">
@@ -292,17 +342,12 @@
         return widths;
       }
 
-      function placeMotif(svg, cols, rows) {
-        var ci = irand(0, cols.length - 1);
-        var ri = irand(0, rows.length - 1);
-        var x = 0; for (var i = 0; i < ci; i++) x += cols[i];
-        var y = 0; for (var j = 0; j < ri; j++) y += rows[j];
-        var cw = cols[ci], ch = rows[ri];
-        var s  = Math.min(cw, ch) * 0.5;
-        var cx = x + cw / 2;
-        var cy = y + ch / 2;
-        var fill = weightedPick(CELL_WEIGHTS);
-        // Diamond (rotated square)
+      function paint(svg) {
+        clear(svg);
+        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PALETTE.cream }));
+      }
+
+      function placeDiamondMotif(svg, cx, cy, s, fill) {
         var pts = cx + ',' + (cy - s / 2) + ' '
                 + (cx + s / 2) + ',' + cy + ' '
                 + cx + ',' + (cy + s / 2) + ' '
@@ -310,44 +355,205 @@
         svg.appendChild(el('polygon', { points: pts, fill: fill }));
       }
 
-      function generate() {
+      function placeChevronMotif(svg, cx, cy, s, fill, dir) {
+        // dir: 1 = points up, -1 = points down
+        var pts = (cx - s / 2) + ',' + (cy + dir * s / 3) + ' '
+                + cx + ',' + (cy - dir * s / 3) + ' '
+                + (cx + s / 2) + ',' + (cy + dir * s / 3);
+        svg.appendChild(el('polyline', {
+          points: pts, fill: 'none', stroke: fill,
+          'stroke-width': Math.max(3, s * 0.18),
+          'stroke-linecap': 'square', 'stroke-linejoin': 'miter'
+        }));
+      }
+
+      function placeCrossMotif(svg, cx, cy, s, fill) {
+        var t = Math.max(3, s * 0.18);
+        svg.appendChild(el('rect', { x: cx - s/2, y: cy - t/2, width: s, height: t, fill: fill }));
+        svg.appendChild(el('rect', { x: cx - t/2, y: cy - s/2, width: t, height: s, fill: fill }));
+      }
+
+      function placeTriangleMotif(svg, cx, cy, s, fill) {
+        var h = s * Math.sqrt(3) / 2;
+        var pts = cx + ',' + (cy - h / 2) + ' '
+                + (cx - s / 2) + ',' + (cy + h / 2) + ' '
+                + (cx + s / 2) + ',' + (cy + h / 2);
+        svg.appendChild(el('polygon', { points: pts, fill: fill }));
+      }
+
+      function placeMotifInCell(svg, cols, rows, ci, ri, kind) {
+        var x = 0; for (var i = 0; i < ci; i++) x += cols[i];
+        var y = 0; for (var j = 0; j < ri; j++) y += rows[j];
+        var cw = cols[ci], ch = rows[ri];
+        var s  = Math.min(cw, ch) * 0.55;
+        var cx = x + cw / 2;
+        var cy = y + ch / 2;
+        var fill = weightedPick(CELL_WEIGHTS);
+        if (kind === 'diamond')      placeDiamondMotif(svg, cx, cy, s, fill);
+        else if (kind === 'chevron') placeChevronMotif(svg, cx, cy, s, fill, Math.random() < 0.5 ? 1 : -1);
+        else if (kind === 'cross')   placeCrossMotif(svg, cx, cy, s, fill);
+        else                         placeTriangleMotif(svg, cx, cy, s, fill);
+      }
+
+      /* ── Level 1: Grid ─────────────────────────────── */
+      function genGrid() {
         var svg = document.getElementById('bh-weaving');
         if (!svg) return;
-        clear(svg);
-
-        // Ground (visible only at fractional pixels where cells may not tile perfectly).
-        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PALETTE.cream }));
+        paint(svg);
 
         var numCols = irand(6, 10);
         var numRows = irand(5, 8);
         var cols = partition(W, 20, numCols, 2, 8);
         var rows = partition(H, 20, numRows, 2, 6);
-
         var dominants = cols.map(function () { return weightedPick(COL_DOMINANT_WEIGHTS); });
 
-        // Fill cells
         var x = 0;
         for (var c = 0; c < cols.length; c++) {
           var y = 0;
           for (var r = 0; r < rows.length; r++) {
             var fill = Math.random() < 0.7 ? dominants[c] : weightedPick(CELL_WEIGHTS);
-            svg.appendChild(el('rect', {
-              x: x, y: y, width: cols[c], height: rows[r], fill: fill
-            }));
+            svg.appendChild(el('rect', { x: x, y: y, width: cols[c], height: rows[r], fill: fill }));
             y += rows[r];
           }
           x += cols[c];
         }
 
-        // 0-2 motifs
         var motifCount = irand(0, 2);
-        for (var m = 0; m < motifCount; m++) placeMotif(svg, cols, rows);
+        for (var m = 0; m < motifCount; m++) {
+          placeMotifInCell(svg, cols, rows, irand(0, cols.length - 1), irand(0, rows.length - 1), 'diamond');
+        }
       }
 
-      generate();
+      /* ── Level 2: Stripes ──────────────────────────── */
+      function genStripes() {
+        var svg = document.getElementById('bh-weaving');
+        if (!svg) return;
+        paint(svg);
+
+        var numCols = irand(6, 12);
+        var cols = partition(W, 20, numCols, 2, 8);
+
+        var x = 0;
+        for (var c = 0; c < cols.length; c++) {
+          var fill = weightedPick(COL_DOMINANT_WEIGHTS);
+          svg.appendChild(el('rect', { x: x, y: 0, width: cols[c], height: H, fill: fill }));
+          x += cols[c];
+        }
+
+        // 1-3 horizontal weft interruptions: a contrasting bar across selected columns
+        var weftCount = irand(1, 3);
+        for (var w = 0; w < weftCount; w++) {
+          var weftY = irand(2, Math.floor(H / 20) - 4) * 20;
+          var weftH = irand(1, 2) * 20;
+          // Pick a contiguous run of columns
+          var startC = irand(0, cols.length - 2);
+          var spanC  = irand(2, Math.min(cols.length - startC, 6));
+          var weftX = 0;
+          for (var k = 0; k < startC; k++) weftX += cols[k];
+          var weftW = 0;
+          for (var k2 = startC; k2 < startC + spanC; k2++) weftW += cols[k2];
+          svg.appendChild(el('rect', {
+            x: weftX, y: weftY, width: weftW, height: weftH,
+            fill: weightedPick(CELL_WEIGHTS)
+          }));
+        }
+      }
+
+      /* ── Level 3: Motifs ───────────────────────────── */
+      function genMotifs() {
+        var svg = document.getElementById('bh-weaving');
+        if (!svg) return;
+        paint(svg);
+
+        var numCols = irand(6, 10);
+        var numRows = irand(5, 8);
+        var cols = partition(W, 20, numCols, 2, 8);
+        var rows = partition(H, 20, numRows, 2, 6);
+        var dominants = cols.map(function () { return weightedPick(COL_DOMINANT_WEIGHTS); });
+
+        var x = 0;
+        for (var c = 0; c < cols.length; c++) {
+          var y = 0;
+          for (var r = 0; r < rows.length; r++) {
+            var fill = Math.random() < 0.7 ? dominants[c] : weightedPick(CELL_WEIGHTS);
+            svg.appendChild(el('rect', { x: x, y: y, width: cols[c], height: rows[r], fill: fill }));
+            y += rows[r];
+          }
+          x += cols[c];
+        }
+
+        // Heavy motif pass: 4-9 motifs of varied kinds in random cells.
+        var motifCount = irand(4, 9);
+        var kinds = ['diamond', 'chevron', 'cross', 'triangle'];
+        for (var m = 0; m < motifCount; m++) {
+          placeMotifInCell(svg, cols, rows, irand(0, cols.length - 1), irand(0, rows.length - 1), kinds[Math.floor(Math.random() * kinds.length)]);
+        }
+
+        // 30% chance: a unified horizontal chevron run across one row
+        if (Math.random() < 0.3) {
+          var rowI = irand(0, rows.length - 1);
+          var dir  = Math.random() < 0.5 ? 1 : -1;
+          var motifFill = weightedPick(CELL_WEIGHTS);
+          var rowY = 0; for (var rr = 0; rr < rowI; rr++) rowY += rows[rr];
+          var rh = rows[rowI];
+          var cx2 = 0;
+          for (var cc = 0; cc < cols.length; cc++) {
+            placeChevronMotif(svg, cx2 + cols[cc] / 2, rowY + rh / 2, Math.min(cols[cc], rh) * 0.55, motifFill, dir);
+            cx2 += cols[cc];
+          }
+        }
+      }
+
+      /* ── Level registry ────────────────────────────── */
+      var LEVELS = [
+        { id: 1, name: 'Grid',    generate: genGrid,
+          caption: 'A non-uniform grid of cells; each column has a dominant colour and cells lean toward it.' },
+        { id: 2, name: 'Stripes', generate: genStripes,
+          caption: 'Pure vertical bands; occasional horizontal weft interruptions in contrasting colour.' },
+        { id: 3, name: 'Motifs',  generate: genMotifs,
+          caption: 'Grid with heavy motif density: diamonds, chevrons, crosses, triangles. Sometimes a unified chevron row.' }
+      ];
+
+      var currentLevel = LEVELS[0];
+      var tabsEl  = document.getElementById('bh-levels');
+      var caption = document.getElementById('bh-caption');
+
+      function renderTabs() {
+        if (!tabsEl) return;
+        tabsEl.innerHTML = '';
+        LEVELS.forEach(function (lvl) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'bh-level-tab' + (lvl === currentLevel ? ' active' : '');
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-selected', lvl === currentLevel ? 'true' : 'false');
+          b.innerHTML = '<span class="lvl-num">L' + String(lvl.id).padStart(2, '0') + '</span>' + lvl.name;
+          b.addEventListener('click', function () { setLevel(lvl); });
+          tabsEl.appendChild(b);
+        });
+      }
+
+      function setLevel(lvl) {
+        currentLevel = lvl;
+        if (tabsEl) {
+          Array.prototype.forEach.call(tabsEl.children, function (child, idx) {
+            var match = LEVELS[idx] === lvl;
+            child.classList.toggle('active', match);
+            child.setAttribute('aria-selected', match ? 'true' : 'false');
+          });
+        }
+        document.querySelectorAll('.bh-technique').forEach(function (node) {
+          node.hidden = (Number(node.dataset.level) !== lvl.id);
+        });
+        if (caption) caption.textContent = lvl.caption;
+        lvl.generate();
+      }
+
+      renderTabs();
+      setLevel(currentLevel);
 
       var btn = document.getElementById('bh-weaving-new');
-      if (btn) btn.addEventListener('click', generate);
+      if (btn) btn.addEventListener('click', function () { currentLevel.generate(); });
     })();
   </script>
 
