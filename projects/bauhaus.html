@@ -252,6 +252,23 @@
           <li>Gropius, W. <cite>The New Architecture and the Bauhaus</cite>. 1935. (Economy of means.)</li>
         </ul>
       </div>
+
+      <div class="bh-technique" data-level="4" hidden>
+        <p class="bh-prose">
+          Level 4 keeps everything from Level 3 and finally addresses colour. Up to now the four palette entries (red, blue, yellow, black) were drawn uniformly: each shape had a one-in-four chance of being any of them. From Level 4 the chances are <strong>unequal</strong>, weighted according to Johannes Itten's colour hierarchy.
+        </p>
+        <p class="bh-prose">
+          Itten taught that the primaries do not have equal visual weight. Yellow has the highest luminosity per area: a small patch of yellow shouts as loudly as a large patch of blue. Blue is the quietest of the three; a lot of it reads as ground rather than figure. Red sits in between. The generator now picks colours with these probabilities: blue 40%, red 30%, yellow 15%, black 15%. The visible result is that yellow becomes punctuation rather than wallpaper.
+        </p>
+        <p class="bh-prose">
+          One extra rule sits on top: the <strong>anchor is never yellow</strong>. The anchor is the composition's largest shape, and a large patch of yellow violates Itten's hierarchy in the most direct way (yellow doesn't ground, it accents). This single constraint kills the "giant yellow square" rolls that plagued Level 3. Anchors fall to blue, red, or black; yellow shows up only on the smaller shapes around them.
+        </p>
+        <ul class="bh-sources">
+          <li>Itten, J. <cite>The Art of Color</cite>. 1961. (Colour weight and the primary hierarchy.)</li>
+          <li>Itten, J. <cite>Elements of Color</cite>. 1970. (Abridged, accessible version of the same theory.)</li>
+          <li>Albers, J. <cite>Interaction of Color</cite>. 1963. (Later, more nuanced colour theory by Itten's successor.)</li>
+        </ul>
+      </div>
     </section>
 
   </main>
@@ -421,7 +438,8 @@
         bar:      [10, 14]
       };
 
-      function genLevel3() {
+      // Shared composition builder. Each level supplies its own colour pickers.
+      function buildComposition(pickFill, pickAnchorFill) {
         paint();
         var M = 40;
         var COLS = W / M;
@@ -437,13 +455,50 @@
         }
         shuffle(typeList);
 
-        // One anchor shape per composition (significantly larger than the rest).
         var anchorIdx = irand(0, n - 1);
 
         for (var j = 0; j < n; j++) {
-          var sizes = (j === anchorIdx) ? L3_ANCHOR : L3_NORMAL;
-          placeSnapped(typeList[j], pick(PALETTE), M, COLS, ROWS, sizes);
+          var isAnchor = (j === anchorIdx);
+          var sizes = isAnchor ? L3_ANCHOR : L3_NORMAL;
+          var fill  = isAnchor ? pickAnchorFill() : pickFill();
+          placeSnapped(typeList[j], fill, M, COLS, ROWS, sizes);
         }
+      }
+
+      function genLevel3() {
+        // Uniform colour, no anchor constraint.
+        var uniform = function () { return pick(PALETTE); };
+        buildComposition(uniform, uniform);
+      }
+
+      /* ── Level 4: colour weighting (Itten) ─────────── */
+      // PALETTE order: [red, blue, yellow, black]
+      // Weights chosen from Itten's hierarchy: blue dominant, red mid, yellow rare, black accent.
+      var L4_WEIGHTS = [30, 40, 15, 15];
+      var YELLOW = '#F1B81E';
+
+      function weightedPick(items, weights) {
+        var total = 0;
+        for (var i = 0; i < weights.length; i++) total += weights[i];
+        var r = Math.random() * total;
+        var acc = 0;
+        for (var k = 0; k < items.length; k++) {
+          acc += weights[k];
+          if (r < acc) return items[k];
+        }
+        return items[items.length - 1];
+      }
+
+      function pickWeighted()       { return weightedPick(PALETTE, L4_WEIGHTS); }
+      function pickAnchorNonYellow() {
+        // Anchor is never yellow: yellow has high luminosity but doesn't ground.
+        var c;
+        do { c = pickWeighted(); } while (c === YELLOW);
+        return c;
+      }
+
+      function genLevel4() {
+        buildComposition(pickWeighted, pickAnchorNonYellow);
       }
 
       /* ── Level registry ────────────────────────────── */
@@ -453,7 +508,9 @@
         { id: 2, name: 'Grid',        generate: genLevel2,
           caption: 'Every shape snapped to a 40-pixel grid. Still random in count, kind, colour, and size.' },
         { id: 3, name: 'Composition', generate: genLevel3,
-          caption: 'Fewer shapes, guaranteed variety, one anchor. Colour is still random.' }
+          caption: 'Fewer shapes, guaranteed variety, one anchor. Colour is still random.' },
+        { id: 4, name: 'Colour',      generate: genLevel4,
+          caption: 'Itten-weighted palette: blue dominant, red mid, yellow rare, black accent. Anchor is never yellow.' }
       ];
 
       var currentLevel = LEVELS[LEVELS.length - 1]; // newest level is default
