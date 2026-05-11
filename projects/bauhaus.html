@@ -66,7 +66,7 @@
 
     .bh-chapter {
       display: grid;
-      grid-template-columns: 56px 1fr 32px;
+      grid-template-columns: 48px 1fr 200px 28px;
       gap: 24px;
       padding: 28px 0;
       border-bottom: 1px solid var(--border-light);
@@ -74,10 +74,22 @@
       color: var(--text);
       align-items: start;
     }
+    @media (max-width: 760px) {
+      .bh-chapter { grid-template-columns: 48px 1fr 28px; }
+      .bh-chapter-thumb { display: none; }
+    }
     .bh-chapter.live { cursor: pointer; }
     .bh-chapter.live:hover .bh-chapter-title { color: var(--accent-red); }
     .bh-chapter.live:hover .bh-chapter-arrow { color: var(--accent-red); transform: translateX(4px); }
     .bh-chapter.coming { opacity: 0.55; cursor: default; }
+
+    .bh-chapter-thumb {
+      width: 200px;
+      height: 140px;
+      display: block;
+      border: 1px solid var(--border-light);
+      background: var(--bg-soft);
+    }
 
     .bh-chapter-num {
       font-family: var(--font-mono);
@@ -356,6 +368,202 @@
     </p>
 
   </main>
+
+  <script>
+    (function () {
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+
+      function el(name, attrs) {
+        var node = document.createElementNS(SVG_NS, name);
+        for (var k in attrs) if (attrs[k] != null) node.setAttribute(k, attrs[k]);
+        return node;
+      }
+      function rect(x, y, w, h, fill, opacity) {
+        return el('rect', { x: x, y: y, width: w, height: h, fill: fill, opacity: opacity });
+      }
+      function circ(cx, cy, r, fill, opacity, stroke, sw) {
+        return el('circle', { cx: cx, cy: cy, r: r, fill: fill, opacity: opacity,
+                              stroke: stroke, 'stroke-width': sw });
+      }
+      function poly(pts, fill, opacity) {
+        return el('polygon', { points: pts, fill: fill, opacity: opacity });
+      }
+      function line(x1, y1, x2, y2, stroke, sw) {
+        return el('line', { x1: x1, y1: y1, x2: x2, y2: y2, stroke: stroke, 'stroke-width': sw, 'stroke-linecap': 'round' });
+      }
+      function ellipse(cx, cy, rx, ry, fill, stroke, sw) {
+        return el('ellipse', { cx: cx, cy: cy, rx: rx, ry: ry, fill: fill, stroke: stroke, 'stroke-width': sw });
+      }
+
+      function thumbItten(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#E8DAB5'));
+        svg.appendChild(circ(70, 65, 36, '#C58B7E', 0.92));
+        svg.appendChild(circ(155, 95, 30, '#88836B', 0.88));
+        svg.appendChild(circ(200, 50, 22, '#B98F5C', 0.9));
+        svg.appendChild(circ(50, 125, 18, '#7A6E91', 0.85));
+      }
+
+      function thumbTurn(svg) {
+        // Left half: dusty / expressionist
+        svg.appendChild(rect(0, 0, 120, 160, '#E8DAB5'));
+        svg.appendChild(circ(60, 80, 36, '#9B7866', 0.7));
+        svg.appendChild(circ(40, 130, 14, '#7A6E91', 0.7));
+        // Right half: paper / geometric
+        svg.appendChild(rect(120, 0, 120, 160, '#F0EAD6'));
+        svg.appendChild(rect(140, 30, 50, 50, '#E32119'));
+        svg.appendChild(circ(200, 105, 25, '#21409A'));
+        svg.appendChild(rect(130, 140, 90, 4, '#1A1A1A'));
+        // Dividing rule
+        svg.appendChild(rect(119, 0, 2, 160, '#1A1A1A', 0.3));
+      }
+
+      function thumbDessau(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#F0EAD6'));
+        svg.appendChild(rect(28, 28, 56, 56, '#E32119'));
+        svg.appendChild(circ(160, 56, 28, '#21409A'));
+        svg.appendChild(poly('100,140 144,140 122,98', '#F1B81E'));
+        svg.appendChild(rect(20, 124, 100, 4, '#1A1A1A'));
+        svg.appendChild(rect(192, 96, 4, 48, '#1A1A1A'));
+      }
+
+      function thumbKlee(svg) {
+        // Klee-ish: outlined shapes, muted palette, hand-drawn feel
+        svg.appendChild(rect(0, 0, 240, 160, '#E8D9B8'));
+        svg.appendChild(rect(40, 30, 60, 90, '#B47B5C', 0.85));
+        svg.appendChild(rect(110, 60, 70, 60, '#6B7A8F', 0.85));
+        svg.appendChild(circ(180, 40, 16, '#C7A24E', 0.9));
+        svg.appendChild(line(20, 130, 220, 140, '#3A2E20', 1.5));
+      }
+
+      function thumbKandinsky(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#1A1410'));
+        svg.appendChild(line(20, 30, 220, 140, '#E8DDC4', 1.2));
+        svg.appendChild(circ(70, 70, 30, '#2A4FAE', null, '#E8DDC4', 1.4));
+        svg.appendChild(circ(145, 95, 38, '#D62F2F', null, '#E8DDC4', 1.4));
+        svg.appendChild(circ(195, 40, 18, '#ECBE1C', null, '#E8DDC4', 1.4));
+        svg.appendChild(circ(45, 130, 12, 'none', null, '#E8DDC4', 1.4));
+      }
+
+      function thumbWeaving(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#E2D7BB'));
+        var cells = [
+          [0,   0,   80,  50, '#1E2E5E'],
+          [0,   50,  80,  60, '#E2D7BB'],
+          [0,   110, 80,  50, '#A5523F'],
+          [80,  0,   100, 50, '#E2D7BB'],
+          [80,  50,  100, 60, '#BF8E2F'],
+          [80,  110, 100, 50, '#E2D7BB'],
+          [180, 0,   60,  50, '#1E2E5E'],
+          [180, 50,  60,  60, '#E2D7BB'],
+          [180, 110, 60,  50, '#2B2B2B']
+        ];
+        cells.forEach(function (c) { svg.appendChild(rect(c[0], c[1], c[2], c[3], c[4])); });
+        // small diamond motif
+        svg.appendChild(poly('130,80 145,95 130,110 115,95', '#1E2E5E'));
+      }
+
+      function thumbSchlemmer(svg) {
+        // Schlemmer-ish: figural mannequin in geometric costume on stage
+        svg.appendChild(rect(0, 0, 240, 160, '#E8DDC4'));
+        // figure: head, torso, legs
+        svg.appendChild(circ(120, 50, 16, '#C5A65E'));      // head
+        svg.appendChild(poly('100,66 140,66 145,110 95,110', '#D04F2E'));  // torso (trapezoid)
+        svg.appendChild(rect(100, 110, 14, 36, '#1F2A4D')); // left leg
+        svg.appendChild(rect(126, 110, 14, 36, '#1F2A4D')); // right leg
+        // stage shadow
+        svg.appendChild(ellipse(120, 150, 50, 6, '#2B2B2B', null, null));
+      }
+
+      function thumbPhotograms(svg) {
+        // Photogram: dark ground, white silhouettes
+        svg.appendChild(rect(0, 0, 240, 160, '#1A1A1A'));
+        svg.appendChild(circ(80, 80, 36, '#EFE6D0'));
+        svg.appendChild(rect(140, 50, 56, 24, '#EFE6D0'));
+        svg.appendChild(rect(150, 100, 40, 4, '#EFE6D0'));
+        svg.appendChild(circ(180, 130, 8, '#EFE6D0'));
+      }
+
+      function thumbMeyer(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#9B8E78'));
+        svg.appendChild(rect(34, 56, 172, 54, '#E8DDC4'));
+        svg.appendChild(rect(50, 70, 24, 26, '#2B2B2B'));
+        svg.appendChild(rect(86, 70, 24, 26, '#2B2B2B'));
+        svg.appendChild(rect(122, 70, 24, 26, '#2B2B2B'));
+        svg.appendChild(rect(158, 70, 24, 26, '#2B2B2B'));
+        svg.appendChild(rect(0, 130, 240, 4, '#1A1A1A'));
+      }
+
+      function thumbMies(svg) {
+        // Architectural orthogonal: building elevation
+        svg.appendChild(rect(0, 0, 240, 160, '#F0EAD6'));
+        svg.appendChild(rect(40, 30, 160, 110, '#1A1A1A', 0.06));
+        // grid of windows
+        for (var c = 0; c < 5; c++) {
+          for (var r = 0; r < 4; r++) {
+            svg.appendChild(rect(50 + c * 30, 40 + r * 24, 22, 18, '#1A1A1A', 0.85));
+          }
+        }
+        // ground line
+        svg.appendChild(rect(0, 140, 240, 2, '#1A1A1A'));
+      }
+
+      function thumbDiaspora(svg) {
+        svg.appendChild(rect(0, 0, 240, 160, '#F0EAD6'));
+        // faded centre
+        svg.appendChild(circ(120, 80, 22, '#1A1A1A', 0.08));
+        // shapes flying outward
+        svg.appendChild(circ(36, 32, 12, '#21409A'));
+        svg.appendChild(rect(180, 26, 22, 22, '#E32119'));
+        svg.appendChild(poly('22,128 46,128 34,108', '#F1B81E'));
+        svg.appendChild(rect(190, 118, 22, 22, '#1A1A1A'));
+        svg.appendChild(circ(118, 28, 6, '#1A1A1A', 0.7));
+        svg.appendChild(circ(124, 134, 6, '#1A1A1A', 0.7));
+      }
+
+      function thumbStub(svg) {
+        // Faded dot grid for any unmatched / coming chapter without a specific thumb
+        svg.appendChild(rect(0, 0, 240, 160, '#1A1A1A', 0.03));
+        for (var x = 20; x < 240; x += 28) {
+          for (var y = 18; y < 160; y += 28) {
+            svg.appendChild(circ(x, y, 1.5, '#999', 0.5));
+          }
+        }
+      }
+
+      var THUMBS = {
+        '01': thumbItten,
+        '02': thumbTurn,
+        '03': thumbDessau,
+        '04': thumbKlee,
+        '05': thumbKandinsky,
+        '06': thumbWeaving,
+        '07': thumbSchlemmer,
+        '08': thumbPhotograms,
+        '09': thumbMeyer,
+        '10': thumbMies,
+        '11': thumbDiaspora
+      };
+
+      var cards = document.querySelectorAll('.bh-chapter');
+      Array.prototype.forEach.call(cards, function (card) {
+        var numEl = card.querySelector('.bh-chapter-num');
+        if (!numEl) return;
+        var num = numEl.textContent.trim();
+        var painter = THUMBS[num] || thumbStub;
+
+        var svg = el('svg', {
+          'class': 'bh-chapter-thumb',
+          viewBox: '0 0 240 160',
+          'aria-hidden': 'true'
+        });
+        painter(svg);
+
+        var arrow = card.querySelector('.bh-chapter-arrow');
+        if (arrow) card.insertBefore(svg, arrow);
+        else card.appendChild(svg);
+      });
+    })();
+  </script>
 
   <script src="/sidebar.js"></script>
 </body>
