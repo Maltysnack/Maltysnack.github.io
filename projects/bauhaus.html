@@ -124,13 +124,6 @@
     }
     .bh-btn:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
     .bh-btn:active { transform: translateY(1px); }
-    .bh-btn[aria-pressed="true"] {
-      background: var(--accent-red);
-      color: #fff;
-      border-color: var(--accent-red);
-    }
-
-    .bh-actions-right { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
 
     .bh-prose {
       font-size: var(--text-base);
@@ -198,10 +191,7 @@
       </div>
       <div class="bh-actions">
         <p class="bh-caption" id="bh-caption">Random shapes in the Bauhaus palette, no compositional rules.</p>
-        <div class="bh-actions-right">
-          <button class="bh-btn" id="bh-grid-toggle" type="button" aria-pressed="false" aria-label="Toggle grid overlay">Grid</button>
-          <button class="bh-btn" id="bh-new" type="button" aria-label="Generate a new composition">New</button>
-        </div>
+        <button class="bh-btn" id="bh-new" type="button" aria-label="Generate a new composition">New</button>
       </div>
     </section>
 
@@ -227,7 +217,7 @@
 
       <div class="bh-technique" data-level="2" hidden>
         <p class="bh-prose">
-          Level 2 keeps everything from Level 1 and adds <strong>one rule</strong>: every shape snaps to a grid. The canvas is divided into a 20-column by 14-row lattice of 40-pixel modules, and every position, every edge, and every dimension lands on those grid lines. Nothing free-floats. Click <strong>Grid</strong> above to reveal the lattice and watch each shape sit exactly on it.
+          Level 2 keeps everything from Level 1 and adds <strong>one rule</strong>: every shape snaps to a grid. The canvas is divided into a 20-column by 14-row lattice of 40-pixel modules, and every position, every edge, and every dimension lands on those grid lines. Nothing free-floats.
         </p>
         <p class="bh-prose">
           The grid is the Bauhaus's most-quoted contribution to graphic design. Walter Gropius set it as the discipline of the typography workshop under Laszlo Moholy-Nagy and later Herbert Bayer: every element on the page is placed by measurement, not by feel. Josef Albers brought the same logic into the painting and weaving workshops. Aligned edges read as <strong>intent</strong>, even when the underlying choices (which shape, which colour, how big) are still random.
@@ -239,6 +229,27 @@
           <li>Moholy-Nagy, L. <cite>The New Typography</cite>. 1923. (Grid as discipline.)</li>
           <li>Muller-Brockmann, J. <cite>Grid Systems in Graphic Design</cite>. 1981. (Post-Bauhaus codification of the same idea.)</li>
           <li>Bayer, H. <cite>On Typography</cite>. 1967. (Bauhaus typography workshop principles.)</li>
+        </ul>
+      </div>
+
+      <div class="bh-technique" data-level="3" hidden>
+        <p class="bh-prose">
+          Level 3 keeps everything from Level 2 and adds <strong>three rules</strong>, all about what to place rather than where. The grid still binds positions and sizes; what changes is the generator's restraint.
+        </p>
+        <p class="bh-prose">
+          <strong>Fewer shapes.</strong> The count drops from 6-12 to 3-7. Walter Gropius framed this as economy of means: every element on the page has to justify being there. A composition with four well-chosen elements reads as design; one with twelve reads as a sprinkle. This single change is the largest visual jump on the page so far.
+        </p>
+        <p class="bh-prose">
+          <strong>Variety guarantee.</strong> Every composition must contain at least three of the four primitive types (circle, square, triangle, bar). Sameness reads as boredom. Contrast between basic forms is what made the school's compositions feel taut rather than busy.
+        </p>
+        <p class="bh-prose">
+          <strong>Anchor.</strong> One shape per composition is forced significantly larger than the rest. That shape becomes the visual ground; the smaller pieces arrange around it. Composition pedagogy in the Vorkurs and in Klee's classes treated hierarchy as a precondition for unity: every piece needs one element that leads, with the others in support. Colour is still random in Level 3, so the anchor can be any colour, which is why some rolls produce a giant yellow square (not what Bauhaus would do; that's Level 4's job).
+        </p>
+        <ul class="bh-sources">
+          <li>Klee, P. <cite>Pedagogical Sketchbook</cite>. Bauhaus Book 2, 1925. (Composition pedagogy and hierarchy.)</li>
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Composition and emphasis.)</li>
+          <li>Itten, J. <cite>Design and Form: The Basic Course at the Bauhaus</cite>. 1975 ed. (Vorkurs composition exercises.)</li>
+          <li>Gropius, W. <cite>The New Architecture and the Bauhaus</cite>. 1935. (Economy of means.)</li>
         </ul>
       </div>
     </section>
@@ -254,17 +265,21 @@
 
       var svg     = document.getElementById('bh-canvas');
       var btn     = document.getElementById('bh-new');
-      var gridBtn = document.getElementById('bh-grid-toggle');
       var tabsEl  = document.getElementById('bh-levels');
       var caption = document.getElementById('bh-caption');
       if (!svg) return;
 
-      var GRID_M = 40;            // grid module in px (matches Level 2)
-      var gridVisible = false;
-
       function rand(min, max) { return min + Math.random() * (max - min); }
       function pick(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
       function irand(min, max){ return min + Math.floor(Math.random() * (max - min + 1)); } // inclusive
+
+      function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+        return arr;
+      }
 
       function el(name, attrs) {
         var node = document.createElementNS(SVG_NS, name);
@@ -276,30 +291,58 @@
         while (node.firstChild) node.removeChild(node.firstChild);
       }
 
-      function drawGrid() {
-        if (!currentLevel || !currentLevel.usesGrid) return;
-        var g = el('g', { id: 'bh-grid' });
-        if (!gridVisible) g.setAttribute('display', 'none');
-        var i;
-        for (i = GRID_M; i < W; i += GRID_M) {
-          g.appendChild(el('line', {
-            x1: i, y1: 0, x2: i, y2: H,
-            stroke: '#1A1A1A', 'stroke-width': 1, 'stroke-opacity': 0.12
-          }));
-        }
-        for (i = GRID_M; i < H; i += GRID_M) {
-          g.appendChild(el('line', {
-            x1: 0, y1: i, x2: W, y2: i,
-            stroke: '#1A1A1A', 'stroke-width': 1, 'stroke-opacity': 0.12
-          }));
-        }
-        svg.appendChild(g);
-      }
-
       function paint() {
         clear(svg);
         svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PAPER }));
-        drawGrid();
+      }
+
+      /* Place one snapped shape. Used by L02 and L03.
+         sizes: { circle:[min,max], square:[min,max], triangle:[min,max], bar:[min,max] }
+         where the numbers are in grid modules. */
+      function placeSnapped(kind, fill, M, COLS, ROWS, sizes) {
+        if (kind === 'circle') {
+          var r_mod = irand(sizes.circle[0], sizes.circle[1]);
+          var cx_g  = irand(r_mod, COLS - r_mod);
+          var cy_g  = irand(r_mod, ROWS - r_mod);
+          svg.appendChild(el('circle', {
+            cx: cx_g * M, cy: cy_g * M, r: r_mod * M, fill: fill
+          }));
+        } else if (kind === 'square') {
+          var s_mod = irand(sizes.square[0], sizes.square[1]);
+          var x_g   = irand(0, COLS - s_mod);
+          var y_g   = irand(0, ROWS - s_mod);
+          svg.appendChild(el('rect', {
+            x: x_g * M, y: y_g * M,
+            width: s_mod * M, height: s_mod * M,
+            fill: fill
+          }));
+        } else if (kind === 'triangle') {
+          var wMod = irand(sizes.triangle[0], sizes.triangle[1]);
+          var hMod = irand(sizes.triangle[0], sizes.triangle[1]);
+          var xg   = irand(0, COLS - wMod);
+          var yg   = irand(0, ROWS - hMod);
+          var x = xg * M, y = yg * M, w = wMod * M, h = hMod * M;
+          var orient = irand(0, 3);
+          var pts;
+          if (orient === 0)      pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + x + ',' + (y + h);
+          else if (orient === 1) pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h);
+          else if (orient === 2) pts = (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h) + ' ' + x + ',' + (y + h);
+          else                   pts = x + ',' + y + ' ' + x + ',' + (y + h) + ' ' + (x + w) + ',' + (y + h);
+          svg.appendChild(el('polygon', { points: pts, fill: fill }));
+        } else { // bar
+          var horizontal = Math.random() < 0.5;
+          var lenMod   = irand(sizes.bar[0], sizes.bar[1]);
+          var thickMod = 1;
+          var wMod2    = horizontal ? lenMod   : thickMod;
+          var hMod2    = horizontal ? thickMod : lenMod;
+          var xg2      = irand(0, COLS - wMod2);
+          var yg2      = irand(0, ROWS - hMod2);
+          svg.appendChild(el('rect', {
+            x: xg2 * M, y: yg2 * M,
+            width: wMod2 * M, height: hMod2 * M,
+            fill: fill
+          }));
+        }
       }
 
       /* ── Level 1: random ───────────────────────────── */
@@ -345,80 +388,72 @@
       }
 
       /* ── Level 2: grid snap ────────────────────────── */
+      var SHAPES = ['circle', 'square', 'triangle', 'bar'];
+      var L2_SIZES = {
+        circle:   [1, 3],
+        square:   [1, 5],
+        triangle: [2, 5],
+        bar:      [3, 10]
+      };
+
       function genLevel2() {
         paint();
-        var M = 40;                  // grid module in px
+        var M = 40;
         var COLS = W / M;            // 20
         var ROWS = H / M;            // 14
-        var SHAPES = ['circle', 'square', 'triangle', 'bar'];
         var n = irand(6, 12);
-
         for (var i = 0; i < n; i++) {
-          var kind = pick(SHAPES);
-          var fill = pick(PALETTE);
+          placeSnapped(pick(SHAPES), pick(PALETTE), M, COLS, ROWS, L2_SIZES);
+        }
+      }
 
-          if (kind === 'circle') {
-            var r_mod = irand(1, 3);
-            var cx_g  = irand(r_mod, COLS - r_mod);
-            var cy_g  = irand(r_mod, ROWS - r_mod);
-            svg.appendChild(el('circle', {
-              cx: cx_g * M, cy: cy_g * M, r: r_mod * M, fill: fill
-            }));
-          } else if (kind === 'square') {
-            var s_mod = irand(1, 5);
-            var x_g   = irand(0, COLS - s_mod);
-            var y_g   = irand(0, ROWS - s_mod);
-            svg.appendChild(el('rect', {
-              x: x_g * M, y: y_g * M,
-              width: s_mod * M, height: s_mod * M,
-              fill: fill
-            }));
-          } else if (kind === 'triangle') {
-            // right triangle, legs on grid, four corner orientations
-            var wMod = irand(2, 5);
-            var hMod = irand(2, 5);
-            var xg   = irand(0, COLS - wMod);
-            var yg   = irand(0, ROWS - hMod);
-            var x = xg * M, y = yg * M, w = wMod * M, h = hMod * M;
-            var orient = irand(0, 3);
-            var pts;
-            if (orient === 0) {
-              // right angle top-left
-              pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + x + ',' + (y + h);
-            } else if (orient === 1) {
-              // right angle top-right
-              pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h);
-            } else if (orient === 2) {
-              // right angle bottom-right
-              pts = (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h) + ' ' + x + ',' + (y + h);
-            } else {
-              // right angle bottom-left
-              pts = x + ',' + y + ' ' + x + ',' + (y + h) + ' ' + (x + w) + ',' + (y + h);
-            }
-            svg.appendChild(el('polygon', { points: pts, fill: fill }));
-          } else { // bar
-            var horizontal = Math.random() < 0.5;
-            var lenMod   = irand(3, 10);
-            var thickMod = 1;
-            var wMod2    = horizontal ? lenMod   : thickMod;
-            var hMod2    = horizontal ? thickMod : lenMod;
-            var xg2      = irand(0, COLS - wMod2);
-            var yg2      = irand(0, ROWS - hMod2);
-            svg.appendChild(el('rect', {
-              x: xg2 * M, y: yg2 * M,
-              width: wMod2 * M, height: hMod2 * M,
-              fill: fill
-            }));
-          }
+      /* ── Level 3: composition discipline ──────────── */
+      var L3_NORMAL = {
+        circle:   [1, 2],
+        square:   [1, 3],
+        triangle: [2, 3],
+        bar:      [3, 7]
+      };
+      var L3_ANCHOR = {
+        circle:   [3, 4],
+        square:   [4, 5],
+        triangle: [4, 5],
+        bar:      [10, 14]
+      };
+
+      function genLevel3() {
+        paint();
+        var M = 40;
+        var COLS = W / M;
+        var ROWS = H / M;
+        var n = irand(3, 7);
+
+        // Type list: guarantee at least 3 distinct primitive types.
+        var deck = SHAPES.slice();
+        shuffle(deck);
+        var typeList = [];
+        for (var i = 0; i < n; i++) {
+          typeList.push(i < 3 ? deck[i] : pick(SHAPES));
+        }
+        shuffle(typeList);
+
+        // One anchor shape per composition (significantly larger than the rest).
+        var anchorIdx = irand(0, n - 1);
+
+        for (var j = 0; j < n; j++) {
+          var sizes = (j === anchorIdx) ? L3_ANCHOR : L3_NORMAL;
+          placeSnapped(typeList[j], pick(PALETTE), M, COLS, ROWS, sizes);
         }
       }
 
       /* ── Level registry ────────────────────────────── */
       var LEVELS = [
-        { id: 1, name: 'Random', usesGrid: false, generate: genLevel1,
+        { id: 1, name: 'Random',      generate: genLevel1,
           caption: 'Random shapes in the Bauhaus palette, no compositional rules.' },
-        { id: 2, name: 'Grid',   usesGrid: true,  generate: genLevel2,
-          caption: 'Every shape snapped to a 40-pixel grid. Still random in count, kind, colour, and size.' }
+        { id: 2, name: 'Grid',        generate: genLevel2,
+          caption: 'Every shape snapped to a 40-pixel grid. Still random in count, kind, colour, and size.' },
+        { id: 3, name: 'Composition', generate: genLevel3,
+          caption: 'Fewer shapes, guaranteed variety, one anchor. Colour is still random.' }
       ];
 
       var currentLevel = LEVELS[LEVELS.length - 1]; // newest level is default
@@ -450,11 +485,6 @@
         document.querySelectorAll('.bh-technique').forEach(function (node) {
           node.hidden = (Number(node.dataset.level) !== lvl.id);
         });
-        // grid button visibility follows the level
-        if (gridBtn) {
-          gridBtn.hidden = !lvl.usesGrid;
-          gridBtn.setAttribute('aria-pressed', (lvl.usesGrid && gridVisible) ? 'true' : 'false');
-        }
         // update caption + svg label
         if (caption) caption.textContent = lvl.caption;
         svg.setAttribute('aria-label',
@@ -465,18 +495,6 @@
       renderTabs();
       setLevel(currentLevel);
       if (btn) btn.addEventListener('click', function () { currentLevel.generate(); });
-
-      if (gridBtn) {
-        gridBtn.addEventListener('click', function () {
-          gridVisible = !gridVisible;
-          gridBtn.setAttribute('aria-pressed', gridVisible ? 'true' : 'false');
-          var g = document.getElementById('bh-grid');
-          if (g) {
-            if (gridVisible) g.removeAttribute('display');
-            else g.setAttribute('display', 'none');
-          }
-        });
-      }
     })();
   </script>
 
