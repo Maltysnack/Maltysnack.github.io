@@ -88,7 +88,7 @@
         The visual output of these final years is mostly <strong>architectural drawings</strong>: plans, elevations, axonometrics, perspectives. Mies's office produced spare orthogonal renderings, line-only or with minimal hatching, on tracing paper. Students learned the conventions of the architectural drawing as the school's central skill. The aesthetic owes more to engineering drafting than to the painting workshops, which is part of why the Mies period feels different from the rest of the Bauhaus: it stopped looking like art and started looking like a building department.
       </p>
       <p class="bh-prose">
-        The generator produces an orthogonal <strong>elevation</strong>: a building rectangle on a ground line, a regular grid of glass bays, occasional dimension marks. The proportions vary across rolls (some compositions are tall-and-narrow, some long-and-low, some mid-rise). The vocabulary is deliberately limited and the line work is deliberately spare. Nothing here is a Mies-by-Mies; the generator is a Mies-flavoured elevation in the school-of-Mies idiom that he and his students would have produced as classroom exercises.
+        The generator alternates between two modes per roll. Roughly 60% are <strong>elevations</strong>: a building rectangle on a ground line, a regular grid of glass bays, occasional dimension marks, proportions varying across tall-and-narrow, mid-rise, and long-and-low. The remaining 40% are <strong>plan views</strong>: top-down floor plans showing an outer rectangle with partial-length interior walls in the Mies "free plan" idiom (walls that suggest spaces without enclosing them), with the occasional round structural column dot, which is the convention Mies inherited from Le Corbusier. The vocabulary is deliberately limited and the line work is deliberately spare in both modes. Nothing here is a Mies-by-Mies; the generator is a Mies-flavoured drawing in the school-of-Mies idiom that he and his students would have produced as classroom exercises.
       </p>
       <ul class="bh-sources">
         <li>Hilberseimer, L. <cite>Mies van der Rohe</cite>. Theobald, 1956. (Early monograph by Mies's close collaborator.)</li>
@@ -120,14 +120,7 @@
       }
       function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
-      function generate() {
-        var svg = document.getElementById('bh-mies');
-        if (!svg) return;
-        clear(svg);
-
-        // Paper ground
-        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PAPER }));
-
+      function generateElevation(svg) {
         // Building proportions: vary across rolls
         var proportion = Math.random();
         var bldgW, bldgH, cols, rows;
@@ -255,6 +248,94 @@
             stroke: INK, 'stroke-width': 0.8
           }));
         }
+      }
+
+      function generatePlan(svg) {
+        // Footprint
+        var bldgW = irand(440, 680);
+        var bldgH = irand(280, 440);
+        var bldgX = Math.round((W - bldgW) / 2 + rand(-20, 20));
+        var bldgY = Math.round((H - bldgH) / 2 + rand(-20, 20));
+
+        // Subtle floor tint
+        svg.appendChild(el('rect', {
+          x: bldgX, y: bldgY, width: bldgW, height: bldgH,
+          fill: '#1A1A1A', opacity: 0.03
+        }));
+
+        // Outer outline (thick line, the building's perimeter)
+        svg.appendChild(el('rect', {
+          x: bldgX, y: bldgY, width: bldgW, height: bldgH,
+          fill: 'none', stroke: INK, 'stroke-width': 3.4
+        }));
+
+        // Internal walls: 3-6 partial-length segments, axis-aligned, snapped to 20px.
+        // Free-plan idiom: walls don't necessarily reach perpendicular partners.
+        var wallCount = irand(3, 6);
+        var thick = 4;
+        for (var i = 0; i < wallCount; i++) {
+          var horizontal = Math.random() < 0.5;
+          if (horizontal) {
+            var wy = bldgY + Math.round(bldgH * rand(0.15, 0.85) / 20) * 20;
+            var wxStart = bldgX + Math.round(bldgW * rand(0, 0.55) / 20) * 20;
+            var wLen = Math.round(bldgW * rand(0.18, 0.55) / 20) * 20;
+            if (wxStart + wLen > bldgX + bldgW) wLen = bldgX + bldgW - wxStart;
+            // Sometimes have a wall reach the perimeter, sometimes float
+            if (Math.random() < 0.4) wxStart = bldgX; // touches left edge
+            svg.appendChild(el('rect', {
+              x: wxStart, y: wy - thick / 2, width: wLen, height: thick, fill: INK
+            }));
+          } else {
+            var wx = bldgX + Math.round(bldgW * rand(0.15, 0.85) / 20) * 20;
+            var wyStart = bldgY + Math.round(bldgH * rand(0, 0.55) / 20) * 20;
+            var wLenV = Math.round(bldgH * rand(0.18, 0.55) / 20) * 20;
+            if (wyStart + wLenV > bldgY + bldgH) wLenV = bldgY + bldgH - wyStart;
+            if (Math.random() < 0.4) wyStart = bldgY; // touches top edge
+            svg.appendChild(el('rect', {
+              x: wx - thick / 2, y: wyStart, width: thick, height: wLenV, fill: INK
+            }));
+          }
+        }
+
+        // Structural column dots: 60% chance to include 2-5 round columns at grid intersections
+        if (Math.random() < 0.6) {
+          var colCount = irand(2, 5);
+          for (var c = 0; c < colCount; c++) {
+            var ccx = bldgX + Math.round(bldgW * rand(0.15, 0.85) / 20) * 20;
+            var ccy = bldgY + Math.round(bldgH * rand(0.15, 0.85) / 20) * 20;
+            svg.appendChild(el('circle', { cx: ccx, cy: ccy, r: 6, fill: INK }));
+          }
+        }
+
+        // North arrow in a corner (50% chance) -- a small mark indicating orientation
+        if (Math.random() < 0.5) {
+          var nax = W - 60, nay = 60;
+          svg.appendChild(el('line', {
+            x1: nax, y1: nay - 20, x2: nax, y2: nay + 20,
+            stroke: INK, 'stroke-width': 1.5
+          }));
+          // arrowhead
+          svg.appendChild(el('polygon', {
+            points: nax + ',' + (nay - 22) + ' ' + (nax - 5) + ',' + (nay - 12) + ' ' + (nax + 5) + ',' + (nay - 12),
+            fill: INK
+          }));
+          // "N" label, faked with a small line group
+          svg.appendChild(el('line', { x1: nax - 4, y1: nay + 8, x2: nax - 4, y2: nay + 18, stroke: INK, 'stroke-width': 1 }));
+          svg.appendChild(el('line', { x1: nax - 4, y1: nay + 8, x2: nax + 4, y2: nay + 18, stroke: INK, 'stroke-width': 1 }));
+          svg.appendChild(el('line', { x1: nax + 4, y1: nay + 8, x2: nax + 4, y2: nay + 18, stroke: INK, 'stroke-width': 1 }));
+        }
+      }
+
+      function generate() {
+        var svg = document.getElementById('bh-mies');
+        if (!svg) return;
+        clear(svg);
+
+        // Paper ground
+        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PAPER }));
+
+        if (Math.random() < 0.6) generateElevation(svg);
+        else                     generatePlan(svg);
       }
 
       generate();

@@ -88,7 +88,10 @@
         <strong>Lucia Moholy</strong>, Laszlo's wife and a serious photographer in her own right, took the photographs that documented the Dessau Bauhaus building, its rooms, its objects, and its faculty. Her photographs of the building exterior are still the canonical images of the school's architecture; she made them with a large-format view camera and they have nothing in common with photograms beyond the medium. She is the figure the popular history most often skips when crediting "Bauhaus photography" to Laszlo alone.
       </p>
       <p class="bh-prose">
-        The generator places four to nine semi-transparent silhouettes (circles, rectangles, narrow bars, occasional thin lines) on a near-black ground. Each shape's fill is a pale cream with 0.55 to 0.9 opacity, and the silhouettes are drawn in a single layer with the SVG <code>mix-blend-mode: screen</code> compositing model so that <strong>overlaps brighten</strong>. The effect approximates the way real photograms register two translucent objects: each one blocks some light independently, and where both block, more light gets through, lightening the paper further. The compositional vocabulary is deliberately limited; photograms were laboratory documents as much as artworks, and the restraint is part of the look.
+        The generator places four to nine semi-transparent silhouettes (circles, rectangles, narrow bars, occasional thin lines, occasional ellipses) on a near-black ground, drawn in a single layer with the SVG <code>mix-blend-mode: screen</code> compositing model so that <strong>overlaps brighten</strong>. The effect approximates the way real photograms register two translucent objects: each one blocks some light independently, and where both block, more light gets through, lightening the paper further.
+      </p>
+      <p class="bh-prose">
+        Roughly 40% of rolls also include one or two <strong>object-like silhouettes</strong> drawn from a small vocabulary (comb, gear, scissors, string-curve), shapes that are recognisable as actual things laid on photographic paper. The original photograms often used everyday objects: scissors, springs, gears, mesh, hands, dust. The compositional restraint is deliberate; photograms were laboratory documents as much as artworks, and the limited vocabulary is part of the look.
       </p>
       <ul class="bh-sources">
         <li>Moholy-Nagy, L. <cite>Painting Photography Film</cite>. Bauhaus Book 8, 1925. (The theoretical manifesto.)</li>
@@ -179,6 +182,120 @@
         }
       }
 
+      function placeComb(group) {
+        var cw = rand(170, 260);
+        var ch = rand(70, 110);
+        var cx = rand(cw / 2 + 20, W - cw / 2 - 20);
+        var cy = rand(ch / 2 + 20, H - ch / 2 - 20);
+        var rot = irand(-25, 25);
+        var teeth = irand(7, 11);
+        var spacing = cw / teeth;
+        var toothW  = spacing * 0.55;
+        var op = rand(0.7, 0.9);
+
+        var combGroup = el('g', { transform: 'rotate(' + rot + ' ' + cx + ' ' + cy + ')' });
+        // Back bar
+        combGroup.appendChild(el('rect', {
+          x: cx - cw / 2, y: cy - ch / 2, width: cw, height: ch * 0.28,
+          fill: LIGHT, opacity: op
+        }));
+        // Teeth
+        for (var i = 0; i < teeth; i++) {
+          var tx = cx - cw / 2 + i * spacing + (spacing - toothW) / 2;
+          combGroup.appendChild(el('rect', {
+            x: tx, y: cy - ch / 2 + ch * 0.28,
+            width: toothW, height: ch * 0.72,
+            fill: LIGHT, opacity: op
+          }));
+        }
+        group.appendChild(combGroup);
+      }
+
+      function placeGear(group) {
+        var rOuter = rand(55, 100);
+        var rInner = rOuter * 0.78;
+        var cx = rand(rOuter + 20, W - rOuter - 20);
+        var cy = rand(rOuter + 20, H - rOuter - 20);
+        var teeth = irand(12, 18);
+        var op = rand(0.7, 0.9);
+
+        var gearGroup = el('g');
+        // Teeth around the rim
+        for (var i = 0; i < teeth; i++) {
+          var angle = i * 360 / teeth;
+          var toothW = rOuter * 0.20;
+          var toothH = (rOuter - rInner) + 8;
+          gearGroup.appendChild(el('rect', {
+            x: cx - toothW / 2, y: cy - rOuter,
+            width: toothW, height: toothH,
+            fill: LIGHT, opacity: op,
+            transform: 'rotate(' + angle + ' ' + cx + ' ' + cy + ')'
+          }));
+        }
+        // Central disk
+        gearGroup.appendChild(el('circle', {
+          cx: cx, cy: cy, r: rInner,
+          fill: LIGHT, opacity: op
+        }));
+        group.appendChild(gearGroup);
+      }
+
+      function placeScissors(group) {
+        var bladeLen = rand(140, 220);
+        var cx = rand(bladeLen / 2 + 20, W - bladeLen / 2 - 20);
+        var cy = rand(bladeLen / 2 + 20, H - bladeLen / 2 - 20);
+        var op = rand(0.7, 0.88);
+        var baseRot = irand(-30, 30);
+
+        var sg = el('g', { transform: 'rotate(' + baseRot + ' ' + cx + ' ' + cy + ')' });
+        // Two long thin ellipses crossing at the pivot
+        sg.appendChild(el('ellipse', {
+          cx: cx, cy: cy - bladeLen * 0.18,
+          rx: bladeLen / 2.4, ry: 12,
+          fill: LIGHT, opacity: op,
+          transform: 'rotate(-18 ' + cx + ' ' + cy + ')'
+        }));
+        sg.appendChild(el('ellipse', {
+          cx: cx, cy: cy - bladeLen * 0.18,
+          rx: bladeLen / 2.4, ry: 12,
+          fill: LIGHT, opacity: op,
+          transform: 'rotate(18 ' + cx + ' ' + cy + ')'
+        }));
+        // Two finger-loops below
+        sg.appendChild(el('circle', {
+          cx: cx - bladeLen * 0.22, cy: cy + bladeLen * 0.18,
+          r: 18, fill: 'none', stroke: LIGHT, 'stroke-width': 6, opacity: op
+        }));
+        sg.appendChild(el('circle', {
+          cx: cx + bladeLen * 0.22, cy: cy + bladeLen * 0.18,
+          r: 18, fill: 'none', stroke: LIGHT, 'stroke-width': 6, opacity: op
+        }));
+        group.appendChild(sg);
+      }
+
+      function placeStringCurve(group) {
+        var x1 = rand(50, W - 50);
+        var y1 = rand(50, H - 50);
+        var x2 = rand(50, W - 50);
+        var y2 = rand(50, H - 50);
+        var ccx = rand(50, W - 50);
+        var ccy = rand(50, H - 50);
+        group.appendChild(el('path', {
+          d: 'M ' + x1 + ',' + y1 + ' Q ' + ccx + ',' + ccy + ' ' + x2 + ',' + y2,
+          stroke: LIGHT, 'stroke-width': rand(2.5, 4.5),
+          fill: 'none', 'stroke-linecap': 'round',
+          opacity: rand(0.75, 0.95)
+        }));
+      }
+
+      function placeObjectSilhouette(group) {
+        var kind = pick(['comb', 'gear', 'scissors', 'string']);
+        if (kind === 'comb')          placeComb(group);
+        else if (kind === 'gear')     placeGear(group);
+        else if (kind === 'scissors') placeScissors(group);
+        else                          placeStringCurve(group);
+      }
+
       function generate() {
         var svg = document.getElementById('bh-photogram');
         if (!svg) return;
@@ -191,6 +308,13 @@
         var group = el('g', { style: 'mix-blend-mode: screen' });
         var n = irand(4, 9);
         for (var i = 0; i < n; i++) placeSilhouette(group);
+
+        // 40% chance to add 1-2 object silhouettes from a small recognisable vocabulary.
+        if (Math.random() < 0.4) {
+          var objCount = irand(1, 2);
+          for (var o = 0; o < objCount; o++) placeObjectSilhouette(group);
+        }
+
         svg.appendChild(group);
       }
 

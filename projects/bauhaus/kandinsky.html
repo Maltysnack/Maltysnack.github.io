@@ -174,7 +174,7 @@
         Kandinsky was the most explicit rule-codifier of all the Bauhaus masters. <cite>Point and Line to Plane</cite> is, almost literally, a textbook on generating composition from first principles. He argued that the basic graphic elements (point, line, plane) carry intrinsic <strong>weights and tensions</strong> that the artist arranges the way an engineer arranges forces. A famous (and disputed) <strong>1923 questionnaire</strong> he distributed at the school asked respondents to associate each primary colour with a primary shape; the result, square-red, circle-blue, triangle-yellow, became the popular shorthand for "Bauhaus" colour theory, although Kandinsky's own paintings only sometimes obey it.
       </p>
       <p class="bh-prose">
-        The generator places five to nine shapes on a warm near-black ground, predominantly circles, with ellipses, triangles, and occasionally a <strong>concentric pairing</strong> (an outline circle around a smaller filled one) as a strong accent. Every shape gets a thin cream outline so overlaps remain readable. One to three thin diagonal lines cross the field behind the shapes. This captures Kandinsky's formal language. It does not capture the spiritual dimension he believed art could reach, which is the half of his work that lives in text rather than rules. The room has both.
+        The generator picks one of three modes per roll. <strong>Sparse mode</strong> places three to five large shapes for breathing-room compositions (closer to <cite>Several Circles</cite>, 1926, in its quietness). <strong>Dense mode</strong> places ten to fifteen smaller shapes for the busy late paintings (closer to <cite>Composition VIII</cite>, 1923, or the layered studies). <strong>Monochrome mode</strong> restricts the palette to two of the six fill colours for the colour-discipline studies. All three modes use the same primitives: circles dominate, ellipses and triangles accent, occasional concentric outline-plus-fill pairs as strong features, one to three thin diagonal lines crossing the field. Every shape has a thin cream outline so overlaps remain readable. This captures Kandinsky's formal language; the spiritual dimension he believed art could reach is the half of his work that lives in text rather than rules. The room has both.
       </p>
       <ul class="bh-sources">
         <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Form theory.)</li>
@@ -213,31 +213,53 @@
       }
       function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
-      function placeCircle(svg, anchor) {
-        var r  = anchor ? rand(90, 150) : rand(28, 80);
+      function circleRadius(sizeMode, anchor) {
+        if (sizeMode === 'large') return rand(95, 170);
+        if (sizeMode === 'small') return rand(16, 55);
+        return anchor ? rand(90, 150) : rand(28, 80);
+      }
+      function ellipseRadii(sizeMode, anchor) {
+        if (sizeMode === 'large') return [rand(95, 160), rand(60, 110)];
+        if (sizeMode === 'small') return [rand(18, 60), rand(14, 45)];
+        if (anchor)               return [rand(80, 140), rand(50, 100)];
+        return [rand(26, 78), rand(20, 60)];
+      }
+      function triangleSide(sizeMode) {
+        if (sizeMode === 'large') return rand(80, 140);
+        if (sizeMode === 'small') return rand(22, 55);
+        return rand(35, 90);
+      }
+      function concentricOuter(sizeMode) {
+        if (sizeMode === 'large') return rand(95, 150);
+        if (sizeMode === 'small') return rand(40, 80);
+        return rand(70, 130);
+      }
+
+      function placeCircle(svg, anchor, fills, sizeMode) {
+        var r  = circleRadius(sizeMode, anchor);
         var cx = rand(r + 20, W - r - 20);
         var cy = rand(r + 20, H - r - 20);
         svg.appendChild(el('circle', {
           cx: cx, cy: cy, r: r,
-          fill: pick(FILLS), stroke: OUTLINE, 'stroke-width': 1.5
+          fill: pick(fills), stroke: OUTLINE, 'stroke-width': 1.5
         }));
       }
 
-      function placeEllipse(svg, anchor) {
-        var rx = anchor ? rand(80, 140) : rand(26, 78);
-        var ry = anchor ? rand(50, 100) : rand(20, 60);
+      function placeEllipse(svg, anchor, fills, sizeMode) {
+        var radii = ellipseRadii(sizeMode, anchor);
+        var rx = radii[0], ry = radii[1];
         var cx = rand(rx + 20, W - rx - 20);
         var cy = rand(ry + 20, H - ry - 20);
         var rotation = Math.random() < 0.4 ? 0 : irand(-40, 40);
         svg.appendChild(el('ellipse', {
           cx: cx, cy: cy, rx: rx, ry: ry,
-          fill: pick(FILLS), stroke: OUTLINE, 'stroke-width': 1.5,
+          fill: pick(fills), stroke: OUTLINE, 'stroke-width': 1.5,
           transform: 'rotate(' + rotation + ' ' + cx + ' ' + cy + ')'
         }));
       }
 
-      function placeTriangle(svg) {
-        var s  = rand(35, 90);
+      function placeTriangle(svg, fills, sizeMode) {
+        var s  = triangleSide(sizeMode);
         var cx = rand(s + 20, W - s - 20);
         var cy = rand(s + 20, H - s - 20);
         var h  = s * Math.sqrt(3) / 2;
@@ -247,13 +269,13 @@
                 + (cx + s / 2) + ',' + (cy + h / 2);
         svg.appendChild(el('polygon', {
           points: pts,
-          fill: pick(FILLS), stroke: OUTLINE, 'stroke-width': 1.5,
+          fill: pick(fills), stroke: OUTLINE, 'stroke-width': 1.5,
           transform: 'rotate(' + rotation + ' ' + cx + ' ' + cy + ')'
         }));
       }
 
-      function placeConcentric(svg) {
-        var outerR = rand(70, 130);
+      function placeConcentric(svg, fills, sizeMode) {
+        var outerR = concentricOuter(sizeMode);
         var innerR = outerR * rand(0.35, 0.6);
         var cx = rand(outerR + 20, W - outerR - 20);
         var cy = rand(outerR + 20, H - outerR - 20);
@@ -263,7 +285,7 @@
         }));
         svg.appendChild(el('circle', {
           cx: cx, cy: cy, r: innerR,
-          fill: pick(FILLS), stroke: OUTLINE, 'stroke-width': 1.5
+          fill: pick(fills), stroke: OUTLINE, 'stroke-width': 1.5
         }));
       }
 
@@ -286,12 +308,34 @@
         clear(svg);
         svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: BG }));
 
+        // Pick mode for this roll.
+        var modeRoll = Math.random();
+        var n, sizeMode, fills;
+        if (modeRoll < 0.30) {
+          // Sparse: few large shapes
+          n = irand(3, 5);
+          sizeMode = 'large';
+          fills = FILLS;
+        } else if (modeRoll < 0.82) {
+          // Dense: many small/medium shapes
+          n = irand(10, 15);
+          sizeMode = 'small';
+          fills = FILLS;
+        } else {
+          // Monochrome: restricted palette, medium density and mixed sizes
+          n = irand(6, 10);
+          sizeMode = 'mixed';
+          var c1 = pick(FILLS);
+          var c2;
+          do { c2 = pick(FILLS); } while (c2 === c1);
+          fills = [c1, c2];
+        }
+
         // Diagonals drawn first so they sit behind the shapes.
         var lineCount = irand(1, 3);
         for (var l = 0; l < lineCount; l++) placeDiagLine(svg);
 
         // Main shape set.
-        var n = irand(5, 9);
         var anchorIdx = irand(0, n - 1);
         var concentricUsed = false;
 
@@ -299,15 +343,16 @@
           var roll     = Math.random();
           var isAnchor = (i === anchorIdx);
 
-          if (!concentricUsed && roll < 0.15) {
-            placeConcentric(svg);
+          // Concentric is suppressed in dense mode (too cluttered there).
+          if (!concentricUsed && roll < 0.15 && sizeMode !== 'small') {
+            placeConcentric(svg, fills, sizeMode);
             concentricUsed = true;
           } else if (roll < 0.65) {
-            placeCircle(svg, isAnchor);
+            placeCircle(svg, isAnchor, fills, sizeMode);
           } else if (roll < 0.88) {
-            placeEllipse(svg, isAnchor);
+            placeEllipse(svg, isAnchor, fills, sizeMode);
           } else {
-            placeTriangle(svg);
+            placeTriangle(svg, fills, sizeMode);
           }
         }
       }

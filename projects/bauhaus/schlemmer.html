@@ -91,7 +91,7 @@
         The workshop was dissolved by Hannes Meyer in 1929, who considered theatre insufficiently social to justify Bauhaus resources. Schlemmer left and worked in Breslau and Berlin until political pressure made employment impossible; he was denounced by the Nazis in 1937 (works included in the <em>Degenerate Art</em> exhibition) and died of illness in 1943, having spent his last years working covertly on small-scale pieces and on a paint factory in southwestern Germany. He was the major Bauhaus master who stayed.
       </p>
       <p class="bh-prose">
-        The generator places one to three figures on a stage. Each figure is assembled from a fixed schema: <strong>head (sphere), torso (trapezoid), legs (bars), arms (optional bars at angle)</strong>, with a shadow ellipse beneath. A horizon line crosses the stage to suggest depth. Costume colours are picked per-figure from a Schlemmer-flavoured palette (terracotta, ochre, indigo, charcoal, with cream highlights). The schema is rigid by design, in the spirit of his actual mannequin sketches. What it cannot do is movement; Schlemmer's work lived in <em>time</em>, on the stage, and a static SVG cannot stand in for that.
+        The generator places one to three figures on a stage. Each figure independently picks one of two schemas. <strong>Round</strong> uses sphere head, trapezoid torso, bar legs, optional bars-at-angle for arms; closer to the <cite>Spherical</cite> dancer of the Triadic Ballet's white series. <strong>Geometric</strong> uses cube head, rectangular torso, blockier limbs, often with a small cuboid hat; closer to the black-series figures of the same ballet. A figure may have an optional sphere-or-cube hat. A horizon line crosses the stage to suggest depth; each figure gets a shadow ellipse beneath. Costume colours are picked per-figure from a Schlemmer-flavoured palette (terracotta, ochre, indigo, charcoal, muted purple, sage, with cream skin). The schemas are rigid by design, in the spirit of his actual mannequin sketches. What it cannot do is movement; Schlemmer's work lived in <em>time</em>, on the stage, and a static SVG cannot stand in for that.
       </p>
       <ul class="bh-sources">
         <li>Schlemmer, O., Moholy-Nagy, L., Molnar, F. <cite>The Theater of the Bauhaus</cite>. Bauhaus Book 4, 1925 (Wesleyan ed. 1961). (Schlemmer's theoretical statement.)</li>
@@ -133,92 +133,150 @@
       function clear(node) { while (node.firstChild) node.removeChild(node.firstChild); }
 
       function placeFigure(svg, cx, baseY, scale) {
+        // Pick a schema for this figure independently of the others.
+        var schema = Math.random() < 0.5 ? 'round' : 'geometric';
+
         // Costume palette for this figure
-        var headColour   = SKIN;
         var torsoColour  = pick(COSTUMES);
         var legsColour   = pick(COSTUMES);
         var armsColour   = pick(COSTUMES);
         while (legsColour === torsoColour && COSTUMES.length > 1) legsColour = pick(COSTUMES);
 
-        // Schema dimensions (relative to scale)
-        var headR    = 22 * scale;
-        var neckGap  = 6  * scale;
-        var torsoW1  = 50 * scale; // top width
-        var torsoW2  = 70 * scale; // bottom width
-        var torsoH   = 80 * scale;
+        // Schema-shared dimensions
         var legThick = 18 * scale;
         var legLen   = 100 * scale;
         var armThick = 14 * scale;
         var armLen   = 70  * scale;
 
+        var headSize  = 22 * scale; // radius for round, half-side for geometric
+        var neckGap   = 6  * scale;
+        var torsoH    = 80 * scale;
+
         // Anchors
         var feetY     = baseY;
         var torsoBotY = feetY - legLen;
         var torsoTopY = torsoBotY - torsoH;
-        var headCY    = torsoTopY - neckGap - headR;
+        var headCY    = torsoTopY - neckGap - headSize;
 
-        // Shadow
+        // Shadow (slightly wider for geometric to suggest a cubic base)
         svg.appendChild(el('ellipse', {
-          cx: cx, cy: feetY + 8, rx: 56 * scale, ry: 6 * scale,
+          cx: cx, cy: feetY + 8,
+          rx: (schema === 'geometric' ? 62 : 56) * scale,
+          ry: 6 * scale,
           fill: SHADOW, opacity: 0.25
         }));
 
-        // Legs (two bars)
+        // Legs
         var legGap = 4 * scale;
-        svg.appendChild(el('rect', {
-          x: cx - legThick - legGap / 2, y: torsoBotY,
-          width: legThick, height: legLen,
-          fill: legsColour
-        }));
-        svg.appendChild(el('rect', {
-          x: cx + legGap / 2, y: torsoBotY,
-          width: legThick, height: legLen,
-          fill: legsColour
-        }));
+        if (schema === 'geometric') {
+          // Slightly thicker, blockier legs
+          var legBlockThick = legThick * 1.1;
+          svg.appendChild(el('rect', {
+            x: cx - legBlockThick - legGap / 2, y: torsoBotY,
+            width: legBlockThick, height: legLen, fill: legsColour
+          }));
+          svg.appendChild(el('rect', {
+            x: cx + legGap / 2, y: torsoBotY,
+            width: legBlockThick, height: legLen, fill: legsColour
+          }));
+        } else {
+          svg.appendChild(el('rect', {
+            x: cx - legThick - legGap / 2, y: torsoBotY,
+            width: legThick, height: legLen, fill: legsColour
+          }));
+          svg.appendChild(el('rect', {
+            x: cx + legGap / 2, y: torsoBotY,
+            width: legThick, height: legLen, fill: legsColour
+          }));
+        }
 
-        // Torso (trapezoid, wider at base)
-        var pts = (cx - torsoW1 / 2) + ',' + torsoTopY + ' '
-                + (cx + torsoW1 / 2) + ',' + torsoTopY + ' '
-                + (cx + torsoW2 / 2) + ',' + torsoBotY + ' '
-                + (cx - torsoW2 / 2) + ',' + torsoBotY;
-        svg.appendChild(el('polygon', { points: pts, fill: torsoColour }));
+        // Torso
+        var torsoW1, torsoW2;
+        if (schema === 'geometric') {
+          // Rectangle: same width top and bottom
+          torsoW1 = 60 * scale;
+          torsoW2 = 60 * scale;
+          svg.appendChild(el('rect', {
+            x: cx - torsoW1 / 2, y: torsoTopY,
+            width: torsoW1, height: torsoH,
+            fill: torsoColour
+          }));
+        } else {
+          // Trapezoid: wider at base
+          torsoW1 = 50 * scale;
+          torsoW2 = 70 * scale;
+          var pts = (cx - torsoW1 / 2) + ',' + torsoTopY + ' '
+                  + (cx + torsoW1 / 2) + ',' + torsoTopY + ' '
+                  + (cx + torsoW2 / 2) + ',' + torsoBotY + ' '
+                  + (cx - torsoW2 / 2) + ',' + torsoBotY;
+          svg.appendChild(el('polygon', { points: pts, fill: torsoColour }));
+        }
 
         // Arms (optional, 70% chance) as angled bars from shoulders
         if (Math.random() < 0.7) {
-          var leftArmAngle  = rand(15, 50);
-          var rightArmAngle = rand(15, 50);
+          var armAngle      = schema === 'geometric' ? rand(8, 22) : rand(15, 50);
+          var leftAngle     = armAngle + rand(-5, 5);
+          var rightAngle    = armAngle + rand(-5, 5);
           var shoulderL = { x: cx - torsoW1 / 2 + 3 * scale, y: torsoTopY + 12 * scale };
           var shoulderR = { x: cx + torsoW1 / 2 - 3 * scale, y: torsoTopY + 12 * scale };
-
           svg.appendChild(el('rect', {
             x: shoulderL.x - armThick, y: shoulderL.y,
             width: armThick, height: armLen,
             fill: armsColour,
-            transform: 'rotate(' + leftArmAngle + ' ' + shoulderL.x + ' ' + shoulderL.y + ')'
+            transform: 'rotate(' + leftAngle + ' ' + shoulderL.x + ' ' + shoulderL.y + ')'
           }));
           svg.appendChild(el('rect', {
             x: shoulderR.x, y: shoulderR.y,
             width: armThick, height: armLen,
             fill: armsColour,
-            transform: 'rotate(' + (-rightArmAngle) + ' ' + shoulderR.x + ' ' + shoulderR.y + ')'
+            transform: 'rotate(' + (-rightAngle) + ' ' + shoulderR.x + ' ' + shoulderR.y + ')'
           }));
         }
 
-        // Head (sphere with a small highlight)
-        svg.appendChild(el('circle', {
-          cx: cx, cy: headCY, r: headR, fill: headColour
-        }));
-        svg.appendChild(el('circle', {
-          cx: cx - headR * 0.35, cy: headCY - headR * 0.35,
-          r: headR * 0.18, fill: '#F0E5D2', opacity: 0.6
-        }));
-
-        // Costume hat or collar (50% chance), a small sphere or trapezoid above the head
-        if (Math.random() < 0.5) {
-          svg.appendChild(el('circle', {
-            cx: cx, cy: headCY - headR - 8 * scale, r: headR * 0.55,
-            fill: torsoColour
+        // Head
+        if (schema === 'geometric') {
+          // Cube head: square
+          var hs = headSize * 1.4; // make the cube head visually similar in size
+          svg.appendChild(el('rect', {
+            x: cx - hs / 2, y: headCY - hs / 2,
+            width: hs, height: hs, fill: SKIN
           }));
+          // Highlight (small square top-left)
+          svg.appendChild(el('rect', {
+            x: cx - hs / 2 + hs * 0.18, y: headCY - hs / 2 + hs * 0.18,
+            width: hs * 0.18, height: hs * 0.18,
+            fill: '#F0E5D2', opacity: 0.55
+          }));
+        } else {
+          // Sphere head
+          svg.appendChild(el('circle', { cx: cx, cy: headCY, r: headSize, fill: SKIN }));
+          svg.appendChild(el('circle', {
+            cx: cx - headSize * 0.35, cy: headCY - headSize * 0.35,
+            r: headSize * 0.18, fill: '#F0E5D2', opacity: 0.6
+          }));
+        }
+
+        // Costume hat (50% chance), shape follows schema
+        if (Math.random() < 0.5) {
+          var hatGap = 8 * scale;
+          if (schema === 'geometric') {
+            // Cuboid hat
+            var hw = headSize * 1.4 * 0.7;
+            var hh = headSize * 0.6;
+            svg.appendChild(el('rect', {
+              x: cx - hw / 2,
+              y: headCY - headSize * 1.4 / 2 - hh - hatGap,
+              width: hw, height: hh,
+              fill: torsoColour
+            }));
+          } else {
+            // Sphere hat
+            svg.appendChild(el('circle', {
+              cx: cx, cy: headCY - headSize - hatGap,
+              r: headSize * 0.55,
+              fill: torsoColour
+            }));
+          }
         }
       }
 

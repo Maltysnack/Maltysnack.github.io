@@ -92,7 +92,7 @@
         Klee's own paintings live in a register that no other Bauhaus master shared. He worked in watercolour, gouache, oil-and-watercolour transfer, and ink, on prepared papers and canvases. His palette was muted: <strong>dusty pinks, sage greens, ochres, soft browns, muted purples, washed blues</strong>. The primaries the typography workshop relied on barely appear. In his late Bauhaus years (roughly 1928 onwards) he developed what is sometimes called his "magic-square" mode: <em>Polyphony</em> (1932), <em>Ad Parnassum</em> (1932), <em>New Harmony</em> (1936), in which the whole canvas is a grid of small colour cells with subtle tonal relationships. Those works are the structural part of his output that a generator can plausibly approach.
       </p>
       <p class="bh-prose">
-        The generator builds a <strong>non-uniform grid</strong> of four to six columns by three to five rows, fills each cell with a colour drawn from a muted six-tone palette, and applies a slight per-cell tonal variation so adjacent cells of the "same" colour are not identical. Twenty to thirty percent of cells get a small motif inset (cross, X, dot, tiny triangle, or short arrow) drawn in a darker ink. An <strong>SVG turbulence-and-displacement filter</strong> is applied to the whole cell group, giving every edge a slight wave that nods at watercolour bleed without literally simulating it.
+        The generator alternates between two modes per roll. The <strong>magic-square mode</strong> builds a near-uniform non-uniform grid of four to six columns by three to five rows, fills each cell with a colour drawn from a muted six-tone palette, and applies a slight per-cell tonal variation so adjacent cells of the "same" colour are not identical. The <strong>Polyphony mode</strong> uses five to eight tall vertical bands of varied width, each divided into two to four horizontal segments; the vertical axis dominates and the rhythm of bands recalls the musical analogy Klee made explicit in <cite>Polyphony</cite> (1932). Both modes share the palette, the per-segment tonal variation, the twenty-to-thirty-percent motif density (cross, X, dot, tiny triangle, short arrow) drawn in a darker ink, and an <strong>SVG turbulence-and-displacement filter</strong> applied to the whole composition that nods at watercolour bleed without literally simulating it.
       </p>
       <p class="bh-prose">
         What the generator misses is large. Klee's paintings often imply <em>figures</em>: <cite>Senecio</cite> (1922) is composed entirely of geometric primitives but unmistakably a face; <cite>Twittering Machine</cite> (1922) renders bird-like creatures on a crank; <cite>Cat and Bird</cite> (1928) suggests animal silhouettes through colour fields. That figurative-from-geometric tension is the centre of his work, and a rule-based generator cannot find it without a great deal more cleverness than this one has. The grid mode is what we can do. The metaphorical readings are what live in the essay. The room is honest about the split.
@@ -201,17 +201,8 @@
         }
       }
 
-      function generate() {
-        var svg = document.getElementById('bh-klee');
-        if (!svg) return;
-        clear(svg);
-
-        // Ground
-        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: GROUND }));
-
-        // Build cells inside a group filtered for slight bleed.
+      function genMagicSquare(svg) {
         var cellGroup = el('g', { filter: 'url(#kleeBleed)' });
-
         var nCols = irand(4, 6);
         var nRows = irand(3, 5);
         var cols = partition(W, nCols);
@@ -230,10 +221,62 @@
           }
           x += cols[c];
         }
+        svg.appendChild(cellGroup);
+        return { cols: cols, rows: rows };
+      }
 
+      function genPolyphony(svg) {
+        var cellGroup = el('g', { filter: 'url(#kleeBleed)' });
+        var nBands = irand(5, 8);
+        var bands  = partition(W, nBands);
+        // For each band, choose a dominant colour and a number of horizontal segments
+        var rowsPerBand = bands.map(function () { return irand(2, 4); });
+
+        var x = 0;
+        for (var b = 0; b < bands.length; b++) {
+          var bandBase = pick(PALETTE);
+          var nSeg = rowsPerBand[b];
+          var segH = partition(H, nSeg);
+          var y = 0;
+          for (var s = 0; s < nSeg; s++) {
+            // Most segments lean toward the band's base colour; occasionally a contrast segment.
+            var fill = (Math.random() < 0.8) ? vary(bandBase, 18) : vary(pick(PALETTE), 12);
+            cellGroup.appendChild(el('rect', {
+              x: x, y: y, width: bands[b], height: segH[s], fill: fill
+            }));
+            y += segH[s];
+          }
+          x += bands[b];
+        }
         svg.appendChild(cellGroup);
 
+        // For motif placement we treat each band as a single column with rowsPerBand-many rows of equal height (approximation).
+        // Easier: just return uniform rows of the maximum row count, accepting some motif imprecision.
+        var maxRows = Math.max.apply(null, rowsPerBand);
+        var uniformRows = [];
+        var totalH = H;
+        for (var rr = 0; rr < maxRows; rr++) uniformRows.push(totalH / maxRows);
+        return { cols: bands, rows: uniformRows };
+      }
+
+      function generate() {
+        var svg = document.getElementById('bh-klee');
+        if (!svg) return;
+        clear(svg);
+
+        // Ground
+        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: GROUND }));
+
+        // Pick mode for this roll
+        var grid;
+        if (Math.random() < 0.5) {
+          grid = genMagicSquare(svg);
+        } else {
+          grid = genPolyphony(svg);
+        }
+
         // Motifs: 2-5 per composition, placed outside the filter for crisp ink lines.
+        var cols = grid.cols, rows = grid.rows;
         var totalCells = cols.length * rows.length;
         var motifCount = Math.max(2, Math.round(totalCells * rand(0.12, 0.25)));
         for (var m = 0; m < motifCount; m++) {
