@@ -4,9 +4,12 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flox Grammar Reference - maltysnack</title>
-  <meta name="description" content="Flox grammar reference: lexical structure, BNF, statements, semantics." />
+  <meta name="description" content="Flox grammar reference: lexical structure, BNF, statements, semantics across river / markov / grid modes." />
   <link rel="stylesheet" href="/style.css" />
   <style>
+    /* full-width override: site default caps .main at ~800px */
+    .main { max-width: none; }
+    .page-title, .page-subtitle, .intro-body { max-width: none; }
 
     .gx-eyebrow {
       font-size: var(--text-xs);
@@ -53,7 +56,6 @@
       font-weight: 700;
       letter-spacing: 0.04em;
     }
-
     .gx-section h3 {
       font-size: var(--text-sm);
       font-weight: 600;
@@ -61,12 +63,12 @@
       margin: 24px 0 8px;
       letter-spacing: 0.02em;
     }
-
     .gx-section p {
       font-size: var(--text-base);
       color: var(--text-muted);
       line-height: 1.65;
       margin-bottom: 12px;
+      max-width: 760px;
     }
     .gx-section code {
       font-family: var(--font-mono, JetBrains Mono, monospace);
@@ -80,6 +82,7 @@
       list-style: none;
       padding: 0;
       margin: 0 0 12px;
+      max-width: 760px;
     }
     .gx-section ul li {
       font-size: var(--text-base);
@@ -109,10 +112,11 @@
       color: var(--text);
       margin: 8px 0 16px;
       white-space: pre;
+      max-width: 900px;
     }
-
     .gx-table {
       width: 100%;
+      max-width: 900px;
       border-collapse: collapse;
       font-size: var(--text-sm);
       margin: 8px 0 16px;
@@ -148,8 +152,8 @@
       border-radius: 3px;
       margin: 8px 0;
       color: var(--text);
+      max-width: 760px;
     }
-
     .gx-foot {
       font-size: var(--text-xs);
       color: var(--text-dim);
@@ -159,12 +163,12 @@
       padding-top: 16px;
       border-top: 1px solid var(--border-light);
     }
-
     .gx-toc {
       background: var(--border-light);
       border-radius: 4px;
       padding: 16px 20px;
       margin-bottom: 32px;
+      max-width: 900px;
     }
     .gx-toc-label {
       font-size: var(--text-xs);
@@ -225,7 +229,7 @@
       <p class="gx-eyebrow"><a href="/projects/flox/">Flox</a><span class="sep">/</span><a href="/projects/flox/docs/">Docs</a><span class="sep">/</span>Grammar</p>
       <h1 class="page-title">Grammar Reference</h1>
       <p class="gx-meta">
-        <span>v0.2</span><span>08-05-2026</span>
+        <span>v0.4</span><span>river, markov, grid</span><span>11-05-2026</span>
       </p>
     </header>
 
@@ -234,190 +238,220 @@
       <ol>
         <li><a href="#lex">Lexical structure</a></li>
         <li><a href="#bnf">Grammar</a></li>
-        <li><a href="#stmts">Statements</a></li>
-        <li><a href="#nodes">Node attributes</a></li>
-        <li><a href="#blocks">Block syntax</a></li>
-        <li><a href="#ops">Operators</a></li>
-        <li><a href="#sem">Semantics</a></li>
+        <li><a href="#statements">Statements</a></li>
+        <li><a href="#nodes">Node declarations</a></li>
+        <li><a href="#chains">Chains and arrows</a></li>
+        <li><a href="#modes">Modes</a></li>
+        <li><a href="#river-sem">River semantics</a></li>
+        <li><a href="#markov-sem">Markov semantics</a></li>
+        <li><a href="#grid-sem">Grid semantics</a></li>
         <li><a href="#reserved">Reserved words</a></li>
       </ol>
     </nav>
 
     <section class="gx-section" id="lex">
       <h2><span class="num">01</span> Lexical structure</h2>
-      <p>Source is plain ASCII. Whitespace separates tokens but is otherwise insignificant. Two comment forms are supported.</p>
+      <p>Source is plain ASCII. Whitespace separates tokens but is otherwise insignificant. Two comment forms are supported:</p>
+      <ul>
+        <li><code>// line comment</code> runs to end of line.</li>
+        <li><code>/* block comment */</code> may span multiple lines; does not nest.</li>
+      </ul>
 
-      <h3>Identifiers</h3>
-      <div class="gx-bnf">IDENTIFIER  &rarr;  [a-zA-Z][a-zA-Z0-9_]*</div>
-      <p>Used as system, river, dam, and outlet names. Case-sensitive.</p>
-
-      <h3>Numbers</h3>
-      <div class="gx-bnf">NUMBER      &rarr;  [0-9]+ ( "." [0-9]+ )?</div>
-      <p>Decimal literals, optional fractional part.</p>
-
-      <h3>Comments</h3>
-      <p><code>//</code> begins a line comment that runs to the next newline. <code>/* ... */</code> begins a block comment that may span multiple lines. Block comments do not nest.</p>
+      <h3>Identifiers and numbers</h3>
+      <div class="gx-bnf">IDENTIFIER  &rarr;  [a-zA-Z][a-zA-Z0-9_]*
+NUMBER      &rarr;  [0-9]+ ( "." [0-9]+ )?</div>
+      <p>Identifiers name systems, rivers, dams, outlets, generic nodes, and modes. Case-sensitive. Numbers are decimal literals with an optional fractional part. A leading <code>-</code> on an attribute value (e.g. <code>supply: -40</code>) negates the number.</p>
     </section>
 
     <section class="gx-section" id="bnf">
       <h2><span class="num">02</span> Grammar</h2>
       <div class="gx-bnf">program     &rarr;  statement* EOF
-statement   &rarr;  systemDecl | nodeDecl | chain
-            |  listStmt | mapStmt | printStmt | helpStmt
+statement   &rarr;  modeDecl | systemDecl | nodeDecl | chain | actionStmt
+modeDecl    &rarr;  "mode" IDENTIFIER ";"
 systemDecl  &rarr;  "system" IDENTIFIER ";"
-nodeDecl    &rarr;  riverDecl | damDecl | outletDecl
-riverDecl   &rarr;  "river"  IDENTIFIER block ";"?
-damDecl     &rarr;  "dam"    IDENTIFIER block ";"?
-outletDecl  &rarr;  "outlet" IDENTIFIER block? ";"?
+nodeDecl    &rarr;  riverDecl | damDecl | outletDecl | genericNode
+riverDecl   &rarr;  "river"   IDENTIFIER block ";"?
+damDecl     &rarr;  "dam"     IDENTIFIER block ";"?
+outletDecl  &rarr;  "outlet"  IDENTIFIER ( block )? ";"?
+genericNode &rarr;  "node"    IDENTIFIER ( block )? ";"?
 block       &rarr;  "{" ( attr ( ","? attr )* )? "}"
-attr        &rarr;  IDENTIFIER ":" NUMBER "%"?
-chain       &rarr;  IDENTIFIER ( "-&gt;" IDENTIFIER )* ";"
+attr        &rarr;  IDENTIFIER ":" "-"? NUMBER "%"?
+chain       &rarr;  IDENTIFIER ( arrow IDENTIFIER )+ ";"
+arrow       &rarr;  "->"  |  "<-"  |  "-[" NUMBER "]->"  |  "<-[" NUMBER "]-"
+actionStmt  &rarr;  startStmt | listStmt | mapStmt | printStmt | helpStmt
+startStmt   &rarr;  "start" IDENTIFIER NUMBER ";"
 listStmt    &rarr;  "list"  IDENTIFIER ";"
 mapStmt     &rarr;  "map"   IDENTIFIER ";"
-printStmt   &rarr;  "print" IDENTIFIER ( NUMBER | series )? ";"
-series      &rarr;  "[" ( NUMBER ( "," NUMBER )* )? "]"
-helpStmt    &rarr;  "help" ";"</div>
+printStmt   &rarr;  "print" IDENTIFIER ( NUMBER | "[" numberList "]" )? ";"
+helpStmt    &rarr;  "help" ";"
+numberList  &rarr;  NUMBER ( "," NUMBER )*</div>
     </section>
 
-    <section class="gx-section" id="stmts">
+    <section class="gx-section" id="statements">
       <h2><span class="num">03</span> Statements</h2>
       <table class="gx-table">
-        <thead>
-          <tr><th>Form</th><th>Meaning</th></tr>
-        </thead>
+        <thead><tr><th>Form</th><th>Meaning</th></tr></thead>
         <tbody>
-          <tr>
-            <td>system <i>Name</i>;</td>
-            <td>Declares a named system. Subsequent declarations and chains attach to the most recently declared system.</td>
-          </tr>
-          <tr>
-            <td>river <i>Name</i> { ... }</td>
-            <td>Declares a river node and its parameters.</td>
-          </tr>
-          <tr>
-            <td>dam <i>Name</i> { ... }</td>
-            <td>Declares a dam node and its parameters.</td>
-          </tr>
-          <tr>
-            <td>outlet <i>Name</i>;</td>
-            <td>Declares an outlet (zero-flow accumulator). Block is optional and must be empty.</td>
-          </tr>
-          <tr>
-            <td>A -&gt; B -&gt; C;</td>
-            <td>Connects nodes by name. Names must be declared somewhere in the same system. Source order does not matter.</td>
-          </tr>
-          <tr>
-            <td>list <i>Name</i>;</td>
-            <td>Lists every river, dam, and outlet in the named system.</td>
-          </tr>
-          <tr>
-            <td>map <i>Name</i>;</td>
-            <td>Prints an ASCII diagram of the network.</td>
-          </tr>
-          <tr>
-            <td>print <i>Name</i>;</td>
-            <td>Simulates the system over ten days at <code>1.0</code> mm rainfall on day 1, dry thereafter. Prints the per-day flow table and cumulative outlet volumes.</td>
-          </tr>
-          <tr>
-            <td>print <i>Name</i> <i>r</i>;</td>
-            <td>Simulates with a single <i>r</i> mm rainfall event on day 1.</td>
-          </tr>
-          <tr>
-            <td>print <i>Name</i> [r<sub>1</sub>, r<sub>2</sub>, ...];</td>
-            <td>Simulates with a per-day rainfall series in millimetres. Each non-zero entry kicks off its own hydrograph; flow on day <i>n</i> is the superposition of every event so far. Series shorter than ten days is padded with zeros.</td>
-          </tr>
-          <tr>
-            <td>help;</td>
-            <td>Prints a short syntax reference covering declarations, chains, and the print forms. Useful at the CLI; the playground duplicates most of it in the Blank template.</td>
-          </tr>
+          <tr><td>mode <i>name</i>;</td><td>Selects the simulator. <code>river</code>, <code>markov</code>, or <code>grid</code>. Defaults to <code>river</code> if absent. One mode per file; later <code>mode</code> declarations overwrite the file's mode.</td></tr>
+          <tr><td>system <i>Name</i>;</td><td>Declares a named system. Subsequent declarations and chains attach to the most recently declared system.</td></tr>
+          <tr><td>river <i>Name</i> { ... }</td><td>Declares a river node. River-mode attributes (see Node declarations).</td></tr>
+          <tr><td>dam <i>Name</i> { ... }</td><td>Declares a dam node. River-mode only in practice.</td></tr>
+          <tr><td>outlet <i>Name</i>;</td><td>Declares a zero-flow accumulator. Block is optional and must be empty.</td></tr>
+          <tr><td>node <i>Name</i>;</td><td>Generic state container. Mode-agnostic; takes only optional <code>supply</code> (used by grid mode).</td></tr>
+          <tr><td>A -&gt; B -&gt; C;</td><td>Chain of bare references. Nodes must be declared somewhere in the same system.</td></tr>
+          <tr><td>start <i>Name</i> <i>mass</i>;</td><td>Markov mode: sets initial mass on the named node. Multiple <code>start</code> statements for the same node accumulate.</td></tr>
+          <tr><td>list <i>Name</i>;</td><td>Lists every node in the named system with its outgoing connections.</td></tr>
+          <tr><td>map <i>Name</i>;</td><td>Prints the mode-appropriate network diagram.</td></tr>
+          <tr><td>print <i>Name</i>;</td><td>Runs the simulator with the mode's default argument and prints the result.</td></tr>
+          <tr><td>print <i>Name</i> <i>n</i>;</td><td>River: simulate at <i>n</i> mm rainfall on day 1. Markov / grid: <i>n</i> = tick budget.</td></tr>
+          <tr><td>print <i>Name</i> [r<sub>1</sub>, r<sub>2</sub>, ...];</td><td>River only: per-day rainfall series in millimetres.</td></tr>
+          <tr><td>help;</td><td>Prints a short CLI syntax reference.</td></tr>
         </tbody>
       </table>
-      <p>The interpreter runs in two passes. Pass 1 collects declarations and chains. A resolve step validates each chain reference against the per-system symbol table. Pass 2 executes <code>list</code>, <code>map</code>, and <code>print</code> in source order.</p>
+      <p>The interpreter runs in two passes. Pass 1 collects declarations and chains. A resolve step validates each chain reference, then a mode-specific validator runs. Pass 2 executes <code>list</code> / <code>map</code> / <code>print</code> in source order.</p>
     </section>
 
     <section class="gx-section" id="nodes">
-      <h2><span class="num">04</span> Node attributes</h2>
+      <h2><span class="num">04</span> Node declarations</h2>
 
       <h3>River</h3>
+      <div class="gx-bnf">river Name { base: N, peak: N, decay: N, supply: N }</div>
       <table class="gx-table">
         <thead><tr><th>Attribute</th><th>Required</th><th>Meaning</th></tr></thead>
         <tbody>
           <tr><td>base</td><td>yes</td><td>Baseline flow in litres per second with no rainfall.</td></tr>
           <tr><td>peak</td><td>yes</td><td>Multiplier applied to rainfall (mm) to compute the peak surge.</td></tr>
           <tr><td>decay</td><td>no</td><td>Fraction of the surge retained each subsequent day. Range 0 to 1. Default <code>0.7</code>.</td></tr>
+          <tr><td>supply</td><td>no</td><td>Grid-mode supply (+) or load (-). Ignored in river / markov modes. Default <code>0</code>.</td></tr>
         </tbody>
       </table>
 
       <h3>Dam</h3>
+      <div class="gx-bnf">dam Name { capacity: N, threshold: N%, normalRate: N, openRate: N }</div>
       <table class="gx-table">
         <thead><tr><th>Attribute</th><th>Required</th><th>Meaning</th></tr></thead>
         <tbody>
           <tr><td>capacity</td><td>yes</td><td>Maximum storage in megalitres.</td></tr>
-          <tr><td>threshold</td><td>yes</td><td>Storage level at which the dam opens. Written as <code>80%</code> or <code>0.8</code>.</td></tr>
+          <tr><td>threshold</td><td>yes</td><td>Storage level at which the dam opens. Written as a percent (<code>80%</code>) or fraction (<code>0.8</code>).</td></tr>
           <tr><td>normalRate</td><td>yes</td><td>Outflow as a fraction of inflow when below threshold.</td></tr>
           <tr><td>openRate</td><td>yes</td><td>Outflow as a fraction of inflow when at or above threshold.</td></tr>
         </tbody>
       </table>
 
       <h3>Outlet</h3>
-      <p>No attributes. An outlet accumulates everything that flows into it. An outlet may have outgoing connections, in which case it acts as a zero-flow passthrough.</p>
+      <div class="gx-bnf">outlet Name;</div>
+      <p>No attributes. Accumulates everything that flows into it. May have outgoing connections (acts as a zero-flow passthrough in that case).</p>
+
+      <h3>Node (generic)</h3>
+      <div class="gx-bnf">node Name;
+node Name { supply: N }</div>
+      <table class="gx-table">
+        <thead><tr><th>Attribute</th><th>Required</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>supply</td><td>no</td><td>Grid-mode supply (+) or load (-). Used only by grid mode. Default <code>0</code>.</td></tr>
+        </tbody>
+      </table>
+      <p>Prefer <code>node</code> in markov and grid programs; <code>river</code> / <code>dam</code> / <code>outlet</code> are river-mode-specific.</p>
     </section>
 
-    <section class="gx-section" id="blocks">
-      <h2><span class="num">05</span> Block syntax</h2>
-      <p>Attributes are written as <code>name: value</code>. Attributes may be separated by commas, whitespace, or both. Single-line and multi-line forms are both legal.</p>
-
-      <div class="gx-bnf">river Spring { base: 2, peak: 2.0, decay: 0.7 }
-
-river Spring {
-  base: 2
-  peak: 2.0
-  decay: 0.7
-}</div>
-
-      <p>The semicolon after a block is optional. After a bare <code>outlet Name</code> without a block, the semicolon is required.</p>
-      <p>Unknown, missing, or duplicate attributes are parse errors that point at the offending declaration.</p>
+    <section class="gx-section" id="chains">
+      <h2><span class="num">05</span> Chains and arrows</h2>
+      <p>A chain is a sequence of identifiers separated by arrows. There are four arrow forms:</p>
+      <table class="gx-table">
+        <thead><tr><th>Form</th><th>Meaning</th></tr></thead>
+        <tbody>
+          <tr><td>A -&gt; B</td><td>Directed edge from A to B with weight 1.</td></tr>
+          <tr><td>A &lt;- B</td><td>Directed edge from B to A with weight 1.</td></tr>
+          <tr><td>A -[w]-&gt; B</td><td>Directed edge from A to B with weight <i>w</i>.</td></tr>
+          <tr><td>A &lt;-[w]- B</td><td>Directed edge from B to A with weight <i>w</i>.</td></tr>
+        </tbody>
+      </table>
+      <p>Direction can flip mid-chain. The arrangement is purely a readability choice; each adjacent pair compiles to one directed edge with one weight. Examples:</p>
+      <div class="gx-bnf">A -&gt; B -&gt; C;                      // three-node line
+C &lt;-[0.5]- A -[0.5]-&gt; B;             // A splits half to C, half to B
+Spring -&gt; Confluence &lt;- Tributary;   // two sources, one sink</div>
+      <p>Grid mode ignores arrow direction (every edge is bidirectional). All four arrow forms still parse but behave the same.</p>
     </section>
 
-    <section class="gx-section" id="ops">
-      <h2><span class="num">06</span> Operators</h2>
-      <h3>Flow arrow</h3>
-      <div class="gx-bnf">A -&gt; B</div>
-      <p>Directed flow from <code>A</code> to <code>B</code>. A node may appear in any number of chains. If a node has multiple outgoing edges, flow is split evenly between them.</p>
+    <section class="gx-section" id="modes">
+      <h2><span class="num">06</span> Modes</h2>
+      <p>A program selects its mode with a <code>mode</code> declaration at any point in the file. The default is <code>river</code>.</p>
+      <table class="gx-table">
+        <thead><tr><th>Mode</th><th>What flows</th><th><code>print</code> argument</th></tr></thead>
+        <tbody>
+          <tr><td>river</td><td>Water (L/s) through a directed network; rainfall is the driver.</td><td>Rainfall (mm), as a scalar or per-day series. Default 1mm on day 1.</td></tr>
+          <tr><td>markov</td><td>Probability mass through a directed network; weights sum to 1 per source.</td><td>Tick budget (integer). Default 30.</td></tr>
+          <tr><td>grid</td><td>Flow through an undirected network; nodes inject (supply +) or draw (-); levels equilibrate.</td><td>Tick budget (integer). Default 500.</td></tr>
+        </tbody>
+      </table>
     </section>
 
-    <section class="gx-section" id="sem">
-      <h2><span class="num">07</span> Semantics</h2>
+    <section class="gx-section" id="river-sem">
+      <h2><span class="num">07</span> River semantics</h2>
 
       <h3>River hydrograph</h3>
       <p>Given <code>r</code> millimetres of rainfall on day 0, river flow on day <i>n</i> is:</p>
-      <div class="gx-formula">day 1 (rising):  base + 0.3 &times; peak &times; r</div>
-      <div class="gx-formula">day 2 (peak):    base + peak &times; r</div>
-      <div class="gx-formula">day n &ge; 3:     base + peak &times; r &times; decay^(n - 2)</div>
-      <p>With no rainfall, every day is just <code>base</code>.</p>
+      <div class="gx-formula">day 1 (rising):  base + 0.3 &times; peak &times; r
+day 2 (peak):    base + peak &times; r
+day n &ge; 3:     base + peak &times; r &times; decay^(n - 2)</div>
+      <p>With a rainfall series, each non-zero day kicks off its own hydrograph; flow on day <i>n</i> is the superposition of every event so far. A series shorter than ten days is padded with zeros.</p>
 
       <h3>Dam outflow</h3>
-      <p>If current storage is below threshold, outflow is <code>inflow &times; normalRate</code>. Otherwise outflow is <code>inflow &times; openRate</code>. Storage is updated each day by <code>inflow &minus; outflow</code>.</p>
+      <p>If current storage is below threshold, outflow = <code>inflow &times; normalRate</code>. Otherwise outflow = <code>inflow &times; openRate</code>. Storage is updated each day by <code>inflow &minus; outflow</code> with units converted at the boundary (L/s &rarr; ML/day).</p>
 
-      <h3>Outlet accumulation</h3>
-      <p>An outlet sums every unit of flow that arrives at it across the simulation. The total appears in the <code>print</code> output as the cumulative outlet volume.</p>
+      <h3>Edge weights</h3>
+      <p>Edge weights scale flow on that edge: <code>flow_on_edge = upstream_flow &times; weight</code>. Default weight 1. Multiple outgoing edges with default weight all receive 100% of their source (a clone, not a split); use explicit weights to model real splits.</p>
+    </section>
+
+    <section class="gx-section" id="markov-sem">
+      <h2><span class="num">08</span> Markov semantics</h2>
+      <p>Each node carries a non-negative <code>mass</code>. The initial distribution is set with one or more <code>start</code> statements. Each tick, every node's mass is redistributed across its outgoing edges in proportion to weights, then collected at the targets.</p>
+
+      <h3>Validation</h3>
+      <ul>
+        <li>For each node with outgoing edges, the weights must sum to <code>1.0</code> (within <code>1e-6</code>).</li>
+        <li>At least one node must have non-zero initial mass.</li>
+        <li>Every <code>start</code> reference must name a declared node.</li>
+      </ul>
+
+      <h3>Convergence</h3>
+      <p>Simulation halts at the tick budget or when the maximum per-node mass change in a single tick drops below <code>1e-9</code>. The output labels the result as "converged" or "not yet converged".</p>
+
+      <h3>Output</h3>
+      <p><code>map</code> prints the chain as states + transitions grouped by source. <code>print</code> runs the simulator and prints the final distribution.</p>
+    </section>
+
+    <section class="gx-section" id="grid-sem">
+      <h2><span class="num">09</span> Grid semantics</h2>
+      <p>Each node carries a <code>level</code> (initialised to 0) and an optional fixed <code>supply</code>. Each undirected edge with conductance <i>c</i> between A and B carries flow <code>(level<sub>A</sub> &minus; level<sub>B</sub>) &times; c</code>. Each tick:</p>
+      <div class="gx-formula">delta[i] = supply[i] + sum_over_neighbors_j((level[j] - level[i]) &times; c[ij])
+level[i] += 0.1 &times; delta[i]</div>
+      <p>The damping factor <code>0.1</code> keeps the iteration stable for moderately conditioned networks. Convergence is detected when the largest per-node change falls below <code>1e-7</code>.</p>
+
+      <h3>Validation</h3>
+      <ul>
+        <li>Total supply must sum to zero across all nodes (within <code>1e-6</code>). Generators (+) and loads (-) balance.</li>
+        <li>At least one node must have non-zero supply.</li>
+      </ul>
+
+      <h3>Bidirectional edges</h3>
+      <p>Arrow direction is ignored: every edge is undirected. Parallel edges between the same pair of nodes sum their conductances. Weighted-arrow notation specifies conductance.</p>
+
+      <h3>Output</h3>
+      <p><code>map</code> classifies nodes as generator / load / relay and lists undirected edges with conductances. <code>print</code> shows final per-node levels and signed per-edge flows (positive = first-to-second direction).</p>
     </section>
 
     <section class="gx-section" id="reserved">
-      <h2><span class="num">08</span> Reserved words</h2>
+      <h2><span class="num">10</span> Reserved words</h2>
+      <p>Top-level keywords:</p>
       <ul>
-        <li><code>system</code></li>
-        <li><code>river</code></li>
-        <li><code>dam</code></li>
-        <li><code>outlet</code></li>
-        <li><code>list</code></li>
-        <li><code>map</code></li>
-        <li><code>print</code></li>
-        <li><code>help</code></li>
+        <li><code>mode</code>, <code>system</code></li>
+        <li><code>river</code>, <code>dam</code>, <code>outlet</code>, <code>node</code></li>
+        <li><code>start</code>, <code>list</code>, <code>map</code>, <code>print</code>, <code>help</code></li>
       </ul>
     </section>
 
-    <p class="gx-foot">Flox grammar reference, version 0.2. Last updated 08-05-2026.</p>
+    <p class="gx-foot">Flox grammar reference, version 0.4. Last updated 11-05-2026.</p>
 
   </main>
 

@@ -77,10 +77,11 @@
     }
 
     .fx-modes {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+      display: flex;
+      flex-direction: column;
       gap: 24px;
       margin-top: 8px;
+      max-width: 820px;
     }
 
     .fx-mode {
@@ -235,6 +236,8 @@ Shoot -[0.90]-&gt; Miss;
 Goal  -[1.0]-&gt; Goal;
 Miss  -[1.0]-&gt; Miss;
 
+node Pass;  node Shoot;  node Goal;  node Miss;
+
 start Pass 1.0;
 print PassOrShoot 200;</pre>
           <a class="fx-cta" href="/projects/flox/playground/?example=passes">Open in playground</a>
@@ -256,10 +259,10 @@ Hub       -[3]-&gt; NorthCity;
 Hub       -[3]-&gt; SouthCity;
 NorthCity -[1]-&gt; SouthCity;
 
-river Plant     { base: 0, peak: 0, supply:  100 }
-river Hub       { base: 0, peak: 0 }
-river NorthCity { base: 0, peak: 0, supply:  -40 }
-river SouthCity { base: 0, peak: 0, supply:  -60 }
+node Plant     { supply:  100 }
+node Hub;
+node NorthCity { supply:  -40 }
+node SouthCity { supply:  -60 }
 
 print MiniGrid 500;</pre>
           <a class="fx-cta" href="/projects/flox/playground/?example=powergrid">Open in playground</a>

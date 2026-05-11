@@ -64,8 +64,8 @@ function printPath(o, system, path) {
   for (let i = 0; i < path.length; i++) {
     const node = path[i];
     const isDam = system.dams.has(node);
-    const river = system.rivers.get(node);
-    const isOutlet = river ? river.isTerminator() : false;
+    const river2 = system.rivers.get(node);
+    const isOutlet = river2 ? river2.isTerminator() : false;
     const indent = "  ".repeat(i);
     let label = node;
     if (isDam) label += " [DAM]";
@@ -374,6 +374,103 @@ function padLeft(s, n) {
   return " ".repeat(n - s.length) + s;
 }
 
+// src/modes.ts
+var river = {
+  validate(_s) {
+  },
+  run(s, arg) {
+    s.simulate(arg);
+  },
+  defaultArg() {
+    return [1];
+  },
+  printMap(o, s) {
+    printMap(o, s);
+  },
+  printResult(o, s, arg) {
+    printFlowTable(o, s, arg);
+  }
+};
+var markov = {
+  validate(s) {
+    for (const name of s.initialMass.keys()) {
+      if (!s.rivers.has(name) && !s.dams.has(name)) {
+        throw new Error(
+          `start references undeclared node '${name}' in system '${s.name}'.`
+        );
+      }
+    }
+    let totalInitial = 0;
+    for (const m of s.initialMass.values()) totalInitial += m;
+    if (totalInitial === 0) {
+      throw new Error(
+        `Markov system '${s.name}' has no initial mass. Use 'start NodeName 1.0;' to set one.`
+      );
+    }
+    for (const [src, edges] of s.connections) {
+      let sum = 0;
+      const lines = [];
+      for (const e of edges) {
+        sum += e.weight;
+        if (e.op) lines.push(e.op.line);
+      }
+      if (Math.abs(sum - 1) > 1e-6) {
+        const where = lines.length > 0 ? ` (${lines.map((l) => "line " + l).join(", ")})` : "";
+        throw new Error(
+          `Markov system '${s.name}': outgoing weights from '${src}'${where} sum to ${sum}, not 1.0.`
+        );
+      }
+    }
+  },
+  run(s, arg) {
+    const ticks = arg.length > 0 ? Math.max(1, Math.round(arg[0])) : 30;
+    s.simulateMarkov(ticks);
+  },
+  defaultArg() {
+    return [30];
+  },
+  printMap(o, s) {
+    printMarkovMap(o, s);
+  },
+  printResult(o, s, _arg) {
+    printMarkovDistribution(o, s);
+  }
+};
+var grid = {
+  validate(s) {
+    let total = 0;
+    let hasSupply = false;
+    for (const r of s.rivers.values()) {
+      total += r.supply;
+      if (r.supply !== 0) hasSupply = true;
+    }
+    if (!hasSupply) {
+      throw new Error(
+        `Grid system '${s.name}' has no supply set on any node. Use 'node X { supply: N }' for generators (+) or loads (-).`
+      );
+    }
+    if (Math.abs(total) > 1e-6) {
+      throw new Error(
+        `Grid system '${s.name}': supplies do not balance (sum = ${total}). Generators (+) and loads (-) must sum to zero.`
+      );
+    }
+  },
+  run(s, arg) {
+    const ticks = arg.length > 0 ? Math.max(1, Math.round(arg[0])) : 500;
+    s.simulateGrid(ticks);
+  },
+  defaultArg() {
+    return [500];
+  },
+  printMap(o, s) {
+    printGridMap(o, s);
+  },
+  printResult(o, s, _arg) {
+    printGridState(o, s);
+  }
+};
+var STRATEGIES = { river, markov, grid };
+
 // src/runtime.ts
 var River = class {
   constructor(name, baseFlow, peakMultiplier, decayRate, supply = 0) {
@@ -472,19 +569,19 @@ var RiverSystem = class {
   // "A->B" -> flow A→B
   gridTicksRun = 0;
   gridConverged = false;
-  addRiver(river) {
-    this.rivers.set(river.name, river);
+  addRiver(river2) {
+    this.rivers.set(river2.name, river2);
   }
   addDam(dam) {
     this.dams.set(dam.name, dam);
   }
-  addConnection(from, to, weight) {
+  addConnection(from, to, weight, op) {
     let downstream = this.connections.get(from);
     if (!downstream) {
       downstream = [];
       this.connections.set(from, downstream);
     }
-    downstream.push({ target: to, weight });
+    downstream.push({ target: to, weight, op });
   }
   identifyRoots() {
     this.roots = [];
@@ -499,17 +596,17 @@ var RiverSystem = class {
     }
   }
   getFinalOutlet() {
-    for (const river of this.rivers.values()) {
-      if (river.isTerminator()) {
-        const downstream = this.connections.get(river.name);
-        if (!downstream || downstream.length === 0) return river.name;
+    for (const river2 of this.rivers.values()) {
+      if (river2.isTerminator()) {
+        const downstream = this.connections.get(river2.name);
+        if (!downstream || downstream.length === 0) return river2.name;
       }
     }
     return null;
   }
   simulate(rainfall) {
     for (const dam of this.dams.values()) dam.reset();
-    for (const river of this.rivers.values()) river.totalAccumulated = 0;
+    for (const river2 of this.rivers.values()) river2.totalAccumulated = 0;
     for (let day = 0; day < 10; day++) {
       const flowThisDay = /* @__PURE__ */ new Map();
       for (const node of this.getTopologicalOrder()) {
@@ -521,17 +618,17 @@ var RiverSystem = class {
             }
           }
         }
-        const river = this.rivers.get(node);
-        if (river && !river.isTerminator()) {
-          flow += river.calculateFlow(day, rainfall);
+        const river2 = this.rivers.get(node);
+        if (river2 && !river2.isTerminator()) {
+          flow += river2.calculateFlow(day, rainfall);
         }
         const dam = this.dams.get(node);
         if (dam) {
           flow = dam.processFlow(flow);
           dam.dailyOutflow[day] = flow;
-        } else if (river) {
-          river.dailyFlow[day] = flow;
-          if (river.isTerminator()) river.totalAccumulated += flow;
+        } else if (river2) {
+          river2.dailyFlow[day] = flow;
+          if (river2.isTerminator()) river2.totalAccumulated += flow;
         }
         flowThisDay.set(node, flow);
       }
@@ -689,10 +786,7 @@ var Interpreter = class {
       }
       for (const s of this.systems.values()) s.mode = this.fileMode;
       this.resolveChains();
-      for (const s of this.systems.values()) {
-        if (s.mode === "markov") this.validateMarkov(s);
-        if (s.mode === "grid") this.validateGrid(s);
-      }
+      for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s);
       for (const s of this.systems.values()) s.identifyRoots();
       this.phase = 1 /* EXECUTE */;
       this.currentSystem = null;
@@ -739,7 +833,7 @@ var Interpreter = class {
         const sys = this.requireSystem(stmt.name);
         if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
           throw new Error(
-            `Node '${stmt.name.lexeme}' is declared more than once in system '${sys.name}'.`
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
           );
         }
         sys.addRiver(
@@ -758,7 +852,7 @@ var Interpreter = class {
         const sys = this.requireSystem(stmt.name);
         if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
           throw new Error(
-            `Node '${stmt.name.lexeme}' is declared more than once in system '${sys.name}'.`
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
           );
         }
         sys.addDam(
@@ -772,12 +866,23 @@ var Interpreter = class {
         );
         return;
       }
+      case "NodeDecl": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const sys = this.requireSystem(stmt.name);
+        if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
+          throw new Error(
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
+          );
+        }
+        sys.addRiver(new River(stmt.name.lexeme, 0, 0, 0.7, stmt.supply));
+        return;
+      }
       case "OutletDecl": {
         if (this.phase !== 0 /* COLLECT */) return;
         const sys = this.requireSystem(stmt.name);
         if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
           throw new Error(
-            `Node '${stmt.name.lexeme}' is declared more than once in system '${sys.name}'.`
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
           );
         }
         sys.addRiver(new River(stmt.name.lexeme, 0, 0, 0.7));
@@ -803,13 +908,7 @@ var Interpreter = class {
       case "MapStmt": {
         if (this.phase !== 1 /* EXECUTE */) return;
         const sys = this.lookupSystem(stmt.systemName);
-        if (sys.mode === "markov") {
-          printMarkovMap(new Output(this.out), sys);
-        } else if (sys.mode === "grid") {
-          printGridMap(new Output(this.out), sys);
-        } else {
-          printMap(new Output(this.out), sys);
-        }
+        STRATEGIES[sys.mode].printMap(new Output(this.out), sys);
         return;
       }
       case "ListStmt": {
@@ -821,25 +920,11 @@ var Interpreter = class {
       case "PrintStmt": {
         if (this.phase !== 1 /* EXECUTE */) return;
         const sys = this.lookupSystem(stmt.systemName);
-        if (sys.mode === "markov") {
-          let ticks = 30;
-          if (stmt.rainfall != null && stmt.rainfall.length > 0) {
-            ticks = Math.max(1, Math.round(stmt.rainfall[0]));
-          }
-          sys.simulateMarkov(ticks);
-          printMarkovDistribution(new Output(this.out), sys);
-        } else if (sys.mode === "grid") {
-          let ticks = 500;
-          if (stmt.rainfall != null && stmt.rainfall.length > 0) {
-            ticks = Math.max(1, Math.round(stmt.rainfall[0]));
-          }
-          sys.simulateGrid(ticks);
-          printGridState(new Output(this.out), sys);
-        } else {
-          const rainfall = stmt.rainfall ?? [1];
-          sys.simulate(rainfall);
-          printFlowTable(new Output(this.out), sys, rainfall);
-        }
+        const strat = STRATEGIES[sys.mode];
+        const arg = stmt.rainfall ?? strat.defaultArg();
+        strat.run(sys, arg);
+        const o = new Output(this.out);
+        strat.printResult(o, sys, arg);
         return;
       }
       case "HelpStmt": {
@@ -867,52 +952,9 @@ var Interpreter = class {
           const from = arrow.forward ? a : b;
           const to = arrow.forward ? b : a;
           const weight = arrow.weight != null ? arrow.weight : 1;
-          system.addConnection(from.lexeme, to.lexeme, weight);
+          system.addConnection(from.lexeme, to.lexeme, weight, arrow.op);
         }
       }
-    }
-  }
-  validateMarkov(system) {
-    for (const name of system.initialMass.keys()) {
-      if (!this.nodeDefined(system, name)) {
-        throw new Error(
-          `start references undeclared node '${name}' in system '${system.name}'.`
-        );
-      }
-    }
-    let totalInitial = 0;
-    for (const m of system.initialMass.values()) totalInitial += m;
-    if (totalInitial === 0) {
-      throw new Error(
-        `Markov system '${system.name}' has no initial mass. Use 'start NodeName 1.0;' to set one.`
-      );
-    }
-    for (const [src, edges] of system.connections) {
-      let sum = 0;
-      for (const e of edges) sum += e.weight;
-      if (Math.abs(sum - 1) > 1e-6) {
-        throw new Error(
-          `Markov system '${system.name}': outgoing weights from '${src}' sum to ${sum}, not 1.0.`
-        );
-      }
-    }
-  }
-  validateGrid(system) {
-    let total = 0;
-    let hasSupply = false;
-    for (const r of system.rivers.values()) {
-      total += r.supply;
-      if (r.supply !== 0) hasSupply = true;
-    }
-    if (!hasSupply) {
-      throw new Error(
-        `Grid system '${system.name}' has no supply set on any node. Use 'river X { base: 0, peak: 0, supply: N }' for generators (+) or loads (-).`
-      );
-    }
-    if (Math.abs(total) > 1e-6) {
-      throw new Error(
-        `Grid system '${system.name}': supplies do not balance (sum = ${total}). Generators (+) and loads (-) must sum to zero.`
-      );
     }
   }
   nodeDefined(system, name) {
@@ -979,6 +1021,7 @@ var Parser = class {
       if (this.match("RIVER" /* RIVER */)) return this.riverDeclaration();
       if (this.match("DAM" /* DAM */)) return this.damDeclaration();
       if (this.match("OUTLET" /* OUTLET */)) return this.outletDeclaration();
+      if (this.match("NODE" /* NODE */)) return this.nodeDeclaration();
       if (this.match("START" /* START */)) return this.startStatement();
       if (this.match("MAP" /* MAP */)) return this.mapStatement();
       if (this.match("LIST" /* LIST */)) return this.listStatement();
@@ -1079,6 +1122,14 @@ var Parser = class {
       normalRate: attrs.get("normalRate"),
       openRate: attrs.get("openRate")
     };
+  }
+  nodeDeclaration() {
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name.");
+    const attrs = this.check("LEFT_BRACE" /* LEFT_BRACE */) ? this.parseBlock(name) : /* @__PURE__ */ new Map();
+    this.consumeOptional("SEMICOLON" /* SEMICOLON */);
+    this.validateAttrs(name, attrs, [], ["supply"]);
+    const supply = attrs.get("supply") ?? 0;
+    return { kind: "NodeDecl", name, supply };
   }
   outletDeclaration() {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect outlet name.");
@@ -1244,6 +1295,7 @@ var Parser = class {
         case "RIVER" /* RIVER */:
         case "DAM" /* DAM */:
         case "OUTLET" /* OUTLET */:
+        case "NODE" /* NODE */:
         case "START" /* START */:
         case "MAP" /* MAP */:
         case "LIST" /* LIST */:
@@ -1265,6 +1317,7 @@ var KEYWORDS = {
   river: "RIVER" /* RIVER */,
   dam: "DAM" /* DAM */,
   outlet: "OUTLET" /* OUTLET */,
+  node: "NODE" /* NODE */,
   mode: "MODE" /* MODE */,
   start: "START" /* START */
 };

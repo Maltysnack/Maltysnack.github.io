@@ -185,7 +185,7 @@
         ],
       });
       monaco.languages.setMonarchTokensProvider('flox', {
-        keywords: ['system', 'river', 'dam', 'outlet', 'list', 'map', 'print', 'help', 'mode', 'start'],
+        keywords: ['system', 'river', 'dam', 'outlet', 'node', 'list', 'map', 'print', 'help', 'mode', 'start'],
         tokenizer: {
           root: [
             [/\/\/.*$/, 'comment'],
@@ -236,6 +236,7 @@
 //   dam    Name { capacity: N, threshold: N%,
 //                 normalRate: N, openRate: N }
 //   outlet Name;                                       zero-flow accumulator
+//   node   Name { supply: N }                          generic state (markov/grid)
 //
 //   A -> B -> C;                                       connect nodes (chain)
 //   A -[w]-> B                                         weighted forward arrow
@@ -516,10 +517,10 @@ Miss -[1.0]-> Miss;
 
 // Markov mode uses river declarations as plain "state" containers.
 // The numeric attributes are unused but the declaration is required.
-river Pass  { base: 0, peak: 0 }
-river Shoot { base: 0, peak: 0 }
-river Goal  { base: 0, peak: 0 }
-river Miss  { base: 0, peak: 0 }
+node Pass;
+node Shoot;
+node Goal;
+node Miss;
 
 start Pass 1.0;
 
@@ -554,9 +555,9 @@ Rainy  -[0.30]-> Sunny;
 Rainy  -[0.30]-> Cloudy;
 Rainy  -[0.40]-> Rainy;
 
-river Sunny  { base: 0, peak: 0 }
-river Cloudy { base: 0, peak: 0 }
-river Rainy  { base: 0, peak: 0 }
+node Sunny;
+node Cloudy;
+node Rainy;
 
 start Sunny 1.0;
 
@@ -586,10 +587,10 @@ Hub       -[3]-> NorthCity;
 Hub       -[3]-> SouthCity;
 NorthCity -[1]-> SouthCity;
 
-river Plant     { base: 0, peak: 0, supply:  100 }
-river Hub       { base: 0, peak: 0 }
-river NorthCity { base: 0, peak: 0, supply:  -40 }
-river SouthCity { base: 0, peak: 0, supply:  -60 }
+node Plant     { supply:  100 }
+node Hub;
+node NorthCity { supply:  -40 }
+node SouthCity { supply:  -60 }
 
 map MiniGrid;
 print MiniGrid 500;
