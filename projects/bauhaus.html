@@ -269,6 +269,27 @@
           <li>Albers, J. <cite>Interaction of Color</cite>. 1963. (Later, more nuanced colour theory by Itten's successor.)</li>
         </ul>
       </div>
+
+      <div class="bh-technique" data-level="5" hidden>
+        <p class="bh-prose">
+          Level 5 adds the last universal rule: <strong>asymmetric balance</strong>. It is the first rule on this page that judges the composition as a whole rather than placing each shape independently. The generator now generates, evaluates, and generates again until the evaluation passes.
+        </p>
+        <p class="bh-prose">
+          Every shape has a <strong>visual weight</strong> equal to its area multiplied by its colour's intensity. Itten's hierarchy gives yellow the highest luminosity per area, then red, then blue, with black sitting heavy from the dark end. A small yellow square pulls the eye as hard as a much larger blue one. We sum the weighted positions of every shape and divide by total weight, giving the composition's centre of mass.
+        </p>
+        <p class="bh-prose">
+          That centroid is then checked against a <strong>tension zone</strong>: an annulus around the canvas centre, currently 50 to 180 pixels out. Closer in is too symmetric (feels centred, classical, anti-Bauhaus). Farther out is too skewed (feels like the piece is tipping). Compositions whose centroid lands in the zone are kept; the rest are rolled again, up to 60 attempts per click. If nothing passes, the closest-to-passing roll is shown.
+        </p>
+        <p class="bh-prose">
+          The visible result: empty centres become <em>designed</em>. When a composition has a hole in the middle, it is because the weight elsewhere balances it out, not because random chance happened to leave a gap. Klee called this dynamic equilibrium; Kandinsky wrote about it as the play of weights and tensions. Both spent classes on it.
+        </p>
+        <ul class="bh-sources">
+          <li>Klee, P. <cite>Pedagogical Sketchbook</cite>. Bauhaus Book 2, 1925. (Gravity, tension, dynamic equilibrium.)</li>
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Weights, tensions, and composition.)</li>
+          <li>Itten, J. <cite>Design and Form</cite>. 1975 ed. (Vorkurs balance exercises.)</li>
+          <li>Arnheim, R. <cite>Art and Visual Perception</cite>. 1954. (Later formalisation of compositional balance.)</li>
+        </ul>
+      </div>
     </section>
 
   </main>
@@ -308,12 +329,24 @@
         while (node.firstChild) node.removeChild(node.firstChild);
       }
 
+      // Tracks the shapes placed in the current composition, for centroid math.
+      var shapesPlaced = [];
+
       function paint() {
         clear(svg);
+        shapesPlaced = [];
         svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PAPER }));
       }
 
-      /* Place one snapped shape. Used by L02 and L03.
+      // Itten's primary-hierarchy intensities, plus black. Higher = pulls the eye more per unit area.
+      var COLOUR_INTENSITY = {
+        '#F1B81E': 9, // yellow, brightest
+        '#1A1A1A': 8, // black, heavy
+        '#E32119': 6, // red, medium
+        '#21409A': 4  // blue, calmest
+      };
+
+      /* Place one snapped shape. Used by L02 onwards.
          sizes: { circle:[min,max], square:[min,max], triangle:[min,max], bar:[min,max] }
          where the numbers are in grid modules. */
       function placeSnapped(kind, fill, M, COLS, ROWS, sizes) {
@@ -321,18 +354,16 @@
           var r_mod = irand(sizes.circle[0], sizes.circle[1]);
           var cx_g  = irand(r_mod, COLS - r_mod);
           var cy_g  = irand(r_mod, ROWS - r_mod);
-          svg.appendChild(el('circle', {
-            cx: cx_g * M, cy: cy_g * M, r: r_mod * M, fill: fill
-          }));
+          var cx = cx_g * M, cy = cy_g * M, r = r_mod * M;
+          svg.appendChild(el('circle', { cx: cx, cy: cy, r: r, fill: fill }));
+          shapesPlaced.push({ cx: cx, cy: cy, area: Math.PI * r * r, fill: fill });
         } else if (kind === 'square') {
           var s_mod = irand(sizes.square[0], sizes.square[1]);
           var x_g   = irand(0, COLS - s_mod);
           var y_g   = irand(0, ROWS - s_mod);
-          svg.appendChild(el('rect', {
-            x: x_g * M, y: y_g * M,
-            width: s_mod * M, height: s_mod * M,
-            fill: fill
-          }));
+          var s = s_mod * M, sx = x_g * M, sy = y_g * M;
+          svg.appendChild(el('rect', { x: sx, y: sy, width: s, height: s, fill: fill }));
+          shapesPlaced.push({ cx: sx + s / 2, cy: sy + s / 2, area: s * s, fill: fill });
         } else if (kind === 'triangle') {
           var wMod = irand(sizes.triangle[0], sizes.triangle[1]);
           var hMod = irand(sizes.triangle[0], sizes.triangle[1]);
@@ -346,6 +377,8 @@
           else if (orient === 2) pts = (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h) + ' ' + x + ',' + (y + h);
           else                   pts = x + ',' + y + ' ' + x + ',' + (y + h) + ' ' + (x + w) + ',' + (y + h);
           svg.appendChild(el('polygon', { points: pts, fill: fill }));
+          // Bounding-box centre is a reasonable approximation of the triangle's centroid for our purpose.
+          shapesPlaced.push({ cx: x + w / 2, cy: y + h / 2, area: 0.5 * w * h, fill: fill });
         } else { // bar
           var horizontal = Math.random() < 0.5;
           var lenMod   = irand(sizes.bar[0], sizes.bar[1]);
@@ -354,12 +387,22 @@
           var hMod2    = horizontal ? thickMod : lenMod;
           var xg2      = irand(0, COLS - wMod2);
           var yg2      = irand(0, ROWS - hMod2);
-          svg.appendChild(el('rect', {
-            x: xg2 * M, y: yg2 * M,
-            width: wMod2 * M, height: hMod2 * M,
-            fill: fill
-          }));
+          var bx = xg2 * M, by = yg2 * M, bw = wMod2 * M, bh = hMod2 * M;
+          svg.appendChild(el('rect', { x: bx, y: by, width: bw, height: bh, fill: fill }));
+          shapesPlaced.push({ cx: bx + bw / 2, cy: by + bh / 2, area: bw * bh, fill: fill });
         }
+      }
+
+      function weightedCentroid() {
+        var tx = 0, ty = 0, tw = 0;
+        for (var i = 0; i < shapesPlaced.length; i++) {
+          var s = shapesPlaced[i];
+          var w = s.area * (COLOUR_INTENSITY[s.fill] || 5);
+          tx += s.cx * w;
+          ty += s.cy * w;
+          tw += w;
+        }
+        return tw > 0 ? { cx: tx / tw, cy: ty / tw } : { cx: W / 2, cy: H / 2 };
       }
 
       /* ── Level 1: random ───────────────────────────── */
@@ -501,6 +544,37 @@
         buildComposition(pickWeighted, pickAnchorNonYellow);
       }
 
+      /* ── Level 5: asymmetric balance (rejection sampling) ── */
+      // Accept compositions whose weighted centroid lands in this annulus around canvas centre.
+      var BAL_MIN = 50;    // closer than this = too symmetric / centred
+      var BAL_MAX = 180;   // farther than this = too skewed / tipping
+      var MAX_TRIES = 60;
+
+      function genLevel5() {
+        var cx = W / 2, cy = H / 2;
+        var bestSnapshot = null;
+        var bestMiss = Infinity;
+
+        for (var i = 0; i < MAX_TRIES; i++) {
+          buildComposition(pickWeighted, pickAnchorNonYellow);
+          var c = weightedCentroid();
+          var dx = c.cx - cx;
+          var dy = c.cy - cy;
+          var d  = Math.sqrt(dx * dx + dy * dy);
+
+          if (d >= BAL_MIN && d <= BAL_MAX) return; // accepted
+
+          var miss = (d < BAL_MIN) ? (BAL_MIN - d) : (d - BAL_MAX);
+          if (miss < bestMiss) {
+            bestMiss = miss;
+            bestSnapshot = svg.innerHTML;
+          }
+        }
+
+        // Timed out. Restore the closest-to-passing attempt.
+        if (bestSnapshot) svg.innerHTML = bestSnapshot;
+      }
+
       /* ── Level registry ────────────────────────────── */
       var LEVELS = [
         { id: 1, name: 'Random',      generate: genLevel1,
@@ -510,7 +584,9 @@
         { id: 3, name: 'Composition', generate: genLevel3,
           caption: 'Fewer shapes, guaranteed variety, one anchor. Colour is still random.' },
         { id: 4, name: 'Colour',      generate: genLevel4,
-          caption: 'Itten-weighted palette: blue dominant, red mid, yellow rare, black accent. Anchor is never yellow.' }
+          caption: 'Itten-weighted palette: blue dominant, red mid, yellow rare, black accent. Anchor is never yellow.' },
+        { id: 5, name: 'Balance',     generate: genLevel5,
+          caption: 'Weighted centroid pushed off centre but not into a corner. Empty middles are now by design.' }
       ];
 
       var currentLevel = LEVELS[LEVELS.length - 1]; // newest level is default
