@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dessau Vorkurs - Bauhaus - maltysnack</title>
+  <meta name="description" content="Chapter 03 of the Bauhaus exhibition. The Dessau geometric aesthetic, 1925-1928. A five-rule generator from random to composition." />
+  <link rel="stylesheet" href="/style.css" />
+  <script>
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <style>
+    .bh-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      text-decoration: none;
+    }
+    a.bh-eyebrow:hover { color: var(--accent-red); }
+    .bh-eyebrow::before {
+      content: "";
+      width: 24px;
+      height: 1px;
+      background: var(--accent-red);
+      display: inline-block;
+    }
+    .bh-lede {
+      font-size: var(--text-md);
+      color: var(--text);
+      max-width: 640px;
+      line-height: 1.6;
+      margin: 0 0 12px;
+    }
+    .bh-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 56px;
+      font-family: var(--font-mono);
+    }
+    .bh-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .bh-levels {
+      display: flex;
+      gap: 24px;
+      margin: 0 0 16px;
+      border-bottom: 1px solid var(--border-light);
+    }
+    .bh-level-tab {
+      font-family: var(--font-body);
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      background: none;
+      color: var(--text-dim);
+      padding: 10px 2px;
+      cursor: pointer;
+      position: relative;
+      margin-bottom: -1px;
+      border: 0;
+      border-bottom: 2px solid transparent;
+      transition: color 0.12s ease, border-color 0.12s ease;
+    }
+    .bh-level-tab:hover { color: var(--text); }
+    .bh-level-tab.active {
+      color: var(--text);
+      border-bottom-color: var(--accent-red);
+    }
+    .bh-level-tab .lvl-num {
+      font-family: var(--font-mono);
+      color: var(--text-dim);
+      margin-right: 8px;
+      letter-spacing: 0.04em;
+    }
+    .bh-level-tab.active .lvl-num { color: var(--accent-red); }
+
+    .bh-stage {
+      background: #F0EAD6;
+      border: 1px solid var(--border);
+      padding: 24px;
+      margin: 0 0 28px;
+    }
+    .bh-stage svg { display: block; width: 100%; height: auto; }
+
+    .bh-caption {
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 0;
+    }
+
+    .bh-actions {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 0 0 56px;
+      flex-wrap: wrap;
+    }
+    .bh-btn {
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 10px 18px;
+      cursor: pointer;
+      border-radius: 0;
+      transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
+    }
+    .bh-btn:hover { background: var(--accent-red); color: #fff; border-color: var(--accent-red); }
+    .bh-btn:active { transform: translateY(1px); }
+
+    .bh-prose {
+      font-size: var(--text-base);
+      color: var(--text-muted);
+      line-height: 1.7;
+      max-width: 640px;
+      margin: 0 0 14px;
+    }
+    .bh-prose strong { color: var(--text); font-weight: 600; }
+
+    .bh-sources {
+      list-style: none;
+      padding: 0;
+      margin: 18px 0 0;
+      max-width: 640px;
+      font-family: var(--font-mono);
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.02em;
+      line-height: 1.7;
+    }
+    .bh-sources li { padding: 4px 0; border-top: 1px solid var(--border-light); }
+    .bh-sources li:first-child { border-top: none; }
+    .bh-sources cite { font-style: italic; color: var(--text-muted); }
+
+    .bh-section { margin: 56px 0; }
+    .bh-section h2 {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 18px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid var(--border-light);
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="wide">
+
+    <header class="page-header">
+      <a href="/projects/bauhaus.html" class="bh-eyebrow">Bauhaus / Chapter 03</a>
+      <h1 class="page-title">Dessau Vorkurs</h1>
+      <p class="bh-lede">
+        The era we picture when we picture Bauhaus. Geometric primaries on a paper ground, the canonical Vorkurs and typography aesthetic of the school's Dessau years. Five levels build from confetti to composition, one rule at a time.
+      </p>
+      <p class="bh-meta">
+        <span>1925 - 1928</span><span>generator</span><span>vanilla JS / SVG</span>
+      </p>
+    </header>
+
+    <section class="bh-section" data-section="stage">
+      <div class="bh-levels" id="bh-levels" role="tablist" aria-label="Generator level"></div>
+      <div class="bh-stage">
+        <svg id="bh-canvas" viewBox="0 0 800 560" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Generative Bauhaus composition."></svg>
+      </div>
+      <div class="bh-actions">
+        <p class="bh-caption" id="bh-caption">Random shapes in the Bauhaus palette, no compositional rules.</p>
+        <button class="bh-btn" id="bh-new" type="button" aria-label="Generate a new composition">New</button>
+      </div>
+    </section>
+
+    <section class="bh-section" data-section="technique">
+      <h2>Technique</h2>
+
+      <div class="bh-technique" data-level="1">
+        <p class="bh-prose">
+          Even at Level 1 the output is not pure noise. Three things are fixed before the random rolls start: the <strong>palette</strong>, the <strong>shape vocabulary</strong>, and the <strong>ground</strong>. Everything else (count, position, size, which shape goes where) is uniform random.
+        </p>
+        <p class="bh-prose">
+          The palette is the Bauhaus primary triad of red, yellow, and blue, plus black, on an off-white paper ground. This three-colour system was taught by Johannes Itten in the Vorkurs, the preliminary course every Bauhaus student took, and it stuck as the school's signature long after Itten left.
+        </p>
+        <p class="bh-prose">
+          The shape vocabulary is circle, square, and triangle, with thin bars added as a fourth. These three primitives are the canonical Bauhaus forms; Kandinsky's questionnaire at the Bauhaus famously proposed a correspondence between them and the primaries (square to red, circle to blue, triangle to yellow), though the correspondence is more often cited than agreed on. Level 1 ignores that pairing entirely and assigns colour at random.
+        </p>
+        <ul class="bh-sources">
+          <li>Itten, J. <cite>The Art of Color</cite>. 1961. (Vorkurs colour theory.)</li>
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Shape and colour correspondence.)</li>
+          <li>Droste, M. <cite>Bauhaus 1919-1933</cite>. Taschen, 2002. (General visual reference.)</li>
+        </ul>
+      </div>
+
+      <div class="bh-technique" data-level="2" hidden>
+        <p class="bh-prose">
+          Level 2 keeps everything from Level 1 and adds <strong>one rule</strong>: every shape snaps to a grid. The canvas is divided into a 20-column by 14-row lattice of 40-pixel modules, and every position, every edge, and every dimension lands on those grid lines. Nothing free-floats.
+        </p>
+        <p class="bh-prose">
+          The grid is the Bauhaus's most-quoted contribution to graphic design. Walter Gropius set it as the discipline of the typography workshop under Laszlo Moholy-Nagy and later Herbert Bayer: every element on the page is placed by measurement, not by feel. Josef Albers brought the same logic into the painting and weaving workshops. Aligned edges read as <strong>intent</strong>, even when the underlying choices (which shape, which colour, how big) are still random.
+        </p>
+        <p class="bh-prose">
+          Triangles in Level 2 are right-angled with both legs on the grid, in one of four corner orientations. This trades the equilateral triangle's classical balance for clean snap; the equilateral apex falls between grid lines because its height involves the square root of three. We will get equilaterals back later when we can place them deliberately.
+        </p>
+        <ul class="bh-sources">
+          <li>Moholy-Nagy, L. <cite>The New Typography</cite>. 1923. (Grid as discipline.)</li>
+          <li>Muller-Brockmann, J. <cite>Grid Systems in Graphic Design</cite>. 1981. (Post-Bauhaus codification of the same idea.)</li>
+          <li>Bayer, H. <cite>On Typography</cite>. 1967. (Bauhaus typography workshop principles.)</li>
+        </ul>
+      </div>
+
+      <div class="bh-technique" data-level="3" hidden>
+        <p class="bh-prose">
+          Level 3 keeps everything from Level 2 and adds <strong>three rules</strong>, all about what to place rather than where. The grid still binds positions and sizes; what changes is the generator's restraint.
+        </p>
+        <p class="bh-prose">
+          <strong>Fewer shapes.</strong> The count drops from 6-12 to 3-7. Walter Gropius framed this as economy of means: every element on the page has to justify being there. A composition with four well-chosen elements reads as design; one with twelve reads as a sprinkle. This single change is the largest visual jump on the page so far.
+        </p>
+        <p class="bh-prose">
+          <strong>Variety guarantee.</strong> Every composition must contain at least three of the four primitive types (circle, square, triangle, bar). Sameness reads as boredom. Contrast between basic forms is what made the school's compositions feel taut rather than busy.
+        </p>
+        <p class="bh-prose">
+          <strong>Anchor.</strong> One shape per composition is forced significantly larger than the rest. That shape becomes the visual ground; the smaller pieces arrange around it. Composition pedagogy in the Vorkurs and in Klee's classes treated hierarchy as a precondition for unity: every piece needs one element that leads, with the others in support. Colour is still random in Level 3, so the anchor can be any colour, which is why some rolls produce a giant yellow square (not what Bauhaus would do; that's Level 4's job).
+        </p>
+        <ul class="bh-sources">
+          <li>Klee, P. <cite>Pedagogical Sketchbook</cite>. Bauhaus Book 2, 1925. (Composition pedagogy and hierarchy.)</li>
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Composition and emphasis.)</li>
+          <li>Itten, J. <cite>Design and Form: The Basic Course at the Bauhaus</cite>. 1975 ed. (Vorkurs composition exercises.)</li>
+          <li>Gropius, W. <cite>The New Architecture and the Bauhaus</cite>. 1935. (Economy of means.)</li>
+        </ul>
+      </div>
+
+      <div class="bh-technique" data-level="4" hidden>
+        <p class="bh-prose">
+          Level 4 keeps everything from Level 3 and finally addresses colour. Up to now the four palette entries (red, blue, yellow, black) were drawn uniformly: each shape had a one-in-four chance of being any of them. From Level 4 the chances are <strong>unequal</strong>, weighted according to Johannes Itten's colour hierarchy.
+        </p>
+        <p class="bh-prose">
+          Itten taught that the primaries do not have equal visual weight. Yellow has the highest luminosity per area: a small patch of yellow shouts as loudly as a large patch of blue. Blue is the quietest of the three; a lot of it reads as ground rather than figure. Red sits in between. The generator now picks colours with these probabilities: blue 40%, red 30%, yellow 15%, black 15%. The visible result is that yellow becomes punctuation rather than wallpaper.
+        </p>
+        <p class="bh-prose">
+          One extra rule sits on top: the <strong>anchor is never yellow</strong>. The anchor is the composition's largest shape, and a large patch of yellow violates Itten's hierarchy in the most direct way (yellow doesn't ground, it accents). This single constraint kills the "giant yellow square" rolls that plagued Level 3. Anchors fall to blue, red, or black; yellow shows up only on the smaller shapes around them.
+        </p>
+        <ul class="bh-sources">
+          <li>Itten, J. <cite>The Art of Color</cite>. 1961. (Colour weight and the primary hierarchy.)</li>
+          <li>Itten, J. <cite>Elements of Color</cite>. 1970. (Abridged, accessible version of the same theory.)</li>
+          <li>Albers, J. <cite>Interaction of Color</cite>. 1963. (Later, more nuanced colour theory by Itten's successor.)</li>
+        </ul>
+      </div>
+
+      <div class="bh-technique" data-level="5" hidden>
+        <p class="bh-prose">
+          Level 5 adds the last universal rule: <strong>asymmetric balance</strong>. It is the first rule on this page that judges the composition as a whole rather than placing each shape independently. The generator now generates, evaluates, and generates again until the evaluation passes.
+        </p>
+        <p class="bh-prose">
+          Every shape has a <strong>visual weight</strong> equal to its area multiplied by its colour's intensity. Itten's hierarchy gives yellow the highest luminosity per area, then red, then blue, with black sitting heavy from the dark end. A small yellow square pulls the eye as hard as a much larger blue one. We sum the weighted positions of every shape and divide by total weight, giving the composition's centre of mass.
+        </p>
+        <p class="bh-prose">
+          That centroid is then checked against a <strong>tension zone</strong>: an annulus around the canvas centre, currently 50 to 180 pixels out. Closer in is too symmetric (feels centred, classical, anti-Bauhaus). Farther out is too skewed (feels like the piece is tipping). Compositions whose centroid lands in the zone are kept; the rest are rolled again, up to 60 attempts per click. If nothing passes, the closest-to-passing roll is shown.
+        </p>
+        <p class="bh-prose">
+          The visible result: empty centres become <em>designed</em>. When a composition has a hole in the middle, it is because the weight elsewhere balances it out, not because random chance happened to leave a gap. Klee called this dynamic equilibrium; Kandinsky wrote about it as the play of weights and tensions. Both spent classes on it.
+        </p>
+        <ul class="bh-sources">
+          <li>Klee, P. <cite>Pedagogical Sketchbook</cite>. Bauhaus Book 2, 1925. (Gravity, tension, dynamic equilibrium.)</li>
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Weights, tensions, and composition.)</li>
+          <li>Itten, J. <cite>Design and Form</cite>. 1975 ed. (Vorkurs balance exercises.)</li>
+          <li>Arnheim, R. <cite>Art and Visual Perception</cite>. 1954. (Later formalisation of compositional balance.)</li>
+        </ul>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    (function () {
+      var PALETTE = ['#E32119', '#21409A', '#F1B81E', '#1A1A1A'];
+      var PAPER   = '#F0EAD6';
+      var W = 800, H = 560;
+      var SVG_NS = 'http://www.w3.org/2000/svg';
+
+      var svg     = document.getElementById('bh-canvas');
+      var btn     = document.getElementById('bh-new');
+      var tabsEl  = document.getElementById('bh-levels');
+      var caption = document.getElementById('bh-caption');
+      if (!svg) return;
+
+      function rand(min, max) { return min + Math.random() * (max - min); }
+      function pick(arr)      { return arr[Math.floor(Math.random() * arr.length)]; }
+      function irand(min, max){ return min + Math.floor(Math.random() * (max - min + 1)); } // inclusive
+
+      function shuffle(arr) {
+        for (var i = arr.length - 1; i > 0; i--) {
+          var j = Math.floor(Math.random() * (i + 1));
+          var tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+        return arr;
+      }
+
+      function el(name, attrs) {
+        var node = document.createElementNS(SVG_NS, name);
+        for (var k in attrs) node.setAttribute(k, attrs[k]);
+        return node;
+      }
+
+      function clear(node) {
+        while (node.firstChild) node.removeChild(node.firstChild);
+      }
+
+      // Tracks the shapes placed in the current composition, for centroid math.
+      var shapesPlaced = [];
+
+      function paint() {
+        clear(svg);
+        shapesPlaced = [];
+        svg.appendChild(el('rect', { x: 0, y: 0, width: W, height: H, fill: PAPER }));
+      }
+
+      // Itten's primary-hierarchy intensities, plus black. Higher = pulls the eye more per unit area.
+      var COLOUR_INTENSITY = {
+        '#F1B81E': 9, // yellow, brightest
+        '#1A1A1A': 8, // black, heavy
+        '#E32119': 6, // red, medium
+        '#21409A': 4  // blue, calmest
+      };
+
+      /* Place one snapped shape. Used by L02 onwards.
+         sizes: { circle:[min,max], square:[min,max], triangle:[min,max], bar:[min,max] }
+         where the numbers are in grid modules. */
+      function placeSnapped(kind, fill, M, COLS, ROWS, sizes) {
+        if (kind === 'circle') {
+          var r_mod = irand(sizes.circle[0], sizes.circle[1]);
+          var cx_g  = irand(r_mod, COLS - r_mod);
+          var cy_g  = irand(r_mod, ROWS - r_mod);
+          var cx = cx_g * M, cy = cy_g * M, r = r_mod * M;
+          svg.appendChild(el('circle', { cx: cx, cy: cy, r: r, fill: fill }));
+          shapesPlaced.push({ cx: cx, cy: cy, area: Math.PI * r * r, fill: fill });
+        } else if (kind === 'square') {
+          var s_mod = irand(sizes.square[0], sizes.square[1]);
+          var x_g   = irand(0, COLS - s_mod);
+          var y_g   = irand(0, ROWS - s_mod);
+          var s = s_mod * M, sx = x_g * M, sy = y_g * M;
+          svg.appendChild(el('rect', { x: sx, y: sy, width: s, height: s, fill: fill }));
+          shapesPlaced.push({ cx: sx + s / 2, cy: sy + s / 2, area: s * s, fill: fill });
+        } else if (kind === 'triangle') {
+          var wMod = irand(sizes.triangle[0], sizes.triangle[1]);
+          var hMod = irand(sizes.triangle[0], sizes.triangle[1]);
+          var xg   = irand(0, COLS - wMod);
+          var yg   = irand(0, ROWS - hMod);
+          var x = xg * M, y = yg * M, w = wMod * M, h = hMod * M;
+          var orient = irand(0, 3);
+          var pts;
+          if (orient === 0)      pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + x + ',' + (y + h);
+          else if (orient === 1) pts = x + ',' + y + ' ' + (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h);
+          else if (orient === 2) pts = (x + w) + ',' + y + ' ' + (x + w) + ',' + (y + h) + ' ' + x + ',' + (y + h);
+          else                   pts = x + ',' + y + ' ' + x + ',' + (y + h) + ' ' + (x + w) + ',' + (y + h);
+          svg.appendChild(el('polygon', { points: pts, fill: fill }));
+          // Bounding-box centre is a reasonable approximation of the triangle's centroid for our purpose.
+          shapesPlaced.push({ cx: x + w / 2, cy: y + h / 2, area: 0.5 * w * h, fill: fill });
+        } else { // bar
+          var horizontal = Math.random() < 0.5;
+          var lenMod   = irand(sizes.bar[0], sizes.bar[1]);
+          var thickMod = 1;
+          var wMod2    = horizontal ? lenMod   : thickMod;
+          var hMod2    = horizontal ? thickMod : lenMod;
+          var xg2      = irand(0, COLS - wMod2);
+          var yg2      = irand(0, ROWS - hMod2);
+          var bx = xg2 * M, by = yg2 * M, bw = wMod2 * M, bh = hMod2 * M;
+          svg.appendChild(el('rect', { x: bx, y: by, width: bw, height: bh, fill: fill }));
+          shapesPlaced.push({ cx: bx + bw / 2, cy: by + bh / 2, area: bw * bh, fill: fill });
+        }
+      }
+
+      function weightedCentroid() {
+        var tx = 0, ty = 0, tw = 0;
+        for (var i = 0; i < shapesPlaced.length; i++) {
+          var s = shapesPlaced[i];
+          var w = s.area * (COLOUR_INTENSITY[s.fill] || 5);
+          tx += s.cx * w;
+          ty += s.cy * w;
+          tw += w;
+        }
+        return tw > 0 ? { cx: tx / tw, cy: ty / tw } : { cx: W / 2, cy: H / 2 };
+      }
+
+      /* ── Level 1: random ───────────────────────────── */
+      function genLevel1() {
+        paint();
+        var SHAPES = ['circle', 'square', 'triangle', 'bar'];
+        var n = irand(6, 12);
+        for (var i = 0; i < n; i++) {
+          var kind = pick(SHAPES);
+          var fill = pick(PALETTE);
+          var cx   = rand(40, W - 40);
+          var cy   = rand(40, H - 40);
+          var size = rand(40, 220);
+
+          if (kind === 'circle') {
+            svg.appendChild(el('circle', { cx: cx, cy: cy, r: size / 2, fill: fill }));
+          } else if (kind === 'square') {
+            svg.appendChild(el('rect', {
+              x: cx - size / 2, y: cy - size / 2,
+              width: size, height: size, fill: fill
+            }));
+          } else if (kind === 'triangle') {
+            var h = size * Math.sqrt(3) / 2;
+            var pts = [
+              cx + ',' + (cy - h / 2),
+              (cx - size / 2) + ',' + (cy + h / 2),
+              (cx + size / 2) + ',' + (cy + h / 2)
+            ].join(' ');
+            svg.appendChild(el('polygon', { points: pts, fill: fill }));
+          } else { // bar
+            var horizontal = Math.random() < 0.5;
+            var len   = rand(120, 420);
+            var thick = rand(3, 14);
+            svg.appendChild(el('rect', {
+              x: cx - (horizontal ? len : thick) / 2,
+              y: cy - (horizontal ? thick : len) / 2,
+              width:  horizontal ? len   : thick,
+              height: horizontal ? thick : len,
+              fill: fill
+            }));
+          }
+        }
+      }
+
+      /* ── Level 2: grid snap ────────────────────────── */
+      var SHAPES = ['circle', 'square', 'triangle', 'bar'];
+      var L2_SIZES = {
+        circle:   [1, 3],
+        square:   [1, 5],
+        triangle: [2, 5],
+        bar:      [3, 10]
+      };
+
+      function genLevel2() {
+        paint();
+        var M = 40;
+        var COLS = W / M;            // 20
+        var ROWS = H / M;            // 14
+        var n = irand(6, 12);
+        for (var i = 0; i < n; i++) {
+          placeSnapped(pick(SHAPES), pick(PALETTE), M, COLS, ROWS, L2_SIZES);
+        }
+      }
+
+      /* ── Level 3: composition discipline ──────────── */
+      var L3_NORMAL = {
+        circle:   [1, 2],
+        square:   [1, 3],
+        triangle: [2, 3],
+        bar:      [3, 7]
+      };
+      var L3_ANCHOR = {
+        circle:   [3, 4],
+        square:   [4, 5],
+        triangle: [4, 5],
+        bar:      [10, 14]
+      };
+
+      // Shared composition builder. Each level supplies its own colour pickers.
+      function buildComposition(pickFill, pickAnchorFill) {
+        paint();
+        var M = 40;
+        var COLS = W / M;
+        var ROWS = H / M;
+        var n = irand(3, 7);
+
+        // Type list: guarantee at least 3 distinct primitive types.
+        var deck = SHAPES.slice();
+        shuffle(deck);
+        var typeList = [];
+        for (var i = 0; i < n; i++) {
+          typeList.push(i < 3 ? deck[i] : pick(SHAPES));
+        }
+        shuffle(typeList);
+
+        var anchorIdx = irand(0, n - 1);
+
+        for (var j = 0; j < n; j++) {
+          var isAnchor = (j === anchorIdx);
+          var sizes = isAnchor ? L3_ANCHOR : L3_NORMAL;
+          var fill  = isAnchor ? pickAnchorFill() : pickFill();
+          placeSnapped(typeList[j], fill, M, COLS, ROWS, sizes);
+        }
+      }
+
+      function genLevel3() {
+        // Uniform colour, no anchor constraint.
+        var uniform = function () { return pick(PALETTE); };
+        buildComposition(uniform, uniform);
+      }
+
+      /* ── Level 4: colour weighting (Itten) ─────────── */
+      // PALETTE order: [red, blue, yellow, black]
+      // Weights chosen from Itten's hierarchy: blue dominant, red mid, yellow rare, black accent.
+      var L4_WEIGHTS = [30, 40, 15, 15];
+      var YELLOW = '#F1B81E';
+
+      function weightedPick(items, weights) {
+        var total = 0;
+        for (var i = 0; i < weights.length; i++) total += weights[i];
+        var r = Math.random() * total;
+        var acc = 0;
+        for (var k = 0; k < items.length; k++) {
+          acc += weights[k];
+          if (r < acc) return items[k];
+        }
+        return items[items.length - 1];
+      }
+
+      function pickWeighted()       { return weightedPick(PALETTE, L4_WEIGHTS); }
+      function pickAnchorNonYellow() {
+        // Anchor is never yellow: yellow has high luminosity but doesn't ground.
+        var c;
+        do { c = pickWeighted(); } while (c === YELLOW);
+        return c;
+      }
+
+      function genLevel4() {
+        buildComposition(pickWeighted, pickAnchorNonYellow);
+      }
+
+      /* ── Level 5: asymmetric balance (rejection sampling) ── */
+      // Accept compositions whose weighted centroid lands in this annulus around canvas centre.
+      var BAL_MIN = 50;    // closer than this = too symmetric / centred
+      var BAL_MAX = 180;   // farther than this = too skewed / tipping
+      var MAX_TRIES = 60;
+
+      function genLevel5() {
+        var cx = W / 2, cy = H / 2;
+        var bestSnapshot = null;
+        var bestMiss = Infinity;
+
+        for (var i = 0; i < MAX_TRIES; i++) {
+          buildComposition(pickWeighted, pickAnchorNonYellow);
+          var c = weightedCentroid();
+          var dx = c.cx - cx;
+          var dy = c.cy - cy;
+          var d  = Math.sqrt(dx * dx + dy * dy);
+
+          if (d >= BAL_MIN && d <= BAL_MAX) return; // accepted
+
+          var miss = (d < BAL_MIN) ? (BAL_MIN - d) : (d - BAL_MAX);
+          if (miss < bestMiss) {
+            bestMiss = miss;
+            bestSnapshot = svg.innerHTML;
+          }
+        }
+
+        // Timed out. Restore the closest-to-passing attempt.
+        if (bestSnapshot) svg.innerHTML = bestSnapshot;
+      }
+
+      /* ── Level registry ────────────────────────────── */
+      var LEVELS = [
+        { id: 1, name: 'Random',      generate: genLevel1,
+          caption: 'Random shapes in the Bauhaus palette, no compositional rules.' },
+        { id: 2, name: 'Grid',        generate: genLevel2,
+          caption: 'Every shape snapped to a 40-pixel grid. Still random in count, kind, colour, and size.' },
+        { id: 3, name: 'Composition', generate: genLevel3,
+          caption: 'Fewer shapes, guaranteed variety, one anchor. Colour is still random.' },
+        { id: 4, name: 'Colour',      generate: genLevel4,
+          caption: 'Itten-weighted palette: blue dominant, red mid, yellow rare, black accent. Anchor is never yellow.' },
+        { id: 5, name: 'Balance',     generate: genLevel5,
+          caption: 'Weighted centroid pushed off centre but not into a corner. Empty middles are now by design.' }
+      ];
+
+      var currentLevel = LEVELS[LEVELS.length - 1]; // newest level is default
+
+      /* ── Tabs ──────────────────────────────────────── */
+      function renderTabs() {
+        tabsEl.innerHTML = '';
+        LEVELS.forEach(function (lvl) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'bh-level-tab' + (lvl === currentLevel ? ' active' : '');
+          b.setAttribute('role', 'tab');
+          b.setAttribute('aria-selected', lvl === currentLevel ? 'true' : 'false');
+          b.innerHTML = '<span class="lvl-num">L' + String(lvl.id).padStart(2, '0') + '</span>' + lvl.name;
+          b.addEventListener('click', function () { setLevel(lvl); });
+          tabsEl.appendChild(b);
+        });
+      }
+
+      function setLevel(lvl) {
+        currentLevel = lvl;
+        // update tab styling
+        Array.prototype.forEach.call(tabsEl.children, function (child, idx) {
+          var match = LEVELS[idx] === lvl;
+          child.classList.toggle('active', match);
+          child.setAttribute('aria-selected', match ? 'true' : 'false');
+        });
+        // swap technique block
+        document.querySelectorAll('.bh-technique').forEach(function (node) {
+          node.hidden = (Number(node.dataset.level) !== lvl.id);
+        });
+        // update caption + svg label
+        if (caption) caption.textContent = lvl.caption;
+        svg.setAttribute('aria-label',
+          'Generative Bauhaus composition, level ' + lvl.id + ': ' + lvl.name.toLowerCase() + '.');
+        lvl.generate();
+      }
+
+      renderTabs();
+      setLevel(currentLevel);
+      if (btn) btn.addEventListener('click', function () { currentLevel.generate(); });
+    })();
+  </script>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
