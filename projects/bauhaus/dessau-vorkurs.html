@@ -292,6 +292,33 @@
           <li>Arnheim, R. <cite>Art and Visual Perception</cite>. 1954. (Later formalisation of compositional balance.)</li>
         </ul>
       </div>
+
+      <div class="bh-technique" data-level="6" hidden>
+        <p class="bh-prose">
+          Level 6 keeps everything from Level 5 (grid, composition, colour, balance) and expands the <strong>shape vocabulary</strong>. Four new primitives join the original four, doubling the alphabet from four to eight.
+        </p>
+        <p class="bh-prose">
+          <strong>Ellipse.</strong> The circle's flattened cousin. Rare in the typography workshop, central to Kandinsky's later painting; he wrote about the ellipse as the circle "in motion" or "under tension". Adding ellipses immediately broadens the compositional possibilities without leaving the Dessau idiom.
+        </p>
+        <p class="bh-prose">
+          <strong>Diagonal bar.</strong> A bar tilted 45 degrees instead of horizontal or vertical. The diagonal is the school's most-used dynamic device: it cuts the orthogonal grid, introduces tension, and reads as motion. The 1923 Bauhaus exhibition poster by Joost Schmidt is structured around a diagonal axis crossing the grid; nearly every poster of the period uses the trick.
+        </p>
+        <p class="bh-prose">
+          <strong>Half-circle.</strong> A circle bisected along a diameter, with four possible orientations (flat-bottom, flat-top, flat-left, flat-right). Half-circles appear constantly in Bauhaus posters as accents and dividers, often paired with their other half elsewhere in the composition.
+        </p>
+        <p class="bh-prose">
+          <strong>Pie sector.</strong> A quarter-circle wedge, the visible slice of a pie. Itten's colour studies used pie sectors as exemplary shapes: the wheel of colours divided into quarters or thirds. Pie sectors also appear in Vorkurs material studies and in poster design as graphic markers.
+        </p>
+        <p class="bh-prose">
+          All previous rules still apply. The grid still binds positions and sizes. The composition discipline still caps the count and requires variety. The colour weighting still keeps yellow rare and away from anchors. The balance check still requires the weighted centroid to land in the tension zone. The vocabulary grew; the rules did not change.
+        </p>
+        <ul class="bh-sources">
+          <li>Kandinsky, W. <cite>Point and Line to Plane</cite>. Bauhaus Book 9, 1926. (Ellipse and curve as primitives in motion.)</li>
+          <li>Schmidt, J. Bauhaus Exhibition poster, 1923. (Diagonal axis with half-circles.)</li>
+          <li>Bayer, H. Universal typeface, 1925. (Letterforms built from circles, half-circles, bars.)</li>
+          <li>Itten, J. <cite>The Art of Color</cite>. 1961. (Colour wheel as pie sectors.)</li>
+        </ul>
+      </div>
     </section>
 
   </main>
@@ -381,7 +408,7 @@
           svg.appendChild(el('polygon', { points: pts, fill: fill }));
           // Bounding-box centre is a reasonable approximation of the triangle's centroid for our purpose.
           shapesPlaced.push({ cx: x + w / 2, cy: y + h / 2, area: 0.5 * w * h, fill: fill });
-        } else { // bar
+        } else if (kind === 'bar') {
           var horizontal = Math.random() < 0.5;
           var lenMod   = irand(sizes.bar[0], sizes.bar[1]);
           var thickMod = 1;
@@ -392,6 +419,77 @@
           var bx = xg2 * M, by = yg2 * M, bw = wMod2 * M, bh = hMod2 * M;
           svg.appendChild(el('rect', { x: bx, y: by, width: bw, height: bh, fill: fill }));
           shapesPlaced.push({ cx: bx + bw / 2, cy: by + bh / 2, area: bw * bh, fill: fill });
+        } else if (kind === 'ellipse') {
+          var rxMod = irand(sizes.ellipse[0], sizes.ellipse[1]);
+          var ryMod = irand(sizes.ellipse[0], sizes.ellipse[1]);
+          var cxe_g = irand(rxMod, COLS - rxMod);
+          var cye_g = irand(ryMod, ROWS - ryMod);
+          var ecx = cxe_g * M, ecy = cye_g * M, erx = rxMod * M, ery = ryMod * M;
+          svg.appendChild(el('ellipse', { cx: ecx, cy: ecy, rx: erx, ry: ery, fill: fill }));
+          shapesPlaced.push({ cx: ecx, cy: ecy, area: Math.PI * erx * ery, fill: fill });
+        } else if (kind === 'diagbar') {
+          var dLen   = irand(sizes.diagbar[0], sizes.diagbar[1]);
+          var dThick = 1;
+          var halfDiag = Math.ceil(dLen * 0.5 + 1);   // half the diagonal-rotated bounding-box span, in modules
+          var dcx_g = irand(halfDiag, COLS - halfDiag);
+          var dcy_g = irand(halfDiag, ROWS - halfDiag);
+          var dcx = dcx_g * M, dcy = dcy_g * M;
+          var dLenPx = dLen * M, dThickPx = dThick * M;
+          var clockwise = Math.random() < 0.5;
+          svg.appendChild(el('rect', {
+            x: dcx - dLenPx / 2, y: dcy - dThickPx / 2,
+            width: dLenPx, height: dThickPx, fill: fill,
+            transform: 'rotate(' + (clockwise ? 45 : -45) + ' ' + dcx + ' ' + dcy + ')'
+          }));
+          shapesPlaced.push({ cx: dcx, cy: dcy, area: dLenPx * dThickPx, fill: fill });
+        } else if (kind === 'halfcircle') {
+          var hcR = irand(sizes.halfcircle[0], sizes.halfcircle[1]);
+          var hcOrient = irand(0, 3); // 0=flat-bottom, 1=flat-top, 2=flat-right, 3=flat-left
+          var bbW = (hcOrient < 2) ? 2 * hcR : hcR;
+          var bbH = (hcOrient < 2) ? hcR     : 2 * hcR;
+          var hcXg = irand(0, COLS - bbW);
+          var hcYg = irand(0, ROWS - bbH);
+          var hx = hcXg * M, hy = hcYg * M, hr = hcR * M;
+          var hPath;
+          if (hcOrient === 0)      hPath = 'M ' + hx + ' ' + (hy + hr) + ' A ' + hr + ' ' + hr + ' 0 0 1 ' + (hx + 2*hr) + ' ' + (hy + hr) + ' Z';
+          else if (hcOrient === 1) hPath = 'M ' + (hx + 2*hr) + ' ' + hy + ' A ' + hr + ' ' + hr + ' 0 0 1 ' + hx + ' ' + hy + ' Z';
+          else if (hcOrient === 2) hPath = 'M ' + (hx + hr) + ' ' + hy + ' A ' + hr + ' ' + hr + ' 0 0 1 ' + (hx + hr) + ' ' + (hy + 2*hr) + ' Z';
+          else                     hPath = 'M ' + hx + ' ' + (hy + 2*hr) + ' A ' + hr + ' ' + hr + ' 0 0 1 ' + hx + ' ' + hy + ' Z';
+          svg.appendChild(el('path', { d: hPath, fill: fill }));
+          shapesPlaced.push({
+            cx: hx + bbW * M / 2,
+            cy: hy + bbH * M / 2,
+            area: 0.5 * Math.PI * hr * hr,
+            fill: fill
+          });
+        } else if (kind === 'sector') {
+          var sR = irand(sizes.sector[0], sizes.sector[1]);
+          var sOrient = irand(0, 3); // 0=opens TR, 1=opens BR, 2=opens BL, 3=opens TL
+          var sXg = irand(0, COLS - sR);
+          var sYg = irand(0, ROWS - sR);
+          var sx = sXg * M, sy = sYg * M, sr = sR * M;
+          // The sector occupies an sr-by-sr bounding box. Its centre (tip) sits at one corner.
+          var sPath;
+          if (sOrient === 0) {
+            // tip at bottom-left, opens top-right
+            sPath = 'M ' + sx + ' ' + (sy + sr) + ' L ' + (sx + sr) + ' ' + (sy + sr) + ' A ' + sr + ' ' + sr + ' 0 0 0 ' + sx + ' ' + sy + ' Z';
+          } else if (sOrient === 1) {
+            // tip at top-left, opens bottom-right
+            sPath = 'M ' + sx + ' ' + sy + ' L ' + (sx + sr) + ' ' + sy + ' A ' + sr + ' ' + sr + ' 0 0 1 ' + sx + ' ' + (sy + sr) + ' Z';
+          } else if (sOrient === 2) {
+            // tip at top-right, opens bottom-left
+            sPath = 'M ' + (sx + sr) + ' ' + sy + ' L ' + (sx + sr) + ' ' + (sy + sr) + ' A ' + sr + ' ' + sr + ' 0 0 0 ' + sx + ' ' + sy + ' Z';
+          } else {
+            // tip at bottom-right, opens top-left
+            sPath = 'M ' + (sx + sr) + ' ' + (sy + sr) + ' L ' + sx + ' ' + (sy + sr) + ' A ' + sr + ' ' + sr + ' 0 0 1 ' + (sx + sr) + ' ' + sy + ' Z';
+          }
+          svg.appendChild(el('path', { d: sPath, fill: fill }));
+          shapesPlaced.push({
+            cx: sx + sr / 2,
+            cy: sy + sr / 2,
+            area: 0.25 * Math.PI * sr * sr,
+            fill: fill
+          });
         }
       }
 
@@ -483,20 +581,21 @@
         bar:      [10, 14]
       };
 
-      // Shared composition builder. Each level supplies its own colour pickers.
-      function buildComposition(pickFill, pickAnchorFill) {
+      // Shared composition builder. Each level supplies its own colour pickers, vocabulary, and sizes.
+      function buildCompositionWith(pickFill, pickAnchorFill, shapeVocab, normalSizes, anchorSizes) {
         paint();
         var M = 40;
         var COLS = W / M;
         var ROWS = H / M;
         var n = irand(3, 7);
 
-        // Type list: guarantee at least 3 distinct primitive types.
-        var deck = SHAPES.slice();
+        // Type list: guarantee at least 3 distinct primitive types (or fewer if vocab is smaller).
+        var varietyN = Math.min(3, shapeVocab.length, n);
+        var deck = shapeVocab.slice();
         shuffle(deck);
         var typeList = [];
         for (var i = 0; i < n; i++) {
-          typeList.push(i < 3 ? deck[i] : pick(SHAPES));
+          typeList.push(i < varietyN ? deck[i] : pick(shapeVocab));
         }
         shuffle(typeList);
 
@@ -504,7 +603,7 @@
 
         for (var j = 0; j < n; j++) {
           var isAnchor = (j === anchorIdx);
-          var sizes = isAnchor ? L3_ANCHOR : L3_NORMAL;
+          var sizes = isAnchor ? anchorSizes : normalSizes;
           var fill  = isAnchor ? pickAnchorFill() : pickFill();
           placeSnapped(typeList[j], fill, M, COLS, ROWS, sizes);
         }
@@ -513,7 +612,7 @@
       function genLevel3() {
         // Uniform colour, no anchor constraint.
         var uniform = function () { return pick(PALETTE); };
-        buildComposition(uniform, uniform);
+        buildCompositionWith(uniform, uniform, SHAPES, L3_NORMAL, L3_ANCHOR);
       }
 
       /* ── Level 4: colour weighting (Itten) ─────────── */
@@ -543,7 +642,7 @@
       }
 
       function genLevel4() {
-        buildComposition(pickWeighted, pickAnchorNonYellow);
+        buildCompositionWith(pickWeighted, pickAnchorNonYellow, SHAPES, L3_NORMAL, L3_ANCHOR);
       }
 
       /* ── Level 5: asymmetric balance (rejection sampling) ── */
@@ -552,29 +651,59 @@
       var BAL_MAX = 180;   // farther than this = too skewed / tipping
       var MAX_TRIES = 60;
 
-      function genLevel5() {
-        var cx = W / 2, cy = H / 2;
+      function rejectionSample(buildFn) {
+        var ccx = W / 2, ccy = H / 2;
         var bestSnapshot = null;
         var bestMiss = Infinity;
-
         for (var i = 0; i < MAX_TRIES; i++) {
-          buildComposition(pickWeighted, pickAnchorNonYellow);
+          buildFn();
           var c = weightedCentroid();
-          var dx = c.cx - cx;
-          var dy = c.cy - cy;
+          var dx = c.cx - ccx;
+          var dy = c.cy - ccy;
           var d  = Math.sqrt(dx * dx + dy * dy);
-
           if (d >= BAL_MIN && d <= BAL_MAX) return; // accepted
-
           var miss = (d < BAL_MIN) ? (BAL_MIN - d) : (d - BAL_MAX);
           if (miss < bestMiss) {
             bestMiss = miss;
             bestSnapshot = svg.innerHTML;
           }
         }
-
-        // Timed out. Restore the closest-to-passing attempt.
         if (bestSnapshot) svg.innerHTML = bestSnapshot;
+      }
+
+      function genLevel5() {
+        rejectionSample(function () {
+          buildCompositionWith(pickWeighted, pickAnchorNonYellow, SHAPES, L3_NORMAL, L3_ANCHOR);
+        });
+      }
+
+      /* ── Level 6: extended vocabulary ──────────────── */
+      var L6_SHAPES = ['circle', 'square', 'triangle', 'bar', 'ellipse', 'diagbar', 'halfcircle', 'sector'];
+      var L6_NORMAL = {
+        circle:     [1, 2],
+        square:     [1, 3],
+        triangle:   [2, 3],
+        bar:        [3, 7],
+        ellipse:    [1, 3],
+        diagbar:    [3, 7],
+        halfcircle: [2, 3],
+        sector:     [2, 3]
+      };
+      var L6_ANCHOR = {
+        circle:     [3, 4],
+        square:     [4, 5],
+        triangle:   [4, 5],
+        bar:        [10, 14],
+        ellipse:    [3, 5],
+        diagbar:    [10, 14],
+        halfcircle: [4, 5],
+        sector:     [4, 5]
+      };
+
+      function genLevel6() {
+        rejectionSample(function () {
+          buildCompositionWith(pickWeighted, pickAnchorNonYellow, L6_SHAPES, L6_NORMAL, L6_ANCHOR);
+        });
       }
 
       /* ── Level registry ────────────────────────────── */
@@ -588,7 +717,9 @@
         { id: 4, name: 'Colour',      generate: genLevel4,
           caption: 'Itten-weighted palette: blue dominant, red mid, yellow rare, black accent. Anchor is never yellow.' },
         { id: 5, name: 'Balance',     generate: genLevel5,
-          caption: 'Weighted centroid pushed off centre but not into a corner. Empty middles are now by design.' }
+          caption: 'Weighted centroid pushed off centre but not into a corner. Empty middles are now by design.' },
+        { id: 6, name: 'Vocabulary',  generate: genLevel6,
+          caption: 'Four new primitives: ellipse, diagonal bar, half-circle, pie sector. All other rules still apply.' }
       ];
 
       var currentLevel = LEVELS[LEVELS.length - 1]; // newest level is default
