@@ -683,7 +683,6 @@ var RiverSystem = class {
   // (supply + net_inflow) over time with a damping factor dt.
   simulateGrid(maxTicks) {
     const EPSILON = 1e-7;
-    const DT = 0.1;
     const nodes = [...this.rivers.keys(), ...this.dams.keys()];
     const edgeC = /* @__PURE__ */ new Map();
     const edgeEnds = /* @__PURE__ */ new Map();
@@ -694,6 +693,15 @@ var RiverSystem = class {
         if (!edgeEnds.has(key)) edgeEnds.set(key, [from, e.target]);
       }
     }
+    const nodeSum = /* @__PURE__ */ new Map();
+    for (const [key, ends] of edgeEnds) {
+      const c = edgeC.get(key);
+      nodeSum.set(ends[0], (nodeSum.get(ends[0]) ?? 0) + c);
+      nodeSum.set(ends[1], (nodeSum.get(ends[1]) ?? 0) + c);
+    }
+    let maxNodeSum = 0;
+    for (const v of nodeSum.values()) maxNodeSum = Math.max(maxNodeSum, v);
+    const DT = maxNodeSum > 0 ? Math.min(0.1, 0.5 / maxNodeSum) : 0.1;
     this.gridLevel.clear();
     for (const n of nodes) this.gridLevel.set(n, 0);
     this.gridTicksRun = 0;
