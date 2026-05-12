@@ -250,6 +250,74 @@
       font-weight: calc(400 + var(--fill, 0) * 300);
       transition: color 120ms ease, font-weight 120ms ease;
     }
+
+    /* Top scorers list: ranked rows, similar look to the paths table. */
+    .wc-scorers {
+      display: grid;
+      grid-template-columns: 2.2em minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(110px, 1fr) 4em 5em;
+      column-gap: 0.6rem;
+      row-gap: 0.4rem;
+      margin-top: 0.8rem;
+      font-size: 0.88rem;
+    }
+    .wc-scorers .header {
+      color: var(--text-muted);
+      font-size: 0.72rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    .wc-scorers .header.right { text-align: right; }
+    .wc-scorers .rank {
+      text-align: right;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-scorers .player {
+      display: flex;
+      align-items: center;
+      gap: 0.45rem;
+      min-width: 0;
+    }
+    .wc-scorers .player .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .wc-scorers .team-cell, .wc-scorers .club-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      color: var(--text-muted);
+      min-width: 0;
+    }
+    .wc-scorers .team-cell .name, .wc-scorers .club-cell .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-scorers .pos {
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.78rem;
+    }
+    .wc-scorers .predicted {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
+      );
+    }
+    @media (max-width: 720px) {
+      .wc-scorers { grid-template-columns: 2em 1fr 4em 5em; }
+      .wc-scorers .team-cell, .wc-scorers .club-cell,
+      .wc-scorers .header.team-h, .wc-scorers .header.club-h { display: none; }
+    }
     .wc-paths .name .team-name {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -902,6 +970,7 @@
             <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
             <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
             <button class="wc-btn" data-tab="table" type="button">Table</button>
+            <button class="wc-btn" data-tab="scorers" type="button">Top scorers</button>
           </div>
           <!-- Mode + Model toggles are benched for now. The defaults
                (average aggregation, latest model) run as before; the
@@ -946,6 +1015,20 @@
         <div class="wc-paths-wrap">
           <div class="wc-paths" id="wc-paths"></div>
         </div>
+      </div>
+
+      <!-- Top scorers view: predicted WC golden boot contenders.
+           Toggled visible when STATE.tab === 'scorers'. -->
+      <div id="wc-scorers-view" hidden>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
+          Predicted top scorers, ranked by expected WC goals. Each player's
+          2025-26 club goals-per-match rate is multiplied by their team's
+          expected tournament matches and a position weight (forwards
+          weighted highest). Coverage grows as more WC squads are announced
+          and more club season pages are scraped; players whose clubs do
+          not yet have season stats are excluded.
+        </p>
+        <div class="wc-scorers" id="wc-scorers"></div>
       </div>
     </section>
 
@@ -1572,17 +1655,22 @@
       function renderTournamentView() {
         const root = document.getElementById('wc-tournament-view');
         const tableView = document.getElementById('wc-table-view');
+        const scorersView = document.getElementById('wc-scorers-view');
 
         // Swap which container is visible based on the active sub-tab.
         const isTable = STATE.tab === 'table';
-        root.hidden = isTable;
+        const isScorers = STATE.tab === 'scorers';
+        root.hidden = isTable || isScorers;
         if (tableView) tableView.hidden = !isTable;
+        if (scorersView) scorersView.hidden = !isScorers;
 
         if (isTable) {
-          // Table rendering is handled by renderPaths(), kicked here too
-          // so the colour scale picks up any future model changes when
-          // Custom model is re-enabled.
           renderPaths();
+          root.innerHTML = '';
+          return;
+        }
+        if (isScorers) {
+          renderScorers();
           root.innerHTML = '';
           return;
         }
@@ -1707,6 +1795,48 @@
           const show = q.length === 0 ? rank < N_VISIBLE_TABLE : team.includes(q);
           el.classList.toggle('wc-hidden', !show);
         });
+      }
+
+      // ── Renderers: Top scorers ───────────────────────────────────
+      function renderScorers() {
+        const container = document.getElementById('wc-scorers');
+        if (!container) return;
+        const data = DATA.scorers;
+        if (!data || !data.top_20 || data.top_20.length === 0) {
+          container.innerHTML =
+            '<p style="color:var(--text-muted);font-size:0.85rem;">' +
+            'Top-scorer prediction needs (1) WC squads to be announced and ' +
+            '(2) club season stats to be scraped. Both are filling in over ' +
+            'the next 2-3 weeks as more squads land.</p>';
+          return;
+        }
+        const top = data.top_20;
+        const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
+        container.innerHTML = `
+          <div class="header">#</div>
+          <div class="header">Player</div>
+          <div class="header team-h">National team</div>
+          <div class="header club-h">Club</div>
+          <div class="header" style="text-align:center;">Pos</div>
+          <div class="header right">Pred. goals</div>
+        ` + top.map((p, i) => {
+          const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
+          return `
+            <div class="rank">${i + 1}</div>
+            <div class="player">
+              <span class="name" title="${p.name}">${p.name}</span>
+            </div>
+            <div class="team-cell">
+              ${flagImg(p.team)}
+              <span class="name" title="${p.team}">${p.team}</span>
+            </div>
+            <div class="club-cell">
+              <span class="name" title="${p.club}">${p.club}</span>
+            </div>
+            <div class="pos">${p.position || '-'}</div>
+            <div class="predicted" style="--fill: ${fill}">${p.predicted_wc_goals.toFixed(1)}</div>
+          `;
+        }).join('');
       }
 
       // ── Controls ─────────────────────────────────────────────────
@@ -2013,13 +2143,19 @@
       }
 
       // ── Init ─────────────────────────────────────────────────────
+      // Top scorers JSON is optional; older builds won't have it. We
+      // fetch it lazily and don't fail the whole page if 404.
       Promise.all([
         fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' }).then(r => r.json()),
         fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup-top-scorers.json', { cache: 'no-cache' })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null),
       ])
-        .then(([bracket, sim]) => {
+        .then(([bracket, sim, scorers]) => {
           DATA.bracket = bracket;
           DATA.sim = sim;
+          DATA.scorers = scorers;
           Object.assign(FLAGS, sim.flags || {});
 
           bracket.groups.forEach(g => {
