@@ -103,6 +103,16 @@
     #pg-graph g.pg-node-load      circle { fill: #d04848; stroke: #962e2e; }
     #pg-graph g.pg-node-relay     circle { fill: var(--border-light); stroke: var(--text-dim); }
     #pg-graph g.pg-faded { opacity: 0.18; }
+    /* Disabled (via 'disable' statement): dimmed + dashed stroke. */
+    #pg-graph g.pg-node-disabled { opacity: 0.3; }
+    #pg-graph g.pg-node-disabled circle,
+    #pg-graph g.pg-node-disabled rect {
+      stroke-dasharray: 3 2;
+    }
+    #pg-graph .pg-edge.pg-edge-disabled {
+      opacity: 0.25;
+      stroke-dasharray: 4 3;
+    }
     .pg-pane-header {
       font-size: var(--text-xs);
       font-weight: 600;
@@ -245,7 +255,7 @@
         ],
       });
       monaco.languages.setMonarchTokensProvider('flox', {
-        keywords: ['system', 'river', 'dam', 'outlet', 'node', 'list', 'map', 'print', 'help', 'mode', 'start'],
+        keywords: ['system', 'river', 'dam', 'outlet', 'node', 'list', 'map', 'print', 'help', 'mode', 'start', 'disable'],
         tokenizer: {
           root: [
             [/\/\/.*$/, 'comment'],
@@ -304,6 +314,8 @@
 //   A <- B          A <-[w]- B                         backward arrows
 //
 //   start NodeName 1.0;                                markov: initial mass
+//   disable NodeName;                                  remove a node from this run
+//   disable A -> B;                                    remove a specific edge
 //
 //   list  Name;                                        print connections
 //   map   Name;                                        print ASCII diagram
@@ -496,6 +508,10 @@ node WestHwy;
 node Downtown;
 node Office     { supply: -45 }
 node Industrial { supply: -45 }
+
+// Scenario: the express shortcut from EastHwy to Office is closed for
+// roadworks today. Comment out the next line to see normal flow.
+disable EastHwy -> Office;
 
 map MorningCommute;
 print MorningCommute 500;
@@ -829,7 +845,7 @@ print MorningCommute 500;
         if (!a || !b) return;
 
         const path = document.createElementNS(SVG_NS, 'path');
-        path.setAttribute('class', 'pg-edge');
+        path.setAttribute('class', 'pg-edge' + (edge.disabled ? ' pg-edge-disabled' : ''));
         path.dataset.from = edge.from;
         path.dataset.to = edge.to;
 
@@ -868,7 +884,7 @@ print MorningCommute 500;
         }
 
         path.setAttribute('d', d);
-        if (edge.directed) path.setAttribute('marker-end', 'url(#arrow)');
+        if (edge.directed && !edge.disabled) path.setAttribute('marker-end', 'url(#arrow)');
         parent.appendChild(path);
 
         // Weight label, only if not default.
@@ -914,7 +930,9 @@ print MorningCommute 500;
 
       function renderNode(parent, node, pos) {
         const g = document.createElementNS(SVG_NS, 'g');
-        g.setAttribute('class', `pg-node pg-node-${node.kind}`);
+        let cls = `pg-node pg-node-${node.kind}`;
+        if (node.disabled) cls += ' pg-node-disabled';
+        g.setAttribute('class', cls);
         g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
         g.dataset.name = node.name;
 
