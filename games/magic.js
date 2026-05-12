@@ -216,7 +216,40 @@
     return Math.max(0.6, Math.min(1.8, mult));
   }
 
-  // Compute one tier's signal for every candidate. Returns Map(name -> {pCond, robustness, signal, coDecks, decksWithSel}).
+  // Recency decay within the pair-stats window. Decks closer to "now" get a
+  // small bonus over decks at the edge of the 12-week window. Helps the score
+  // respond to meta shifts faster when a new set drops without changing the
+  // window itself. Linear: 1.25x at the most-recent week, 1.0x at cutoff.
+  // Stored as a function of week string so we can cache.
+  let _weekDecayCache = null;
+  function deckRecencyMult(week) {
+    if (!week || !meta) return 1;
+    if (!_weekDecayCache) {
+      _weekDecayCache = new Map();
+      const cutoff = meta.pair_window_first_week;
+      const last = meta.last_week;
+      if (cutoff && last) {
+        const cutMs = new Date(cutoff).getTime();
+        const lastMs = new Date(last).getTime();
+        const span = lastMs - cutMs;
+        // Pre-fill nothing; computed on demand
+        _weekDecayCache.set("__span__", span);
+        _weekDecayCache.set("__cut__", cutMs);
+      }
+    }
+    const span = _weekDecayCache.get("__span__");
+    const cut = _weekDecayCache.get("__cut__");
+    if (!span || !cut) return 1;
+    const t = new Date(week).getTime();
+    const frac = Math.max(0, Math.min(1, (t - cut) / span));
+    return 1 + 0.25 * frac;
+  }
+
+  // Compute one tier's signal for every candidate.
+  // Returns Map(name -> {pCond, robustness, signal, coDecks, decksWithSel, tierLift}).
+  // Now also computes per-tier baseline prevalence for "tier lift" (pCond / pBase
+  // within this tier). Exposes how "selection-specific" a card is vs. just being
+  // a popular tier-wide pick.
   function computeTierSignal(tierDecks, tier) {
     const result = new Map();
     if (!tierDecks.length || !selection.length) return result;
@@ -224,7 +257,18 @@
     const selSet = new Set(selection);
     const n = selection.length;
 
-    // Total weighted "selection presence" within this tier
+    // Per-tier baseline: weighted prevalence of each card in this tier's pool
+    let tierTotalW = 0;
+    const tierBaseW = new Map();
+    for (const d of tierDecks) {
+      const w = (d.weight || 1) * deckRecencyMult(d.week);
+      tierTotalW += w;
+      for (const c of d.main || []) {
+        tierBaseW.set(c.name, (tierBaseW.get(c.name) || 0) + w);
+      }
+    }
+
+    // Selection-aware co-occurrence
     let totalSelW = 0;
     const candidateCo = new Map();
     for (const d of tierDecks) {
@@ -234,7 +278,8 @@
       for (const s of selection) if (names.has(s)) matched++;
       if (matched === 0) continue;
       const selFrac = matched / n;
-      const matchWeight = (d.weight || 1) * Math.pow(selFrac, COVERAGE_POWER);
+      const recencyMult = deckRecencyMult(d.week);
+      const matchWeight = (d.weight || 1) * recencyMult * Math.pow(selFrac, COVERAGE_POWER);
       totalSelW += matchWeight;
       for (const c of main) {
         if (selSet.has(c.name)) continue;
@@ -247,12 +292,13 @@
     for (const [name, coW] of candidateCo) {
       const pCond = coW / totalSelW;
       const robustness = Math.min(Math.sqrt(coW / ref), 1);
-      // Within-tier signal: just the (robustness-weighted) conditional probability.
-      // We're asking "given a tier-T deck with the selection, how often is the
-      // candidate also there." No lift / strength normalisation here; that's
-      // applied in the final blend via the novelty discount on baseline P(B).
       const signal = pCond * robustness;
-      result.set(name, { pCond, robustness, signal, coDecks: coW });
+      // Within-tier lift: how much above the tier's own baseline is this card?
+      // pCond/pBase. >1 means specifically tied to the selection; ~1 means
+      // just popular in the tier regardless of selection.
+      const pBaseTier = (tierBaseW.get(name) || 0) / Math.max(tierTotalW, 1);
+      const tierLift = pBaseTier > 0 ? pCond / pBaseTier : 0;
+      result.set(name, { pCond, robustness, signal, coDecks: coW, tierLift, pBaseTier });
     }
     return result;
   }
@@ -340,6 +386,8 @@
         tierBreakdown[tier] = {
           pCond: Math.round(entry.pCond * 1000) / 1000,
           coDecks: Math.round(entry.coDecks * 10) / 10,
+          tierLift: Math.round(entry.tierLift * 100) / 100,
+          pBaseTier: Math.round(entry.pBaseTier * 1000) / 1000,
         };
       }
       if (weightUsed === 0) continue;
@@ -1129,6 +1177,29 @@
   // The wrapper is a <div role="button"> rather than <button>, because the score
   // badge needs to be a separate clickable element (links inside <button> get
   // auto-relocated by the HTML parser, which moves the score outside the thumb).
+  // Modal copy count from cards.json's copy_hist_main. Returns a short string
+  // like "×4" or "×1–2" or "×3–4" reflecting how the card typically plays.
+  // Helps the user know if a 95-scoring card is a 4-of staple or a 1-of flex.
+  function copyCountHint(name) {
+    const c = cardData(name);
+    const hist = c && c.copy_hist_main;
+    if (!hist) return "";
+    const buckets = ["1","2","3","4"].map(k => [k, hist[k] || 0]);
+    const total = buckets.reduce((s, [, v]) => s + v, 0);
+    if (total < 4) return "";  // too few samples to call
+    // Sort buckets by count desc
+    buckets.sort((a, b) => b[1] - a[1]);
+    const top = buckets[0][1];
+    // Modes: which counts have ≥ 70% of the top bucket?
+    const modes = buckets.filter(([, v]) => v >= top * 0.7).map(([k]) => parseInt(k)).sort();
+    if (modes.length === 1) return `×${modes[0]}`;
+    if (modes.length >= 2) {
+      const lo = modes[0], hi = modes[modes.length - 1];
+      return lo === hi ? `×${lo}` : `×${lo}–${hi}`;
+    }
+    return "";
+  }
+
   function renderThumb(item) {
     const name = item.name;
     const im = img(name);
@@ -1136,9 +1207,10 @@
     const score = typeof item.score === "number" ? item.score : null;
     const cls = score !== null ? scoreColorClass(score) : "";
     const showBreakdown = breakdownFor === name;
+    const copies = score !== null ? copyCountHint(name) : "";
     return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" data-preview="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
-      ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="button" tabindex="0">${score}</span>` : ""}
+      ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="button" tabindex="0">${score}${copies ? `<span class="thumb-copies">${copies}</span>` : ""}</span>` : ""}
       ${showBreakdown ? renderBreakdownPopover(name) : ""}
     </div>`;
   }
@@ -1166,15 +1238,24 @@
                      b.tagMult < 0.98 ? `−${Math.round((1 - b.tagMult) * 100)}% balance malus` : "";
 
     // Tier rows: ladder / premier / pt_main / pt_top8
+    // Show both per-tier conditional and the in-tier lift (pCond / pBase_tier).
+    // Lift > 1.5 marked as "specific" (this card is tied to selection beyond
+    // its own tier popularity). Lift ~1 means "just popular in this tier."
     const tierLabel = { ladder: "Ladder", premier: "Premier", pt_main: "PT main", pt_top8: "PT Top 8" };
     const tierRows = ["pt_top8", "pt_main", "premier", "ladder"]
       .filter(t => b.tiers && b.tiers[t])
       .map(t => {
         const row = b.tiers[t];
         const pct = Math.round(row.pCond * 100);
+        const liftStr = row.tierLift && row.tierLift > 0
+          ? (row.tierLift >= 1.5 ? `×${row.tierLift.toFixed(1)} specific`
+             : row.tierLift >= 1.1 ? `×${row.tierLift.toFixed(1)}`
+             : `×${row.tierLift.toFixed(1)} ambient`)
+          : "";
         return `<div class="bd-tier-row">
           <span class="bd-tier-label">${tierLabel[t]}</span>
           <span class="bd-tier-val">${pct}% <span class="bd-tier-co">(${row.coDecks})</span></span>
+          <span class="bd-tier-lift">${liftStr}</span>
         </div>`;
       }).join("");
 

@@ -339,6 +339,17 @@ body:has(.magic-page) .main {
   padding: 2px 0;
 }
 .thumb-score:hover { transform: translateY(-1px); }
+/* Modal copy-count hint sits next to the score, smaller and dimmer. Tells
+   you whether a 95-score card is a 4-of or a 1-of in winning lists. */
+.thumb-copies {
+  display: inline-block;
+  margin-left: 4px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-dim);
+  letter-spacing: 0;
+}
 /* Color is on the text only, gradient from bright green to muted grey */
 .thumb-score.score-90 { color: #2cc26b; }
 .thumb-score.score-80 { color: #6dd083; }
@@ -512,8 +523,9 @@ body:has(.magic-page) .main {
   margin-bottom: 4px;
 }
 .bd-tier-row {
-  display: flex;
-  justify-content: space-between;
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 8px;
   align-items: baseline;
   font-size: var(--text-xs);
   padding: 2px 0;
@@ -526,6 +538,14 @@ body:has(.magic-page) .main {
   font-variant-numeric: tabular-nums;
 }
 .bd-tier-co { color: var(--text-dim); font-weight: 400; font-size: 10px; }
+.bd-tier-lift {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  min-width: 70px;
+  text-align: right;
+}
 .bd-tier-note {
   font-size: var(--text-xs);
   color: var(--accent-red);
