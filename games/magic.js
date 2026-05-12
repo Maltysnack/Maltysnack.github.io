@@ -26,7 +26,7 @@
   let searchQuery = "";      // live search input value, drives results strip
   let viewMode = "fits";     // "fits" (top-fit recs) or "off-meta" (lift inversion)
   let breakdownFor = null;   // which card has its score-breakdown popover open
-  let inspectFor = null;     // which card has its inspect popover open
+  let shapePanelOpen = false; // selection shape settings panel toggle
   let tagFilter = null;      // optional tag to filter recs to (e.g. "removal")
   let tagBoosts = new Set(); // tags currently boosted (multi-select)
   let tagInteractionMode = "boost"; // "boost" or "filter"
@@ -55,7 +55,6 @@
     selection = [...selection, name];
     listsOpen = false;
     searchQuery = "";                         // clear the search so the user sees the new state
-    inspectFor = null;
     invalidateScores();
     writeHash();
     render();
@@ -525,13 +524,13 @@
   function renderMatchingListsTag() {
     if (!selection.length) return "";
     if (!decks) {
-      return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">find matching pro lists ↓</button></div>`;
+      return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">find pro player lists with your selection ↓</button></div>`;
     }
     const n = matchingDecks().length;
     if (n === 0) {
-      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no winning lists contain all of these together</span></div>`;
+      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no pro player list contains all of these together</span></div>`;
     }
-    return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">${n} matching pro list${n === 1 ? "" : "s"} ↓</button></div>`;
+    return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">${n} pro player list${n === 1 ? "" : "s"} with your selection ↓</button></div>`;
   }
 
   function renderSearchResultsSection() {
@@ -556,10 +555,16 @@
   }
 
   function renderSearch() {
+    const hasShape = selection.length > 0;
+    const cog = hasShape
+      ? `<button class="search-cog ${shapePanelOpen ? "active" : ""}" id="search-cog" title="selection shape & filters" aria-label="open shape and filters">⚙</button>`
+      : "";
     return `
       <div class="search-shell">
         <input class="search-input" type="text" placeholder="search…  try t:creature  c:ur  cmc<=3" autocomplete="off" spellcheck="false" value="${escapeAttr(searchQuery)}">
+        ${cog}
       </div>
+      ${hasShape && shapePanelOpen ? renderShapeWidget() : ""}
     `;
   }
 
@@ -710,7 +715,6 @@
     const title = viewMode === "off-meta" ? "Off the beaten path" : "Travels with";
 
     return `
-      ${renderShapeWidget()}
       <div class="stacked">
         ${sectionWithToggle(title, subtitle, renderGrid(items))}
         ${renderListsSection()}
@@ -853,8 +857,8 @@
     // Always offer the toggle when selection is non-empty. Lazy-load decks_raw on first open.
     const matchCount = decks ? matchingDecks().length : null;
     const label = matchCount === null
-      ? "view matching lists"
-      : `${matchCount} matching list${matchCount === 1 ? "" : "s"}`;
+      ? "find pro player lists with your selection"
+      : `${matchCount} pro player list${matchCount === 1 ? "" : "s"} with your selection`;
     const arrow = listsOpen ? "▴" : "▾";
     return `
       <section class="sec lists-sec">
@@ -925,7 +929,7 @@
     const byKey = groupAndSortCards(cards);
     const renderLine = (c) => {
       const inSel = selection.includes(c.name);
-      return `<li class="${inSel ? "deck-line-hit" : ""}"><span class="deck-line-q">${c.qty}</span><button class="deck-line-name" data-name="${escapeAttr(c.name)}">${escapeHtml(c.name)}</button></li>`;
+      return `<li class="${inSel ? "deck-line-hit" : ""}"><span class="deck-line-q">${c.qty}</span><button class="deck-line-name" data-name="${escapeAttr(c.name)}" data-preview="${escapeAttr(c.name)}">${escapeHtml(c.name)}</button></li>`;
     };
     const sections = [];
     for (const g of TYPE_GROUPS) {
@@ -1020,40 +1024,13 @@
     const score = typeof item.score === "number" ? item.score : null;
     const cls = score !== null ? scoreColorClass(score) : "";
     const showBreakdown = breakdownFor === name;
-    const showInspect = inspectFor === name;
-    return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}${showInspect ? " inspect-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" title="${escapeAttr(name)}">
+    return `<div class="thumb${inSel ? " in-sel" : ""}${showBreakdown ? " breakdown-open" : ""}" role="button" tabindex="0" data-name="${escapeAttr(name)}" data-preview="${escapeAttr(name)}" title="${escapeAttr(name)}">
       ${im ? `<img class="thumb-img" src="${im}" alt="" loading="lazy">` : `<div class="thumb-img thumb-noimg">${escapeHtml(name)}</div>`}
-      <button class="thumb-inspect" data-inspect="${escapeAttr(name)}" title="inspect card without adding" aria-label="inspect">i</button>
       ${score !== null ? `<span class="thumb-score ${cls}" data-score-link role="button" tabindex="0">${score}</span>` : ""}
       ${showBreakdown ? renderBreakdownPopover(name) : ""}
-      ${showInspect ? renderInspectPopover(name) : ""}
     </div>`;
   }
 
-  function renderInspectPopover(name) {
-    const sf = scryfall[name] || {};
-    const c = cardData(name);
-    const tags = (sf.tags || []).filter(t => t !== "spell" && !t.startsWith("kw-"));
-    const oracle = (sf.oracle_text || "").replace(/\n/g, "<br>");
-    let stats = "";
-    if (c) {
-      const parts = [];
-      if (c.recent_main_decks > 0) parts.push(`${c.recent_main_decks} winning decks (12wk)`);
-      if (c.tier) parts.push(`tier: ${c.tier}`);
-      if (parts.length) stats = `<div class="ip-stats">${parts.join(" · ")}</div>`;
-    } else if (sf.legal_standard) {
-      stats = `<div class="ip-stats">Standard-legal, no winning lists yet</div>`;
-    } else if (sf.released_at) {
-      stats = `<div class="ip-stats">not Standard-legal</div>`;
-    }
-    return `<div class="ip-popover" data-bd="1">
-      <div class="ip-name">${escapeHtml(name)}</div>
-      <div class="ip-type">${escapeHtml(sf.mana_cost || "")} ${escapeHtml(sf.type_line || "")}</div>
-      ${tags.length ? `<div class="ip-tags">${tags.slice(0,8).map(t => `<span class="bd-tag">${escapeHtml(t)}</span>`).join("")}</div>` : ""}
-      ${oracle ? `<div class="ip-oracle">${oracle}</div>` : ""}
-      ${stats}
-    </div>`;
-  }
 
   function renderBreakdownPopover(name) {
     const entry = synergyEntry(name);
@@ -1163,49 +1140,24 @@
         }
       });
     });
-    // Click outside any open breakdown / inspect popover closes it
-    if (breakdownFor || inspectFor) {
+    // Click outside any open breakdown popover closes it
+    if (breakdownFor) {
       const closeOnOutside = (e) => {
-        if (!e.target.closest(".bd-popover") &&
-            !e.target.closest(".ip-popover") &&
-            !e.target.closest("[data-score-link]") &&
-            !e.target.closest("[data-inspect]")) {
+        if (!e.target.closest(".bd-popover") && !e.target.closest("[data-score-link]")) {
           breakdownFor = null;
-          inspectFor = null;
           document.removeEventListener("click", closeOnOutside, true);
           render();
         }
       };
       setTimeout(() => document.addEventListener("click", closeOnOutside, true), 0);
     }
-    // Inspect buttons on each thumb. After opening, set data-pop-edge based
-    // on the thumb's position so the popover stays in viewport.
-    $$("[data-inspect]").forEach((el) => {
-      el.addEventListener("click", (e) => {
-        e.stopPropagation();
-        const name = el.dataset.inspect;
-        inspectFor = inspectFor === name ? null : name;
-        breakdownFor = null;
-        render();
-        // After re-render, position the popover relative to viewport
-        if (inspectFor === name) {
-          requestAnimationFrame(() => {
-            const thumb = document.querySelector(`.thumb[data-name="${CSS.escape(name)}"]`);
-            if (!thumb) return;
-            const rect = thumb.getBoundingClientRect();
-            const vw = window.innerWidth;
-            const popWidth = 280;
-            // If centered popover would clip right edge → anchor right
-            if (rect.left + rect.width / 2 + popWidth / 2 > vw - 12) {
-              thumb.dataset.popEdge = "right";
-            } else if (rect.left + rect.width / 2 - popWidth / 2 < 12) {
-              thumb.dataset.popEdge = "left";
-            } else {
-              delete thumb.dataset.popEdge;
-            }
-          });
-        }
-      });
+    // Hover preview wiring (covers grid thumbs AND deck-list rows)
+    setupHoverPreview();
+    // Settings cog opens / closes the selection shape panel
+    const cog = $("#search-cog");
+    if (cog) cog.addEventListener("click", () => {
+      shapePanelOpen = !shapePanelOpen;
+      render();
     });
     // Shape widget chips
     $$("[data-shape-tag]").forEach((el) => {
@@ -1445,6 +1397,72 @@
     allNames = Array.from(new Set(seenImage.values())).sort();
     dataReady = true;
     render(); // re-render now that we have full data
+  }
+
+  // ── Hover preview ──
+  // Single floating element shows a big version of any card you hover over.
+  // Works for grid thumbs and pro-list card names. Positions itself near the
+  // hovered element, flipping side to stay in viewport.
+  let _previewEl = null;
+  function getPreviewEl() {
+    if (_previewEl) return _previewEl;
+    _previewEl = document.createElement("div");
+    _previewEl.className = "card-preview";
+    _previewEl.style.display = "none";
+    document.body.appendChild(_previewEl);
+    return _previewEl;
+  }
+  function positionPreview(rect) {
+    const el = _previewEl;
+    if (!el) return;
+    const pw = 280;        // matches CSS width
+    const ph = 391;        // 488/680 aspect ratio
+    const margin = 12;
+    const vw = window.innerWidth, vh = window.innerHeight;
+    // Prefer right side of element
+    let left = rect.right + margin;
+    if (left + pw > vw - margin) left = rect.left - pw - margin;
+    if (left < margin) left = Math.max(margin, vw - pw - margin);
+    let top = rect.top + (rect.height / 2) - (ph / 2);
+    if (top + ph > vh - margin) top = vh - ph - margin;
+    if (top < margin) top = margin;
+    el.style.left = left + "px";
+    el.style.top = top + "px";
+  }
+  function showPreview(name, anchor) {
+    const sf = scryfall && scryfall[name];
+    if (!sf) return;
+    const src = sf.image || sf.image_small;
+    if (!src) return;
+    const el = getPreviewEl();
+    el.innerHTML = `<img src="${src}" alt="">`;
+    el.style.display = "block";
+    positionPreview(anchor.getBoundingClientRect());
+  }
+  function hidePreview() {
+    if (_previewEl) _previewEl.style.display = "none";
+  }
+  // Delegated mouseover/mouseout. Re-binding per render would be needed
+  // wireCardClicks runs each render, but mouseover delegation can be on body
+  // and survive across renders. So this only attaches once.
+  let _previewBound = false;
+  function setupHoverPreview() {
+    if (_previewBound) return;
+    _previewBound = true;
+    document.body.addEventListener("mouseover", (e) => {
+      const tgt = e.target.closest("[data-preview]");
+      if (tgt) showPreview(tgt.dataset.preview, tgt);
+    });
+    document.body.addEventListener("mouseout", (e) => {
+      const tgt = e.target.closest("[data-preview]");
+      if (!tgt) return;
+      // Only hide if moving outside the previewable element entirely
+      const to = e.relatedTarget;
+      if (to && tgt.contains(to)) return;
+      hidePreview();
+    });
+    // Also hide on scroll so it doesn't dangle in the wrong place
+    window.addEventListener("scroll", hidePreview, { passive: true });
   }
 
   // ── Boot ──
