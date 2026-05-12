@@ -320,12 +320,118 @@ def main():
         })
     catalysts.sort(key=lambda r: r["shell_delta"], reverse=True)
 
+    # ── Tier-divergent picks (what pros chose that ladder hasn't) ──
+    # Cards whose share in PT main is significantly higher than in ladder.
+    # The ratio surfaces "the cutting edge that hasn't trickled down."
+    pt_main_decks_recent = [d for d in decks if d.get("weight") == 5
+                            and d.get("week", "") >= (pair_cutoff_week or "")]
+    ladder_decks_recent = [d for d in decks if d.get("weight") == 1
+                           and d.get("week", "") >= (pair_cutoff_week or "")]
+    pt_main_total = sum(d["weight"] for d in pt_main_decks_recent)
+    ladder_total = sum(d["weight"] for d in ladder_decks_recent)
+    pt_main_prev = defaultdict(float)
+    ladder_prev = defaultdict(float)
+    for d in pt_main_decks_recent:
+        for c in d.get("main", []):
+            pt_main_prev[c["name"]] += d["weight"]
+    for d in ladder_decks_recent:
+        for c in d.get("main", []):
+            ladder_prev[c["name"]] += d["weight"]
+
+    pt_picks = []
+    for name in pt_main_prev:
+        if name in lands:
+            continue
+        pt_share = pt_main_prev[name] / pt_main_total if pt_main_total else 0
+        lad_share = ladder_prev.get(name, 0) / ladder_total if ladder_total else 0
+        if pt_share < 0.05:  # too small a PT presence to be meaningful
+            continue
+        spread = pt_share - lad_share
+        if spread < 0.05:    # PT lead must be at least 5pp over ladder
+            continue
+        ratio = (pt_share / lad_share) if lad_share > 0 else float("inf")
+        pt_picks.append({
+            "name": name,
+            "pt_share": round(pt_share, 4),
+            "ladder_share": round(lad_share, 4),
+            "spread": round(spread, 4),
+            "ratio_capped": min(ratio, 999) if ratio != float("inf") else 999,
+        })
+    # Sort by ratio (∞ first), then by spread
+    pt_picks.sort(key=lambda r: (r["ratio_capped"], r["spread"]), reverse=True)
+
+    # ── Bridge cards (cross-archetype: high lift to two partners who rarely meet) ──
+    # A bridge B has P(X|B) and P(Y|B) both high, but P(Y|X) is low.
+    # These are cards that move across archetypes without locking into one.
+    #
+    # Compute everything directly from the recent deck pool. pairs.json is
+    # truncated to top-N companions per card, so its cross-lookup misses many
+    # real pairs; for this analysis we need the full matrix.
+    recent_decks = [d for d in decks if d.get("week", "") >= (pair_cutoff_week or "")]
+    # full weighted prevalence in recent pool
+    full_prev = defaultdict(float)
+    for d in recent_decks:
+        w = d["weight"]
+        for c in d.get("main", []):
+            full_prev[c["name"]] += w
+    # weighted pair co-occurrence
+    full_co = defaultdict(lambda: defaultdict(float))
+    for d in recent_decks:
+        w = d["weight"]
+        names = list({c["name"] for c in d.get("main", [])})
+        for i, a in enumerate(names):
+            for b in names[i + 1:]:
+                full_co[a][b] += w
+                full_co[b][a] += w
+
+    bridges = []
+    for a, ap in pairs.items():
+        if a in lands:
+            continue
+        if cards.get(a, {}).get("recent_main_decks", 0) < MIN_SUPPORT:
+            continue
+        strong = []
+        for r in ap.get("companions", []):
+            if r["name"] in lands:
+                continue
+            if r["p_b_given_a"] >= 0.4 and cards.get(r["name"], {}).get("recent_main_decks", 0) >= MIN_SUPPORT:
+                strong.append((r["p_b_given_a"], r["name"]))
+        if len(strong) < 2:
+            continue
+        best_pair = None
+        best_cross = 1.0
+        for i in range(len(strong)):
+            for j in range(i + 1, len(strong)):
+                p1, b1 = strong[i]
+                p2, b2 = strong[j]
+                co_b1b2 = full_co[b1].get(b2, 0)
+                p_b1 = full_prev[b1]
+                cross = co_b1b2 / p_b1 if p_b1 > 0 else 0
+                if cross < best_cross:
+                    best_cross = cross
+                    best_pair = (b1, b2, p1, p2, cross)
+        if best_pair is None or best_cross > 0.25:
+            continue
+        b1, b2, p1, p2, cross = best_pair
+        bridges.append({
+            "name": a,
+            "left": b1,
+            "right": b2,
+            "p_left": round(p1, 3),
+            "p_right": round(p2, 3),
+            "cross_p": round(cross, 3),
+            "score": round((p1 * p2) - cross, 3),
+        })
+    bridges.sort(key=lambda r: r["score"], reverse=True)
+
     explore = {
         "pillars": pillars[:18],
         "risen": [r for r in risen if r["delta"] > 0.005][:18],
         "disappeared": [r for r in disappeared if r["delta"] < -0.005][:12],
         "side_risers": side_risers[:12],
         "catalysts": catalysts[:12],
+        "pt_picks": pt_picks[:14],
+        "bridges": bridges[:10],
         "recent_window_weeks": recent,
         "prior_window_weeks": prior,
     }
@@ -365,8 +471,8 @@ def main():
         f"{label}={sum(1 for c in cards.values() if c['tier']==label)}"
         for _, label in TIER_BOUNDARIES + [(0, "rare")]))
     print(f"  pillars={len(explore['pillars'])} risen={len(explore['risen'])} "
-          f"disappeared={len(explore['disappeared'])} "
-          f"side_risers={len(explore['side_risers'])} catalysts={len(explore['catalysts'])}")
+          f"catalysts={len(explore['catalysts'])} pt_picks={len(explore['pt_picks'])} "
+          f"bridges={len(explore['bridges'])}")
 
 
 if __name__ == "__main__":
