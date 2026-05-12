@@ -235,11 +235,21 @@
     .wc-paths .cell-num {
       text-align: right;
       font-variant-numeric: tabular-nums;
+      /* Per-cell heat-map background. --fill is set inline by the
+         renderer based on column-normalised probability. */
+      background: rgba(180, 150, 80, calc(var(--fill, 0) * 0.32));
+      padding: 0.18rem 0.4rem;
+      border-radius: 2px;
+      transition: background 120ms ease;
     }
     .wc-paths .v {
       color: var(--text-muted);
     }
-    .wc-paths .v.high { color: var(--text-body, inherit); }
+    /* Text colour ramps with intensity: muted at low fill, body at high. */
+    .wc-paths .cell-num[data-tier="1"] .v { color: rgba(var(--text-rgb, 180,170,160), 0.85); }
+    .wc-paths .cell-num[data-tier="2"] .v { color: var(--text-body, inherit); }
+    .wc-paths .cell-num[data-tier="3"] .v { color: var(--text-body, inherit); font-weight: 600; }
+    .wc-paths .cell-num[data-tier="4"] .v { color: var(--text-strong, inherit); font-weight: 700; }
     .wc-paths .name .team-name {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -1628,16 +1638,38 @@
           <div class="header right">Champion</div>
         `;
 
+        // Per-column max across all teams (not just visible top 24) so
+        // the heat-map scale stays stable when the user filters. Use a
+        // small floor so tiny columns (e.g. p_champion) don't look maxed
+        // out by a single 1.5% value when everyone else is near zero.
+        const probKeys = ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'];
+        const colMax = {};
+        probKeys.forEach(k => {
+          const m = Math.max(...stats.map(s => s[k] || 0));
+          colMax[k] = Math.max(m, 5);  // floor so column always has some shading
+        });
+        // Tier the normalised value into 5 visual bands (0..4) so text
+        // colour ramps in discrete steps, matching the background fill.
+        const tierOf = (frac) => {
+          if (frac < 0.15) return 0;
+          if (frac < 0.4)  return 1;
+          if (frac < 0.65) return 2;
+          if (frac < 0.85) return 3;
+          return 4;
+        };
+
         stats.forEach((s, i) => {
           const dh = darkHorseSet.has(s.team);
-          const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           // dataset.team includes "dark horse" so the search input matches it
           const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
           const meta = { 'data-team': searchKey, 'data-rank': String(i) };
-          const addCell = (className, html) => {
+          const addCell = (className, html, extraAttrs) => {
             const c = document.createElement('div');
             c.className = 'wc-paths-row ' + className;
             for (const [k, v] of Object.entries(meta)) c.setAttribute(k, v);
+            if (extraAttrs) {
+              for (const [k, v] of Object.entries(extraAttrs)) c.setAttribute(k, v);
+            }
             c.innerHTML = html;
             container.appendChild(c);
           };
@@ -1647,9 +1679,19 @@
           addCell('team-rating', s.rating);
           // 3. Dark horse tag (always renders the cell so the column lines up)
           addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
-          // 4-8. Probabilities
-          ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
-            addCell('cell-num', fmt(s[k]));
+          // 4-8. Probabilities, with per-column heat-map fill + text tier.
+          probKeys.forEach(k => {
+            const v = s[k] || 0;
+            const frac = Math.min(v / colMax[k], 1);  // 0..1 within column
+            const tier = tierOf(frac);
+            // Square-root scale for the fill: low-but-nonzero values still
+            // get visible shading instead of looking like 0.
+            const fill = Math.sqrt(frac).toFixed(3);
+            const html = `<span class="v">${v.toFixed(1)}%</span>`;
+            addCell('cell-num', html, {
+              'style': `--fill: ${fill}`,
+              'data-tier': String(tier),
+            });
           });
         });
         applyPathsFilter('');
