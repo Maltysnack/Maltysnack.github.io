@@ -217,99 +217,114 @@
 
       <p>
         For a candidate card <em>B</em> being scored against a selection
-        <em>S</em> = {a₁, a₂, ..., aₙ}, here's what gets computed.
+        <em>S</em>, here's what gets computed.
       </p>
 
-      <h3>1. Lift, per pair</h3>
+      <h3>1. Tier separation</h3>
 
       <p>
-        Lift answers <em>"how much more often than chance do these two
-        cards appear together?"</em> For one pair (A, B):
+        The recent deck pool is split into four sub-pools by source quality:
       </p>
 
-      <pre class="ss-formula">lift(A, B) = P(A and B) / (P(A) × P(B))</pre>
+      <ul>
+        <li><strong>Pro Tour Top 8</strong> (weight 10): currently 8 decks.</li>
+        <li><strong>Pro Tour main field</strong> (weight 5).</li>
+        <li><strong>Premier event Top cuts</strong> (weight 3).</li>
+        <li><strong>Ladder Bo3 6-0</strong> (weight 1): the baseline volume.</li>
+      </ul>
 
       <p>
-        If A is in 10% of decks and B is in 10% of decks, you'd expect them
-        together in 1% of decks by chance. If they're actually together in
-        8%, lift is 8. We compute lift for the candidate against each card
-        in your selection, capped at 30 to dampen tiny-denominator noise.
+        Each tier produces its own conditional probability for the candidate:
+        <em>"of the tier-T decks containing my selection, how often does the
+        candidate also appear?"</em> Then we blend across tiers, giving
+        tiers' votes proportional to a configurable weight.
       </p>
 
-      <h3>2. Geometric mean across selection</h3>
+      <pre class="ss-formula">TIER_BLEND = { ladder: 0.15, premier: 0.20, pt_main: 0.30, pt_top8: 0.35 }</pre>
 
       <p>
-        With multiple cards in selection, we take the geometric mean of
-        the lifts. Geometric (not arithmetic) because lifts are
-        multiplicative; one near-zero pairing should drag the score down
-        more than one big pairing should pull it up.
-      </p>
-
-      <pre class="ss-formula">geomLift = (lift₁ × lift₂ × ... × liftₙ)^(1/n)</pre>
-
-      <h3>3. Sample-size dampening</h3>
-
-      <p>
-        A pair seen together in 3 decks is fragile data, even if its
-        lift is 50. A pair seen in 200 decks is robust. We multiply by
-        log(1 + total co-occurrence count) to give well-supported pairs
-        more weight than statistical flukes.
-      </p>
-
-      <pre class="ss-formula">sample = log(1 + coOccurrenceCount)</pre>
-
-      <h3>4. Coverage</h3>
-
-      <p>
-        If you've selected 4 cards and the candidate only pairs (in the
-        data) with 2 of them, that's weaker than a candidate that pairs
-        with all 4. Coverage is the fraction of selected cards the
-        candidate actually has data for, raised to a power that softens
-        the curve so single-pair recommendations aren't completely
-        flattened.
-      </p>
-
-      <pre class="ss-formula">coverage = (cards_paired_with / |selection|)^0.7</pre>
-
-      <h3>5. Novelty discount</h3>
-
-      <p>
-        This is the part that distinguishes us from "just look at the
-        Pro Tour Top 8." If a card is already in 30% of all winning
-        decks (a meta staple, like Cavern of Souls or Llanowar Elves),
-        we don't need an algorithm to tell you to play it. The novelty
-        factor pushes those cards down so the more interesting hits
-        rise to the top.
-      </p>
-
-      <pre class="ss-formula">novelty = 1 / (1 + 8 × ownRecentPrevalence)</pre>
-
-      <p>
-        At 1% prevalence: novelty ≈ 0.93 (essentially full credit).<br>
-        At 5% prevalence: novelty ≈ 0.71.<br>
-        At 15% prevalence: novelty ≈ 0.45.<br>
-        At 30% prevalence: novelty ≈ 0.29 (heavily discounted).
+        Why this matters: a card that appears in 2 of 8 PT Top 8 decks
+        running your selection is a 25% conditional probability at the
+        top tier. With the old all-tiers-merged math, that signal got
+        diluted to ~5% by the much-larger ladder pool. With per-tier
+        blending, the Top 8's 25% carries its own weight regardless of
+        ladder sample.
       </p>
 
       <p>
-        The 8 is tunable. Higher means more aggressive demotion of meta
-        staples; lower means we just rank by raw signal. We chose 8 because
-        it produces a curve that still recommends true staples when
-        they're genuinely the best fit, but lets surprising hits surface
-        when they have strong lift.
+        Tiers with no data for the candidate don't dilute. The blend
+        renormalises across the active tiers, so a card in PT Top 8 only
+        still gets a strong score if no other tier has been tested.
+      </p>
+
+      <h3>2. Per-tier robustness</h3>
+
+      <p>
+        Each tier has its own "full confidence" threshold proportional to
+        typical sample size:
+      </p>
+
+      <pre class="ss-formula">robustness_T = min(sqrt(co_decks_T / REF_T), 1)
+REF: ladder=100, premier=15, pt_main=10, pt_top8=3</pre>
+
+      <p>
+        With only 8 total PT Top 8 decks, 2 of them is half the full-
+        confidence threshold (3). That's a real signal. With 3000 ladder
+        decks, 2 of them is essentially noise. Per-tier references stop
+        ladder math from punishing legitimate PT signals.
+      </p>
+
+      <h3>3. Partial selection coverage</h3>
+
+      <p>
+        Decks in a tier that contain only some of your selected cards
+        contribute proportionally:
+      </p>
+
+      <pre class="ss-formula">match_weight = (cards_matched / |selection|)² × deck_weight</pre>
+
+      <p>
+        A deck containing all 3 of your 3 selected cards contributes its
+        full weight. A deck containing 2 of 3 contributes 44%. A deck
+        containing 1 of 3 contributes 11%. A deck containing none
+        contributes nothing. This is computed within each tier separately.
+      </p>
+
+      <h3>4. Novelty discount</h3>
+
+      <p>
+        Computed on overall pool prevalence (not per-tier). Pushes meta
+        staples down so interesting hits surface.
+      </p>
+
+      <pre class="ss-formula">novelty = 1 / (1 + 5 × baselinePrevalence)</pre>
+
+      <p>
+        At 2% prevalence: novelty ≈ 0.91.
+        At 10% prevalence: 0.67.
+        At 25% prevalence: 0.44.
+      </p>
+
+      <h3>5. Deck-balance multiplier</h3>
+
+      <p>
+        Selection's tag distribution drives a small per-candidate
+        multiplier: cards filling under-represented categories
+        (e.g. removal when you have none) get up to +30%; cards piling
+        onto saturated categories get up to -25%. Capped 0.6x–1.8x.
       </p>
 
       <h3>6. Putting it together</h3>
 
-      <pre class="ss-formula">raw = log(geomLift) × sample × coverage × novelty
-score = clamp(round(raw × 16), 0, 99)</pre>
+      <pre class="ss-formula">blended = Σ (tier_signal × tier_weight) / Σ active_tier_weights
+raw     = blended × novelty × balance_multiplier
+score   = clamp(99 × (1 - exp(-8 × raw)), 0, 99)</pre>
 
       <p>
-        The 16 is calibrated against the dataset distribution. It's set so
-        that a "definitely-belongs-here" card lands in the 80-95 range, a
-        "solid optional include" lands 65-75, and a "marginal play" lands
-        45-55. The cap at 99 keeps any single pair from dominating; the
-        cap at 0 prevents negative scores from edge cases.
+        The asymptotic curve means 99 is reserved for genuinely
+        outstanding pairs. A solid empirical pair with PT validation
+        typically lands 75–90. A card present only in ladder lists with
+        moderate co-occurrence lands 40–60.
       </p>
 
       <h3>7. Semantic fallback</h3>

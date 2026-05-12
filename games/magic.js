@@ -140,10 +140,35 @@
   //   3. NOVELTY: 1 / (1 + 5 * P(B in pool))
   // Multiplied, then mapped to 0-99 via 99 * (1 - exp(-4.5 * raw)).
   const NOVELTY_K = 5;
-  const ROBUSTNESS_REF = 200;
-  const CURVE_K = 4.5;
+  const CURVE_K = 8;             // bumped from 4.5: with per-tier blend, raw values are smaller
   const SEMANTIC_CAP = 30;
   const COVERAGE_POWER = 2;      // partial-match weight = (k/n)^COVERAGE_POWER
+
+  // Per-tier scoring. Each tier computes its own conditional probability and
+  // robustness against its own deck pool, then we blend with TIER_BLEND_WEIGHTS.
+  // PT Top 8 gets a substantial vote even with tiny sample because that's the
+  // signal the user cares about most. Adjustable from one place.
+  const TIER_WEIGHT_MAP = {
+    1:  "ladder",
+    3:  "premier",
+    5:  "pt_main",
+    10: "pt_top8",
+  };
+  const TIER_BLEND_WEIGHTS = {
+    ladder:   0.15,
+    premier:  0.20,
+    pt_main:  0.30,
+    pt_top8:  0.35,
+  };
+  // Per-tier robustness reference: full-confidence threshold scales with
+  // typical tier size. 2 of 8 PT Top 8 decks should feel substantial; 2 of
+  // 600 ladder decks should not.
+  const TIER_ROBUSTNESS_REF = {
+    ladder:   100,
+    premier:  15,
+    pt_main:  10,
+    pt_top8:  3,
+  };
 
   // ── Tag-aware deck-balance booster ──
   // Compute the selection's tag distribution. A candidate's "tag fit" is how
@@ -191,8 +216,61 @@
     return Math.max(0.6, Math.min(1.8, mult));
   }
 
+  // Compute one tier's signal for every candidate. Returns Map(name -> {pCond, robustness, signal, coDecks, decksWithSel}).
+  function computeTierSignal(tierDecks, tier) {
+    const result = new Map();
+    if (!tierDecks.length || !selection.length) return result;
+
+    const selSet = new Set(selection);
+    const n = selection.length;
+
+    // Total weighted "selection presence" within this tier
+    let totalSelW = 0;
+    const candidateCo = new Map();
+    for (const d of tierDecks) {
+      const main = d.main || [];
+      const names = new Set(main.map((c) => c.name));
+      let matched = 0;
+      for (const s of selection) if (names.has(s)) matched++;
+      if (matched === 0) continue;
+      const selFrac = matched / n;
+      const matchWeight = (d.weight || 1) * Math.pow(selFrac, COVERAGE_POWER);
+      totalSelW += matchWeight;
+      for (const c of main) {
+        if (selSet.has(c.name)) continue;
+        candidateCo.set(c.name, (candidateCo.get(c.name) || 0) + matchWeight);
+      }
+    }
+    if (totalSelW === 0) return result;
+
+    const ref = TIER_ROBUSTNESS_REF[tier] || 100;
+    for (const [name, coW] of candidateCo) {
+      const pCond = coW / totalSelW;
+      const robustness = Math.min(Math.sqrt(coW / ref), 1);
+      // Within-tier signal: just the (robustness-weighted) conditional probability.
+      // We're asking "given a tier-T deck with the selection, how often is the
+      // candidate also there." No lift / strength normalisation here; that's
+      // applied in the final blend via the novelty discount on baseline P(B).
+      const signal = pCond * robustness;
+      result.set(name, { pCond, robustness, signal, coDecks: coW });
+    }
+    return result;
+  }
+
   // Compute the score map for the current selection + bans. Caches by key.
   // Returns Map(name -> { score, breakdown }).
+  //
+  // Per-tier-then-blend approach (option D from the design discussion):
+  //   1. Split the recent, ban-filtered deck pool into ladder / premier /
+  //      pt_main / pt_top8 sub-pools by deck.weight.
+  //   2. For each tier, compute (pCond, robustness, signal) for every
+  //      candidate.
+  //   3. Blend tier signals with TIER_BLEND_WEIGHTS, renormalised across
+  //      tiers that actually have data for the pair. So a card in PT Top 8
+  //      decks but not in ladder doesn't get its score watered down by an
+  //      absent-ladder zero; the PT signal carries it.
+  //   4. Apply novelty discount on overall baseline + tag-balance multiplier.
+  //   5. Map raw blend through the asymptotic curve.
   function computeScoreMap() {
     if (!decks) return null;
     const key = JSON.stringify({ s: selection, b: bans, m: viewMode, t: [...tagBoosts] });
@@ -201,9 +279,9 @@
 
     const cutoff = (meta && meta.pair_window_first_week) || "";
     const banSet = new Set(bans);
-    const selSet = new Set(selection);
 
-    // Pool: recent decks that don't contain any banned card
+    // Pool: recent decks that don't contain any banned card, split by tier
+    const tierDecks = { ladder: [], premier: [], pt_main: [], pt_top8: [] };
     const pool = [];
     for (const d of decks) {
       if (cutoff && (d.week || "") < cutoff) continue;
@@ -214,9 +292,11 @@
       }
       if (hasBan) continue;
       pool.push(d);
+      const tier = TIER_WEIGHT_MAP[d.weight || 1];
+      if (tier) tierDecks[tier].push(d);
     }
 
-    // Baseline: weighted prevalence of each card in the (recent, ban-free) pool
+    // Baseline prevalence across the full pool, for novelty
     const totalW = pool.reduce((s, d) => s + (d.weight || 1), 0);
     const baseline = new Map();
     for (const d of pool) {
@@ -229,79 +309,67 @@
     const scores = new Map();
     if (selection.length === 0) { _scoresMap = scores; return scores; }
 
-    // Selection-weighted co-occurrence: each deck contributes
-    // (matchedSelectionCards / |selection|)^COVERAGE_POWER × deckWeight
-    // to any candidate it contains. So decks that share more of the selection
-    // pull harder; decks sharing none contribute nothing.
-    const candidateCo = new Map();
-    let totalSelW = 0;  // total weighted "selection presence" across pool
-    const n = selection.length;
-
-    for (const d of pool) {
-      const main = d.main || [];
-      const names = new Set(main.map((c) => c.name));
-      let matched = 0;
-      for (const s of selection) if (names.has(s)) matched++;
-      if (matched === 0) continue;
-      const selFrac = matched / n;
-      const matchWeight = (d.weight || 1) * Math.pow(selFrac, COVERAGE_POWER);
-      totalSelW += matchWeight;
-      for (const c of main) {
-        if (selSet.has(c.name)) continue;     // don't recommend the selection itself
-        candidateCo.set(c.name, (candidateCo.get(c.name) || 0) + matchWeight);
-      }
-    }
-
-    if (totalSelW === 0) { _scoresMap = scores; return scores; }
+    // Per-tier signals
+    const tierSignals = {
+      ladder:  computeTierSignal(tierDecks.ladder,  "ladder"),
+      premier: computeTierSignal(tierDecks.premier, "premier"),
+      pt_main: computeTierSignal(tierDecks.pt_main, "pt_main"),
+      pt_top8: computeTierSignal(tierDecks.pt_top8, "pt_top8"),
+    };
+    // All candidates we have any tier signal for
+    const allCandidates = new Set();
+    for (const tier in tierSignals) for (const n of tierSignals[tier].keys()) allCandidates.add(n);
 
     const profile = selectionTagProfile();
 
-    for (const [name, coW] of candidateCo) {
+    for (const name of allCandidates) {
       if (banSet.has(name)) continue;
       if (!isLegal(name)) continue;
       const baseW = baseline.get(name) || 0;
-      if (baseW === 0) continue;
-      const pBase = baseW / totalW;
-      if (pBase >= 1) continue;
-      const pCondSel = coW / totalSelW;
-      const strength = (pCondSel - pBase) / (1 - pBase);
+      const pBase = baseW / Math.max(totalW, 1);
 
+      // Blend: tiers with data each contribute their weight, normalised to
+      // the active set so absent tiers don't dilute.
+      let blended = 0, weightUsed = 0;
+      const tierBreakdown = {};
+      for (const [tier, w] of Object.entries(TIER_BLEND_WEIGHTS)) {
+        const entry = tierSignals[tier].get(name);
+        if (!entry) continue;
+        blended += entry.signal * w;
+        weightUsed += w;
+        tierBreakdown[tier] = {
+          pCond: Math.round(entry.pCond * 1000) / 1000,
+          coDecks: Math.round(entry.coDecks * 10) / 10,
+        };
+      }
+      if (weightUsed === 0) continue;
+      blended /= weightUsed;  // normalise to active tiers
+
+      // Off-meta lens: re-shape the blended signal to peak at mid-prevalence
       let raw, label;
       if (viewMode === "off-meta") {
-        // Off-meta: rank by middle-prevalence pairs that are below the obvious
-        // staples but above the noise floor. Boosts cards in 5-25% of the
-        // selection's decks, demotes both the always-included and the rare.
-        // pCondSel ∈ [0.05, 0.25] = sweet spot. Outside that range, dampen.
         let mid = 0;
-        if (pCondSel >= 0.04 && pCondSel <= 0.30) {
-          mid = 1 - Math.abs(pCondSel - 0.15) / 0.15;  // peak at 15%
+        if (blended >= 0.04 && blended <= 0.40) {
+          mid = 1 - Math.abs(blended - 0.18) / 0.22;
         }
-        const robustness = Math.min(Math.sqrt(coW / 60), 1);  // lower ref since we're in mid-band
-        const novelty = 1 / (1 + (NOVELTY_K * 0.6) * pBase);  // softer novelty (mid-pop OK)
-        raw = mid * robustness * novelty;
+        const novelty = 1 / (1 + (NOVELTY_K * 0.6) * pBase);
+        raw = mid * novelty;
         label = "off-meta";
       } else {
-        // Default "what fits" mode
-        if (strength <= 0) continue;
-        const robustness = Math.min(Math.sqrt(coW / ROBUSTNESS_REF), 1);
         const novelty = 1 / (1 + NOVELTY_K * pBase);
-        raw = strength * robustness * novelty;
+        raw = blended * novelty;
         label = "fits";
       }
 
       const tagMult = tagBalanceMultiplier(name, profile);
       raw *= tagMult;
 
-      // User-driven tag boost: cards with any boosted tag get a bump
       if (tagBoosts.size) {
         const cTags = new Set(tagsFor(name));
         let matches = 0;
         for (const t of tagBoosts) if (cTags.has(t)) matches++;
-        if (matches > 0) {
-          raw *= (1 + 0.5 * matches);  // each matching boosted tag = +50%
-        } else {
-          raw *= 0.85;                  // others slightly demoted (not removed)
-        }
+        if (matches > 0) raw *= (1 + 0.5 * matches);
+        else raw *= 0.85;
       }
 
       const score = Math.round(Math.min(99, Math.max(0, 99 * (1 - Math.exp(-CURVE_K * raw)))));
@@ -310,11 +378,10 @@
           score,
           mode: label,
           breakdown: {
-            strength: Math.round(strength * 100) / 100,
-            pCondSel: Math.round(pCondSel * 100) / 100,
+            blended: Math.round(blended * 1000) / 1000,
             pBase: Math.round(pBase * 1000) / 1000,
-            coW: Math.round(coW),
             tagMult: Math.round(tagMult * 100) / 100,
+            tiers: tierBreakdown,
           },
         });
       }
@@ -1050,20 +1117,31 @@
     }
 
     const b = entry.breakdown;
-    const pCondPct = Math.round(b.pCondSel * 100);
-    const pBasePct = Math.round(b.pBase * 1000) / 10;
-    const tagDelta = b.tagMult > 1.02 ? `+${Math.round((b.tagMult - 1) * 100)}% deck-balance bonus` :
-                     b.tagMult < 0.98 ? `−${Math.round((1 - b.tagMult) * 100)}% deck-balance malus` : "";
+    const tagDelta = b.tagMult > 1.02 ? `+${Math.round((b.tagMult - 1) * 100)}% balance bonus` :
+                     b.tagMult < 0.98 ? `−${Math.round((1 - b.tagMult) * 100)}% balance malus` : "";
+
+    // Tier rows: ladder / premier / pt_main / pt_top8
+    const tierLabel = { ladder: "Ladder", premier: "Premier", pt_main: "PT main", pt_top8: "PT Top 8" };
+    const tierRows = ["pt_top8", "pt_main", "premier", "ladder"]
+      .filter(t => b.tiers && b.tiers[t])
+      .map(t => {
+        const row = b.tiers[t];
+        const pct = Math.round(row.pCond * 100);
+        return `<div class="bd-tier-row">
+          <span class="bd-tier-label">${tierLabel[t]}</span>
+          <span class="bd-tier-val">${pct}% <span class="bd-tier-co">(${row.coDecks})</span></span>
+        </div>`;
+      }).join("");
+
     return `<div class="bd-popover" data-bd="1">
       <div class="bd-row bd-name">${escapeHtml(name)}</div>
       <div class="bd-row bd-mode">${entry.mode === "off-meta" ? "off-meta lens" : "what-fits lens"}</div>
       ${tagsHtml}
-      <div class="bd-grid">
-        <div class="bd-cell"><span class="bd-label">in selection's decks</span><span class="bd-val">${pCondPct}%</span></div>
-        <div class="bd-cell"><span class="bd-label">vs pool baseline</span><span class="bd-val">${pBasePct}%</span></div>
-        <div class="bd-cell"><span class="bd-label">co-occurrence weight</span><span class="bd-val">${b.coW}</span></div>
-        ${tagDelta ? `<div class="bd-cell"><span class="bd-label">deck balance</span><span class="bd-val">${tagDelta}</span></div>` : ""}
+      <div class="bd-tier-list">
+        <div class="bd-tier-header">per-tier conditional probability</div>
+        ${tierRows}
       </div>
+      ${tagDelta ? `<div class="bd-tier-note">${tagDelta}</div>` : ""}
       <a class="bd-link" href="/games/synergy-score.html" data-bd-stop>read about synergy score →</a>
     </div>`;
   }
