@@ -245,7 +245,7 @@
       color: color-mix(
         in oklab,
         var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
-        rgb(210, 165, 70) calc(var(--fill, 0) * 100%)
+        rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
       );
       font-weight: calc(400 + var(--fill, 0) * 300);
       transition: color 120ms ease, font-weight 120ms ease;
@@ -903,12 +903,16 @@
             <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
             <button class="wc-btn" data-tab="table" type="button">Table</button>
           </div>
-          <div class="wc-toggle" id="wc-mode-toggle" role="tablist" aria-label="Mode">
+          <!-- Mode + Model toggles are benched for now. The defaults
+               (average aggregation, latest model) run as before; the
+               buttons stay in the DOM so re-enabling later is just
+               removing the `hidden` attribute from these two divs. -->
+          <div class="wc-toggle" id="wc-mode-toggle" role="tablist" aria-label="Mode" hidden>
             <button class="wc-btn active" data-mode="average" type="button">Average</button>
             <button class="wc-btn" data-mode="single" type="button">Single sim</button>
           </div>
           <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
-          <div class="wc-toggle right" role="tablist" aria-label="Model">
+          <div class="wc-toggle right" role="tablist" aria-label="Model" hidden>
             <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
             <button class="wc-btn" data-source="custom" type="button">Custom model</button>
           </div>
@@ -1568,20 +1572,16 @@
       function renderTournamentView() {
         const root = document.getElementById('wc-tournament-view');
         const tableView = document.getElementById('wc-table-view');
-        const modeToggle = document.getElementById('wc-mode-toggle');
-        const rollBtn = document.getElementById('wc-roll-btn');
 
-        // Show/hide the right block + irrelevant controls per tab.
+        // Swap which container is visible based on the active sub-tab.
         const isTable = STATE.tab === 'table';
         root.hidden = isTable;
         if (tableView) tableView.hidden = !isTable;
-        // Mode (Average / Single sim) only applies to bracket + groups.
-        if (modeToggle) modeToggle.hidden = isTable;
-        if (isTable && rollBtn) rollBtn.hidden = true;
 
         if (isTable) {
-          // Table rendering is handled by renderPaths(), but we kick it
-          // here too so the colour scale picks up any model changes.
+          // Table rendering is handled by renderPaths(), kicked here too
+          // so the colour scale picks up any future model changes when
+          // Custom model is re-enabled.
           renderPaths();
           root.innerHTML = '';
           return;
