@@ -677,6 +677,38 @@
       font-weight: 500;
     }
     .wc-btn[hidden] { display: none; }
+
+    /* Top-level tab nav (Match Centre / Tournament / Table). Slightly
+       larger + bolder than sub-toggles, sits at the top of the page,
+       and stays visible while you browse a pane. */
+    .wc-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1.2rem 0 0;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-tab {
+      font: inherit;
+      font-size: 0.95rem;
+      font-family: inherit;
+      padding: 0.45rem 0.95rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wc-tab:hover { background: rgba(180,150,80,0.08); }
+    .wc-tab.active {
+      background: rgba(180,150,80,0.14);
+      border-color: rgba(180,150,80,0.55);
+      color: var(--text-body, inherit);
+      font-weight: 600;
+    }
+    .wc-pane[hidden] { display: none; }
+    .wc-pane { margin-top: 1rem; }
     .wc-tournament-meta {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -751,99 +783,107 @@
       </p>
     </section>
 
-    <div class="divider"></div>
+    <nav class="wc-tabs" role="tablist" aria-label="View">
+      <button class="wc-tab active" data-pane="match-centre" type="button" role="tab">Match centre</button>
+      <button class="wc-tab" data-pane="tournament" type="button" role="tab">Tournament</button>
+      <button class="wc-tab" data-pane="table" type="button" role="tab">Table</button>
+    </nav>
 
-    <section class="intro">
-      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Next match
-      </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        The first unplayed fixture. Win/draw/loss probabilities and the
-        most likely scoreline. Updates as the tournament progresses.
-      </p>
-      <div class="wc-next-wrap" id="wc-next">
-        <div class="wc-next-meta">Loading...</div>
+    <!-- ── Match centre pane ─────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="match-centre" role="tabpanel" aria-label="Match centre">
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Next match
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          The first unplayed fixture. Win/draw/loss probabilities and the
+          most likely scoreline. Updates as the tournament progresses.
+        </p>
+        <div class="wc-next-wrap" id="wc-next">
+          <div class="wc-next-meta">Loading...</div>
+        </div>
+        <div class="wc-upcoming" id="wc-upcoming"></div>
+        <div class="wc-lookup" id="wc-lookup">
+          <label for="wc-lookup-team">Lookup any fixture</label>
+          <select id="wc-lookup-team">
+            <option value="">(pick a team)</option>
+          </select>
+        </div>
+        <div class="wc-lookup-result" id="wc-lookup-result"></div>
       </div>
-      <div class="wc-upcoming" id="wc-upcoming"></div>
-      <div class="wc-lookup" id="wc-lookup">
-        <label for="wc-lookup-team">Lookup any fixture</label>
-        <select id="wc-lookup-team">
-          <option value="">(pick a team)</option>
-        </select>
-      </div>
-      <div class="wc-lookup-result" id="wc-lookup-result"></div>
-    </section>
 
-    <div style="margin-top:0.8rem;">
-      <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
-        Recent results
-        <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
-          predicted vs actual
+      <div style="margin-top:1.5rem;">
+        <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
+          Recent results
+          <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
+            predicted vs actual
+          </span>
         </span>
-      </span>
-      <div class="wc-recent" id="wc-recent"></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <section class="intro">
-      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Tournament
-      </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Switch between knockout bracket and group stage. The default view
-        shows averaged predictions from <span id="wc-nsims">10,000</span>
-        Monte Carlo runs. Single sim shows one random tournament with
-        scores. Custom model lets you adjust any team's rating and watch
-        the predictions update.
-      </p>
-
-      <div class="wc-tournament-bar">
-        <div class="wc-toggle" role="tablist" aria-label="View">
-          <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
-          <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
-        </div>
-        <div class="wc-toggle" role="tablist" aria-label="Mode">
-          <button class="wc-btn active" data-mode="average" type="button">Average</button>
-          <button class="wc-btn" data-mode="single" type="button">Single sim</button>
-        </div>
-        <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
-        <div class="wc-toggle right" role="tablist" aria-label="Model">
-          <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
-          <button class="wc-btn" data-source="custom" type="button">Custom model</button>
-        </div>
+        <div class="wc-recent" id="wc-recent"></div>
       </div>
-
-      <div class="wc-customise" id="wc-customise" hidden>
-        <input list="wc-team-list" id="wc-add-team" type="search"
-               class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
-        <datalist id="wc-team-list"></datalist>
-        <div id="wc-adjustments" class="wc-adjustments"></div>
-      </div>
-      <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
     </section>
 
-    <!-- Tournament view: bracket or group cards. -->
-    <div id="wc-tournament-view"></div>
+    <!-- ── Tournament pane ───────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="tournament" role="tabpanel" aria-label="Tournament" hidden>
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Tournament
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          Switch between knockout bracket and group stage. The default view
+          shows averaged predictions from <span id="wc-nsims">10,000</span>
+          Monte Carlo runs. Single sim shows one random tournament with
+          scores. Custom model lets you adjust any team's rating and watch
+          the predictions update.
+        </p>
 
-    <div class="divider"></div>
+        <div class="wc-tournament-bar">
+          <div class="wc-toggle" role="tablist" aria-label="View">
+            <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
+          </div>
+          <div class="wc-toggle" role="tablist" aria-label="Mode">
+            <button class="wc-btn active" data-mode="average" type="button">Average</button>
+            <button class="wc-btn" data-mode="single" type="button">Single sim</button>
+          </div>
+          <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
+          <div class="wc-toggle right" role="tablist" aria-label="Model">
+            <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
+            <button class="wc-btn" data-source="custom" type="button">Custom model</button>
+          </div>
+        </div>
 
-    <section class="intro" style="margin-top:1rem;">
-      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-        How far each team is likely to go
-      </h3>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Probability each team reaches a given round, averaged across all
-        Monte Carlo runs (does not change with the toggles above). The five
-        teams flagged <span class="wc-darkhorse-tag">dark horse</span> are
-        outside the top eight by raw rating but punch hardest above their
-        weight, ranked by a score that rewards both how lowly-rated they
-        are and how often they go deep (deeper rounds count more). Showing
-        top 24, search to find more.
-      </p>
-      <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
-      <div class="wc-paths-wrap">
-        <div class="wc-paths" id="wc-paths"></div>
+        <div class="wc-customise" id="wc-customise" hidden>
+          <input list="wc-team-list" id="wc-add-team" type="search"
+                 class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
+          <datalist id="wc-team-list"></datalist>
+          <div id="wc-adjustments" class="wc-adjustments"></div>
+        </div>
+        <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
+      </div>
+
+      <!-- Tournament view: bracket or group cards. -->
+      <div id="wc-tournament-view"></div>
+    </section>
+
+    <!-- ── Table pane ────────────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="table" role="tabpanel" aria-label="Table" hidden>
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          How far each team is likely to go
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          Probability each team reaches a given round, averaged across all
+          Monte Carlo runs. The five teams flagged
+          <span class="wc-darkhorse-tag">dark horse</span> are outside the
+          top eight by raw rating but punch hardest above their weight,
+          ranked by a score that rewards both how lowly-rated they are
+          and how often they go deep. Showing top 24, search to find more.
+        </p>
+        <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
+        <div class="wc-paths-wrap">
+          <div class="wc-paths" id="wc-paths"></div>
+        </div>
       </div>
     </section>
 
@@ -1724,6 +1764,41 @@
         }, 220);
       }
 
+      // Top-level pane switching. Persists active pane in URL hash so
+      // links like #tournament drop you straight onto that view.
+      function showPane(name) {
+        const panes = document.querySelectorAll('.wc-pane');
+        const tabs = document.querySelectorAll('.wc-tab');
+        let matched = false;
+        panes.forEach(p => {
+          const isMe = p.dataset.pane === name;
+          p.hidden = !isMe;
+          if (isMe) matched = true;
+        });
+        if (!matched) {
+          // Unknown hash: fall back to default.
+          panes.forEach((p, i) => p.hidden = i !== 0);
+          name = panes[0]?.dataset.pane;
+        }
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+        // Reflect in URL without scrolling.
+        if (name && history.replaceState) {
+          history.replaceState(null, '', `#${name}`);
+        }
+      }
+      function wireTabs() {
+        document.querySelectorAll('.wc-tab').forEach(b => {
+          b.addEventListener('click', () => showPane(b.dataset.pane));
+        });
+        // Honour initial #hash if present.
+        const initial = (location.hash || '').replace(/^#/, '');
+        if (initial) showPane(initial);
+        // Respond to back/forward and external hash changes.
+        window.addEventListener('hashchange', () => {
+          showPane((location.hash || '').replace(/^#/, '') || 'match-centre');
+        });
+      }
+
       function wireControls() {
         document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
           b.addEventListener('click', () => {
@@ -1823,6 +1898,7 @@
           });
 
           wireControls();
+          wireTabs();
           renderNext();
           renderUpcoming();
           renderLookup();
