@@ -235,21 +235,21 @@
     .wc-paths .cell-num {
       text-align: right;
       font-variant-numeric: tabular-nums;
-      /* Per-cell heat-map background. --fill is set inline by the
-         renderer based on column-normalised probability. */
-      background: rgba(180, 150, 80, calc(var(--fill, 0) * 0.32));
-      padding: 0.18rem 0.4rem;
-      border-radius: 2px;
-      transition: background 120ms ease;
     }
+    /* Text colour ramps with column-normalised intensity, no background.
+       --fill is set inline by the renderer (0..1). At fill=0 the number
+       sits in muted body text; at fill=1 it lifts into a saturated brand
+       gold + bold weight. Smooth interpolation via color-mix so it works
+       in light + dark themes. */
     .wc-paths .v {
-      color: var(--text-muted);
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(210, 165, 70) calc(var(--fill, 0) * 100%)
+      );
+      font-weight: calc(400 + var(--fill, 0) * 300);
+      transition: color 120ms ease, font-weight 120ms ease;
     }
-    /* Text colour ramps with intensity: muted at low fill, body at high. */
-    .wc-paths .cell-num[data-tier="1"] .v { color: rgba(var(--text-rgb, 180,170,160), 0.85); }
-    .wc-paths .cell-num[data-tier="2"] .v { color: var(--text-body, inherit); }
-    .wc-paths .cell-num[data-tier="3"] .v { color: var(--text-body, inherit); font-weight: 600; }
-    .wc-paths .cell-num[data-tier="4"] .v { color: var(--text-strong, inherit); font-weight: 700; }
     .wc-paths .name .team-name {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -901,8 +901,9 @@
           <div class="wc-toggle" role="tablist" aria-label="View">
             <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
             <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
+            <button class="wc-btn" data-tab="table" type="button">Table</button>
           </div>
-          <div class="wc-toggle" role="tablist" aria-label="Mode">
+          <div class="wc-toggle" id="wc-mode-toggle" role="tablist" aria-label="Mode">
             <button class="wc-btn active" data-mode="average" type="button">Average</button>
             <button class="wc-btn" data-mode="single" type="button">Single sim</button>
           </div>
@@ -925,17 +926,17 @@
       <!-- Tournament view: bracket or group cards. -->
       <div id="wc-tournament-view"></div>
 
-      <div class="intro" style="margin-top:1.8rem;">
-        <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-          How far each team is likely to go
-        </h3>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+      <!-- Table view: probability of reaching each round.
+           Toggled visible when STATE.tab === 'table'. -->
+      <div id="wc-table-view" hidden>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
           Probability each team reaches a given round, averaged across all
-          Monte Carlo runs. The five teams flagged
+          Monte Carlo runs. Cells are coloured per column: the strongest
+          team in each round sets the deepest gold, others scale from there.
+          The five teams flagged
           <span class="wc-darkhorse-tag">dark horse</span> are outside the
-          top eight by raw rating but punch hardest above their weight,
-          ranked by a score that rewards both how lowly-rated they are
-          and how often they go deep. Showing top 24, search to find more.
+          top eight by raw rating but punch hardest above their weight.
+          Showing top 24, search to find more.
         </p>
         <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
         <div class="wc-paths-wrap">
@@ -1566,6 +1567,26 @@
 
       function renderTournamentView() {
         const root = document.getElementById('wc-tournament-view');
+        const tableView = document.getElementById('wc-table-view');
+        const modeToggle = document.getElementById('wc-mode-toggle');
+        const rollBtn = document.getElementById('wc-roll-btn');
+
+        // Show/hide the right block + irrelevant controls per tab.
+        const isTable = STATE.tab === 'table';
+        root.hidden = isTable;
+        if (tableView) tableView.hidden = !isTable;
+        // Mode (Average / Single sim) only applies to bracket + groups.
+        if (modeToggle) modeToggle.hidden = isTable;
+        if (isTable && rollBtn) rollBtn.hidden = true;
+
+        if (isTable) {
+          // Table rendering is handled by renderPaths(), but we kick it
+          // here too so the colour scale picks up any model changes.
+          renderPaths();
+          root.innerHTML = '';
+          return;
+        }
+
         root.innerHTML = '';
         const { knockout, groups, decimal, withScores } = activeDataset();
         if (STATE.tab === 'knockouts') {
@@ -1639,37 +1660,24 @@
         `;
 
         // Per-column max across all teams (not just visible top 24) so
-        // the heat-map scale stays stable when the user filters. Use a
-        // small floor so tiny columns (e.g. p_champion) don't look maxed
-        // out by a single 1.5% value when everyone else is near zero.
+        // the colour scale stays stable when the user filters. Floor so
+        // a single tiny value doesn't max out the column.
         const probKeys = ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'];
         const colMax = {};
         probKeys.forEach(k => {
           const m = Math.max(...stats.map(s => s[k] || 0));
-          colMax[k] = Math.max(m, 5);  // floor so column always has some shading
+          colMax[k] = Math.max(m, 5);
         });
-        // Tier the normalised value into 5 visual bands (0..4) so text
-        // colour ramps in discrete steps, matching the background fill.
-        const tierOf = (frac) => {
-          if (frac < 0.15) return 0;
-          if (frac < 0.4)  return 1;
-          if (frac < 0.65) return 2;
-          if (frac < 0.85) return 3;
-          return 4;
-        };
 
         stats.forEach((s, i) => {
           const dh = darkHorseSet.has(s.team);
           // dataset.team includes "dark horse" so the search input matches it
           const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
           const meta = { 'data-team': searchKey, 'data-rank': String(i) };
-          const addCell = (className, html, extraAttrs) => {
+          const addCell = (className, html) => {
             const c = document.createElement('div');
             c.className = 'wc-paths-row ' + className;
             for (const [k, v] of Object.entries(meta)) c.setAttribute(k, v);
-            if (extraAttrs) {
-              for (const [k, v] of Object.entries(extraAttrs)) c.setAttribute(k, v);
-            }
             c.innerHTML = html;
             container.appendChild(c);
           };
@@ -1679,19 +1687,14 @@
           addCell('team-rating', s.rating);
           // 3. Dark horse tag (always renders the cell so the column lines up)
           addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
-          // 4-8. Probabilities, with per-column heat-map fill + text tier.
+          // 4-8. Probabilities. Square-root scale on the fill so low-but-
+          // nonzero values still get visible tint instead of looking like 0.
           probKeys.forEach(k => {
             const v = s[k] || 0;
-            const frac = Math.min(v / colMax[k], 1);  // 0..1 within column
-            const tier = tierOf(frac);
-            // Square-root scale for the fill: low-but-nonzero values still
-            // get visible shading instead of looking like 0.
+            const frac = Math.min(v / colMax[k], 1);
             const fill = Math.sqrt(frac).toFixed(3);
-            const html = `<span class="v">${v.toFixed(1)}%</span>`;
-            addCell('cell-num', html, {
-              'style': `--fill: ${fill}`,
-              'data-tier': String(tier),
-            });
+            addCell('cell-num',
+              `<span class="v" style="--fill: ${fill}">${v.toFixed(1)}%</span>`);
           });
         });
         applyPathsFilter('');
