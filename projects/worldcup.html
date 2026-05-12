@@ -251,10 +251,12 @@
       transition: color 120ms ease, font-weight 120ms ease;
     }
 
-    /* Top scorers list: ranked rows, similar look to the paths table. */
+    /* Top scorers list: ranked rows, similar look to the paths table.
+       Columns: rank, player, national team (with flag), club (with
+       league-country flag), predicted goals. */
     .wc-scorers {
       display: grid;
-      grid-template-columns: 2.2em minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(110px, 1fr) 4em 5em;
+      grid-template-columns: 2.2em minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(130px, 1fr) 5em;
       column-gap: 0.6rem;
       row-gap: 0.4rem;
       margin-top: 0.8rem;
@@ -298,10 +300,10 @@
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .wc-scorers .pos {
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 0.78rem;
+    .wc-scorers .club-cell .wc-flag, .wc-scorers .team-cell .wc-flag {
+      width: 18px;
+      height: 13px;
+      flex-shrink: 0;
     }
     .wc-scorers .predicted {
       text-align: right;
@@ -314,7 +316,7 @@
       );
     }
     @media (max-width: 720px) {
-      .wc-scorers { grid-template-columns: 2em 1fr 4em 5em; }
+      .wc-scorers { grid-template-columns: 2em 1fr 5em; }
       .wc-scorers .team-cell, .wc-scorers .club-cell,
       .wc-scorers .header.team-h, .wc-scorers .header.club-h { display: none; }
     }
@@ -1812,28 +1814,31 @@
         }
         const top = data.top_20;
         const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
+        // Render a country-flag <img> for any ISO code that flagcdn supports.
+        const clubFlagFor = (iso) => iso
+          ? `<img class="wc-flag" src="https://flagcdn.com/w40/${iso}.png" alt="" loading="lazy" />`
+          : '';
         container.innerHTML = `
           <div class="header">#</div>
           <div class="header">Player</div>
           <div class="header team-h">National team</div>
           <div class="header club-h">Club</div>
-          <div class="header" style="text-align:center;">Pos</div>
           <div class="header right">Pred. goals</div>
         ` + top.map((p, i) => {
           const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
           return `
             <div class="rank">${i + 1}</div>
             <div class="player">
-              <span class="name" title="${p.name}">${p.name}</span>
+              <span class="name" title="${p.name}${p.position ? ' (' + p.position + ')' : ''}">${p.name}</span>
             </div>
             <div class="team-cell">
               ${flagImg(p.team)}
               <span class="name" title="${p.team}">${p.team}</span>
             </div>
             <div class="club-cell">
+              ${clubFlagFor(p.club_country)}
               <span class="name" title="${p.club}">${p.club}</span>
             </div>
-            <div class="pos">${p.position || '-'}</div>
             <div class="predicted" style="--fill: ${fill}">${p.predicted_wc_goals.toFixed(1)}</div>
           `;
         }).join('');
