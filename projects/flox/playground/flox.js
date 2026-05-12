@@ -779,24 +779,39 @@ var Interpreter = class {
   fileMode = "river";
   interpret(statements) {
     try {
-      this.phase = 0 /* COLLECT */;
-      this.currentSystem = null;
-      for (const stmt of statements) {
-        if (stmt) this.execute(stmt);
-      }
-      for (const s of this.systems.values()) s.mode = this.fileMode;
-      this.resolveChains();
-      for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s);
-      for (const s of this.systems.values()) s.identifyRoots();
-      this.phase = 1 /* EXECUTE */;
-      this.currentSystem = null;
-      for (const stmt of statements) {
-        if (stmt) this.execute(stmt);
-      }
+      this.collectAndResolve(statements);
+      this.executeAll(statements);
     } catch (e) {
       const msg = e instanceof Error ? e.message : String(e);
       this.errs.push("Runtime error: " + msg + "\n");
     }
+  }
+  // Phase 1: collect declarations, apply file mode, resolve chain edges,
+  // validate per-mode, identify roots. Stops before any list/map/print
+  // executes. Used by parseGraph() to extract the network structure
+  // without running the simulator.
+  collectAndResolve(statements) {
+    this.phase = 0 /* COLLECT */;
+    this.currentSystem = null;
+    for (const stmt of statements) {
+      if (stmt) this.execute(stmt);
+    }
+    for (const s of this.systems.values()) s.mode = this.fileMode;
+    this.resolveChains();
+    for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s);
+    for (const s of this.systems.values()) s.identifyRoots();
+  }
+  executeAll(statements) {
+    this.phase = 1 /* EXECUTE */;
+    this.currentSystem = null;
+    for (const stmt of statements) {
+      if (stmt) this.execute(stmt);
+    }
+  }
+  // Read-only access to the systems map after collectAndResolve.
+  // Used by parseGraph(); not meant for general consumption.
+  getSystems() {
+    return this.systems;
   }
   execute(stmt) {
     switch (stmt.kind) {
@@ -1499,6 +1514,62 @@ function interpret(source) {
     hadError: errs.length > 0
   };
 }
+function parseGraph(source) {
+  const out = [];
+  const errs = [];
+  const tokens = new Scanner(source, errs).scanTokens();
+  if (errs.length > 0) {
+    return { systems: [], hadError: true, stderr: errs.join("") };
+  }
+  const ast = new Parser(tokens, errs).parse();
+  if (errs.length > 0) {
+    return { systems: [], hadError: true, stderr: errs.join("") };
+  }
+  const interp = new Interpreter(out, errs);
+  try {
+    interp.collectAndResolve(ast);
+  } catch (e) {
+    const msg = e instanceof Error ? e.message : String(e);
+    errs.push("Runtime error: " + msg + "\n");
+  }
+  const systems = [];
+  for (const sys of interp.getSystems().values()) {
+    systems.push(systemToGraph(sys));
+  }
+  return { systems, hadError: errs.length > 0, stderr: errs.join("") };
+}
+function systemToGraph(sys) {
+  const nodes = [];
+  for (const r of sys.rivers.values()) {
+    nodes.push({
+      name: r.name,
+      kind: classifyRiver(r, sys.mode),
+      supply: r.supply
+    });
+  }
+  for (const d of sys.dams.values()) {
+    nodes.push({ name: d.name, kind: "dam", supply: 0 });
+  }
+  const directed = sys.mode !== "grid";
+  const edges = [];
+  for (const [from, outEdges] of sys.connections) {
+    for (const e of outEdges) {
+      edges.push({ from, to: e.target, weight: e.weight, directed });
+    }
+  }
+  return { name: sys.name, mode: sys.mode, nodes, edges };
+}
+function classifyRiver(r, mode) {
+  if (mode === "grid") {
+    if (r.supply > 0) return "generator";
+    if (r.supply < 0) return "load";
+    return "relay";
+  }
+  if (mode === "markov") return "state";
+  if (r.baseFlow === 0 && r.peakMultiplier === 0) return "outlet";
+  return "river";
+}
 export {
-  interpret
+  interpret,
+  parseGraph
 };

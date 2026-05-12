@@ -46,11 +46,63 @@
       overflow: hidden;
       background: var(--bg);
     }
-    /* Editor fills most of the visible viewport. Output flows below it;
-       since the table is usually too tall to fit anyway, the user
-       scrolls to read it. */
+    /* Editor fills most of the visible viewport. Graph sits beneath
+       (fixed-height SVG canvas). Output flows below; the user scrolls. */
     .pg-pane.pg-pane-editor { height: calc(100vh - 280px); min-height: 420px; }
+    .pg-pane.pg-pane-graph  { height: 420px; }
     .pg-pane.pg-pane-output { min-height: 280px; }
+    #pg-graph {
+      flex: 1 1 auto;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+    }
+    #pg-graph text {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 11px;
+      fill: var(--text);
+      pointer-events: none;
+      user-select: none;
+    }
+    #pg-graph .pg-graph-empty {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 12px;
+      fill: var(--text-dim);
+      font-style: italic;
+    }
+    #pg-graph .pg-edge {
+      stroke: var(--text-dim);
+      stroke-width: 1.4;
+      fill: none;
+      opacity: 0.75;
+    }
+    #pg-graph .pg-edge-label {
+      font-size: 10px;
+      fill: var(--text-dim);
+      font-style: italic;
+    }
+    #pg-graph .pg-edge-label-bg {
+      fill: var(--bg);
+      stroke: none;
+      opacity: 0.85;
+    }
+    #pg-graph g.pg-node circle,
+    #pg-graph g.pg-node rect {
+      stroke-width: 1.5;
+      cursor: grab;
+    }
+    #pg-graph g.pg-node:active circle,
+    #pg-graph g.pg-node:active rect { cursor: grabbing; }
+    /* node-kind palette */
+    #pg-graph g.pg-node-river   circle { fill: #4a82d4; stroke: #2c5fa0; }
+    #pg-graph g.pg-node-dam     rect   { fill: #4a82d4; stroke: #2c5fa0; }
+    #pg-graph g.pg-node-outlet  circle { fill: var(--bg); stroke: var(--text-dim); stroke-width: 2.4; }
+    #pg-graph g.pg-node-state   circle { fill: var(--border-light); stroke: var(--text-dim); }
+    #pg-graph g.pg-node-generator circle { fill: #4caf6f; stroke: #2e7a4b; }
+    #pg-graph g.pg-node-load      circle { fill: #d04848; stroke: #962e2e; }
+    #pg-graph g.pg-node-relay     circle { fill: var(--border-light); stroke: var(--text-dim); }
+    #pg-graph g.pg-faded { opacity: 0.18; }
     .pg-pane-header {
       font-size: var(--text-xs);
       font-weight: 600;
@@ -118,6 +170,7 @@
 
     @media (max-width: 640px) {
       .pg-pane.pg-pane-editor { height: 300px; }
+      .pg-pane.pg-pane-graph  { height: 320px; }
     }
   </style>
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
@@ -154,6 +207,13 @@
         </div>
         <div id="pg-editor"></div>
       </div>
+      <div class="pg-pane pg-pane-graph">
+        <div class="pg-pane-header">
+          <span>Graph</span>
+          <span class="pg-status" id="pg-graph-status"></span>
+        </div>
+        <svg id="pg-graph" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
       <div class="pg-pane pg-pane-output">
         <div class="pg-pane-header">
           <span>Output</span>
@@ -171,7 +231,7 @@
   <script>
     require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs' } });
     require(['vs/editor/editor.main'], async () => {
-      const { interpret } = await import('./flox.js');
+      const { interpret, parseGraph } = await import('./flox.js');
 
       // Flox language definition (Monarch tokenizer)
       monaco.languages.register({ id: 'flox' });
@@ -689,11 +749,518 @@ print SeriesDemo [0, 1, 30, 10, 0, 0, 0];
 
       const outputEl = document.getElementById('pg-output');
       const statusEl = document.getElementById('pg-status');
+      const graphEl = document.getElementById('pg-graph');
+      const graphStatusEl = document.getElementById('pg-graph-status');
+
+      // ─── Graph renderer ──────────────────────────────────────────────
+      // Pure SVG, no library. Two layouts, auto-selected: layered for
+      // DAGs (clear top-down flow), force-directed for cyclic graphs.
+      // Per-mode node styles via CSS classes.
+
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const NODE_R = 18;
+
+      function clearGraph() {
+        while (graphEl.firstChild) graphEl.removeChild(graphEl.firstChild);
+      }
+
+      function drawGraph(parseResult) {
+        clearGraph();
+        if (parseResult.hadError) {
+          graphStatusEl.textContent = '';
+          showMessage('parse error');
+          return;
+        }
+        const systems = parseResult.systems;
+        if (systems.length === 0) {
+          graphStatusEl.textContent = '';
+          showMessage('no system declared');
+          return;
+        }
+        // Render the first system. Multi-system programs only show the first.
+        const sys = systems[0];
+        if (sys.nodes.length === 0) {
+          graphStatusEl.textContent = `${sys.name} / ${sys.mode}`;
+          showMessage('system declared but has no nodes yet');
+          return;
+        }
+
+        const rect = graphEl.getBoundingClientRect();
+        const W = Math.max(320, rect.width);
+        const H = Math.max(240, rect.height);
+        graphEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+        const isDag = !hasCycle(sys);
+        const positions = isDag
+          ? layeredLayout(sys, W, H)
+          : forceLayout(sys, W, H);
+
+        graphStatusEl.textContent =
+          `${sys.name} / ${sys.mode} / ${sys.nodes.length} nodes / ${sys.edges.length} edges`;
+
+        // Arrowhead marker (defined once per render).
+        const defs = document.createElementNS(SVG_NS, 'defs');
+        const marker = document.createElementNS(SVG_NS, 'marker');
+        marker.setAttribute('id', 'arrow');
+        marker.setAttribute('viewBox', '0 0 10 10');
+        marker.setAttribute('refX', '9');
+        marker.setAttribute('refY', '5');
+        marker.setAttribute('markerWidth', '7');
+        marker.setAttribute('markerHeight', '7');
+        marker.setAttribute('orient', 'auto-start-reverse');
+        const arrowPath = document.createElementNS(SVG_NS, 'path');
+        arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+        arrowPath.setAttribute('fill', 'var(--text-dim)');
+        arrowPath.setAttribute('opacity', '0.85');
+        marker.appendChild(arrowPath);
+        defs.appendChild(marker);
+        graphEl.appendChild(defs);
+
+        // Render edges first so nodes draw on top.
+        const edgeGroup = document.createElementNS(SVG_NS, 'g');
+        edgeGroup.setAttribute('class', 'pg-edges');
+        graphEl.appendChild(edgeGroup);
+
+        // Identify reverse-edge pairs so we can curve them apart.
+        const edgeKey = (e) => `${e.from}|${e.to}`;
+        const pairs = new Set();
+        for (const e of sys.edges) {
+          const rev = `${e.to}|${e.from}`;
+          if (sys.edges.some(x => edgeKey(x) === rev)) pairs.add(edgeKey(e));
+        }
+
+        for (const e of sys.edges) {
+          renderEdge(edgeGroup, e, positions, pairs.has(edgeKey(e)));
+        }
+
+        // Nodes
+        const nodeGroup = document.createElementNS(SVG_NS, 'g');
+        nodeGroup.setAttribute('class', 'pg-nodes');
+        graphEl.appendChild(nodeGroup);
+
+        const nodeEls = new Map();
+        for (const n of sys.nodes) {
+          const el = renderNode(nodeGroup, n, positions.get(n.name));
+          nodeEls.set(n.name, el);
+        }
+
+        // Interactivity: drag, hover.
+        attachInteractions(sys, positions, nodeEls, edgeGroup, pairs);
+      }
+
+      function showMessage(text) {
+        clearGraph();
+        const rect = graphEl.getBoundingClientRect();
+        const W = Math.max(320, rect.width);
+        const H = Math.max(160, rect.height);
+        graphEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('x', W / 2);
+        t.setAttribute('y', H / 2);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('class', 'pg-graph-empty');
+        t.textContent = text;
+        graphEl.appendChild(t);
+      }
+
+      function hasCycle(sys) {
+        // DFS three-coloring on directed edges. Undirected (grid) treats
+        // any edge as a cycle except for a single-edge graph.
+        if (sys.mode === 'grid') {
+          // Grid is undirected. If there are more edges than n-1, there's a
+          // cycle. Otherwise treat as a tree.
+          return sys.edges.length > sys.nodes.length - 1;
+        }
+        const adj = new Map();
+        for (const n of sys.nodes) adj.set(n.name, []);
+        for (const e of sys.edges) {
+          const list = adj.get(e.from);
+          if (list) list.push(e.to);
+        }
+        const color = new Map();
+        for (const n of sys.nodes) color.set(n.name, 'white');
+        function visit(v) {
+          color.set(v, 'gray');
+          for (const w of (adj.get(v) || [])) {
+            if (color.get(w) === 'gray') return true;
+            if (color.get(w) === 'white' && visit(w)) return true;
+          }
+          color.set(v, 'black');
+          return false;
+        }
+        for (const n of sys.nodes) {
+          if (color.get(n.name) === 'white' && visit(n.name)) return true;
+        }
+        return false;
+      }
+
+      function layeredLayout(sys, W, H) {
+        // Longest-path layering: each node's rank is the max distance
+        // from any source. Nodes with no incoming edges are sources.
+        const inDegree = new Map();
+        const adj = new Map();
+        for (const n of sys.nodes) {
+          inDegree.set(n.name, 0);
+          adj.set(n.name, []);
+        }
+        for (const e of sys.edges) {
+          inDegree.set(e.to, (inDegree.get(e.to) || 0) + 1);
+          adj.get(e.from).push(e.to);
+        }
+        const rank = new Map();
+        const queue = [];
+        for (const n of sys.nodes) {
+          if (inDegree.get(n.name) === 0) {
+            rank.set(n.name, 0);
+            queue.push(n.name);
+          }
+        }
+        const remain = new Map(inDegree);
+        while (queue.length > 0) {
+          const v = queue.shift();
+          for (const w of adj.get(v)) {
+            rank.set(w, Math.max(rank.get(w) || 0, (rank.get(v) || 0) + 1));
+            remain.set(w, remain.get(w) - 1);
+            if (remain.get(w) === 0) queue.push(w);
+          }
+        }
+        // Fallback for nodes never reached (e.g. isolated): put at rank 0.
+        for (const n of sys.nodes) if (!rank.has(n.name)) rank.set(n.name, 0);
+
+        // Group nodes by rank, then space within each rank.
+        const byRank = new Map();
+        for (const n of sys.nodes) {
+          const r = rank.get(n.name);
+          if (!byRank.has(r)) byRank.set(r, []);
+          byRank.get(r).push(n.name);
+        }
+        const maxRank = Math.max(...rank.values(), 0);
+        const positions = new Map();
+        const pad = 50;
+        const layerH = (H - 2 * pad) / Math.max(1, maxRank);
+        for (const [r, names] of byRank) {
+          const layerW = (W - 2 * pad) / Math.max(1, names.length);
+          names.forEach((name, i) => {
+            const x = pad + layerW * (i + 0.5);
+            const y = pad + layerH * r;
+            positions.set(name, { x, y });
+          });
+        }
+        return positions;
+      }
+
+      function forceLayout(sys, W, H) {
+        // Fruchterman-Reingold force-directed layout. Random init,
+        // converges in ~150 iterations for small graphs.
+        const positions = new Map();
+        const n = sys.nodes.length;
+        const area = W * H;
+        const k = Math.sqrt(area / Math.max(1, n)) * 0.7;
+        const cx = W / 2;
+        const cy = H / 2;
+        // Initial positions on a circle to avoid degeneracies.
+        sys.nodes.forEach((node, i) => {
+          const angle = (i / n) * Math.PI * 2;
+          positions.set(node.name, {
+            x: cx + Math.cos(angle) * Math.min(W, H) * 0.3,
+            y: cy + Math.sin(angle) * Math.min(W, H) * 0.3,
+          });
+        });
+
+        let temp = Math.min(W, H) / 8;
+        const iters = 200;
+        const pad = 50;
+
+        for (let step = 0; step < iters; step++) {
+          const disp = new Map();
+          for (const node of sys.nodes) disp.set(node.name, { x: 0, y: 0 });
+
+          // Repulsion: every pair.
+          for (let i = 0; i < sys.nodes.length; i++) {
+            for (let j = i + 1; j < sys.nodes.length; j++) {
+              const a = sys.nodes[i].name;
+              const b = sys.nodes[j].name;
+              const pa = positions.get(a);
+              const pb = positions.get(b);
+              let dx = pa.x - pb.x;
+              let dy = pa.y - pb.y;
+              let d = Math.hypot(dx, dy) || 0.01;
+              const f = (k * k) / d;
+              dx /= d; dy /= d;
+              disp.get(a).x += dx * f;
+              disp.get(a).y += dy * f;
+              disp.get(b).x -= dx * f;
+              disp.get(b).y -= dy * f;
+            }
+          }
+
+          // Attraction along edges.
+          for (const e of sys.edges) {
+            if (e.from === e.to) continue;  // self-loop, no attraction
+            const pa = positions.get(e.from);
+            const pb = positions.get(e.to);
+            let dx = pa.x - pb.x;
+            let dy = pa.y - pb.y;
+            let d = Math.hypot(dx, dy) || 0.01;
+            const f = (d * d) / k;
+            dx /= d; dy /= d;
+            disp.get(e.from).x -= dx * f;
+            disp.get(e.from).y -= dy * f;
+            disp.get(e.to).x += dx * f;
+            disp.get(e.to).y += dy * f;
+          }
+
+          // Apply, with temperature cap and bounding.
+          for (const node of sys.nodes) {
+            const d = disp.get(node.name);
+            const mag = Math.hypot(d.x, d.y) || 0.01;
+            const limit = Math.min(mag, temp);
+            const p = positions.get(node.name);
+            p.x += (d.x / mag) * limit;
+            p.y += (d.y / mag) * limit;
+            p.x = Math.max(pad, Math.min(W - pad, p.x));
+            p.y = Math.max(pad, Math.min(H - pad, p.y));
+          }
+
+          temp *= 0.96;
+        }
+        return positions;
+      }
+
+      function renderEdge(parent, edge, positions, hasReverse) {
+        const a = positions.get(edge.from);
+        const b = positions.get(edge.to);
+        if (!a || !b) return;
+
+        const path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('class', 'pg-edge');
+        path.dataset.from = edge.from;
+        path.dataset.to = edge.to;
+
+        let d;
+        let midX, midY;
+
+        if (edge.from === edge.to) {
+          // Self-loop: small arc.
+          const r = NODE_R;
+          d = `M ${a.x} ${a.y - r} ` +
+              `C ${a.x + r * 2.5} ${a.y - r * 2.5}, ` +
+              `${a.x + r * 2.5} ${a.y + r * 0.5}, ` +
+              `${a.x + r} ${a.y}`;
+          midX = a.x + r * 2;
+          midY = a.y - r * 0.8;
+        } else if (hasReverse) {
+          // Curve perpendicular to the line midpoint.
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const nx = -dy / dist;
+          const ny = dx / dist;
+          const curve = Math.min(dist * 0.2, 30);
+          const cx = (a.x + b.x) / 2 + nx * curve;
+          const cy = (a.y + b.y) / 2 + ny * curve;
+          // End point pulled back to node edge for arrowhead positioning.
+          const end = pullBackToNodeEdge(b, cx, cy, NODE_R + 4);
+          d = `M ${a.x} ${a.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
+          midX = cx;
+          midY = cy;
+        } else {
+          const end = pullBackToNodeEdge(b, a.x, a.y, NODE_R + 4);
+          d = `M ${a.x} ${a.y} L ${end.x} ${end.y}`;
+          midX = (a.x + b.x) / 2;
+          midY = (a.y + b.y) / 2;
+        }
+
+        path.setAttribute('d', d);
+        if (edge.directed) path.setAttribute('marker-end', 'url(#arrow)');
+        parent.appendChild(path);
+
+        // Weight label, only if not default.
+        if (edge.weight !== 1 || edge.directed === false) {
+          renderEdgeLabel(parent, midX, midY, formatWeight(edge.weight));
+        }
+      }
+
+      function pullBackToNodeEdge(target, fromX, fromY, r) {
+        const dx = target.x - fromX;
+        const dy = target.y - fromY;
+        const d = Math.hypot(dx, dy) || 1;
+        return { x: target.x - (dx / d) * r, y: target.y - (dy / d) * r };
+      }
+
+      function renderEdgeLabel(parent, x, y, text) {
+        const len = text.length;
+        const bg = document.createElementNS(SVG_NS, 'rect');
+        bg.setAttribute('x', x - len * 3.2);
+        bg.setAttribute('y', y - 6.5);
+        bg.setAttribute('width', len * 6.4);
+        bg.setAttribute('height', 12);
+        bg.setAttribute('rx', '2');
+        bg.setAttribute('class', 'pg-edge-label-bg');
+        parent.appendChild(bg);
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 3.5);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('class', 'pg-edge-label');
+        t.textContent = text;
+        parent.appendChild(t);
+      }
+
+      function formatWeight(w) {
+        if (Number.isInteger(w)) return String(w);
+        // Trim trailing zeros.
+        let s = w.toFixed(3);
+        while (s.endsWith('0')) s = s.slice(0, -1);
+        if (s.endsWith('.')) s += '0';
+        return s;
+      }
+
+      function renderNode(parent, node, pos) {
+        const g = document.createElementNS(SVG_NS, 'g');
+        g.setAttribute('class', `pg-node pg-node-${node.kind}`);
+        g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+        g.dataset.name = node.name;
+
+        let shape;
+        if (node.kind === 'dam') {
+          shape = document.createElementNS(SVG_NS, 'rect');
+          shape.setAttribute('x', -NODE_R);
+          shape.setAttribute('y', -NODE_R);
+          shape.setAttribute('width', NODE_R * 2);
+          shape.setAttribute('height', NODE_R * 2);
+          shape.setAttribute('rx', '4');
+        } else {
+          shape = document.createElementNS(SVG_NS, 'circle');
+          shape.setAttribute('r', NODE_R);
+        }
+        g.appendChild(shape);
+
+        // Generator / load badge: a small +/- in the centre.
+        if (node.kind === 'generator' || node.kind === 'load') {
+          const badge = document.createElementNS(SVG_NS, 'text');
+          badge.setAttribute('x', 0);
+          badge.setAttribute('y', 4);
+          badge.setAttribute('text-anchor', 'middle');
+          badge.setAttribute('fill', 'white');
+          badge.setAttribute('font-weight', 'bold');
+          badge.setAttribute('font-size', '14');
+          badge.textContent = node.kind === 'generator' ? '+' : '−';
+          g.appendChild(badge);
+        }
+
+        // Name label below the node.
+        const label = document.createElementNS(SVG_NS, 'text');
+        label.setAttribute('x', 0);
+        label.setAttribute('y', NODE_R + 14);
+        label.setAttribute('text-anchor', 'middle');
+        label.textContent = node.name;
+        g.appendChild(label);
+
+        // Supply value beneath the name, for grid generators/loads.
+        if (node.kind === 'generator' || node.kind === 'load') {
+          const v = document.createElementNS(SVG_NS, 'text');
+          v.setAttribute('x', 0);
+          v.setAttribute('y', NODE_R + 26);
+          v.setAttribute('text-anchor', 'middle');
+          v.setAttribute('class', 'pg-edge-label');
+          v.textContent = (node.supply > 0 ? '+' : '') + node.supply;
+          g.appendChild(v);
+        }
+
+        parent.appendChild(g);
+        return g;
+      }
+
+      function attachInteractions(sys, positions, nodeEls, edgeGroup, pairs) {
+        // Hover: dim everything except the hovered node and its neighbours.
+        for (const [name, el] of nodeEls) {
+          el.addEventListener('mouseenter', () => {
+            const incident = new Set([name]);
+            for (const e of sys.edges) {
+              if (e.from === name) incident.add(e.to);
+              if (e.to === name) incident.add(e.from);
+            }
+            for (const [otherName, otherEl] of nodeEls) {
+              otherEl.classList.toggle('pg-faded', !incident.has(otherName));
+            }
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              const f = edgeEl.dataset.from;
+              const t = edgeEl.dataset.to;
+              const touches = f === name || t === name;
+              edgeEl.style.opacity = touches ? '1' : '0.15';
+            }
+          });
+          el.addEventListener('mouseleave', () => {
+            for (const otherEl of nodeEls.values()) {
+              otherEl.classList.remove('pg-faded');
+            }
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              edgeEl.style.opacity = '';
+            }
+          });
+
+          // Drag.
+          let dragging = false;
+          let offsetX, offsetY;
+          el.addEventListener('mousedown', (ev) => {
+            dragging = true;
+            const pt = svgPoint(ev.clientX, ev.clientY);
+            const pos = positions.get(name);
+            offsetX = pt.x - pos.x;
+            offsetY = pt.y - pos.y;
+            ev.preventDefault();
+          });
+          window.addEventListener('mousemove', (ev) => {
+            if (!dragging) return;
+            const pt = svgPoint(ev.clientX, ev.clientY);
+            const pos = positions.get(name);
+            pos.x = pt.x - offsetX;
+            pos.y = pt.y - offsetY;
+            el.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+            // Redraw edges touching this node.
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              const f = edgeEl.dataset.from;
+              const t = edgeEl.dataset.to;
+              if (f !== name && t !== name) continue;
+            }
+            // Simpler: redraw all edges.
+            redrawEdges(sys, positions, edgeGroup, pairs);
+          });
+          window.addEventListener('mouseup', () => { dragging = false; });
+        }
+      }
+
+      function redrawEdges(sys, positions, edgeGroup, pairs) {
+        while (edgeGroup.firstChild) edgeGroup.removeChild(edgeGroup.firstChild);
+        const edgeKey = (e) => `${e.from}|${e.to}`;
+        for (const e of sys.edges) {
+          renderEdge(edgeGroup, e, positions, pairs.has(edgeKey(e)));
+        }
+      }
+
+      function svgPoint(clientX, clientY) {
+        const pt = graphEl.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const ctm = graphEl.getScreenCTM();
+        return ctm ? pt.matrixTransform(ctm.inverse()) : { x: clientX, y: clientY };
+      }
+
+      // ─── End graph renderer ──────────────────────────────────────────
 
       let timer = null;
       function run() {
+        const source = editor.getValue();
+        // Graph: render whatever can be parsed, even on simulation error.
         try {
-          const result = interpret(editor.getValue());
+          drawGraph(parseGraph(source));
+        } catch (e) {
+          showMessage('graph render failed: ' + (e && e.message || String(e)));
+        }
+        // Text output: full interpret pass.
+        try {
+          const result = interpret(source);
           if (result.hadError) {
             outputEl.innerHTML = '';
             const errSpan = document.createElement('span');
@@ -716,6 +1283,15 @@ print SeriesDemo [0, 1, 30, 10, 0, 0, 0];
           statusEl.className = 'pg-status pg-status-error';
         }
       }
+
+      // Re-render the graph on window resize so the SVG viewBox stays sane.
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          try { drawGraph(parseGraph(editor.getValue())); } catch (e) {}
+        }, 150);
+      });
 
       editor.onDidChangeModelContent(() => {
         if (timer) clearTimeout(timer);
