@@ -678,6 +678,39 @@ body:has(.magic-page) .main {
   color: var(--text-dim);
   font-weight: 600;
   margin-bottom: 6px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+.deck-col-total {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-red);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.deck-type-group {
+  margin-bottom: 12px;
+}
+.deck-type-group:last-child { margin-bottom: 0; }
+.deck-type-label {
+  font-size: 10px;
+  letter-spacing: 0.10em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+  border-bottom: 1px solid var(--border-light);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.deck-type-count {
+  font-family: var(--font-mono);
+  color: var(--text-dim);
+  font-weight: 400;
+  font-size: 10px;
 }
 .deck-card-list {
   display: flex;

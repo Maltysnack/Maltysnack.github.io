@@ -882,6 +882,73 @@
     return "Ladder";
   }
 
+  // Primary card type for grouping. Order matters: this is the display order.
+  const TYPE_GROUPS = [
+    { key: "creature",     label: "Creatures",     match: t => t.includes("Creature") },
+    { key: "planeswalker", label: "Planeswalkers", match: t => t.includes("Planeswalker") },
+    { key: "instant",      label: "Instants",      match: t => t.includes("Instant") },
+    { key: "sorcery",      label: "Sorceries",     match: t => t.includes("Sorcery") },
+    { key: "enchantment",  label: "Enchantments",  match: t => t.includes("Enchantment") },
+    { key: "artifact",     label: "Artifacts",     match: t => t.includes("Artifact") },
+    { key: "battle",       label: "Battles",       match: t => t.includes("Battle") },
+    { key: "land",         label: "Lands",         match: t => t.includes("Land") },
+  ];
+  function primaryGroupKey(name) {
+    const sf = scryfall[name] || {};
+    const type = sf.type_line || "";
+    for (const g of TYPE_GROUPS) if (g.match(type)) return g.key;
+    return "other";
+  }
+
+  function groupAndSortCards(cards) {
+    // cards: [{qty, name}, ...]
+    const byKey = new Map();
+    for (const c of cards) {
+      const k = primaryGroupKey(c.name);
+      if (!byKey.has(k)) byKey.set(k, []);
+      byKey.get(k).push(c);
+    }
+    // Sort each group: mana value ascending, then name
+    for (const arr of byKey.values()) {
+      arr.sort((a, b) => {
+        const ca = (scryfall[a.name] && scryfall[a.name].cmc) || 0;
+        const cb = (scryfall[b.name] && scryfall[b.name].cmc) || 0;
+        if (ca !== cb) return ca - cb;
+        return a.name.localeCompare(b.name);
+      });
+    }
+    return byKey;
+  }
+
+  function renderDeckHalf(cards) {
+    if (!cards || !cards.length) return "";
+    const byKey = groupAndSortCards(cards);
+    const renderLine = (c) => {
+      const inSel = selection.includes(c.name);
+      return `<li class="${inSel ? "deck-line-hit" : ""}"><span class="deck-line-q">${c.qty}</span><button class="deck-line-name" data-name="${escapeAttr(c.name)}">${escapeHtml(c.name)}</button></li>`;
+    };
+    const sections = [];
+    for (const g of TYPE_GROUPS) {
+      const arr = byKey.get(g.key);
+      if (!arr || !arr.length) continue;
+      const total = arr.reduce((s, c) => s + (c.qty || 0), 0);
+      sections.push(`<div class="deck-type-group">
+        <div class="deck-type-label">${g.label} <span class="deck-type-count">${total}</span></div>
+        <ul class="deck-card-list">${arr.map(renderLine).join("")}</ul>
+      </div>`);
+    }
+    // Cards we couldn't classify (no scryfall data) go in "Other"
+    const other = byKey.get("other") || [];
+    if (other.length) {
+      const total = other.reduce((s, c) => s + (c.qty || 0), 0);
+      sections.push(`<div class="deck-type-group">
+        <div class="deck-type-label">Other <span class="deck-type-count">${total}</span></div>
+        <ul class="deck-card-list">${other.map(renderLine).join("")}</ul>
+      </div>`);
+    }
+    return sections.join("");
+  }
+
   function renderDeck(d, idx) {
     const title = d.deck_title || "Unknown player";
     const sub = d.subtitle || "";
@@ -889,12 +956,8 @@
     const dt = d.event_date || (d.week ? fmtDate(d.week) : "");
     const tag = tierLabelForWeight(d.weight || 1);
     const link = d.source ? `<a class="deck-source" href="${escapeAttr(d.source)}" target="_blank" rel="noopener">source ↗</a>` : "";
-    const renderCardLine = (c) => {
-      const inSel = selection.includes(c.name);
-      return `<li class="${inSel ? "deck-line-hit" : ""}"><span class="deck-line-q">${c.qty}</span><button class="deck-line-name" data-name="${escapeAttr(c.name)}">${escapeHtml(c.name)}</button></li>`;
-    };
-    const main = (d.main || []).map(renderCardLine).join("");
-    const side = (d.side || []).map(renderCardLine).join("");
+    const mainTotal = (d.main || []).reduce((s, c) => s + (c.qty || 0), 0);
+    const sideTotal = (d.side || []).reduce((s, c) => s + (c.qty || 0), 0);
     return `
       <article class="deck-card">
         <header class="deck-card-head">
@@ -915,12 +978,12 @@
         </header>
         <div class="deck-card-cols">
           <div class="deck-card-col">
-            <div class="deck-card-col-label">Main</div>
-            <ul class="deck-card-list">${main}</ul>
+            <div class="deck-card-col-label">Main <span class="deck-col-total">${mainTotal}</span></div>
+            ${renderDeckHalf(d.main || [])}
           </div>
-          ${side ? `<div class="deck-card-col">
-            <div class="deck-card-col-label">Sideboard</div>
-            <ul class="deck-card-list">${side}</ul>
+          ${sideTotal > 0 ? `<div class="deck-card-col">
+            <div class="deck-card-col-label">Sideboard <span class="deck-col-total">${sideTotal}</span></div>
+            ${renderDeckHalf(d.side || [])}
           </div>` : ""}
         </div>
         <div class="deck-card-status" id="deck-card-status-${idx}"></div>
