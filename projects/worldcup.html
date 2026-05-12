@@ -236,10 +236,20 @@
       text-align: right;
       font-variant-numeric: tabular-nums;
     }
+    /* Text colour ramps with column-normalised intensity, no background.
+       --fill is set inline by the renderer (0..1). At fill=0 the number
+       sits in muted body text; at fill=1 it lifts into a saturated brand
+       gold + bold weight. Smooth interpolation via color-mix so it works
+       in light + dark themes. */
     .wc-paths .v {
-      color: var(--text-muted);
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
+      );
+      font-weight: calc(400 + var(--fill, 0) * 300);
+      transition: color 120ms ease, font-weight 120ms ease;
     }
-    .wc-paths .v.high { color: var(--text-body, inherit); }
     .wc-paths .name .team-name {
       overflow: hidden;
       text-overflow: ellipsis;
@@ -454,9 +464,9 @@
       .wc-upcoming { grid-template-columns: 1fr; }
     }
 
-    /* Recent results: same team / score / team layout as the Next match
-       hero, but smaller. Actual result up top, predicted same format
-       below in a smaller / muted line. */
+    /* Recent results: one teams-row at top with the actual scoreline,
+       elo deltas underneath each team, and a small predicted-score
+       caption below. Flags + team names appear once per card. */
     .wc-recent {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
@@ -466,7 +476,7 @@
     .wc-recent-card {
       border: 1px solid rgba(128,128,128,0.3);
       border-radius: 3px;
-      padding: 0.6rem 0.9rem 0.65rem;
+      padding: 0.6rem 0.9rem 0.7rem;
       display: flex;
       flex-direction: column;
       gap: 0.4rem;
@@ -480,56 +490,79 @@
       text-transform: uppercase;
       letter-spacing: 0.05em;
     }
-    .wc-recent-card .meta .tag {
-      font-weight: 600;
-    }
-    .wc-recent-line {
+    .wc-recent-card .meta .tag { font-weight: 600; }
+
+    /* Actual result row: team / flag / score / flag / team. */
+    .wc-recent-actual {
       display: grid;
       grid-template-columns: 1fr auto 1fr;
       align-items: center;
       gap: 0.6rem;
+      font-size: 0.95rem;
+      font-weight: 600;
     }
-    .wc-recent-line .team {
+    .wc-recent-actual .team {
       display: flex;
       align-items: center;
       gap: 0.4rem;
       min-width: 0;
-      font-weight: 600;
     }
-    .wc-recent-line .team.right { justify-content: flex-end; }
-    .wc-recent-line .team .wc-flag { width: 22px; height: 16px; }
-    .wc-recent-line .team .name {
+    .wc-recent-actual .team.right { justify-content: flex-end; }
+    .wc-recent-actual .team .wc-flag { width: 22px; height: 16px; }
+    .wc-recent-actual .team .name {
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .wc-recent-line .score {
-      font-variant-numeric: tabular-nums;
-      letter-spacing: -0.02em;
-    }
-    /* Actual result line: prominent. */
-    .wc-recent-line.actual {
-      font-size: 0.95rem;
-    }
-    .wc-recent-line.actual .score {
+    .wc-recent-actual .score {
       font-weight: 700;
-      font-size: 1.2rem;
+      font-size: 1.25rem;
       color: var(--text-strong, inherit);
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
     }
-    /* Predicted line: same shape, smaller + muted. Lights up on exact hit. */
-    .wc-recent-line.predicted {
-      font-size: 0.78rem;
+
+    /* Elo delta row: one number under each team, color coded. */
+    .wc-recent-elo {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: baseline;
+      gap: 0.6rem;
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
       color: var(--text-muted);
-      padding-top: 0.4rem;
+    }
+    .wc-recent-elo .delta { font-weight: 600; }
+    .wc-recent-elo .delta.right { text-align: right; }
+    .wc-recent-elo .delta.up   { color: rgb(85, 160, 100); }
+    .wc-recent-elo .delta.down { color: rgb(200, 95, 95); }
+    .wc-recent-elo .center {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Predicted scoreline: small caption, centered, no flags. */
+    .wc-recent-pred {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding-top: 0.45rem;
       border-top: 1px solid rgba(128,128,128,0.2);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
     }
-    .wc-recent-line.predicted .team { font-weight: 500; }
-    .wc-recent-line.predicted .team .wc-flag { width: 16px; height: 12px; }
-    .wc-recent-line.predicted .score {
-      font-weight: 600;
-      font-size: 0.9rem;
+    .wc-recent-pred .pred-score {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      font-variant-numeric: tabular-nums;
     }
-    .wc-recent-line.predicted.hit { color: var(--text-body, inherit); }
+    .wc-recent-pred.hit .pred-score { color: var(--text-body, inherit); }
 
     /* Customise panel: sits right under the Custom toggle, right-aligned */
     .wc-customise {
@@ -654,6 +687,72 @@
       font-weight: 500;
     }
     .wc-btn[hidden] { display: none; }
+
+    /* Top-level tab nav (Match Centre / Tournament / Table). Slightly
+       larger + bolder than sub-toggles, sits at the top of the page,
+       and stays visible while you browse a pane. */
+    .wc-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1.2rem 0 0;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-tab {
+      font: inherit;
+      font-size: 0.95rem;
+      font-family: inherit;
+      padding: 0.45rem 0.95rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wc-tab:hover { background: rgba(180,150,80,0.08); }
+    .wc-tab.active {
+      background: rgba(180,150,80,0.14);
+      border-color: rgba(180,150,80,0.55);
+      color: var(--text-body, inherit);
+      font-weight: 600;
+    }
+    .wc-pane[hidden] { display: none; }
+    .wc-pane { margin-top: 1rem; }
+
+    /* Status badges next to section headings. */
+    .wc-live-status, .wc-pred-badge {
+      display: inline-block;
+      margin-left: 0.55rem;
+      vertical-align: middle;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+    }
+    .wc-live-status.upcoming { color: rgba(180,150,80,0.85); }
+    .wc-live-status.live { color: rgb(85,160,100); }
+    .wc-pred-badge.forecast { color: rgba(180,150,80,0.85); }
+    .wc-pred-badge.archived { color: var(--text-muted); }
+    .wc-live-placeholder {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      border: 1px dashed rgba(128,128,128,0.3);
+      border-radius: 3px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .wc-live-placeholder strong {
+      display: block;
+      font-size: 1.05rem;
+      color: var(--text-body, inherit);
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
     .wc-tournament-meta {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -728,99 +827,125 @@
       </p>
     </section>
 
-    <div class="divider"></div>
+    <nav class="wc-tabs" role="tablist" aria-label="View">
+      <button class="wc-tab active" data-pane="live" type="button" role="tab">Live</button>
+      <button class="wc-tab" data-pane="prediction" type="button" role="tab">Prediction</button>
+    </nav>
 
-    <section class="intro">
-      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Next match
-      </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        The first unplayed fixture. Win/draw/loss probabilities and the
-        most likely scoreline. Updates as the tournament progresses.
-      </p>
-      <div class="wc-next-wrap" id="wc-next">
-        <div class="wc-next-meta">Loading...</div>
+    <!-- ── Live pane ─────────────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="live" role="tabpanel" aria-label="Live">
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Next match
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          The first unplayed fixture. Win/draw/loss probabilities and the
+          most likely scoreline. Updates as the tournament progresses.
+        </p>
+        <div class="wc-next-wrap" id="wc-next">
+          <div class="wc-next-meta">Loading...</div>
+        </div>
+        <div class="wc-upcoming" id="wc-upcoming"></div>
+        <div class="wc-lookup" id="wc-lookup">
+          <label for="wc-lookup-team">Lookup any fixture</label>
+          <select id="wc-lookup-team">
+            <option value="">(pick a team)</option>
+          </select>
+        </div>
+        <div class="wc-lookup-result" id="wc-lookup-result"></div>
       </div>
-      <div class="wc-upcoming" id="wc-upcoming"></div>
-      <div class="wc-lookup" id="wc-lookup">
-        <label for="wc-lookup-team">Lookup any fixture</label>
-        <select id="wc-lookup-team">
-          <option value="">(pick a team)</option>
-        </select>
-      </div>
-      <div class="wc-lookup-result" id="wc-lookup-result"></div>
-    </section>
 
-    <div style="margin-top:0.8rem;">
-      <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
-        Recent results
-        <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
-          predicted vs actual
+      <div style="margin-top:1.5rem;">
+        <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
+          Recent results
+          <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
+            predicted vs actual
+          </span>
         </span>
-      </span>
-      <div class="wc-recent" id="wc-recent"></div>
-    </div>
-
-    <div class="divider"></div>
-
-    <section class="intro">
-      <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-        Tournament
-      </h2>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Switch between knockout bracket and group stage. The default view
-        shows averaged predictions from <span id="wc-nsims">10,000</span>
-        Monte Carlo runs. Single sim shows one random tournament with
-        scores. Custom model lets you adjust any team's rating and watch
-        the predictions update.
-      </p>
-
-      <div class="wc-tournament-bar">
-        <div class="wc-toggle" role="tablist" aria-label="View">
-          <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
-          <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
-        </div>
-        <div class="wc-toggle" role="tablist" aria-label="Mode">
-          <button class="wc-btn active" data-mode="average" type="button">Average</button>
-          <button class="wc-btn" data-mode="single" type="button">Single sim</button>
-        </div>
-        <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
-        <div class="wc-toggle right" role="tablist" aria-label="Model">
-          <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
-          <button class="wc-btn" data-source="custom" type="button">Custom model</button>
-        </div>
+        <div class="wc-recent" id="wc-recent"></div>
       </div>
 
-      <div class="wc-customise" id="wc-customise" hidden>
-        <input list="wc-team-list" id="wc-add-team" type="search"
-               class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
-        <datalist id="wc-team-list"></datalist>
-        <div id="wc-adjustments" class="wc-adjustments"></div>
+      <!-- Live group standings + bracket: empty until the WC starts,
+           then populated from actual results as games are played. -->
+      <div class="intro" style="margin-top:1.8rem;">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Live tournament
+          <span class="wc-live-status" id="wc-live-status"></span>
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          The real group standings and bracket as games are played. Empty
+          until kickoff on 11 June. Until then the
+          <a href="#prediction">Prediction</a> tab has our pre-tournament forecast.
+        </p>
+        <div id="wc-live-view"></div>
       </div>
-      <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
     </section>
 
-    <!-- Tournament view: bracket or group cards. -->
-    <div id="wc-tournament-view"></div>
+    <!-- ── Prediction pane ───────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction" hidden>
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Tournament forecast
+          <span class="wc-pred-badge" id="wc-pred-badge"></span>
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          What the model thinks will happen. Bracket and group stage from
+          <span id="wc-nsims">10,000</span> Monte Carlo runs. Single sim
+          shows one random tournament with scores. Custom model lets you
+          adjust any team's rating and watch the predictions update.
+          Once the tournament begins this view becomes a frozen archive
+          of our pre-kickoff forecast.
+        </p>
 
-    <div class="divider"></div>
+        <div class="wc-tournament-bar">
+          <div class="wc-toggle" role="tablist" aria-label="View">
+            <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
+            <button class="wc-btn" data-tab="table" type="button">Table</button>
+          </div>
+          <!-- Mode + Model toggles are benched for now. The defaults
+               (average aggregation, latest model) run as before; the
+               buttons stay in the DOM so re-enabling later is just
+               removing the `hidden` attribute from these two divs. -->
+          <div class="wc-toggle" id="wc-mode-toggle" role="tablist" aria-label="Mode" hidden>
+            <button class="wc-btn active" data-mode="average" type="button">Average</button>
+            <button class="wc-btn" data-mode="single" type="button">Single sim</button>
+          </div>
+          <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
+          <div class="wc-toggle right" role="tablist" aria-label="Model" hidden>
+            <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
+            <button class="wc-btn" data-source="custom" type="button">Custom model</button>
+          </div>
+        </div>
 
-    <section class="intro" style="margin-top:1rem;">
-      <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
-        How far each team is likely to go
-      </h3>
-      <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-        Probability each team reaches a given round, averaged across all
-        Monte Carlo runs (does not change with the toggles above). The five
-        teams flagged <span class="wc-darkhorse-tag">dark horse</span> are
-        outside the top eight by raw rating but punch hardest above their
-        weight, ranked by a score that rewards both how lowly-rated they
-        are and how often they go deep (deeper rounds count more). Showing
-        top 24, search to find more.
-      </p>
-      <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
-      <div class="wc-paths-wrap">
-        <div class="wc-paths" id="wc-paths"></div>
+        <div class="wc-customise" id="wc-customise" hidden>
+          <input list="wc-team-list" id="wc-add-team" type="search"
+                 class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
+          <datalist id="wc-team-list"></datalist>
+          <div id="wc-adjustments" class="wc-adjustments"></div>
+        </div>
+        <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
+      </div>
+
+      <!-- Tournament view: bracket or group cards. -->
+      <div id="wc-tournament-view"></div>
+
+      <!-- Table view: probability of reaching each round.
+           Toggled visible when STATE.tab === 'table'. -->
+      <div id="wc-table-view" hidden>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
+          Probability each team reaches a given round, averaged across all
+          Monte Carlo runs. Cells are coloured per column: the strongest
+          team in each round sets the deepest gold, others scale from there.
+          The five teams flagged
+          <span class="wc-darkhorse-tag">dark horse</span> are outside the
+          top eight by raw rating but punch hardest above their weight.
+          Showing top 24, search to find more.
+        </p>
+        <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
+        <div class="wc-paths-wrap">
+          <div class="wc-paths" id="wc-paths"></div>
+        </div>
       </div>
     </section>
 
@@ -1292,6 +1417,15 @@
           if (t.includes('qualif')) return 'Qualifier';
           return m.tournament || '';
         };
+        // Format an Elo delta as "+4" / "−6" / "0" with sign and class.
+        const fmtDelta = (v) => {
+          if (v == null) return { text: '', cls: '' };
+          const r = Math.round(v);
+          if (r === 0) return { text: '0', cls: '' };
+          const sign = r > 0 ? '+' : '−'; // proper minus sign
+          const cls = r > 0 ? 'up' : 'down';
+          return { text: `${sign}${Math.abs(r)}`, cls };
+        };
         recent.slice(0, 12).forEach(m => {
           const card = document.createElement('div');
           card.className = 'wc-recent-card';
@@ -1299,12 +1433,22 @@
           const exactHit =
             m.modal_score[0] === m.actual_home_goals &&
             m.modal_score[1] === m.actual_away_goals;
+          const dh = fmtDelta(m.elo_delta_home);
+          const da = fmtDelta(m.elo_delta_away);
+          const eloRow = (m.elo_delta_home != null && m.elo_delta_away != null)
+            ? `
+              <div class="wc-recent-elo">
+                <span class="delta ${dh.cls}">${dh.text}</span>
+                <span class="center">elo</span>
+                <span class="delta right ${da.cls}">${da.text}</span>
+              </div>`
+            : '';
           card.innerHTML = `
             <div class="meta">
               <span class="tag">${tagFor(m)}</span>
               <span>${fmtDate(m.match_date)}</span>
             </div>
-            <div class="wc-recent-line actual">
+            <div class="wc-recent-actual">
               <span class="team">
                 ${flagImg(m.home_team)}
                 <span class="name">${m.home_team}</span>
@@ -1315,16 +1459,10 @@
                 ${flagImg(m.away_team)}
               </span>
             </div>
-            <div class="wc-recent-line predicted${exactHit ? ' hit' : ''}">
-              <span class="team">
-                ${flagImg(m.home_team)}
-                <span class="name">${m.home_team}</span>
-              </span>
-              <span class="score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</span>
-              <span class="team right">
-                <span class="name">${m.away_team}</span>
-                ${flagImg(m.away_team)}
-              </span>
+            ${eloRow}
+            <div class="wc-recent-pred${exactHit ? ' hit' : ''}">
+              <span>predicted</span>
+              <span class="pred-score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</span>
             </div>
           `;
           container.appendChild(card);
@@ -1433,6 +1571,22 @@
 
       function renderTournamentView() {
         const root = document.getElementById('wc-tournament-view');
+        const tableView = document.getElementById('wc-table-view');
+
+        // Swap which container is visible based on the active sub-tab.
+        const isTable = STATE.tab === 'table';
+        root.hidden = isTable;
+        if (tableView) tableView.hidden = !isTable;
+
+        if (isTable) {
+          // Table rendering is handled by renderPaths(), kicked here too
+          // so the colour scale picks up any future model changes when
+          // Custom model is re-enabled.
+          renderPaths();
+          root.innerHTML = '';
+          return;
+        }
+
         root.innerHTML = '';
         const { knockout, groups, decimal, withScores } = activeDataset();
         if (STATE.tab === 'knockouts') {
@@ -1505,9 +1659,18 @@
           <div class="header right">Champion</div>
         `;
 
+        // Per-column max across all teams (not just visible top 24) so
+        // the colour scale stays stable when the user filters. Floor so
+        // a single tiny value doesn't max out the column.
+        const probKeys = ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'];
+        const colMax = {};
+        probKeys.forEach(k => {
+          const m = Math.max(...stats.map(s => s[k] || 0));
+          colMax[k] = Math.max(m, 5);
+        });
+
         stats.forEach((s, i) => {
           const dh = darkHorseSet.has(s.team);
-          const fmt = (v) => `<span class="v ${v >= 25 ? 'high' : ''}">${v.toFixed(1)}%</span>`;
           // dataset.team includes "dark horse" so the search input matches it
           const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
           const meta = { 'data-team': searchKey, 'data-rank': String(i) };
@@ -1524,9 +1687,14 @@
           addCell('team-rating', s.rating);
           // 3. Dark horse tag (always renders the cell so the column lines up)
           addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
-          // 4-8. Probabilities
-          ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'].forEach(k => {
-            addCell('cell-num', fmt(s[k]));
+          // 4-8. Probabilities. Square-root scale on the fill so low-but-
+          // nonzero values still get visible tint instead of looking like 0.
+          probKeys.forEach(k => {
+            const v = s[k] || 0;
+            const frac = Math.min(v / colMax[k], 1);
+            const fill = Math.sqrt(frac).toFixed(3);
+            addCell('cell-num',
+              `<span class="v" style="--fill: ${fill}">${v.toFixed(1)}%</span>`);
           });
         });
         applyPathsFilter('');
@@ -1688,6 +1856,99 @@
         }, 220);
       }
 
+      // Top-level pane switching. Persists active pane in URL hash so
+      // links like #tournament drop you straight onto that view.
+      function showPane(name) {
+        const panes = document.querySelectorAll('.wc-pane');
+        const tabs = document.querySelectorAll('.wc-tab');
+        let matched = false;
+        panes.forEach(p => {
+          const isMe = p.dataset.pane === name;
+          p.hidden = !isMe;
+          if (isMe) matched = true;
+        });
+        if (!matched) {
+          // Unknown hash: fall back to default.
+          panes.forEach((p, i) => p.hidden = i !== 0);
+          name = panes[0]?.dataset.pane;
+        }
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+        // Reflect in URL without scrolling.
+        if (name && history.replaceState) {
+          history.replaceState(null, '', `#${name}`);
+        }
+      }
+      function wireTabs() {
+        document.querySelectorAll('.wc-tab').forEach(b => {
+          b.addEventListener('click', () => showPane(b.dataset.pane));
+        });
+        // Honour initial #hash if present.
+        const initial = (location.hash || '').replace(/^#/, '');
+        if (initial) showPane(initial);
+        // Respond to back/forward and external hash changes.
+        window.addEventListener('hashchange', () => {
+          showPane((location.hash || '').replace(/^#/, '') || 'live');
+        });
+      }
+
+      // ── Live / archived status badges ────────────────────────────
+      // Today (pre-kickoff) the Prediction tab is a "live forecast" that
+      // still updates nightly. Once we freeze the pre-kickoff snapshot
+      // it becomes an "archived" forecast. Detection: if the JSON includes
+      // a `frozen_at` field (added by the freeze script), treat the data
+      // as archived. Otherwise we're still in forecast mode.
+      const WC_KICKOFF = new Date('2026-06-11T00:00:00');
+      function renderStatusBadges() {
+        const today = new Date();
+        const kickedOff = today >= WC_KICKOFF;
+        const frozen = !!(DATA.sim && DATA.sim.frozen_at);
+
+        const liveBadge = document.getElementById('wc-live-status');
+        if (liveBadge) {
+          if (kickedOff) {
+            liveBadge.className = 'wc-live-status live';
+            liveBadge.textContent = 'Live';
+          } else {
+            liveBadge.className = 'wc-live-status upcoming';
+            liveBadge.textContent = 'Begins 11 June';
+          }
+        }
+        const predBadge = document.getElementById('wc-pred-badge');
+        if (predBadge) {
+          if (frozen) {
+            predBadge.className = 'wc-pred-badge archived';
+            predBadge.textContent = 'Pre-kickoff archive';
+          } else {
+            predBadge.className = 'wc-pred-badge forecast';
+            predBadge.textContent = 'Live forecast';
+          }
+        }
+
+        // Live tournament view: placeholder until WC kicks off. Once
+        // games are played we will populate it from real results.
+        const liveView = document.getElementById('wc-live-view');
+        if (liveView) {
+          if (!kickedOff) {
+            const days = Math.ceil((WC_KICKOFF - today) / 86400000);
+            liveView.innerHTML = `
+              <div class="wc-live-placeholder">
+                <strong>${days} day${days === 1 ? '' : 's'} until kickoff.</strong>
+                The real bracket and group standings will fill in here as
+                matches are played. Pre-tournament forecast is in
+                <a href="#prediction">Prediction</a>.
+              </div>`;
+          } else {
+            // TODO: render the real-results-driven groups + bracket
+            // once we have actual WC matches in the dataset.
+            liveView.innerHTML = `
+              <div class="wc-live-placeholder">
+                Live tournament view is being populated. Check back as
+                more matches are played.
+              </div>`;
+          }
+        }
+      }
+
       function wireControls() {
         document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
           b.addEventListener('click', () => {
@@ -1787,6 +2048,8 @@
           });
 
           wireControls();
+          wireTabs();
+          renderStatusBadges();
           renderNext();
           renderUpcoming();
           renderLookup();
