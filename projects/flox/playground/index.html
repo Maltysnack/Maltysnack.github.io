@@ -520,7 +520,15 @@ print MorningCommute 500;
       ];
 
       // Default landing program: the demo (named in EXAMPLES above).
-      const DEFAULT_PROGRAM = EXAMPLES.find((e) => e.id === "demo").source;
+      // Default landing program. ?example=<id> on the URL overrides it
+      // (used by deep-links from the project page's mode cards). Falls
+      // back to the Demo if the id is unknown or absent.
+      const params = new URLSearchParams(window.location.search);
+      const requestedId = params.get('example');
+      const initialExample =
+        EXAMPLES.find((e) => e.id === requestedId) ||
+        EXAMPLES.find((e) => e.id === 'demo');
+      const DEFAULT_PROGRAM = initialExample.source;
 
       const editor = monaco.editor.create(document.getElementById('pg-editor'), {
         value: DEFAULT_PROGRAM,

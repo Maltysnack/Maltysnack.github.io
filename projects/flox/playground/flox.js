@@ -89,6 +89,7 @@ function printFlowTable(o, system, rainfall) {
   let locWidth = 8;
   for (const r of system.rivers.values()) {
     if (r.name === finalOutlet) continue;
+    if (system.disabledNodes.has(r.name)) continue;
     if (r.name.length > locWidth) locWidth = r.name.length;
     for (let day = 0; day < 10; day++) {
       const w = fmtFixed(r.dailyFlow[day], 1).length;
@@ -96,6 +97,7 @@ function printFlowTable(o, system, rainfall) {
     }
   }
   for (const d of system.dams.values()) {
+    if (system.disabledNodes.has(d.name)) continue;
     if (d.name.length > locWidth) locWidth = d.name.length;
     for (let day = 0; day < 10; day++) {
       const w = fmtFixed(d.dailyOutflow[day], 1).length;
@@ -129,6 +131,7 @@ function printFlowTable(o, system, rainfall) {
   o.println("");
   for (const r of system.rivers.values()) {
     if (r.name === finalOutlet) continue;
+    if (system.disabledNodes.has(r.name)) continue;
     o.print(padRight(r.name, locWidth));
     for (let day = 0; day < 10; day++) {
       o.print("|  " + padLeft(fmtFixed(r.dailyFlow[day], 1), valWidth) + " ");
@@ -136,6 +139,7 @@ function printFlowTable(o, system, rainfall) {
     o.println("|");
   }
   for (const d of system.dams.values()) {
+    if (system.disabledNodes.has(d.name)) continue;
     o.print(padRight(d.name, locWidth));
     for (let day = 0; day < 10; day++) {
       o.print("|  " + padLeft(fmtFixed(d.dailyOutflow[day], 1), valWidth) + " ");
@@ -252,29 +256,37 @@ function printGridMap(o, system) {
     if (r.supply > 0) tag2 = "generator  " + signedFmt(r.supply);
     else if (r.supply < 0) tag2 = "load       " + signedFmt(r.supply);
     else tag2 = "relay";
-    o.println("  " + padRight(r.name, nameWidth) + "  " + tag2);
+    const suffix = system.disabledNodes.has(r.name) ? "  (disabled)" : "";
+    o.println("  " + padRight(r.name, nameWidth) + "  " + tag2 + suffix);
   }
   o.println("");
   const edgeC = /* @__PURE__ */ new Map();
   const edgeEnds = /* @__PURE__ */ new Map();
+  const edgeDisabled = /* @__PURE__ */ new Map();
   for (const [from, edges] of system.connections) {
     for (const e of edges) {
       const key = from <= e.target ? `${from}|${e.target}` : `${e.target}|${from}`;
       edgeC.set(key, (edgeC.get(key) ?? 0) + e.weight);
       if (!edgeEnds.has(key)) edgeEnds.set(key, [from, e.target]);
+      const disabled = !e.enabled || system.disabledNodes.has(from) || system.disabledNodes.has(e.target);
+      edgeDisabled.set(key, (edgeDisabled.get(key) ?? false) || disabled);
     }
   }
   o.println("Edges (" + edgeC.size + "):");
   for (const [key, ends] of edgeEnds) {
     const c = edgeC.get(key);
+    const suffix = edgeDisabled.get(key) ? "   (disabled)" : "";
     o.println(
-      "  " + padRight(ends[0], nameWidth) + " <-> " + padRight(ends[1], nameWidth) + "   c=" + formatWeight(c)
+      "  " + padRight(ends[0], nameWidth) + " <-> " + padRight(ends[1], nameWidth) + "   c=" + formatWeight(c) + suffix
     );
   }
   o.println("");
   let sum = 0;
-  for (const r of system.rivers.values()) sum += r.supply;
-  const tag = Math.abs(sum) < 1e-6 ? " \u2713 (balanced)" : " \u2717 (unbalanced!)";
+  for (const r of system.rivers.values()) {
+    if (system.disabledNodes.has(r.name)) continue;
+    sum += r.supply;
+  }
+  const tag = Math.abs(sum) < 1e-6 ? " \u2713 (balanced)" : " \u2717 (unbalanced)";
   o.println("Net supply: " + formatWeight(sum) + tag);
   o.println("");
 }
@@ -376,7 +388,7 @@ function padLeft(s, n) {
 
 // src/modes.ts
 var river = {
-  validate(_s) {
+  validate(_s, _errs) {
   },
   run(s, arg) {
     s.simulate(arg);
@@ -392,7 +404,7 @@ var river = {
   }
 };
 var markov = {
-  validate(s) {
+  validate(s, errs) {
     for (const name of s.initialMass.keys()) {
       if (!s.rivers.has(name) && !s.dams.has(name)) {
         throw new Error(
@@ -401,24 +413,46 @@ var markov = {
       }
     }
     let totalInitial = 0;
-    for (const m of s.initialMass.values()) totalInitial += m;
+    for (const [name, m] of s.initialMass) {
+      if (s.disabledNodes.has(name)) continue;
+      totalInitial += m;
+    }
     if (totalInitial === 0) {
       throw new Error(
-        `Markov system '${s.name}' has no initial mass. Use 'start NodeName 1.0;' to set one.`
+        `Markov system '${s.name}' has no initial mass on any active node. Use 'start NodeName 1.0;' to set one.`
       );
     }
+    let softened = s.disabledNodes.size > 0;
+    if (!softened) {
+      for (const edges of s.connections.values()) {
+        for (const e of edges) if (!e.enabled) {
+          softened = true;
+          break;
+        }
+        if (softened) break;
+      }
+    }
     for (const [src, edges] of s.connections) {
+      if (s.disabledNodes.has(src)) continue;
       let sum = 0;
+      let anyEnabled = false;
       const lines = [];
       for (const e of edges) {
+        if (!e.enabled) continue;
+        anyEnabled = true;
         sum += e.weight;
         if (e.op) lines.push(e.op.line);
       }
+      if (!anyEnabled) continue;
       if (Math.abs(sum - 1) > 1e-6) {
         const where = lines.length > 0 ? ` (${lines.map((l) => "line " + l).join(", ")})` : "";
-        throw new Error(
-          `Markov system '${s.name}': outgoing weights from '${src}'${where} sum to ${sum}, not 1.0.`
-        );
+        const msg = `Markov system '${s.name}': outgoing weights from '${src}'${where} sum to ${sum}, not 1.0.`;
+        if (softened) {
+          errs.push(`Note (scenario): ${msg}
+`);
+        } else {
+          throw new Error(msg);
+        }
       }
     }
   },
@@ -437,22 +471,37 @@ var markov = {
   }
 };
 var grid = {
-  validate(s) {
+  validate(s, errs) {
     let total = 0;
     let hasSupply = false;
     for (const r of s.rivers.values()) {
+      if (s.disabledNodes.has(r.name)) continue;
       total += r.supply;
       if (r.supply !== 0) hasSupply = true;
     }
     if (!hasSupply) {
       throw new Error(
-        `Grid system '${s.name}' has no supply set on any node. Use 'node X { supply: N }' for generators (+) or loads (-).`
+        `Grid system '${s.name}' has no supply set on any active node. Use 'node X { supply: N }' for generators (+) or loads (-).`
       );
     }
+    let softened = s.disabledNodes.size > 0;
+    if (!softened) {
+      for (const edges of s.connections.values()) {
+        for (const e of edges) if (!e.enabled) {
+          softened = true;
+          break;
+        }
+        if (softened) break;
+      }
+    }
     if (Math.abs(total) > 1e-6) {
-      throw new Error(
-        `Grid system '${s.name}': supplies do not balance (sum = ${total}). Generators (+) and loads (-) must sum to zero.`
-      );
+      const msg = `Grid system '${s.name}': supplies do not balance (sum = ${formatTotal(total)} after disabling). Generators (+) and loads (-) must sum to zero.`;
+      if (softened) {
+        errs.push(`Note (scenario): ${msg}
+`);
+      } else {
+        throw new Error(msg);
+      }
     }
   },
   run(s, arg) {
@@ -469,6 +518,9 @@ var grid = {
     printGridState(o, s);
   }
 };
+function formatTotal(n) {
+  return Number.isInteger(n) ? n.toFixed(1) : String(n);
+}
 var STRATEGIES = { river, markov, grid };
 
 // src/runtime.ts
@@ -558,6 +610,9 @@ var RiverSystem = class {
   dams = /* @__PURE__ */ new Map();
   connections = /* @__PURE__ */ new Map();
   roots = [];
+  // Nodes explicitly disabled via 'disable' statements. Skipped by every
+  // simulator; remain in rivers/dams so the visualisation can dim them.
+  disabledNodes = /* @__PURE__ */ new Set();
   // Markov state
   initialMass = /* @__PURE__ */ new Map();
   markovHistory = /* @__PURE__ */ new Map();
@@ -581,15 +636,19 @@ var RiverSystem = class {
       downstream = [];
       this.connections.set(from, downstream);
     }
-    downstream.push({ target: to, weight, op });
+    downstream.push({ target: to, weight, op, enabled: true });
   }
   identifyRoots() {
     this.roots = [];
     const hasUpstream = /* @__PURE__ */ new Set();
     for (const edges of this.connections.values()) {
-      for (const e of edges) hasUpstream.add(e.target);
+      for (const e of edges) {
+        if (!e.enabled) continue;
+        hasUpstream.add(e.target);
+      }
     }
     for (const r of this.rivers.values()) {
+      if (this.disabledNodes.has(r.name)) continue;
       if (!hasUpstream.has(r.name) && !r.isTerminator()) {
         this.roots.push(r.name);
       }
@@ -610,9 +669,11 @@ var RiverSystem = class {
     for (let day = 0; day < 10; day++) {
       const flowThisDay = /* @__PURE__ */ new Map();
       for (const node of this.getTopologicalOrder()) {
+        if (this.disabledNodes.has(node)) continue;
         let flow = 0;
         for (const [from, edges] of this.connections) {
           for (const e of edges) {
+            if (!e.enabled) continue;
             if (e.target === node) {
               flow += (flowThisDay.get(from) ?? 0) * e.weight;
             }
@@ -639,7 +700,9 @@ var RiverSystem = class {
   // maxTicks or when the state stops changing within EPSILON.
   simulateMarkov(maxTicks) {
     const EPSILON = 1e-9;
-    const nodes = [...this.rivers.keys(), ...this.dams.keys()];
+    const nodes = [];
+    for (const n of this.rivers.keys()) if (!this.disabledNodes.has(n)) nodes.push(n);
+    for (const n of this.dams.keys()) if (!this.disabledNodes.has(n)) nodes.push(n);
     let mass = /* @__PURE__ */ new Map();
     for (const n of nodes) mass.set(n, this.initialMass.get(n) ?? 0);
     this.markovHistory.clear();
@@ -660,6 +723,7 @@ var RiverSystem = class {
           continue;
         }
         for (const e of outs) {
+          if (!e.enabled) continue;
           if (!next.has(e.target)) continue;
           next.set(e.target, (next.get(e.target) ?? 0) + (mass.get(src) ?? 0) * e.weight);
         }
@@ -683,11 +747,14 @@ var RiverSystem = class {
   // (supply + net_inflow) over time with a damping factor dt.
   simulateGrid(maxTicks) {
     const EPSILON = 1e-7;
-    const nodes = [...this.rivers.keys(), ...this.dams.keys()];
+    const nodes = [];
+    for (const n of this.rivers.keys()) if (!this.disabledNodes.has(n)) nodes.push(n);
+    for (const n of this.dams.keys()) if (!this.disabledNodes.has(n)) nodes.push(n);
     const edgeC = /* @__PURE__ */ new Map();
     const edgeEnds = /* @__PURE__ */ new Map();
     for (const [from, edges] of this.connections) {
       for (const e of edges) {
+        if (!e.enabled) continue;
         const key = from <= e.target ? `${from}|${e.target}` : `${e.target}|${from}`;
         edgeC.set(key, (edgeC.get(key) ?? 0) + e.weight);
         if (!edgeEnds.has(key)) edgeEnds.set(key, [from, e.target]);
@@ -749,6 +816,7 @@ var RiverSystem = class {
     for (const n of allNodes) inDegree.set(n, 0);
     for (const edges of this.connections.values()) {
       for (const e of edges) {
+        if (!e.enabled) continue;
         inDegree.set(e.target, (inDegree.get(e.target) ?? 0) + 1);
       }
     }
@@ -762,6 +830,7 @@ var RiverSystem = class {
       const edges = this.connections.get(node);
       if (edges) {
         for (const e of edges) {
+          if (!e.enabled) continue;
           const d = (inDegree.get(e.target) ?? 0) - 1;
           inDegree.set(e.target, d);
           if (d === 0) queue.push(e.target);
@@ -782,6 +851,7 @@ var Interpreter = class {
   errs;
   systems = /* @__PURE__ */ new Map();
   pendingChains = /* @__PURE__ */ new Map();
+  pendingDisables = /* @__PURE__ */ new Map();
   currentSystem = null;
   phase = 0 /* COLLECT */;
   fileMode = "river";
@@ -806,7 +876,8 @@ var Interpreter = class {
     }
     for (const s of this.systems.values()) s.mode = this.fileMode;
     this.resolveChains();
-    for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s);
+    this.applyDisables();
+    for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s, this.errs);
     for (const s of this.systems.values()) s.identifyRoots();
   }
   executeAll(statements) {
@@ -831,6 +902,7 @@ var Interpreter = class {
             s = new RiverSystem(name);
             this.systems.set(name, s);
             this.pendingChains.set(name, []);
+            this.pendingDisables.set(name, []);
           }
           this.currentSystem = s;
         } else {
@@ -919,6 +991,12 @@ var Interpreter = class {
         this.pendingChains.get(sys.name).push(stmt);
         return;
       }
+      case "DisableStmt": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const sys = this.requireSystem(stmt.first);
+        this.pendingDisables.get(sys.name).push(stmt);
+        return;
+      }
       case "StartStmt": {
         if (this.phase !== 0 /* COLLECT */) return;
         const sys = this.requireSystem(stmt.node);
@@ -976,6 +1054,53 @@ var Interpreter = class {
           const to = arrow.forward ? b : a;
           const weight = arrow.weight != null ? arrow.weight : 1;
           system.addConnection(from.lexeme, to.lexeme, weight, arrow.op);
+        }
+      }
+    }
+  }
+  applyDisables() {
+    for (const [sysName, stmts] of this.pendingDisables) {
+      const system = this.systems.get(sysName);
+      if (!system) continue;
+      for (const stmt of stmts) {
+        if (stmt.second === null) {
+          const name = stmt.first.lexeme;
+          if (!this.nodeDefined(system, name)) {
+            throw new Error(
+              `disable references undeclared node '${name}' (line ${stmt.first.line}) in system '${system.name}'.`
+            );
+          }
+          system.disabledNodes.add(name);
+          const outs = system.connections.get(name);
+          if (outs) for (const e of outs) e.enabled = false;
+          for (const es of system.connections.values()) {
+            for (const e of es) if (e.target === name) e.enabled = false;
+          }
+        } else {
+          const a = stmt.first.lexeme;
+          const b = stmt.second.lexeme;
+          const from = stmt.forward ? a : b;
+          const to = stmt.forward ? b : a;
+          if (!this.nodeDefined(system, from) || !this.nodeDefined(system, to)) {
+            throw new Error(
+              `disable references undeclared node in edge '${from} -> ${to}' (line ${stmt.first.line}) in system '${system.name}'.`
+            );
+          }
+          const outs = system.connections.get(from);
+          let found = false;
+          if (outs) {
+            for (const e of outs) {
+              if (e.target === to) {
+                e.enabled = false;
+                found = true;
+              }
+            }
+          }
+          if (!found) {
+            throw new Error(
+              `disable references edge '${from} -> ${to}' (line ${stmt.first.line}) which is not declared in system '${system.name}'.`
+            );
+          }
         }
       }
     }
@@ -1046,6 +1171,7 @@ var Parser = class {
       if (this.match("OUTLET" /* OUTLET */)) return this.outletDeclaration();
       if (this.match("NODE" /* NODE */)) return this.nodeDeclaration();
       if (this.match("START" /* START */)) return this.startStatement();
+      if (this.match("DISABLE" /* DISABLE */)) return this.disableStatement();
       if (this.match("MAP" /* MAP */)) return this.mapStatement();
       if (this.match("LIST" /* LIST */)) return this.listStatement();
       if (this.match("PRINT" /* PRINT */)) return this.printStatement();
@@ -1063,6 +1189,20 @@ var Parser = class {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect mode name (e.g. river, markov).");
     this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after mode name.");
     return { kind: "ModeDecl", mode: name };
+  }
+  disableStatement() {
+    const first = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after 'disable'.");
+    let second = null;
+    let forward = true;
+    if (this.match("ARROW" /* ARROW */)) {
+      forward = true;
+      second = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after '->' in 'disable'.");
+    } else if (this.match("LARROW" /* LARROW */)) {
+      forward = false;
+      second = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after '<-' in 'disable'.");
+    }
+    this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after disable statement.");
+    return { kind: "DisableStmt", first, second, forward };
   }
   startStatement() {
     const node = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after 'start'.");
@@ -1320,6 +1460,7 @@ var Parser = class {
         case "OUTLET" /* OUTLET */:
         case "NODE" /* NODE */:
         case "START" /* START */:
+        case "DISABLE" /* DISABLE */:
         case "MAP" /* MAP */:
         case "LIST" /* LIST */:
         case "PRINT" /* PRINT */:
@@ -1342,7 +1483,8 @@ var KEYWORDS = {
   outlet: "OUTLET" /* OUTLET */,
   node: "NODE" /* NODE */,
   mode: "MODE" /* MODE */,
-  start: "START" /* START */
+  start: "START" /* START */,
+  disable: "DISABLE" /* DISABLE */
 };
 var Scanner = class {
   constructor(source, errs) {
@@ -1552,17 +1694,30 @@ function systemToGraph(sys) {
     nodes.push({
       name: r.name,
       kind: classifyRiver(r, sys.mode),
-      supply: r.supply
+      supply: r.supply,
+      disabled: sys.disabledNodes.has(r.name)
     });
   }
   for (const d of sys.dams.values()) {
-    nodes.push({ name: d.name, kind: "dam", supply: 0 });
+    nodes.push({
+      name: d.name,
+      kind: "dam",
+      supply: 0,
+      disabled: sys.disabledNodes.has(d.name)
+    });
   }
   const directed = sys.mode !== "grid";
   const edges = [];
   for (const [from, outEdges] of sys.connections) {
     for (const e of outEdges) {
-      edges.push({ from, to: e.target, weight: e.weight, directed });
+      const incidentDisabled = sys.disabledNodes.has(from) || sys.disabledNodes.has(e.target);
+      edges.push({
+        from,
+        to: e.target,
+        weight: e.weight,
+        directed,
+        disabled: !e.enabled || incidentDisabled
+      });
     }
   }
   return { name: sys.name, mode: sys.mode, nodes, edges };
