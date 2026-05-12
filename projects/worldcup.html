@@ -709,6 +709,40 @@
     }
     .wc-pane[hidden] { display: none; }
     .wc-pane { margin-top: 1rem; }
+
+    /* Status badges next to section headings. */
+    .wc-live-status, .wc-pred-badge {
+      display: inline-block;
+      margin-left: 0.55rem;
+      vertical-align: middle;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+    }
+    .wc-live-status.upcoming { color: rgba(180,150,80,0.85); }
+    .wc-live-status.live { color: rgb(85,160,100); }
+    .wc-pred-badge.forecast { color: rgba(180,150,80,0.85); }
+    .wc-pred-badge.archived { color: var(--text-muted); }
+    .wc-live-placeholder {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      border: 1px dashed rgba(128,128,128,0.3);
+      border-radius: 3px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .wc-live-placeholder strong {
+      display: block;
+      font-size: 1.05rem;
+      color: var(--text-body, inherit);
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
     .wc-tournament-meta {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -784,13 +818,12 @@
     </section>
 
     <nav class="wc-tabs" role="tablist" aria-label="View">
-      <button class="wc-tab active" data-pane="match-centre" type="button" role="tab">Match centre</button>
-      <button class="wc-tab" data-pane="tournament" type="button" role="tab">Tournament</button>
-      <button class="wc-tab" data-pane="table" type="button" role="tab">Table</button>
+      <button class="wc-tab active" data-pane="live" type="button" role="tab">Live</button>
+      <button class="wc-tab" data-pane="prediction" type="button" role="tab">Prediction</button>
     </nav>
 
-    <!-- ── Match centre pane ─────────────────────────────────────── -->
-    <section class="wc-pane" data-pane="match-centre" role="tabpanel" aria-label="Match centre">
+    <!-- ── Live pane ─────────────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="live" role="tabpanel" aria-label="Live">
       <div class="intro">
         <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
           Next match
@@ -821,20 +854,37 @@
         </span>
         <div class="wc-recent" id="wc-recent"></div>
       </div>
-    </section>
 
-    <!-- ── Tournament pane ───────────────────────────────────────── -->
-    <section class="wc-pane" data-pane="tournament" role="tabpanel" aria-label="Tournament" hidden>
-      <div class="intro">
+      <!-- Live group standings + bracket: empty until the WC starts,
+           then populated from actual results as games are played. -->
+      <div class="intro" style="margin-top:1.8rem;">
         <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-          Tournament
+          Live tournament
+          <span class="wc-live-status" id="wc-live-status"></span>
         </h2>
         <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-          Switch between knockout bracket and group stage. The default view
-          shows averaged predictions from <span id="wc-nsims">10,000</span>
-          Monte Carlo runs. Single sim shows one random tournament with
-          scores. Custom model lets you adjust any team's rating and watch
-          the predictions update.
+          The real group standings and bracket as games are played. Empty
+          until kickoff on 11 June. Until then the
+          <a href="#prediction">Prediction</a> tab has our pre-tournament forecast.
+        </p>
+        <div id="wc-live-view"></div>
+      </div>
+    </section>
+
+    <!-- ── Prediction pane ───────────────────────────────────────── -->
+    <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction" hidden>
+      <div class="intro">
+        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+          Tournament forecast
+          <span class="wc-pred-badge" id="wc-pred-badge"></span>
+        </h2>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
+          What the model thinks will happen. Bracket and group stage from
+          <span id="wc-nsims">10,000</span> Monte Carlo runs. Single sim
+          shows one random tournament with scores. Custom model lets you
+          adjust any team's rating and watch the predictions update.
+          Once the tournament begins this view becomes a frozen archive
+          of our pre-kickoff forecast.
         </p>
 
         <div class="wc-tournament-bar">
@@ -864,14 +914,11 @@
 
       <!-- Tournament view: bracket or group cards. -->
       <div id="wc-tournament-view"></div>
-    </section>
 
-    <!-- ── Table pane ────────────────────────────────────────────── -->
-    <section class="wc-pane" data-pane="table" role="tabpanel" aria-label="Table" hidden>
-      <div class="intro">
-        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
+      <div class="intro" style="margin-top:1.8rem;">
+        <h3 style="font-weight:600;font-size:1.15rem;margin-bottom:0.4rem;letter-spacing:-0.02em;">
           How far each team is likely to go
-        </h2>
+        </h3>
         <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
           Probability each team reaches a given round, averaged across all
           Monte Carlo runs. The five teams flagged
@@ -1795,8 +1842,66 @@
         if (initial) showPane(initial);
         // Respond to back/forward and external hash changes.
         window.addEventListener('hashchange', () => {
-          showPane((location.hash || '').replace(/^#/, '') || 'match-centre');
+          showPane((location.hash || '').replace(/^#/, '') || 'live');
         });
+      }
+
+      // ── Live / archived status badges ────────────────────────────
+      // Today (pre-kickoff) the Prediction tab is a "live forecast" that
+      // still updates nightly. Once we freeze the pre-kickoff snapshot
+      // it becomes an "archived" forecast. Detection: if the JSON includes
+      // a `frozen_at` field (added by the freeze script), treat the data
+      // as archived. Otherwise we're still in forecast mode.
+      const WC_KICKOFF = new Date('2026-06-11T00:00:00');
+      function renderStatusBadges() {
+        const today = new Date();
+        const kickedOff = today >= WC_KICKOFF;
+        const frozen = !!(DATA.sim && DATA.sim.frozen_at);
+
+        const liveBadge = document.getElementById('wc-live-status');
+        if (liveBadge) {
+          if (kickedOff) {
+            liveBadge.className = 'wc-live-status live';
+            liveBadge.textContent = 'Live';
+          } else {
+            liveBadge.className = 'wc-live-status upcoming';
+            liveBadge.textContent = 'Begins 11 June';
+          }
+        }
+        const predBadge = document.getElementById('wc-pred-badge');
+        if (predBadge) {
+          if (frozen) {
+            predBadge.className = 'wc-pred-badge archived';
+            predBadge.textContent = 'Pre-kickoff archive';
+          } else {
+            predBadge.className = 'wc-pred-badge forecast';
+            predBadge.textContent = 'Live forecast';
+          }
+        }
+
+        // Live tournament view: placeholder until WC kicks off. Once
+        // games are played we will populate it from real results.
+        const liveView = document.getElementById('wc-live-view');
+        if (liveView) {
+          if (!kickedOff) {
+            const days = Math.ceil((WC_KICKOFF - today) / 86400000);
+            liveView.innerHTML = `
+              <div class="wc-live-placeholder">
+                <strong>${days} day${days === 1 ? '' : 's'} until kickoff.</strong>
+                The real bracket and group standings will fill in here as
+                matches are played. Pre-tournament forecast is in
+                <a href="#prediction">Prediction</a>.
+              </div>`;
+          } else {
+            // TODO: render the real-results-driven groups + bracket
+            // once we have actual WC matches in the dataset.
+            liveView.innerHTML = `
+              <div class="wc-live-placeholder">
+                Live tournament view is being populated. Check back as
+                more matches are played.
+              </div>`;
+          }
+        }
       }
 
       function wireControls() {
@@ -1899,6 +2004,7 @@
 
           wireControls();
           wireTabs();
+          renderStatusBadges();
           renderNext();
           renderUpcoming();
           renderLookup();
