@@ -1812,12 +1812,12 @@
             'the next 2-3 weeks as more squads land.</p>';
           return;
         }
-        // Filter to players whose prediction rounds to >= 1 goal. Below
-        // that we'd be ranking noise: a 0.4 prediction is essentially
-        // "this player might score, might not, very low signal." Keeps
-        // the list short and human-readable instead of trailing into
-        // dozens of fractional projections.
-        const top = data.top_20.filter(p => Math.round(p.predicted_wc_goals) >= 1);
+        // Filter to players whose prediction rounds to >= 1 goal, then
+        // cap at 10. Below 1 is noise; below the top 10 is uninteresting
+        // for a "golden boot contenders" view.
+        const top = data.top_20
+          .filter(p => Math.round(p.predicted_wc_goals) >= 1)
+          .slice(0, 10);
         if (top.length === 0) {
           container.innerHTML =
             '<p style="color:var(--text-muted);font-size:0.85rem;">' +
