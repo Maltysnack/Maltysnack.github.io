@@ -230,7 +230,8 @@
     .wc-paths {
       display: grid;
       /* Team | Elo | dark-horse tag | R16 | QF | SF | Final | Champion */
-      grid-template-columns: minmax(160px, 1.4fr) 3em 6.5em repeat(5, 1fr);
+      /* Team | Elo | dark-horse tag | R16 | QF | SF | F | Champion | Market | Δ */
+      grid-template-columns: minmax(160px, 1.4fr) 3em 6.5em repeat(5, 1fr) 1fr 0.9fr;
       column-gap: 0.3rem;
       row-gap: 0.4rem;
       font-size: 0.85rem;
@@ -271,6 +272,32 @@
       font-weight: calc(400 + var(--fill, 0) * 300);
       transition: color 120ms ease, font-weight 120ms ease;
     }
+    /* Market column: muted body colour, no gradient (market is a
+       reference value, not a ranked-by-strength signal). */
+    .wc-paths .v.market {
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    /* Delta column: gold tint when model is bullish vs market,
+       blue tint when market is bullish. Saturation scales with |Δ|. */
+    .wc-paths .v.delta {
+      font-weight: calc(500 + var(--fill, 0) * 200);
+    }
+    .wc-paths .v.delta.pos {
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(200, 165, 80) calc(var(--fill, 0) * 100%)
+      );
+    }
+    .wc-paths .v.delta.neg {
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(110, 145, 195) calc(var(--fill, 0) * 100%)
+      );
+    }
+    .wc-paths .v.delta.zero { color: var(--text-muted); }
 
     /* Top scorers list: rank | flag | name | badge | goals, packed
        tight. Grid is capped at a comfortable max-width and centered
@@ -1030,11 +1057,14 @@
         <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
           Probability each team reaches a given round, averaged across all
           Monte Carlo runs. Cells are coloured per column: the strongest
-          team in each round sets the deepest gold, others scale from there.
+          team in each round sets the deepest green, others scale from there.
           The five teams flagged
           <span class="wc-darkhorse-tag">dark horse</span> are outside the
           top eight by raw rating but punch hardest above their weight.
-          Showing top 24, search to find more.
+          The <strong>Market</strong> column is the de-vigged Polymarket
+          implied probability for outright champion; <strong>Δ</strong> is
+          our model minus market (gold when we're more bullish, blue when
+          the market is). Showing top 24, search to find more.
         </p>
         <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
         <div class="wc-paths-wrap">
@@ -1767,7 +1797,9 @@
         );
 
         const container = document.getElementById('wc-paths');
-        // 8 columns: team | rating | DH | R16 | QF | SF | Final | Champion
+        // 10 columns: team | rating | DH | R16 | QF | SF | F | Champion | Market | Δ
+        // Market column = Polymarket-implied de-vigged probability.
+        // Δ column = model - market. Positive = we're more bullish.
         container.innerHTML = `
           <div class="header">Team</div>
           <div class="header right">Elo</div>
@@ -1777,6 +1809,8 @@
           <div class="header right">SF</div>
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
+          <div class="header right" title="Polymarket de-vigged probability">Market</div>
+          <div class="header right" title="Model minus market; positive = we are bullish vs market">Δ</div>
         `;
 
         // Per-column max across all teams (not just visible top 24) so
@@ -1816,6 +1850,27 @@
             addCell('cell-num',
               `<span class="v" style="--fill: ${fill}">${v.toFixed(1)}%</span>`);
           });
+          // 9. Market (Polymarket implied probability)
+          if (s.market_p_champion != null) {
+            addCell('cell-num',
+              `<span class="v market" style="--fill: 0">${s.market_p_champion.toFixed(1)}%</span>`);
+          } else {
+            addCell('cell-num', '<span class="v" style="--fill:0">&mdash;</span>');
+          }
+          // 10. Δ (model minus market). Color-coded: gold tint when
+          // model is bullish vs market, blue tint when market is bullish.
+          if (s.model_minus_market != null) {
+            const d = s.model_minus_market;
+            const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'zero');
+            const sign = d > 0 ? '+' : (d < 0 ? '−' : '');
+            const abs_d = Math.abs(d).toFixed(1);
+            // Intensity scales with magnitude up to 5pp
+            const intensity = Math.min(Math.abs(d) / 5, 1).toFixed(3);
+            addCell('cell-num',
+              `<span class="v delta ${cls}" style="--fill:${intensity}">${sign}${abs_d}</span>`);
+          } else {
+            addCell('cell-num', '<span class="v" style="--fill:0">&mdash;</span>');
+          }
         });
         applyPathsFilter('');
       }
