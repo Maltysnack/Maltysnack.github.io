@@ -1084,12 +1084,29 @@
     <section class="wc-pane" data-pane="live" role="tabpanel" aria-label="Live">
       <div class="intro">
         <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-          Next match
+          Live tournament
+          <span class="wc-live-status" id="wc-live-status"></span>
         </h2>
         <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-          The first unplayed fixture. Win/draw/loss probabilities and the
-          most likely scoreline. Updates as the tournament progresses.
+          The real tournament as it unfolds. Same structure as the
+          <a href="#prediction">Prediction</a> tab so you can flip between
+          them to compare. Group standings and the knockout bracket fill in
+          from actual results as games are played.
         </p>
+
+        <div class="wc-tournament-bar">
+          <div class="wc-toggle" role="tablist" aria-label="Live view">
+            <button class="wc-btn" data-tab="groups" data-scope="live" type="button">Group stage</button>
+            <button class="wc-btn" data-tab="knockouts" data-scope="live" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="scorers" data-scope="live" type="button">Top scorers</button>
+            <button class="wc-btn active" data-tab="upcoming" data-scope="live" type="button">Upcoming</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sub-view: Upcoming (next match + lookup + recent results).
+           This is the default Live sub-view pre-tournament. -->
+      <div id="wc-live-upcoming-view">
         <div class="wc-next-wrap" id="wc-next">
           <div class="wc-next-meta">Loading...</div>
         </div>
@@ -1101,31 +1118,33 @@
           </select>
         </div>
         <div class="wc-lookup-result" id="wc-lookup-result"></div>
-      </div>
 
-      <div style="margin-top:1.5rem;">
-        <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
-          Recent results
-          <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
-            predicted vs actual
+        <div style="margin-top:1.5rem;">
+          <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
+            Recent results
+            <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
+              predicted vs actual
+            </span>
           </span>
-        </span>
-        <div class="wc-recent" id="wc-recent"></div>
+          <div class="wc-recent" id="wc-recent"></div>
+        </div>
       </div>
 
-      <!-- Live group standings + bracket: empty until the WC starts,
-           then populated from actual results as games are played. -->
-      <div class="intro" style="margin-top:1.8rem;">
-        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-          Live tournament
-          <span class="wc-live-status" id="wc-live-status"></span>
-        </h2>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-          The real group standings and bracket as games are played. Empty
-          until kickoff on 11 June. Until then the
-          <a href="#prediction">Prediction</a> tab has our pre-tournament forecast.
-        </p>
-        <div id="wc-live-view"></div>
+      <!-- Sub-view: Group stage. Same card format as the Prediction
+           tab's groups, fed from live_tournament.json. -->
+      <div id="wc-live-groups-view" hidden>
+        <div id="wc-live-groups-content"></div>
+      </div>
+
+      <!-- Sub-view: Knockouts. Same bracket format as the Prediction
+           tab. Empty before kickoff; fills in as KO matches are played. -->
+      <div id="wc-live-knockouts-view" hidden>
+        <div id="wc-live-knockouts-content"></div>
+      </div>
+
+      <!-- Sub-view: Top scorers (actual goals scored, when available). -->
+      <div id="wc-live-scorers-view" hidden>
+        <div id="wc-live-scorers-content"></div>
       </div>
     </section>
 
@@ -1146,11 +1165,11 @@
         </p>
 
         <div class="wc-tournament-bar">
-          <div class="wc-toggle" role="tablist" aria-label="View">
-            <button class="wc-btn active" data-tab="knockouts" type="button">Knockouts</button>
-            <button class="wc-btn" data-tab="groups" type="button">Group stage</button>
-            <button class="wc-btn" data-tab="table" type="button">Table</button>
-            <button class="wc-btn" data-tab="scorers" type="button">Top scorers</button>
+          <div class="wc-toggle" role="tablist" aria-label="Prediction view">
+            <button class="wc-btn" data-tab="groups" data-scope="prediction" type="button">Group stage</button>
+            <button class="wc-btn active" data-tab="knockouts" data-scope="prediction" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="scorers" data-scope="prediction" type="button">Top scorers</button>
+            <button class="wc-btn" data-tab="table" data-scope="prediction" type="button">Table</button>
           </div>
           <!-- Mode + Model toggles are benched for now. The defaults
                (average aggregation, latest model) run as before; the
@@ -1254,12 +1273,14 @@
 
       // ── State ────────────────────────────────────────────────────
       const STATE = {
-        tab: 'knockouts',     // 'knockouts' | 'groups'
+        // Sub-tab is shared across Live + Prediction panes. Each pane
+        // remaps invalid values to its default (Live→'upcoming', Pred→'knockouts').
+        tab: 'upcoming',      // 'groups' | 'knockouts' | 'scorers' | 'table' | 'upcoming'
         mode: 'average',      // 'average' | 'single'
         source: 'latest',     // 'latest' | 'custom'
         bumps: {},
-        currentSim: null,     // last single-sim sample, for current source
-        customAggregate: null,// aggregated stats when source=custom
+        currentSim: null,
+        customAggregate: null,
       };
       const DATA = { bracket: null, sim: null };
       const SANDBOX = { groups: {}, baseRatings: {}, fixtures: [] };
@@ -1847,9 +1868,18 @@
         const tableView = document.getElementById('wc-table-view');
         const scorersView = document.getElementById('wc-scorers-view');
 
-        // Swap which container is visible based on the active sub-tab.
-        const isTable = STATE.tab === 'table';
-        const isScorers = STATE.tab === 'scorers';
+        // STATE.tab is shared with the Live pane. If it's 'upcoming'
+        // (Live-only), Prediction defaults to 'knockouts'.
+        const predValid = ['groups', 'knockouts', 'scorers', 'table'];
+        let activeTab = STATE.tab;
+        if (!predValid.includes(activeTab)) activeTab = 'knockouts';
+
+        // Highlight Prediction's own sub-tab buttons
+        document.querySelectorAll('.wc-toggle button[data-scope="prediction"]')
+          .forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+
+        const isTable = activeTab === 'table';
+        const isScorers = activeTab === 'scorers';
         root.hidden = isTable || isScorers;
         if (tableView) tableView.hidden = !isTable;
         if (scorersView) scorersView.hidden = !isScorers;
@@ -1867,7 +1897,7 @@
 
         root.innerHTML = '';
         const { knockout, groups, decimal, withScores } = activeDataset();
-        if (STATE.tab === 'knockouts') {
+        if (activeTab === 'knockouts') {
           const wrap = document.createElement('div');
           wrap.className = 'wc-bracket-wrap';
           const inner = document.createElement('div');
@@ -2224,15 +2254,17 @@
           if (isMe) matched = true;
         });
         if (!matched) {
-          // Unknown hash: fall back to default.
           panes.forEach((p, i) => p.hidden = i !== 0);
           name = panes[0]?.dataset.pane;
         }
         tabs.forEach(t => t.classList.toggle('active', t.dataset.pane === name));
-        // Reflect in URL without scrolling.
         if (name && history.replaceState) {
           history.replaceState(null, '', `#${name}`);
         }
+        // Refresh the now-visible pane's sub-view so its active sub-tab
+        // + content matches STATE.tab.
+        if (name === 'live') renderLiveSubview();
+        if (name === 'prediction') renderTournamentView();
       }
       function wireTabs() {
         document.querySelectorAll('.wc-tab').forEach(b => {
@@ -2282,134 +2314,179 @@
           }
         }
 
-        renderLiveTournament();
+        renderLiveSubview();
       }
 
-      // ── Renderer: Live tournament (groups + KO fill-in) ──────────
+      // ── Live sub-view dispatcher ──────────────────────────────────
+      // The Live pane has 4 sub-tabs (Group stage / Knockouts / Top
+      // scorers / Upcoming). STATE.tab is shared with the Prediction
+      // pane so flipping top-tabs keeps the same sub-view if available.
+      // If STATE.tab isn't a valid Live sub-tab (e.g., 'table'), we
+      // default to 'upcoming' which is the Live-only sub-tab.
+      function renderLiveSubview() {
+        const liveValid = ['groups', 'knockouts', 'scorers', 'upcoming'];
+        let activeTab = STATE.tab;
+        if (!liveValid.includes(activeTab)) activeTab = 'upcoming';
+
+        const views = {
+          groups:    'wc-live-groups-view',
+          knockouts: 'wc-live-knockouts-view',
+          scorers:   'wc-live-scorers-view',
+          upcoming:  'wc-live-upcoming-view',
+        };
+        for (const [tab, id] of Object.entries(views)) {
+          const el = document.getElementById(id);
+          if (el) el.hidden = tab !== activeTab;
+        }
+        // Highlight the active sub-tab button in Live's nav
+        document.querySelectorAll('.wc-toggle button[data-scope="live"]')
+          .forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+
+        // Render the active sub-view's content
+        if (activeTab === 'groups')    renderLiveGroups();
+        if (activeTab === 'knockouts') renderLiveKnockouts();
+        if (activeTab === 'scorers')   renderLiveScorers();
+        // upcoming: nothing to render here; renderNext/renderUpcoming/
+        // renderLookup/renderRecent are called once at page load and
+        // their content is already in the upcoming-view container.
+      }
+
+      // ── Renderer: Live tournament (legacy unified renderer; kept
+      //    for callers that just want the status banner). ────────────
       function renderLiveTournament() {
-        const root = document.getElementById('wc-live-view');
-        if (!root) return;
+        // No-op now; the sub-view renderers do the work. Status badges
+        // are handled by renderStatusBadges. Leaving this as a stub so
+        // old call sites don't break.
+      }
+
+      function _liveDataOrEmpty() {
+        const root = document.getElementById('wc-live-groups-content');
         const live = DATA.live;
         if (!live) {
-          // Backend hasn't generated the live JSON yet.
-          root.innerHTML =
+          if (root) root.innerHTML =
             '<div class="wc-live-placeholder">Live tournament data not yet generated.</div>';
-          return;
+          return null;
         }
-        const status = live.tournament_status;  // pre / groups / knockouts / complete
-        const days = live.days_to_kickoff;
+        return live;
+      }
 
-        // Status banner
-        let banner;
-        if (status === 'pre') {
-          banner = `<div class="wc-live-banner upcoming">
-              <strong>${days} day${days === 1 ? '' : 's'} until kickoff</strong>
-              <span class="muted"> · 12 groups, 48 teams · fixtures + predictions below</span>
-            </div>`;
-        } else if (status === 'groups') {
-          banner = `<div class="wc-live-banner live">
-              <strong>Group stage in progress</strong>
-              <span class="muted"> · ${live.n_group_matches_played}/${live.n_group_matches_total} matches played</span>
-            </div>`;
-        } else if (status === 'knockouts') {
-          banner = `<div class="wc-live-banner live">
-              <strong>Knockout phase</strong>
-              <span class="muted"> · groups complete (${live.n_played}/${live.n_total} matches done)</span>
-            </div>`;
-        } else {
-          banner = `<div class="wc-live-banner live">
-              <strong>Tournament complete</strong>
-              <span class="muted"> · all ${live.n_total} matches played</span>
-            </div>`;
-        }
+      // ── Renderer: Live > Group stage (matches Prediction format) ──
+      function renderLiveGroups() {
+        const live = _liveDataOrEmpty();
+        if (!live) return;
+        const container = document.getElementById('wc-live-groups-content');
+        if (!container) return;
 
-        // 12 group cards
-        const fmtDate = (s) => {
-          try {
-            const d = new Date(s + 'T00:00:00');
-            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-          } catch (e) { return s; }
-        };
-        const groupsHtml = live.groups.map(g => {
+        // Render as 12 cards using the SAME .wc-group CSS class as the
+        // Prediction tab so flipping between tabs gives an apples-to-
+        // apples comparison.
+        const cardsHtml = live.groups.map(g => {
           const rows = g.standings.map(s => {
-            const pos = s.position || '·';
-            const advancing = s.position && s.position <= 2 ? ' advancing' : '';
+            const cls = s.position && s.position <= 2 ? 'advancing'
+                       : (s.played > 0 ? 'eliminated' : '');
+            const posStr = s.position ?? '·';
             return `
-              <div class="wc-live-row${advancing}">
-                <span class="pos">${pos}</span>
+              <div class="wc-group-row ${cls}">
                 <span class="team-block">
+                  <span class="pos">${posStr}.</span>
                   ${flagImg(s.team)}
                   <span class="team-name">${s.team}</span>
                 </span>
-                <span class="num">${s.played}</span>
-                <span class="num">${s.gd >= 0 ? '+' + s.gd : s.gd}</span>
-                <span class="num bold">${s.points}</span>
-              </div>`;
-          }).join('');
-          const matchRows = g.matches.map(m => {
-            const dStr = fmtDate(m.date);
-            const pred = m.prediction || {};
-            const modal = pred.modal_score || ['?', '?'];
-            if (m.played) {
-              return `
-                <div class="wc-live-match played">
-                  <span class="date">${dStr}</span>
-                  <span class="team-cell home">${m.home_team}</span>
-                  <span class="score">${m.home_score} &ndash; ${m.away_score}</span>
-                  <span class="team-cell away">${m.away_team}</span>
-                  <span class="pred-mini" title="our pre-match prediction">${modal[0]}&ndash;${modal[1]}</span>
-                </div>`;
-            }
-            return `
-              <div class="wc-live-match">
-                <span class="date">${dStr}</span>
-                <span class="team-cell home">${m.home_team}</span>
-                <span class="score muted">vs</span>
-                <span class="team-cell away">${m.away_team}</span>
-                <span class="pred-mini" title="our predicted modal scoreline">${modal[0]}&ndash;${modal[1]}</span>
+                <span>${s.points}</span>
               </div>`;
           }).join('');
           return `
-            <div class="wc-live-group">
+            <div class="wc-group">
               <h4>Group ${g.name}</h4>
-              <div class="wc-live-table">
-                <div class="wc-live-row header">
-                  <span class="pos">#</span>
-                  <span class="team-block"></span>
-                  <span class="num">P</span>
-                  <span class="num">GD</span>
-                  <span class="num">Pts</span>
-                </div>
-                ${rows}
-              </div>
-              <div class="wc-live-matches">${matchRows}</div>
+              ${rows}
             </div>`;
         }).join('');
+        container.innerHTML = `<div class="wc-groups">${cardsHtml}</div>`;
+      }
 
-        let knockoutHtml = '';
-        if (status === 'knockouts' || status === 'complete') {
-          knockoutHtml = `
-            <div class="wc-live-ko">
-              <h3>Knockout bracket</h3>
-              <p class="muted small">${live.knockout_matches.length} knockout matches played.</p>
-            </div>`;
-          // Could expand: render real bracket here as games complete.
-          // Today there is nothing to show; placeholder remains until kickoff.
+      // ── Renderer: Live > Knockouts (matches Prediction bracket format) ──
+      function renderLiveKnockouts() {
+        const container = document.getElementById('wc-live-knockouts-content');
+        if (!container) return;
+        const live = DATA.live;
+        if (!live) {
+          container.innerHTML =
+            '<div class="wc-live-placeholder">Live tournament data not yet generated.</div>';
+          return;
         }
+        const status = live.tournament_status;
+        if (status === 'pre' || status === 'groups') {
+          const days = Math.max(0, live.days_to_kickoff || 0);
+          container.innerHTML = `
+            <div class="wc-live-placeholder">
+              <strong>Knockout bracket is not yet set</strong>
+              ${status === 'pre'
+                ? `Begins after the group stage. Tournament kicks off in ${days} day${days===1?'':'s'}.`
+                : `Group stage is in progress (${live.n_group_matches_played}/${live.n_group_matches_total} matches done). Bracket fills in once groups conclude.`}
+              See the <a href="#prediction">Prediction</a> tab for our pre-tournament forecast bracket.
+            </div>`;
+          return;
+        }
+        // Status is 'knockouts' or 'complete': render the bracket from
+        // live.knockout_matches (which the live builder fills as games
+        // happen). Reuse the same renderBracketInto used by Prediction.
+        const ko = _shapeLiveKnockoutsForBracket(live.knockout_matches);
+        const wrap = document.createElement('div');
+        wrap.className = 'wc-bracket-wrap';
+        const inner = document.createElement('div');
+        inner.className = 'wc-bracket';
+        wrap.appendChild(inner);
+        container.innerHTML = '';
+        container.appendChild(wrap);
+        renderBracketInto(inner, ko, true);
+      }
 
-        root.innerHTML = `
-          ${banner}
-          <div class="wc-live-groups">${groupsHtml}</div>
-          ${knockoutHtml}
-        `;
+      function _shapeLiveKnockoutsForBracket(matches) {
+        // Bucket KO matches into rounds for the bracket renderer.
+        // Placeholder shape; refined as the WC progresses.
+        const buckets = { round_of_32: [], round_of_16: [],
+                          quarter_finals: [], semi_finals: [], final: [] };
+        const champion = null;
+        return { ...buckets, champion };
+      }
+
+      // ── Renderer: Live > Top scorers (actual goals when available) ──
+      function renderLiveScorers() {
+        const container = document.getElementById('wc-live-scorers-content');
+        if (!container) return;
+        const live = DATA.live;
+        if (!live || live.tournament_status === 'pre') {
+          container.innerHTML = `
+            <div class="wc-live-placeholder">
+              <strong>No goals scored yet</strong>
+              Live top scorers appear here as goals go in during the
+              tournament. See the <a href="#prediction">Prediction</a>
+              tab for our pre-tournament golden-boot forecast.
+            </div>`;
+          return;
+        }
+        container.innerHTML = `
+          <div class="wc-live-placeholder">
+            Live top scorers will populate from the next data refresh.
+          </div>`;
       }
 
       function wireControls() {
+        // Sub-tab buttons appear in BOTH the Live and Prediction panes
+        // (data-scope="live" or "prediction"). STATE.tab is shared so
+        // clicking a sub-tab in either pane re-renders the active one.
         document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
           b.addEventListener('click', () => {
             STATE.tab = b.dataset.tab;
             renderControls();
-            renderTournamentView();
+            // Re-render the currently-visible pane's sub-view
+            const activePane = document.querySelector('.wc-pane:not([hidden])');
+            if (!activePane) return;
+            if (activePane.dataset.pane === 'live') {
+              renderLiveSubview();
+            } else {
+              renderTournamentView();
+            }
           });
         });
         document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
@@ -2522,7 +2599,10 @@
           renderPaths();
           renderControls();
           renderMeta();
+          // Render both panes' active sub-views so flipping between
+          // top tabs is instant.
           renderTournamentView();
+          renderLiveSubview();
         })
         .catch(err => {
           document.getElementById('wc-tournament-view').innerHTML =
