@@ -413,6 +413,137 @@
     }
     .wc-hidden { display: none !important; }
 
+    /* Unified match list (Live > Upcoming sub-view).
+       One compact card per match. Past matches show actual + prediction;
+       future matches show prediction + W/D/L bar. Chronological. */
+    .wc-match-filter {
+      width: 100%;
+      max-width: 320px;
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      margin: 0.5rem 0 0.7rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: transparent;
+      color: inherit;
+    }
+    .wc-match-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .wc-match-list .divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin: 0.4rem 0 0.2rem;
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+    }
+    .wc-match-list .divider::before,
+    .wc-match-list .divider::after {
+      content: "";
+      flex: 1;
+      height: 1px;
+      background: rgba(128,128,128,0.2);
+    }
+    .wc-row {
+      display: grid;
+      grid-template-columns: 4em 1fr auto;
+      align-items: center;
+      gap: 0.7rem;
+      padding: 0.45rem 0.6rem;
+      border: 1px solid rgba(128,128,128,0.22);
+      border-radius: 3px;
+      font-size: 0.82rem;
+    }
+    .wc-row.next { border-color: rgba(85,160,100,0.5); }
+    .wc-row .date {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+    .wc-row .date small {
+      display: block;
+      font-size: 0.6rem;
+      text-transform: none;
+      letter-spacing: 0;
+      opacity: 0.7;
+    }
+    .wc-row .teams {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-row .teams .team {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .wc-row .teams .team.right { justify-content: flex-end; }
+    .wc-row .teams .team .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .wc-row .teams .team .wc-flag { width: 18px; height: 13px; }
+    .wc-row .teams .score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      padding: 0 0.2rem;
+    }
+    .wc-row .teams .score.vs {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+    .wc-row .meta {
+      text-align: right;
+      font-size: 0.68rem;
+      color: var(--text-muted);
+      line-height: 1.25;
+      min-width: 7em;
+    }
+    .wc-row .meta .tag {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .wc-row .meta .pred {
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-row .meta .pred.hit { color: var(--text-body, inherit); }
+    .wc-row .meta .wdl {
+      display: inline-flex;
+      gap: 0.45rem;
+      font-variant-numeric: tabular-nums;
+      margin-top: 0.1rem;
+    }
+    .wc-row .meta .delta {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .wc-row .meta .delta.up   { color: rgb(85, 160, 100); }
+    .wc-row .meta .delta.down { color: rgb(200, 95, 95); }
+    @media (max-width: 540px) {
+      .wc-row { grid-template-columns: 4em 1fr; row-gap: 0.3rem; }
+      .wc-row .meta {
+        grid-column: 1 / -1;
+        text-align: left;
+      }
+    }
+
     /* Next match hero card */
     .wc-next-wrap {
       margin-top: 1rem;
@@ -1104,30 +1235,23 @@
         </div>
       </div>
 
-      <!-- Sub-view: Upcoming (next match + lookup + recent results).
-           This is the default Live sub-view pre-tournament. -->
+      <!-- Sub-view: Upcoming (unified chronological match list).
+           Recently played + next up, all in one tight list. Filter by
+           team via the input at top. Default Live sub-view pre-WC. -->
       <div id="wc-live-upcoming-view">
-        <div class="wc-next-wrap" id="wc-next">
-          <div class="wc-next-meta">Loading...</div>
+        <input type="search" class="wc-match-filter" id="wc-match-filter"
+               placeholder="Filter by team..." autocomplete="off" />
+        <div class="wc-match-list" id="wc-match-list"></div>
+        <!-- Dormant: legacy containers kept so the old renderers
+             (renderNext / renderUpcoming / renderLookup / renderRecent)
+             don't crash. They run but nothing surfaces. -->
+        <div id="wc-next" hidden></div>
+        <div id="wc-upcoming" hidden></div>
+        <div id="wc-lookup" hidden>
+          <select id="wc-lookup-team"><option value=""></option></select>
         </div>
-        <div class="wc-upcoming" id="wc-upcoming"></div>
-        <div class="wc-lookup" id="wc-lookup">
-          <label for="wc-lookup-team">Lookup any fixture</label>
-          <select id="wc-lookup-team">
-            <option value="">(pick a team)</option>
-          </select>
-        </div>
-        <div class="wc-lookup-result" id="wc-lookup-result"></div>
-
-        <div style="margin-top:1.5rem;">
-          <span style="font-size:0.78rem;color:var(--text-muted);text-transform:uppercase;letter-spacing:0.06em;">
-            Recent results
-            <span style="text-transform:none;letter-spacing:0;font-style:italic;margin-left:0.4rem;">
-              predicted vs actual
-            </span>
-          </span>
-          <div class="wc-recent" id="wc-recent"></div>
-        </div>
+        <div id="wc-lookup-result" hidden></div>
+        <div id="wc-recent" hidden></div>
       </div>
 
       <!-- Sub-view: Group stage. Same card format as the Prediction
@@ -1517,7 +1641,138 @@
         return { team_stats, n_simulations: n };
       }
 
-      // ── Renderers: Next match ────────────────────────────────────
+      // ── Renderer: unified match list (Live > Upcoming sub-view) ──
+      // Combines recent results + upcoming fixtures into one tight,
+      // chronologically-sorted list. Replaces the previous "next match
+      // hero + two half-cards + lookup + recent results" layout which
+      // had too many disconnected visual treatments.
+      function renderMatchList() {
+        const container = document.getElementById('wc-match-list');
+        if (!container) return;
+        const recent = (DATA.sim.recent_matches || []);
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
+
+        // Take the latest 8 recent + the next 8 upcoming
+        const recentTrimmed = recent.slice(0, 8).reverse(); // oldest first
+        const upcomingTrimmed = upcoming.slice(0, 8);
+
+        const fmtDate = (s) => {
+          try {
+            const d = new Date(s + 'T12:00:00');
+            const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const md  = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return `<small>${day}</small>${md}`;
+          } catch (e) { return s; }
+        };
+        const tagFor = (t) => {
+          const tl = (t || '').toLowerCase();
+          if (tl === 'friendly') return 'Friendly';
+          if (tl.includes('world cup')) return 'World Cup';
+          if (tl.includes('nations league')) return 'Nations Lg';
+          if (tl.includes('qualif')) return 'Qualifier';
+          return t || '';
+        };
+        const fmtDelta = (v) => {
+          if (v == null) return '';
+          const r = Math.round(v);
+          if (r === 0) return '';
+          const sign = r > 0 ? '+' : '−';
+          const cls = r > 0 ? 'up' : 'down';
+          return `<span class="delta ${cls}">${sign}${Math.abs(r)}</span>`;
+        };
+
+        const playedRow = (m) => {
+          const exactHit =
+            m.modal_score && m.modal_score[0] === m.actual_home_goals
+                          && m.modal_score[1] === m.actual_away_goals;
+          const dh = fmtDelta(m.elo_delta_home);
+          const da = fmtDelta(m.elo_delta_away);
+          const elo = dh && da
+            ? `<span class="wdl">${dh}<span style="opacity:0.5">·</span>${da}</span>`
+            : '';
+          const pred = m.modal_score
+            ? `<span class="pred${exactHit ? ' hit' : ''}">predicted ${m.modal_score[0]}–${m.modal_score[1]}</span>`
+            : '';
+          return `
+            <div class="wc-row" data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}">
+              <div class="date">${fmtDate(m.match_date)}</div>
+              <div class="teams">
+                <span class="team">
+                  ${flagImg(m.home_team)}
+                  <span class="name">${m.home_team}</span>
+                </span>
+                <span class="score">${m.actual_home_goals}–${m.actual_away_goals}</span>
+                <span class="team right">
+                  <span class="name">${m.away_team}</span>
+                  ${flagImg(m.away_team)}
+                </span>
+              </div>
+              <div class="meta">
+                <div class="tag">${tagFor(m.tournament)}</div>
+                <div>${pred}</div>
+                ${elo}
+              </div>
+            </div>`;
+        };
+        const upcomingRow = (m, isNext) => {
+          const modal = m.modal_score || ['?', '?'];
+          const ph = Math.round((m.p_home_win || 0) * 100);
+          const pd = Math.round((m.p_draw || 0) * 100);
+          const pa = Math.round((m.p_away_win || 0) * 100);
+          const wdl = `<span class="wdl">
+              <span>H ${ph}%</span>
+              <span>D ${pd}%</span>
+              <span>A ${pa}%</span>
+            </span>`;
+          return `
+            <div class="wc-row${isNext ? ' next' : ''}"
+                 data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}">
+              <div class="date">${fmtDate(m.match_date)}</div>
+              <div class="teams">
+                <span class="team">
+                  ${flagImg(m.home_team)}
+                  <span class="name">${m.home_team}</span>
+                </span>
+                <span class="score vs">vs</span>
+                <span class="team right">
+                  <span class="name">${m.away_team}</span>
+                  ${flagImg(m.away_team)}
+                </span>
+              </div>
+              <div class="meta">
+                <div class="tag">${tagFor(m.tournament)}</div>
+                <div><span class="pred">predicted ${modal[0]}–${modal[1]}</span></div>
+                ${wdl}
+              </div>
+            </div>`;
+        };
+
+        const parts = [];
+        if (recentTrimmed.length) {
+          parts.push('<div class="divider">Recent results</div>');
+          recentTrimmed.forEach(m => parts.push(playedRow(m)));
+        }
+        if (upcomingTrimmed.length) {
+          parts.push('<div class="divider">Next up</div>');
+          upcomingTrimmed.forEach((m, i) => parts.push(upcomingRow(m, i === 0)));
+        }
+        container.innerHTML = parts.join('');
+
+        // Filter wiring
+        const filter = document.getElementById('wc-match-filter');
+        if (filter && !filter._wired) {
+          filter.addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            container.querySelectorAll('.wc-row').forEach(row => {
+              const teams = row.dataset.teams || '';
+              row.classList.toggle('wc-hidden', q !== '' && !teams.includes(q));
+            });
+          });
+          filter._wired = true;
+        }
+      }
+
+      // ── Renderers: Next match (legacy, no longer surfaced) ───────
       function renderNext() {
         const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
         if (!upcoming.length) {
@@ -2592,6 +2847,8 @@
           wireControls();
           wireTabs();
           renderStatusBadges();
+          renderMatchList();
+          // Legacy renderers (containers hidden but kept to avoid errors)
           renderNext();
           renderUpcoming();
           renderLookup();
@@ -2599,8 +2856,6 @@
           renderPaths();
           renderControls();
           renderMeta();
-          // Render both panes' active sub-views so flipping between
-          // top tabs is instant.
           renderTournamentView();
           renderLiveSubview();
         })
