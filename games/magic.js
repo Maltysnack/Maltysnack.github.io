@@ -14,7 +14,6 @@
   let dataReady = false;
   let decks = null;       // raw decks, eager-loaded after initial render
   let stories = null;     // hand-curated narratives, loaded with the initial bundle
-  let listsOpen = false;
   // Synergy scores are computed ad-hoc from raw decks against the current
   // selection + bans, then cached. Cleared whenever selection or bans change.
   let _scoresMap = null;
@@ -60,7 +59,6 @@
     currentTab = t;
     // Tab change closes any open per-card popover so it doesn't dangle
     breakdownFor = null;
-    listsOpen = false;
     writeHash();
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -73,7 +71,6 @@
     if (!name || selection.includes(name)) return;
     bans = bans.filter((n) => n !== name);   // adding to selection unbans
     selection = [...selection, name];
-    listsOpen = false;
     searchQuery = "";                         // clear the search so the user sees the new state
     invalidateScores();
     writeHash();
@@ -81,7 +78,6 @@
   }
   function selectionRemove(name) {
     selection = selection.filter((n) => n !== name);
-    if (!selection.length) listsOpen = false;
     invalidateScores();
     writeHash();
     render();
@@ -641,16 +637,19 @@
   function render() {
     const root = $(".magic-page");
     if (!root) return;
+    // Selection / ban chips live above all tabs except Stories. Stories is a
+    // reading view; the chip strip clutters it without offering useful action.
+    const showSelectionStrip = currentTab !== "stories";
     root.innerHTML = `
       ${renderPageHeader()}
       ${renderTabNav()}
-      ${renderSelection()}
+      ${showSelectionStrip ? renderSelection() : ""}
       ${currentTab === "cards" ? renderMatchingListsTag() : ""}
       ${renderTabContent()}
       <footer class="dataset-stamp" id="dataset-stamp"></footer>
     `;
     fillDatasetStamp();
-    if (currentTab === "cards") wireSearch();
+    if (currentTab === "cards" || currentTab === "pros") wireSearch();
     wireTabNav();
     wireCardClicks();
   }
@@ -700,7 +699,13 @@
   }
 
   function renderProsTab() {
-    if (!decks) return `<div class="loading">loading the deck pool&hellip;</div>`;
+    if (!decks) {
+      return `
+        ${renderSearch()}
+        ${renderSearchResultsSection()}
+        <div class="loading">loading the deck pool&hellip;</div>
+      `;
+    }
     const proDecks = decks.filter((d) => (d.weight || 1) >= 3);
     const banSet = new Set(bans);
     const filtered = proDecks.filter((d) => {
@@ -722,6 +727,8 @@
         ? "no pro list contains all your selected cards together"
         : "no pro decks in the current window";
       return `
+        ${renderSearch()}
+        ${renderSearchResultsSection()}
         <section class="sec">
           <header class="sec-header">
             <h2 class="sec-title">Pro decks</h2>
@@ -733,6 +740,8 @@
     }
 
     return `
+      ${renderSearch()}
+      ${renderSearchResultsSection()}
       <section class="sec">
         <header class="sec-header">
           <h2 class="sec-title">Pro decks</h2>
@@ -903,16 +912,17 @@
 
   // Indicator that sits between selection and search, "outside" the selection
   // box but visually anchored to it. Shown only when selection has cards.
+  // Non-interactive count indicator. The full list lives on the Pro decks tab.
   function renderMatchingListsTag() {
     if (!selection.length) return "";
     if (!decks) {
-      return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">find pro player lists with your selection ↓</button></div>`;
+      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">checking pro lists&hellip;</span></div>`;
     }
     const n = matchingDecks().length;
     if (n === 0) {
-      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no pro player list contains all of these together</span></div>`;
+      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no pro list contains all selected cards</span></div>`;
     }
-    return `<div class="match-tag-row"><button class="match-tag" id="match-tag-btn">${n} pro player list${n === 1 ? "" : "s"} with your selection ↓</button></div>`;
+    return `<div class="match-tag-row"><span class="match-tag match-tag-count">${n} pro list${n === 1 ? "" : "s"} contain${n === 1 ? "s" : ""} your selection</span></div>`;
   }
 
   function renderSearchResultsSection() {
@@ -1141,10 +1151,11 @@
           : `cards that travel with all ${selection.length} of your selection`);
     const title = viewMode === "off-meta" ? "Off the beaten path" : "Travels with";
 
+    // Pro-list browsing happens on the Pro decks tab now. This page is just
+    // the recommendations grid.
     return `
       <div class="stacked">
         ${sectionWithToggle(title, subtitle, renderGrid(items))}
-        ${renderListsSection()}
       </div>
     `;
   }
@@ -1280,31 +1291,10 @@
     `;
   }
 
-  function renderListsSection() {
-    // Always offer the toggle when selection is non-empty. Lazy-load decks_raw on first open.
-    const matchCount = decks ? matchingDecks().length : null;
-    const label = matchCount === null
-      ? "find pro player lists with your selection"
-      : `${matchCount} pro player list${matchCount === 1 ? "" : "s"} with your selection`;
-    const arrow = listsOpen ? "▴" : "▾";
-    return `
-      <section class="sec lists-sec">
-        <button class="lists-toggle" id="lists-toggle">${label} ${arrow}</button>
-        ${listsOpen && decks ? renderListsBody() : ""}
-      </section>
-    `;
-  }
-
+  // Cache of the most-recently-rendered deck array, so deck-card actions
+  // (copy to MTGA, load into selection) can resolve idx -> deck object.
+  // Set by renderProsTab.
   let _matchingCache = null;
-  function renderListsBody() {
-    const ms = matchingDecks();
-    if (!ms.length) {
-      return `<div class="rec-empty">no winning lists contain all of these cards together</div>`;
-    }
-    ms.sort((a, b) => (b.weight || 1) - (a.weight || 1) || (b.week || "").localeCompare(a.week || ""));
-    _matchingCache = ms;
-    return `<div class="lists-body">${ms.map((d, i) => renderDeck(d, i)).join("")}</div>`;
-  }
 
   function tierLabelForWeight(w) {
     if (w >= 10) return "PT Top 8";
@@ -1717,19 +1707,6 @@
     });
     const banClr = $("#ban-clear");
     if (banClr) banClr.addEventListener("click", bansClear);
-    // Matching-lists tag button (separate row outside selection)
-    const tag = $("#match-tag-btn");
-    if (tag) tag.addEventListener("click", async () => {
-      if (!decks) {
-        tag.textContent = "loading lists…";
-        try { decks = await loadJson("decks_raw"); }
-        catch { tag.textContent = "couldn't load lists"; return; }
-      }
-      listsOpen = true;
-      render();
-      const sec = $(".lists-sec");
-      if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
     // Lands toggle in "what fits" header
     const lt = $("#lands-toggle");
     if (lt) lt.addEventListener("click", () => {
@@ -1743,21 +1720,6 @@
     const mOff = $("#mode-offmeta");
     if (mOff) mOff.addEventListener("click", () => {
       if (viewMode !== "off-meta") { viewMode = "off-meta"; invalidateScores(); render(); }
-    });
-    // View matching lists toggle (in body)
-    const ltog = $("#lists-toggle");
-    if (ltog) ltog.addEventListener("click", async () => {
-      if (!decks) {
-        ltog.textContent = "loading lists…";
-        try { decks = await loadJson("decks_raw"); }
-        catch { ltog.textContent = "couldn't load lists"; return; }
-      }
-      listsOpen = !listsOpen;
-      render();
-      if (listsOpen) {
-        const sec = $(".lists-sec");
-        if (sec) sec.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
     });
     // Cards inside a deck list are clickable to add to selection
     $$(".deck-line-name").forEach((el) => {
@@ -1816,7 +1778,6 @@
     for (const c of d.main || []) names.add(c.name);
     selection = [...names];
     writeSelectionToHash();
-    listsOpen = false;
     render();
     window.scrollTo({ top: 0, behavior: "smooth" });
   }
