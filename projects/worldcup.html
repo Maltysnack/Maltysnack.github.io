@@ -251,14 +251,18 @@
       transition: color 120ms ease, font-weight 120ms ease;
     }
 
-    /* Top scorers list: rank | flag | player name | club badge | goals.
-       No headers (each cell self-evident from icons + numbers). */
+    /* Top scorers list: rank | flag | name | badge | goals, packed
+       tight. Grid is capped at a comfortable max-width and centered
+       in the pane so there's whitespace on either side rather than
+       stretched cells. The name column is the only flexible one but
+       sized to content rather than greedily taking all spare space. */
     .wc-scorers {
       display: grid;
-      grid-template-columns: 2.2em 26px minmax(140px, 1fr) 26px 4em;
+      grid-template-columns: 2.2em auto 1fr auto auto;
       column-gap: 0.7rem;
-      row-gap: 0.5rem;
-      margin-top: 0.8rem;
+      row-gap: 0.55rem;
+      margin: 0.8rem auto 0;
+      max-width: 460px;
       font-size: 0.92rem;
       align-items: center;
     }
@@ -272,9 +276,11 @@
       align-items: center;
       justify-content: center;
     }
+    /* Smaller flag, higher-res source. flagcdn w80 gives a crisp
+       image at 18px display on 2x-DPR screens. */
     .wc-scorers .team-flag .wc-flag {
-      width: 24px;
-      height: 17px;
+      width: 18px;
+      height: 13px;
       flex-shrink: 0;
     }
     .wc-scorers .player-name {
@@ -282,6 +288,7 @@
       overflow: hidden;
       text-overflow: ellipsis;
       white-space: nowrap;
+      padding-right: 0.5rem;
     }
     .wc-scorers .club-badge {
       display: flex;
@@ -289,16 +296,17 @@
       justify-content: center;
     }
     .wc-scorers .club-badge img {
-      width: 22px;
-      height: 22px;
+      width: 20px;
+      height: 20px;
       object-fit: contain;
       flex-shrink: 0;
     }
     .wc-scorers .club-badge .fallback {
-      width: 22px;
-      height: 16px;
+      width: 20px;
+      height: 14px;
     }
     .wc-scorers .predicted {
+      min-width: 1.6em;
       text-align: right;
       font-variant-numeric: tabular-nums;
       font-weight: 700;
@@ -1816,7 +1824,7 @@
         const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
         // Country flag fallback if no club badge available.
         const clubFlagFallback = (iso) => iso
-          ? `<img class="wc-flag fallback" src="https://flagcdn.com/w40/${iso}.png" alt="" loading="lazy" />`
+          ? `<img class="wc-flag fallback" src="https://flagcdn.com/w80/${iso}.png" alt="" loading="lazy" />`
           : '';
         container.innerHTML = top.map((p, i) => {
           const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
