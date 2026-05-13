@@ -96,7 +96,6 @@
         <div class="nav-section">
           <span class="nav-label">Projects</span>
           <ul>
-            <li><a href="/projects/saltysnacks.html" ${active('/projects/saltysnacks.html')}>Saltysnacks</a></li>
             <li><a href="/projects/fpl/" ${path.startsWith('/projects/fpl/') ? 'class="nav-active"' : ''}>FPL Predicted XI</a></li>
             <li><a href="/projects/happyhour.html" ${active('/projects/happyhour.html')}>Happy Hour</a></li>
             <li><a href="/projects/worldcup.html" ${active('/projects/worldcup.html')}>World Cup 2026</a></li>

@@ -29,7 +29,6 @@ SECTIONS = [
         ("/films/filmclub.html",       "Filmclub"),
     ]),
     ("Projects", [
-        ("/projects/saltysnacks.html",  "Saltysnacks"),
         ("/projects/fpl/index.html",     "FPL Predicted XI"),
         ("/projects/happyhour.html",    "Happy Hour"),
         ("/projects/worldcup.html",     "World Cup 2026"),

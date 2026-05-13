@@ -13,9 +13,6 @@ A mobile app for groups to agree on a film. Live at filmclub.watch.
 
 ### Projects
 
-**Saltysnacks:**<br>
-A Chrome extension that strips recipe pages down to ingredients and method.
-
 **FPL Predicted XI:**<br>
 Premier League fantasy predictions for the upcoming gameweek, refreshed daily from the public FPL API.
 
