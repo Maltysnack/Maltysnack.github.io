@@ -802,6 +802,9 @@
       border-radius: 2px;
       border: 1px solid currentColor;
     }
+    /* Don't render an empty pill (used while pre-freeze when there's
+       nothing meaningful to badge). */
+    .wc-live-status:empty, .wc-pred-badge:empty { display: none; }
     .wc-live-status.upcoming { color: rgba(180,150,80,0.85); }
     .wc-live-status.live { color: rgb(85,160,100); }
     .wc-pred-badge.forecast { color: rgba(180,150,80,0.85); }
@@ -2061,8 +2064,10 @@
             predBadge.className = 'wc-pred-badge archived';
             predBadge.textContent = 'Pre-kickoff archive';
           } else {
-            predBadge.className = 'wc-pred-badge forecast';
-            predBadge.textContent = 'Live forecast';
+            // No badge before freeze. "Live forecast" is an oxymoron;
+            // the Live tab covers what's actually live.
+            predBadge.className = 'wc-pred-badge';
+            predBadge.textContent = '';
           }
         }
 
