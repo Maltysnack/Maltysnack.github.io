@@ -2688,10 +2688,15 @@
             </div>`;
           return;
         }
-        // Status is 'knockouts' or 'complete': render the bracket from
-        // live.knockout_matches (which the live builder fills as games
-        // happen). Reuse the same renderBracketInto used by Prediction.
-        const ko = _shapeLiveKnockoutsForBracket(live.knockout_matches);
+        // Status is 'knockouts' or 'complete': render the bracket
+        // from live.knockout (pre-bucketed by live_tournament.py into
+        // round_of_32 / round_of_16 / quarter_finals / semi_finals /
+        // final). Reuses the same renderBracketInto used by Prediction.
+        const ko = live.knockout || {
+          round_of_32: [], round_of_16: [],
+          quarter_finals: [], semi_finals: [], final: [],
+          champion: null,
+        };
         const wrap = document.createElement('div');
         wrap.className = 'wc-bracket-wrap';
         const inner = document.createElement('div');
@@ -2700,15 +2705,6 @@
         container.innerHTML = '';
         container.appendChild(wrap);
         renderBracketInto(inner, ko, true);
-      }
-
-      function _shapeLiveKnockoutsForBracket(matches) {
-        // Bucket KO matches into rounds for the bracket renderer.
-        // Placeholder shape; refined as the WC progresses.
-        const buckets = { round_of_32: [], round_of_16: [],
-                          quarter_finals: [], semi_finals: [], final: [] };
-        const champion = null;
-        return { ...buckets, champion };
       }
 
       // ── Renderer: Live > Top scorers (actual goals when available) ──
