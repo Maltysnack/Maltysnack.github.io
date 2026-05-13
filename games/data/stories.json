@@ -9,6 +9,7 @@
       "week": "2026-05-11",
       "status": "active",
       "kind": "returning-cluster",
+      "is_shell": true,
       "title": "Rakdos Boggart back at peak density",
       "summary": "A red-black goblin shell vanished for the six weeks before the Pro Tour, then came back at its densest ever the week after.",
       "stats": [
@@ -26,6 +27,7 @@
       "week": "2026-05-11",
       "status": "active",
       "kind": "post-pt-shift",
+      "is_shell": true,
       "title": "Erode: 0 to 20 percent in two weeks",
       "summary": "Erode was not on ladder two weeks ago. One in five winning lists runs it now, the largest single-card jump in the dataset.",
       "stats": [

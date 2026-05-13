@@ -862,9 +862,12 @@
       : "";
 
     const cards = (s.cards || []).filter((n) => scryfall && scryfall[n]);
-    const loadBtn = cards.length >= 2 ? `
+    // Only offer "load into selection" for stories that describe a coherent
+    // shell or cluster. Stories like "PT staples ladder hasn't caught" list
+    // cards that aren't meant to be played together, so the button would mislead.
+    const loadBtn = (s.is_shell && cards.length >= 2) ? `
       <button class="story-load" data-story-load="${escapeAttr(s.id || "")}" title="replace your selection with these cards">
-        load into selection
+        load shell into selection
       </button>
     ` : "";
     const cardThumbs = cards.length ? `
