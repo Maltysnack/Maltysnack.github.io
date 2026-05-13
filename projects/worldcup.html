@@ -1579,7 +1579,11 @@
           matches.forEach(m => {
             const card = document.createElement('div');
             card.className = 'wc-match';
-            const showScores = withScores && m.score_a != null;
+            // Show scores whenever they are present on the match. Used
+            // to require an explicit withScores flag (only true for
+            // Single-sim mode), but the deterministic bracket now
+            // includes scores too.
+            const showScores = m.score_a != null;
             const penA = m.pens && m.winner === m.team_a ? ' <span class="wc-pen-tag">pens</span>' : '';
             const penB = m.pens && m.winner === m.team_b ? ' <span class="wc-pen-tag">pens</span>' : '';
             const scoreA = showScores ? `<span class="wc-score">${m.score_a}${penA}</span>` : '';
