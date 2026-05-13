@@ -733,6 +733,9 @@
       display: inline-flex;
       gap: 0.3rem;
     }
+    /* Explicit override: CSS display rules above defeat the HTML
+       `hidden` attribute, so re-establish hide-when-hidden here. */
+    .wc-toggle[hidden] { display: none; }
     .wc-toggle.right { margin-left: auto; }
     .wc-btn {
       font: inherit;
