@@ -19,7 +19,7 @@
   let _scoresMap = null;
   let _scoresKey = "";
 
-  // ── Selection + Bans (mirrored to URL hash #sel=a,b&ban=x,y) ──
+  // ── Selection + Bans (mirrored to URL hash #sel=a,b&ban=x,y&t=cards) ──
   let selection = parseHashList("sel");
   let bans = parseHashList("ban");
   let showLands = false;     // lands toggle near "what fits" header
@@ -31,6 +31,14 @@
   let tagBoosts = new Set(); // tags currently boosted (multi-select)
   let tagInteractionMode = "boost"; // "boost" or "filter"
 
+  // Top-level tab. "cards" = explorer, "pros" = pro deck list, "stories" = digest.
+  const VALID_TABS = ["cards", "pros", "stories"];
+  let currentTab = (function () {
+    const m = (location.hash || "").match(/[#&]t=([^&]*)/);
+    const t = m && decodeURIComponent(m[1]);
+    return VALID_TABS.includes(t) ? t : "cards";
+  })();
+
   function parseHashList(key) {
     const m = (location.hash || "").match(new RegExp("[#&]" + key + "=([^&]*)"));
     if (!m) return [];
@@ -38,12 +46,23 @@
   }
   function writeHash() {
     const parts = [];
+    if (currentTab && currentTab !== "cards") parts.push("t=" + encodeURIComponent(currentTab));
     if (selection.length) parts.push("sel=" + selection.map(encodeURIComponent).join(","));
     if (bans.length) parts.push("ban=" + bans.map(encodeURIComponent).join(","));
     const newHash = parts.length ? "#" + parts.join("&") : "";
     if (newHash !== location.hash) {
       history.replaceState(null, "", location.pathname + newHash);
     }
+  }
+  function setTab(t) {
+    if (!VALID_TABS.includes(t) || t === currentTab) return;
+    currentTab = t;
+    // Tab change closes any open per-card popover so it doesn't dangle
+    breakdownFor = null;
+    listsOpen = false;
+    writeHash();
+    render();
+    window.scrollTo({ top: 0, behavior: "smooth" });
   }
   // Backward compat shim: old name
   function writeSelectionToHash() { writeHash(); }
@@ -622,16 +641,127 @@
     const root = $(".magic-page");
     if (!root) return;
     root.innerHTML = `
+      ${renderPageHeader()}
+      ${renderTabNav()}
       ${renderSelection()}
-      ${renderMatchingListsTag()}
-      ${renderSearch()}
-      ${renderSearchResultsSection()}
-      ${selection.length ? renderRecommendations() : renderLanding()}
+      ${currentTab === "cards" ? renderMatchingListsTag() : ""}
+      ${renderTabContent()}
       <footer class="dataset-stamp" id="dataset-stamp"></footer>
     `;
     fillDatasetStamp();
-    wireSearch();
+    if (currentTab === "cards") wireSearch();
+    wireTabNav();
     wireCardClicks();
+  }
+
+  function renderPageHeader() {
+    return `
+      <header class="page-header">
+        <h1 class="page-title">Magic: The Gathering</h1>
+        <div class="page-sub">Standard meta explorer</div>
+        <div class="format-disclosure" title="All input data comes from magic.gg Bo3 Traditional ranked ladder, premier events (RCQ, RC) and the Pro Tour. Bo1 ladder is not included. This biases the picture toward control and midrange shells; pure aggro and combo are typically over-represented in Bo1.">
+          <span class="format-badge">Bo3 only</span>
+          <span class="format-note">ladder + premier + Pro Tour</span>
+        </div>
+      </header>
+    `;
+  }
+
+  function renderTabNav() {
+    const tab = (id, label, sub) => {
+      const active = currentTab === id ? " active" : "";
+      return `<button class="tab-btn${active}" data-tab="${id}">
+        <span class="tab-label">${escapeHtml(label)}</span>
+        <span class="tab-sub">${escapeHtml(sub)}</span>
+      </button>`;
+    };
+    return `
+      <nav class="tab-nav" aria-label="Sections">
+        ${tab("cards", "Cards", "search, synergies, landing")}
+        ${tab("pros", "Pro decks", "premier + Pro Tour lists")}
+        ${tab("stories", "Stories", "clusters, digest, narrative")}
+      </nav>
+    `;
+  }
+
+  function renderTabContent() {
+    if (currentTab === "pros") return renderProsTab();
+    if (currentTab === "stories") return renderStoriesTab();
+    return renderCardsTab();
+  }
+
+  function renderCardsTab() {
+    return `
+      ${renderSearch()}
+      ${renderSearchResultsSection()}
+      ${selection.length ? renderRecommendations() : renderLanding()}
+    `;
+  }
+
+  function renderProsTab() {
+    if (!decks) return `<div class="loading">loading the deck pool&hellip;</div>`;
+    const proDecks = decks.filter((d) => (d.weight || 1) >= 3);
+    const banSet = new Set(bans);
+    const filtered = proDecks.filter((d) => {
+      const names = new Set((d.main || []).map((c) => c.name));
+      if (bans.length && [...names].some((n) => banSet.has(n))) return false;
+      if (selection.length && !selection.every((n) => names.has(n))) return false;
+      return true;
+    });
+    filtered.sort((a, b) => ((b.weight || 1) - (a.weight || 1)) || (b.week || "").localeCompare(a.week || ""));
+    _matchingCache = filtered;
+
+    const subParts = [];
+    subParts.push(`${filtered.length} list${filtered.length === 1 ? "" : "s"}`);
+    if (selection.length) subParts.push("containing your selection");
+    if (bans.length) subParts.push("no banned cards");
+
+    if (!filtered.length) {
+      const reason = selection.length
+        ? "no pro list contains all your selected cards together"
+        : "no pro decks in the current window";
+      return `
+        <section class="sec">
+          <header class="sec-header">
+            <h2 class="sec-title">Pro decks</h2>
+            <span class="sec-sub">no matching lists</span>
+          </header>
+          <div class="rec-empty">${reason}</div>
+        </section>
+      `;
+    }
+
+    return `
+      <section class="sec">
+        <header class="sec-header">
+          <h2 class="sec-title">Pro decks</h2>
+          <span class="sec-sub">${escapeHtml(subParts.join(" · "))}</span>
+        </header>
+        <div class="lists-body">${filtered.map((d, i) => renderDeck(d, i)).join("")}</div>
+      </section>
+    `;
+  }
+
+  function renderStoriesTab() {
+    return `
+      <section class="sec stories-sec">
+        <header class="sec-header">
+          <h2 class="sec-title">Stories &amp; clusters</h2>
+          <span class="sec-sub">in design</span>
+        </header>
+        <div class="stories-intro">
+          <p>This tab will surface the meta narratives the data tells us each week. Things like:</p>
+          <ul>
+            <li><strong>Returning clusters.</strong> Archetypes that disappeared and came back, often as counter-meta after a Pro Tour reshapes the field.</li>
+            <li><strong>Post-event shifts.</strong> What the ladder picked up the week after pros showed it off.</li>
+            <li><strong>Color-strategy gaps.</strong> Open lanes where no successful deck currently lives.</li>
+            <li><strong>4-of conversions.</strong> Cards that jumped from one-of flex slots to four-of staples in winning lists.</li>
+            <li><strong>Weekly digest.</strong> A short, plain-English read of what changed since last week.</li>
+          </ul>
+          <p>Heuristic detection is being built. The first version ships with the next data refresh.</p>
+        </div>
+      </section>
+    `;
   }
 
   // Indicator that sits between selection and search, "outside" the selection
@@ -1318,6 +1448,12 @@
     });
   }
 
+  function wireTabNav() {
+    $$(".tab-btn").forEach((el) => {
+      el.addEventListener("click", () => setTab(el.dataset.tab));
+    });
+  }
+
   function wireCardClicks() {
     // Grid thumbnails: click on art toggles selection; click on score opens an
     // inline breakdown popover. Click the score badge again to close, or
@@ -1680,6 +1816,10 @@
   window.addEventListener("hashchange", () => {
     selection = parseHashList("sel");
     bans = parseHashList("ban");
+    const m = (location.hash || "").match(/[#&]t=([^&]*)/);
+    const t = m && decodeURIComponent(m[1]);
+    if (VALID_TABS.includes(t)) currentTab = t;
+    else currentTab = "cards";
     invalidateScores();
     render();
   });
