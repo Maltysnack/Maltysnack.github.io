@@ -90,12 +90,26 @@
       color: var(--text-muted);
     }
     .wc-team.winner .wc-score { color: var(--text-body, inherit); }
+    /* Per-team-row inline pens tag (legacy from Single-sim mode).
+       Kept for backwards compat but no longer used by renderBracketInto;
+       pens are shown via .wc-pen-footer below the two team rows so
+       they don't push the winning team's score column out of alignment. */
     .wc-pen-tag {
       font-size: 0.6rem;
       letter-spacing: 0.05em;
       text-transform: uppercase;
       color: rgba(180,150,80,0.8);
       margin-left: 0.3rem;
+    }
+    .wc-pen-footer {
+      font-size: 0.6rem;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      color: rgba(180,150,80,0.85);
+      text-align: center;
+      margin-top: 0.2rem;
+      padding-top: 0.2rem;
+      border-top: 1px dashed rgba(128,128,128,0.18);
     }
     .wc-team.winner {
       color: var(--text-body, inherit);
@@ -1579,15 +1593,15 @@
           matches.forEach(m => {
             const card = document.createElement('div');
             card.className = 'wc-match';
-            // Show scores whenever they are present on the match. Used
-            // to require an explicit withScores flag (only true for
-            // Single-sim mode), but the deterministic bracket now
-            // includes scores too.
+            // Show scores whenever they are present on the match.
             const showScores = m.score_a != null;
-            const penA = m.pens && m.winner === m.team_a ? ' <span class="wc-pen-tag">pens</span>' : '';
-            const penB = m.pens && m.winner === m.team_b ? ' <span class="wc-pen-tag">pens</span>' : '';
-            const scoreA = showScores ? `<span class="wc-score">${m.score_a}${penA}</span>` : '';
-            const scoreB = showScores ? `<span class="wc-score">${m.score_b}${penB}</span>` : '';
+            const scoreA = showScores ? `<span class="wc-score">${m.score_a}</span>` : '';
+            const scoreB = showScores ? `<span class="wc-score">${m.score_b}</span>` : '';
+            // Pens: render as a centered footer line below both teams
+            // so it doesn't push the winning team's score column wider.
+            const pensFooter = m.pens
+              ? `<div class="wc-pen-footer">${shortName(m.winner)} on penalties</div>`
+              : '';
             card.innerHTML = `
               <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${m.team_a}">
                 ${flagImg(m.team_a)}
@@ -1599,6 +1613,7 @@
                 <span class="wc-team-name">${shortName(m.team_b)}</span>
                 ${scoreB}
               </div>
+              ${pensFooter}
             `;
             wrap.appendChild(card);
           });
