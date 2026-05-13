@@ -10,7 +10,7 @@
       "status": "active",
       "kind": "returning-cluster",
       "title": "Rakdos Boggart back at peak density",
-      "summary": "8-card goblin shell, absent for 6 weeks pre-PT, returned on 04-05 and 11-05.",
+      "summary": "A red-black goblin shell vanished for the six weeks before the Pro Tour, then came back at its densest ever the week after.",
       "stats": [
         {"label": "First seen", "value": "03-03-2025, 4 shell cards"},
         {"label": "Peak pre-gap", "value": "8 shell cards, 02-02-2026"},
@@ -18,7 +18,7 @@
         {"label": "Return", "value": "9 cards (04-05), 8 cards (11-05)"},
         {"label": "Players", "value": "2 Platinum-Mythic, independent"}
       ],
-      "detail": "Densest the package has been in 14 months of data.",
+      "detail": "Two players brought it back independently in the same week, with no overlap in supporting cards beyond the core. The colors and the timing read as a counter-pick against the post-PT field rather than a fluke.",
       "cards": ["Mudbutton Cursetosser", "Boggart Cursecrafter", "Searslicer Goblin", "Stadium Headliner", "Howlsquad Heavy", "Bile-Vial Boggart"]
     },
     {
@@ -27,7 +27,7 @@
       "status": "active",
       "kind": "post-pt-shift",
       "title": "Erode: 0 to 20 percent in two weeks",
-      "summary": "Largest week-over-week single-card jump in the dataset.",
+      "summary": "Erode was not on ladder two weeks ago. One in five winning lists runs it now, the largest single-card jump in the dataset.",
       "stats": [
         {"label": "Ladder share, 20-04", "value": "0%"},
         {"label": "Ladder share, 27-04", "value": "4%"},
@@ -35,6 +35,7 @@
         {"label": "Ladder share, 11-05", "value": "20%"},
         {"label": "Shell", "value": "Dyadrine, Hardened Academic, Flitterwing Nuisance, Shardmage's Rescue, Lumbering Worldwagon"}
       ],
+      "detail": "The shell behind it had been drifting in fringe lists for weeks. Erode pulled it into a winning configuration.",
       "cards": ["Erode", "Dyadrine, Synthesis Amalgam", "Hardened Academic", "Flitterwing Nuisance", "Lumbering Worldwagon", "Shardmage's Rescue"]
     },
     {
@@ -43,7 +44,7 @@
       "status": "active",
       "kind": "pt-vs-ladder",
       "title": "Five PT staples ladder has not touched",
-      "summary": "Cards over 5 percent at the Pro Tour, near zero on ladder.",
+      "summary": "Five cards pros are betting on that the ladder has not picked up. Each above 5 percent at the Pro Tour, near zero on ranked ladder.",
       "stats": [
         {"label": "Prismari Charm", "value": "27% PT, 0.4% ladder (64x)"},
         {"label": "Get Out", "value": "30% PT, 1.3% ladder (24x)"},
@@ -52,7 +53,7 @@
         {"label": "Hearth Elemental", "value": "9% PT, 0% ladder"},
         {"label": "Tablet of Discovery", "value": "5% PT, 0% ladder"}
       ],
-      "detail": "Erode followed this pattern two weeks ago and is now at 20%.",
+      "detail": "Erode hit this exact profile two weeks ago and is now at 20 percent ladder share. Expect at least two of these five to follow over the next fortnight.",
       "cards": ["Colorstorm Stallion", "Hearth Elemental", "Tablet of Discovery", "Prismari Charm", "Impractical Joke", "Get Out"]
     }
   ]

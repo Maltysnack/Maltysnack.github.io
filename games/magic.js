@@ -862,15 +862,23 @@
       : "";
 
     const cards = (s.cards || []).filter((n) => scryfall && scryfall[n]);
+    const loadBtn = cards.length >= 2 ? `
+      <button class="story-load" data-story-load="${escapeAttr(s.id || "")}" title="replace your selection with these cards">
+        load into selection
+      </button>
+    ` : "";
     const cardThumbs = cards.length ? `
-      <div class="story-cards">
-        ${cards.map((n) => {
-          const im = img(n);
-          return `<div class="story-card-thumb" role="button" tabindex="0" data-name="${escapeAttr(n)}" data-preview="${escapeAttr(n)}" title="${escapeAttr(n)}">
-            ${im ? `<img src="${im}" alt="" loading="lazy">` : `<div class="story-card-noimg">${escapeHtml(n)}</div>`}
-            <div class="story-card-name">${escapeHtml(n)}</div>
-          </div>`;
-        }).join("")}
+      <div class="story-cards-wrap">
+        <div class="story-cards">
+          ${cards.map((n) => {
+            const im = img(n);
+            return `<div class="story-card-thumb" role="button" tabindex="0" data-name="${escapeAttr(n)}" data-preview="${escapeAttr(n)}" title="${escapeAttr(n)}">
+              ${im ? `<img src="${im}" alt="" loading="lazy">` : `<div class="story-card-noimg">${escapeHtml(n)}</div>`}
+              <div class="story-card-name">${escapeHtml(n)}</div>
+            </div>`;
+          }).join("")}
+        </div>
+        ${loadBtn}
       </div>
     ` : "";
 
@@ -918,11 +926,16 @@
     if (!decks) {
       return `<div class="match-tag-row"><span class="match-tag match-tag-empty">checking pro lists&hellip;</span></div>`;
     }
-    const n = matchingDecks().length;
-    if (n === 0) {
-      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no pro list contains all selected cards</span></div>`;
+    // Pro decks tab shows weight >= 3 only. The indicator must match that
+    // filter, otherwise a ladder-only shell shows "2 pro lists" but the
+    // Pro decks tab is empty.
+    const pro = matchingDecks().filter((d) => (d.weight || 1) >= 3);
+    const ladder = matchingDecks().filter((d) => (d.weight || 1) === 1);
+    if (pro.length === 0) {
+      const ladderNote = ladder.length ? ` · ${ladder.length} ladder list${ladder.length === 1 ? "" : "s"} match` : "";
+      return `<div class="match-tag-row"><span class="match-tag match-tag-empty">no pro list contains all selected cards${ladderNote}</span></div>`;
     }
-    return `<div class="match-tag-row"><span class="match-tag match-tag-count">${n} pro list${n === 1 ? "" : "s"} contain${n === 1 ? "s" : ""} your selection</span></div>`;
+    return `<div class="match-tag-row"><span class="match-tag match-tag-count">${pro.length} pro list${pro.length === 1 ? "" : "s"} contain${pro.length === 1 ? "s" : ""} your selection</span></div>`;
   }
 
   function renderSearchResultsSection() {
@@ -1638,6 +1651,25 @@
         e.preventDefault();
         selectionAdd(el.dataset.name);
         setTab("cards");
+      });
+    });
+    // "Load into selection" button on stories: replace selection with the
+    // story's full card list, then jump to Cards tab.
+    $$("[data-story-load]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        const id = el.dataset.storyLoad;
+        const story = stories && stories.stories && stories.stories.find((s) => s.id === id);
+        if (!story || !story.cards || !story.cards.length) return;
+        const valid = story.cards.filter((n) => scryfall && scryfall[n]);
+        if (!valid.length) return;
+        if (selection.length && !confirm(`Replace your current selection (${selection.length} card${selection.length === 1 ? "" : "s"}) with the ${valid.length}-card shell from this story?`)) return;
+        selection = [...new Set(valid)];
+        bans = bans.filter((n) => !selection.includes(n));
+        invalidateScores();
+        writeHash();
+        setTab("cards");
+        if (currentTab === "cards") render();  // setTab no-ops if already there
       });
     });
     // Settings cog opens / closes the selection shape panel

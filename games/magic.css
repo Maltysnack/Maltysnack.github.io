@@ -250,12 +250,33 @@ body:has(.magic-page) .main {
 }
 .story-timeline-note { color: var(--text-muted); flex: 1; }
 
+.story-cards-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 6px;
+}
 .story-cards {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
   gap: 10px;
-  margin-top: 6px;
 }
+.story-load {
+  align-self: flex-start;
+  background: none;
+  border: 1px solid var(--accent-red);
+  color: var(--accent-red);
+  padding: 6px 14px;
+  border-radius: 3px;
+  font-family: inherit;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background var(--transition), color var(--transition);
+}
+.story-load:hover { background: var(--accent-red); color: #fff; }
 .story-card-thumb {
   display: flex;
   flex-direction: column;
