@@ -31,9 +31,6 @@ A small language for describing flow networks.
 **Algorithms:**<br>
 Two small problems, three classical search algorithms, four heuristics, all running live in the browser.
 
-**Bauhaus:**<br>
-An exhibition of generative Bauhaus art, room by room. Each chapter walks through one moment, workshop, or master, with rule-based generators where the visual logic is tractable and essays where it isn't.
-
 ### Games
 
 **dnd:**<br>

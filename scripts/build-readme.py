@@ -35,7 +35,6 @@ SECTIONS = [
         ("/projects/worldcup.html",     "World Cup 2026"),
         ("/projects/flox/index.html",   "Flox"),
         ("/projects/algorithms.html",   "Algorithms"),
-        ("/projects/bauhaus.html",      "Bauhaus"),
     ]),
     ("Games", [
         ("/dnd/index.html",             "dnd"),
