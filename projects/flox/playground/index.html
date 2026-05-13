@@ -606,7 +606,6 @@ print MorningCommute 500;
           showMessage('no system declared');
           return;
         }
-        // Render the first system. Multi-system programs only show the first.
         const sys = systems[0];
         if (sys.nodes.length === 0) {
           graphStatusEl.textContent = `${sys.name} / ${sys.mode}`;
@@ -619,15 +618,7 @@ print MorningCommute 500;
         const H = Math.max(240, rect.height);
         graphEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
 
-        const isDag = !hasCycle(sys);
-        const positions = isDag
-          ? layeredLayout(sys, W, H)
-          : forceLayout(sys, W, H);
-
-        graphStatusEl.textContent =
-          `${sys.name} / ${sys.mode} / ${sys.nodes.length} nodes / ${sys.edges.length} edges`;
-
-        // Arrowhead marker (defined once per render).
+        // Arrowhead marker is shared across all sub-groups.
         const defs = document.createElementNS(SVG_NS, 'defs');
         const marker = document.createElementNS(SVG_NS, 'marker');
         marker.setAttribute('id', 'arrow');
@@ -645,12 +636,117 @@ print MorningCommute 500;
         defs.appendChild(marker);
         graphEl.appendChild(defs);
 
-        // Render edges first so nodes draw on top.
+        // Compare scenarios: render N small multiples side-by-side. Each
+        // sub-canvas applies the scenario's overrides to the base system
+        // and renders it independently.
+        if (sys.scenarios && sys.scenarios.length > 0) {
+          drawScenarios(sys, W, H);
+          return;
+        }
+
+        graphStatusEl.textContent =
+          `${sys.name} / ${sys.mode} / ${sys.nodes.length} nodes / ${sys.edges.length} edges`;
+        drawSingleSystem(graphEl, sys, W, H);
+      }
+
+      function drawScenarios(sys, W, H) {
+        const N = sys.scenarios.length;
+        const titleH = 26;
+        const colW = W / N;
+        const innerH = H - titleH;
+
+        graphStatusEl.textContent =
+          `${sys.name} / ${sys.mode} / ${N} scenarios side-by-side`;
+
+        for (let i = 0; i < N; i++) {
+          const scenario = sys.scenarios[i];
+          const variant = applyScenario(sys, scenario);
+
+          // Wrapper group offset to this column.
+          const wrap = document.createElementNS(SVG_NS, 'g');
+          wrap.setAttribute('transform', `translate(${i * colW}, 0)`);
+          graphEl.appendChild(wrap);
+
+          // Vertical separator between columns.
+          if (i > 0) {
+            const sep = document.createElementNS(SVG_NS, 'line');
+            sep.setAttribute('x1', '0');
+            sep.setAttribute('y1', '8');
+            sep.setAttribute('x2', '0');
+            sep.setAttribute('y2', String(H - 8));
+            sep.setAttribute('stroke', 'var(--border-light)');
+            sep.setAttribute('stroke-width', '1');
+            wrap.appendChild(sep);
+          }
+
+          // Scenario label.
+          const lbl = document.createElementNS(SVG_NS, 'text');
+          lbl.setAttribute('x', String(colW / 2));
+          lbl.setAttribute('y', '16');
+          lbl.setAttribute('text-anchor', 'middle');
+          lbl.setAttribute('font-weight', '600');
+          lbl.setAttribute('font-size', '11');
+          lbl.textContent = truncateLabel(scenario.label, 28);
+          wrap.appendChild(lbl);
+
+          // Sub-canvas that holds this scenario's graph below the label.
+          const inner = document.createElementNS(SVG_NS, 'g');
+          inner.setAttribute('transform', `translate(0, ${titleH})`);
+          wrap.appendChild(inner);
+          drawSingleSystem(inner, variant, colW, innerH);
+        }
+      }
+
+      function applyScenario(baseSys, scenario) {
+        // Build a copy of the system with the scenario's overrides
+        // applied. Nodes and edges keep their structure; only the
+        // 'disabled' flags and supply values change.
+        const disabledNodes = new Set();
+        const disabledEdges = new Set();   // "from|to"
+        const supplyOverrides = new Map();
+        for (const o of scenario.overrides) {
+          if (o.kind === 'disable-node') disabledNodes.add(o.name);
+          else if (o.kind === 'disable-edge') disabledEdges.add(o.from + '|' + o.to);
+          else if (o.kind === 'supply') supplyOverrides.set(o.name, o.value);
+        }
+        const nodes = baseSys.nodes.map(n => {
+          let kind = n.kind;
+          let supply = n.supply;
+          if (supplyOverrides.has(n.name)) {
+            supply = supplyOverrides.get(n.name);
+            if (baseSys.mode === 'grid') {
+              if (supply > 0) kind = 'generator';
+              else if (supply < 0) kind = 'load';
+              else kind = 'relay';
+            }
+          }
+          return {
+            ...n,
+            kind,
+            supply,
+            disabled: n.disabled || disabledNodes.has(n.name),
+          };
+        });
+        const edges = baseSys.edges.map(e => ({
+          ...e,
+          disabled: e.disabled
+            || disabledEdges.has(e.from + '|' + e.to)
+            || disabledNodes.has(e.from)
+            || disabledNodes.has(e.to),
+        }));
+        return { ...baseSys, nodes, edges };
+      }
+
+      function drawSingleSystem(target, sys, W, H) {
+        const isDag = !hasCycle(sys);
+        const positions = isDag
+          ? layeredLayout(sys, W, H)
+          : forceLayout(sys, W, H);
+
         const edgeGroup = document.createElementNS(SVG_NS, 'g');
         edgeGroup.setAttribute('class', 'pg-edges');
-        graphEl.appendChild(edgeGroup);
+        target.appendChild(edgeGroup);
 
-        // Identify reverse-edge pairs so we can curve them apart.
         const edgeKey = (e) => `${e.from}|${e.to}`;
         const pairs = new Set();
         for (const e of sys.edges) {
@@ -662,10 +758,9 @@ print MorningCommute 500;
           renderEdge(edgeGroup, e, positions, pairs.has(edgeKey(e)));
         }
 
-        // Nodes
         const nodeGroup = document.createElementNS(SVG_NS, 'g');
         nodeGroup.setAttribute('class', 'pg-nodes');
-        graphEl.appendChild(nodeGroup);
+        target.appendChild(nodeGroup);
 
         const nodeEls = new Map();
         for (const n of sys.nodes) {
@@ -673,8 +768,11 @@ print MorningCommute 500;
           nodeEls.set(n.name, el);
         }
 
-        // Interactivity: drag, hover.
-        attachInteractions(sys, positions, nodeEls, edgeGroup, pairs);
+        // Interactivity is only attached for the main (single) graph;
+        // small-multiples skip drag/hover to keep them lightweight.
+        if (target === graphEl) {
+          attachInteractions(sys, positions, nodeEls, edgeGroup, pairs);
+        }
       }
 
       function showMessage(text) {
@@ -794,9 +892,10 @@ print MorningCommute 500;
         return positions;
       }
 
-      function truncateLabel(name) {
-        if (name.length <= LABEL_MAX) return name;
-        return name.slice(0, LABEL_MAX - 1) + '…';
+      function truncateLabel(name, max) {
+        const m = max ?? LABEL_MAX;
+        if (name.length <= m) return name;
+        return name.slice(0, m - 1) + '…';
       }
 
       function forceLayout(sys, W, H) {

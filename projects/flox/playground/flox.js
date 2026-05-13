@@ -1884,9 +1884,34 @@ function parseGraph(source) {
     const msg = e instanceof Error ? e.message : String(e);
     errs.push("Runtime error: " + msg + "\n");
   }
+  const scenariosBySystem = /* @__PURE__ */ new Map();
+  for (const stmt of ast) {
+    if (stmt && stmt.kind === "CompareStmt") {
+      const sysName = stmt.systemName.lexeme;
+      const sceneList = scenariosBySystem.get(sysName) ?? [];
+      for (const sc of stmt.scenarios) {
+        sceneList.push({
+          label: sc.label,
+          overrides: sc.overrides.map((o) => {
+            if (o.kind === "disable-node") return { kind: "disable-node", name: o.name1.lexeme };
+            if (o.kind === "disable-edge") {
+              const from = o.forward ? o.name1.lexeme : o.name2.lexeme;
+              const to = o.forward ? o.name2.lexeme : o.name1.lexeme;
+              return { kind: "disable-edge", from, to };
+            }
+            return { kind: "supply", name: o.name1.lexeme, value: o.value };
+          })
+        });
+      }
+      scenariosBySystem.set(sysName, sceneList);
+    }
+  }
   const systems = [];
   for (const sys of interp.getSystems().values()) {
-    systems.push(systemToGraph(sys));
+    const graph = systemToGraph(sys);
+    const scenarios = scenariosBySystem.get(sys.name);
+    if (scenarios && scenarios.length > 0) graph.scenarios = scenarios;
+    systems.push(graph);
   }
   return { systems, hadError: errs.length > 0, stderr: errs.join("") };
 }
