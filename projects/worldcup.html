@@ -59,6 +59,7 @@
       background: transparent;
       align-self: center;
       width: 100%;
+      position: relative;
     }
     .wc-team {
       padding: 0.1rem 0;
@@ -101,15 +102,21 @@
       color: rgba(180,150,80,0.8);
       margin-left: 0.3rem;
     }
-    .wc-pen-footer {
-      font-size: 0.6rem;
-      letter-spacing: 0.06em;
-      text-transform: uppercase;
-      color: rgba(180,150,80,0.85);
-      text-align: center;
-      margin-top: 0.2rem;
-      padding-top: 0.2rem;
-      border-top: 1px dashed rgba(128,128,128,0.18);
+    /* Pens indicator: tiny absolute-positioned "P" badge in the
+       card's top-right corner. Hover for full text. Doesn't add to
+       the card's vertical footprint (was a footer line previously,
+       which made the whole bracket too tall). */
+    .wc-pen-marker {
+      position: absolute;
+      top: 2px;
+      right: 4px;
+      font-size: 0.55rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: rgba(180,150,80,0.9);
+      line-height: 1;
+      pointer-events: auto;
+      cursor: help;
     }
     .wc-team.winner {
       color: var(--text-body, inherit);
@@ -1597,12 +1604,15 @@
             const showScores = m.score_a != null;
             const scoreA = showScores ? `<span class="wc-score">${m.score_a}</span>` : '';
             const scoreB = showScores ? `<span class="wc-score">${m.score_b}</span>` : '';
-            // Pens: render as a centered footer line below both teams
-            // so it doesn't push the winning team's score column wider.
-            const pensFooter = m.pens
-              ? `<div class="wc-pen-footer">${shortName(m.winner)} on penalties</div>`
+            // Pens: tiny "P" marker in the card's top-right corner.
+            // Title attribute carries the full "winner on penalties"
+            // text on hover. Absolute-positioned so it doesn't make
+            // the card any taller.
+            const pensMarker = m.pens
+              ? `<span class="wc-pen-marker" title="${m.winner} on penalties">P</span>`
               : '';
             card.innerHTML = `
+              ${pensMarker}
               <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${m.team_a}">
                 ${flagImg(m.team_a)}
                 <span class="wc-team-name">${shortName(m.team_a)}</span>
@@ -1613,7 +1623,6 @@
                 <span class="wc-team-name">${shortName(m.team_b)}</span>
                 ${scoreB}
               </div>
-              ${pensFooter}
             `;
             wrap.appendChild(card);
           });
