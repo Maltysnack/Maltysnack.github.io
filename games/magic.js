@@ -13,6 +13,7 @@
   let allNames = null;
   let dataReady = false;
   let decks = null;       // raw decks, eager-loaded after initial render
+  let stories = null;     // hand-curated narratives, loaded with the initial bundle
   let listsOpen = false;
   // Synergy scores are computed ad-hoc from raw decks against the current
   // selection + bans, then cached. Cleared whenever selection or bans change.
@@ -742,25 +743,87 @@
     `;
   }
 
+  // Kind labels and short descriptions for the story-kind badge
+  const STORY_KIND_META = {
+    "returning-cluster": { label: "returning cluster", note: "archetype that vanished and came back" },
+    "copy-conversion":   { label: "4-of conversion",   note: "card jumped from flex slot to staple" },
+    "post-pt-shift":     { label: "post-PT shift",     note: "ladder picked it up after the Pro Tour" },
+    "returning-card":    { label: "returning card",    note: "absent for several weeks, now back" },
+    "pt-vs-ladder":      { label: "PT vs ladder",      note: "pros are picking, ladder has not caught up" },
+  };
+
   function renderStoriesTab() {
+    if (!stories || !stories.stories || !stories.stories.length) {
+      return `
+        <section class="sec stories-sec">
+          <header class="sec-header">
+            <h2 class="sec-title">Stories &amp; clusters</h2>
+            <span class="sec-sub">no stories this week</span>
+          </header>
+          <div class="stories-intro">
+            <p>The detector did not find anything worth surfacing this week. Check back after the next data refresh.</p>
+          </div>
+        </section>
+      `;
+    }
+
+    const intro = `
+      <div class="stories-header">
+        <div class="stories-window">${escapeHtml(stories.window_label || "")}</div>
+        <div class="stories-blurb">Narratives the data is currently telling. Each story is anchored on a measurable signal you can verify by clicking through to the cards involved.</div>
+      </div>
+    `;
+
+    const items = stories.stories.map(renderStory).join("");
     return `
       <section class="sec stories-sec">
         <header class="sec-header">
           <h2 class="sec-title">Stories &amp; clusters</h2>
-          <span class="sec-sub">in design</span>
+          <span class="sec-sub">${stories.stories.length} thread${stories.stories.length === 1 ? "" : "s"} this week</span>
         </header>
-        <div class="stories-intro">
-          <p>This tab will surface the meta narratives the data tells us each week. Things like:</p>
-          <ul>
-            <li><strong>Returning clusters.</strong> Archetypes that disappeared and came back, often as counter-meta after a Pro Tour reshapes the field.</li>
-            <li><strong>Post-event shifts.</strong> What the ladder picked up the week after pros showed it off.</li>
-            <li><strong>Color-strategy gaps.</strong> Open lanes where no successful deck currently lives.</li>
-            <li><strong>4-of conversions.</strong> Cards that jumped from one-of flex slots to four-of staples in winning lists.</li>
-            <li><strong>Weekly digest.</strong> A short, plain-English read of what changed since last week.</li>
-          </ul>
-          <p>Heuristic detection is being built. The first version ships with the next data refresh.</p>
-        </div>
+        ${intro}
+        <div class="stories-list">${items}</div>
       </section>
+    `;
+  }
+
+  function renderStory(s) {
+    const kindMeta = STORY_KIND_META[s.kind] || { label: s.kind || "story", note: "" };
+    const cards = (s.cards || []).filter((n) => scryfall && scryfall[n]);
+    const cardThumbs = cards.length ? `
+      <div class="story-cards">
+        ${cards.map((n) => {
+          const im = img(n);
+          return `<div class="story-card-thumb" role="button" tabindex="0" data-name="${escapeAttr(n)}" data-preview="${escapeAttr(n)}" title="${escapeAttr(n)}">
+            ${im ? `<img src="${im}" alt="" loading="lazy">` : `<div class="story-card-noimg">${escapeHtml(n)}</div>`}
+            <div class="story-card-name">${escapeHtml(n)}</div>
+          </div>`;
+        }).join("")}
+      </div>
+    ` : "";
+
+    const timeline = (s.timeline || []).length ? `
+      <div class="story-timeline">
+        ${s.timeline.map((t) => `
+          <div class="story-timeline-row">
+            <span class="story-timeline-period">${escapeHtml(t.period || "")}</span>
+            <span class="story-timeline-note">${escapeHtml(t.note || "")}</span>
+          </div>
+        `).join("")}
+      </div>
+    ` : "";
+
+    return `
+      <article class="story" data-story-id="${escapeAttr(s.id || "")}">
+        <header class="story-head">
+          <span class="story-kind">${escapeHtml(kindMeta.label)}</span>
+          <h3 class="story-title">${escapeHtml(s.title || "")}</h3>
+        </header>
+        ${s.summary ? `<p class="story-summary">${escapeHtml(s.summary)}</p>` : ""}
+        ${s.detail ? `<p class="story-detail">${escapeHtml(s.detail)}</p>` : ""}
+        ${timeline}
+        ${cardThumbs}
+      </article>
     `;
   }
 
@@ -1500,6 +1563,19 @@
     $$(".bridge-side-img").forEach((el) => {
       el.addEventListener("click", () => selectionToggle(el.dataset.preview));
     });
+    // Story-card thumbs (Stories tab): click adds to selection, then bounce to Cards tab
+    $$(".story-card-thumb").forEach((el) => {
+      el.addEventListener("click", () => {
+        selectionAdd(el.dataset.name);
+        setTab("cards");
+      });
+      el.addEventListener("keydown", (e) => {
+        if (e.key !== "Enter" && e.key !== " ") return;
+        e.preventDefault();
+        selectionAdd(el.dataset.name);
+        setTab("cards");
+      });
+    });
     // Settings cog opens / closes the selection shape panel
     const cog = $("#search-cog");
     if (cog) cog.addEventListener("click", () => {
@@ -1701,9 +1777,14 @@
   }
 
   async function loadInitial() {
-    [meta, explore, scryfall] = await Promise.all([
-      loadJson("meta"), loadJson("explore"), loadJson("scryfall"),
+    // stories.json is optional; if it 404s we just hide the Stories tab content
+    const results = await Promise.all([
+      loadJson("meta"),
+      loadJson("explore"),
+      loadJson("scryfall"),
+      loadJson("stories").catch(() => null),
     ]);
+    [meta, explore, scryfall, stories] = results;
   }
 
   async function loadFull() {
