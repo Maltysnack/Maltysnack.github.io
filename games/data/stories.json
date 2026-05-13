@@ -1,40 +1,59 @@
 {
   "generated_at": "2026-05-13",
-  "window_label": "data through 11-05-2026, post-PT Final Fantasy",
+  "window_label": "data through 11-05-2026",
+  "current_week": "2026-05-11",
   "window_weeks": ["2026-04-06", "2026-04-13", "2026-04-20", "2026-04-27", "2026-05-01", "2026-05-04", "2026-05-08", "2026-05-11"],
   "stories": [
     {
       "id": "rakdos-boggart-return",
       "week": "2026-05-11",
-      "title": "Rakdos Boggart returns as counter-meta",
+      "status": "active",
       "kind": "returning-cluster",
-      "summary": "A near-Lorwyn-themed red-black goblin shell vanished for six weeks before the Pro Tour, then came back stronger than ever the week after.",
-      "detail": "The Boggart shell, anchored by Mudbutton Cursetosser, Boggart Cursecrafter, Searslicer Goblin and Stadium Headliner, first surfaced in March 2025 as a fringe pick at 4 shell cards per list. It locked in as a deeper 8-card package when Edge of Eternities reshuffled the format in February 2026, then went quiet from late March through April. The week after Pro Tour Final Fantasy, two separate Platinum-Mythic players brought it back with 8 and 9 shell cards each, the densest the package has ever been. A deliberate counter-pick against the post-PT field is the most parsimonious read.",
-      "cards": ["Mudbutton Cursetosser", "Boggart Cursecrafter", "Searslicer Goblin", "Stadium Headliner", "Howlsquad Heavy", "Bile-Vial Boggart"],
-      "timeline": [
-        {"period": "Mar to Nov 2025", "note": "fringe, 4 to 5 shell cards per appearance"},
-        {"period": "Feb 2026 (Edge of Eternities)", "note": "8-card shell locks in"},
-        {"period": "23-03-2026 to 04-05-2026", "note": "6 consecutive weeks absent"},
-        {"period": "04-05-2026 and 11-05-2026", "note": "returns 8 to 9 shell cards strong"}
-      ]
+      "title": "Rakdos Boggart back at peak density",
+      "summary": "8-card goblin shell, absent for 6 weeks pre-PT, returned on 04-05 and 11-05.",
+      "stats": [
+        {"label": "First seen", "value": "03-03-2025, 4 shell cards"},
+        {"label": "Peak pre-gap", "value": "8 shell cards, 02-02-2026"},
+        {"label": "Gap", "value": "23-03 to 04-05 (6 weeks, 0 appearances)"},
+        {"label": "Return", "value": "9 cards (04-05), 8 cards (11-05)"},
+        {"label": "Players", "value": "2 Platinum-Mythic, independent"}
+      ],
+      "detail": "Densest the package has been in 14 months of data.",
+      "cards": ["Mudbutton Cursetosser", "Boggart Cursecrafter", "Searslicer Goblin", "Stadium Headliner", "Howlsquad Heavy", "Bile-Vial Boggart"]
     },
     {
       "id": "erode-breakout",
       "week": "2026-05-11",
-      "title": "Erode jumps from 1 percent to 17 percent",
+      "status": "active",
       "kind": "post-pt-shift",
-      "summary": "An Erode-anchored counter-tempo shell did not exist on ladder before the Pro Tour. It is now in one in every six ladder winners.",
-      "detail": "Erode showed up on 27-04-2026 in a small number of lists at 3 percent share. The week after Pro Tour Final Fantasy it surged to 16.7 percent of ladder winners, on the back of a catalyst shell that includes Dyadrine, Hardened Academic, Flitterwing Nuisance, Shardmage's Rescue and Lumbering Worldwagon. It is the biggest single-card week-over-week jump in the dataset.",
+      "title": "Erode: 0 to 20 percent in two weeks",
+      "summary": "Largest week-over-week single-card jump in the dataset.",
+      "stats": [
+        {"label": "Ladder share, 20-04", "value": "0%"},
+        {"label": "Ladder share, 27-04", "value": "4%"},
+        {"label": "Ladder share, 04-05", "value": "13%"},
+        {"label": "Ladder share, 11-05", "value": "20%"},
+        {"label": "Shell", "value": "Dyadrine, Hardened Academic, Flitterwing Nuisance, Shardmage's Rescue, Lumbering Worldwagon"}
+      ],
       "cards": ["Erode", "Dyadrine, Synthesis Amalgam", "Hardened Academic", "Flitterwing Nuisance", "Lumbering Worldwagon", "Shardmage's Rescue"]
     },
     {
       "id": "pt-picks-ladder-lag",
       "week": "2026-05-11",
-      "title": "Five Pro Tour staples the ladder has not caught",
+      "status": "active",
       "kind": "pt-vs-ladder",
-      "summary": "Colorstorm Stallion, Hearth Elemental, Tablet of Discovery, Prismari Charm and Impractical Joke are all over 5 percent at the Pro Tour and effectively 0 percent on ladder.",
-      "detail": "Pro Tour Final Fantasy showcased five cards that the ladder has not yet replicated at any meaningful share. Colorstorm Stallion at 20 percent of PT decks versus 0 percent on ladder is the most dramatic. Prismari Charm sits at 27 percent PT versus 0.4 percent ladder, a 64x ratio. The lag suggests these picks need either an infrastructure ladder has not yet built around, or that pros are taking risks the field has not vetted. In either case, expect at least two of the five to follow Erode's trajectory and break out in the next two weeks.",
-      "cards": ["Colorstorm Stallion", "Hearth Elemental", "Tablet of Discovery", "Prismari Charm", "Impractical Joke"]
+      "title": "Five PT staples ladder has not touched",
+      "summary": "Cards over 5 percent at the Pro Tour, near zero on ladder.",
+      "stats": [
+        {"label": "Prismari Charm", "value": "27% PT, 0.4% ladder (64x)"},
+        {"label": "Get Out", "value": "30% PT, 1.3% ladder (24x)"},
+        {"label": "Colorstorm Stallion", "value": "20% PT, 0% ladder"},
+        {"label": "Impractical Joke", "value": "19% PT, 0.4% ladder (45x)"},
+        {"label": "Hearth Elemental", "value": "9% PT, 0% ladder"},
+        {"label": "Tablet of Discovery", "value": "5% PT, 0% ladder"}
+      ],
+      "detail": "Erode followed this pattern two weeks ago and is now at 20%.",
+      "cards": ["Colorstorm Stallion", "Hearth Elemental", "Tablet of Discovery", "Prismari Charm", "Impractical Joke", "Get Out"]
     }
   ]
 }

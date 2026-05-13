@@ -743,52 +743,115 @@
     `;
   }
 
-  // Kind labels and short descriptions for the story-kind badge
+  // Kind labels for the story-kind badge
   const STORY_KIND_META = {
-    "returning-cluster": { label: "returning cluster", note: "archetype that vanished and came back" },
-    "copy-conversion":   { label: "4-of conversion",   note: "card jumped from flex slot to staple" },
-    "post-pt-shift":     { label: "post-PT shift",     note: "ladder picked it up after the Pro Tour" },
-    "returning-card":    { label: "returning card",    note: "absent for several weeks, now back" },
-    "pt-vs-ladder":      { label: "PT vs ladder",      note: "pros are picking, ladder has not caught up" },
+    "returning-cluster": { label: "returning cluster" },
+    "copy-conversion":   { label: "4-of conversion" },
+    "post-pt-shift":     { label: "post-PT shift" },
+    "returning-card":    { label: "returning card" },
+    "pt-vs-ladder":      { label: "PT vs ladder" },
+    "color-gap":         { label: "color gap" },
   };
+
+  function statusLabel(s) {
+    if (s === "resolved")  return "resolved";
+    if (s === "withdrawn") return "withdrawn";
+    return "active";
+  }
 
   function renderStoriesTab() {
     if (!stories || !stories.stories || !stories.stories.length) {
       return `
         <section class="sec stories-sec">
           <header class="sec-header">
-            <h2 class="sec-title">Stories &amp; clusters</h2>
+            <h2 class="sec-title">Stories</h2>
             <span class="sec-sub">no stories this week</span>
           </header>
-          <div class="stories-intro">
-            <p>The detector did not find anything worth surfacing this week. Check back after the next data refresh.</p>
-          </div>
+          <div class="stories-intro"><p>Detector found nothing worth surfacing this week.</p></div>
         </section>
       `;
     }
 
-    const intro = `
-      <div class="stories-header">
-        <div class="stories-window">${escapeHtml(stories.window_label || "")}</div>
-        <div class="stories-blurb">Narratives the data is currently telling. Each story is anchored on a measurable signal you can verify by clicking through to the cards involved.</div>
-      </div>
-    `;
+    // Current week = max week across all stories, unless explicitly set
+    const currentWeek = stories.current_week || stories.stories.reduce((acc, s) => (s.week || "") > acc ? s.week : acc, "");
+    const current = stories.stories.filter((s) => s.week === currentWeek);
+    const older   = stories.stories.filter((s) => s.week !== currentWeek);
 
-    const items = stories.stories.map(renderStory).join("");
+    const currentHtml = current.length
+      ? `<div class="stories-list">${current.map(renderStory).join("")}</div>`
+      : `<div class="rec-empty">no new stories this week</div>`;
+
     return `
       <section class="sec stories-sec">
         <header class="sec-header">
-          <h2 class="sec-title">Stories &amp; clusters</h2>
-          <span class="sec-sub">${stories.stories.length} thread${stories.stories.length === 1 ? "" : "s"} this week</span>
+          <h2 class="sec-title">Stories</h2>
+          <span class="sec-sub">week of ${fmtDate(currentWeek)} · ${current.length} active</span>
         </header>
-        ${intro}
-        <div class="stories-list">${items}</div>
+        <div class="stories-header">
+          <div class="stories-window">${escapeHtml(stories.window_label || "")}</div>
+        </div>
+        ${currentHtml}
+        ${renderStoriesArchive(older)}
       </section>
     `;
   }
 
+  function renderStoriesArchive(older) {
+    if (!older.length) return "";
+    // Group by week, sort weeks desc
+    const byWeek = {};
+    for (const s of older) {
+      const w = s.week || "unknown";
+      if (!byWeek[w]) byWeek[w] = [];
+      byWeek[w].push(s);
+    }
+    const weeks = Object.keys(byWeek).sort().reverse();
+    const totalWord = older.length === 1 ? "story" : "stories";
+    const weekWord = weeks.length === 1 ? "week" : "weeks";
+    return `
+      <details class="stories-archive">
+        <summary class="archive-toggle">${older.length} ${totalWord} from ${weeks.length} previous ${weekWord}</summary>
+        <div class="archive-content">
+          ${weeks.map((w) => {
+            const ss = byWeek[w];
+            const word = ss.length === 1 ? "story" : "stories";
+            return `
+              <details class="archive-week" open>
+                <summary class="archive-week-head">week of ${fmtDate(w)} · ${ss.length} ${word}</summary>
+                <div class="archive-week-list">${ss.map(renderArchivedStory).join("")}</div>
+              </details>
+            `;
+          }).join("")}
+        </div>
+      </details>
+    `;
+  }
+
+  function renderArchivedStory(s) {
+    const status = s.status || "active";
+    return `
+      <details class="archive-story" data-story-id="${escapeAttr(s.id || "")}">
+        <summary class="archive-story-head">
+          <span class="archive-story-status status-${status}">${statusLabel(status)}</span>
+          <span class="archive-story-title">${escapeHtml(s.title || "")}</span>
+          ${s.summary ? `<span class="archive-story-summary">${escapeHtml(s.summary)}</span>` : ""}
+        </summary>
+        <div class="archive-story-body">${renderStoryInner(s)}</div>
+      </details>
+    `;
+  }
+
   function renderStory(s) {
-    const kindMeta = STORY_KIND_META[s.kind] || { label: s.kind || "story", note: "" };
+    return `<article class="story" data-story-id="${escapeAttr(s.id || "")}">${renderStoryInner(s)}</article>`;
+  }
+
+  function renderStoryInner(s) {
+    const kindMeta = STORY_KIND_META[s.kind] || { label: s.kind || "story" };
+    const status = s.status || "active";
+    const statusBadge = status !== "active"
+      ? `<span class="story-status status-${status}">${statusLabel(status)}${s.status_note ? ": " + escapeHtml(s.status_note) : ""}</span>`
+      : "";
+
     const cards = (s.cards || []).filter((n) => scryfall && scryfall[n]);
     const cardThumbs = cards.length ? `
       <div class="story-cards">
@@ -800,6 +863,17 @@
           </div>`;
         }).join("")}
       </div>
+    ` : "";
+
+    const stats = (s.stats || []).length ? `
+      <dl class="story-stats">
+        ${s.stats.map((st) => `
+          <div class="story-stat-row">
+            <dt class="story-stat-label">${escapeHtml(st.label || "")}</dt>
+            <dd class="story-stat-value">${escapeHtml(st.value || "")}</dd>
+          </div>
+        `).join("")}
+      </dl>
     ` : "";
 
     const timeline = (s.timeline || []).length ? `
@@ -814,16 +888,16 @@
     ` : "";
 
     return `
-      <article class="story" data-story-id="${escapeAttr(s.id || "")}">
-        <header class="story-head">
-          <span class="story-kind">${escapeHtml(kindMeta.label)}</span>
-          <h3 class="story-title">${escapeHtml(s.title || "")}</h3>
-        </header>
-        ${s.summary ? `<p class="story-summary">${escapeHtml(s.summary)}</p>` : ""}
-        ${s.detail ? `<p class="story-detail">${escapeHtml(s.detail)}</p>` : ""}
-        ${timeline}
-        ${cardThumbs}
-      </article>
+      <header class="story-head">
+        <span class="story-kind">${escapeHtml(kindMeta.label)}</span>
+        ${statusBadge}
+        <h3 class="story-title">${escapeHtml(s.title || "")}</h3>
+      </header>
+      ${s.summary ? `<p class="story-summary">${escapeHtml(s.summary)}</p>` : ""}
+      ${stats}
+      ${s.detail ? `<p class="story-detail">${escapeHtml(s.detail)}</p>` : ""}
+      ${timeline}
+      ${cardThumbs}
     `;
   }
 
