@@ -5,10 +5,11 @@
   "stories": [
     {
       "id": "rakdos-boggart-return",
+      "week": "2026-05-11",
       "title": "Rakdos Boggart returns as counter-meta",
       "kind": "returning-cluster",
       "summary": "A near-Lorwyn-themed red-black goblin shell vanished for six weeks before the Pro Tour, then came back stronger than ever the week after.",
-      "detail": "The Boggart shell, anchored by Mudbutton Cursetosser, Boggart Cursecrafter, Searslicer Goblin and Stadium Headliner, first surfaced in March 2025 as a fringe pick at 4 shell cards per list. It locked in as a deeper 8-card package when Edge of Eternities reshuffled the format in February 2026, then went quiet from late March through April. The week after Pro Tour Final Fantasy, two separate Platinum-Mythic players brought it back with 8 and 9 shell cards each, the densest the package has ever been. It is currently the only fully non-Final-Fantasy-themed deck winning on the ranked ladder, which makes it look less like a relic and more like a deliberate counter-pick against the post-PT field.",
+      "detail": "The Boggart shell, anchored by Mudbutton Cursetosser, Boggart Cursecrafter, Searslicer Goblin and Stadium Headliner, first surfaced in March 2025 as a fringe pick at 4 shell cards per list. It locked in as a deeper 8-card package when Edge of Eternities reshuffled the format in February 2026, then went quiet from late March through April. The week after Pro Tour Final Fantasy, two separate Platinum-Mythic players brought it back with 8 and 9 shell cards each, the densest the package has ever been. A deliberate counter-pick against the post-PT field is the most parsimonious read.",
       "cards": ["Mudbutton Cursetosser", "Boggart Cursecrafter", "Searslicer Goblin", "Stadium Headliner", "Howlsquad Heavy", "Bile-Vial Boggart"],
       "timeline": [
         {"period": "Mar to Nov 2025", "note": "fringe, 4 to 5 shell cards per appearance"},
@@ -18,15 +19,8 @@
       ]
     },
     {
-      "id": "meltstrider-4of-conversion",
-      "title": "Meltstrider's Resolve becomes a 4-of",
-      "kind": "copy-conversion",
-      "summary": "Two weeks ago Meltstrider's Resolve was running at one copy in a handful of lists. It is now a hard 4-of in 67 winning decks.",
-      "detail": "The card jumped from 1-of mode (4 decks, 0 percent running it as a 4-of) to 4-of mode (67 decks, 48 percent running the full playset) inside a single Pro Tour cycle. Every list that picks it up is the same Selesnya Landfall package: Llanowar Elves, Badgermole Cub, Mightform Harmonizer, Earthbender Ascension, Icetill Explorer, Sazh's Chocobo. This is the deck that mirrored itself in the SOS final, and ladder absorbed the consolidated build verbatim the next week. The card moved from flex slot to staple without ever stopping at 2-of or 3-of.",
-      "cards": ["Meltstrider's Resolve", "Badgermole Cub", "Mightform Harmonizer", "Earthbender Ascension", "Llanowar Elves", "Icetill Explorer"]
-    },
-    {
       "id": "erode-breakout",
+      "week": "2026-05-11",
       "title": "Erode jumps from 1 percent to 17 percent",
       "kind": "post-pt-shift",
       "summary": "An Erode-anchored counter-tempo shell did not exist on ladder before the Pro Tour. It is now in one in every six ladder winners.",
@@ -34,15 +28,8 @@
       "cards": ["Erode", "Dyadrine, Synthesis Amalgam", "Hardened Academic", "Flitterwing Nuisance", "Lumbering Worldwagon", "Shardmage's Rescue"]
     },
     {
-      "id": "fomo-comeback",
-      "title": "Fear of Missing Out reappears",
-      "kind": "returning-card",
-      "summary": "A long-running format staple, absent for seven straight weeks, has appeared in two of the last three.",
-      "detail": "Fear of Missing Out has 53 weeks of meaningful presence in the dataset, but it disappeared from winning lists in mid-March. It reappeared on 04-05-2026 at 8.3 percent of ladder. The shell it returned in is red-leaning aggro alongside Slickshot Show-Off and Burst Lightning, which is a different home from the Mouse-tribal midrange it used to live in. The card is being re-purposed as a tempo-pressure four-drop.",
-      "cards": ["Fear of Missing Out", "Slickshot Show-Off", "Burst Lightning"]
-    },
-    {
       "id": "pt-picks-ladder-lag",
+      "week": "2026-05-11",
       "title": "Five Pro Tour staples the ladder has not caught",
       "kind": "pt-vs-ladder",
       "summary": "Colorstorm Stallion, Hearth Elemental, Tablet of Discovery, Prismari Charm and Impractical Joke are all over 5 percent at the Pro Tour and effectively 0 percent on ladder.",
