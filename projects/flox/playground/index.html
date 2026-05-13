@@ -699,8 +699,9 @@ print MorningCommute 500;
 
       function applyScenario(baseSys, scenario) {
         // Build a copy of the system with the scenario's overrides
-        // applied. Nodes and edges keep their structure; only the
-        // 'disabled' flags and supply values change.
+        // applied. Attaches per-scenario level / flow values to the
+        // nodes and edges so the renderer can label them with their
+        // equilibrium values.
         const disabledNodes = new Set();
         const disabledEdges = new Set();   // "from|to"
         const supplyOverrides = new Map();
@@ -709,6 +710,8 @@ print MorningCommute 500;
           else if (o.kind === 'disable-edge') disabledEdges.add(o.from + '|' + o.to);
           else if (o.kind === 'supply') supplyOverrides.set(o.name, o.value);
         }
+        const levels = scenario.levels || {};
+        const flows = scenario.flows || {};
         const nodes = baseSys.nodes.map(n => {
           let kind = n.kind;
           let supply = n.supply;
@@ -725,6 +728,7 @@ print MorningCommute 500;
             kind,
             supply,
             disabled: n.disabled || disabledNodes.has(n.name),
+            level: levels[n.name],
           };
         });
         const edges = baseSys.edges.map(e => ({
@@ -733,6 +737,7 @@ print MorningCommute 500;
             || disabledEdges.has(e.from + '|' + e.to)
             || disabledNodes.has(e.from)
             || disabledNodes.has(e.to),
+          flow: flows[`${e.from}->${e.to}`],
         }));
         return { ...baseSys, nodes, edges };
       }
@@ -1024,10 +1029,23 @@ print MorningCommute 500;
         if (edge.directed && !edge.disabled) path.setAttribute('marker-end', 'url(#arrow)');
         parent.appendChild(path);
 
-        // Weight label, only if not default.
-        if (edge.weight !== 1 || edge.directed === false) {
+        // Label. When the scenario provides a flow value, label the edge
+        // with that (signed); otherwise fall back to the conductance /
+        // weight from the source. Disabled edges show "(off)".
+        if (edge.disabled) {
+          renderEdgeLabel(parent, midX, midY, '(off)');
+        } else if (typeof edge.flow === 'number') {
+          renderEdgeLabel(parent, midX, midY, signedFmt(edge.flow));
+        } else if (edge.weight !== 1 || edge.directed === false) {
           renderEdgeLabel(parent, midX, midY, formatWeight(edge.weight));
         }
+      }
+
+      // Match Java/TS signedFmt: always show sign on non-zero values.
+      function signedFmt(v) {
+        if (v > 0) return '+' + v.toFixed(1);
+        if (v < 0) return v.toFixed(1);
+        return '0.0';
       }
 
       function pullBackToNodeEdge(target, fromX, fromY, r) {
@@ -1115,7 +1133,18 @@ print MorningCommute 500;
         g.appendChild(label);
 
         // Supply value beneath the name, for grid generators/loads.
-        if (node.kind === 'generator' || node.kind === 'load') {
+        // In scenario mode (when a level is provided) we show the level
+        // instead. The level is the equilibrium answer the user wants to see.
+        const hasLevel = typeof node.level === 'number';
+        if (hasLevel) {
+          const v = document.createElementNS(SVG_NS, 'text');
+          v.setAttribute('x', 0);
+          v.setAttribute('y', NODE_R + 26);
+          v.setAttribute('text-anchor', 'middle');
+          v.setAttribute('class', 'pg-edge-label');
+          v.textContent = signedFmt(node.level);
+          g.appendChild(v);
+        } else if (node.kind === 'generator' || node.kind === 'load') {
           const v = document.createElementNS(SVG_NS, 'text');
           v.setAttribute('x', 0);
           v.setAttribute('y', NODE_R + 26);

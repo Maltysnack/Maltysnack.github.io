@@ -1151,6 +1151,7 @@ var Interpreter = class {
       }
     }
   }
+  // Public so parseGraph() can run scenarios and capture state.
   scenarioClone(src, overrides) {
     const supplyOverrides = /* @__PURE__ */ new Map();
     const extraDisableNodes = /* @__PURE__ */ new Set();
@@ -1886,25 +1887,51 @@ function parseGraph(source) {
   }
   const scenariosBySystem = /* @__PURE__ */ new Map();
   for (const stmt of ast) {
-    if (stmt && stmt.kind === "CompareStmt") {
-      const sysName = stmt.systemName.lexeme;
-      const sceneList = scenariosBySystem.get(sysName) ?? [];
-      for (const sc of stmt.scenarios) {
-        sceneList.push({
-          label: sc.label,
-          overrides: sc.overrides.map((o) => {
-            if (o.kind === "disable-node") return { kind: "disable-node", name: o.name1.lexeme };
-            if (o.kind === "disable-edge") {
-              const from = o.forward ? o.name1.lexeme : o.name2.lexeme;
-              const to = o.forward ? o.name2.lexeme : o.name1.lexeme;
-              return { kind: "disable-edge", from, to };
-            }
-            return { kind: "supply", name: o.name1.lexeme, value: o.value };
-          })
-        });
+    if (!stmt || stmt.kind !== "CompareStmt") continue;
+    const sysName = stmt.systemName.lexeme;
+    const baseSys = interp.getSystems().get(sysName);
+    if (!baseSys) continue;
+    const strat = STRATEGIES[baseSys.mode];
+    const arg = stmt.ticks != null ? [stmt.ticks] : strat.defaultArg();
+    const sceneList = scenariosBySystem.get(sysName) ?? [];
+    for (const sc of stmt.scenarios) {
+      const overrides = sc.overrides.map((o) => {
+        if (o.kind === "disable-node") return { kind: "disable-node", name: o.name1.lexeme };
+        if (o.kind === "disable-edge") {
+          const from = o.forward ? o.name1.lexeme : o.name2.lexeme;
+          const to = o.forward ? o.name2.lexeme : o.name1.lexeme;
+          return { kind: "disable-edge", from, to };
+        }
+        return { kind: "supply", name: o.name1.lexeme, value: o.value };
+      });
+      let levels;
+      let flows;
+      let ticksRun;
+      let converged;
+      try {
+        const clone = interp.scenarioClone(baseSys, sc.overrides);
+        const localErrs = [];
+        strat.validate(clone, localErrs);
+        clone.identifyRoots();
+        strat.run(clone, arg);
+        if (baseSys.mode === "grid") {
+          levels = Object.fromEntries(clone.gridLevel);
+          flows = Object.fromEntries(clone.gridFlow);
+          ticksRun = clone.gridTicksRun;
+          converged = clone.gridConverged;
+        } else if (baseSys.mode === "markov") {
+          levels = {};
+          for (const [k, hist] of clone.markovHistory) {
+            levels[k] = hist[clone.markovTicksRun] ?? 0;
+          }
+          ticksRun = clone.markovTicksRun;
+          converged = clone.markovConverged;
+        }
+      } catch (_e) {
       }
-      scenariosBySystem.set(sysName, sceneList);
+      sceneList.push({ label: sc.label, overrides, levels, flows, ticksRun, converged });
     }
+    scenariosBySystem.set(sysName, sceneList);
   }
   const systems = [];
   for (const sys of interp.getSystems().values()) {
