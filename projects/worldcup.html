@@ -251,59 +251,52 @@
       transition: color 120ms ease, font-weight 120ms ease;
     }
 
-    /* Top scorers list: ranked rows, similar look to the paths table.
-       Columns: rank, player, national team (with flag), club (with
-       league-country flag), predicted goals. */
+    /* Top scorers list: rank | flag | player name | club badge | goals.
+       No headers (each cell self-evident from icons + numbers). */
     .wc-scorers {
       display: grid;
-      grid-template-columns: 2.2em minmax(150px, 1.4fr) minmax(110px, 1fr) minmax(130px, 1fr) 5em;
-      column-gap: 0.6rem;
-      row-gap: 0.4rem;
+      grid-template-columns: 2.2em 26px minmax(140px, 1fr) 26px 4em;
+      column-gap: 0.7rem;
+      row-gap: 0.5rem;
       margin-top: 0.8rem;
-      font-size: 0.88rem;
+      font-size: 0.92rem;
+      align-items: center;
     }
-    .wc-scorers .header {
-      color: var(--text-muted);
-      font-size: 0.72rem;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      padding-bottom: 0.3rem;
-      border-bottom: 1px solid rgba(128,128,128,0.2);
-    }
-    .wc-scorers .header.right { text-align: right; }
     .wc-scorers .rank {
       text-align: right;
       color: var(--text-muted);
       font-variant-numeric: tabular-nums;
     }
-    .wc-scorers .player {
+    .wc-scorers .team-flag {
       display: flex;
       align-items: center;
-      gap: 0.45rem;
-      min-width: 0;
+      justify-content: center;
     }
-    .wc-scorers .player .name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      font-weight: 600;
-    }
-    .wc-scorers .team-cell, .wc-scorers .club-cell {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      color: var(--text-muted);
-      min-width: 0;
-    }
-    .wc-scorers .team-cell .name, .wc-scorers .club-cell .name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-    .wc-scorers .club-cell .wc-flag, .wc-scorers .team-cell .wc-flag {
-      width: 18px;
-      height: 13px;
+    .wc-scorers .team-flag .wc-flag {
+      width: 24px;
+      height: 17px;
       flex-shrink: 0;
+    }
+    .wc-scorers .player-name {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-scorers .club-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wc-scorers .club-badge img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .wc-scorers .club-badge .fallback {
+      width: 22px;
+      height: 16px;
     }
     .wc-scorers .predicted {
       text-align: right;
@@ -314,11 +307,6 @@
         var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
         rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
       );
-    }
-    @media (max-width: 720px) {
-      .wc-scorers { grid-template-columns: 2em 1fr 5em; }
-      .wc-scorers .team-cell, .wc-scorers .club-cell,
-      .wc-scorers .header.team-h, .wc-scorers .header.club-h { display: none; }
     }
     .wc-paths .name .team-name {
       overflow: hidden;
@@ -1826,33 +1814,27 @@
           return;
         }
         const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
-        // Render a country-flag <img> for any ISO code that flagcdn supports.
-        const clubFlagFor = (iso) => iso
-          ? `<img class="wc-flag" src="https://flagcdn.com/w40/${iso}.png" alt="" loading="lazy" />`
+        // Country flag fallback if no club badge available.
+        const clubFlagFallback = (iso) => iso
+          ? `<img class="wc-flag fallback" src="https://flagcdn.com/w40/${iso}.png" alt="" loading="lazy" />`
           : '';
-        container.innerHTML = `
-          <div class="header">#</div>
-          <div class="header">Player</div>
-          <div class="header team-h">National team</div>
-          <div class="header club-h">Club</div>
-          <div class="header right">Pred. goals</div>
-        ` + top.map((p, i) => {
+        container.innerHTML = top.map((p, i) => {
           const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
           const rounded = Math.round(p.predicted_wc_goals);
           const exact = p.predicted_wc_goals.toFixed(2);
+          // Prefer the actual club crest from Wikipedia; fall back to
+          // the league-country flag if we don't have a badge for that club.
+          const badgeHtml = p.club_badge
+            ? `<img src="${p.club_badge}" alt="${p.club}" loading="lazy" title="${p.club}" />`
+            : clubFlagFallback(p.club_country);
+          const playerTitle = `${p.name}${p.position ? ' (' + p.position + ')' : ''}`;
           return `
             <div class="rank">${i + 1}</div>
-            <div class="player">
-              <span class="name" title="${p.name}${p.position ? ' (' + p.position + ')' : ''}">${p.name}</span>
-            </div>
-            <div class="team-cell">
+            <div class="team-flag" title="${p.team}">
               ${flagImg(p.team)}
-              <span class="name" title="${p.team}">${p.team}</span>
             </div>
-            <div class="club-cell">
-              ${clubFlagFor(p.club_country)}
-              <span class="name" title="${p.club}">${p.club}</span>
-            </div>
+            <div class="player-name" title="${playerTitle}">${p.name}</div>
+            <div class="club-badge">${badgeHtml}</div>
             <div class="predicted" style="--fill: ${fill}" title="exact projection: ${exact}">${rounded}</div>
           `;
         }).join('');
