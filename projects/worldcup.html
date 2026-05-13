@@ -1682,37 +1682,25 @@
             return `<small>${day}</small>${md}`;
           } catch (e) { return s; }
         };
-        const tagFor = (t) => {
-          const tl = (t || '').toLowerCase();
-          if (tl === 'friendly') return 'Friendly';
-          if (tl.includes('world cup')) return 'World Cup';
-          if (tl.includes('nations league')) return 'Nations Lg';
-          if (tl.includes('qualif')) return 'Qualifier';
-          return t || '';
-        };
-        const fmtDelta = (v) => {
-          if (v == null) return '';
-          const r = Math.round(v);
-          if (r === 0) return '';
-          const sign = r > 0 ? '+' : '−';
-          const cls = r > 0 ? 'up' : 'down';
-          return `<span class="delta ${cls}">${sign}${Math.abs(r)}</span>`;
-        };
-
+        // Crucial-only card: date + teams + score (or vs) + predicted.
+        // No tournament tag, W/D/L percentages, or Elo deltas — those
+        // surface in tooltips instead so the visible card stays clean.
         const playedRow = (m) => {
           const exactHit =
             m.modal_score && m.modal_score[0] === m.actual_home_goals
                           && m.modal_score[1] === m.actual_away_goals;
-          const dh = fmtDelta(m.elo_delta_home);
-          const da = fmtDelta(m.elo_delta_away);
-          const elo = dh && da
-            ? `<span class="wdl">${dh}<span style="opacity:0.5">·</span>${da}</span>`
-            : '';
           const pred = m.modal_score
-            ? `<span class="pred${exactHit ? ' hit' : ''}">predicted ${m.modal_score[0]}–${m.modal_score[1]}</span>`
+            ? `<span class="pred${exactHit ? ' hit' : ''}">pred ${m.modal_score[0]}–${m.modal_score[1]}</span>`
             : '';
+          const dh = m.elo_delta_home != null ? Math.round(m.elo_delta_home) : null;
+          const da = m.elo_delta_away != null ? Math.round(m.elo_delta_away) : null;
+          const tooltip = `${m.tournament || ''}${dh != null && da != null
+            ? '\nElo Δ: ' + m.home_team + ' ' + (dh >= 0 ? '+' : '') + dh
+              + ', ' + m.away_team + ' ' + (da >= 0 ? '+' : '') + da
+            : ''}`;
           return `
-            <div class="wc-row" data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}">
+            <div class="wc-row" data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}"
+                 title="${tooltip}">
               <div class="date">${fmtDate(m.match_date)}</div>
               <div class="teams">
                 <span class="team">
@@ -1725,11 +1713,7 @@
                   ${flagImg(m.away_team)}
                 </span>
               </div>
-              <div class="meta">
-                <div class="tag">${tagFor(m.tournament)}</div>
-                <div>${pred}</div>
-                ${elo}
-              </div>
+              <div class="meta">${pred}</div>
             </div>`;
         };
         const upcomingRow = (m, isNext) => {
@@ -1737,14 +1721,11 @@
           const ph = Math.round((m.p_home_win || 0) * 100);
           const pd = Math.round((m.p_draw || 0) * 100);
           const pa = Math.round((m.p_away_win || 0) * 100);
-          const wdl = `<span class="wdl">
-              <span>H ${ph}%</span>
-              <span>D ${pd}%</span>
-              <span>A ${pa}%</span>
-            </span>`;
+          const tooltip = `${m.tournament || ''}\nH ${ph}% · D ${pd}% · A ${pa}%`;
           return `
             <div class="wc-row${isNext ? ' next' : ''}"
-                 data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}">
+                 data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}"
+                 title="${tooltip}">
               <div class="date">${fmtDate(m.match_date)}</div>
               <div class="teams">
                 <span class="team">
@@ -1758,9 +1739,7 @@
                 </span>
               </div>
               <div class="meta">
-                <div class="tag">${tagFor(m.tournament)}</div>
-                <div><span class="pred">predicted ${modal[0]}–${modal[1]}</span></div>
-                ${wdl}
+                <span class="pred">pred ${modal[0]}–${modal[1]}</span>
               </div>
             </div>`;
         };
