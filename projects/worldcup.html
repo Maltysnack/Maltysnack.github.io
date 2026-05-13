@@ -1812,7 +1812,19 @@
             'the next 2-3 weeks as more squads land.</p>';
           return;
         }
-        const top = data.top_20;
+        // Filter to players whose prediction rounds to >= 1 goal. Below
+        // that we'd be ranking noise: a 0.4 prediction is essentially
+        // "this player might score, might not, very low signal." Keeps
+        // the list short and human-readable instead of trailing into
+        // dozens of fractional projections.
+        const top = data.top_20.filter(p => Math.round(p.predicted_wc_goals) >= 1);
+        if (top.length === 0) {
+          container.innerHTML =
+            '<p style="color:var(--text-muted);font-size:0.85rem;">' +
+            'No players currently project to 1+ goals. Coverage will ' +
+            'fill out as more WC squads are announced.</p>';
+          return;
+        }
         const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
         // Render a country-flag <img> for any ISO code that flagcdn supports.
         const clubFlagFor = (iso) => iso
@@ -1826,6 +1838,8 @@
           <div class="header right">Pred. goals</div>
         ` + top.map((p, i) => {
           const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
+          const rounded = Math.round(p.predicted_wc_goals);
+          const exact = p.predicted_wc_goals.toFixed(2);
           return `
             <div class="rank">${i + 1}</div>
             <div class="player">
@@ -1839,7 +1853,7 @@
               ${clubFlagFor(p.club_country)}
               <span class="name" title="${p.club}">${p.club}</span>
             </div>
-            <div class="predicted" style="--fill: ${fill}">${p.predicted_wc_goals.toFixed(1)}</div>
+            <div class="predicted" style="--fill: ${fill}" title="exact projection: ${exact}">${rounded}</div>
           `;
         }).join('');
       }
