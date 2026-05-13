@@ -290,6 +290,74 @@ function printGridMap(o, system) {
   o.println("Net supply: " + formatWeight(sum) + tag);
   o.println("");
 }
+function printGridComparison(o, original, runs, labels) {
+  o.println("");
+  o.println("=== COMPARE: " + original.name + " ===\n");
+  let labelW = "Scenarios".length;
+  for (const l of labels) labelW = Math.max(labelW, l.length);
+  o.println("Scenarios:");
+  for (let i = 0; i < runs.length; i++) {
+    const r = runs[i];
+    const status = r.gridConverged ? "converged" : "not yet converged";
+    o.println(
+      "  " + padRight(labels[i], labelW) + "  " + r.gridTicksRun + " tick" + (r.gridTicksRun === 1 ? "" : "s") + ", " + status
+    );
+  }
+  o.println("");
+  const colW = [];
+  for (let i = 0; i < runs.length; i++) {
+    let w = Math.max(8, labels[i].length);
+    for (const v of runs[i].gridLevel.values()) w = Math.max(w, signedFmt(v).length);
+    for (const v of runs[i].gridFlow.values()) w = Math.max(w, signedFmt(v).length);
+    w = Math.max(w, "(off)".length);
+    colW.push(w);
+  }
+  let rowLabelW = "Levels:".length;
+  for (const n of original.rivers.keys()) rowLabelW = Math.max(rowLabelW, n.length + 2);
+  for (const n of original.dams.keys()) rowLabelW = Math.max(rowLabelW, n.length + 2);
+  for (const [from, edges] of original.connections) {
+    for (const e of edges) {
+      rowLabelW = Math.max(rowLabelW, (from + " -> " + e.target).length + 2);
+    }
+  }
+  o.print(padRight("", rowLabelW));
+  for (let i = 0; i < runs.length; i++) {
+    o.print("  " + padLeft(labels[i], colW[i]));
+  }
+  o.println("");
+  o.println("Levels:");
+  for (const node of original.rivers.keys()) {
+    o.print(padRight("  " + node, rowLabelW));
+    for (let i = 0; i < runs.length; i++) {
+      const r = runs[i];
+      let cell;
+      if (r.disabledNodes.has(node)) cell = "(off)";
+      else if (r.gridLevel.has(node)) cell = signedFmt(r.gridLevel.get(node));
+      else cell = "\u2014";
+      o.print("  " + padLeft(cell, colW[i]));
+    }
+    o.println("");
+  }
+  o.println("");
+  o.println("Flows (positive = first-to-second direction):");
+  for (const [from, edges] of original.connections) {
+    for (const e of edges) {
+      const label = "  " + from + " -> " + e.target;
+      o.print(padRight(label, rowLabelW));
+      const key = `${from}->${e.target}`;
+      for (let i = 0; i < runs.length; i++) {
+        const r = runs[i];
+        let cell;
+        if (r.disabledNodes.has(from) || r.disabledNodes.has(e.target)) cell = "(off)";
+        else if (r.gridFlow.has(key)) cell = signedFmt(r.gridFlow.get(key));
+        else cell = "(off)";
+        o.print("  " + padLeft(cell, colW[i]));
+      }
+      o.println("");
+    }
+  }
+  o.println("");
+}
 function printGridState(o, system) {
   const tickWord = system.gridTicksRun === 1 ? "tick" : "ticks";
   const status = system.gridConverged ? ", converged" : ", not yet converged";
@@ -422,7 +490,7 @@ var markov = {
         `Markov system '${s.name}' has no initial mass on any active node. Use 'start NodeName 1.0;' to set one.`
       );
     }
-    let softened = s.disabledNodes.size > 0;
+    let softened = s.scenarioRun || s.disabledNodes.size > 0;
     if (!softened) {
       for (const edges of s.connections.values()) {
         for (const e of edges) if (!e.enabled) {
@@ -484,7 +552,7 @@ var grid = {
         `Grid system '${s.name}' has no supply set on any active node. Use 'node X { supply: N }' for generators (+) or loads (-).`
       );
     }
-    let softened = s.disabledNodes.size > 0;
+    let softened = s.scenarioRun || s.disabledNodes.size > 0;
     if (!softened) {
       for (const edges of s.connections.values()) {
         for (const e of edges) if (!e.enabled) {
@@ -613,6 +681,9 @@ var RiverSystem = class {
   // Nodes explicitly disabled via 'disable' statements. Skipped by every
   // simulator; remain in rivers/dams so the visualisation can dim them.
   disabledNodes = /* @__PURE__ */ new Set();
+  // Marker set by `compare` so per-mode validators know to soften their
+  // requirements (the run is exploring a scenario, not the canonical one).
+  scenarioRun = false;
   // Markov state
   initialMass = /* @__PURE__ */ new Map();
   markovHistory = /* @__PURE__ */ new Map();
@@ -1028,6 +1099,28 @@ var Interpreter = class {
         strat.printResult(o, sys, arg);
         return;
       }
+      case "CompareStmt": {
+        if (this.phase !== 1 /* EXECUTE */) return;
+        const original = this.lookupSystem(stmt.systemName);
+        if (original.mode !== "grid") {
+          throw new Error(
+            `'compare' is only supported in grid mode for now (system '${original.name}' is ${original.mode} mode).`
+          );
+        }
+        const arg = stmt.ticks != null ? [stmt.ticks] : STRATEGIES[original.mode].defaultArg();
+        const runs = [];
+        const labels = [];
+        for (const sc of stmt.scenarios) {
+          const clone = this.scenarioClone(original, sc.overrides);
+          STRATEGIES[clone.mode].validate(clone, this.errs);
+          clone.identifyRoots();
+          STRATEGIES[clone.mode].run(clone, arg);
+          runs.push(clone);
+          labels.push(sc.label);
+        }
+        printGridComparison(new Output(this.out), original, runs, labels);
+        return;
+      }
       case "HelpStmt": {
         if (this.phase !== 1 /* EXECUTE */) return;
         printHelp(new Output(this.out));
@@ -1057,6 +1150,45 @@ var Interpreter = class {
         }
       }
     }
+  }
+  scenarioClone(src, overrides) {
+    const supplyOverrides = /* @__PURE__ */ new Map();
+    const extraDisableNodes = /* @__PURE__ */ new Set();
+    const extraDisableEdges = /* @__PURE__ */ new Set();
+    for (const o of overrides) {
+      if (o.kind === "disable-node") extraDisableNodes.add(o.name1.lexeme);
+      else if (o.kind === "disable-edge") {
+        const from = o.forward ? o.name1.lexeme : o.name2.lexeme;
+        const to = o.forward ? o.name2.lexeme : o.name1.lexeme;
+        extraDisableEdges.add(`${from}|${to}`);
+      } else if (o.kind === "supply") {
+        supplyOverrides.set(o.name1.lexeme, o.value);
+      }
+    }
+    const clone = new RiverSystem(src.name);
+    clone.mode = src.mode;
+    clone.scenarioRun = true;
+    for (const r of src.rivers.values()) {
+      const supply = supplyOverrides.get(r.name) ?? r.supply;
+      clone.addRiver(new River(r.name, r.baseFlow, r.peakMultiplier, r.decayRate, supply));
+    }
+    for (const d of src.dams.values()) clone.addDam(d);
+    for (const n of src.disabledNodes) clone.disabledNodes.add(n);
+    for (const n of extraDisableNodes) clone.disabledNodes.add(n);
+    for (const [from, edges] of src.connections) {
+      for (const e of edges) {
+        clone.addConnection(from, e.target, e.weight, e.op);
+        const outs = clone.connections.get(from);
+        const added = outs[outs.length - 1];
+        added.enabled = e.enabled;
+        if (extraDisableEdges.has(`${from}|${e.target}`)) added.enabled = false;
+        if (clone.disabledNodes.has(from) || clone.disabledNodes.has(e.target)) {
+          added.enabled = false;
+        }
+      }
+    }
+    for (const [k, v] of src.initialMass) clone.initialMass.set(k, v);
+    return clone;
   }
   applyDisables() {
     for (const [sysName, stmts] of this.pendingDisables) {
@@ -1172,6 +1304,7 @@ var Parser = class {
       if (this.match("NODE" /* NODE */)) return this.nodeDeclaration();
       if (this.match("START" /* START */)) return this.startStatement();
       if (this.match("DISABLE" /* DISABLE */)) return this.disableStatement();
+      if (this.match("COMPARE" /* COMPARE */)) return this.compareStatement();
       if (this.match("MAP" /* MAP */)) return this.mapStatement();
       if (this.match("LIST" /* LIST */)) return this.listStatement();
       if (this.match("PRINT" /* PRINT */)) return this.printStatement();
@@ -1189,6 +1322,48 @@ var Parser = class {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect mode name (e.g. river, markov).");
     this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after mode name.");
     return { kind: "ModeDecl", mode: name };
+  }
+  compareStatement() {
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect system name after 'compare'.");
+    let ticks = null;
+    if (this.match("NUMBER" /* NUMBER */)) {
+      ticks = this.previous().literal;
+    }
+    this.consume("AS" /* AS */, "Expect 'as' before the scenario list.");
+    const scenarios = [this.scenario()];
+    while (this.match("COMMA" /* COMMA */)) scenarios.push(this.scenario());
+    this.consume("SEMICOLON" /* SEMICOLON */, "Expect ';' after compare statement.");
+    return { kind: "CompareStmt", systemName: name, ticks, scenarios };
+  }
+  scenario() {
+    const label = this.consume("STRING" /* STRING */, "Expect scenario label string.");
+    const overrides = [];
+    while (this.match("WITH" /* WITH */)) overrides.push(this.overrideClause());
+    return { label: label.lexeme, overrides };
+  }
+  overrideClause() {
+    if (this.match("DISABLE" /* DISABLE */)) {
+      const first = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after 'disable'.");
+      if (this.match("ARROW" /* ARROW */)) {
+        const second = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after '->'.");
+        return { kind: "disable-edge", name1: first, name2: second, forward: true };
+      } else if (this.match("LARROW" /* LARROW */)) {
+        const second = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after '<-'.");
+        return { kind: "disable-edge", name1: first, name2: second, forward: false };
+      }
+      return { kind: "disable-node", name1: first };
+    }
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name or 'disable' in override clause.");
+    this.consume("DOT" /* DOT */, "Expect '.' after node name in property override.");
+    const attr = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect attribute name.");
+    if (attr.lexeme !== "supply") {
+      throw this.errorAt(attr, `Only 'supply' is supported as a property override (got '${attr.lexeme}').`);
+    }
+    this.consume("EQUALS" /* EQUALS */, "Expect '=' after attribute name in override.");
+    const negate = this.match("DASH" /* DASH */);
+    let value = this.consumeNumber("Expect number on right-hand side of override.");
+    if (negate) value = -value;
+    return { kind: "supply", name1: name, value };
   }
   disableStatement() {
     const first = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect node name after 'disable'.");
@@ -1461,6 +1636,7 @@ var Parser = class {
         case "NODE" /* NODE */:
         case "START" /* START */:
         case "DISABLE" /* DISABLE */:
+        case "COMPARE" /* COMPARE */:
         case "MAP" /* MAP */:
         case "LIST" /* LIST */:
         case "PRINT" /* PRINT */:
@@ -1484,7 +1660,10 @@ var KEYWORDS = {
   node: "NODE" /* NODE */,
   mode: "MODE" /* MODE */,
   start: "START" /* START */,
-  disable: "DISABLE" /* DISABLE */
+  disable: "DISABLE" /* DISABLE */,
+  compare: "COMPARE" /* COMPARE */,
+  as: "AS" /* AS */,
+  with: "WITH" /* WITH */
 };
 var Scanner = class {
   constructor(source, errs) {
@@ -1532,6 +1711,15 @@ var Scanner = class {
       case ":":
         this.addToken("COLON" /* COLON */);
         break;
+      case ".":
+        this.addToken("DOT" /* DOT */);
+        break;
+      case "=":
+        this.addToken("EQUALS" /* EQUALS */);
+        break;
+      case '"':
+        this.string();
+        break;
       case "-":
         if (this.match(">")) {
           this.addToken("ARROW" /* ARROW */);
@@ -1575,6 +1763,20 @@ var Scanner = class {
         }
         break;
     }
+  }
+  string() {
+    while (this.peek() !== '"' && !this.isAtEnd()) {
+      if (this.peek() === "\n") this.line++;
+      this.advance();
+    }
+    if (this.isAtEnd()) {
+      this.errs.push(`Unterminated string starting at line ${this.line}
+`);
+      return;
+    }
+    this.advance();
+    const value = this.source.slice(this.start + 1, this.current - 1);
+    this.tokens.push(new Token("STRING" /* STRING */, value, null, this.line));
   }
   blockComment() {
     while (!this.isAtEnd()) {
