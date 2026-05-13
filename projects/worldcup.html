@@ -873,6 +873,134 @@
       margin-bottom: 0.3rem;
       font-weight: 600;
     }
+
+    /* Live tournament: status banner + group cards + match list */
+    .wc-live-banner {
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 3px;
+      font-size: 0.95rem;
+      border: 1px solid rgba(128,128,128,0.25);
+    }
+    .wc-live-banner strong { font-weight: 600; color: var(--text-body, inherit); }
+    .wc-live-banner .muted { color: var(--text-muted); }
+    .wc-live-banner.upcoming { border-color: rgba(180,150,80,0.4); }
+    .wc-live-banner.live { border-color: rgba(85,160,100,0.45); }
+
+    .wc-live-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+    .wc-live-group {
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      padding: 0.6rem 0.85rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .wc-live-group h4 {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .wc-live-table { display: flex; flex-direction: column; gap: 0.05rem; }
+    .wc-live-row {
+      display: grid;
+      grid-template-columns: 1.3em 1fr 2em 2.4em 2em;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      padding: 0.08rem 0;
+      color: var(--text-muted);
+    }
+    .wc-live-row.header {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-live-row .pos {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+    .wc-live-row .team-block {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .wc-live-row .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-row .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-live-row .num.bold { font-weight: 600; }
+    .wc-live-row.advancing { color: var(--text-body, inherit); }
+    .wc-live-row.advancing .pos { color: rgb(85,160,100); font-weight: 600; }
+
+    .wc-live-matches {
+      margin-top: 0.4rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid rgba(128,128,128,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .wc-live-match {
+      display: grid;
+      grid-template-columns: 2.8em 1fr auto 1fr 3em;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 0.05rem 0;
+    }
+    .wc-live-match .date { font-variant-numeric: tabular-nums; }
+    .wc-live-match .team-cell.home {
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-match .team-cell.away {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-match .score {
+      font-variant-numeric: tabular-nums;
+      padding: 0 0.2rem;
+    }
+    .wc-live-match .score.muted { color: var(--text-muted); font-size: 0.65rem; }
+    .wc-live-match.played {
+      color: var(--text-body, inherit);
+    }
+    .wc-live-match.played .score { font-weight: 600; }
+    .wc-live-match .pred-mini {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-align: right;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-live-ko { margin-top: 1.5rem; }
+    .wc-live-ko h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.3rem 0;
+    }
+    .wc-live-ko .small { font-size: 0.85rem; margin: 0; }
     .wc-tournament-meta {
       font-size: 0.78rem;
       color: var(--text-muted);
@@ -2154,29 +2282,126 @@
           }
         }
 
-        // Live tournament view: placeholder until WC kicks off. Once
-        // games are played we will populate it from real results.
-        const liveView = document.getElementById('wc-live-view');
-        if (liveView) {
-          if (!kickedOff) {
-            const days = Math.ceil((WC_KICKOFF - today) / 86400000);
-            liveView.innerHTML = `
-              <div class="wc-live-placeholder">
-                <strong>${days} day${days === 1 ? '' : 's'} until kickoff.</strong>
-                The real bracket and group standings will fill in here as
-                matches are played. Pre-tournament forecast is in
-                <a href="#prediction">Prediction</a>.
-              </div>`;
-          } else {
-            // TODO: render the real-results-driven groups + bracket
-            // once we have actual WC matches in the dataset.
-            liveView.innerHTML = `
-              <div class="wc-live-placeholder">
-                Live tournament view is being populated. Check back as
-                more matches are played.
-              </div>`;
-          }
+        renderLiveTournament();
+      }
+
+      // ── Renderer: Live tournament (groups + KO fill-in) ──────────
+      function renderLiveTournament() {
+        const root = document.getElementById('wc-live-view');
+        if (!root) return;
+        const live = DATA.live;
+        if (!live) {
+          // Backend hasn't generated the live JSON yet.
+          root.innerHTML =
+            '<div class="wc-live-placeholder">Live tournament data not yet generated.</div>';
+          return;
         }
+        const status = live.tournament_status;  // pre / groups / knockouts / complete
+        const days = live.days_to_kickoff;
+
+        // Status banner
+        let banner;
+        if (status === 'pre') {
+          banner = `<div class="wc-live-banner upcoming">
+              <strong>${days} day${days === 1 ? '' : 's'} until kickoff</strong>
+              <span class="muted"> · 12 groups, 48 teams · fixtures + predictions below</span>
+            </div>`;
+        } else if (status === 'groups') {
+          banner = `<div class="wc-live-banner live">
+              <strong>Group stage in progress</strong>
+              <span class="muted"> · ${live.n_group_matches_played}/${live.n_group_matches_total} matches played</span>
+            </div>`;
+        } else if (status === 'knockouts') {
+          banner = `<div class="wc-live-banner live">
+              <strong>Knockout phase</strong>
+              <span class="muted"> · groups complete (${live.n_played}/${live.n_total} matches done)</span>
+            </div>`;
+        } else {
+          banner = `<div class="wc-live-banner live">
+              <strong>Tournament complete</strong>
+              <span class="muted"> · all ${live.n_total} matches played</span>
+            </div>`;
+        }
+
+        // 12 group cards
+        const fmtDate = (s) => {
+          try {
+            const d = new Date(s + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          } catch (e) { return s; }
+        };
+        const groupsHtml = live.groups.map(g => {
+          const rows = g.standings.map(s => {
+            const pos = s.position || '·';
+            const advancing = s.position && s.position <= 2 ? ' advancing' : '';
+            return `
+              <div class="wc-live-row${advancing}">
+                <span class="pos">${pos}</span>
+                <span class="team-block">
+                  ${flagImg(s.team)}
+                  <span class="team-name">${s.team}</span>
+                </span>
+                <span class="num">${s.played}</span>
+                <span class="num">${s.gd >= 0 ? '+' + s.gd : s.gd}</span>
+                <span class="num bold">${s.points}</span>
+              </div>`;
+          }).join('');
+          const matchRows = g.matches.map(m => {
+            const dStr = fmtDate(m.date);
+            const pred = m.prediction || {};
+            const modal = pred.modal_score || ['?', '?'];
+            if (m.played) {
+              return `
+                <div class="wc-live-match played">
+                  <span class="date">${dStr}</span>
+                  <span class="team-cell home">${m.home_team}</span>
+                  <span class="score">${m.home_score} &ndash; ${m.away_score}</span>
+                  <span class="team-cell away">${m.away_team}</span>
+                  <span class="pred-mini" title="our pre-match prediction">${modal[0]}&ndash;${modal[1]}</span>
+                </div>`;
+            }
+            return `
+              <div class="wc-live-match">
+                <span class="date">${dStr}</span>
+                <span class="team-cell home">${m.home_team}</span>
+                <span class="score muted">vs</span>
+                <span class="team-cell away">${m.away_team}</span>
+                <span class="pred-mini" title="our predicted modal scoreline">${modal[0]}&ndash;${modal[1]}</span>
+              </div>`;
+          }).join('');
+          return `
+            <div class="wc-live-group">
+              <h4>Group ${g.name}</h4>
+              <div class="wc-live-table">
+                <div class="wc-live-row header">
+                  <span class="pos">#</span>
+                  <span class="team-block"></span>
+                  <span class="num">P</span>
+                  <span class="num">GD</span>
+                  <span class="num">Pts</span>
+                </div>
+                ${rows}
+              </div>
+              <div class="wc-live-matches">${matchRows}</div>
+            </div>`;
+        }).join('');
+
+        let knockoutHtml = '';
+        if (status === 'knockouts' || status === 'complete') {
+          knockoutHtml = `
+            <div class="wc-live-ko">
+              <h3>Knockout bracket</h3>
+              <p class="muted small">${live.knockout_matches.length} knockout matches played.</p>
+            </div>`;
+          // Could expand: render real bracket here as games complete.
+          // Today there is nothing to show; placeholder remains until kickoff.
+        }
+
+        root.innerHTML = `
+          ${banner}
+          <div class="wc-live-groups">${groupsHtml}</div>
+          ${knockoutHtml}
+        `;
       }
 
       function wireControls() {
@@ -2251,11 +2476,15 @@
         fetch('/projects/worldcup-top-scorers.json', { cache: 'no-cache' })
           .then(r => r.ok ? r.json() : null)
           .catch(() => null),
+        fetch('/projects/worldcup-live.json', { cache: 'no-cache' })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null),
       ])
-        .then(([bracket, sim, scorers]) => {
+        .then(([bracket, sim, scorers, live]) => {
           DATA.bracket = bracket;
           DATA.sim = sim;
           DATA.scorers = scorers;
+          DATA.live = live;
           Object.assign(FLAGS, sim.flags || {});
 
           bracket.groups.forEach(g => {
