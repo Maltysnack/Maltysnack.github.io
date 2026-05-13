@@ -487,6 +487,36 @@ print MiniGrid 500;
 `,
         },
         {
+          id: "scenarios",
+          category: "grid",
+          label: "Grid: scenario comparison (compare + disable)",
+          source: `// Same power network, four operating scenarios run side by side.
+// 'compare' clones the system for each scenario, applies its
+// overrides, runs the equilibrium solver, and prints a combined
+// table. Disabled nodes/edges show as '(off)' in their column.
+mode grid;
+system PowerGrid;
+
+Plant     -[5]-> Hub;
+Backup    -[2]-> Hub;
+Hub       -[3]-> NorthCity;
+Hub       -[3]-> SouthCity;
+NorthCity -[1]-> SouthCity;
+
+node Plant     { supply:  100 }
+node Backup    { supply:   30 }
+node Hub;
+node NorthCity { supply:  -65 }
+node SouthCity { supply:  -65 }
+
+compare PowerGrid 500 as
+    "Baseline",
+    "Plant offline"   with disable Plant,
+    "Backup boosted"  with Backup.supply = 80,
+    "Tie line cut"    with disable NorthCity -> SouthCity;
+`,
+        },
+        {
           id: "citytraffic",
           category: "grid",
           label: "Grid: morning commute (suburbs, highways, downtown)",

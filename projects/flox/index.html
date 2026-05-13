@@ -251,21 +251,29 @@ print PassOrShoot 200;</pre>
           <p>
             An interconnected web. Nodes inject (generators) or draw (loads); edges conduct between them, bidirectionally. Levels equilibrate to satisfy Kirchhoff's law at every node. Useful for power grids and traffic networks. Total supply must sum to zero (generators balance loads).
           </p>
+          <p>
+            <code>disable</code> takes a node or edge out for one run. <code>compare</code> runs the same system under several scenarios side by side. The example below answers "what happens if the main plant trips, or the tie line is cut?" in one pass.
+          </p>
 <pre class="fx-code">mode grid;
-system MiniGrid;
+system PowerGrid;
 
 Plant     -[5]-&gt; Hub;
+Backup    -[2]-&gt; Hub;
 Hub       -[3]-&gt; NorthCity;
 Hub       -[3]-&gt; SouthCity;
 NorthCity -[1]-&gt; SouthCity;
 
 node Plant     { supply:  100 }
+node Backup    { supply:   30 }
 node Hub;
-node NorthCity { supply:  -40 }
-node SouthCity { supply:  -60 }
+node NorthCity { supply:  -65 }
+node SouthCity { supply:  -65 }
 
-print MiniGrid 500;</pre>
-          <a class="fx-cta" href="/projects/flox/playground/?example=powergrid">Open in playground</a>
+compare PowerGrid 500 as
+    "Baseline",
+    "Plant offline" with disable Plant,
+    "Tie line cut"  with disable NorthCity -&gt; SouthCity;</pre>
+          <a class="fx-cta" href="/projects/flox/playground/?example=scenarios">Open in playground</a>
         </article>
 
         <article class="fx-mode">
