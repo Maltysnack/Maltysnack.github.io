@@ -333,8 +333,8 @@ numberList  &rarr;  NUMBER ( "," NUMBER )*</div>
         <tbody>
           <tr><td>capacity</td><td>yes</td><td>Maximum storage in megalitres.</td></tr>
           <tr><td>threshold</td><td>yes</td><td>Storage level at which the dam opens. Written as a percent (<code>80%</code>) or fraction (<code>0.8</code>).</td></tr>
-          <tr><td>normalRate</td><td>yes</td><td>Outflow as a fraction of inflow when below threshold.</td></tr>
-          <tr><td>openRate</td><td>yes</td><td>Outflow as a fraction of inflow when at or above threshold.</td></tr>
+          <tr><td>normalRate</td><td>yes</td><td>Outflow in ML/day when storage is below threshold.</td></tr>
+          <tr><td>openRate</td><td>yes</td><td>Outflow in ML/day when storage is at or above threshold.</td></tr>
         </tbody>
       </table>
 
@@ -397,7 +397,7 @@ day n &ge; 3:     base + peak &times; r &times; decay^(n - 2)</div>
       <p>With a rainfall series, each non-zero day kicks off its own hydrograph; flow on day <i>n</i> is the superposition of every event so far. A series shorter than ten days is padded with zeros.</p>
 
       <h3>Dam outflow</h3>
-      <p>If current storage is below threshold, outflow = <code>inflow &times; normalRate</code>. Otherwise outflow = <code>inflow &times; openRate</code>. Storage is updated each day by <code>inflow &minus; outflow</code> with units converted at the boundary (L/s &rarr; ML/day).</p>
+      <p>Outflow is a fixed daily volume independent of inflow. If storage is below threshold the dam releases <code>normalRate</code> ML/day; at or above threshold it releases <code>openRate</code> ML/day. Storage is updated each day by <code>inflow &minus; outflow</code> with units converted at the boundary (L/s &rarr; ML/day). Pick <code>normalRate &lt; typical inflow &lt; openRate</code> to make the threshold meaningful.</p>
 
       <h3>Edge weights</h3>
       <p>Edge weights scale flow on that edge: <code>flow_on_edge = upstream_flow &times; weight</code>. Default weight 1. Multiple outgoing edges with default weight all receive 100% of their source (a clone, not a split); use explicit weights to model real splits.</p>

@@ -83,7 +83,8 @@ function printFlowTable(o, system, rainfall) {
   o.println(
     "=== FLOW SIMULATION: " + system.name + " (" + formatRainfall(rainfall) + ") ===\n"
   );
-  o.println("(Flow values represent water volume per day in L/s)\n");
+  const flowLabel = system.unitLabels.get("flow") ?? "water volume per day in L/s";
+  o.println("(Flow values represent " + flowLabel + ")\n");
   const finalOutlet = system.getFinalOutlet();
   let valWidth = 5;
   let locWidth = 8;
@@ -369,12 +370,14 @@ function printGridState(o, system) {
   for (const n of system.gridLevel.keys()) {
     if (n.length > nameWidth) nameWidth = n.length;
   }
-  o.println("Levels:");
+  const levelTag = system.unitLabels.has("level") ? " (" + system.unitLabels.get("level") + ")" : "";
+  const flowTag = system.unitLabels.has("flow") ? ", " + system.unitLabels.get("flow") : "";
+  o.println("Levels" + levelTag + ":");
   for (const [name, lvl] of system.gridLevel) {
     o.println("  " + padRight(name, nameWidth) + "  " + signedFmt(lvl));
   }
   o.println("");
-  o.println("Flows (positive = first-to-second direction):");
+  o.println("Flows (positive = first-to-second direction" + flowTag + "):");
   for (const [key, flow] of system.gridFlow) {
     const parts = key.split("->");
     const label = padRight(parts[0], nameWidth) + " -> " + padRight(parts[1], nameWidth);
@@ -646,23 +649,17 @@ var Dam = class _Dam {
   static L_PER_S_TO_ML_PER_DAY = 0.0864;
   currentLevel;
   dailyOutflow = new Array(10).fill(0);
+  // Outflow is a fixed daily volume (ML/day): normalRate below
+  // threshold, openRate at or above. Independent of inflow, matching
+  // how a real reservoir releases on a schedule.
   processFlow(inflowLps) {
     const inflowVolumeMl = inflowLps * _Dam.L_PER_S_TO_ML_PER_DAY;
     this.currentLevel += inflowVolumeMl;
-    let outflowLps;
-    if (this.currentLevel >= this.capacity * this.threshold) {
-      outflowLps = inflowLps * this.openRate;
-    } else {
-      outflowLps = inflowLps * this.normalRate;
-    }
-    let outflowVolumeMl = outflowLps * _Dam.L_PER_S_TO_ML_PER_DAY;
-    if (outflowVolumeMl > this.currentLevel) {
-      outflowVolumeMl = this.currentLevel;
-      outflowLps = outflowVolumeMl / _Dam.L_PER_S_TO_ML_PER_DAY;
-    }
+    let outflowVolumeMl = this.currentLevel >= this.capacity * this.threshold ? this.openRate : this.normalRate;
+    if (outflowVolumeMl > this.currentLevel) outflowVolumeMl = this.currentLevel;
     this.currentLevel -= outflowVolumeMl;
     if (this.currentLevel > this.capacity) this.currentLevel = this.capacity;
-    return outflowLps;
+    return outflowVolumeMl / _Dam.L_PER_S_TO_ML_PER_DAY;
   }
   reset() {
     this.currentLevel = this.capacity * 0.5;
@@ -684,6 +681,7 @@ var RiverSystem = class {
   // Marker set by `compare` so per-mode validators know to soften their
   // requirements (the run is exploring a scenario, not the canonical one).
   scenarioRun = false;
+  unitLabels = /* @__PURE__ */ new Map();
   // Markov state
   initialMass = /* @__PURE__ */ new Map();
   markovHistory = /* @__PURE__ */ new Map();
@@ -926,6 +924,7 @@ var Interpreter = class {
   currentSystem = null;
   phase = 0 /* COLLECT */;
   fileMode = "river";
+  fileUnits = /* @__PURE__ */ new Map();
   interpret(statements) {
     try {
       this.collectAndResolve(statements);
@@ -945,7 +944,10 @@ var Interpreter = class {
     for (const stmt of statements) {
       if (stmt) this.execute(stmt);
     }
-    for (const s of this.systems.values()) s.mode = this.fileMode;
+    for (const s of this.systems.values()) {
+      s.mode = this.fileMode;
+      for (const [k, v] of this.fileUnits) s.unitLabels.set(k, v);
+    }
     this.resolveChains();
     this.applyDisables();
     for (const s of this.systems.values()) STRATEGIES[s.mode].validate(s, this.errs);
@@ -1066,6 +1068,13 @@ var Interpreter = class {
         if (this.phase !== 0 /* COLLECT */) return;
         const sys = this.requireSystem(stmt.first);
         this.pendingDisables.get(sys.name).push(stmt);
+        return;
+      }
+      case "UnitsDecl": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        for (const [k, v] of Object.entries(stmt.labels)) {
+          this.fileUnits.set(k, v);
+        }
         return;
       }
       case "StartStmt": {
@@ -1298,6 +1307,7 @@ var Parser = class {
   declaration() {
     try {
       if (this.match("MODE" /* MODE */)) return this.modeDeclaration();
+      if (this.match("UNITS" /* UNITS */)) return this.unitsDeclaration();
       if (this.match("SYSTEM" /* SYSTEM */)) return this.systemDeclaration();
       if (this.match("RIVER" /* RIVER */)) return this.riverDeclaration();
       if (this.match("DAM" /* DAM */)) return this.damDeclaration();
@@ -1318,6 +1328,20 @@ var Parser = class {
       }
       throw e;
     }
+  }
+  unitsDeclaration() {
+    this.consume("LEFT_BRACE" /* LEFT_BRACE */, "Expect '{' after 'units'.");
+    const labels = {};
+    while (!this.check("RIGHT_BRACE" /* RIGHT_BRACE */) && !this.isAtEnd()) {
+      const key = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect units key.");
+      this.consume("COLON" /* COLON */, `Expect ':' after units key '${key.lexeme}'.`);
+      const value = this.consume("STRING" /* STRING */, `Expect string value for units key '${key.lexeme}'.`);
+      labels[key.lexeme] = value.lexeme;
+      this.match("COMMA" /* COMMA */);
+    }
+    this.consume("RIGHT_BRACE" /* RIGHT_BRACE */, "Expect '}' to close units block.");
+    this.consumeOptional("SEMICOLON" /* SEMICOLON */);
+    return { kind: "UnitsDecl", labels };
   }
   modeDeclaration() {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect mode name (e.g. river, markov).");
@@ -1638,6 +1662,7 @@ var Parser = class {
         case "START" /* START */:
         case "DISABLE" /* DISABLE */:
         case "COMPARE" /* COMPARE */:
+        case "UNITS" /* UNITS */:
         case "MAP" /* MAP */:
         case "LIST" /* LIST */:
         case "PRINT" /* PRINT */:
@@ -1664,7 +1689,8 @@ var KEYWORDS = {
   disable: "DISABLE" /* DISABLE */,
   compare: "COMPARE" /* COMPARE */,
   as: "AS" /* AS */,
-  with: "WITH" /* WITH */
+  with: "WITH" /* WITH */,
+  units: "UNITS" /* UNITS */
 };
 var Scanner = class {
   constructor(source, errs) {
@@ -1933,6 +1959,15 @@ function parseGraph(source) {
     }
     scenariosBySystem.set(sysName, sceneList);
   }
+  for (const sys of interp.getSystems().values()) {
+    if (sys.mode !== "river") continue;
+    try {
+      const strat = STRATEGIES["river"];
+      sys.identifyRoots();
+      strat.run(sys, strat.defaultArg());
+    } catch (_e) {
+    }
+  }
   const systems = [];
   for (const sys of interp.getSystems().values()) {
     const graph = systemToGraph(sys);
@@ -1944,21 +1979,30 @@ function parseGraph(source) {
 }
 function systemToGraph(sys) {
   const nodes = [];
+  const isRiver = sys.mode === "river";
   for (const r of sys.rivers.values()) {
-    nodes.push({
+    const node = {
       name: r.name,
       kind: classifyRiver(r, sys.mode),
       supply: r.supply,
       disabled: sys.disabledNodes.has(r.name)
-    });
+    };
+    if (isRiver && r.dailyFlow && r.dailyFlow.length > 0) {
+      node.series = r.dailyFlow.slice();
+    }
+    nodes.push(node);
   }
   for (const d of sys.dams.values()) {
-    nodes.push({
+    const node = {
       name: d.name,
       kind: "dam",
       supply: 0,
       disabled: sys.disabledNodes.has(d.name)
-    });
+    };
+    if (isRiver && d.dailyOutflow && d.dailyOutflow.length > 0) {
+      node.series = d.dailyOutflow.slice();
+    }
+    nodes.push(node);
   }
   const directed = sys.mode !== "grid";
   const edges = [];
