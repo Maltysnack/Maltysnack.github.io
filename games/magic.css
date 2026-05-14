@@ -1209,6 +1209,15 @@ body:has(.magic-page) .main {
   font-style: italic;
   padding: 16px 0;
 }
+.incoherent-banner {
+  background: rgba(179, 64, 47, 0.06);
+  border: 1px solid rgba(179, 64, 47, 0.4);
+  border-radius: 4px;
+  padding: 14px 16px;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+  line-height: 1.55;
+}
 
 
 /* ── Responsive ───────────────────────────────────────── */

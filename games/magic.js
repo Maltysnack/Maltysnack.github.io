@@ -272,6 +272,14 @@
 
     const selSet = new Set(selection);
     const n = selection.length;
+    // When the user has 2+ cards selected, require a deck to contain at
+    // least 2 of them before it contributes to scoring. Without this,
+    // an incoherent selection (e.g. {Dellian Fel + Colorstorm Stallion},
+    // which never appear together) gets misleadingly-high scores from
+    // candidates that co-occur with only one of the selected cards.
+    // The score should answer "what fits with all of these together",
+    // not "what fits with any one of these."
+    const MIN_MATCH = n >= 2 ? 2 : 1;
 
     // Per-tier baseline: weighted prevalence of each card in this tier's pool
     let tierTotalW = 0;
@@ -292,7 +300,7 @@
       const names = new Set(main.map((c) => c.name));
       let matched = 0;
       for (const s of selection) if (names.has(s)) matched++;
-      if (matched === 0) continue;
+      if (matched < MIN_MATCH) continue;
       const selFrac = matched / n;
       const recencyMult = deckRecencyMult(d.week);
       const matchWeight = (d.weight || 1) * recencyMult * Math.pow(selFrac, COVERAGE_POWER);
@@ -1114,6 +1122,23 @@
     const lands = scored.filter((r) => isLand(r.name)).slice(0, 24);
     const items = showLands ? lands : spells;
 
+    // Incoherent-selection banner. When the user has 2+ cards selected and
+    // the scoring returned nothing, it means no winning deck contains at
+    // least 2 of the selected cards together. Without this banner the user
+    // sees an empty grid and can't tell whether the page is broken or the
+    // selection itself has no support in the data.
+    let coherenceBanner = "";
+    if (selection.length >= 2 && scored.length === 0) {
+      coherenceBanner = `
+        <div class="incoherent-banner">
+          No winning deck in the recent pool contains two or more of your
+          selected cards together. These cards do not currently share a shell,
+          so no synergy ranking can be computed. Try removing one card or
+          banning the conflicting piece.
+        </div>
+      `;
+    }
+
     const subtitle = viewMode === "off-meta"
       ? (selection.length === 1
           ? `mid-frequency partners of ${escapeHtml(selection[0])} (less obvious picks)`
@@ -1127,6 +1152,7 @@
     // the recommendations grid.
     return `
       <div class="stacked">
+        ${coherenceBanner}
         ${sectionWithToggle(title, subtitle, renderGrid(items))}
       </div>
     `;
