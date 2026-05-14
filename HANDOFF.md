@@ -13,6 +13,12 @@ Living scratchpad. Read first thing each session, update last thing. Overwrite f
 - Editorial sanitize routine fires Sun ~10:00. Quiet janitor sweep.
 - Pre-commit hook lives at `scripts/hooks/pre-commit`. Activate per clone with `git config core.hooksPath scripts/hooks`.
 
+## Recently shipped (happyhour / coffeetime track)
+
+- **happyhour + coffeetime pages**: cinematic full-bleed slideshow per city. Photo via `happyhour-proxy.vercel.app` (Vercel proxy hides Unsplash key). Weather via Open-Meteo. ~280 cities embedded inline. Drinks/coffees curated for ~150 cities. Local-language toasts/greetings. Real flagcdn flags. Regional minimap (continent-zoomed). Sequential fade-through-dark transition (4.5s fade, 600ms gap). 12hr time. Sister-link toggle (`happyhour. · coffeetime`) next to wordmark; coffeetime is an easter egg, not in sidebar/index. Empty state cross-recommends.
+- **Photo quality bump (last change shipped)**: proxy now builds image URL from `urls.raw` with `w=2400&q=85` default (`?res=widget` returns 1080w/q82). Was using `urls.regular` (1080w fixed) which looked upscaled on retina/1440+.
+- **Scriptable widgets** at `widgets/{happyhour,coffeetime}.js`. User asked these be **frozen** &mdash; do not update unless explicitly requested. Website-only focus from here.
+
 ## Active subsystem: `/dnd/` D&D character sheet engine
 
 - 4 live characters: Grosh (Triton Paladin Ancients 5), Shieka (Giant Warlock Fiend 5), Jhotan (Forest Gnome Battle Master 5), Japlan (Standard Human Sorcerer Draconic Brass 5).
@@ -82,7 +88,6 @@ scripts/build-dnd-index.js     regen index.json + per-character shims
   "defaultInventory":[{name,notes}]
 }
 ```
-
 ## In flight
 
 - **Magic meta-explorer Archetypes tab (LOCAL ONLY, do not push).** New 4th tab on `/games/magic.html`. Uses NMF clustering of recent decks to discover card packages.
