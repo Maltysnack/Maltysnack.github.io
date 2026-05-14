@@ -1069,11 +1069,6 @@
             };
           }))
         ) : ""}
-        ${(explore.bridges || []).length ? section(
-          "Bridge cards",
-          "cards that connect two partners who rarely share decks",
-          renderBridges(explore.bridges)
-        ) : ""}
         ${section("New arrivals that moved a shell", "catalyst detection",
           renderGrid(explore.catalysts.map((r) => ({
             name: r.name,
@@ -1082,45 +1077,6 @@
         )}
       </div>
     `;
-  }
-
-  // Bridges have a specific structure: the bridge card + two partners that
-  // rarely meet. Render as a row with the bridge thumb on the left and the
-  // two partners as small thumbnails to its right.
-  function renderBridges(bridges) {
-    if (!bridges || !bridges.length) return "";
-    return `<div class="bridge-list">${bridges.map((r) => {
-      const left = scryfall[r.left];
-      const right = scryfall[r.right];
-      const leftIm = left ? (left.image_small || left.image || "") : "";
-      const rightIm = right ? (right.image_small || right.image || "") : "";
-      const im = img(r.name);
-      return `<div class="bridge-row" data-name="${escapeAttr(r.name)}" data-preview="${escapeAttr(r.name)}">
-        <button class="bridge-main" data-name="${escapeAttr(r.name)}" data-preview="${escapeAttr(r.name)}">
-          ${im ? `<img class="bridge-img" src="${im}" alt="">` : `<div class="bridge-img bridge-noimg">${escapeHtml(r.name)}</div>`}
-          <div class="bridge-name">${escapeHtml(r.name)}</div>
-        </button>
-        <div class="bridge-conn">
-          <div class="bridge-conn-side">
-            ${leftIm ? `<img class="bridge-side-img" src="${leftIm}" alt="" data-preview="${escapeAttr(r.left)}">` : ""}
-            <div class="bridge-side-text">
-              <div class="bridge-side-name">${escapeHtml(r.left)}</div>
-              <div class="bridge-side-pct">${(r.p_left * 100).toFixed(0)}%</div>
-            </div>
-          </div>
-          <div class="bridge-conn-cross">
-            cross ${(r.cross_p * 100).toFixed(0)}%
-          </div>
-          <div class="bridge-conn-side">
-            ${rightIm ? `<img class="bridge-side-img" src="${rightIm}" alt="" data-preview="${escapeAttr(r.right)}">` : ""}
-            <div class="bridge-side-text">
-              <div class="bridge-side-name">${escapeHtml(r.right)}</div>
-              <div class="bridge-side-pct">${(r.p_right * 100).toFixed(0)}%</div>
-            </div>
-          </div>
-        </div>
-      </div>`;
-    }).join("")}</div>`;
   }
 
   // ── Matching decks ──
@@ -1636,13 +1592,6 @@
     }
     // Hover preview wiring (covers grid thumbs AND deck-list rows)
     setupHoverPreview();
-    // Bridge rows on the landing
-    $$(".bridge-main").forEach((el) => {
-      el.addEventListener("click", () => selectionToggle(el.dataset.name));
-    });
-    $$(".bridge-side-img").forEach((el) => {
-      el.addEventListener("click", () => selectionToggle(el.dataset.preview));
-    });
     // Story-card thumbs (Stories tab): click adds to selection, then bounce to Cards tab
     $$(".story-card-thumb").forEach((el) => {
       el.addEventListener("click", () => {
