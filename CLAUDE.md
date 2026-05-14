@@ -136,3 +136,38 @@ A few rules to keep parallel sessions from clobbering each other:
 4. **Commit per concept, push immediately.** Long-running uncommitted work is the highest-risk state. Three small commits beat one big one: easier to merge, easier to bisect, easier to recover from.
 
 If you'll be editing a shared file (sidebar.js, index.html, style.css), do it quickly and push so you don't sit on an outdated tree.
+
+## Reply style
+
+Default: terse, factual, blunt. No preamble, no recap of what the user said, no closing flourishes.
+
+- Direct answer first. Reasoning only if the user asks "why" or the decision is non-obvious.
+- One-sentence summaries beat paragraph summaries.
+- Tables only when comparing 3+ items along 2+ dimensions. Otherwise prose.
+- Skip "Great question" / "Happy to help" / "Let me know if..." filler.
+- When you finish a multi-step task, report what changed in one line per change. Do not re-explain the change.
+
+Trigger phrase for long-form: if the user says **"explain"** or **"why"** in their message, give the detailed version. Otherwise stay terse.
+
+## Code editing rules
+
+- Never Read a file after editing it. The Edit tool already verified the change.
+- For "where is X defined / used" questions: delegate to the Explore agent. Don't grep + Read into your own context.
+- Use `--oneline`, `--limit 5`, `head -20`, `tail -5` by default. Never list more than needed.
+- Plan the edit before reading. If you find yourself reading "to see what's there," stop and ask what specifically you're looking for.
+
+## When to start a fresh session
+
+Conversation over ~50k tokens, or shifting to an unrelated task. Recommend to user at this time.
+
+## Handoff between sessions
+
+`HANDOFF.md` at the repo root is the living scratchpad.
+
+- Read it first thing every new session.
+- Update it last thing every session: current state, in-flight work, decisions pending, gotchas.
+- Commit it with the rest of the work.
+
+Commits capture what shipped. Issues capture what's next. `HANDOFF.md` captures the in-between (what's running, what's blocked, what would surprise the next session).
+
+Compaction is lossy. Fresh + handoff beats long conversation + auto-summary.
