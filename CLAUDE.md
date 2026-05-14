@@ -1,6 +1,6 @@
 # Working in this repo
 
-Read this and then `handoff.md` before doing anything. `handoff.md` carries the most recent session's state and is the freshest context. Overwrite `handoff.md` during your session so it always reflects what is currently in flight; that way reopening a session preserves working context without bloating CLAUDE.md.
+Read this and then `HANDOFF.md` before doing anything. `HANDOFF.md` carries the most recent session's state and is the freshest context. Update `HANDOFF.md` during your session so it always reflects what is currently in flight; reopening a session then preserves working context without bloating CLAUDE.md.
 
 ## Response style
 
