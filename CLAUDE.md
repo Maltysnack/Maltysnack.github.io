@@ -1,6 +1,10 @@
 # Working in this repo
 
-Read this before doing anything. It's short.
+Read this and then `handoff.md` before doing anything. `handoff.md` carries the most recent session's state and is the freshest context. Overwrite `handoff.md` during your session so it always reflects what is currently in flight; that way reopening a session preserves working context without bloating CLAUDE.md.
+
+## Response style
+
+Short, terse, blunt, factual, concise, precise. No re-explaining what was just done, no flowery sign-offs, no compliments. Minimise tokens. State what changed and stop.
 
 This is **maltysnack's** personal site (`maltysnack.github.io`). Plain HTML, no framework, served by GitHub Pages from `main`. Multiple Claude sessions work on it in parallel, so the rules below exist to keep things clean across sessions.
 
