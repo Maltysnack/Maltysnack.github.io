@@ -508,11 +508,8 @@
       </div>
     </div>
 
-    <!-- Price Watch -->
-    <div class="fpl-pricewatch" id="priceSection" style="display:none">
-      <div class="fpl-pricewatch-bar">Price Watch</div>
-      <div class="fpl-pricewatch-body" id="priceBody"></div>
-    </div>
+    <!-- Price Watch section removed. -->
+
 
     <!-- Prediction Tracker -->
     <div class="fpl-tracker" id="trackerSection" style="display:none">
@@ -1287,7 +1284,7 @@
       renderPredicted(lineup);
       renderCaptainPick(lineup.starting);
       renderBestOfRest(squad, scored);
-      renderPriceWatch();
+      // renderPriceWatch();  // Price Watch panel removed.
 
       // Auto-load default team - best-effort, uses CORS proxies, fails gracefully
       loadMyTeam(DEFAULT_TEAM_ID).catch(() => {});
