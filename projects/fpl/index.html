@@ -456,7 +456,11 @@
             <div class="fpl-bench-row" id="myBench"></div>
           </div>
           <div class="fpl-team-footer">
-            <span class="fpl-team-footer-label">Team ID:</span>
+            <button class="fpl-team-btn" onclick="loadMyTeam('6493589')">Milo (6493589)</button>
+            <button class="fpl-team-btn" onclick="loadMyTeam('13098128')" style="margin-left:6px">Bot (13098128)</button>
+          </div>
+          <div class="fpl-team-footer" style="border-top:none;margin-top:0;padding-top:0">
+            <span class="fpl-team-footer-label">Custom:</span>
             <input class="fpl-team-input" id="teamIdInput" type="number"
                    value="6493589" min="1" placeholder="FPL team ID" />
             <button class="fpl-team-btn" onclick="loadMyTeam()">Load</button>
