@@ -310,19 +310,6 @@
     .fpl-captain-tag { font-size: 0.52rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: rgba(255,255,255,0.65); background: rgba(255,255,255,0.12); padding: 2px 6px; border-radius: 3px; }
 
 
-    /* ── Transfer suggestions ── */
-    .fpl-transfers { margin-top: 10px; font-family: system-ui, sans-serif; }
-    .fpl-transfers-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; display: flex; justify-content: space-between; align-items: center; }
-    .fpl-transfers-body { background: #dfe1e5; border-radius: 0 0 6px 6px; padding: 8px 10px; display: flex; flex-direction: column; gap: 6px; }
-    .fpl-transfer-row { display: flex; align-items: center; gap: 8px; background: #fff; border-radius: 5px; padding: 7px 10px; }
-    .fpl-transfer-player { flex: 1; min-width: 0; }
-    .fpl-transfer-name { font-size: 0.72rem; font-weight: 700; color: #37003c; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .fpl-transfer-meta { font-size: 0.57rem; color: #888; margin-top: 1px; }
-    .fpl-transfer-arrow { color: #37003c; font-weight: 900; font-size: 0.9rem; flex-shrink: 0; }
-    .fpl-transfer-stat { text-align: right; flex-shrink: 0; }
-    .fpl-transfer-gain { font-size: 0.68rem; font-weight: 800; color: #00aa55; }
-    .fpl-transfer-cost { font-size: 0.57rem; color: #888; }
-
     /* ── Price watch ── */
     .fpl-pricewatch { margin-top: 32px; font-family: system-ui, sans-serif; }
     .fpl-pricewatch-bar { background: #37003c; color: #fff; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 8px 14px; border-radius: 6px 6px 0 0; }
@@ -337,18 +324,6 @@
     .fpl-pw-change.up { color: #00aa55; font-weight: 800; }
     .fpl-pw-change.dn { color: #cc2200; font-weight: 800; }
     .fpl-pw-change.soon { color: #888; font-size: 0.62rem; font-weight: 600; }
-
-    /* ── Transfer sub-headers ── */
-    .fpl-transfer-sub {
-      font-size: 0.6rem; font-weight: 700; letter-spacing: 0.1em;
-      text-transform: uppercase; color: #37003c;
-      padding: 8px 0 4px;
-    }
-    .fpl-transfer-sub + .fpl-transfer-row { margin-top: 0; }
-    .fpl-transfer-sub:not(:first-child) {
-      margin-top: 10px; padding-top: 10px;
-      border-top: 1px solid #c8cad0;
-    }
 
     /* ── Formula Calibration ── */
     .fpl-calibration { margin-top: 32px; font-family: system-ui, sans-serif; }
@@ -486,14 +461,6 @@
                    value="6493589" min="1" placeholder="FPL team ID" />
             <button class="fpl-team-btn" onclick="loadMyTeam(document.getElementById('teamIdInputFb').value)">Load</button>
           </div>
-        </div>
-        <!-- Transfer suggestions -->
-        <div id="transferSection" style="display:none" class="fpl-transfers">
-          <div class="fpl-transfers-bar">
-            <span>Suggested Transfers</span>
-            <span id="transferBank" style="font-size:0.62rem;opacity:0.7;font-weight:400;text-transform:none;letter-spacing:0"></span>
-          </div>
-          <div class="fpl-transfers-body" id="transferBody"></div>
         </div>
       </div>
 
@@ -948,119 +915,6 @@
     document.getElementById('priceSection').style.display = '';
   }
 
-  // Sum of predicted scores across next 3 GWs (GW+1 already in player.predicted)
-  function predict3GW(player) {
-    const gw2 = (typeof player.pred_gw2 === 'number' && isFinite(player.pred_gw2))
-      ? player.pred_gw2
-      : predictWithFixtures(player, gw2FixMap[player.team] || []);
-    const gw3 = (typeof player.pred_gw3 === 'number' && isFinite(player.pred_gw3))
-      ? player.pred_gw3
-      : predictWithFixtures(player, gw3FixMap[player.team] || []);
-    return (player.predicted || 0) + gw2 + gw3;
-  }
-
-  function renderTransferSuggestions(picks, bank) {
-    const squadIds  = new Set(picks.map(p => p.id));
-    const clubCount = {};
-    picks.forEach(p => { clubCount[p.team] = (clubCount[p.team]||0) + 1; });
-    const posLabel = { 1:'GKP', 2:'DEF', 3:'MID', 4:'FWD' };
-    const has3GW   = Object.keys(gw2FixMap).length > 0;
-
-    // Find best affordable replacement for a player, ranked by scoreFn
-    function bestReplacement(curr, scoreFn) {
-      const budget = (curr.selling_price || curr.now_cost) + bank;
-      return Object.values(elementMap).filter(p =>
-        p.element_type === curr.element_type &&
-        !squadIds.has(p.id) && p.now_cost <= budget &&
-        (clubCount[p.team]||0) < 3 && (p.predicted||0) > 0 && p.minutes > 0
-      ).sort((a, b) => scoreFn(b) - scoreFn(a))[0];
-    }
-
-    // ── Next GW suggestions ──────────────────────────────────────────
-    const nextSugs = [];
-    for (const curr of picks.filter(p => p.position <= 11)) {
-      const best = bestReplacement(curr, p => p.predicted || 0);
-      if (!best) continue;
-      const gain = (best.predicted||0) - (curr.predicted||0);
-      if (gain < 0.5) continue;
-      nextSugs.push({
-        out: curr, in: best, gain,
-        diff: best.now_cost - (curr.selling_price || curr.now_cost)
-      });
-    }
-    const topNext = nextSugs.sort((a, b) => b.gain - a.gain).slice(0, 3);
-
-    // ── 3-Game plan suggestions ──────────────────────────────────────
-    const planSugs = [];
-    if (has3GW) {
-      for (const curr of picks.filter(p => p.position <= 11)) {
-        const currEl    = elementMap[curr.id] || curr;
-        const currScore = predict3GW(currEl);
-        const best      = bestReplacement(curr, p => predict3GW(p));
-        if (!best) continue;
-        const bestScore = predict3GW(best);
-        const gain = bestScore - currScore;
-        if (gain < 1.5) continue;
-        planSugs.push({
-          out: curr, in: best, gain, currScore, bestScore,
-          diff: best.now_cost - (curr.selling_price || curr.now_cost)
-        });
-      }
-    }
-    const topPlan = planSugs.sort((a, b) => b.gain - a.gain).slice(0, 3);
-
-    if (!topNext.length && !topPlan.length) return;
-
-    document.getElementById('transferBank').textContent = `Bank: £${(bank/10).toFixed(1)}m`;
-
-    function diffStr(diff) {
-      return diff > 0 ? `+£${(diff/10).toFixed(1)}m` : diff < 0 ? `-£${(Math.abs(diff)/10).toFixed(1)}m` : 'same cost';
-    }
-
-    let html = '';
-
-    if (topNext.length) {
-      html += `<div class="fpl-transfer-sub">Next GW</div>`;
-      html += topNext.map(s => `<div class="fpl-transfer-row">
-        <div class="fpl-transfer-player">
-          <div class="fpl-transfer-name">${displayName(s.out.web_name)}</div>
-          <div class="fpl-transfer-meta">${posLabel[s.out.element_type]} · ${(s.out.predicted||0).toFixed(1)} pred</div>
-        </div>
-        <div class="fpl-transfer-arrow">→</div>
-        <div class="fpl-transfer-player">
-          <div class="fpl-transfer-name">${displayName(s.in.web_name)}</div>
-          <div class="fpl-transfer-meta">${posLabel[s.in.element_type]} · ${(s.in.predicted||0).toFixed(1)} pred</div>
-        </div>
-        <div class="fpl-transfer-stat">
-          <div class="fpl-transfer-gain">+${s.gain.toFixed(1)}pts</div>
-          <div class="fpl-transfer-cost">${diffStr(s.diff)}</div>
-        </div>
-      </div>`).join('');
-    }
-
-    if (topPlan.length) {
-      html += `<div class="fpl-transfer-sub">3-Game Plan</div>`;
-      html += topPlan.map(s => `<div class="fpl-transfer-row">
-        <div class="fpl-transfer-player">
-          <div class="fpl-transfer-name">${displayName(s.out.web_name)}</div>
-          <div class="fpl-transfer-meta">${posLabel[s.out.element_type]} · ${s.currScore.toFixed(1)} over 3 GW</div>
-        </div>
-        <div class="fpl-transfer-arrow">→</div>
-        <div class="fpl-transfer-player">
-          <div class="fpl-transfer-name">${displayName(s.in.web_name)}</div>
-          <div class="fpl-transfer-meta">${posLabel[s.in.element_type]} · ${s.bestScore.toFixed(1)} over 3 GW</div>
-        </div>
-        <div class="fpl-transfer-stat">
-          <div class="fpl-transfer-gain">+${s.gain.toFixed(1)}pts</div>
-          <div class="fpl-transfer-cost">${diffStr(s.diff)}</div>
-        </div>
-      </div>`).join('');
-    }
-
-    document.getElementById('transferBody').innerHTML = html;
-    document.getElementById('transferSection').style.display = '';
-  }
-
   async function loadMyTeam(idOverride) {
     const inputEl = document.getElementById('teamIdInput');
     const teamId  = idOverride || (inputEl ? inputEl.value.trim() : '');
@@ -1142,9 +996,6 @@
 
       statusEl.style.display   = 'none';
       outerEl.style.display    = '';
-
-
-      renderTransferSuggestions(allPicks, entryHistory.bank || 0);
 
     } catch (err) {
       statusEl.textContent = err.message || 'Could not load team.';
