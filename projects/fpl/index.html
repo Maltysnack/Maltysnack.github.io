@@ -526,21 +526,10 @@
       <div id="trackerBody"></div>
     </div>
 
-    <!-- Formula Calibration -->
-    <div class="fpl-calibration" id="calibrationSection" style="display:none">
-      <div class="fpl-calibration-bar">
-        <span>Formula Calibration</span>
-        <span class="fpl-cal-gw-badge" id="calGwBadge"></span>
-      </div>
-      <div class="fpl-calibration-body">
-        <div class="fpl-cal-intro">
-          Each gameweek the formula compares its predictions to actual FPL scores
-          per position. A rolling average of the last 4 GWs drives a small correction
-          factor applied to next week's predictions.
-        </div>
-        <div id="calibrationBody"></div>
-      </div>
-    </div>
+    <!-- Formula Calibration section removed: was tied to the legacy inline
+         formula. The live model (bps_magnet) has its own internal calibration
+         via priors.json + 4-season haul-probabilities. -->
+
 
   </div>
 
@@ -1306,8 +1295,8 @@
       // Load prediction tracker
       loadTracker();
 
-      // Render calibration table (reflects formula self-tuning history)
-      renderCalibration(cache.calibration);
+      // Calibration UI removed; calibration factors are still loaded above for
+      // the legacy inline formula fallback (predictWithFixtures).
 
       // Show cache age
       if (cache.updatedAt) {
