@@ -731,6 +731,11 @@
   }
 
   function predictScore(player) {
+    // Prefer pre-computed model output (sync.js, variant=bps_magnet) when present.
+    // Falls back to inline formula for back-compat.
+    if (typeof player.pred_next === 'number' && isFinite(player.pred_next)) {
+      return player.pred_next;
+    }
     return predictWithFixtures(player, fixtureMap[player.team] || []);
   }
 
@@ -945,9 +950,13 @@
 
   // Sum of predicted scores across next 3 GWs (GW+1 already in player.predicted)
   function predict3GW(player) {
-    return (player.predicted || 0)
-         + predictWithFixtures(player, gw2FixMap[player.team] || [])
-         + predictWithFixtures(player, gw3FixMap[player.team] || []);
+    const gw2 = (typeof player.pred_gw2 === 'number' && isFinite(player.pred_gw2))
+      ? player.pred_gw2
+      : predictWithFixtures(player, gw2FixMap[player.team] || []);
+    const gw3 = (typeof player.pred_gw3 === 'number' && isFinite(player.pred_gw3))
+      ? player.pred_gw3
+      : predictWithFixtures(player, gw3FixMap[player.team] || []);
+    return (player.predicted || 0) + gw2 + gw3;
   }
 
   function renderTransferSuggestions(picks, bank) {
@@ -1103,7 +1112,9 @@
       // Predicted score per player using last GW fixtures
       function predLastGw(p) {
         const el = elementMap[p.id];
-        return el ? predictScoreWithFixMap(el, lastFixMap) : 0;
+        if (!el) return 0;
+        if (typeof el.pred_last === 'number' && isFinite(el.pred_last)) return el.pred_last;
+        return predictScoreWithFixMap(el, lastFixMap);
       }
 
       const totalActual = entryHistory.points;
