@@ -544,6 +544,7 @@
   let gw3FixMap    = {};   // team_id → fixtures for GW+3
   let nextOppMap   = {};   // team_id → "ARS (H)" for next GW
   let lastOppMap   = {};   // team_id → "ARS (H)" for last GW
+  let gw2OppMap    = {};   // team_id → "ARS (H)" for GW+2
   let teamMap      = {};   // team_id → team object
   let nextGwId     = null;
   let lastGwId     = null;
@@ -831,12 +832,12 @@
     const gwId = gwSlot === 2 ? (nextGwId + 1) : nextGwId;
     document.getElementById('predGwLabel').textContent  = `Gameweek ${gwId} - Predicted (${formation})`;
     document.getElementById('predTotalPts').textContent = total.toFixed(1) + ' pts';
-    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
-    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
-    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
-    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
+    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, gwSlot === 2 ? gw2OppMap : nextOppMap)).join('');
+    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, gwSlot === 2 ? gw2OppMap : nextOppMap)).join('');
+    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, gwSlot === 2 ? gw2OppMap : nextOppMap)).join('');
+    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, gwSlot === 2 ? gw2OppMap : nextOppMap)).join('');
     document.getElementById('predBench').innerHTML  = bench.map(p =>
-      benchCardHTML(p, posLabel(p.element_type), gwSlot === 2 ? {} : nextOppMap)
+      benchCardHTML(p, posLabel(p.element_type), gwSlot === 2 ? gw2OppMap : nextOppMap)
     ).join('');
 
     document.getElementById('predStatus').style.display = 'none';
@@ -1146,6 +1147,7 @@
       });
       buildOppMap(nextFixtures, nextOppMap);
       buildOppMap(lastFixtures, lastOppMap);
+      buildOppMap(cache.gw2Fixtures || [], gw2OppMap);
 
       statusEl.textContent = 'Building predicted XI...';
 
