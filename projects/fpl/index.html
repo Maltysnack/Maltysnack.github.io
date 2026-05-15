@@ -888,6 +888,7 @@
   function renderCaptainPick(starting) {
     const all = [...starting.gkp, ...starting.def, ...starting.mid, ...starting.fwd];
     const cap = all.reduce((best, p) => p.predicted > best.predicted ? p : best);
+    const capEl = elementMap[cap.id] || cap;
     const tags = [];
     if (cap.penalties_order === 1) tags.push('pen taker');
     const fixList = fixtureMap[cap.team] || [];
@@ -899,6 +900,19 @@
     }
     const opp = nextOppMap[cap.team] || '';
     if (opp) tags.push(opp);
+
+    // Issue #18: surface haul probabilities + tier badge.
+    const p10 = capEl.p_haul10;
+    const p15 = capEl.p_haul15;
+    if (typeof p10 === 'number' && p10 > 0) {
+      const tier = p10 >= 0.30 ? 'A' : p10 >= 0.20 ? 'B' : p10 >= 0.10 ? 'C' : 'D';
+      tags.unshift(`haul tier ${tier}`);
+      tags.push(`P≥10 ${Math.round(p10 * 100)}%`);
+      if (typeof p15 === 'number' && p15 >= 0.05) {
+        tags.push(`P≥15 ${Math.round(p15 * 100)}%`);
+      }
+    }
+
     document.getElementById('captainName').textContent = displayName(cap.web_name);
     document.getElementById('captainPts').textContent  = cap.predicted.toFixed(1) + ' pts';
     document.getElementById('captainTags').innerHTML   = tags.map(t => `<span class="fpl-captain-tag">${t}</span>`).join('');
