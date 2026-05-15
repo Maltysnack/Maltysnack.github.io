@@ -48,6 +48,10 @@
 
     .fpl-gw-pts { background: #00ff87; color: #37003c; font-size: 0.7rem; font-weight: 800; padding: 3px 10px; border-radius: 100px; white-space: nowrap; flex-shrink: 0; }
     .fpl-gw-pts.is-actual { background: #ffe44e; color: #37003c; }
+    .fpl-gw-toggle { display: flex; gap: 4px; margin-top: 4px; }
+    .fpl-gw-tab { font-family: inherit; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; padding: 3px 8px; border: 1px solid rgba(255,255,255,0.25); background: transparent; color: rgba(255,255,255,0.7); border-radius: 100px; cursor: pointer; }
+    .fpl-gw-tab.is-active { background: #00ff87; color: #37003c; border-color: #00ff87; }
+    .fpl-squad-meta { font-size: 0.62rem; color: #888; padding: 4px 14px 0; letter-spacing: 0.04em; text-transform: uppercase; }
 
     .fpl-status { font-size: 0.85rem; color: #666; padding: 32px 0; text-align: center; }
     .fpl-status.error { color: #c00; }
@@ -376,15 +380,20 @@
 
       <!-- ══ LEFT: PREDICTED XI ══ -->
       <div class="fpl-panel">
-        <div class="fpl-panel-title">Predicted Best XI</div>
+        <div class="fpl-panel-title">Predicted 15-Man Squad</div>
         <div id="predStatus" class="fpl-status">Loading...</div>
         <div id="predOuter" style="display:none">
           <div class="fpl-gw-bar">
             <div class="fpl-gw-left">
               <div class="fpl-gw-label" id="predGwLabel">Gameweek -</div>
+              <div id="predGwToggle" class="fpl-gw-toggle">
+                <button type="button" id="predGwBtn1" class="fpl-gw-tab is-active" onclick="setPredGw(1)">GW+1</button>
+                <button type="button" id="predGwBtn2" class="fpl-gw-tab" onclick="setPredGw(2)">GW+2</button>
+              </div>
             </div>
             <div class="fpl-gw-pts" id="predTotalPts">- pts</div>
           </div>
+          <div class="fpl-squad-meta" id="predSquadMeta"></div>
           <div class="fpl-pitch-wrap">
             <div class="fpl-pitch">
               <div class="fpl-box-top"></div><div class="fpl-small-box-top"></div>
@@ -692,38 +701,38 @@
     return predictWithFixtures(player, fixtureMap[player.team] || []);
   }
 
-  function selectSquad442(players) {
-    const BUDGET = 1000, MAX_CLUB = 3;
-    const byPos = { 1:[], 2:[], 3:[], 4:[] };
-    players.forEach(p => { if (p.predicted > 0 && p.minutes > 0) byPos[p.element_type].push(p); });
-    Object.values(byPos).forEach(arr => arr.sort((a,b) => b.predicted - a.predicted));
+  // Server-side `two_gw_squad` (from sync.js + two-gw-squad.js) picks one
+  // 15-man squad that respects FPL rules and maximizes objective across
+  // GW+1 and GW+2 jointly. Page just slices it per gameweek.
+  let twoGwState = { squad: null, gwSlot: 1 };
 
-    const picked = [], clubCount = {};
-    let budget = BUDGET;
+  function lineupForGw(squad, gwSlot) {
+    const meta = gwSlot === 2 ? squad.gw2 : squad.gw1;
+    const xiSet = new Set(meta.xi);
+    const players = squad.squad.map(p => ({ ...elementMap[p.id], is_captain: p.id === meta.captain }));
+    const predKey = gwSlot === 2 ? 'pred_gw2' : 'pred_next';
+    players.forEach(p => { p.predicted = p[predKey] || 0; });
 
-    function pick(pos, n) {
-      let count = 0;
-      for (const p of byPos[pos]) {
-        if (count === n) break;
-        if (picked.find(x => x.id === p.id)) continue;
-        if (p.now_cost > budget) continue;
-        if ((clubCount[p.team]||0) >= MAX_CLUB) continue;
-        picked.push(p); budget -= p.now_cost;
-        clubCount[p.team] = (clubCount[p.team]||0) + 1;
-        count++;
-      }
+    const starting = { gkp: [], def: [], mid: [], fwd: [] };
+    const bench    = [];
+    const posBucket = { 1: 'gkp', 2: 'def', 3: 'mid', 4: 'fwd' };
+    for (const p of players) {
+      if (xiSet.has(p.id)) starting[posBucket[p.element_type]].push(p);
+      else                 bench.push(p);
     }
-    pick(1,2); pick(2,5); pick(3,5); pick(4,3);
-    return picked;
+    for (const k of Object.keys(starting)) starting[k].sort((a, b) => b.predicted - a.predicted);
+    bench.sort((a, b) => (a.element_type === 1 ? -1 : b.element_type === 1 ? 1 : 0));
+    return { starting, bench, formation: meta.formation, predicted: meta.predicted };
   }
 
-  function buildLineup442(squad) {
-    const sorted = pos => squad.filter(p=>p.element_type===pos).sort((a,b)=>b.predicted-a.predicted);
-    const gkps=sorted(1), defs=sorted(2), mids=sorted(3), fwds=sorted(4);
-    return {
-      starting: { gkp:[gkps[0]], def:defs.slice(0,4), mid:mids.slice(0,4), fwd:fwds.slice(0,2) },
-      bench: [gkps[1], defs[4], mids[4], fwds[2]]
-    };
+  function setPredGw(gwSlot) {
+    if (!twoGwState.squad) return;
+    twoGwState.gwSlot = gwSlot;
+    document.getElementById('predGwBtn1').classList.toggle('is-active', gwSlot === 1);
+    document.getElementById('predGwBtn2').classList.toggle('is-active', gwSlot === 2);
+    const lineup = lineupForGw(twoGwState.squad, gwSlot);
+    renderPredicted(lineup, gwSlot);
+    renderCaptainPick(lineup.starting);
   }
 
   // Strip leading initials: "B. Fernandes" → "Fernandes", "T.A. Arnold" → "Arnold"
@@ -814,19 +823,20 @@
     </div>`;
   }
 
-  function renderPredicted(lineup) {
-    const { starting, bench } = lineup;
+  function renderPredicted(lineup, gwSlot) {
+    const { starting, bench, formation } = lineup;
     const total = [...starting.gkp, ...starting.def, ...starting.mid, ...starting.fwd]
       .reduce((s,p) => s + p.predicted, 0);
 
-    document.getElementById('predGwLabel').textContent  = `Gameweek ${nextGwId} - Predicted`;
+    const gwId = gwSlot === 2 ? (nextGwId + 1) : nextGwId;
+    document.getElementById('predGwLabel').textContent  = `Gameweek ${gwId} - Predicted (${formation})`;
     document.getElementById('predTotalPts').textContent = total.toFixed(1) + ' pts';
-    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, nextOppMap)).join('');
-    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, nextOppMap)).join('');
-    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, nextOppMap)).join('');
-    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, nextOppMap)).join('');
+    document.getElementById('predRowFwd').innerHTML = starting.fwd.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
+    document.getElementById('predRowMid').innerHTML = starting.mid.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
+    document.getElementById('predRowDef').innerHTML = starting.def.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
+    document.getElementById('predRowGkp').innerHTML = starting.gkp.map(p => cardHTML(p, gwSlot === 2 ? {} : nextOppMap)).join('');
     document.getElementById('predBench').innerHTML  = bench.map(p =>
-      benchCardHTML(p, posLabel(p.element_type), nextOppMap)
+      benchCardHTML(p, posLabel(p.element_type), gwSlot === 2 ? {} : nextOppMap)
     ).join('');
 
     document.getElementById('predStatus').style.display = 'none';
@@ -1142,13 +1152,17 @@
       const scored = bootstrap.elements.map(p => ({ ...p, predicted: predictScore(p) }));
       scored.forEach(p => { elementMap[p.id] = p; });
 
-      const squad = selectSquad442(scored);
-      if (squad.length < 15) throw new Error('Budget too tight.');
+      const twoGw = cache.two_gw_squad;
+      if (!twoGw) throw new Error('Squad not available (off-season?).');
+      twoGwState.squad = twoGw;
 
-      const lineup = buildLineup442(squad);
-      renderPredicted(lineup);
-      renderCaptainPick(lineup.starting);
-      renderBestOfRest(squad, scored);
+      const metaEl = document.getElementById('predSquadMeta');
+      if (metaEl) {
+        metaEl.textContent = `15-man squad · £${(twoGw.cost / 10).toFixed(1)}m · 2-GW projected ${twoGw.predicted_total.toFixed(1)} pts`;
+      }
+
+      setPredGw(1);
+      renderBestOfRest(twoGw.squad.map(p => elementMap[p.id]), scored);
       // renderPriceWatch();  // Price Watch panel removed.
 
       // Auto-load default team - best-effort, uses CORS proxies, fails gracefully
