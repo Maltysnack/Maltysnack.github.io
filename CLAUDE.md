@@ -30,6 +30,7 @@ These will fail CI via `scripts/sanitize.sh`:
 3. **No `.DS_Store` or junk files committed.** `.gitignore` already covers `.DS_Store`. Don't fight it.
 4. **No broken internal links** from `sidebar.js` or `index.html`.
 5. **All user-facing dates are `dd-mm-yyyy`.** e.g. `04-05-2026`, never `2026-05-04` or `May 4, 2026` or `4 May`. Applies to anything rendered to the page (timestamps, labels, sparkline axes, "last updated" stamps). Internal data files can stay in ISO `yyyy-mm-dd` for sortability; convert at the render layer.
+6. **Project state belongs in project HANDOFFs.** Root `HANDOFF.md` is site-wide only and links to per-project HANDOFFs. Never add an "In flight" or "Decisions pending" item to the root for a specific page; put it in that page's folder. See "HANDOFF discipline" below.
 
 ## Adding a new page
 
@@ -43,8 +44,18 @@ You **must** do all of these:
 6. Run `python3 scripts/build-readme.py` to regenerate the README's pages section.
 7. **Include `<script src="/sidebar.js"></script>` before `</body>`.** sidebar.js injects the canonical favicon links (with the current cache-buster version) into `<head>` automatically, so you don't need to hand-roll the icon block. The static block still works if you want defense-in-depth, but it isn't required and the version on it can drift; sidebar.js is the source of truth.
 8. `git add` the new page and the regenerated `README.md`. CI will fail if either is missing or stale.
+9. **If the page is non-trivial** (in-flight features, decisions pending, project-specific gotchas, or its own wiring like a Vercel function or cron), create `<project-folder>/HANDOFF.md` and add a link to it in the root `HANDOFF.md` project-handoffs list. Project HANDOFFs follow the same shape as the root: current state, in flight, decisions pending, gotchas, recent session log. They live in their folder so they move with the code. If the page has no folder yet, either create one (preferred) or add a section to the closest parent HANDOFF (`games/HANDOFF.md`, `projects/HANDOFF.md`).
 
 If your page is self-contained with its own design system (like Happy Hour or Duoclue), it can skip `/style.css` and the icon block above. It still needs to live in the sidebar and home cards.
+
+## HANDOFF discipline
+
+The project uses **layered handoff docs**:
+
+- `/HANDOFF.md` (root): site-wide only: build/deploy, sanitize, layout tokens, sidebar/README rules, cross-cutting gotchas, parallel-session warnings. **Never** contains "In flight" or "Decisions pending" items for a specific project page. Instead, it has a link list to per-project HANDOFFs.
+- `<project>/HANDOFF.md`: that project's state. In-flight features, decisions pending, gotchas specific to the project, recent session log. Lives in the project folder so it travels with the code.
+
+When you finish or start work on a project, update **its** HANDOFF, not the root. The only edits to the root are: adding/removing entries in the project-handoffs link list, and changes that affect the whole site.
 
 ## Git hygiene
 
@@ -166,12 +177,12 @@ Conversation over ~50k tokens, or shifting to an unrelated task. Recommend to us
 
 ## Handoff between sessions
 
-`HANDOFF.md` at the repo root is the living scratchpad.
+HANDOFFs are layered. Root `HANDOFF.md` is site-wide; each project has its own `<project>/HANDOFF.md`. See "HANDOFF discipline" above for the split.
 
-- Read it first thing every new session.
-- Update it last thing every session: current state, in-flight work, decisions pending, gotchas.
-- Commit it with the rest of the work.
+- **Read** the root `HANDOFF.md` first thing every session. Then read the HANDOFF for whichever project(s) you're touching.
+- **Update** the project HANDOFF for any in-flight or finished work in that project. Update the root only for site-wide changes or to add/remove an entry in the project-handoffs link list.
+- Commit HANDOFF updates with the rest of the work.
 
-Commits capture what shipped. Issues capture what's next. `HANDOFF.md` captures the in-between (what's running, what's blocked, what would surprise the next session).
+Commits capture what shipped. Issues capture what's next. HANDOFFs capture the in-between (what's running, what's blocked, what would surprise the next session).
 
-Compaction is lossy. Fresh + handoff beats long conversation + auto-summary.
+Compaction is lossy. Fresh + layered handoffs beats long conversation + auto-summary.
