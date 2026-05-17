@@ -11,7 +11,7 @@ Scratchpad for `/projects/happyhour/`. Coffeetime is the sister page; it lives a
 
 ## Decisions
 
-- **Scriptable widgets** at `widgets/{happyhour,coffeetime}.js` are FROZEN. Do not update unless explicitly requested. Website-only focus from here.
+- **Scriptable widgets** at `projects/happyhour/widget-{happyhour,coffeetime}.js` are FROZEN. Do not update unless explicitly requested. Website-only focus from here. Both widgets live under happyhour because coffeetime is its sister page and they share the proxy + city list; moved here 18-05-2026 from the now-deleted root `widgets/` folder.
 
 ## Gotchas
 

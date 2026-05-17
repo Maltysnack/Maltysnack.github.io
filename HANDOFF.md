@@ -37,9 +37,10 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 ## Decisions pending (cross-cutting)
 
 - ~~Loose-page reorg.~~ Done 18-05-2026.
-- **`widgets/` orphaned.** `widgets/happyhour.js` and `widgets/coffeetime.js` are frozen Scriptable widgets but sit at the repo root, unmentioned by any project. Either move them into `projects/{happyhour,coffeetime}/widget.js` or add a "constrained-to-stay" line in each project HANDOFF. Pick one next session.
-- **`vercel-out/index.html`.** Looks like a build artifact. Probably belongs in `.gitignore`, not the repo. Confirm and delete next session.
-- **Stray untracked files.** `.github/workflows/sync-fpl.yml.disabled` and `projects/test_perm.txt` exist as untracked. Either commit, gitignore, or remove.
+- ~~`widgets/` orphaned.~~ Done 18-05-2026: both Scriptable widgets moved into `projects/happyhour/` (coffeetime is its sister page). Root `widgets/` folder deleted.
+- ~~`vercel-out/index.html` stale.~~ Done 18-05-2026: it isn't a build artifact (declared as Vercel deployment root in `vercel.json`); fixed its `/dnd/` link to point at the new `/games/dnd/`.
+- ~~`projects/test_perm.txt` stale.~~ Deleted 18-05-2026.
+- `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose. See `projects/fpl/HANDOFF.md` (awaiting maltysnack's call on re-enabling).
 - **Magic Archetypes status.** `games/magic/HANDOFF.md` still flags Archetypes as "LOCAL ONLY, do not push." That note is stale: shipped 18-05-2026 in commit `2f0cc12`. Update the HANDOFF to reflect live state.
 
 ## Recent session log

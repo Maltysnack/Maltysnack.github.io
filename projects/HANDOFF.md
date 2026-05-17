@@ -18,4 +18,4 @@ Index for `/projects/`. Every project owns its own folder + HANDOFF.
 ## Gotchas
 
 - happyhour and coffeetime share the `happyhour-proxy.vercel.app` image proxy and the same inline city list. Treat them as one project for design decisions; per-page state lives in each HANDOFF.
-- Scriptable widgets at `/widgets/{happyhour,coffeetime}.js` are FROZEN (see happyhour HANDOFF).
+- Scriptable widgets at `projects/happyhour/widget-{happyhour,coffeetime}.js` are FROZEN (see happyhour HANDOFF).
