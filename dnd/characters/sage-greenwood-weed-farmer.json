@@ -1,242 +1,111 @@
 {
   "schemaVersion": 1,
   "id": "sage-greenwood-weed-farmer",
-  "descriptors": [
-    "weed",
-    "farmer"
-  ],
+  "descriptors": ["weed", "farmer"],
   "identity": {
     "name": "Sage Greenwood",
-    "classLine": "Half Elf Druid Level 5",
+    "classLine": "Half-Elf Druid 5",
     "background": "Farmer",
     "speedLine": "Speed 30",
-    "languages": "",
-    "otherProficiencies": ""
+    "languages": "Common, Elvish, Druidic",
+    "otherProficiencies": "light/medium armor (non-metal), shields (non-metal), clubs, daggers, darts, javelins, maces, quarterstaves, scimitars, sickles, slings, spears, herbalism kit"
   },
   "class": "druid",
   "level": 5,
   "profBonus": 3,
-  "spellcastingAbility": "cha",
+  "spellcastingAbility": "wis",
   "combat": {
     "ac": 12,
-    "hpMax": 10,
-    "hitDiceMax": 1,
+    "hpMax": 24,
+    "hitDiceMax": 5,
     "hitDiceType": "d8"
   },
   "startingGold": 15,
   "abilities": [
-    {
-      "key": "str",
-      "name": "Strength",
-      "score": 0
-    },
-    {
-      "key": "dex",
-      "name": "Dexterity",
-      "score": 1
-    },
-    {
-      "key": "con",
-      "name": "Constitution",
-      "score": -1
-    },
-    {
-      "key": "int",
-      "name": "Intelligence",
-      "score": 1
-    },
-    {
-      "key": "wis",
-      "name": "Wisdom",
-      "score": 5
-    },
-    {
-      "key": "cha",
-      "name": "Charisma",
-      "score": 2
-    }
+    { "key": "str", "name": "Strength",     "score": 10 },
+    { "key": "dex", "name": "Dexterity",    "score": 12 },
+    { "key": "con", "name": "Constitution", "score":  9 },
+    { "key": "int", "name": "Intelligence", "score": 12 },
+    { "key": "wis", "name": "Wisdom",       "score": 20 },
+    { "key": "cha", "name": "Charisma",     "score": 14 }
   ],
   "saves": [
-    {
-      "ability": "str",
-      "proficient": false
-    },
-    {
-      "ability": "dex",
-      "proficient": false
-    },
-    {
-      "ability": "con",
-      "proficient": false
-    },
-    {
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "ability": "wis",
-      "proficient": true
-    },
-    {
-      "ability": "cha",
-      "proficient": false
-    }
+    { "ability": "str", "proficient": false },
+    { "ability": "dex", "proficient": false },
+    { "ability": "con", "proficient": false },
+    { "ability": "int", "proficient": true  },
+    { "ability": "wis", "proficient": true  },
+    { "ability": "cha", "proficient": false }
   ],
   "skills": [
-    {
-      "name": "Acrobatics",
-      "ability": "dex",
-      "proficient": true
-    },
-    {
-      "name": "Animal Handling",
-      "ability": "wis",
-      "proficient": true
-    },
-    {
-      "name": "Arcana",
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "name": "Athletics",
-      "ability": "str",
-      "proficient": true
-    },
-    {
-      "name": "Deception",
-      "ability": "cha",
-      "proficient": true
-    },
-    {
-      "name": "History",
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "name": "Insight",
-      "ability": "wis",
-      "proficient": true
-    },
-    {
-      "name": "Intimidation",
-      "ability": "cha",
-      "proficient": true
-    },
-    {
-      "name": "Investigation",
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "name": "Medicine",
-      "ability": "wis",
-      "proficient": true
-    },
-    {
-      "name": "Nature",
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "name": "Perception",
-      "ability": "wis",
-      "proficient": true
-    },
-    {
-      "name": "Performance",
-      "ability": "cha",
-      "proficient": true
-    },
-    {
-      "name": "Persuasion",
-      "ability": "cha",
-      "proficient": true
-    },
-    {
-      "name": "Religion",
-      "ability": "int",
-      "proficient": true
-    },
-    {
-      "name": "Sleight of Hand",
-      "ability": "dex",
-      "proficient": true
-    },
-    {
-      "name": "Stealth",
-      "ability": "dex",
-      "proficient": true
-    },
-    {
-      "name": "Survival",
-      "ability": "wis",
-      "proficient": true
-    }
+    { "name": "Acrobatics",      "ability": "dex", "proficient": false },
+    { "name": "Animal Handling", "ability": "wis", "proficient": true  },
+    { "name": "Arcana",          "ability": "int", "proficient": false },
+    { "name": "Athletics",       "ability": "str", "proficient": false },
+    { "name": "Deception",       "ability": "cha", "proficient": false },
+    { "name": "History",         "ability": "int", "proficient": false },
+    { "name": "Insight",         "ability": "wis", "proficient": true  },
+    { "name": "Intimidation",    "ability": "cha", "proficient": false },
+    { "name": "Investigation",   "ability": "int", "proficient": false },
+    { "name": "Medicine",        "ability": "wis", "proficient": true  },
+    { "name": "Nature",          "ability": "int", "proficient": true  },
+    { "name": "Perception",      "ability": "wis", "proficient": true  },
+    { "name": "Performance",     "ability": "cha", "proficient": false },
+    { "name": "Persuasion",      "ability": "cha", "proficient": false },
+    { "name": "Religion",        "ability": "int", "proficient": false },
+    { "name": "Sleight of Hand", "ability": "dex", "proficient": false },
+    { "name": "Stealth",         "ability": "dex", "proficient": false },
+    { "name": "Survival",        "ability": "wis", "proficient": true  }
   ],
-  "attacks": [],
-  "spellSlots": {
-    "1": 4,
-    "2": 3,
-    "3": 2
+  "attacks": [
+    { "name": "Quarterstaff (Shillelagh)", "atk": "+8", "notes": "1d8+5 bludgeoning", "extra": "WIS-based via Shillelagh" },
+    { "name": "Dagger",                    "atk": "+4", "notes": "1d4+1 piercing",    "extra": "finesse, thrown 20/60" }
+  ],
+  "reaction": {
+    "title": "",
+    "desc": ""
   },
+  "spellSlots": { "1": 4, "2": 3, "3": 2 },
+  "spellSlotsRestoresOn": "long",
   "resources": [
-    {
-      "key": "wildShape",
-      "name": "Wild Shape",
-      "type": "pip",
-      "max": 2,
-      "restoresOn": "short"
-    }
+    { "key": "wildShape", "name": "Wild Shape", "type": "pip", "max": 2, "restoresOn": "short" }
   ],
-  "spells": [],
-  "limitedSpells": [],
-  "features": [],
+  "spellSource": "",
+  "spells": [
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Shillelagh",   "slug": "shillelagh",    "tags": ["BA"],          "desc": "club/staff: atk + dmg use WIS, dmg becomes 1d8, magical, 1 min" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Guidance",     "slug": "guidance",      "tags": ["conc"],        "desc": "touch ally adds 1d4 to one ability check w/in 1 min" },
+    { "lvl": 0, "lvlLabel": "Cant", "name": "Thorn Whip",   "slug": "thorn-whip",    "tags": [],              "desc": "30 ft, 2d6 piercing, pull Large or smaller 10 ft" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Cure Wounds",  "slug": "cure-wounds",   "tags": [],              "desc": "touch: heal 1d8+5, +1d8 per slot above 1st" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Detect Magic", "slug": "detect-magic",  "tags": ["conc"],        "desc": "sense magic w/in 30 ft, 10 min" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Entangle",     "slug": "entangle",      "tags": ["conc"],        "desc": "20 ft sq, STR save or restrained, 1 min" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Faerie Fire",  "slug": "faerie-fire",   "tags": ["conc"],        "desc": "20 ft cube, DEX save or outlined: adv on atks vs target, no invis, 1 min" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Moonbeam",     "slug": "moonbeam",      "tags": ["conc"],        "desc": "5 ft beam, 2d10 radiant on enter/turn, CON save half, move 60 ft as action, 1 min" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Wither and Bloom", "slug": "wither-and-bloom", "tags": [],       "desc": "10 ft sphere, 2d6 necrotic CON save half; one ally spends + rolls hit die to heal" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Locate Object", "slug": "locate-object", "tags": ["conc"],       "desc": "sense direction to known object w/in 1000 ft, 10 min" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Water Breathing", "slug": "water-breathing", "tags": ["ritual"], "desc": "10 creatures breathe underwater, 24 hr" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Revivify",     "slug": "revivify",      "tags": [],              "desc": "return creature dead <1 min to 1 HP (300 gp diamond)" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Plant Growth", "slug": "plant-growth",  "tags": [],              "desc": "100 ft radius difficult terrain, or 8 hr ritual enriches 0.5 mile" }
+  ],
+  "limitedSpells": [
+    { "group": "Items", "key": "weedPipeCureWounds", "name": "Cure Wounds", "slug": "cure-wounds", "count": 1, "restoresOn": "long", "tags": ["homebrew"], "meta": "weed pipe", "desc": "1/day free cast from magic weed pipe" }
+  ],
+  "racialTraits": [
+    { "name": "Darkvision 60",      "desc": "see dim as bright, dark as dim (greyscale)" },
+    { "name": "Fey Ancestry",       "desc": "adv vs charm, immune magical sleep" },
+    { "name": "Skill Versatility",  "desc": "+2 skill proficiencies (taken: Nature, Perception)" }
+  ],
+  "features": [
+    { "name": "Druidic",     "tag": "language",  "desc": "secret druid tongue, leave hidden messages only druids notice" },
+    { "name": "Wild Shape",  "tag": "2/short",   "desc": "BA: transform into beast CR ≤ 1/2 (no fly until lvl 8), 2.5 hr, HP = beast" },
+    { "name": "Druid Circle", "upcoming": true,  "desc": "subclass not yet chosen (Land or Moon expected at lvl 2). Confirm to unlock circle features" }
+  ],
   "defaultInventory": [
-    {
-      "name": "Golden dog whistle (all creatures who can hear",
-      "notes": ""
-    },
-    {
-      "name": "in a 30ft radius",
-      "notes": ""
-    },
-    {
-      "name": "has to make a DC 16 constitution saving throw",
-      "notes": ""
-    },
-    {
-      "name": "or be stunned for 2 rounds).\r\rMagic weed pipe (grants the ability to cast 1 free Cure Wounds spell per day).\r\rQuarterstaff\rDagger\rLeather armour\rExplorers Pack - backpack",
-      "notes": ""
-    },
-    {
-      "name": "bedroll",
-      "notes": ""
-    },
-    {
-      "name": "mess kit (kitchen stuff)",
-      "notes": ""
-    },
-    {
-      "name": "tinderbox",
-      "notes": ""
-    },
-    {
-      "name": "10 torches",
-      "notes": ""
-    },
-    {
-      "name": "10 days of rations",
-      "notes": ""
-    },
-    {
-      "name": "waterskin",
-      "notes": ""
-    },
-    {
-      "name": "50ft of hemp rope\r\rDruidic focus - Magic Weed Pipe above",
-      "notes": ""
-    }
+    { "name": "Golden dog whistle",  "notes": "homebrew, all who hear in 30 ft DC 16 CON save or stunned 2 rounds" },
+    { "name": "Magic weed pipe",     "notes": "homebrew, druidic focus, 1/day free Cure Wounds" },
+    { "name": "Quarterstaff",        "notes": "1d6 bludgeoning, versatile 1d8" },
+    { "name": "Dagger",              "notes": "1d4 piercing, finesse, thrown 20/60" },
+    { "name": "Leather armour",      "notes": "AC 11 + DEX" },
+    { "name": "Explorer's Pack",     "notes": "backpack, bedroll, mess kit, tinderbox, 10 torches, 10 days rations, waterskin, 50 ft hemp rope" }
   ],
-  "homebrew": "RAW PDF FIELDS (parser did not structure these, polish step please interpret):\n  Wpn1 AtkBonus: +8\n  Wpn1 Damage: 1d8 +5 b\n  Wpn2 AtkBonus : +4\n  Wpn2 Damage : 1 d4 +1 p\n  CharacterName 2: Sage Greenwood\n  SlotsTotal 19: 4\n  Spells 1014: Shillelagh\n  Spells 1015: Cure Wounds\n  Spells 1016: Guidance\n  Spells 1017: Thorn Whip\n  Spells 1023: Detect Magic\n  Spells 1024: Entangle\n  Spells 1025: Faerie Fire\n  SlotsTotal 20: 3\n  Spells 1034: Moonbeam\n  Spells 1035: Wither and Bloom\n  Spells 1046: Locate Object\n  SlotsTotal 21: 2\n  Spells 1047: Water Breathing\n  Spells 1048: Revivify\n  Spells 1049: Plant Growth"
+  "homebrew": ""
 }
