@@ -1,7 +1,7 @@
 /* =====================================================================
    /api/upload  (Vercel Function)
 
-   Receives a parsed-and-confirmed character JSON from /dnd/ and opens
+   Receives a parsed-and-confirmed character JSON from /games/dnd/ and opens
    a pull request against this repo adding the file to dnd/characters/.
 
    Env vars required (set in Vercel dashboard):

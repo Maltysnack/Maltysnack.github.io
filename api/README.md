@@ -1,6 +1,6 @@
 # /api/upload · Vercel function
 
-Receives a parsed character JSON from `/dnd/`, validates it, and opens a pull request adding the file to `dnd/characters/`.
+Receives a parsed character JSON from `/games/dnd/`, validates it, and opens a pull request adding the file to `dnd/characters/`.
 
 ## One-time setup (you only do this once)
 
@@ -30,7 +30,7 @@ Then **redeploy** the project so the new env var takes effect (Settings → Depl
 
 ### 3. Verify
 
-Once redeployed, the upload form's "Submit for review" button on `maltysnack.github.io/dnd/` will work end-to-end. A successful submission opens a PR titled `New character: <name>` against `main`. Review the JSON and click Merge.
+Once redeployed, the upload form's "Submit for review" button on `maltysnack.github.io/games/dnd/` will work end-to-end. A successful submission opens a PR titled `New character: <name>` against `main`. Review the JSON and click Merge.
 
 ## After merge
 
@@ -52,4 +52,4 @@ The function runs on Vercel only; there's no local API. To smoke-test the functi
 - `api/upload.js` · the function
 - `vercel.json` · minimal Vercel config (deploys `vercel-out/` as static + `api/` as functions)
 - `.vercelignore` · keeps the rest of the static site out of the Vercel deploy
-- `vercel-out/index.html` · placeholder that redirects vercel.app visitors to maltysnack.github.io/dnd/
+- `vercel-out/index.html` · placeholder that redirects vercel.app visitors to maltysnack.github.io/games/dnd/

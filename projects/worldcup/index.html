@@ -2805,12 +2805,12 @@
       // Top scorers JSON is optional; older builds won't have it. We
       // fetch it lazily and don't fail the whole page if 404.
       Promise.all([
-        fetch('/projects/worldcup-bracket.json', { cache: 'no-cache' }).then(r => r.json()),
-        fetch('/projects/worldcup-simulation.json', { cache: 'no-cache' }).then(r => r.json()),
-        fetch('/projects/worldcup-top-scorers.json', { cache: 'no-cache' })
+        fetch('/projects/worldcup/bracket.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup/simulation.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup/top-scorers.json', { cache: 'no-cache' })
           .then(r => r.ok ? r.json() : null)
           .catch(() => null),
-        fetch('/projects/worldcup-live.json', { cache: 'no-cache' })
+        fetch('/projects/worldcup/live.json', { cache: 'no-cache' })
           .then(r => r.ok ? r.json() : null)
           .catch(() => null),
       ])

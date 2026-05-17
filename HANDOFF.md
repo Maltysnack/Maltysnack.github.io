@@ -6,14 +6,18 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 
 ## Project handoffs
 
-- [`dnd/HANDOFF.md`](dnd/HANDOFF.md): character sheet subsystem
-- [`games/HANDOFF.md`](games/HANDOFF.md): games index (magic, duoclue)
-- [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes in flight)
-- [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
-- [`projects/HANDOFF.md`](projects/HANDOFF.md): happyhour, coffeetime, worldcup, algorithms (loose pages)
-- [`projects/fpl/HANDOFF.md`](projects/fpl/HANDOFF.md): FPL tracker
-- [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): flox docs
-- [`wren/HANDOFF.md`](wren/HANDOFF.md): Wren persona, runlog, cron
+- [`games/HANDOFF.md`](games/HANDOFF.md): games index
+  - [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes in flight)
+  - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
+  - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): character sheet subsystem
+- [`projects/HANDOFF.md`](projects/HANDOFF.md): projects index
+  - [`projects/fpl/HANDOFF.md`](projects/fpl/HANDOFF.md): FPL Predicted XI
+  - [`projects/happyhour/HANDOFF.md`](projects/happyhour/HANDOFF.md): Happy Hour
+  - [`projects/coffeetime/HANDOFF.md`](projects/coffeetime/HANDOFF.md): Coffee Time
+  - [`projects/worldcup/HANDOFF.md`](projects/worldcup/HANDOFF.md): World Cup 2026
+  - [`projects/algorithms/HANDOFF.md`](projects/algorithms/HANDOFF.md): algorithm visualisations
+  - [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): Flox docs
+- [`wren/HANDOFF.md`](wren/HANDOFF.md): Wren persona, runlog, cron (covers `/shelf/` too)
 - [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions
 
 ## Current state (as of 18-05-2026)
@@ -32,7 +36,7 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 
 ## Decisions pending (cross-cutting)
 
-- **Loose-page reorg.** Several projects sit as loose files at the parent-folder level (`projects/happyhour.html`, `projects/coffeetime.html`, `projects/worldcup.html` + 4 json, `projects/algorithms.html` + 5 algo files). Plan is to move each into its own folder (e.g. `projects/worldcup/index.html` + data) so each project owns its scope. Do as a follow-up, one project at a time, not in a single sweep. No redirect stubs needed: site has no inbound traffic from the old URLs. (Magic + Duoclue done 18-05-2026.)
+- ~~Loose-page reorg.~~ Done 18-05-2026: magic, duoclue, dnd, happyhour, coffeetime, worldcup, algorithms all now own their folder + HANDOFF. No redirect stubs (site has no inbound traffic from old URLs).
 
 ## Cross-cutting gotchas
 

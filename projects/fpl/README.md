@@ -58,7 +58,7 @@ It fetches from `fantasy.premierleague.com/api/` (no auth needed) and overwrites
 
 ## What's outside this folder that does NOT belong to FPL
 
-Everything else. The site's stylesheet (`/style.css`), sidebar (`/sidebar.js`), other pages (`/dnd/`, `/shelf/`, etc.) are someone else's work. Don't touch them. If `index.html`'s rendering looks broken because of a sidebar or stylesheet change, raise it with maltysnack rather than fixing it here.
+Everything else. The site's stylesheet (`/style.css`), sidebar (`/sidebar.js`), other pages (`/games/dnd/`, `/shelf/`, etc.) are someone else's work. Don't touch them. If `index.html`'s rendering looks broken because of a sidebar or stylesheet change, raise it with maltysnack rather than fixing it here.
 
 ## Conventions inherited from the parent repo
 

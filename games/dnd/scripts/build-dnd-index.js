@@ -2,9 +2,9 @@
 /* =====================================================================
    build-dnd-index.js
 
-   Walks /dnd/characters/*.json (excluding index.json), writes
-   /dnd/characters/index.json with summary fields for the browse page,
-   and ensures /dnd/<id>.html shim exists for each character.
+   Walks /games/dnd/characters/*.json (excluding index.json), writes
+   /games/dnd/characters/index.json with summary fields for the browse page,
+   and ensures /games/dnd/<id>.html shim exists for each character.
 
    Usage:  node dnd/scripts/build-dnd-index.js
    Exits non-zero on slug collisions or invalid JSON.
@@ -24,7 +24,7 @@ const SHIM_TEMPLATE = (id, name) => `<!DOCTYPE html>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>${name} - Character Sheet</title>
-  <link rel="stylesheet" href="/dnd/sheet.css">
+  <link rel="stylesheet" href="/games/dnd/sheet.css">
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
   <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
@@ -33,7 +33,7 @@ const SHIM_TEMPLATE = (id, name) => `<!DOCTYPE html>
 </head>
 <body>
   <script>window.CHARACTER_ID = '${id}';</script>
-  <script src="/dnd/sheet.js"></script>
+  <script src="/games/dnd/sheet.js"></script>
 </body>
 </html>
 `;
@@ -120,7 +120,7 @@ function main() {
   fs.writeFileSync(INDEX_PATH, JSON.stringify(out, null, 2) + '\n');
   console.log(`Wrote ${path.relative(ROOT, INDEX_PATH)} (${characters.length} character${characters.length === 1 ? '' : 's'}).`);
 
-  // warn on orphan shims (html exists in /dnd/ that doesn't match a character or known relic)
+  // warn on orphan shims (html exists in /games/dnd/ that doesn't match a character or known relic)
   const knownRelics = new Set(['index.html', 'grosh.html']);
   const allDndHtml = fs.readdirSync(DND_DIR).filter(f => f.endsWith('.html'));
   const orphans = allDndHtml.filter(f => !knownRelics.has(f) && !seen.has(path.basename(f, '.html')));

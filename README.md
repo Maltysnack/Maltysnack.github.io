@@ -19,6 +19,9 @@ Premier League fantasy predictions for the upcoming gameweek, refreshed daily fr
 **Happy Hour:**<br>
 It's happy hour somewhere.
 
+**Coffee Time:**<br>
+It's coffee time somewhere.
+
 **World Cup 2026:**<br>
 A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
 

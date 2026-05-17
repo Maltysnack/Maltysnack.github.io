@@ -8,7 +8,7 @@ Two pipelines produce PRs that need polishing:
 
 | pipeline | trigger | PR title prefix |
 |---|---|---|
-| **Upload** | new character via `/dnd/` upload form | `New character: <name>` |
+| **Upload** | new character via `/games/dnd/` upload form | `New character: <name>` |
 | **Update** | `Update sheet` form on the live sheet | `Update <name>: <first 60 chars>` |
 
 Both go through the same polish process. The difference is whether the character JSON exists yet (upload = new) or is being modified (update = diff against main).

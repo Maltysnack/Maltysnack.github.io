@@ -1,41 +1,21 @@
 # projects HANDOFF
 
-Scratchpad for `/projects/` pages that don't have their own folder yet. Root `HANDOFF.md` covers site-wide.
+Index for `/projects/`. Every project owns its own folder + HANDOFF.
 
-Projects with their own folders own their own HANDOFFs:
-- [`fpl/HANDOFF.md`](fpl/HANDOFF.md)
-- [`flox/HANDOFF.md`](flox/HANDOFF.md)
-- [`duoclue/HANDOFF.md`](duoclue/HANDOFF.md)
+## Subprojects
 
-## Loose pages tracked here
+- [`fpl/HANDOFF.md`](fpl/HANDOFF.md): FPL Predicted XI
+- [`flox/HANDOFF.md`](flox/HANDOFF.md): Flox docs
+- [`happyhour/HANDOFF.md`](happyhour/HANDOFF.md): Happy Hour (with sister page Coffee Time)
+- [`coffeetime/HANDOFF.md`](coffeetime/HANDOFF.md): Coffee Time (easter-egg sister of Happy Hour)
+- [`worldcup/HANDOFF.md`](worldcup/HANDOFF.md): World Cup 2026 simulator
+- [`algorithms/HANDOFF.md`](algorithms/HANDOFF.md): algorithm visualisations
 
-- `happyhour.html` + `coffeetime.html` (sister projects, share infra)
-- `worldcup.html` + `worldcup-*.json` (4 data files)
-- `algorithms.html` + `algo-*.{mjs,js}` (5 algo files)
+## Current state (as of 18-05-2026)
 
-## happyhour + coffeetime
-
-### Recently shipped
-
-- Cinematic full-bleed slideshow per city. Photo via `happyhour-proxy.vercel.app` (Vercel proxy hides Unsplash key). Weather via Open-Meteo. ~280 cities embedded inline. ~150 with curated drinks/coffees. Local-language toasts/greetings. Real flagcdn flags. Regional minimap (continent-zoomed). Sequential fade-through-dark transition (4.5s fade, 600ms gap). 12hr time.
-- Sister-link toggle (`happyhour. · coffeetime`) next to wordmark. coffeetime is an easter egg, not in sidebar/index. Empty state cross-recommends.
-- **Photo quality bump (last change shipped)**: proxy now builds image URL from `urls.raw` with `w=2400&q=85` default (`?res=widget` returns 1080w/q82). Was using `urls.regular` (1080w fixed) which looked upscaled on retina/1440+.
-
-### Decisions
-
-- **Scriptable widgets** at `widgets/{happyhour,coffeetime}.js` are FROZEN. Do not update unless explicitly requested. Website-only focus from here.
-
-## worldcup
-
-- Nightly auto-refresh wired (see commits `worldcup: nightly auto-refresh`).
-- Predictions use Dixon-Coles goals model.
-- 4 JSON data files at `projects/worldcup-*.json` (bracket, live, simulation, top-scorers).
-
-## algorithms
-
-- 5 algo modules: `algo-core.mjs`, `algo-grid.mjs`, `algo-tile.mjs`, `algo-tsp.mjs`, `algo-viz.js`.
-- No in-flight work.
+- Loose-page reorg completed 18-05-2026: happyhour, coffeetime, worldcup, algorithms each got their own folder with `index.html` + assets + HANDOFF. No redirect stubs (site has no inbound traffic from the old URLs).
 
 ## Gotchas
 
-- These pages will eventually move into per-project folders (see root HANDOFF "Loose-page reorg"). When they do, this doc splits per project and shrinks to a link list.
+- happyhour and coffeetime share the `happyhour-proxy.vercel.app` image proxy and the same inline city list. Treat them as one project for design decisions; per-page state lives in each HANDOFF.
+- Scriptable widgets at `/widgets/{happyhour,coffeetime}.js` are FROZEN (see happyhour HANDOFF).

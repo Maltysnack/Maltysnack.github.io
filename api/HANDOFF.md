@@ -7,7 +7,7 @@ Scratchpad for `/api/` Vercel serverless functions. Root `HANDOFF.md` covers sit
 - `upload.js`: opens a PR for a new dnd character from a filled WotC PDF.
 - `update.js`: opens a PR to update an existing character.
 
-Both are consumed by `/dnd/`. See [`dnd/HANDOFF.md`](../dnd/HANDOFF.md) for the upload + polish flow.
+Both are consumed by `/games/dnd/`. See [`games/dnd/HANDOFF.md`](../games/dnd/HANDOFF.md) for the upload + polish flow.
 
 ## Wiring
 

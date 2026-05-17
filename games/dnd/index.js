@@ -1,6 +1,6 @@
 /* =====================================================================
    index.js - dnd browse page
-   Loads /dnd/characters/index.json, handles search / sort / filter /
+   Loads /games/dnd/characters/index.json, handles search / sort / filter /
    pagination on the card grid.
    ===================================================================== */
 
@@ -40,7 +40,7 @@ const $ = (id) => document.getElementById(id);
 
 async function init() {
   try {
-    const res = await fetch('/dnd/characters/index.json', { cache: 'no-cache' });
+    const res = await fetch('/games/dnd/characters/index.json', { cache: 'no-cache' });
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     allCharacters = data.characters || [];
@@ -143,7 +143,7 @@ function renderCards() {
   slice.forEach(c => {
     const a = document.createElement('a');
     a.className = 'home-card character-card';
-    a.href = `/dnd/${c.id}.html`;
+    a.href = `/games/dnd/${c.id}.html`;
 
     const desc = (c.descriptors || []).join(' · ');
     const parts = parseClassLine(c.classLine || c.class || '');

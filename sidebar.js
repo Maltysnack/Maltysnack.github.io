@@ -97,17 +97,17 @@
           <span class="nav-label">Projects</span>
           <ul>
             <li><a href="/projects/fpl/" ${path.startsWith('/projects/fpl/') ? 'class="nav-active"' : ''}>FPL Predicted XI</a></li>
-            <li><a href="/projects/happyhour.html" ${active('/projects/happyhour.html')}>Happy Hour</a></li>
-            <li><a href="/projects/worldcup.html" ${active('/projects/worldcup.html')}>World Cup 2026</a></li>
+            <li><a href="/projects/happyhour/" ${path.startsWith('/projects/happyhour') || path.startsWith('/projects/coffeetime') ? 'class="nav-active"' : ''}>Happy Hour</a></li>
+            <li><a href="/projects/worldcup/" ${path.startsWith('/projects/worldcup') ? 'class="nav-active"' : ''}>World Cup 2026</a></li>
             <li><a href="/projects/flox/" ${path.startsWith('/projects/flox') ? 'class="nav-active"' : ''}>Flox</a></li>
-            <li><a href="/projects/algorithms.html" ${active('/projects/algorithms.html')}>Algorithms</a></li>
+            <li><a href="/projects/algorithms/" ${path.startsWith('/projects/algorithms') ? 'class="nav-active"' : ''}>Algorithms</a></li>
           </ul>
         </div>
 
         <div class="nav-section">
           <span class="nav-label">Games</span>
           <ul>
-            <li><a href="/dnd/" ${path.startsWith('/dnd/') || path.startsWith('/dnd.html') ? 'class="nav-active"' : ''}>dnd</a></li>
+            <li><a href="/games/dnd/" ${path.startsWith('/games/dnd/') ? 'class="nav-active"' : ''}>dnd</a></li>
             <li><a href="/games/duoclue/" ${path.startsWith('/games/duoclue') ? 'class="nav-active"' : ''}>Duoclue</a></li>
             <li><a href="/games/magic/" ${path.startsWith('/games/magic') ? 'class="nav-active"' : ''}>Magic: The Gathering</a></li>
           </ul>

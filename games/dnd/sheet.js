@@ -1,10 +1,10 @@
 /* =====================================================================
    sheet.js - generic D&D 5E character sheet engine
 
-   Reads window.CHARACTER_ID, fetches /dnd/characters/<id>.json, builds
+   Reads window.CHARACTER_ID, fetches /games/dnd/characters/<id>.json, builds
    the entire DOM, manages localStorage state.
 
-   To add a new character: drop a JSON in /dnd/characters/, run the
+   To add a new character: drop a JSON in /games/dnd/characters/, run the
    build script, the engine handles the rest.
    ===================================================================== */
 
@@ -318,7 +318,7 @@ function showError(msg) {
     <div style="max-width:600px;margin:80px auto;padding:24px;border:1px solid #d0d7de;border-radius:6px;font-family:-apple-system,BlinkMacSystemFont,sans-serif">
       <h1 style="margin:0 0 12px;font-size:18px">Couldn't load this character</h1>
       <p style="margin:0;color:#57606a;font-size:13px">${msg}</p>
-      <p style="margin:16px 0 0;font-size:12px"><a href="/dnd/">&larr; back to characters</a></p>
+      <p style="margin:16px 0 0;font-size:12px"><a href="/games/dnd/">&larr; back to characters</a></p>
     </div>
   `;
 }
@@ -1068,9 +1068,9 @@ async function downloadPdf() {
   try {
     const [pdfLib, exporter] = await Promise.all([
       import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm'),
-      import('/dnd/pdf-export.js'),
+      import('/games/dnd/pdf-export.js'),
     ]);
-    const tplBuf = await fetch('/dnd/assets/5E_CharacterSheet_Fillable.pdf').then(r => r.arrayBuffer());
+    const tplBuf = await fetch('/games/dnd/assets/5E_CharacterSheet_Fillable.pdf').then(r => r.arrayBuffer());
     const bytes = await exporter.fillCharacterPdf(CHARACTER, state, tplBuf, pdfLib.PDFDocument);
     const blob = new Blob([bytes], { type: 'application/pdf' });
     const url = URL.createObjectURL(blob);
@@ -1098,11 +1098,11 @@ async function init() {
     return;
   }
   try {
-    const res = await fetch(`/dnd/characters/${SLUG}.json`);
+    const res = await fetch(`/games/dnd/characters/${SLUG}.json`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     CHARACTER = await res.json();
   } catch (err) {
-    showError(`Could not load /dnd/characters/${SLUG}.json. (${err.message})`);
+    showError(`Could not load /games/dnd/characters/${SLUG}.json. (${err.message})`);
     return;
   }
   buildLayout();
