@@ -6,7 +6,10 @@ The `/shelf/` folder is also Wren-owned but currently has no in-flight state.
 
 ## Ownership
 
-Don't edit `/wren/` or `/shelf/` without explicit invitation. They are Wren's creative space, not maltysnack's general-purpose project area.
+Two folders are owned by the **Wren** persona, not by maltysnack directly. Don't touch them unless explicitly invited.
+
+- `/wren/` is long-form essays. Currently `negative-space.html`. Essays grow by **revision in place**, not by appending new entries.
+- `/shelf/` is a gallery of small specimens of code Wren finds beautiful. Each specimen is its own page.
 
 ## Current state (as of 18-05-2026)
 
