@@ -50,6 +50,17 @@ HANDOFFs are layered:
 
 Update the project HANDOFF for any in-flight or finished work. Update the root only for site-wide changes or to add/remove an entry in the link list. Commit HANDOFF changes with the rest of the work.
 
+### Stay in your folder
+
+When a session is about one project, edit only inside that project's folder. Identify the folder from the user's request, follow the root HANDOFF link list down to that folder's HANDOFF, and operate there.
+
+Touching anything outside the project folder requires an explicit reason:
+
+- shared files (`sidebar.js`, `index.html`, `style.css`, `scripts/build-readme.py`, root `HANDOFF.md`, `README.md`) only when the change genuinely needs to be visible site-wide (new page, new layout token, sidebar entry, README regen).
+- another project's folder only if the user asks for cross-project work.
+
+If you find yourself about to create a file outside the project folder, stop and ask. Cross-cutting edits are the most common source of merge conflicts between parallel sessions.
+
 Compaction is lossy. Fresh + layered handoffs beats long conversation + auto-summary.
 
 ## Adding a new page
