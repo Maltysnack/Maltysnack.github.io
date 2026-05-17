@@ -37,7 +37,7 @@ Once redeployed, the upload form's "Submit for review" button on `maltysnack.git
 A PR merge adds `dnd/characters/<id>.json` to main. To finish wiring it up to the browse page and create the per-character HTML shim, run locally:
 
 ```sh
-node scripts/build-dnd-index.js
+node dnd/scripts/build-dnd-index.js
 git add -A && git commit -m "build(dnd): index after upload" && git push
 ```
 

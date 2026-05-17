@@ -3,7 +3,7 @@
 1. Drop the character's JSON file in this directory. Filename must match the `id` field inside, e.g. `bob-knight-tavern.json` for `"id": "bob-knight-tavern"`.
 2. From the repo root, run:
    ```sh
-   node scripts/build-dnd-index.js
+   node dnd/scripts/build-dnd-index.js
    ```
    This regenerates `index.json` (used by the browse page) and creates `/dnd/<id>.html` if it doesn't exist.
 3. Commit and push.

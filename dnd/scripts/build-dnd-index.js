@@ -6,14 +6,14 @@
    /dnd/characters/index.json with summary fields for the browse page,
    and ensures /dnd/<id>.html shim exists for each character.
 
-   Usage:  node scripts/build-dnd-index.js
+   Usage:  node dnd/scripts/build-dnd-index.js
    Exits non-zero on slug collisions or invalid JSON.
    ===================================================================== */
 
 const fs = require('fs');
 const path = require('path');
 
-const ROOT = path.resolve(__dirname, '..');
+const ROOT = path.resolve(__dirname, '..', '..');
 const CHARS_DIR = path.join(ROOT, 'dnd', 'characters');
 const DND_DIR = path.join(ROOT, 'dnd');
 const INDEX_PATH = path.join(CHARS_DIR, 'index.json');

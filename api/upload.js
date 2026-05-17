@@ -112,7 +112,7 @@ module.exports = async function handler(req, res) {
       ``,
       `---`,
       ``,
-      `To accept: review \`${path}\`, click **Merge**. Then locally pull and run \`node scripts/build-dnd-index.js\` to rebuild the index + shim.`,
+      `To accept: review \`${path}\`, click **Merge**. Then locally pull and run \`node dnd/scripts/build-dnd-index.js\` to rebuild the index + shim.`,
     ].join('\n');
 
     const pr = await gh(`/repos/${REPO}/pulls`, token, {

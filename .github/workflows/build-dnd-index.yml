@@ -23,7 +23,7 @@ jobs:
           node-version: '20'
 
       - name: Build dnd index + shims
-        run: node scripts/build-dnd-index.js
+        run: node dnd/scripts/build-dnd-index.js
 
       - name: Commit + push if changed
         run: |
@@ -46,7 +46,7 @@ jobs:
             fi
             echo "Push rejected (attempt $i). Pulling + rebuilding..."
             git pull --rebase origin main
-            node scripts/build-dnd-index.js
+            node dnd/scripts/build-dnd-index.js
             git add dnd/characters/index.json 'dnd/*.html' 2>/dev/null || true
             git diff --staged --quiet && exit 0
             git commit --amend --no-edit
