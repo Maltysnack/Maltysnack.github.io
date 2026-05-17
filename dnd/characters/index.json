@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-05-10",
+  "generatedAt": "2026-05-17",
   "characters": [
     {
       "id": "grosh-chef-lifeguard",
@@ -37,6 +37,18 @@
       "class": "fighter",
       "level": 5,
       "background": "Hermit"
+    },
+    {
+      "id": "sage-greenwood-weed-farmer",
+      "name": "Sage Greenwood",
+      "descriptors": [
+        "weed",
+        "farmer"
+      ],
+      "classLine": "Half-Elf Druid (Shepherd) 5",
+      "class": "druid",
+      "level": 5,
+      "background": "Farmer"
     },
     {
       "id": "shieka-metal-head",
