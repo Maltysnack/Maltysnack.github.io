@@ -50,6 +50,8 @@ HANDOFFs are layered:
 
 Update the project HANDOFF for any in-flight or finished work. Update the root only for site-wide changes or to add/remove an entry in the link list. Commit HANDOFF changes with the rest of the work.
 
+**Write to the HANDOFF as you go, not at the end.** Continuity across sessions depends on the HANDOFF reflecting reality at any cut-point, not just the moment you stop. After every concrete change (a moved file, a fixed bug, a decision made, a path you chose not to take), write the one line that captures it. If the session crashes mid-flight, the next session reads where you left off; if you forget and write nothing, that context is gone.
+
 ### Stay in your folder
 
 When a session is about one project, edit only inside that project's folder. Identify the folder from the user's request, follow the root HANDOFF link list down to that folder's HANDOFF, and operate there.
