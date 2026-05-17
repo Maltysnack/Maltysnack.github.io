@@ -23,6 +23,31 @@ Short. Blunt. Almost rude. Straight to the point. State the result, stop.
 - Plan the edit before reading. If you're reading "to see what's there," stop and ask what specifically you're looking for.
 - Conversation over ~50k tokens, or shifting to unrelated work: recommend a fresh session.
 
+### Verify after structural moves
+
+After moving or renaming any page, do not rely on grep alone. Grep catches link strings but misses baked-in absolute paths inside built artefacts (Next.js `assetPrefix`, Vite `base`, webpack publicPath, hashed CSS URLs). For every moved page, run a local server and confirm assets actually resolve:
+
+```sh
+python3 -m http.server 8765 --bind 127.0.0.1 &
+curl -sI http://127.0.0.1:8765/<new-path>/ | head -1                 # 200 OK
+curl -s  http://127.0.0.1:8765/<new-path>/ | grep -oE '/[^" ]+\.(css|js|woff2|json)' \
+  | sort -u | while read u; do
+    code=$(curl -sI "http://127.0.0.1:8765$u" -o /dev/null -w '%{http_code}')
+    echo "$code $u"
+  done
+```
+
+Anything non-200 is a hardcoded reference to the old path. Fix it before committing. This is the silent equivalent of opening the page; no preview panel involved.
+
+### Bulk sed / global-replace discipline
+
+Path-bump sweeps across a folder are the biggest source of self-inflicted slop. Two rules:
+
+1. **Scope the file list explicitly.** Don't `sed -i '' 's|/old|/new|g' $(find ...)` on a wide pattern. Pick the file extensions you actually need (`.html .js .css .json` for asset paths; `.md` only when you're sure markdown text should change). Markdown HANDOFFs almost always contain *historical* path references ("moved from /old to /new") that must NOT be auto-rewritten.
+2. **Use word boundaries when the prefix overlaps with itself.** Replacing `/dnd/` → `/games/dnd/` over content that already contains `/games/dnd/` produces `/games/games/dnd/`. Either run the sed only on files known to have *only* the old form, or use a guard like `sed 's|\([^s]\)/dnd/|\1/games/dnd/|g'`, or do a pre-check `grep` for the new form first and fail loudly if present.
+
+After any bulk sed, grep for both the old form (should be zero hits) and pathological forms like double prefixes (`/old/old/`, `/new/new/`). Doing this once per sweep beats finding it three commits later.
+
 ## Context bar
 
 The site is linked in job applications. Tone is honest, considered, personal.
