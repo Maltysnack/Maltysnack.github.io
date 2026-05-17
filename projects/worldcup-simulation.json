@@ -1764,7 +1764,7 @@
       "elo_delta_away": 11.8
     }
   ],
-  "generated_at": "2026-05-16T07:53:30Z",
+  "generated_at": "2026-05-17T08:13:32Z",
   "n_simulations": 10000,
   "calibration": {
     "lambda_home_at_parity": 1.41,
