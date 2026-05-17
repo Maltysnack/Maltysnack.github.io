@@ -1,0 +1,47 @@
+{
+  "n_decks": 3253,
+  "n_decks_by_weight": {
+    "1": 2865,
+    "3": 48,
+    "5": 332,
+    "10": 8
+  },
+  "total_weighted_decks": 4749,
+  "n_weeks": 98,
+  "first_week": "2024-07-22",
+  "last_week": "2026-05-11",
+  "pair_window_weeks": 12,
+  "pair_window_first_week": "2026-03-14",
+  "pair_window_total_weighted": 2035.0,
+  "n_cards_total": 3877,
+  "n_cards_above_support": 338,
+  "min_support_decks": 30,
+  "tier_boundaries": [
+    {
+      "min_centerpiece_prevalence": 0.1,
+      "label": "defines"
+    },
+    {
+      "min_centerpiece_prevalence": 0.05,
+      "label": "driving"
+    },
+    {
+      "min_centerpiece_prevalence": 0.02,
+      "label": "major"
+    },
+    {
+      "min_centerpiece_prevalence": 0.005,
+      "label": "played"
+    },
+    {
+      "min_centerpiece_prevalence": 0.001,
+      "label": "fringe"
+    }
+  ],
+  "weights_explained": {
+    "1": "Traditional Bo3 ladder lists",
+    "3": "Premier event Top cuts (Champions Cup, RC, Spotlight, etc.)",
+    "5": "Pro Tour main field",
+    "10": "Pro Tour Top 8"
+  }
+}

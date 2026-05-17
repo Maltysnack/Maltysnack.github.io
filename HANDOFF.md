@@ -7,11 +7,12 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 ## Project handoffs
 
 - [`dnd/HANDOFF.md`](dnd/HANDOFF.md): character sheet subsystem
-- [`games/HANDOFF.md`](games/HANDOFF.md): Magic meta-explorer (in flight), synergy-score
+- [`games/HANDOFF.md`](games/HANDOFF.md): games index (magic, duoclue)
+- [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes in flight)
+- [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
 - [`projects/HANDOFF.md`](projects/HANDOFF.md): happyhour, coffeetime, worldcup, algorithms (loose pages)
 - [`projects/fpl/HANDOFF.md`](projects/fpl/HANDOFF.md): FPL tracker
 - [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): flox docs
-- [`projects/duoclue/HANDOFF.md`](projects/duoclue/HANDOFF.md): duoclue
 - [`wren/HANDOFF.md`](wren/HANDOFF.md): Wren persona, runlog, cron
 - [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions
 
@@ -31,7 +32,7 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 
 ## Decisions pending (cross-cutting)
 
-- **Loose-page reorg.** Several projects sit as loose files at the parent-folder level (`games/magic.{html,js,css}`, `projects/happyhour.html`, `projects/coffeetime.html`, `projects/worldcup.html` + 4 json, `projects/algorithms.html` + 5 algo files). Plan is to move each into its own folder (e.g. `projects/worldcup/index.html` + data) so each project owns its scope. URL stability matters (site is linked in job apps), so this needs redirect stubs from the old paths. Do as a follow-up, one project at a time, not in a single sweep.
+- **Loose-page reorg.** Several projects sit as loose files at the parent-folder level (`projects/happyhour.html`, `projects/coffeetime.html`, `projects/worldcup.html` + 4 json, `projects/algorithms.html` + 5 algo files). Plan is to move each into its own folder (e.g. `projects/worldcup/index.html` + data) so each project owns its scope. URL stability matters (site is linked in job apps), so this needs redirect stubs from the old paths. Do as a follow-up, one project at a time, not in a single sweep. (Magic + Duoclue done 18-05-2026.)
 
 ## Cross-cutting gotchas
 

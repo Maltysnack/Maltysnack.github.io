@@ -37,8 +37,8 @@ SECTIONS = [
     ]),
     ("Games", [
         ("/dnd/index.html",             "dnd"),
-        ("/projects/duoclue/index.html", "Duoclue"),
-        ("/games/magic.html",           "Magic"),
+        ("/games/duoclue/index.html",   "Duoclue"),
+        ("/games/magic/index.html",     "Magic"),
     ]),
     ("Wren", [
         ("/shelf/index.html",           "Shelf"),

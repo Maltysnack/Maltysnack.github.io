@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Synergy Score - maltysnack</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="stylesheet" href="/games/magic/magic.css" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="icon" href="/favicon.ico" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <link rel="manifest" href="/manifest.json" />
+  <meta name="theme-color" content="#13110d" />
+  <style>
+    .ss-page { max-width: 720px; }
+    .ss-page h1 { font-size: var(--text-3xl); font-weight: 600; letter-spacing: -0.035em; color: var(--text-strong); margin-bottom: 18px; line-height: 1.0; }
+    .ss-page h2 { font-size: var(--text-xl); font-weight: 600; letter-spacing: -0.025em; color: var(--text-strong); margin: 56px 0 14px; }
+    .ss-page h3 { font-size: var(--text-md); font-weight: 600; color: var(--text-strong); margin: 28px 0 8px; letter-spacing: -0.01em; }
+    .ss-page p, .ss-page li { font-size: var(--text-base); line-height: 1.7; color: var(--text); }
+    .ss-page p { margin-bottom: 16px; max-width: 640px; }
+    .ss-page ul, .ss-page ol { padding-left: 22px; margin-bottom: 18px; max-width: 640px; }
+    .ss-page li { margin-bottom: 6px; }
+    .ss-back { display: inline-block; margin-bottom: 24px; font-size: var(--text-sm); color: var(--text-dim); }
+    .ss-back:hover { color: var(--accent-red); }
+    .ss-lead { font-size: var(--text-md); color: var(--text-muted); max-width: 640px; line-height: 1.7; margin-bottom: 32px; }
+    .ss-formula {
+      font-family: var(--font-mono);
+      font-size: var(--text-sm);
+      background: var(--bg-soft);
+      padding: 14px 18px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      line-height: 1.6;
+      margin: 18px 0;
+      overflow-x: auto;
+      white-space: pre;
+    }
+    .ss-band-grid { display: grid; grid-template-columns: 80px 1fr; gap: 6px 18px; align-items: center; margin: 18px 0; max-width: 540px; }
+    .ss-band { font-family: var(--font-mono); font-size: 13px; font-weight: 700; padding: 4px 10px; border-radius: 3px; text-align: center; min-width: 70px; display: inline-block; }
+    .ss-band-90 { background: #2cc26b; color: #fff; }
+    .ss-band-80 { background: #6dd083; color: #06250f; }
+    .ss-band-70 { background: #d4d164; color: #2a2614; }
+    .ss-band-60 { background: #d99947; color: #2a1a08; }
+    .ss-band-50 { background: #b07a55; color: #fff; }
+    .ss-band-low { background: #8a877d; color: #2a2722; }
+    .ss-pull-quote {
+      font-style: italic;
+      color: var(--text-muted);
+      border-left: 2px solid var(--accent-red);
+      padding: 4px 0 4px 16px;
+      margin: 24px 0;
+      font-size: var(--text-md);
+    }
+    .ss-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      font-size: var(--text-sm);
+    }
+    .ss-table th, .ss-table td {
+      border-bottom: 1px solid var(--border-light);
+      padding: 8px 10px;
+      text-align: left;
+    }
+    .ss-table th {
+      font-size: var(--text-xs);
+      letter-spacing: 0.10em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      font-weight: 600;
+    }
+    .ss-callout {
+      padding: 14px 18px;
+      background: var(--bg-soft);
+      border-left: 3px solid var(--accent-red);
+      border-radius: 0 4px 4px 0;
+      margin: 24px 0;
+      font-size: var(--text-sm);
+      color: var(--text);
+      max-width: 640px;
+    }
+    .ss-callout strong { color: var(--accent-red); }
+    .ss-mini-bars { display: flex; align-items: flex-end; gap: 3px; height: 60px; margin: 18px 0; }
+    .ss-mini-bars div {
+      width: 22px;
+      background: var(--accent-red);
+      border-radius: 2px 2px 0 0;
+      position: relative;
+    }
+    .ss-mini-bars div::after {
+      content: attr(data-l);
+      position: absolute;
+      bottom: -16px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 10px;
+      color: var(--text-dim);
+      font-family: var(--font-mono);
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+    <article class="ss-page">
+
+      <a class="ss-back" href="/games/magic/">← back to Magic: The Gathering</a>
+
+      <h1>The Synergy Score</h1>
+
+      <p class="ss-lead">
+        A single number, 0 to 99, on every card you see in a recommendation.
+        It tells you how strongly the data thinks this card belongs in a deck
+        with the cards you've selected, weighted toward recent and surprising
+        signals over old and obvious ones. This page is the long version of
+        why the number is what it is, what it can and can't tell you, and
+        what's behind it.
+      </p>
+
+      <h2>The short version</h2>
+
+      <p>
+        For each candidate card, we compute four things from the data:
+      </p>
+
+      <ol>
+        <li><strong>Synergy strength</strong>: how much more often this card appears with your selection than chance would predict.</li>
+        <li><strong>Sample size</strong>: how many real winning lists support that signal.</li>
+        <li><strong>Coverage</strong>: how many of your selected cards this card actually pairs with.</li>
+        <li><strong>Novelty</strong>: a discount applied to cards that are already meta staples, so we don't keep recommending the obvious.</li>
+      </ol>
+
+      <p>
+        Those four are multiplied, log-shaped, and calibrated to land on a
+        0-99 scale. Higher means stronger fit. Cards with no direct co-occurrence
+        data fall back to a smaller "semantic" score based on shared color
+        identity and card type.
+      </p>
+
+      <div class="ss-band-grid">
+        <span class="ss-band ss-band-90">90+</span><span>genuinely standout fit, recently confirmed</span>
+        <span class="ss-band ss-band-80">80-89</span><span>strong fit, well-supported</span>
+        <span class="ss-band ss-band-70">70-79</span><span>solid, expected synergy</span>
+        <span class="ss-band ss-band-60">60-69</span><span>passable, partial fit</span>
+        <span class="ss-band ss-band-50">50-59</span><span>weak signal, marginal</span>
+        <span class="ss-band ss-band-low">&lt;50</span><span>noise, plays of opportunity</span>
+      </div>
+
+      <h2>Where the data comes from</h2>
+
+      <p>
+        Every winning Standard decklist that magic.gg has published since
+        July 2024. That includes the weekly Traditional Bo3 ladder lists
+        (decks that hit the 6-0 cutoff on MTG Arena), every premier event
+        page (Champions Cup, Spotlights, Regional Championships, MIT, SEA,
+        ANZ, EU Magic Series), the Pro Tour main field, and the Pro Tour
+        Top 8 lists embedded in news articles. The dataset rebuilds itself
+        every Tuesday through a GitHub Action that scrapes magic.gg, enriches
+        with Scryfall metadata, and recomputes the stats.
+      </p>
+
+      <p>
+        Decks aren't all weighted the same. A Pro Tour Top 8 list reflects
+        someone who survived 14+ rounds of high-skill play; a ladder list
+        is one anonymous player who happened to go 6-0 on a given day.
+        Weights:
+      </p>
+
+      <table class="ss-table">
+        <thead>
+          <tr><th>Source</th><th>Weight</th><th>Why</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Pro Tour Top 8</td><td>10</td><td>survived a full pro-level event</td></tr>
+          <tr><td>Pro Tour main field</td><td>5</td><td>tested by pros, made the cut to enter</td></tr>
+          <tr><td>Premier event Top cuts</td><td>3</td><td>regional championships, spotlights, etc.</td></tr>
+          <tr><td>Bo3 ladder 6-0</td><td>1</td><td>baseline, large sample size, anonymous</td></tr>
+        </tbody>
+      </table>
+
+      <p>
+        Every count below is weighted. So a card appearing in 6 PT Top 8
+        decks contributes the same as 60 ladder decks to the prevalence
+        and pair stats.
+      </p>
+
+      <h2>The recency window</h2>
+
+      <p>
+        <strong>Pair stats only count decks from the last 12 weeks.</strong>
+        Anything older doesn't influence the score, even if the card itself
+        has been around for years.
+      </p>
+
+      <p>
+        Why: the Magic meta shifts every few months. A card might have
+        crushing co-occurrence stats from six months ago when it was a meta
+        pillar, then get banned, or have its key partners rotate out, and
+        be functionally dead today. If we used all-time data, the score
+        would still recommend the dead card. The 12-week window means the
+        score reflects what's currently winning, not what once won.
+      </p>
+
+      <p>
+        This has consequences:
+      </p>
+
+      <ul>
+        <li>Brand-new cards (less than ~3 weeks of data) may have weak or unreliable pair stats. They'll often score from semantic fallback instead.</li>
+        <li>Cards that just rotated in or just got unbanned will take a few weeks to accumulate a meaningful score.</li>
+        <li>Banned cards drop out completely and get filtered by the Standard-legality check too.</li>
+      </ul>
+
+      <h2>The math, in detail</h2>
+
+      <p>
+        For a candidate card <em>B</em> being scored against a selection
+        <em>S</em>, here's what gets computed.
+      </p>
+
+      <h3>1. Tier separation</h3>
+
+      <p>
+        The recent deck pool is split into four sub-pools by source quality:
+      </p>
+
+      <ul>
+        <li><strong>Pro Tour Top 8</strong> (weight 10): currently 8 decks.</li>
+        <li><strong>Pro Tour main field</strong> (weight 5).</li>
+        <li><strong>Premier event Top cuts</strong> (weight 3).</li>
+        <li><strong>Ladder Bo3 6-0</strong> (weight 1): the baseline volume.</li>
+      </ul>
+
+      <p>
+        Each tier produces its own conditional probability for the candidate:
+        <em>"of the tier-T decks containing my selection, how often does the
+        candidate also appear?"</em> Then we blend across tiers, giving
+        tiers' votes proportional to a configurable weight.
+      </p>
+
+      <pre class="ss-formula">TIER_BLEND = { ladder: 0.15, premier: 0.20, pt_main: 0.30, pt_top8: 0.35 }</pre>
+
+      <p>
+        Why this matters: a card that appears in 2 of 8 PT Top 8 decks
+        running your selection is a 25% conditional probability at the
+        top tier. With the old all-tiers-merged math, that signal got
+        diluted to ~5% by the much-larger ladder pool. With per-tier
+        blending, the Top 8's 25% carries its own weight regardless of
+        ladder sample.
+      </p>
+
+      <p>
+        Tiers with no data for the candidate don't dilute. The blend
+        renormalises across the active tiers, so a card in PT Top 8 only
+        still gets a strong score if no other tier has been tested.
+      </p>
+
+      <h3>2. Recency decay within the window</h3>
+
+      <p>
+        Within the 12-week window, more-recent decks count slightly more.
+        A linear decay from 1.25× at the most-recent week to 1.0× at the
+        cutoff. Subtle, but it makes the score respond a little faster to
+        a new set drop or banlist shift without us having to shorten the
+        whole window (which would shrink the sample dramatically).
+      </p>
+
+      <h3>3. Per-tier robustness</h3>
+
+      <p>
+        Each tier has its own "full confidence" threshold proportional to
+        typical sample size:
+      </p>
+
+      <pre class="ss-formula">robustness_T = min(sqrt(co_decks_T / REF_T), 1)
+REF: ladder=100, premier=15, pt_main=10, pt_top8=3</pre>
+
+      <p>
+        With only 8 total PT Top 8 decks, 2 of them is half the full-
+        confidence threshold (3). That's a real signal. With 3000 ladder
+        decks, 2 of them is essentially noise. Per-tier references stop
+        ladder math from punishing legitimate PT signals.
+      </p>
+
+      <h3>4. Partial selection coverage</h3>
+
+      <p>
+        Decks in a tier that contain only some of your selected cards
+        contribute proportionally:
+      </p>
+
+      <pre class="ss-formula">match_weight = (cards_matched / |selection|)² × deck_weight</pre>
+
+      <p>
+        A deck containing all 3 of your 3 selected cards contributes its
+        full weight. A deck containing 2 of 3 contributes 44%. A deck
+        containing 1 of 3 contributes 11%. A deck containing none
+        contributes nothing. This is computed within each tier separately.
+      </p>
+
+      <h3>5. Novelty discount</h3>
+
+      <p>
+        Computed on overall pool prevalence (not per-tier). Pushes meta
+        staples down so interesting hits surface.
+      </p>
+
+      <pre class="ss-formula">novelty = 1 / (1 + 5 × baselinePrevalence)</pre>
+
+      <p>
+        At 2% prevalence: novelty ≈ 0.91.
+        At 10% prevalence: 0.67.
+        At 25% prevalence: 0.44.
+      </p>
+
+      <h3>6. Deck-balance multiplier</h3>
+
+      <p>
+        Selection's tag distribution drives a small per-candidate
+        multiplier: cards filling under-represented categories
+        (e.g. removal when you have none) get up to +30%; cards piling
+        onto saturated categories get up to -25%. Capped 0.6x–1.8x.
+      </p>
+
+      <h3>Per-tier lift, for diagnostic transparency</h3>
+
+      <p>
+        Inside the breakdown popover (click any score badge) each tier's row
+        also shows a <em>tier lift</em> number: the per-tier conditional
+        probability divided by the per-tier baseline. This tells you whether
+        a high-scoring card is specifically tied to your selection within
+        that tier, or just popular there regardless of what's selected.
+      </p>
+
+      <ul>
+        <li><strong>×1.5 or higher</strong>: "specific". This card is in
+            your selection's decks meaningfully more than chance for the
+            tier.</li>
+        <li><strong>×1.1 to 1.5</strong>: mild lift, normal-fit territory.</li>
+        <li><strong>~×1</strong>: "ambient". The card is just popular in
+            this tier; its presence with your selection is largely incidental.</li>
+      </ul>
+
+      <h3>7. Putting it together</h3>
+
+      <pre class="ss-formula">blended = Σ (tier_signal × tier_weight) / Σ active_tier_weights
+raw     = blended × novelty × balance_multiplier
+score   = clamp(99 × (1 - exp(-8 × raw)), 0, 99)</pre>
+
+      <p>
+        The asymptotic curve means 99 is reserved for genuinely
+        outstanding pairs. A solid empirical pair with PT validation
+        typically lands 75–90. A card present only in ladder lists with
+        moderate co-occurrence lands 40–60.
+      </p>
+
+      <h3>7. Semantic fallback</h3>
+
+      <p>
+        If a candidate has no direct pair data with anything in your
+        selection (the recency window dropped it, or it's brand new, or
+        it's just rare), we fall back to a smaller "semantic" score. It
+        compares the candidate's color identity and primary card type
+        against the selection profile and returns at most 30 points. This
+        is intentionally lower than empirical scores; it's the system's
+        way of saying "this card thematically fits but we have no data
+        to confirm."
+      </p>
+
+      <h2>How to read the score</h2>
+
+      <div class="ss-callout">
+        <strong>Position is the data, the score is the explanation.</strong>
+        Cards are already ordered top-to-bottom by their score. The number
+        on each card is just there so you can see <em>why</em>, and color
+        is there so you can scan a grid in one glance.
+      </div>
+
+      <ul>
+        <li><strong>90+ (bright green)</strong>: a genuinely standout pick. Strong recent co-occurrence, well-supported by sample size, novel enough to not be obvious. If you're building around your selection and you ignore these, you're probably leaving value on the table.</li>
+        <li><strong>80-89 (light green)</strong>: a strong fit. Confidence is high, novelty is decent. These are the cards a knowledgeable player would expect, presented without the data weighting too aggressively against them.</li>
+        <li><strong>70-79 (yellow)</strong>: a solid expected synergy. Often the meta staples in the selection's color identity, with the novelty discount holding them back from going higher.</li>
+        <li><strong>60-69 (orange)</strong>: a passable pick. Worth considering, especially if you're avoiding the obvious staples.</li>
+        <li><strong>50-59 (warm muted)</strong>: weak signal. Probably won't be a load-bearing piece. Consider as flex slots.</li>
+        <li><strong>Below 50 (grey)</strong>: noise. Co-occurrence is incidental. Skip unless you have a specific reason.</li>
+      </ul>
+
+      <h2>What the score can't tell you</h2>
+
+      <p>The dataset is winning decks. It is not:</p>
+
+      <ul>
+        <li><strong>Matchup data.</strong> We don't know which decks beat which. A card might be in a lot of winning lists because the deck is good, not because the card is. Lift catches this partially, but not perfectly.</li>
+        <li><strong>Causal.</strong> Two cards always appearing together doesn't mean either causes the other to be good. They might both be necessary because of the same third thing.</li>
+        <li><strong>Forward-looking.</strong> The score reflects what's worked recently. A new strategy that hasn't shown up in winning lists yet won't have a high score even if it's correct.</li>
+        <li><strong>Build-priority aware.</strong> A 95 doesn't mean "definitely play 4 of these in your deck." It means "this card has been performing alongside your selection." Copy counts, mana curve, and slot allocation are still your problem.</li>
+      </ul>
+
+      <p>
+        The score is a tool for finding ideas, not a list of correct
+        moves. If it points you somewhere unexpected, the right reaction
+        is "huh, why?" and to look at the actual decklists where that
+        pairing came up.
+      </p>
+
+      <h2>Things to keep in mind</h2>
+
+      <ul>
+        <li><strong>Recency cuts both ways.</strong> The 12-week window means the score is current, but also that a card you remember crushing the meta last year may now have no score at all. That's by design.</li>
+        <li><strong>Sample size matters more for new sets.</strong> Right after a set release, a few weeks of data exist; many cards have small co-occurrence counts. Scores will be more volatile until the meta settles.</li>
+        <li><strong>The novelty discount is opinionated.</strong> It pushes meta staples down. If you specifically want to play the obvious deck, you're better off just copying a Pro Tour list, which the matching-lists panel on the main page makes easy.</li>
+        <li><strong>The semantic fallback is a hint, not a measurement.</strong> A score of 28 on a sparse-data card means "this might fit thematically," nothing stronger. Treat it as a brewing prompt.</li>
+        <li><strong>Lands behave differently.</strong> They get filtered out of the main score grid because "Steam Vents has high lift with everything in UR" isn't useful. The manabase panel below the main grid shows them separately with their own scores.</li>
+      </ul>
+
+      <h2>Why design it this way</h2>
+
+      <p>
+        Most decklist sites show you the most popular cards. We didn't want
+        to build that, because everyone else already has. The data we
+        collect lets us answer a different question: <em>which cards
+        actually belong together that you wouldn't have guessed from the
+        top decklist?</em> Lift catches that. Novelty discount keeps it
+        catching that. Recency keeps it honest about today's meta.
+      </p>
+
+      <div class="ss-pull-quote">
+        If you want to play the meta deck, copy a list. If you want to
+        find what hasn't been built yet, follow the score.
+      </div>
+
+      <p>
+        That's the whole philosophy of the site, condensed into one number.
+      </p>
+
+      <a class="ss-back" href="/games/magic/" style="margin-top: 48px; display: inline-block;">← back to Magic: The Gathering</a>
+
+    </article>
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>
