@@ -36,7 +36,15 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 
 ## Decisions pending (cross-cutting)
 
-- ~~Loose-page reorg.~~ Done 18-05-2026: magic, duoclue, dnd, happyhour, coffeetime, worldcup, algorithms all now own their folder + HANDOFF. No redirect stubs (site has no inbound traffic from old URLs).
+- ~~Loose-page reorg.~~ Done 18-05-2026.
+- **`widgets/` orphaned.** `widgets/happyhour.js` and `widgets/coffeetime.js` are frozen Scriptable widgets but sit at the repo root, unmentioned by any project. Either move them into `projects/{happyhour,coffeetime}/widget.js` or add a "constrained-to-stay" line in each project HANDOFF. Pick one next session.
+- **`vercel-out/index.html`.** Looks like a build artifact. Probably belongs in `.gitignore`, not the repo. Confirm and delete next session.
+- **Stray untracked files.** `.github/workflows/sync-fpl.yml.disabled` and `projects/test_perm.txt` exist as untracked. Either commit, gitignore, or remove.
+- **Magic Archetypes status.** `games/magic/HANDOFF.md` still flags Archetypes as "LOCAL ONLY, do not push." That note is stale: shipped 18-05-2026 in commit `2f0cc12`. Update the HANDOFF to reflect live state.
+
+## Recent session log
+
+- **18-05-2026 (this session):** Big reorg pass. Magic (with synergy-score + data), Duoclue, and dnd moved under `/games/`. All loose `projects/*.html` moved into per-project folders. Every project now owns a folder + HANDOFF. Root HANDOFF link list flattened to one tree. CLAUDE.md overhauled: deduped (188 to 136 lines), Wren-folders block moved to `wren/HANDOFF.md`, added rules for "stay in your folder", "write to HANDOFF as you go", "do not open the preview panel", sharpened response-style. Five commits pushed: `2f0cc12` `0f8ff96` `e2cae15` `ba6d803` `bfc0b2b` `78d2930`. No redirect stubs (site has no inbound traffic from old URLs).
 
 ## Cross-cutting gotchas
 
