@@ -4,7 +4,7 @@ Index for `/games/`. Each game owns its own HANDOFF when non-trivial. Root `HAND
 
 ## Subprojects
 
-- [`magic/HANDOFF.md`](magic/HANDOFF.md): Magic meta-explorer (Archetypes tab in flight). Synergy-score now lives inside here.
+- [`magic/HANDOFF.md`](magic/HANDOFF.md): Magic meta-explorer (Archetypes tab live). Synergy-score now lives inside here.
 - [`duoclue/HANDOFF.md`](duoclue/HANDOFF.md): Duoclue
 - [`dnd/HANDOFF.md`](dnd/HANDOFF.md): D&D character sheet subsystem
 

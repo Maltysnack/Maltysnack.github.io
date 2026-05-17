@@ -12,10 +12,10 @@ Scratchpad for `/games/magic/`. Parent `games/HANDOFF.md` lists sibling games; r
 - 3 tabs live (Cards, Decks, Pro-Tour). 4th tab (Archetypes) in flight.
 - Folder reorg done 18-05-2026: was `games/magic.{html,js,css}` + `games/data/`, now `games/magic/{index.html,magic.js,magic.css}` + `games/magic/data/`. `DATA_DIR` in `magic.js` updated. No redirect from old path (site has no inbound traffic).
 
-## In flight
+## Live
 
-- **Magic Archetypes tab (LOCAL ONLY, do not push to main).** NMF clustering of recent decks to discover card packages.
-  - Uncommitted files: `games/magic/magic.js`, `games/magic/magic.css` (tab + UI), `games/magic/data/cluster.py` (new, NMF script), `games/magic/data/clusters.json` (new, 16 clusters, 87% archetype-classification).
+- **Archetypes tab.** NMF clustering of recent decks to discover card packages. Shipped 18-05-2026 in commit `2f0cc12` (previously flagged LOCAL ONLY; gate lifted).
+  - Files: `games/magic/magic.js`, `games/magic/magic.css` (tab + UI), `games/magic/data/cluster.py` (NMF script), `games/magic/data/clusters.json` (16 clusters, 87% archetype-classification).
   - Local server to view: `python3 -m http.server 8765 --bind 127.0.0.1` from repo root, then `http://127.0.0.1:8765/games/magic/#t=archetypes`.
   - Closed cluster card = 2x2 thumbnail preview of top 4 cards.
   - Open cluster card = n×n grid spans at three discrete sizes (anchor 6×6, medium 4×4, small 2×2) on col-width 22px × row-height 30px (card aspect 0.72), dense flow, 560px max-width centered. Outer `.cluster-grid` uses `grid-auto-flow: row dense` so siblings reflow when one opens full-width.

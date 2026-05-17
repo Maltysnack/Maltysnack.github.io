@@ -7,7 +7,7 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 ## Project handoffs
 
 - [`games/HANDOFF.md`](games/HANDOFF.md): games index
-  - [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes in flight)
+  - [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes live)
   - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
   - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): character sheet subsystem
 - [`projects/HANDOFF.md`](projects/HANDOFF.md): projects index
@@ -41,7 +41,7 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 - ~~`vercel-out/index.html` stale.~~ Done 18-05-2026: it isn't a build artifact (declared as Vercel deployment root in `vercel.json`); fixed its `/dnd/` link to point at the new `/games/dnd/`.
 - ~~`projects/test_perm.txt` stale.~~ Deleted 18-05-2026.
 - `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose. See `projects/fpl/HANDOFF.md` (awaiting maltysnack's call on re-enabling).
-- **Magic Archetypes status.** `games/magic/HANDOFF.md` still flags Archetypes as "LOCAL ONLY, do not push." That note is stale: shipped 18-05-2026 in commit `2f0cc12`. Update the HANDOFF to reflect live state.
+- ~~Magic Archetypes "LOCAL ONLY" stale note.~~ Cleared 18-05-2026: tab confirmed live, magic HANDOFF moved it from "In flight" to "Live".
 
 ## Recent session log
 
