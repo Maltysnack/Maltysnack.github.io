@@ -10,7 +10,7 @@ Scratchpad for `/games/magic/`. Parent `games/HANDOFF.md` lists sibling games; r
 ## Current state (as of 18-05-2026)
 
 - 3 tabs live (Cards, Decks, Pro-Tour). 4th tab (Archetypes) in flight.
-- Folder reorg done 18-05-2026: was `games/magic.{html,js,css}` + `games/data/`, now `games/magic/{index.html,magic.js,magic.css}` + `games/magic/data/`. Redirect stub at `games/magic.html`. `DATA_DIR` in `magic.js` updated.
+- Folder reorg done 18-05-2026: was `games/magic.{html,js,css}` + `games/data/`, now `games/magic/{index.html,magic.js,magic.css}` + `games/magic/data/`. `DATA_DIR` in `magic.js` updated. No redirect from old path (site has no inbound traffic).
 
 ## In flight
 
@@ -34,9 +34,9 @@ Scratchpad for `/games/magic/`. Parent `games/HANDOFF.md` lists sibling games; r
 ## Gotchas
 
 - Lands must stay filtered from clustering input or clusters collapse onto color buckets.
-- `synergy-score.html` shares `magic.css`; keep selectors that don't conflict with its `.ss-*` scope. Moved into `games/magic/` 18-05-2026 (redirect at old `/games/synergy-score.html`).
+- `synergy-score.html` shares `magic.css`; keep selectors that don't conflict with its `.ss-*` scope. Moved into `games/magic/` 18-05-2026.
 
 ## Recent session log
 
-- 18-05-2026: Folder reorg: magic + data moved into `games/magic/`. Redirect stub at old path.
+- 18-05-2026: Folder reorg: magic + data + synergy-score moved into `games/magic/`. Old paths deleted.
 - 18-05-2026: Archetypes tab grid math finalised (three discrete sizes, dense flow). HANDOFF carved out from root.

@@ -32,7 +32,7 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 
 ## Decisions pending (cross-cutting)
 
-- **Loose-page reorg.** Several projects sit as loose files at the parent-folder level (`projects/happyhour.html`, `projects/coffeetime.html`, `projects/worldcup.html` + 4 json, `projects/algorithms.html` + 5 algo files). Plan is to move each into its own folder (e.g. `projects/worldcup/index.html` + data) so each project owns its scope. URL stability matters (site is linked in job apps), so this needs redirect stubs from the old paths. Do as a follow-up, one project at a time, not in a single sweep. (Magic + Duoclue done 18-05-2026.)
+- **Loose-page reorg.** Several projects sit as loose files at the parent-folder level (`projects/happyhour.html`, `projects/coffeetime.html`, `projects/worldcup.html` + 4 json, `projects/algorithms.html` + 5 algo files). Plan is to move each into its own folder (e.g. `projects/worldcup/index.html` + data) so each project owns its scope. Do as a follow-up, one project at a time, not in a single sweep. No redirect stubs needed: site has no inbound traffic from the old URLs. (Magic + Duoclue done 18-05-2026.)
 
 ## Cross-cutting gotchas
 
