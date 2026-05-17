@@ -4,7 +4,7 @@
   "descriptors": ["weed", "farmer"],
   "identity": {
     "name": "Sage Greenwood",
-    "classLine": "Half-Elf Druid 5",
+    "classLine": "Half-Elf Druid (Shepherd) 5",
     "background": "Farmer",
     "speedLine": "Speed 30",
     "languages": "Common, Elvish, Druidic",
@@ -16,7 +16,7 @@
   "spellcastingAbility": "wis",
   "combat": {
     "ac": 12,
-    "hpMax": 24,
+    "hpMax": 23,
     "hitDiceMax": 5,
     "hitDiceType": "d8"
   },
@@ -68,20 +68,27 @@
   "spellSlots": { "1": 4, "2": 3, "3": 2 },
   "spellSlotsRestoresOn": "long",
   "resources": [
-    { "key": "wildShape", "name": "Wild Shape", "type": "pip", "max": 2, "restoresOn": "short" }
+    { "key": "wildShape",   "name": "Wild Shape",   "type": "pip", "max": 2, "restoresOn": "short" },
+    { "key": "spiritTotem", "name": "Spirit Totem", "type": "pip", "max": 1, "restoresOn": "short" }
   ],
-  "spellSource": "",
+  "spellSource": "includes Shepherd circle spells",
   "spells": [
     { "lvl": 0, "lvlLabel": "Cant", "name": "Shillelagh",   "slug": "shillelagh",    "tags": ["BA"],          "desc": "club/staff: atk + dmg use WIS, dmg becomes 1d8, magical, 1 min" },
     { "lvl": 0, "lvlLabel": "Cant", "name": "Guidance",     "slug": "guidance",      "tags": ["conc"],        "desc": "touch ally adds 1d4 to one ability check w/in 1 min" },
     { "lvl": 0, "lvlLabel": "Cant", "name": "Thorn Whip",   "slug": "thorn-whip",    "tags": [],              "desc": "30 ft, 2d6 piercing, pull Large or smaller 10 ft" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Animal Friendship", "slug": "animal-friendship", "tags": ["circle"], "desc": "beast WIS save or charmed 24 hr (immune INT 4+)" },
+    { "lvl": 1, "lvlLabel": "1st",  "name": "Speak with Animals", "slug": "speak-with-animals", "tags": ["ritual","circle"], "desc": "comprehend + verbal communicate w/ beasts, 10 min" },
     { "lvl": 1, "lvlLabel": "1st",  "name": "Cure Wounds",  "slug": "cure-wounds",   "tags": [],              "desc": "touch: heal 1d8+5, +1d8 per slot above 1st" },
     { "lvl": 1, "lvlLabel": "1st",  "name": "Detect Magic", "slug": "detect-magic",  "tags": ["conc"],        "desc": "sense magic w/in 30 ft, 10 min" },
     { "lvl": 1, "lvlLabel": "1st",  "name": "Entangle",     "slug": "entangle",      "tags": ["conc"],        "desc": "20 ft sq, STR save or restrained, 1 min" },
     { "lvl": 1, "lvlLabel": "1st",  "name": "Faerie Fire",  "slug": "faerie-fire",   "tags": ["conc"],        "desc": "20 ft cube, DEX save or outlined: adv on atks vs target, no invis, 1 min" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Beast Sense",  "slug": "beast-sense",   "tags": ["ritual","conc","circle"], "desc": "see/hear through a willing beast's senses, 1 hr" },
+    { "lvl": 2, "lvlLabel": "2nd",  "name": "Animal Messenger", "slug": "animal-messenger", "tags": ["circle"], "desc": "tiny beast delivers 25-word message up to 24 hr travel" },
     { "lvl": 2, "lvlLabel": "2nd",  "name": "Moonbeam",     "slug": "moonbeam",      "tags": ["conc"],        "desc": "5 ft beam, 2d10 radiant on enter/turn, CON save half, move 60 ft as action, 1 min" },
     { "lvl": 2, "lvlLabel": "2nd",  "name": "Wither and Bloom", "slug": "wither-and-bloom", "tags": [],       "desc": "10 ft sphere, 2d6 necrotic CON save half; one ally spends + rolls hit die to heal" },
     { "lvl": 2, "lvlLabel": "2nd",  "name": "Locate Object", "slug": "locate-object", "tags": ["conc"],       "desc": "sense direction to known object w/in 1000 ft, 10 min" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Speak with Plants", "slug": "speak-with-plants", "tags": ["circle"], "desc": "10 min: question + command plants in 30 ft, learn local events" },
+    { "lvl": 3, "lvlLabel": "3rd",  "name": "Conjure Animals", "slug": "conjure-animals", "tags": ["conc","circle"], "desc": "summon fey beasts CR 2/1/0.5/0.25 (1/2/4/8), 1 hr" },
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Water Breathing", "slug": "water-breathing", "tags": ["ritual"], "desc": "10 creatures breathe underwater, 24 hr" },
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Revivify",     "slug": "revivify",      "tags": [],              "desc": "return creature dead <1 min to 1 HP (300 gp diamond)" },
     { "lvl": 3, "lvlLabel": "3rd",  "name": "Plant Growth", "slug": "plant-growth",  "tags": [],              "desc": "100 ft radius difficult terrain, or 8 hr ritual enriches 0.5 mile" }
@@ -97,7 +104,8 @@
   "features": [
     { "name": "Druidic",     "tag": "language",  "desc": "secret druid tongue, leave hidden messages only druids notice" },
     { "name": "Wild Shape",  "tag": "2/short",   "desc": "BA: transform into beast CR ≤ 1/2 (no fly until lvl 8), 2.5 hr, HP = beast" },
-    { "name": "Druid Circle", "upcoming": true,  "desc": "subclass not yet chosen (Land or Moon expected at lvl 2). Confirm to unlock circle features" }
+    { "name": "Speech of the Woods", "group": "Circle of the Shepherd", "tag": "passive",  "desc": "Sylvan + woodland speech: communicate basic ideas w/ beasts that can't speak (no charm)" },
+    { "name": "Spirit Totem",        "group": "Circle of the Shepherd", "tag": "1/short",  "desc": "BA: 60 ft spirit, 30 ft radius, 1 min. Bear: temp HP 5+lvl + adv STR; Hawk: RX give adv on atk; Unicorn: adv detect, allies +lvl HP when you cast heal" }
   ],
   "defaultInventory": [
     { "name": "Golden dog whistle",  "notes": "homebrew, all who hear in 30 ft DC 16 CON save or stunned 2 rounds" },
