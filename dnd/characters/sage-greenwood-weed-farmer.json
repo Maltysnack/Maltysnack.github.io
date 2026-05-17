@@ -1,0 +1,242 @@
+{
+  "schemaVersion": 1,
+  "id": "sage-greenwood-weed-farmer",
+  "descriptors": [
+    "weed",
+    "farmer"
+  ],
+  "identity": {
+    "name": "Sage Greenwood",
+    "classLine": "Half Elf Druid Level 5",
+    "background": "Farmer",
+    "speedLine": "Speed 30",
+    "languages": "",
+    "otherProficiencies": ""
+  },
+  "class": "druid",
+  "level": 5,
+  "profBonus": 3,
+  "spellcastingAbility": "cha",
+  "combat": {
+    "ac": 12,
+    "hpMax": 10,
+    "hitDiceMax": 1,
+    "hitDiceType": "d8"
+  },
+  "startingGold": 15,
+  "abilities": [
+    {
+      "key": "str",
+      "name": "Strength",
+      "score": 0
+    },
+    {
+      "key": "dex",
+      "name": "Dexterity",
+      "score": 1
+    },
+    {
+      "key": "con",
+      "name": "Constitution",
+      "score": -1
+    },
+    {
+      "key": "int",
+      "name": "Intelligence",
+      "score": 1
+    },
+    {
+      "key": "wis",
+      "name": "Wisdom",
+      "score": 5
+    },
+    {
+      "key": "cha",
+      "name": "Charisma",
+      "score": 2
+    }
+  ],
+  "saves": [
+    {
+      "ability": "str",
+      "proficient": false
+    },
+    {
+      "ability": "dex",
+      "proficient": false
+    },
+    {
+      "ability": "con",
+      "proficient": false
+    },
+    {
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "ability": "cha",
+      "proficient": false
+    }
+  ],
+  "skills": [
+    {
+      "name": "Acrobatics",
+      "ability": "dex",
+      "proficient": true
+    },
+    {
+      "name": "Animal Handling",
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "name": "Arcana",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Athletics",
+      "ability": "str",
+      "proficient": true
+    },
+    {
+      "name": "Deception",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "History",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Insight",
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "name": "Intimidation",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "Investigation",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Medicine",
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "name": "Nature",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Perception",
+      "ability": "wis",
+      "proficient": true
+    },
+    {
+      "name": "Performance",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "Persuasion",
+      "ability": "cha",
+      "proficient": true
+    },
+    {
+      "name": "Religion",
+      "ability": "int",
+      "proficient": true
+    },
+    {
+      "name": "Sleight of Hand",
+      "ability": "dex",
+      "proficient": true
+    },
+    {
+      "name": "Stealth",
+      "ability": "dex",
+      "proficient": true
+    },
+    {
+      "name": "Survival",
+      "ability": "wis",
+      "proficient": true
+    }
+  ],
+  "attacks": [],
+  "spellSlots": {
+    "1": 4,
+    "2": 3,
+    "3": 2
+  },
+  "resources": [
+    {
+      "key": "wildShape",
+      "name": "Wild Shape",
+      "type": "pip",
+      "max": 2,
+      "restoresOn": "short"
+    }
+  ],
+  "spells": [],
+  "limitedSpells": [],
+  "features": [],
+  "defaultInventory": [
+    {
+      "name": "Golden dog whistle (all creatures who can hear",
+      "notes": ""
+    },
+    {
+      "name": "in a 30ft radius",
+      "notes": ""
+    },
+    {
+      "name": "has to make a DC 16 constitution saving throw",
+      "notes": ""
+    },
+    {
+      "name": "or be stunned for 2 rounds).\r\rMagic weed pipe (grants the ability to cast 1 free Cure Wounds spell per day).\r\rQuarterstaff\rDagger\rLeather armour\rExplorers Pack - backpack",
+      "notes": ""
+    },
+    {
+      "name": "bedroll",
+      "notes": ""
+    },
+    {
+      "name": "mess kit (kitchen stuff)",
+      "notes": ""
+    },
+    {
+      "name": "tinderbox",
+      "notes": ""
+    },
+    {
+      "name": "10 torches",
+      "notes": ""
+    },
+    {
+      "name": "10 days of rations",
+      "notes": ""
+    },
+    {
+      "name": "waterskin",
+      "notes": ""
+    },
+    {
+      "name": "50ft of hemp rope\r\rDruidic focus - Magic Weed Pipe above",
+      "notes": ""
+    }
+  ],
+  "homebrew": "RAW PDF FIELDS (parser did not structure these, polish step please interpret):\n  Wpn1 AtkBonus: +8\n  Wpn1 Damage: 1d8 +5 b\n  Wpn2 AtkBonus : +4\n  Wpn2 Damage : 1 d4 +1 p\n  CharacterName 2: Sage Greenwood\n  SlotsTotal 19: 4\n  Spells 1014: Shillelagh\n  Spells 1015: Cure Wounds\n  Spells 1016: Guidance\n  Spells 1017: Thorn Whip\n  Spells 1023: Detect Magic\n  Spells 1024: Entangle\n  Spells 1025: Faerie Fire\n  SlotsTotal 20: 3\n  Spells 1034: Moonbeam\n  Spells 1035: Wither and Bloom\n  Spells 1046: Locate Object\n  SlotsTotal 21: 2\n  Spells 1047: Water Breathing\n  Spells 1048: Revivify\n  Spells 1049: Plant Growth"
+}
