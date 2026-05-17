@@ -2337,7 +2337,7 @@
         container.innerHTML = top.map((p, i) => {
           const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
           const rounded = Math.round(p.predicted_wc_goals);
-          const exact = p.predicted_wc_goals.toFixed(2);
+          const exact = (p.predicted_wc_goals_raw ?? p.predicted_wc_goals).toFixed(2);
           // Prefer the actual club crest from Wikipedia; fall back to
           // the league-country flag if we don't have a badge for that club.
           const badgeHtml = p.club_badge
