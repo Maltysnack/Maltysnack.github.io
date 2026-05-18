@@ -229,9 +229,11 @@
 
     .wc-paths {
       display: grid;
-      /* Team | Elo | dark-horse tag | R16 | QF | SF | Final | Champion */
-      /* Team | Elo | dark-horse tag | R16 | QF | SF | F | Champion | Market | Δ */
-      grid-template-columns: minmax(160px, 1.4fr) 3em 6.5em repeat(5, 1fr) 1fr 0.9fr;
+      /* Team | dark-horse tag | R16 | QF | SF | F | Champion | Market | Δ
+         (Elo column intentionally hidden: it's a model input, not an
+         output, and the layer bumps make raw Elo a confusing tiebreaker
+         alongside champion%.) */
+      grid-template-columns: minmax(160px, 1.4fr) 6.5em repeat(5, 1fr) 1fr 0.9fr;
       column-gap: 0.3rem;
       row-gap: 0.4rem;
       font-size: 0.85rem;
@@ -1347,9 +1349,11 @@
           Probability each team reaches a given round, averaged across all
           Monte Carlo runs. Cells are coloured per column: the strongest
           team in each round sets the deepest green, others scale from there.
-          The five teams flagged
-          <span class="wc-darkhorse-tag">dark horse</span> are outside the
-          top eight by raw rating but punch hardest above their weight.
+          Up to two teams are flagged
+          <span class="wc-darkhorse-tag">dark horse</span> &mdash; their
+          championship-probability rank sits at least two places above
+          their model-strength rank, even after every adjustment we apply.
+          Hosts excluded.
           The <strong>Market</strong> column is the de-vigged Polymarket
           implied probability for outright champion; <strong>Δ</strong> is
           our model minus market (gold when we're more bullish, blue when
@@ -2183,36 +2187,41 @@
       function renderPaths() {
         const sim = activeStats();
         const stats = sim.team_stats;
-        // Rank by RAW Elo (plus any active boost). Using raw avoids
-        // "double-counting" effects: a team whose effective rating we already
-        // pulled down via squad/form blends shouldn't then get credit
-        // for outperforming the suppressed rating.
-        const rawFor = (s) => (s.raw_rating != null ? s.raw_rating : s.rating);
-        const byRating = [...stats].sort((a, b) => rawFor(b) - rawFor(a));
+        // Rank by BOOSTED rating (the one the simulator actually uses,
+        // after host + altitude + NT-trophy + form layers). The dark-horse
+        // logic below compares this to champion% rank, using the boosted
+        // rating means a team's host/altitude bonus is already priced in,
+        // so the only way to surface as a dark horse is to have a tournament
+        // path that lifts you beyond what your full model strength predicts.
+        const byRating = [...stats].sort((a, b) => b.rating - a.rating);
         const ratingRank = new Map();
         byRating.forEach((s, i) => ratingRank.set(s.team, i + 1));
 
-        // Dark-horse selection: deliberately sparse. We score every team
-        // outside the top 8 by how much they outperform their rank-implied
-        // ceiling, then take only the top 5. The score weights the teams'
-        // probability of going deep (QF and SF) by how far down the ranking
-        // they sit. A team ranked 22nd reaching the QF in 15% of sims
-        // beats a team ranked 9th doing the same.
-        function darkHorseScore(s) {
-          const rank = ratingRank.get(s.team);
-          if (rank <= 8) return -1;
-          const rankWeight = Math.max(0, rank - 6);  // rank 9 -> 3, 16 -> 10
-          // p_semis is rarer and more impressive than p_quarters; weight it
-          return rankWeight * (s.p_quarters + 2 * s.p_semis + 3 * s.p_final);
-        }
+        // Dark-horse selection: a team whose champion% rank is meaningfully
+        // higher than its boosted-Elo rank. We use the boosted rating (which
+        // already includes host, altitude, NT-trophy and form bumps) so the
+        // signal is not just "we gave them a bonus, now they outperform raw
+        // Elo", it's "even after layering on every known adjustment, this
+        // team's tournament path makes them punch above their strength."
+        // Hosts are also explicitly excluded as belt-and-braces.
+        // Cap at 2; require a minimum rank jump and a non-trivial champion%.
+        const WC2026_HOSTS = new Set(['United States', 'Mexico', 'Canada']);
+        const champRank = new Map();
+        [...stats].sort((a, b) => b.p_champion - a.p_champion)
+          .forEach((s, i) => champRank.set(s.team, i + 1));
         const darkHorseSet = new Set(
           [...stats]
-            .filter(s => ratingRank.get(s.team) > 8)
-            .map(s => ({ s, score: darkHorseScore(s) }))
-            .filter(x => x.score > 25)  // floor: ignore truly unimpressive
-            .sort((a, b) => b.score - a.score)
-            .slice(0, 5)
-            .map(x => x.s.team)
+            .filter(s => !WC2026_HOSTS.has(s.team))
+            .filter(s => s.p_champion >= 1.0)
+            .map(s => ({
+              team: s.team,
+              gap: ratingRank.get(s.team) - champRank.get(s.team),
+              p_champion: s.p_champion,
+            }))
+            .filter(x => x.gap >= 2)
+            .sort((a, b) => b.gap - a.gap || b.p_champion - a.p_champion)
+            .slice(0, 2)
+            .map(x => x.team)
         );
 
         const container = document.getElementById('wc-paths');
@@ -2221,7 +2230,6 @@
         // Δ column = model - market. Positive = we're more bullish.
         container.innerHTML = `
           <div class="header">Team</div>
-          <div class="header right">Elo</div>
           <div class="header"></div>
           <div class="header right">R16</div>
           <div class="header right">QF</div>
@@ -2256,9 +2264,7 @@
           };
           // 1. Team (flag + name)
           addCell('name', `${flagImg(s.team)}<span class="team-name">${s.team}</span>`);
-          // 2. Effective rating
-          addCell('team-rating', s.rating);
-          // 3. Dark horse tag (always renders the cell so the column lines up)
+          // 2. Dark horse tag (always renders the cell so the column lines up)
           addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
           // 4-8. Probabilities. Square-root scale on the fill so low-but-
           // nonzero values still get visible tint instead of looking like 0.
