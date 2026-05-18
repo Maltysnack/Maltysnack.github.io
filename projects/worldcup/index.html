@@ -1301,6 +1301,7 @@
         // most upfront (round-by-round probabilities, market column,
         // dark horses), then groups and knockouts as the narrative
         // continuation, and top scorers as a separate slice.
+        // Hydrated from URL hash or localStorage on init (see initApp).
         tab: 'table',         // 'table' | 'groups' | 'knockouts' | 'scorers'
         mode: 'average',      // 'average' | 'single'
         source: 'latest',     // 'latest' | 'custom'
@@ -2600,6 +2601,11 @@
         document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
           b.addEventListener('click', () => {
             STATE.tab = b.dataset.tab;
+            // Persist for refresh / share-link.
+            try { localStorage.setItem('worldcup.tab', STATE.tab); } catch (_) {}
+            if (history.replaceState) {
+              history.replaceState(null, '', `#${STATE.tab}`);
+            }
             renderControls();
             // Re-render the currently-visible pane's sub-view
             const activePane = document.querySelector('.wc-pane:not([hidden])');
@@ -2710,6 +2716,21 @@
             opt.label = `${team} (${Math.round(SANDBOX.baseRatings[team] || 1500)})`;
             datalist.appendChild(opt);
           });
+
+          // Persist the active sub-tab across refresh + share-link. URL
+          // hash wins (so `#groups` loads straight onto Groups, and is
+          // shareable). localStorage is the fallback for return visits
+          // where the user landed without a hash.
+          const VALID_TABS = ['table', 'groups', 'knockouts', 'scorers'];
+          const fromHash = (location.hash || '').replace(/^#/, '');
+          if (VALID_TABS.includes(fromHash)) {
+            STATE.tab = fromHash;
+          } else {
+            try {
+              const stored = localStorage.getItem('worldcup.tab');
+              if (VALID_TABS.includes(stored)) STATE.tab = stored;
+            } catch (_) {}
+          }
 
           wireControls();
           wireTabs();
