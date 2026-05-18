@@ -1202,74 +1202,11 @@
       </p>
     </section>
 
-    <nav class="wc-tabs" role="tablist" aria-label="View">
-      <button class="wc-tab active" data-pane="live" type="button" role="tab">Live</button>
-      <button class="wc-tab" data-pane="prediction" type="button" role="tab">Prediction</button>
-    </nav>
-
-    <!-- ── Live pane ─────────────────────────────────────────────── -->
-    <section class="wc-pane" data-pane="live" role="tabpanel" aria-label="Live">
-      <div class="intro">
-        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-          Live tournament
-          <span class="wc-live-status" id="wc-live-status"></span>
-        </h2>
-        <p class="wc-pane-intro" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-          What is actually happening in the tournament. Group standings,
-          knockout bracket and top scorers fill in from real results.
-          Same layout as the <a href="#prediction">Prediction</a> tab so
-          you can flip between to compare.
-        </p>
-
-        <div class="wc-tournament-bar">
-          <div class="wc-toggle" role="tablist" aria-label="Live view">
-            <button class="wc-btn" data-tab="groups" data-scope="live" type="button">Group stage</button>
-            <button class="wc-btn" data-tab="knockouts" data-scope="live" type="button">Knockouts</button>
-            <button class="wc-btn" data-tab="scorers" data-scope="live" type="button">Top scorers</button>
-            <button class="wc-btn active" data-tab="upcoming" data-scope="live" type="button">Upcoming</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- Sub-view: Upcoming (unified chronological match list).
-           Recently played + next up, all in one tight list. Filter by
-           team via the input at top. Default Live sub-view pre-WC. -->
-      <div id="wc-live-upcoming-view">
-        <input type="search" class="wc-match-filter" id="wc-match-filter"
-               placeholder="Filter by team..." autocomplete="off" />
-        <div class="wc-match-list" id="wc-match-list"></div>
-        <!-- Dormant: legacy containers kept so the old renderers
-             (renderNext / renderUpcoming / renderLookup / renderRecent)
-             don't crash. They run but nothing surfaces. -->
-        <div id="wc-next" hidden></div>
-        <div id="wc-upcoming" hidden></div>
-        <div id="wc-lookup" hidden>
-          <select id="wc-lookup-team"><option value=""></option></select>
-        </div>
-        <div id="wc-lookup-result" hidden></div>
-        <div id="wc-recent" hidden></div>
-      </div>
-
-      <!-- Sub-view: Group stage. Same card format as the Prediction
-           tab's groups, fed from live_tournament.json. -->
-      <div id="wc-live-groups-view" hidden>
-        <div id="wc-live-groups-content"></div>
-      </div>
-
-      <!-- Sub-view: Knockouts. Same bracket format as the Prediction
-           tab. Empty before kickoff; fills in as KO matches are played. -->
-      <div id="wc-live-knockouts-view" hidden>
-        <div id="wc-live-knockouts-content"></div>
-      </div>
-
-      <!-- Sub-view: Top scorers (actual goals scored, when available). -->
-      <div id="wc-live-scorers-view" hidden>
-        <div id="wc-live-scorers-content"></div>
-      </div>
-    </section>
+    <!-- Live tab removed: the page now focuses solely on pre-tournament
+         prediction. Live coverage is better served by BBC / ESPN / FIFA. -->
 
     <!-- ── Prediction pane ───────────────────────────────────────── -->
-    <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction" hidden>
+    <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction">
       <div class="intro">
         <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
           Tournament forecast
@@ -2480,7 +2417,6 @@
         }
         // Refresh the now-visible pane's sub-view so its active sub-tab
         // + content matches STATE.tab.
-        if (name === 'live') renderLiveSubview();
         if (name === 'prediction') renderTournamentView();
       }
       function wireTabs() {
@@ -2492,7 +2428,7 @@
         if (initial) showPane(initial);
         // Respond to back/forward and external hash changes.
         window.addEventListener('hashchange', () => {
-          showPane((location.hash || '').replace(/^#/, '') || 'live');
+          showPane((location.hash || '').replace(/^#/, '') || 'prediction');
         });
       }
 
