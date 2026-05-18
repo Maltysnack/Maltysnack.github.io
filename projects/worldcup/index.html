@@ -2423,12 +2423,18 @@
         document.querySelectorAll('.wc-tab').forEach(b => {
           b.addEventListener('click', () => showPane(b.dataset.pane));
         });
-        // Honour initial #hash if present.
+        // Hash is also used for sub-tab persistence (#table, #groups, etc.),
+        // so we only treat it as a pane name when it literally matches a
+        // pane. Otherwise leave the active pane alone; sub-tab hydration
+        // handled separately in init.
+        const paneNames = new Set(
+          [...document.querySelectorAll('.wc-pane')].map(p => p.dataset.pane)
+        );
         const initial = (location.hash || '').replace(/^#/, '');
-        if (initial) showPane(initial);
-        // Respond to back/forward and external hash changes.
+        if (initial && paneNames.has(initial)) showPane(initial);
         window.addEventListener('hashchange', () => {
-          showPane((location.hash || '').replace(/^#/, '') || 'prediction');
+          const h = (location.hash || '').replace(/^#/, '');
+          if (paneNames.has(h)) showPane(h);
         });
       }
 
