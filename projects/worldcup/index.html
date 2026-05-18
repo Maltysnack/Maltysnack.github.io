@@ -16,6 +16,32 @@
   <meta name="theme-color" content="#13110d" />
 
   <style>
+    /* Compact the page header. The shared .intro styles assume a
+       narrative page (prose width 540px, 64px bottom gap); here we
+       want the description full-width, slightly smaller, and snug
+       against the tabs so the actual data lands above the fold. */
+    .intro { margin-bottom: 1rem; }
+    .intro-heading { margin-bottom: 0.6rem; }
+    .intro-body {
+      max-width: none;
+      font-size: var(--text-sm);
+      line-height: 1.45;
+    }
+    .intro p[style*="italic"] { margin-top: 0.5rem; }
+    .wc-pane { margin-top: 0.5rem; }
+    .wc-pane .intro { margin-bottom: 0.5rem; }
+    .wc-tournament-bar { margin-top: 0.3rem; margin-bottom: 0.3rem; }
+
+    /* Trim default tab/data spacing too. */
+    .wc-paths { margin-top: 0.4rem; font-size: 0.8rem; }
+    .wc-paths .header { padding-bottom: 0.2rem; font-size: 0.7rem; }
+    .wc-group { padding: 0.45rem 0.6rem; }
+    .wc-group h4 { font-size: 0.95rem; margin: 0 0 0.3rem 0; }
+    .wc-group-row { padding: 0.08rem 0; }
+    .wc-bracket-wrap { margin-top: 0.6rem; }
+    .wc-match { padding: 0.18rem 0.4rem; font-size: 0.74rem; }
+    .wc-scorers { font-size: 0.88rem; }
+
     /* Pre-tournament bracket */
     .wc-bracket-wrap {
       overflow-x: auto;
