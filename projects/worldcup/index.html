@@ -102,18 +102,18 @@
       color: rgba(180,150,80,0.8);
       margin-left: 0.3rem;
     }
-    /* Pens indicator: tiny absolute-positioned "P" badge in the
-       card's top-right corner. Hover for full text. Doesn't add to
-       the card's vertical footprint (was a footer line previously,
-       which made the whole bracket too tall). */
+    /* Pens indicator: "P" badge just outside the card's right edge,
+       vertically centered so it never overlaps the team rows.
+       Hover for full text. Doesn't add to the card's vertical footprint. */
     .wc-pen-marker {
       position: absolute;
-      top: 2px;
-      right: 4px;
-      font-size: 0.55rem;
+      top: 50%;
+      right: -0.95rem;
+      transform: translateY(-50%);
+      font-size: 0.78rem;
       font-weight: 700;
       letter-spacing: 0.05em;
-      color: rgba(180,150,80,0.9);
+      color: #d23a3a;
       line-height: 1;
       pointer-events: auto;
       cursor: help;
