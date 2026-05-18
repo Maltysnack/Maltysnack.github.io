@@ -1353,6 +1353,17 @@
         const src = flagSrc(team);
         return src ? `<img class="wc-flag" src="${src}" alt="" loading="lazy" />` : '';
       }
+      // Display-only overrides for the canonical names that come out of
+      // the match-data feed (martj42/international_results). The
+      // canonical string is used everywhere in the data pipeline
+      // (ratings, matches, bracket joins, host bonuses, etc.) so we
+      // can't rename it without breaking joins. Renaming here only
+      // changes what the user sees.
+      const TEAM_DISPLAY = {
+        "Turkey": "Türkiye",
+      };
+      function displayName(team) { return TEAM_DISPLAY[team] || team; }
+
       // Display names compressed for the narrow bracket cards. The
       // probability table and group cards use the full names.
       const TEAM_SHORT = {
@@ -1364,7 +1375,11 @@
         "New Zealand": "N. Zealand",
         "Saudi Arabia": "S. Arabia",
       };
-      function shortName(team) { return TEAM_SHORT[team] || team; }
+      // Bracket cards: prefer the short form, falling back to the
+      // display-name override (so e.g. Türkiye renders Türkiye when no
+      // short form is registered, and renamed teams still respect their
+      // override if a short form is later added for them).
+      function shortName(team) { return TEAM_SHORT[team] || displayName(team); }
       function poisson(lambda) {
         const L = Math.exp(-lambda);
         let k = 0, p = 1;
@@ -1964,12 +1979,12 @@
               : '';
             card.innerHTML = `
               ${pensMarker}
-              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${m.team_a}">
+              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${displayName(m.team_a)}">
                 ${flagImg(m.team_a)}
                 <span class="wc-team-name">${shortName(m.team_a)}</span>
                 ${scoreA}
               </div>
-              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}" title="${m.team_b}">
+              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}" title="${displayName(m.team_b)}">
                 ${flagImg(m.team_b)}
                 <span class="wc-team-name">${shortName(m.team_b)}</span>
                 ${scoreB}
@@ -1997,7 +2012,7 @@
                 <span class="team-block">
                   <span class="pos">${s.position}.</span>
                   ${flagImg(s.team)}
-                  <span class="team-name">${s.team}</span>
+                  <span class="team-name">${displayName(s.team)}</span>
                 </span>
                 <span>${ptsValue}</span>
               </div>`;
@@ -2160,8 +2175,14 @@
 
         stats.forEach((s, i) => {
           const dh = darkHorseSet.has(s.team);
-          // dataset.team includes "dark horse" so the search input matches it
-          const searchKey = s.team.toLowerCase() + (dh ? ' dark horse' : '');
+          // dataset.team lets the search input filter by either the
+          // canonical name (e.g. "Turkey") or the display override
+          // (e.g. "Türkiye"), plus the 'dark horse' tag.
+          const searchKey = [
+            s.team.toLowerCase(),
+            displayName(s.team).toLowerCase(),
+            dh ? 'dark horse' : '',
+          ].filter(Boolean).join(' ');
           const meta = { 'data-team': searchKey, 'data-rank': String(i) };
           const addCell = (className, html) => {
             const c = document.createElement('div');
@@ -2171,7 +2192,7 @@
             container.appendChild(c);
           };
           // 1. Team (flag + name)
-          addCell('name', `${flagImg(s.team)}<span class="team-name">${s.team}</span>`);
+          addCell('name', `${flagImg(s.team)}<span class="team-name">${displayName(s.team)}</span>`);
           // 2. Dark horse tag (always renders the cell so the column lines up)
           addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
           // 4-8. Probabilities. Square-root scale on the fill so low-but-
@@ -2239,7 +2260,7 @@
           const playerTitle = `${p.name}${p.position ? ' (' + p.position + ')' : ''}`;
           return `
             <div class="rank">${i + 1}</div>
-            <div class="team-flag" title="${p.team}">
+            <div class="team-flag" title="${displayName(p.team)}">
               ${flagImg(p.team)}
             </div>
             <div class="player-name" title="${playerTitle}">${p.name}</div>
@@ -2745,7 +2766,7 @@
           [...wcTeams].sort().forEach(team => {
             const opt = document.createElement('option');
             opt.value = team;
-            opt.label = `${team} (${Math.round(SANDBOX.baseRatings[team] || 1500)})`;
+            opt.label = `${displayName(team)} (${Math.round(SANDBOX.baseRatings[team] || 1500)})`;
             datalist.appendChild(opt);
           });
 
