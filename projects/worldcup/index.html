@@ -1355,25 +1355,34 @@
       }
       // Display-only overrides for the canonical names that come out of
       // the match-data feed (martj42/international_results). The
-      // canonical string is used everywhere in the data pipeline
-      // (ratings, matches, bracket joins, host bonuses, etc.) so we
-      // can't rename it without breaking joins. Renaming here only
-      // changes what the user sees.
+      // canonical string is the key for every join in the data
+      // pipeline (ratings, matches, bracket joins, host bonuses, etc.)
+      // so we can't rename it without breaking joins. Overriding here
+      // only changes what the user sees.
+      //
+      // Source: official FIFA WC 2026 nation list.
       const TEAM_DISPLAY = {
-        "Turkey": "Türkiye",
+        "Iran":           "IR Iran",
+        "South Korea":    "Korea Republic",
+        "Cape Verde":     "Cabo Verde",
+        "DR Congo":       "Congo DR",
+        "Ivory Coast":    "Côte d'Ivoire",
+        "Czech Republic": "Czechia",
+        "Turkey":         "Türkiye",
       };
       function displayName(team) { return TEAM_DISPLAY[team] || team; }
 
       // Display names compressed for the narrow bracket cards. The
-      // probability table and group cards use the full names.
+      // probability table and group cards use the full display names.
+      // Keys are canonical names (the data-feed strings).
       const TEAM_SHORT = {
         "Bosnia and Herzegovina": "Bosnia",
-        "United States": "USA",
-        "South Korea": "S. Korea",
-        "South Africa": "S. Africa",
-        "Czech Republic": "Czechia",
-        "New Zealand": "N. Zealand",
-        "Saudi Arabia": "S. Arabia",
+        "United States":          "USA",
+        "South Korea":            "Korea",
+        "South Africa":           "S. Africa",
+        "Czech Republic":         "Czechia",
+        "New Zealand":            "N. Zealand",
+        "Saudi Arabia":           "S. Arabia",
       };
       // Bracket cards: prefer the short form, falling back to the
       // display-name override (so e.g. Türkiye renders Türkiye when no
