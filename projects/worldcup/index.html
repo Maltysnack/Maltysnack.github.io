@@ -229,11 +229,11 @@
 
     .wc-paths {
       display: grid;
-      /* Team | dark-horse tag | R16 | QF | SF | F | Champion | Market | Δ
-         (Elo column intentionally hidden: it's a model input, not an
-         output, and the layer bumps make raw Elo a confusing tiebreaker
-         alongside champion%.) */
-      grid-template-columns: minmax(160px, 1.4fr) 6.5em repeat(5, 1fr) 1fr 0.9fr;
+      /* Team | dark-horse tag | R16 | QF | SF | F | Champion
+         (Elo, Market and Δ columns intentionally removed: Elo is a
+         model input that confuses next to champion%, and Market/Δ are
+         placeholders for a Polymarket feed that's not wired up.) */
+      grid-template-columns: minmax(160px, 1.4fr) 6.5em repeat(5, 1fr);
       column-gap: 0.3rem;
       row-gap: 0.4rem;
       font-size: 0.85rem;
@@ -274,32 +274,6 @@
       font-weight: calc(400 + var(--fill, 0) * 300);
       transition: color 120ms ease, font-weight 120ms ease;
     }
-    /* Market column: muted body colour, no gradient (market is a
-       reference value, not a ranked-by-strength signal). */
-    .wc-paths .v.market {
-      color: var(--text-muted);
-      font-weight: 500;
-    }
-    /* Delta column: gold tint when model is bullish vs market,
-       blue tint when market is bullish. Saturation scales with |Δ|. */
-    .wc-paths .v.delta {
-      font-weight: calc(500 + var(--fill, 0) * 200);
-    }
-    .wc-paths .v.delta.pos {
-      color: color-mix(
-        in oklab,
-        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
-        rgb(200, 165, 80) calc(var(--fill, 0) * 100%)
-      );
-    }
-    .wc-paths .v.delta.neg {
-      color: color-mix(
-        in oklab,
-        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
-        rgb(110, 145, 195) calc(var(--fill, 0) * 100%)
-      );
-    }
-    .wc-paths .v.delta.zero { color: var(--text-muted); }
 
     /* Top scorers list: rank | flag | name | badge | goals, packed
        tight. Grid is capped at a comfortable max-width and centered
@@ -1350,14 +1324,10 @@
           Monte Carlo runs. Cells are coloured per column: the strongest
           team in each round sets the deepest green, others scale from there.
           Up to two teams are flagged
-          <span class="wc-darkhorse-tag">dark horse</span> &mdash; their
-          championship-probability rank sits at least two places above
-          their model-strength rank, even after every adjustment we apply.
-          Hosts excluded.
-          The <strong>Market</strong> column is the de-vigged Polymarket
-          implied probability for outright champion; <strong>Δ</strong> is
-          our model minus market (gold when we're more bullish, blue when
-          the market is). Showing top 24, search to find more.
+          <span class="wc-darkhorse-tag">dark horse</span>: their
+          championship-probability rank sits above their model-strength
+          rank, even after every adjustment we apply. Hosts excluded.
+          Showing top 24, search to find more.
         </p>
         <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
         <div class="wc-paths-wrap">
@@ -2218,7 +2188,7 @@
               gap: ratingRank.get(s.team) - champRank.get(s.team),
               p_champion: s.p_champion,
             }))
-            .filter(x => x.gap >= 2)
+            .filter(x => x.gap >= 1)
             .sort((a, b) => b.gap - a.gap || b.p_champion - a.p_champion)
             .slice(0, 2)
             .map(x => x.team)
@@ -2236,8 +2206,6 @@
           <div class="header right">SF</div>
           <div class="header right">Final</div>
           <div class="header right">Champion</div>
-          <div class="header right" title="Polymarket de-vigged probability">Market</div>
-          <div class="header right" title="Model minus market; positive = we are bullish vs market">Δ</div>
         `;
 
         // Per-column max across all teams (not just visible top 24) so
@@ -2275,27 +2243,6 @@
             addCell('cell-num',
               `<span class="v" style="--fill: ${fill}">${v.toFixed(1)}%</span>`);
           });
-          // 9. Market (Polymarket implied probability)
-          if (s.market_p_champion != null) {
-            addCell('cell-num',
-              `<span class="v market" style="--fill: 0">${s.market_p_champion.toFixed(1)}%</span>`);
-          } else {
-            addCell('cell-num', '<span class="v" style="--fill:0">&mdash;</span>');
-          }
-          // 10. Δ (model minus market). Color-coded: gold tint when
-          // model is bullish vs market, blue tint when market is bullish.
-          if (s.model_minus_market != null) {
-            const d = s.model_minus_market;
-            const cls = d > 0 ? 'pos' : (d < 0 ? 'neg' : 'zero');
-            const sign = d > 0 ? '+' : (d < 0 ? '−' : '');
-            const abs_d = Math.abs(d).toFixed(1);
-            // Intensity scales with magnitude up to 5pp
-            const intensity = Math.min(Math.abs(d) / 5, 1).toFixed(3);
-            addCell('cell-num',
-              `<span class="v delta ${cls}" style="--fill:${intensity}">${sign}${abs_d}</span>`);
-          } else {
-            addCell('cell-num', '<span class="v" style="--fill:0">&mdash;</span>');
-          }
         });
         applyPathsFilter('');
       }
