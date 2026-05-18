@@ -1192,9 +1192,12 @@
     <section class="intro">
       <h1 class="intro-heading">World Cup 2026.</h1>
       <p class="intro-body">
-        A model that simulates the 2026 World Cup and reports back what
-        it thinks will happen. Pre-tournament bracket, per-match
-        predictions during the tournament, refined as we learn.
+        A model that simulates the 2026 World Cup
+        <span id="wc-nsims">10,000</span> times and reports the average
+        outcome. Group standings, knockout bracket, top-scorer
+        contenders, and a probability table. Frozen the day before
+        kickoff so the prediction stands on its own.
+        <span class="wc-pred-badge" id="wc-pred-badge"></span>
       </p>
       <p style="font-style:italic;color:var(--text-muted);font-size:0.95rem;margin-top:1rem;">
         Kickoff: 11 June 2026. Source on
@@ -1202,29 +1205,16 @@
       </p>
     </section>
 
-    <!-- Live tab removed: the page now focuses solely on pre-tournament
-         prediction. Live coverage is better served by BBC / ESPN / FIFA. -->
-
-    <!-- ── Prediction pane ───────────────────────────────────────── -->
+    <!-- Single pane (live tab removed May 2026). The intro above carries
+         all the context; tabs sit directly under it. -->
     <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction">
       <div class="intro">
-        <h2 style="font-weight:600;font-size:1.4rem;margin-bottom:0.5rem;letter-spacing:-0.02em;">
-          Tournament forecast
-          <span class="wc-pred-badge" id="wc-pred-badge"></span>
-        </h2>
-        <p class="wc-pane-intro" style="color:var(--text-muted);font-size:0.9rem;margin-bottom:0;">
-          What the model thinks will happen. Group stage, knockout
-          bracket, top scorers and a probability table, averaged across
-          <span id="wc-nsims">10,000</span> Monte Carlo runs. Becomes a
-          frozen archive once the tournament begins.
-        </p>
-
         <div class="wc-tournament-bar">
-          <div class="wc-toggle" role="tablist" aria-label="Prediction view">
+          <div class="wc-toggle" role="tablist" aria-label="View">
+            <button class="wc-btn active" data-tab="table" data-scope="prediction" type="button">Table</button>
             <button class="wc-btn" data-tab="groups" data-scope="prediction" type="button">Group stage</button>
-            <button class="wc-btn active" data-tab="knockouts" data-scope="prediction" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="knockouts" data-scope="prediction" type="button">Knockouts</button>
             <button class="wc-btn" data-tab="scorers" data-scope="prediction" type="button">Top scorers</button>
-            <button class="wc-btn" data-tab="table" data-scope="prediction" type="button">Table</button>
           </div>
           <!-- Mode + Model toggles are benched for now. The defaults
                (average aggregation, latest model) run as before; the
@@ -1256,33 +1246,14 @@
       <!-- Table view: probability of reaching each round.
            Toggled visible when STATE.tab === 'table'. -->
       <div id="wc-table-view" hidden>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
-          Probability each team reaches a given round, averaged across all
-          Monte Carlo runs. Cells are coloured per column: the strongest
-          team in each round sets the deepest green, others scale from there.
-          Up to two teams are flagged
-          <span class="wc-darkhorse-tag">dark horse</span>: their
-          championship-probability rank sits above their model-strength
-          rank, even after every adjustment we apply. Hosts excluded.
-          Showing top 24, search to find more.
-        </p>
         <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
         <div class="wc-paths-wrap">
           <div class="wc-paths" id="wc-paths"></div>
         </div>
       </div>
 
-      <!-- Top scorers view: predicted WC golden boot contenders.
-           Toggled visible when STATE.tab === 'scorers'. -->
+      <!-- Top scorers view: predicted WC golden boot contenders. -->
       <div id="wc-scorers-view" hidden>
-        <p style="color:var(--text-muted);font-size:0.9rem;margin-top:1rem;margin-bottom:0.6rem;">
-          Predicted top scorers, ranked by expected WC goals. Each player's
-          2025-26 club goals-per-match rate is multiplied by their team's
-          expected tournament matches and a position weight (forwards
-          weighted highest). Coverage grows as more WC squads are announced
-          and more club season pages are scraped; players whose clubs do
-          not yet have season stats are excluded.
-        </p>
         <div class="wc-scorers" id="wc-scorers"></div>
       </div>
     </section>
@@ -1326,9 +1297,11 @@
 
       // ── State ────────────────────────────────────────────────────
       const STATE = {
-        // Sub-tab is shared across Live + Prediction panes. Each pane
-        // remaps invalid values to its default (Live→'upcoming', Pred→'knockouts').
-        tab: 'upcoming',      // 'groups' | 'knockouts' | 'scorers' | 'table' | 'upcoming'
+        // Default sub-tab. Table sits leftmost because it explains the
+        // most upfront (round-by-round probabilities, market column,
+        // dark horses), then groups and knockouts as the narrative
+        // continuation, and top scorers as a separate slice.
+        tab: 'table',         // 'table' | 'groups' | 'knockouts' | 'scorers'
         mode: 'average',      // 'average' | 'single'
         source: 'latest',     // 'latest' | 'custom'
         bumps: {},
@@ -2047,7 +2020,7 @@
         // (Live-only), Prediction defaults to 'knockouts'.
         const predValid = ['groups', 'knockouts', 'scorers', 'table'];
         let activeTab = STATE.tab;
-        if (!predValid.includes(activeTab)) activeTab = 'knockouts';
+        if (!predValid.includes(activeTab)) activeTab = 'table';
 
         // Highlight Prediction's own sub-tab buttons
         document.querySelectorAll('.wc-toggle button[data-scope="prediction"]')
