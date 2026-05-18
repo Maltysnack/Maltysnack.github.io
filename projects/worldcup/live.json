@@ -1,5 +1,5 @@
 {
-  "generated_at": "2026-05-18T01:55:17+00:00",
+  "generated_at": "2026-05-18T02:45:45+00:00",
   "kickoff": "2026-06-11",
   "today": "2026-05-18",
   "days_to_kickoff": 24,
@@ -84,10 +84,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.8374,
-            "p_draw": 0.1182,
-            "p_away_win": 0.0444,
-            "expected_home_goals": 2.64,
+            "p_home_win": 0.8314,
+            "p_draw": 0.123,
+            "p_away_win": 0.0456,
+            "expected_home_goals": 2.63,
             "expected_away_goals": 0.49,
             "modal_score": [
               2,
@@ -106,11 +106,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.523,
-            "p_draw": 0.2534,
-            "p_away_win": 0.2236,
-            "expected_home_goals": 1.65,
-            "expected_away_goals": 0.93,
+            "p_home_win": 0.5206,
+            "p_draw": 0.259,
+            "p_away_win": 0.2204,
+            "expected_home_goals": 1.64,
+            "expected_away_goals": 0.94,
             "modal_score": [
               1,
               1
@@ -128,11 +128,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.479,
-            "p_draw": 0.2574,
-            "p_away_win": 0.2636,
-            "expected_home_goals": 1.5,
-            "expected_away_goals": 1.03,
+            "p_home_win": 0.4942,
+            "p_draw": 0.255,
+            "p_away_win": 0.2508,
+            "expected_home_goals": 1.51,
+            "expected_away_goals": 1.02,
             "modal_score": [
               1,
               0
@@ -150,9 +150,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5832,
-            "p_draw": 0.236,
-            "p_away_win": 0.1808,
+            "p_home_win": 0.5872,
+            "p_draw": 0.2324,
+            "p_away_win": 0.1804,
             "expected_home_goals": 1.73,
             "expected_away_goals": 0.83,
             "modal_score": [
@@ -172,11 +172,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.742,
-            "p_draw": 0.1698,
+            "p_home_win": 0.743,
+            "p_draw": 0.1688,
             "p_away_win": 0.0882,
-            "expected_home_goals": 2.23,
-            "expected_away_goals": 0.6,
+            "expected_home_goals": 2.21,
+            "expected_away_goals": 0.61,
             "modal_score": [
               2,
               0
@@ -194,14 +194,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1386,
-            "p_draw": 0.2076,
-            "p_away_win": 0.6538,
+            "p_home_win": 0.1334,
+            "p_draw": 0.2036,
+            "p_away_win": 0.663,
             "expected_home_goals": 0.77,
             "expected_away_goals": 1.99,
             "modal_score": [
               0,
-              2
+              1
             ]
           }
         }
@@ -277,13 +277,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6588,
-            "p_draw": 0.204,
-            "p_away_win": 0.1372,
+            "p_home_win": 0.658,
+            "p_draw": 0.2064,
+            "p_away_win": 0.1356,
             "expected_home_goals": 1.89,
             "expected_away_goals": 0.74,
             "modal_score": [
-              2,
+              1,
               0
             ]
           }
@@ -299,11 +299,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.0694,
-            "p_draw": 0.143,
-            "p_away_win": 0.7876,
-            "expected_home_goals": 0.6,
-            "expected_away_goals": 2.57,
+            "p_home_win": 0.0716,
+            "p_draw": 0.1462,
+            "p_away_win": 0.7822,
+            "expected_home_goals": 0.61,
+            "expected_away_goals": 2.52,
             "modal_score": [
               0,
               2
@@ -321,11 +321,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.8052,
-            "p_draw": 0.1346,
-            "p_away_win": 0.0602,
-            "expected_home_goals": 2.45,
-            "expected_away_goals": 0.54,
+            "p_home_win": 0.8018,
+            "p_draw": 0.1388,
+            "p_away_win": 0.0594,
+            "expected_home_goals": 2.41,
+            "expected_away_goals": 0.55,
             "modal_score": [
               2,
               0
@@ -343,13 +343,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.637,
-            "p_draw": 0.2148,
-            "p_away_win": 0.1482,
-            "expected_home_goals": 1.92,
+            "p_home_win": 0.6322,
+            "p_draw": 0.2128,
+            "p_away_win": 0.155,
+            "expected_home_goals": 1.91,
             "expected_away_goals": 0.8,
             "modal_score": [
-              2,
+              1,
               0
             ]
           }
@@ -365,14 +365,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5458,
-            "p_draw": 0.2388,
-            "p_away_win": 0.2154,
-            "expected_home_goals": 1.66,
-            "expected_away_goals": 0.93,
+            "p_home_win": 0.5378,
+            "p_draw": 0.2492,
+            "p_away_win": 0.213,
+            "expected_home_goals": 1.63,
+            "expected_away_goals": 0.94,
             "modal_score": [
               1,
-              0
+              1
             ]
           }
         },
@@ -387,10 +387,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3872,
-            "p_draw": 0.2746,
-            "p_away_win": 0.3382,
-            "expected_home_goals": 1.29,
+            "p_home_win": 0.3852,
+            "p_draw": 0.273,
+            "p_away_win": 0.3418,
+            "expected_home_goals": 1.28,
             "expected_away_goals": 1.2,
             "modal_score": [
               1,
@@ -470,11 +470,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4072,
-            "p_draw": 0.2746,
-            "p_away_win": 0.3182,
-            "expected_home_goals": 1.35,
-            "expected_away_goals": 1.14,
+            "p_home_win": 0.4048,
+            "p_draw": 0.2724,
+            "p_away_win": 0.3228,
+            "expected_home_goals": 1.34,
+            "expected_away_goals": 1.15,
             "modal_score": [
               1,
               1
@@ -492,13 +492,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2404,
-            "p_draw": 0.2546,
-            "p_away_win": 0.505,
-            "expected_home_goals": 0.98,
-            "expected_away_goals": 1.57,
+            "p_home_win": 0.227,
+            "p_draw": 0.257,
+            "p_away_win": 0.516,
+            "expected_home_goals": 0.97,
+            "expected_away_goals": 1.59,
             "modal_score": [
-              1,
+              0,
               1
             ]
           }
@@ -514,10 +514,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.7886,
-            "p_draw": 0.1406,
-            "p_away_win": 0.0708,
-            "expected_home_goals": 2.52,
+            "p_home_win": 0.7922,
+            "p_draw": 0.1428,
+            "p_away_win": 0.065,
+            "expected_home_goals": 2.53,
             "expected_away_goals": 0.61,
             "modal_score": [
               2,
@@ -536,9 +536,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1596,
-            "p_draw": 0.2332,
-            "p_away_win": 0.6072,
+            "p_home_win": 0.1678,
+            "p_draw": 0.2246,
+            "p_away_win": 0.6076,
             "expected_home_goals": 0.84,
             "expected_away_goals": 1.83,
             "modal_score": [
@@ -558,10 +558,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.7422,
-            "p_draw": 0.1678,
-            "p_away_win": 0.09,
-            "expected_home_goals": 2.31,
+            "p_home_win": 0.7538,
+            "p_draw": 0.1604,
+            "p_away_win": 0.0858,
+            "expected_home_goals": 2.34,
             "expected_away_goals": 0.66,
             "modal_score": [
               2,
@@ -580,14 +580,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1272,
-            "p_draw": 0.2014,
-            "p_away_win": 0.6714,
-            "expected_home_goals": 0.77,
-            "expected_away_goals": 1.99,
+            "p_home_win": 0.1406,
+            "p_draw": 0.1938,
+            "p_away_win": 0.6656,
+            "expected_home_goals": 0.78,
+            "expected_away_goals": 1.97,
             "modal_score": [
               0,
-              1
+              2
             ]
           }
         }
@@ -663,14 +663,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4946,
-            "p_draw": 0.2604,
-            "p_away_win": 0.245,
-            "expected_home_goals": 1.53,
-            "expected_away_goals": 0.96,
+            "p_home_win": 0.511,
+            "p_draw": 0.2542,
+            "p_away_win": 0.2348,
+            "expected_home_goals": 1.56,
+            "expected_away_goals": 0.94,
             "modal_score": [
               1,
-              1
+              0
             ]
           }
         },
@@ -685,13 +685,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2286,
-            "p_draw": 0.2496,
-            "p_away_win": 0.5218,
+            "p_home_win": 0.2356,
+            "p_draw": 0.2428,
+            "p_away_win": 0.5216,
             "expected_home_goals": 0.96,
             "expected_away_goals": 1.6,
             "modal_score": [
-              1,
+              0,
               1
             ]
           }
@@ -707,11 +707,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4862,
+            "p_home_win": 0.4878,
             "p_draw": 0.263,
-            "p_away_win": 0.2508,
-            "expected_home_goals": 1.52,
-            "expected_away_goals": 1.01,
+            "p_away_win": 0.2492,
+            "expected_home_goals": 1.53,
+            "expected_away_goals": 1.0,
             "modal_score": [
               1,
               1
@@ -729,11 +729,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5316,
-            "p_draw": 0.2534,
-            "p_away_win": 0.215,
-            "expected_home_goals": 1.6,
-            "expected_away_goals": 0.91,
+            "p_home_win": 0.537,
+            "p_draw": 0.2478,
+            "p_away_win": 0.2152,
+            "expected_home_goals": 1.62,
+            "expected_away_goals": 0.9,
             "modal_score": [
               1,
               0
@@ -751,11 +751,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.403,
-            "p_draw": 0.264,
-            "p_away_win": 0.333,
-            "expected_home_goals": 1.3,
-            "expected_away_goals": 1.18,
+            "p_home_win": 0.3986,
+            "p_draw": 0.259,
+            "p_away_win": 0.3424,
+            "expected_home_goals": 1.29,
+            "expected_away_goals": 1.19,
             "modal_score": [
               1,
               1
@@ -773,11 +773,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3716,
-            "p_draw": 0.2788,
-            "p_away_win": 0.3496,
-            "expected_home_goals": 1.28,
-            "expected_away_goals": 1.21,
+            "p_home_win": 0.3872,
+            "p_draw": 0.2652,
+            "p_away_win": 0.3476,
+            "expected_home_goals": 1.29,
+            "expected_away_goals": 1.19,
             "modal_score": [
               1,
               1
@@ -856,10 +856,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.7712,
-            "p_draw": 0.1548,
-            "p_away_win": 0.074,
-            "expected_home_goals": 2.46,
+            "p_home_win": 0.7792,
+            "p_draw": 0.1506,
+            "p_away_win": 0.0702,
+            "expected_home_goals": 2.49,
             "expected_away_goals": 0.62,
             "modal_score": [
               2,
@@ -878,9 +878,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3068,
-            "p_draw": 0.2592,
-            "p_away_win": 0.434,
+            "p_home_win": 0.3134,
+            "p_draw": 0.2574,
+            "p_away_win": 0.4292,
             "expected_home_goals": 1.11,
             "expected_away_goals": 1.38,
             "modal_score": [
@@ -900,9 +900,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.747,
-            "p_draw": 0.169,
-            "p_away_win": 0.084,
+            "p_home_win": 0.752,
+            "p_draw": 0.1526,
+            "p_away_win": 0.0954,
             "expected_home_goals": 2.34,
             "expected_away_goals": 0.66,
             "modal_score": [
@@ -922,11 +922,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4522,
-            "p_draw": 0.27,
-            "p_away_win": 0.2778,
-            "expected_home_goals": 1.46,
-            "expected_away_goals": 1.06,
+            "p_home_win": 0.4558,
+            "p_draw": 0.2728,
+            "p_away_win": 0.2714,
+            "expected_home_goals": 1.47,
+            "expected_away_goals": 1.05,
             "modal_score": [
               1,
               1
@@ -944,11 +944,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.123,
-            "p_draw": 0.1942,
-            "p_away_win": 0.6828,
+            "p_home_win": 0.1234,
+            "p_draw": 0.1868,
+            "p_away_win": 0.6898,
             "expected_home_goals": 0.73,
-            "expected_away_goals": 2.09,
+            "expected_away_goals": 2.1,
             "modal_score": [
               0,
               2
@@ -966,11 +966,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3204,
-            "p_draw": 0.2664,
-            "p_away_win": 0.4132,
-            "expected_home_goals": 1.18,
-            "expected_away_goals": 1.31,
+            "p_home_win": 0.315,
+            "p_draw": 0.2648,
+            "p_away_win": 0.4202,
+            "expected_home_goals": 1.16,
+            "expected_away_goals": 1.32,
             "modal_score": [
               1,
               1
@@ -1049,9 +1049,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3766,
-            "p_draw": 0.266,
-            "p_away_win": 0.3574,
+            "p_home_win": 0.3772,
+            "p_draw": 0.2682,
+            "p_away_win": 0.3546,
             "expected_home_goals": 1.27,
             "expected_away_goals": 1.21,
             "modal_score": [
@@ -1071,11 +1071,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4204,
-            "p_draw": 0.2804,
-            "p_away_win": 0.2992,
-            "expected_home_goals": 1.38,
-            "expected_away_goals": 1.12,
+            "p_home_win": 0.4384,
+            "p_draw": 0.268,
+            "p_away_win": 0.2936,
+            "expected_home_goals": 1.4,
+            "expected_away_goals": 1.1,
             "modal_score": [
               1,
               1
@@ -1093,9 +1093,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5834,
-            "p_draw": 0.2338,
-            "p_away_win": 0.1828,
+            "p_home_win": 0.5808,
+            "p_draw": 0.2306,
+            "p_away_win": 0.1886,
             "expected_home_goals": 1.77,
             "expected_away_goals": 0.87,
             "modal_score": [
@@ -1115,11 +1115,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1546,
-            "p_draw": 0.212,
-            "p_away_win": 0.6334,
-            "expected_home_goals": 0.8,
-            "expected_away_goals": 1.92,
+            "p_home_win": 0.1612,
+            "p_draw": 0.2146,
+            "p_away_win": 0.6242,
+            "expected_home_goals": 0.79,
+            "expected_away_goals": 1.94,
             "modal_score": [
               0,
               2
@@ -1137,10 +1137,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5806,
-            "p_draw": 0.224,
-            "p_away_win": 0.1954,
-            "expected_home_goals": 1.73,
+            "p_home_win": 0.579,
+            "p_draw": 0.23,
+            "p_away_win": 0.191,
+            "expected_home_goals": 1.72,
             "expected_away_goals": 0.89,
             "modal_score": [
               1,
@@ -1159,14 +1159,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1418,
-            "p_draw": 0.2084,
-            "p_away_win": 0.6498,
-            "expected_home_goals": 0.78,
-            "expected_away_goals": 1.97,
+            "p_home_win": 0.1358,
+            "p_draw": 0.2012,
+            "p_away_win": 0.663,
+            "expected_home_goals": 0.77,
+            "expected_away_goals": 1.99,
             "modal_score": [
               0,
-              2
+              1
             ]
           }
         }
@@ -1242,14 +1242,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5204,
-            "p_draw": 0.2514,
-            "p_away_win": 0.2282,
-            "expected_home_goals": 1.6,
-            "expected_away_goals": 0.96,
+            "p_home_win": 0.5232,
+            "p_draw": 0.2504,
+            "p_away_win": 0.2264,
+            "expected_home_goals": 1.61,
+            "expected_away_goals": 0.95,
             "modal_score": [
               1,
-              0
+              1
             ]
           }
         },
@@ -1264,9 +1264,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4756,
-            "p_draw": 0.2674,
-            "p_away_win": 0.257,
+            "p_home_win": 0.4708,
+            "p_draw": 0.2624,
+            "p_away_win": 0.2668,
             "expected_home_goals": 1.49,
             "expected_away_goals": 1.03,
             "modal_score": [
@@ -1286,9 +1286,9 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5648,
-            "p_draw": 0.2324,
-            "p_away_win": 0.2028,
+            "p_home_win": 0.5748,
+            "p_draw": 0.2328,
+            "p_away_win": 0.1924,
             "expected_home_goals": 1.71,
             "expected_away_goals": 0.9,
             "modal_score": [
@@ -1308,11 +1308,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2288,
-            "p_draw": 0.2492,
-            "p_away_win": 0.522,
-            "expected_home_goals": 0.97,
-            "expected_away_goals": 1.59,
+            "p_home_win": 0.2322,
+            "p_draw": 0.2468,
+            "p_away_win": 0.521,
+            "expected_home_goals": 0.98,
+            "expected_away_goals": 1.58,
             "modal_score": [
               0,
               1
@@ -1330,11 +1330,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3918,
-            "p_draw": 0.2698,
-            "p_away_win": 0.3384,
-            "expected_home_goals": 1.32,
-            "expected_away_goals": 1.16,
+            "p_home_win": 0.3878,
+            "p_draw": 0.2758,
+            "p_away_win": 0.3364,
+            "expected_home_goals": 1.31,
+            "expected_away_goals": 1.17,
             "modal_score": [
               1,
               1
@@ -1352,14 +1352,14 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1264,
-            "p_draw": 0.1946,
-            "p_away_win": 0.679,
+            "p_home_win": 0.1304,
+            "p_draw": 0.1878,
+            "p_away_win": 0.6818,
             "expected_home_goals": 0.75,
             "expected_away_goals": 2.05,
             "modal_score": [
               0,
-              1
+              2
             ]
           }
         }
@@ -1435,11 +1435,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1398,
-            "p_draw": 0.2044,
-            "p_away_win": 0.6558,
-            "expected_home_goals": 0.78,
-            "expected_away_goals": 1.97,
+            "p_home_win": 0.1366,
+            "p_draw": 0.208,
+            "p_away_win": 0.6554,
+            "expected_home_goals": 0.79,
+            "expected_away_goals": 1.95,
             "modal_score": [
               0,
               1
@@ -1457,10 +1457,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.8544,
-            "p_draw": 0.1066,
-            "p_away_win": 0.039,
-            "expected_home_goals": 2.91,
+            "p_home_win": 0.8498,
+            "p_draw": 0.1092,
+            "p_away_win": 0.041,
+            "expected_home_goals": 2.93,
             "expected_away_goals": 0.53,
             "modal_score": [
               2,
@@ -1479,13 +1479,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.8624,
-            "p_draw": 0.1014,
-            "p_away_win": 0.0362,
+            "p_home_win": 0.8612,
+            "p_draw": 0.1006,
+            "p_away_win": 0.0382,
             "expected_home_goals": 2.98,
             "expected_away_goals": 0.52,
             "modal_score": [
-              2,
+              3,
               0
             ]
           }
@@ -1501,13 +1501,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.637,
-            "p_draw": 0.2136,
-            "p_away_win": 0.1494,
-            "expected_home_goals": 1.93,
+            "p_home_win": 0.6378,
+            "p_draw": 0.2054,
+            "p_away_win": 0.1568,
+            "expected_home_goals": 1.92,
             "expected_away_goals": 0.8,
             "modal_score": [
-              2,
+              1,
               0
             ]
           }
@@ -1523,11 +1523,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3802,
-            "p_draw": 0.2628,
-            "p_away_win": 0.357,
-            "expected_home_goals": 1.27,
-            "expected_away_goals": 1.21,
+            "p_home_win": 0.3788,
+            "p_draw": 0.2652,
+            "p_away_win": 0.356,
+            "expected_home_goals": 1.26,
+            "expected_away_goals": 1.22,
             "modal_score": [
               1,
               1
@@ -1545,11 +1545,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1674,
-            "p_draw": 0.2184,
-            "p_away_win": 0.6142,
-            "expected_home_goals": 0.82,
-            "expected_away_goals": 1.88,
+            "p_home_win": 0.1562,
+            "p_draw": 0.2146,
+            "p_away_win": 0.6292,
+            "expected_home_goals": 0.81,
+            "expected_away_goals": 1.89,
             "modal_score": [
               0,
               1
@@ -1628,10 +1628,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5182,
-            "p_draw": 0.2462,
-            "p_away_win": 0.2356,
-            "expected_home_goals": 1.57,
+            "p_home_win": 0.5208,
+            "p_draw": 0.256,
+            "p_away_win": 0.2232,
+            "expected_home_goals": 1.58,
             "expected_away_goals": 0.98,
             "modal_score": [
               1,
@@ -1650,11 +1650,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1372,
-            "p_draw": 0.202,
-            "p_away_win": 0.6608,
+            "p_home_win": 0.1308,
+            "p_draw": 0.2116,
+            "p_away_win": 0.6576,
             "expected_home_goals": 0.77,
-            "expected_away_goals": 2.0,
+            "expected_away_goals": 2.01,
             "modal_score": [
               0,
               1
@@ -1672,10 +1672,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.8172,
-            "p_draw": 0.1298,
-            "p_away_win": 0.053,
-            "expected_home_goals": 2.65,
+            "p_home_win": 0.8122,
+            "p_draw": 0.1356,
+            "p_away_win": 0.0522,
+            "expected_home_goals": 2.64,
             "expected_away_goals": 0.58,
             "modal_score": [
               2,
@@ -1694,11 +1694,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3366,
-            "p_draw": 0.264,
-            "p_away_win": 0.3994,
-            "expected_home_goals": 1.18,
-            "expected_away_goals": 1.3,
+            "p_home_win": 0.3386,
+            "p_draw": 0.2716,
+            "p_away_win": 0.3898,
+            "expected_home_goals": 1.2,
+            "expected_away_goals": 1.28,
             "modal_score": [
               1,
               1
@@ -1717,10 +1717,10 @@
           "played": false,
           "prediction": {
             "p_home_win": 0.2242,
-            "p_draw": 0.249,
-            "p_away_win": 0.5268,
+            "p_draw": 0.2502,
+            "p_away_win": 0.5256,
             "expected_home_goals": 0.94,
-            "expected_away_goals": 1.64,
+            "expected_away_goals": 1.63,
             "modal_score": [
               1,
               1
@@ -1738,11 +1738,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6878,
-            "p_draw": 0.1912,
-            "p_away_win": 0.121,
-            "expected_home_goals": 2.1,
-            "expected_away_goals": 0.73,
+            "p_home_win": 0.6776,
+            "p_draw": 0.199,
+            "p_away_win": 0.1234,
+            "expected_home_goals": 2.08,
+            "expected_away_goals": 0.74,
             "modal_score": [
               2,
               0
@@ -1821,13 +1821,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6552,
-            "p_draw": 0.2024,
-            "p_away_win": 0.1424,
-            "expected_home_goals": 1.95,
+            "p_home_win": 0.6432,
+            "p_draw": 0.2156,
+            "p_away_win": 0.1412,
+            "expected_home_goals": 1.94,
             "expected_away_goals": 0.79,
             "modal_score": [
-              1,
+              2,
               0
             ]
           }
@@ -1843,10 +1843,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.494,
-            "p_draw": 0.2628,
-            "p_away_win": 0.2432,
-            "expected_home_goals": 1.52,
+            "p_home_win": 0.4984,
+            "p_draw": 0.2588,
+            "p_away_win": 0.2428,
+            "expected_home_goals": 1.53,
             "expected_away_goals": 1.01,
             "modal_score": [
               1,
@@ -1865,11 +1865,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.673,
-            "p_draw": 0.1964,
-            "p_away_win": 0.1306,
-            "expected_home_goals": 2.03,
-            "expected_away_goals": 0.76,
+            "p_home_win": 0.6664,
+            "p_draw": 0.1984,
+            "p_away_win": 0.1352,
+            "expected_home_goals": 2.0,
+            "expected_away_goals": 0.77,
             "modal_score": [
               2,
               0
@@ -1887,11 +1887,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2322,
-            "p_draw": 0.2508,
-            "p_away_win": 0.517,
-            "expected_home_goals": 0.97,
-            "expected_away_goals": 1.58,
+            "p_home_win": 0.2358,
+            "p_draw": 0.2454,
+            "p_away_win": 0.5188,
+            "expected_home_goals": 0.98,
+            "expected_away_goals": 1.57,
             "modal_score": [
               0,
               1
@@ -1909,11 +1909,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3844,
-            "p_draw": 0.2658,
-            "p_away_win": 0.3498,
-            "expected_home_goals": 1.29,
-            "expected_away_goals": 1.19,
+            "p_home_win": 0.3776,
+            "p_draw": 0.2674,
+            "p_away_win": 0.355,
+            "expected_home_goals": 1.28,
+            "expected_away_goals": 1.21,
             "modal_score": [
               1,
               1
@@ -1931,11 +1931,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.0694,
-            "p_draw": 0.1472,
-            "p_away_win": 0.7834,
-            "expected_home_goals": 0.62,
-            "expected_away_goals": 2.48,
+            "p_home_win": 0.0724,
+            "p_draw": 0.1498,
+            "p_away_win": 0.7778,
+            "expected_home_goals": 0.63,
+            "expected_away_goals": 2.46,
             "modal_score": [
               0,
               2
@@ -2014,13 +2014,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6694,
-            "p_draw": 0.2048,
-            "p_away_win": 0.1258,
-            "expected_home_goals": 2.0,
-            "expected_away_goals": 0.77,
+            "p_home_win": 0.6714,
+            "p_draw": 0.1982,
+            "p_away_win": 0.1304,
+            "expected_home_goals": 2.02,
+            "expected_away_goals": 0.76,
             "modal_score": [
-              2,
+              1,
               0
             ]
           }
@@ -2036,11 +2036,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1762,
-            "p_draw": 0.2276,
-            "p_away_win": 0.5962,
-            "expected_home_goals": 0.84,
-            "expected_away_goals": 1.83,
+            "p_home_win": 0.1746,
+            "p_draw": 0.2314,
+            "p_away_win": 0.594,
+            "expected_home_goals": 0.85,
+            "expected_away_goals": 1.81,
             "modal_score": [
               0,
               1
@@ -2058,10 +2058,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.5906,
-            "p_draw": 0.2376,
-            "p_away_win": 0.1718,
-            "expected_home_goals": 1.81,
+            "p_home_win": 0.5902,
+            "p_draw": 0.2302,
+            "p_away_win": 0.1796,
+            "expected_home_goals": 1.8,
             "expected_away_goals": 0.85,
             "modal_score": [
               1,
@@ -2080,13 +2080,13 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6736,
-            "p_draw": 0.1982,
-            "p_away_win": 0.1282,
+            "p_home_win": 0.672,
+            "p_draw": 0.1966,
+            "p_away_win": 0.1314,
             "expected_home_goals": 2.03,
             "expected_away_goals": 0.76,
             "modal_score": [
-              2,
+              1,
               0
             ]
           }
@@ -2102,11 +2102,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3032,
-            "p_draw": 0.275,
-            "p_away_win": 0.4218,
-            "expected_home_goals": 1.12,
-            "expected_away_goals": 1.38,
+            "p_home_win": 0.3028,
+            "p_draw": 0.2656,
+            "p_away_win": 0.4316,
+            "expected_home_goals": 1.11,
+            "expected_away_goals": 1.39,
             "modal_score": [
               1,
               1
@@ -2124,11 +2124,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.3696,
-            "p_draw": 0.269,
-            "p_away_win": 0.3614,
-            "expected_home_goals": 1.26,
-            "expected_away_goals": 1.22,
+            "p_home_win": 0.3664,
+            "p_draw": 0.2664,
+            "p_away_win": 0.3672,
+            "expected_home_goals": 1.24,
+            "expected_away_goals": 1.24,
             "modal_score": [
               1,
               1
@@ -2207,11 +2207,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.4772,
-            "p_draw": 0.2648,
-            "p_away_win": 0.258,
-            "expected_home_goals": 1.48,
-            "expected_away_goals": 1.04,
+            "p_home_win": 0.4844,
+            "p_draw": 0.258,
+            "p_away_win": 0.2576,
+            "expected_home_goals": 1.49,
+            "expected_away_goals": 1.03,
             "modal_score": [
               1,
               1
@@ -2229,11 +2229,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2948,
-            "p_draw": 0.269,
-            "p_away_win": 0.4362,
+            "p_home_win": 0.2956,
+            "p_draw": 0.2664,
+            "p_away_win": 0.438,
             "expected_home_goals": 1.09,
-            "expected_away_goals": 1.41,
+            "expected_away_goals": 1.4,
             "modal_score": [
               1,
               1
@@ -2251,10 +2251,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.7372,
-            "p_draw": 0.1734,
-            "p_away_win": 0.0894,
-            "expected_home_goals": 2.28,
+            "p_home_win": 0.743,
+            "p_draw": 0.1666,
+            "p_away_win": 0.0904,
+            "expected_home_goals": 2.3,
             "expected_away_goals": 0.67,
             "modal_score": [
               2,
@@ -2273,10 +2273,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.2024,
-            "p_draw": 0.2424,
-            "p_away_win": 0.5552,
-            "expected_home_goals": 0.92,
+            "p_home_win": 0.2,
+            "p_draw": 0.2458,
+            "p_away_win": 0.5542,
+            "expected_home_goals": 0.91,
             "expected_away_goals": 1.68,
             "modal_score": [
               0,
@@ -2295,10 +2295,10 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.6336,
-            "p_draw": 0.2132,
-            "p_away_win": 0.1532,
-            "expected_home_goals": 1.9,
+            "p_home_win": 0.6366,
+            "p_draw": 0.2108,
+            "p_away_win": 0.1526,
+            "expected_home_goals": 1.91,
             "expected_away_goals": 0.81,
             "modal_score": [
               1,
@@ -2317,11 +2317,11 @@
           "away_score": null,
           "played": false,
           "prediction": {
-            "p_home_win": 0.1308,
-            "p_draw": 0.19,
-            "p_away_win": 0.6792,
-            "expected_home_goals": 0.77,
-            "expected_away_goals": 2.01,
+            "p_home_win": 0.1274,
+            "p_draw": 0.1914,
+            "p_away_win": 0.6812,
+            "expected_home_goals": 0.76,
+            "expected_away_goals": 2.03,
             "modal_score": [
               0,
               1
