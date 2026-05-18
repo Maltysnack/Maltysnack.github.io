@@ -2081,10 +2081,13 @@
       function activeDataset() {
         if (STATE.mode === 'average') {
           // Average view: show pre-built data unless the user has actually
-          // applied boosts under Custom.
+          // applied boosts under Custom. Standings come from a single
+          // representative trial that matches the predicted knockout
+          // bracket, so points/GD/GF are integers and consistent with
+          // the bracket below (set decimal:false to render integers).
           if (!customActive()) {
             return { knockout: DATA.bracket.knockout, groups: DATA.bracket.groups,
-                     decimal: true, withScores: false };
+                     decimal: false, withScores: false };
           }
           if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
           return { knockout: STATE.currentSim.knockout,
