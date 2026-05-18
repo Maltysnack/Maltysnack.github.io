@@ -2767,12 +2767,11 @@
           wireControls();
           wireTabs();
           renderStatusBadges();
-          renderMatchList();
-          // Legacy renderers (containers hidden but kept to avoid errors)
-          renderNext();
-          renderUpcoming();
-          renderLookup();
-          renderRecent();
+          // renderMatchList / renderNext / renderUpcoming / renderLookup /
+          // renderRecent are all dead since the Live pane was removed;
+          // their target containers (wc-next, wc-upcoming, wc-lookup,
+          // wc-recent, wc-match-list) no longer exist and calling them
+          // crashes init and surfaces "Tournament data not available".
           renderPaths();
           renderControls();
           renderMeta();
