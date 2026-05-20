@@ -1,13 +1,49 @@
 {
-  "generated_at": "2026-05-13",
-  "window_label": "data through 11-05-2026",
-  "current_week": "2026-05-11",
-  "window_weeks": ["2026-04-06", "2026-04-13", "2026-04-20", "2026-04-27", "2026-05-01", "2026-05-04", "2026-05-08", "2026-05-11"],
+  "generated_at": "2026-05-20",
+  "window_label": "data through 18-05-2026",
+  "current_week": "2026-05-18",
+  "window_weeks": ["2026-04-13", "2026-04-20", "2026-04-27", "2026-05-01", "2026-05-04", "2026-05-09", "2026-05-11", "2026-05-18"],
   "stories": [
+    {
+      "id": "pt-tech-still-not-on-ladder",
+      "week": "2026-05-18",
+      "status": "active",
+      "kind": "pt-vs-ladder",
+      "is_shell": false,
+      "title": "The Pro Tour tech still hasn't reached the ladder",
+      "summary": "A fortnight ago the site flagged six Pro Tour staples the ladder hadn't adopted and expected at least two to cross over. None have.",
+      "stats": [
+        {"label": "Get Out", "value": "30% Pro Tour, 1% ladder"},
+        {"label": "Prismari Charm", "value": "27% Pro Tour, 1% ladder"},
+        {"label": "Colorstorm Stallion", "value": "20% Pro Tour, 1% ladder"},
+        {"label": "Impractical Joke", "value": "19% Pro Tour, 1% ladder"},
+        {"label": "Prior call", "value": "the 11-05 story expected 2+ to cross over within a fortnight"}
+      ],
+      "detail": "Pro Tour results usually seed ladder tech within a week or two. This time they haven't. The honest read is that either the ladder is unusually slow this cycle, or this Pro Tour's best cards are tuned for a field the ladder does not have.",
+      "cards": ["Get Out", "Prismari Charm", "Colorstorm Stallion", "Impractical Joke"]
+    },
+    {
+      "id": "erode-breakout-held",
+      "week": "2026-05-18",
+      "status": "active",
+      "kind": "post-pt-shift",
+      "is_shell": true,
+      "title": "Erode's breakout held",
+      "summary": "Erode has sat near 20% of winning ladder lists for three straight weeks. The fast riser flagged a fortnight ago consolidated instead of fading.",
+      "stats": [
+        {"label": "Ladder share, 27-04", "value": "4%"},
+        {"label": "Ladder share, 04-05", "value": "13%"},
+        {"label": "Ladder share, 11-05", "value": "20%"},
+        {"label": "Ladder share, 18-05", "value": "19%"}
+      ],
+      "detail": "Cards that spike quickly usually fall back just as fast. Erode did not. Three weeks after crossing into double digits it is steady at around a fifth of winning ladder lists, which marks it as a settled fixture rather than a one-week spike.",
+      "cards": ["Erode", "Dyadrine, Synthesis Amalgam", "Hardened Academic", "Flitterwing Nuisance", "Lumbering Worldwagon", "Shardmage's Rescue"]
+    },
     {
       "id": "rakdos-boggart-return",
       "week": "2026-05-11",
-      "status": "active",
+      "status": "resolved",
+      "status_note": "the return did not hold; the shell was gone again by 18-05",
       "kind": "returning-cluster",
       "is_shell": true,
       "title": "Rakdos Boggart back at peak density",
@@ -25,7 +61,8 @@
     {
       "id": "erode-breakout",
       "week": "2026-05-11",
-      "status": "active",
+      "status": "resolved",
+      "status_note": "Erode held near 20%; see the 18-05 follow-up",
       "kind": "post-pt-shift",
       "is_shell": true,
       "title": "Erode: 0 to 20 percent in two weeks",
@@ -43,7 +80,8 @@
     {
       "id": "pt-picks-ladder-lag",
       "week": "2026-05-11",
-      "status": "active",
+      "status": "resolved",
+      "status_note": "the predicted crossover did not happen; see the 18-05 follow-up",
       "kind": "pt-vs-ladder",
       "title": "Five PT staples ladder has not touched",
       "summary": "Five cards pros are betting on that the ladder has not picked up. Each above 5 percent at the Pro Tour, near zero on ranked ladder.",
