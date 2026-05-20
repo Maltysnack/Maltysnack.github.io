@@ -28,6 +28,12 @@
       line-height: 1.45;
     }
     .intro p[style*="italic"] { margin-top: 0.5rem; }
+    .wc-method-link {
+      font-style: italic;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .wc-method-link:hover { text-decoration: underline; }
     .wc-pane { margin-top: 0.5rem; }
     .wc-pane .intro { margin-bottom: 0.5rem; }
     .wc-tournament-bar { margin-top: 0.3rem; margin-bottom: 0.3rem; }
@@ -1227,7 +1233,7 @@
         tournament's number of upsets is preserved. Top scorers are
         predicted separately from club form. Frozen the day before
         kickoff so the prediction stands on its own.
-        <a href="/projects/worldcup/methodology.html">How the model works</a>.
+        <a class="wc-method-link" href="/projects/worldcup/methodology.html">How the model works &rarr;</a>
         <span class="wc-pred-badge" id="wc-pred-badge"></span>
       </p>
       <p style="font-style:italic;color:var(--text-muted);font-size:0.95rem;margin-top:1rem;">

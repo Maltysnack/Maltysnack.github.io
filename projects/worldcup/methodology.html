@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="/style.css" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
   <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
   <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
   <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
@@ -16,34 +15,126 @@
   <meta name="theme-color" content="#13110d" />
 
   <style>
-    .wc-method { max-width: 720px; }
-    .wc-method h2 {
-      font-family: "Playfair Display", serif;
-      font-size: 1.35rem;
-      font-weight: 600;
-      margin: 2.2rem 0 0.5rem;
-      letter-spacing: 0.01em;
-    }
-    .wc-method h2:first-of-type { margin-top: 1.4rem; }
-    .wc-method p { margin: 0.55rem 0; line-height: 1.55; }
-    .wc-method ul { margin: 0.45rem 0 0.55rem 1.15rem; padding: 0; }
-    .wc-method li { margin: 0.2rem 0; line-height: 1.5; }
+    .wc-method { max-width: 760px; }
+
     .wc-method .lede {
-      font-size: 1.02rem;
+      font-size: 1.05rem;
       color: var(--text-muted);
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.6rem;
+      line-height: 1.6;
     }
-    .wc-method .backlink {
+
+    /* Pipeline schematic */
+    .wc-pipeline {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 0.45rem 0.5rem;
+      margin: 1.4rem 0 0.6rem;
+      padding: 1rem 1.1rem;
+      background: var(--bg-soft);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
+    .wc-pipeline .stage {
+      font-family: var(--font-mono);
+      font-size: 0.76rem;
+      font-weight: 500;
+      padding: 0.32rem 0.6rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 5px;
+      white-space: nowrap;
+    }
+    .wc-pipeline .stage.out {
+      background: var(--accent);
+      color: #faf7f0;
+      border-color: var(--accent);
+    }
+    .wc-pipeline .arrow {
+      color: var(--accent);
+      font-weight: 700;
+      font-family: var(--font-mono);
+    }
+    .wc-pipeline-note {
+      font-size: 0.84rem;
+      color: var(--text-dim);
+      margin: 0.4rem 0 0;
+    }
+
+    /* Sections */
+    .wc-method .section {
+      margin-top: 2.6rem;
+      padding-top: 1.7rem;
+      border-top: 1px solid var(--border);
+    }
+    .wc-method h2 {
+      font-family: var(--font-body);
+      font-size: 1.32rem;
+      font-weight: 600;
+      letter-spacing: -0.012em;
+      margin: 0 0 0.7rem;
+    }
+    .wc-method h2 .num {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--accent);
+      margin-right: 0.55rem;
+    }
+
+    /* Plain-language overview */
+    .wc-method .plain {
+      border-left: 3px solid var(--accent);
+      padding-left: 0.95rem;
+      margin: 0.6rem 0 1.1rem;
+      font-size: 1.05rem;
+      line-height: 1.6;
+      color: var(--text);
+    }
+
+    /* Technical block */
+    .wc-method .tech-label {
       display: inline-block;
-      margin-top: 2.5rem;
-      font-size: 0.92rem;
-      color: var(--text-muted);
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-dim);
+      margin: 0.6rem 0 0.1rem;
     }
+    .wc-method p { margin: 0.5rem 0; line-height: 1.58; }
+    .wc-method ul { margin: 0.5rem 0 0.6rem 1.15rem; padding: 0; }
+    .wc-method li { margin: 0.28rem 0; line-height: 1.5; }
+
+    /* Code snippets */
+    .wc-method pre {
+      background: var(--bg-island);
+      color: #e8e2d2;
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.55;
+      padding: 0.95rem 1.1rem;
+      border-radius: 7px;
+      overflow-x: auto;
+      margin: 0.95rem 0;
+      border-left: 3px solid var(--accent);
+    }
+    .wc-method pre .c { color: #8f8b80; }
     .wc-method code {
       font-size: 0.88em;
-      background: rgba(255,255,255,0.05);
+      background: rgba(179,64,47,0.1);
       padding: 0.05em 0.35em;
       border-radius: 3px;
+    }
+
+    .wc-method .backlink {
+      display: inline-block;
+      margin-top: 2.8rem;
+      font-size: 0.92rem;
+      font-style: italic;
+      color: var(--accent);
     }
   </style>
 </head>
@@ -57,111 +148,231 @@
       <h1 class="intro-heading">Methodology.</h1>
       <p class="lede">
         How the World Cup 2026 numbers on the
-        <a href="/projects/worldcup/">main page</a> are produced. Concepts
-        only. The code is private; this page exists so the claims can be
-        evaluated on their reasoning.
+        <a href="/projects/worldcup/">main page</a> are produced. Each
+        section gives the plain-English version first, then the technical
+        detail underneath. The code and the tuned parameters stay private;
+        the reasoning does not.
       </p>
 
-      <h2>Data</h2>
-      <p>The model is trained on every senior men's international result the
-      database has, going back decades. Four sources feed it:</p>
-      <ul>
-        <li>International match results (date, teams, score, venue, competition type).</li>
-        <li>Club rosters and recent appearances, scraped per published squad.</li>
-        <li>Historical World Cup top scorers, used to fit league-strength multipliers, not goal counts directly.</li>
-        <li>Bookmaker outright prices, used only as a sanity check, never as an input.</li>
-      </ul>
+      <div class="wc-pipeline">
+        <span class="stage">Match results</span>
+        <span class="arrow">&rarr;</span>
+        <span class="stage">Elo ratings</span>
+        <span class="arrow">&rarr;</span>
+        <span class="stage">Match model</span>
+        <span class="arrow">&rarr;</span>
+        <span class="stage">10,000 simulations</span>
+        <span class="arrow">&rarr;</span>
+        <span class="stage out">Probabilities</span>
+      </div>
+      <p class="wc-pipeline-note">
+        The top-scorer prediction runs on a separate track from club form.
+      </p>
 
-      <h2>Team rating: Elo</h2>
-      <p>Each team carries an Elo rating, the same family of rating used in
-      chess and FiveThirtyEight's old soccer model. A team's rating moves up
-      when it beats stronger opposition and down when it loses to weaker
-      opposition, with the size of the move set by the result, the score
-      margin, and how surprising the result was.</p>
-      <p>Two adjustments matter:</p>
-      <ul>
-        <li>Friendlies are weighted less than competitive matches. A friendly drubbing of a B-team should not move ratings the way a qualifier loss does.</li>
-        <li>Recent matches count more than old ones, but only mildly. Heavy recency weighting performed worse in validation than a long memory.</li>
-      </ul>
+      <div class="section">
+        <h2><span class="num">01</span>Data</h2>
+        <p class="plain">
+          Everything the model knows, it learned from results that already
+          happened. No opinions, no bought-in rankings, no eye test.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>The core training set is every senior men's international result
+        the database holds, going back decades: date, teams, score, venue,
+        competition type. Three further sources feed specific parts of the
+        pipeline:</p>
+        <ul>
+          <li>Published squad lists and recent club appearances, scraped per team.</li>
+          <li>Historical World Cup top scorers, used to fit league-strength multipliers, never as goal counts directly.</li>
+          <li>Bookmaker outright prices, used only as an after-the-fact sanity check, never as a model input.</li>
+        </ul>
+      </div>
 
-      <h2>Match model</h2>
-      <p>Given two ratings, a match is simulated as a joint scoring process
-      rather than two independent Poisson draws. Goals in real football are
-      correlated (a team chasing concedes more, leading teams shut up shop),
-      and the joint sampler reproduces that better than independent goals.</p>
-      <p>On top of the rating difference, three layers apply:</p>
-      <ul>
-        <li><strong>Home advantage</strong> calibrated on the actual home edge in the result database, not a guessed constant.</li>
-        <li><strong>Altitude</strong> bump for matches at high-elevation Mexican venues. Visiting sides historically underperform there.</li>
-        <li><strong>Temperature</strong> on the scoring distribution, fitted to make predicted score frequencies match observed ones.</li>
-      </ul>
+      <div class="section">
+        <h2><span class="num">02</span>Team rating: Elo</h2>
+        <p class="plain">
+          Every team carries one number for how strong it is right now.
+          Beat someone better than you and it climbs; lose to someone worse
+          and it falls. Simple, and it travels well across eras.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>The rating is an Elo, the same family used in chess and
+        FiveThirtyEight's old soccer model. After each match a team's
+        rating moves by an amount set by the result, the goal margin, and
+        how surprising the outcome was.</p>
+        <pre><span class="c"># standard Elo update, applied after every match</span>
+expected = 1 / (1 + 10 ** ((opp_rating - team_rating) / scale))
+team_rating += K * margin_mult * (result - expected)
 
-      <h2>Squad layer</h2>
-      <p>National-team rating drifts from squad reality between tournaments.
-      Players retire, new ones break through, key forwards get injured. A
-      squad layer adjusts the rating using current club form of each named
-      player in the published squad. It is held back from the live model
-      pending more squads being announced, because adjusting on partial
-      rosters skews toward whichever country announced first.</p>
+<span class="c"># K, scale, the margin multiplier and the recency</span>
+<span class="c"># half-life are all tuned on held-out data, not shown.</span></pre>
+        <p>Two adjustments earned their place in validation:</p>
+        <ul>
+          <li>Friendlies are weighted less than competitive matches. A friendly drubbing of a B-team should not move ratings the way a qualifier loss does.</li>
+          <li>Recent matches count more than old ones, but only mildly. Heavy recency weighting performed worse than a long memory.</li>
+        </ul>
+      </div>
 
-      <h2>Tournament simulation</h2>
-      <p>The tournament is simulated end to end ten thousand times. Each
-      simulation plays every group game, computes standings, resolves
-      best-third qualifiers, and runs the knockout bracket including extra
-      time and penalty shootouts.</p>
-      <p>The table shows averaged probabilities of reaching each round. The
-      group and knockout tabs show one single representative tournament
-      taken from those ten thousand runs, picked to sit near the median
-      chaos level so a typical number of upsets is preserved. This avoids
-      the common failure where a probabilistic table is paired with a
-      modal-bracket view, leaving the two views internally inconsistent.</p>
+      <div class="section">
+        <h2><span class="num">03</span>Match model</h2>
+        <p class="plain">
+          Give the model two teams and it does not just name a winner. It
+          produces a full spread of plausible scorelines, 2-1, 0-0, the
+          occasional 4-0, at realistic frequencies.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>A match is drawn as a single joint scoring process, not two
+        independent Poisson draws. Real football goals are correlated: a
+        chasing team concedes more, a leading team shuts up shop. The joint
+        sampler reproduces that; independent goals do not.</p>
+        <pre><span class="c"># one correlated draw, not two independent Poissons</span>
+home_goals, away_goals = joint_sample(
+    rating_gap,
+    home_advantage,   <span class="c"># calibrated from the result database</span>
+    altitude_bump,    <span class="c"># high-elevation Mexican venues</span>
+    temperature,      <span class="c"># shapes the score distribution</span>
+)</pre>
+        <p>Three layers sit on top of the rating gap:</p>
+        <ul>
+          <li><strong>Home advantage</strong> calibrated on the actual home edge in the result database, not a guessed constant.</li>
+          <li><strong>Altitude</strong> bump for matches at high-elevation Mexican venues, where visiting sides historically underperform.</li>
+          <li><strong>Temperature</strong> on the scoring distribution, fitted so predicted score frequencies match observed ones.</li>
+        </ul>
+      </div>
 
-      <h2>Top scorer</h2>
-      <p>Top scorer is predicted separately. A player's expected World Cup
-      goals are built from minutes played, recent club scoring rate, role
-      (forward, attacking mid, etc.), and the strength of their domestic
-      league.</p>
-      <p>League strength is fit empirically. For every past World Cup, the
-      share of top-ten finishers from each league is compared against the
-      share of forwards from that league in tournament squads. Leagues that
-      consistently over-deliver get a multiplier above one; those that
-      under-deliver get a multiplier below one. The fit uses empirical
-      Bayes shrinkage so leagues with few historical samples are pulled
-      toward neutral rather than swinging on small data.</p>
-      <p>A separate scaler lifts absolute predicted totals so the winner
-      lands in the historical range, not below it.</p>
+      <div class="section">
+        <h2><span class="num">04</span>Squad layer</h2>
+        <p class="plain">
+          A nation's rating can drift away from who actually turns up.
+          Stars retire, a wonderkid breaks through, the first-choice
+          striker limps off in May. This layer corrects for that.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>It adjusts the national-team rating using the current club form
+        of each named player in the published squad.</p>
+        <p>It is deliberately held out of the live model for now. Adjusting
+        on partial squad lists biases the table toward whichever countries
+        announced first; the layer switches on once enough squads are
+        public for the comparison to be fair.</p>
+      </div>
 
-      <h2>Validation</h2>
-      <p>The full pipeline is back-tested on sixteen past tournaments
-      (World Cups, Euros, Copa Américas, AFCONs, Asian Cups), running every
-      match through the model using only data available before that match.
-      Each tournament produces around 64 to 128 evaluations; the full grid
-      is roughly 1,400.</p>
-      <p>The metric is log-loss against the actual result. Changes to the
-      model are kept only if they improve log-loss on the held-out grid,
-      not on the matches they were tuned on. Several intuitively appealing
-      changes (travel fatigue, deeper recency weighting, Bayesian
-      in-tournament updating) were tried and rejected on this basis.</p>
+      <div class="section">
+        <h2><span class="num">05</span>Tournament simulation</h2>
+        <p class="plain">
+          The model plays the entire World Cup, every group game and every
+          knockout, ten thousand times over. How often a team reaches each
+          stage becomes its probability.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>Each run plays the group stage, computes standings, resolves the
+        best-third qualifiers, and runs the bracket including extra time
+        and penalty shootouts.</p>
+        <pre>for trial in range(10_000):
+    standings  = play_group_stage()
+    qualifiers = standings + best_thirds(standings)
+    champion   = run_knockouts(qualifiers)   <span class="c"># ET, then pens</span>
+    record(trial, rounds_reached)
 
-      <h2>What was deliberately left out</h2>
-      <ul>
-        <li><strong>Travel fatigue.</strong> No measurable effect after controlling for opponent strength.</li>
-        <li><strong>Player form via match-by-match scraping.</strong> Noise dominated the signal at the granularity tested.</li>
-        <li><strong>Continental-host edges.</strong> Captured already by the home-advantage and altitude layers.</li>
-        <li><strong>Bayesian in-tournament updating.</strong> Group-stage results are too few to update ratings reliably; the prior dominates anyway.</li>
-      </ul>
+probabilities = average_over_trials()</pre>
+        <p>The Table shows probabilities averaged across all ten thousand
+        runs. The Group and Knockout tabs show one single run, chosen to
+        sit near the median chaos level so a typical number of upsets
+        survives. Picking one real run, rather than stitching together the
+        most likely result of each tie, keeps the two views internally
+        consistent.</p>
+      </div>
 
-      <h2>Known limitations</h2>
-      <ul>
-        <li>Top-scorer training data is survivor-biased: it only sees players who actually went to the World Cup. Non-Big-5 leagues have small samples, which is why their multipliers are shrunk hard.</li>
-        <li>The home-advantage figure is averaged across host nations and competitions. A specific host's edge could be larger or smaller.</li>
-        <li>Squad data is only as current as the published rosters. Late injuries are not reflected unless squads are re-scraped.</li>
-        <li>The model has no view on managerial changes, internal squad dynamics, or the specific tactical match-ups that often decide knockout games.</li>
-      </ul>
+      <div class="section">
+        <h2><span class="num">06</span>Top scorer</h2>
+        <p class="plain">
+          Who wins the Golden Boot is its own question. The model builds
+          each contender's goal tally from how much he plays, how prolific
+          he is for his club, where he plays, and how strong his league is.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>Club scoring rate comes from 2025-26 season data; position sets
+        a role weight. League strength is fitted empirically: for every
+        past World Cup, the share of top-ten finishers from a league is
+        compared with that league's share of forwards in tournament
+        squads. Over-delivering leagues earn a multiplier above one,
+        under-delivering leagues below one, with empirical-Bayes shrinkage
+        so thin samples are pulled toward neutral.</p>
+        <pre>expected_wc_goals = (
+      minutes_share        <span class="c"># how much he is on the pitch</span>
+    * club_scoring_rate    <span class="c"># 2025-26 club goals per 90</span>
+    * role_weight          <span class="c"># forward, attacking mid, ...</span>
+    * league_multiplier    <span class="c"># empirically fitted, per league</span>
+    * environment_scaler   <span class="c"># lifts totals into historic range</span>
+)
+<span class="c"># every weight and multiplier is fitted; values stay private.</span></pre>
+        <p>The final environment scaler lifts absolute totals so the
+        predicted winner lands inside the historical Golden Boot range
+        rather than below it.</p>
+      </div>
 
-      <h2>Why the code is private</h2>
-      <p>Parameters and weights are the output of months of validation
-      work. The reasoning above is the part worth sharing.</p>
+      <div class="section">
+        <h2><span class="num">07</span>Validation</h2>
+        <p class="plain">
+          None of this is worth anything if it cannot be checked. Every
+          change to the model has to prove itself by re-predicting
+          tournaments that have already happened.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>The full pipeline is back-tested on sixteen past tournaments,
+        World Cups, Euros, Copa Américas, AFCONs and Asian Cups,
+        predicting each match using only data available before kickoff.
+        The full grid is roughly 1,400 evaluations.</p>
+        <pre>loss = 0
+for tournament in past_16:   <span class="c"># WCs, Euros, Copas, AFCONs, Asian Cups</span>
+    for match in tournament:
+        p = model.predict(match, using=data_before(match))
+        loss += log_loss(p, actual_result)
+
+<span class="c"># a change ships only if it lowers loss on matches</span>
+<span class="c"># it was never tuned on.</span></pre>
+        <p>The metric is log-loss against the actual result. A change is
+        kept only if it lowers log-loss on the held-out grid. Travel
+        fatigue, deeper recency weighting and Bayesian in-tournament
+        updating all looked sensible and all failed this test.</p>
+      </div>
+
+      <div class="section">
+        <h2><span class="num">08</span>What was deliberately left out</h2>
+        <p class="plain">
+          Some ideas sound right and still do not help. These were built,
+          tested, and dropped.
+        </p>
+        <ul>
+          <li><strong>Travel fatigue.</strong> No measurable effect after controlling for opponent strength.</li>
+          <li><strong>Player form via match-by-match scraping.</strong> Noise dominated the signal at the granularity tested.</li>
+          <li><strong>Continental-host edges.</strong> Already captured by the home-advantage and altitude layers.</li>
+          <li><strong>Bayesian in-tournament updating.</strong> Group-stage results are too few to update ratings reliably; the prior dominates anyway.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2><span class="num">09</span>Known limitations</h2>
+        <p class="plain">
+          Where the model is weakest, stated plainly.
+        </p>
+        <ul>
+          <li>Top-scorer training data is survivor-biased: it only sees players who actually went to the World Cup. Non-Big-5 leagues have small samples, which is why their multipliers are shrunk hard.</li>
+          <li>The home-advantage figure is averaged across host nations and competitions. A specific host's edge could be larger or smaller.</li>
+          <li>Squad data is only as current as the published rosters. Late injuries are not reflected unless squads are re-scraped.</li>
+          <li>The model has no view on managerial changes, internal squad dynamics, or the specific tactical match-ups that often decide knockout games.</li>
+        </ul>
+      </div>
+
+      <div class="section">
+        <h2><span class="num">10</span>Why the code is private</h2>
+        <p class="plain">
+          The parameters are the prize. The thinking is the part worth
+          sharing.
+        </p>
+        <span class="tech-label">Under the hood</span>
+        <p>Every weight, multiplier and scaler above is the output of
+        months of validation work. The structure and the reasoning are on
+        this page; the tuned numbers stay in the repository.</p>
+      </div>
 
       <a class="backlink" href="/projects/worldcup/">&larr; Back to the predictions</a>
     </section>
