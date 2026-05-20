@@ -135,20 +135,26 @@
         <p>The rating belongs to the Elo family used in chess and
         FiveThirtyEight's old soccer model, but the version here is heavily
         adapted for international football. All 49,000 matches are replayed
-        in date order; after each result a team's rating shifts by an
-        amount set jointly by the outcome, the goal margin, and how far the
-        result departed from what the ratings expected.</p>
+        in strict chronological order, so a rating is never informed by a
+        match that had not yet happened. Each update is the product of
+        three terms: the surprise of the result against the rating-implied
+        probability, a non-linear margin-of-victory curve that rewards a
+        4-0 far less than four times a 1-0, and a competition-tier weight
+        that scales a World Cup qualifier well above a mid-cycle friendly.
+        The update rate, the shape of the margin curve, the tier weights
+        and the recency half-life are not set by hand; they are jointly
+        optimised, and several plausible alternatives were discarded for
+        scoring worse out of sample.</p>
         <pre><span class="c"># standard Elo update, applied after every match</span>
 expected = 1 / (1 + 10 ** ((opp_rating - team_rating) / scale))
 team_rating += K * margin_mult * (result - expected)
 
 <span class="c"># K, scale, the margin multiplier and the recency</span>
 <span class="c"># half-life are all tuned on held-out data, not shown.</span></pre>
-        <p>Two adjustments earned their place in validation:</p>
-        <ul>
-          <li>Competitive matches outweigh friendlies. A friendly drubbing of a B-team should not move ratings the way a qualifier loss does.</li>
-          <li>Recent matches count more than old ones, but only mildly. Heavy recency weighting performed worse than a long memory.</li>
-        </ul>
+        <p>One finding ran against intuition and stuck. Weighting recent
+        results heavily looks like an obvious improvement; in validation it
+        consistently scored worse than a long memory, so the model keeps a
+        long one on purpose.</p>
       </div>
 
       <div class="section">
@@ -158,13 +164,16 @@ team_rating += K * margin_mult * (result - expected)
           produces a full spread of plausible scorelines, 2-1, 0-0, the
           occasional 4-0, at realistic frequencies.
         </p>
-        <p>A match is drawn as a single joint scoring process, not two
-        independent Poisson draws. Real football goals are correlated: a
-        chasing team commits bodies forward and concedes more, a leading
-        team shuts up shop. The sampler models both score lines together,
-        so the whole distribution of results lands correctly, the draw
-        rate, the frequency of heavy wins, the long tail, not just the
-        expected winner.</p>
+        <p>A match is drawn from a bivariate scoring distribution with an
+        explicit dependence parameter, not two independent Poisson draws.
+        Independence gets the average goal count right but the shape wrong:
+        too few draws, too few blowouts. Real football goals are
+        correlated, a chasing team commits bodies forward and concedes
+        more, a leading team shuts up shop, and modelling the two score
+        lines jointly, with the correlation itself fitted to observed
+        results, reproduces the real distribution: the draw rate, the 1-0
+        frequency, the heavy-win tail. That whole distribution, not just
+        the expected winner, is what the knockout simulation depends on.</p>
         <pre><span class="c"># one correlated draw, not two independent Poissons</span>
 home_goals, away_goals = joint_sample(
     rating_gap,
@@ -172,8 +181,8 @@ home_goals, away_goals = joint_sample(
     altitude_bump,    <span class="c"># high-elevation Mexican venues</span>
     temperature,      <span class="c"># shapes the score distribution</span>
 )</pre>
-        <p>Three layers sit on top of the rating gap, each fitted to the
-        data rather than guessed:</p>
+        <p>Three environmental layers sit on top of the rating gap, each
+        calibrated against the match record rather than set by hand:</p>
         <ul>
           <li><strong>Home advantage</strong> calibrated on the actual home edge measured across the result database.</li>
           <li><strong>Altitude</strong> bump for matches at high-elevation Mexican venues, where visiting sides historically underperform.</li>
@@ -188,9 +197,11 @@ home_goals, away_goals = joint_sample(
           Stars retire, a wonderkid breaks through, the first-choice
           striker limps off in May. This layer corrects for that.
         </p>
-        <p>It adjusts the national-team rating using the current club form
-        of each named player in the published squad, blending team-level
-        history with the players actually selected.</p>
+        <p>It builds a squad-strength index from the current club form of
+        every named player, then blends that index against the team's own
+        rating history. The blend weight is not a guess, it is fitted, and
+        the adjustment is bounded, so a single unusually hot or cold club
+        season cannot overwhelm decades of international evidence.</p>
         <p>It is deliberately held out of the live model for now. Adjusting
         on partial squad lists biases the table toward whichever countries
         announced first; the layer switches on once enough squads are
@@ -216,12 +227,16 @@ home_goals, away_goals = joint_sample(
     record(trial, rounds_reached)
 
 probabilities = average_over_trials()</pre>
-        <p>The Table shows probabilities averaged across all ten thousand
-        runs. The Group and Knockout tabs show one single run, chosen to
-        sit near the median chaos level so a typical number of upsets
-        survives. Picking one real run, rather than stitching together the
-        most likely result of each tie, keeps the two views internally
-        consistent.</p>
+        <p>The Table reports probabilities averaged across all ten
+        thousand runs, a Monte Carlo estimate that tightens as the sample
+        grows. The Group and Knockout tabs instead show one single
+        simulated tournament, selected so its number of upsets sits near
+        the median of the ten thousand. This avoids a subtle but common
+        inconsistency: a bracket stitched together from the most likely
+        result of each individual tie produces a tournament that, taken as
+        a whole, is far more chalk than any real one. Showing a genuine run
+        keeps the probabilistic table and the example bracket telling the
+        same story.</p>
       </div>
 
       <div class="section">
@@ -247,9 +262,12 @@ probabilities = average_over_trials()</pre>
     * environment_scaler   <span class="c"># lifts totals into historic range</span>
 )
 <span class="c"># every weight and multiplier is fitted; values stay private.</span></pre>
-        <p>The final environment scaler lifts absolute totals so the
-        predicted winner lands inside the historical Golden Boot range
-        rather than below it.</p>
+        <p>Each contender actually receives two independent forecasts, one
+        driven by club form, one by his share of his national team's recent
+        goals, combined with a weight fixed by back-testing against real
+        Golden Boot races. A final environment scaler then lifts absolute
+        totals so the predicted winner lands inside the historical Golden
+        Boot range rather than below it.</p>
       </div>
 
       <div class="section">
@@ -260,10 +278,11 @@ probabilities = average_over_trials()</pre>
           tournaments that have already happened.
         </p>
         <p>The full pipeline is back-tested on sixteen past tournaments,
-        World Cups, Euros, Copa Américas, AFCONs and Asian Cups. Each match
-        is replayed walk-forward: the model is shown only the data that
-        existed before kickoff, predicts, and is scored against what
-        actually happened, roughly 1,400 separate predictions in all.</p>
+        World Cups, Euros, Copa Américas, AFCONs and Asian Cups, by
+        walk-forward cross-validation. For every match the model is refit
+        on only the data that existed before kickoff, predicts, and is
+        scored against what actually happened, roughly 1,400 independent
+        evaluations in all.</p>
         <pre>loss = 0
 for tournament in past_16:   <span class="c"># WCs, Euros, Copas, AFCONs, Asian Cups</span>
     for match in tournament:
@@ -272,10 +291,13 @@ for tournament in past_16:   <span class="c"># WCs, Euros, Copas, AFCONs, Asian 
 
 <span class="c"># a change ships only if it lowers loss on matches</span>
 <span class="c"># it was never tuned on.</span></pre>
-        <p>The metric is log-loss against the actual result. A change is
-        kept only if it lowers log-loss on the held-out grid. Travel
+        <p>The metric is log-loss, the proper scoring rule for
+        probabilistic forecasts: it punishes a confident wrong call far
+        harder than a hedged one. A candidate change ships only if it
+        lowers held-out log-loss, never the log-loss of the matches it was
+        tuned on. It is a deliberately harsh bar, and it is why travel
         fatigue, deeper recency weighting and Bayesian in-tournament
-        updating all looked sensible and all failed this test.</p>
+        updating were each built, measured, and cut.</p>
       </div>
 
       <a class="backlink" href="/projects/worldcup/">&larr; Back to the predictions</a>
