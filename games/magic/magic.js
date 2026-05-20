@@ -13,10 +13,13 @@
   let allNames = null;
   let dataReady = false;
   let decks = null;       // raw decks, eager-loaded after initial render
+  let fullLoadFailed = false; // cards.json / decks_raw.json fetch or parse failed
   let stories = null;     // hand-curated narratives, loaded with the initial bundle
   let clusters = null;    // NMF-derived clusters + archetype mixes (local preview)
   let selectedArchetype = null;  // currently-expanded archetype name on Archetypes tab
   let selectedCluster = null;    // currently-expanded cluster id on Archetypes tab
+  let clusterCardFocus = null;   // card name with in-place panel open inside selectedCluster
+  let hidePureArchetypes = true; // hide single-cluster archetypes (top weight >= 0.85)
   // Synergy scores are computed ad-hoc from raw decks against the current
   // selection + bans, then cached. Cleared whenever selection or bans change.
   let _scoresMap = null;
@@ -1018,17 +1021,31 @@
     return top.length > 18 ? top.slice(0, 16) + "…" : top;
   }
 
+  // A "pure" archetype is dominated by one cluster (top weight >= 0.85). For
+  // those, the NMF cluster mix adds nothing the archetype label didn't already
+  // say. Hidden by default so the genuine *mixtures* (Izzet Prowess, Temur
+  // Harmonizer) get foreground attention.
+  function isPureArchetype(a) {
+    return a.cluster_mix.length > 0 && a.cluster_mix[0].weight >= 0.85;
+  }
+
   function renderArchetypeList(q) {
-    const list = clusters.archetypes.filter((a) => archetypeMatchesQuery(a, q));
+    let list = clusters.archetypes.filter((a) => archetypeMatchesQuery(a, q));
+    const totalMatching = list.length;
+    if (hidePureArchetypes) list = list.filter((a) => !isPureArchetype(a));
+    const hiddenCount = totalMatching - list.length;
+    const toggle = `<button class="arch-pure-toggle${hidePureArchetypes ? "" : " active"}" data-toggle-pure title="Single-cluster archetypes are dominated by one package; the mix view adds nothing for them.">
+      ${hidePureArchetypes ? `show single-cluster (${hiddenCount} hidden)` : `hide single-cluster`}
+    </button>`;
     if (q && !list.length) {
       return `<div class="arch-block">
-        <h3 class="arch-block-title">Archetypes</h3>
-        <div class="rec-empty">no archetype matches "${escapeHtml(q)}"</div>
+        <h3 class="arch-block-title">Archetypes ${toggle}</h3>
+        <div class="rec-empty">no ${hidePureArchetypes ? "mixture" : "archetype"} matches "${escapeHtml(q)}"</div>
       </div>`;
     }
     return `
       <div class="arch-block">
-        <h3 class="arch-block-title">Archetypes${q ? ` <span class="arch-filter-note">filtered: ${list.length}</span>` : ""}</h3>
+        <h3 class="arch-block-title">Archetypes${q ? ` <span class="arch-filter-note">filtered: ${list.length}</span>` : ""} ${toggle}</h3>
         <div class="arch-grid">
           ${list.map((a) => renderArchetypeCard(a)).join("")}
         </div>
@@ -1157,13 +1174,76 @@
       }).join("")}</div>`;
     }
 
+    // Travels-with row (open only): top 3 partner clusters by conditional
+    // probability that this cluster co-appears with each. Surfaces the
+    // package-graph implicit in cluster_pairings.
+    let travelsHtml = "";
+    if (isOpen && clusters.cluster_pairings) {
+      const pair = clusters.cluster_pairings.find((p) => p.cluster === c.id);
+      if (pair && pair.partners && pair.partners.length) {
+        const partners = pair.partners.slice(0, 3);
+        travelsHtml = `<div class="cluster-travels">
+          <span class="cluster-travels-label">travels with</span>
+          ${partners.map((p) => {
+            const key = clusterKeyImg(p.cluster);
+            const pct = Math.round((p.p_cond || 0) * 100);
+            const imgHtml = key && key.src
+              ? `<img class="cluster-travels-img" src="${key.src}" alt="" data-preview="${escapeAttr(key.name)}" title="${escapeAttr(key.name)}">`
+              : `<span class="cluster-travels-noimg">${escapeHtml(p.cluster)}</span>`;
+            return `<button class="cluster-travels-chip" data-cluster-pick="${escapeAttr(p.cluster)}" title="${escapeAttr((key ? key.name : p.cluster) + ` · ${pct}% of ${c.id} decks`)}">
+              ${imgHtml}
+              <span class="cluster-travels-pct">${pct}%</span>
+            </button>`;
+          }).join("")}
+        </div>`;
+      }
+    }
+
+    // In-place card panel (open + a tile clicked): shows the focused card's
+    // image, mana cost, type, oracle text inline so the user can read it
+    // without leaving the tab.
+    let cardPanelHtml = "";
+    if (isOpen && clusterCardFocus) {
+      const focusInCluster = c.members.some((m) => m.name === clusterCardFocus);
+      if (focusInCluster) cardPanelHtml = renderClusterCardPanel(clusterCardFocus);
+    }
+
     return `
       <article class="cluster-card${isOpen ? " open" : ""}" data-cluster-pick="${escapeAttr(c.id)}">
         <div class="cluster-card-head">
           <span class="cluster-card-id">${c.id} · ${c.member_count} cards</span>
         </div>
         ${tilesHtml}
+        ${travelsHtml}
+        ${cardPanelHtml}
       </article>
+    `;
+  }
+
+  // Inline card panel for the Archetypes tab. Reads from the loaded scryfall
+  // map. Kept minimal: image, cost, type line, oracle text, plus "add to
+  // selection" and "open in Cards tab" actions for the user who wants more.
+  function renderClusterCardPanel(name) {
+    const s = scryfall && scryfall[name];
+    const im = img(name);
+    const inSel = selection.includes(name);
+    const cost = s && (s.mana_cost || "");
+    const typeLine = s && (s.type_line || "");
+    const oracle = s && (s.oracle_text || "");
+    return `
+      <div class="cluster-card-panel" data-card-panel="${escapeAttr(name)}">
+        <button class="cluster-card-panel-close" data-panel-close title="close">×</button>
+        ${im ? `<img class="cluster-card-panel-img" src="${im}" alt="${escapeAttr(name)}">` : ""}
+        <div class="cluster-card-panel-body">
+          <div class="cluster-card-panel-title">${escapeHtml(name)}${cost ? ` <span class="cluster-card-panel-cost">${escapeHtml(cost)}</span>` : ""}</div>
+          ${typeLine ? `<div class="cluster-card-panel-type">${escapeHtml(typeLine)}</div>` : ""}
+          ${oracle ? `<div class="cluster-card-panel-oracle">${escapeHtml(oracle).replace(/\n/g, "<br>")}</div>` : ""}
+          <div class="cluster-card-panel-actions">
+            <button class="cluster-card-panel-btn" data-panel-add="${escapeAttr(name)}">${inSel ? "in selection" : "add to selection"}</button>
+            <button class="cluster-card-panel-btn cluster-card-panel-btn-secondary" data-panel-jump="${escapeAttr(name)}">open in Cards tab</button>
+          </div>
+        </div>
+      </div>
     `;
   }
 
@@ -1775,6 +1855,12 @@
     if (wb["3"]) pieces.push(`${wb["3"]} premier event`);
     if (wb["1"]) pieces.push(`${wb["1"]} ladder`);
     el.textContent = `${meta.n_decks.toLocaleString()} winning decks · ${pieces.join(", ")} · ${meta.n_weeks} weeks · ${fmtDate(meta.first_week)} to ${fmtDate(meta.last_week)}`;
+    if (fullLoadFailed) {
+      const warn = document.createElement("span");
+      warn.className = "dataset-stamp-warn";
+      warn.textContent = " · dataset partially loaded, synergy + full grid unavailable";
+      el.appendChild(warn);
+    }
   }
 
   // ── Wiring ──
@@ -1915,23 +2001,62 @@
       });
     });
     // Cluster card click: toggle expansion. Also handles cluster chips inside
-    // archetype details (data-cluster-pick on a button).
+    // archetype details (data-cluster-pick on a button) and travels-with chips.
+    // Tile clicks inside an OPEN cluster open the in-place card panel instead
+    // of collapsing the cluster.
     $$("[data-cluster-pick]").forEach((el) => {
       el.addEventListener("click", (e) => {
         e.stopPropagation();
         const id = el.dataset.clusterPick;
+        // If the click came from a tile inside an already-open cluster, open
+        // the card panel instead of toggling the cluster closed.
+        const tile = e.target.closest("[data-name]");
+        if (tile && selectedCluster === id && el.classList.contains("cluster-card")) {
+          const cardName = tile.dataset.name;
+          clusterCardFocus = clusterCardFocus === cardName ? null : cardName;
+          render();
+          return;
+        }
+        // Switching to a different cluster clears any open card panel.
+        if (selectedCluster !== id) clusterCardFocus = null;
         selectedCluster = selectedCluster === id ? null : id;
+        if (!selectedCluster) clusterCardFocus = null;
         render();
         // If we're scrolling to a cluster from an archetype, bring it into view
         const target = $(`.cluster-card[data-cluster-pick="${id}"]`);
         if (target) target.scrollIntoView({ behavior: "smooth", block: "center" });
       });
     });
-    // Cluster tiles: hover already shows the card preview via data-preview.
-    // Clicks bubble to the parent cluster-card article to toggle expansion;
-    // we do not auto-add to selection because that would jump the user out
-    // of the Archetypes tab against their wishes. In-place card→cluster
-    // navigation is a planned follow-up.
+    // Card-panel actions (in-place panel inside an open cluster card)
+    $$("[data-panel-close]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        clusterCardFocus = null;
+        render();
+      });
+    });
+    $$("[data-panel-add]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectionAdd(el.dataset.panelAdd);
+        render();
+      });
+    });
+    $$("[data-panel-jump]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        selectionAdd(el.dataset.panelJump);
+        setTab("cards");
+      });
+    });
+    // Hide single-cluster archetypes toggle
+    $$("[data-toggle-pure]").forEach((el) => {
+      el.addEventListener("click", (e) => {
+        e.stopPropagation();
+        hidePureArchetypes = !hidePureArchetypes;
+        render();
+      });
+    });
     // "Load into selection" button on stories: replace selection with the
     // story's full card list, then jump to Cards tab.
     $$("[data-story-load]").forEach((el) => {
@@ -2210,7 +2335,10 @@
     const src = sf.image || sf.image_small;
     if (!src) return;
     const el = getPreviewEl();
-    el.innerHTML = `<img src="${src}" alt="">`;
+    const img = document.createElement("img");
+    img.src = src;
+    img.alt = name;
+    el.replaceChildren(img);
     el.style.display = "block";
     positionPreview(anchor.getBoundingClientRect());
   }
@@ -2254,7 +2382,11 @@
 
   loadInitial().then(() => {
     render();
-    loadFull();
+    loadFull().catch((err) => {
+      console.error("loadFull failed:", err);
+      fullLoadFailed = true;
+      fillDatasetStamp();
+    });
   }).catch((err) => {
     $(".magic-page").innerHTML = `<div class="error">couldn't load the dataset. ${escapeHtml(String(err))}</div>`;
   });

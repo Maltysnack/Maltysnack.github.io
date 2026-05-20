@@ -31,7 +31,8 @@ N_CANDIDATES = [12, 16, 20, 24, 30, 40]
 RANDOM_SEED  = 42
 
 # ── 1. Filter to recent decks, collect cards ────────────────────────────
-recent = [d for d in DECKS if d.get("week", "") >= WINDOW_START]
+recent_idxs = [i for i, d in enumerate(DECKS) if d.get("week", "") >= WINDOW_START]
+recent = [DECKS[i] for i in recent_idxs]
 
 def is_land(name):
     sf = SCRY.get(name, {})
@@ -111,6 +112,61 @@ for n, score, recon, W, H in results:
         break
 n, score, recon, W, H = chosen
 print(f"\nChosen N: {n}  (accuracy {score:.3f}, max was {max_score:.3f})")
+
+# ── 3.5. Merge near-duplicate clusters ──────────────────────────────────
+# NMF occasionally produces two clusters that share most of their top cards
+# (e.g., two Landfall variants). Detect any pair whose H rows (full
+# cluster-over-cards distributions) have cosine similarity >= 0.6 and merge:
+# sum the H rows and W columns, then renumber. Cosine on the weighted H is
+# better than Jaccard on top-N names because it (a) accounts for cards
+# *both* clusters care about regardless of rank position and (b) doesn't
+# falsely separate variants that swap a single card in their top 10.
+COSINE_THRESHOLD = 0.6
+
+def cosine(a, b):
+    na = np.linalg.norm(a)
+    nb = np.linalg.norm(b)
+    if na == 0 or nb == 0:
+        return 0.0
+    return float(a @ b / (na * nb))
+
+parent = list(range(n))
+def find(x):
+    while parent[x] != x:
+        parent[x] = parent[parent[x]]
+        x = parent[x]
+    return x
+def union(a, b):
+    ra, rb = find(a), find(b)
+    if ra != rb:
+        parent[max(ra, rb)] = min(ra, rb)
+
+merge_log = []
+for i in range(n):
+    for j in range(i + 1, n):
+        sim = cosine(H[i], H[j])
+        if sim >= COSINE_THRESHOLD:
+            union(i, j)
+            merge_log.append((i, j, sim))
+
+groups = defaultdict(list)
+for i in range(n):
+    groups[find(i)].append(i)
+if len(groups) < n:
+    n_merged = n - len(groups)
+    merged_groups = [g for g in groups.values() if len(g) > 1]
+    print(f"\nMerging {n_merged} duplicate cluster(s) into {len(merged_groups)} group(s):")
+    for i, j, sim in merge_log:
+        print(f"  c{i} <-> c{j}  cosine={sim:.3f}")
+    keep_order = sorted(groups.keys())
+    new_n = len(keep_order)
+    new_H = np.zeros((new_n, H.shape[1]))
+    new_W = np.zeros((W.shape[0], new_n))
+    for new_idx, root in enumerate(keep_order):
+        for member in groups[root]:
+            new_H[new_idx] += H[member]
+            new_W[:, new_idx] += W[:, member]
+    H, W, n = new_H, new_W, new_n
 
 # ── 4. Per-cluster top cards ────────────────────────────────────────────
 TOP_CARDS_PER_CLUSTER = 14

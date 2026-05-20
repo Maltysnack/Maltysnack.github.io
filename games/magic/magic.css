@@ -13,6 +13,7 @@ body:has(.magic-page) .main {
 
 /* ── Page header + format disclosure ───────────────────── */
 .page-header {
+  position: relative;
   margin: 0 0 18px;
   display: flex;
   flex-direction: column;
@@ -315,7 +316,7 @@ body:has(.magic-page) .main {
 }
 
 /* ── Archetypes tab ────────────────────────────────────── */
-.arch-sec { max-width: 920px; }
+.arch-sec { max-width: 1000px; }
 .arch-intro {
   font-size: var(--text-sm);
   color: var(--text-muted);
@@ -637,6 +638,147 @@ body:has(.magic-page) .main {
   display: flex;
   flex-wrap: wrap;
 }
+
+/* ── Travels-with row (cluster_pairings) ─────────────────── */
+.cluster-travels {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.cluster-travels-label {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.cluster-travels-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px 4px 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: inherit;
+}
+.cluster-travels-chip:hover { border-color: var(--text-dim); }
+.cluster-travels-img {
+  width: 26px;
+  height: 26px;
+  object-fit: cover;
+  border-radius: 3px;
+  display: block;
+}
+.cluster-travels-noimg {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+}
+.cluster-travels-pct {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-strong);
+}
+
+/* ── In-place card panel (inside open cluster) ───────────── */
+.cluster-card-panel {
+  position: relative;
+  margin-top: 14px;
+  padding: 14px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  gap: 14px;
+}
+.cluster-card-panel-img {
+  width: 100%;
+  height: auto;
+  border-radius: 6px;
+  display: block;
+  align-self: start;
+}
+.cluster-card-panel-close {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 4px 6px;
+}
+.cluster-card-panel-close:hover { color: var(--text-strong); }
+.cluster-card-panel-body {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+.cluster-card-panel-title {
+  font-weight: 600;
+  font-size: var(--text-sm);
+  color: var(--text-strong);
+}
+.cluster-card-panel-cost {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  margin-left: 4px;
+}
+.cluster-card-panel-type {
+  font-size: var(--text-xs);
+  color: var(--text-dim);
+  font-style: italic;
+}
+.cluster-card-panel-oracle {
+  font-size: var(--text-xs);
+  color: var(--text);
+  line-height: 1.5;
+  white-space: normal;
+}
+.cluster-card-panel-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+  flex-wrap: wrap;
+}
+.cluster-card-panel-btn {
+  padding: 5px 10px;
+  background: var(--bg-soft);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+}
+.cluster-card-panel-btn:hover { border-color: var(--text-dim); color: var(--text-strong); }
+.cluster-card-panel-btn-secondary { color: var(--text-dim); }
+
+/* ── Hide-pure-archetypes toggle ─────────────────────────── */
+.arch-pure-toggle {
+  margin-left: 10px;
+  padding: 3px 9px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  color: var(--text-dim);
+  font-family: inherit;
+  font-size: var(--text-xs);
+  cursor: pointer;
+  vertical-align: middle;
+}
+.arch-pure-toggle:hover { color: var(--text-strong); border-color: var(--text-dim); }
+.arch-pure-toggle.active { color: var(--accent-red); border-color: var(--accent-red); }
 
 
 /* ── Archive ───────────────────────────────────────────── */
@@ -1516,6 +1658,9 @@ body:has(.magic-page) .main {
   font-size: var(--text-xs);
   color: var(--text-dim);
   letter-spacing: 0.04em;
+}
+.dataset-stamp-warn {
+  color: var(--accent-red);
 }
 .loading {
   font-size: var(--text-sm);
