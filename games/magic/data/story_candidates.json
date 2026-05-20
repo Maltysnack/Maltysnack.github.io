@@ -1,0 +1,346 @@
+{
+  "generated_at": "2026-05-20",
+  "current_week": "2026-05-18",
+  "window_weeks": [
+    "2026-04-06",
+    "2026-04-13",
+    "2026-04-20",
+    "2026-04-27",
+    "2026-05-04",
+    "2026-05-09",
+    "2026-05-11",
+    "2026-05-18"
+  ],
+  "candidate_count": 13,
+  "candidates": [
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Flow State",
+      "headline_hint": "Flow State up +31pp on ladder (0% to 31%)",
+      "is_shell": false,
+      "cards": [
+        "Flow State"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "0.0%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "31.1%"
+        },
+        {
+          "label": "Delta",
+          "value": "+31.1pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Spell Pierce",
+      "headline_hint": "Spell Pierce up +27pp on ladder (4% to 31%)",
+      "is_shell": false,
+      "cards": [
+        "Spell Pierce"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "3.9%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "31.2%"
+        },
+        {
+          "label": "Delta",
+          "value": "+27.3pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Eddymurk Crab",
+      "headline_hint": "Eddymurk Crab up +27pp on ladder (7% to 33%)",
+      "is_shell": false,
+      "cards": [
+        "Eddymurk Crab"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "6.8%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "33.4%"
+        },
+        {
+          "label": "Delta",
+          "value": "+26.7pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Sleight of Hand",
+      "headline_hint": "Sleight of Hand up +26pp on ladder (9% to 35%)",
+      "is_shell": false,
+      "cards": [
+        "Sleight of Hand"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "8.7%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "34.9%"
+        },
+        {
+          "label": "Delta",
+          "value": "+26.3pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Get Out",
+      "headline_hint": "Get Out up +26pp on ladder (1% to 27%)",
+      "is_shell": false,
+      "cards": [
+        "Get Out"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "0.6%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "26.6%"
+        },
+        {
+          "label": "Delta",
+          "value": "+26.0pp"
+        }
+      ],
+      "already_in_stories": true
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Opt",
+      "headline_hint": "Opt up +25pp on ladder (11% to 36%)",
+      "is_shell": false,
+      "cards": [
+        "Opt"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "10.6%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "35.8%"
+        },
+        {
+          "label": "Delta",
+          "value": "+25.2pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "pt-vs-ladder",
+      "key": "pt-vs-ladder",
+      "headline_hint": "6 cards over-indexed at the Pro Tour vs ladder",
+      "is_shell": false,
+      "cards": [
+        "Colorstorm Stallion",
+        "Impractical Joke",
+        "Get Out",
+        "Prismari Charm",
+        "Roaring Furnace // Steaming Sauna",
+        "Flow State"
+      ],
+      "stats": [
+        {
+          "label": "Colorstorm Stallion",
+          "value": "20% PT, 0.7% ladder"
+        },
+        {
+          "label": "Impractical Joke",
+          "value": "19% PT, 0.7% ladder"
+        },
+        {
+          "label": "Get Out",
+          "value": "30% PT, 1.4% ladder"
+        },
+        {
+          "label": "Prismari Charm",
+          "value": "27% PT, 1.4% ladder"
+        },
+        {
+          "label": "Roaring Furnace // Steaming Sauna",
+          "value": "13% PT, 0.7% ladder"
+        },
+        {
+          "label": "Flow State",
+          "value": "35% PT, 2.2% ladder"
+        }
+      ],
+      "already_in_stories": true
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Overlord of the Hauntwoods",
+      "headline_hint": "Overlord of the Hauntwoods back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Overlord of the Hauntwoods"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "21%"
+        },
+        {
+          "label": "Gap",
+          "value": "20-04-2026 to 09-05-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "6% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Overlord of the Floodpits",
+      "headline_hint": "Overlord of the Floodpits back after a 23-week absence",
+      "is_shell": false,
+      "cards": [
+        "Overlord of the Floodpits"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "20%"
+        },
+        {
+          "label": "Gap",
+          "value": "08-12-2025 to 11-05-2026 (23 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Zombify",
+      "headline_hint": "Zombify back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Zombify"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "17%"
+        },
+        {
+          "label": "Gap",
+          "value": "27-04-2026 to 11-05-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Tragic Trajectory",
+      "headline_hint": "Tragic Trajectory back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Tragic Trajectory"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "17%"
+        },
+        {
+          "label": "Gap",
+          "value": "27-04-2026 to 11-05-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Aclazotz, Deepest Betrayal",
+      "headline_hint": "Aclazotz, Deepest Betrayal back after a 6-week absence",
+      "is_shell": false,
+      "cards": [
+        "Aclazotz, Deepest Betrayal"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "15%"
+        },
+        {
+          "label": "Gap",
+          "value": "06-04-2026 to 09-05-2026 (6 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Elegy Acolyte",
+      "headline_hint": "Elegy Acolyte back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Elegy Acolyte"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "14%"
+        },
+        {
+          "label": "Gap",
+          "value": "27-04-2026 to 11-05-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (18-05-2026)"
+        }
+      ],
+      "already_in_stories": false
+    }
+  ]
+}

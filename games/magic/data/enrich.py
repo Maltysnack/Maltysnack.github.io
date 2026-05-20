@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Enrich card names with Scryfall metadata (image URLs, mana cost, types).
 
-Uses Scryfall's bulk-data endpoint — one ~50MB download per run gets every
+Uses Scryfall's bulk-data endpoint; one ~50MB download per run gets every
 card's metadata, way faster and more polite than per-card lookups for full
 sweeps. Maintains a local scryfall.json with only the entries we need.
 Falls back to per-card fuzzy lookup for anything the bulk file misses.
 
 Outputs:
-  scryfall.json — { name: { image, image_small, mana_cost, type_line, ... } }
+  scryfall.json: { name: { image, image_small, mana_cost, type_line, ... } }
 """
 
 import json
@@ -34,7 +34,7 @@ def http_json(url: str) -> dict:
 
 
 def http_bytes(url: str, attempts: int = 3) -> bytes:
-    """Stream-download with retries — bulk files are >100MB and connections drop."""
+    """Stream-download with retries; bulk files are >100MB and connections drop."""
     last_err = None
     for attempt in range(attempts):
         try:

@@ -5,11 +5,11 @@ All counts are WEIGHTED by deck.weight (ladder=1, premier=3, PT=5, Top8=10).
 Cards get a popularity tier based on their weighted centerpiece prevalence.
 
 Outputs:
-  cards.json     — per-card weighted stats, tier, copy histogram, weekly trends
-  pairs.json     — top spell-companions / satellites / anchors by weighted lift
-  explore.json   — pillars, recently risen, quietly disappeared, side risers,
-                   set-anchored catalysts
-  meta.json      — dataset summary
+  cards.json:    per-card weighted stats, tier, copy histogram, weekly trends
+  pairs.json:    top spell-companions / satellites / anchors by weighted lift
+  explore.json:  pillars, recently risen, quietly disappeared, side risers,
+                 set-anchored catalysts
+  meta.json:     dataset summary
 """
 
 import json
