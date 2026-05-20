@@ -60,13 +60,19 @@ ATTR_RE = re.compile(r'(\w[\w-]*)="([^"]*)"')
 SECTION_RE = re.compile(r"<(main-deck|side-board|companion-card)>(.*?)</\1>", re.S)
 LINE_RE = re.compile(r"^\s*(\d+)\s+(.+?)\s*$")
 
+# magic.gg very occasionally appends an internal CMS id to a card name, e.g.
+# "Kaito, Bane of Nightmares [bGPbmuxtex3AmlffwZUqv]". Card names never contain
+# square brackets, so a trailing [token] is always junk and breaks resolution.
+ID_SUFFIX_RE = re.compile(r"\s*\[[A-Za-z0-9_-]+\]\s*$")
+
 
 def parse_section(body: str) :
     out = []
     for raw in body.strip().splitlines():
         m = LINE_RE.match(raw)
         if m:
-            out.append({"qty": int(m.group(1)), "name": m.group(2)})
+            name = ID_SUFFIX_RE.sub("", m.group(2)).strip()
+            out.append({"qty": int(m.group(1)), "name": name})
     return out
 
 
@@ -82,8 +88,30 @@ def parse_event_date(s: str) -> str:
     return None
 
 
+def slug_city(slug: str) -> str:
+    """The city token in a premier-event slug sits right before the month,
+    e.g. champions-cup-final-<city>-may-2026-... gives <city>. "" if none."""
+    toks = slug.split("-")
+    for i, t in enumerate(toks):
+        if t in MONTHS and i > 0:
+            return toks[i - 1]
+    return ""
+
+
+def fix_event_name(event_name: str, slug: str) -> str:
+    """magic.gg sometimes ships a decklist page whose event-name attribute was
+    copy-pasted from another event (seen: the Tokyo Champions Cup page carries
+    ": Kyoto"). The slug is the URL and can't be wrong, so when it names a city
+    the attribute contradicts, trust the slug."""
+    city = slug_city(slug)
+    if not city or ": " not in event_name or city in event_name.lower():
+        return event_name
+    return event_name.rsplit(": ", 1)[0] + ": " + city.title()
+
+
 def parse_page(html: str, weight: int, source_url: str, default_week: str = "") :
     decks = []
+    slug = source_url.rstrip("/").rsplit("/", 1)[-1]
     for attrs_blob, body in DECK_RE.findall(html):
         attrs = dict(ATTR_RE.findall(attrs_blob))
         if attrs.get("format", "").strip() != "Standard":
@@ -98,7 +126,7 @@ def parse_page(html: str, weight: int, source_url: str, default_week: str = "") 
             "deck_title": attrs.get("deck-title", "").strip(),
             "subtitle": attrs.get("subtitle", "").strip(),
             "event_date": attrs.get("event-date", "").strip(),
-            "event_name": attrs.get("event-name", "").strip(),
+            "event_name": fix_event_name(attrs.get("event-name", "").strip(), slug),
             "format": attrs.get("format", "").strip(),
             "main": sections.get("main-deck", []),
             "side": sections.get("side-board", []),
