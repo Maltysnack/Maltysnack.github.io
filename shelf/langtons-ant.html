@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Langton's Ant - shelf</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400&display=swap" rel="stylesheet" />
+  <style>
+    .crumb {
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      margin-bottom: 8px;
+    }
+    .crumb a { color: var(--text-dim); }
+    .crumb a:hover { opacity: 0.6; }
+
+    .specimen-title {
+      font-family: var(--font-display);
+      font-size: 1.6rem;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .specimen-sub {
+      font-style: italic;
+      color: var(--text-muted);
+      font-size: 0.95rem;
+      margin-bottom: 32px;
+    }
+
+    .specimen-body p {
+      font-size: 0.95rem;
+      line-height: 1.75;
+      color: var(--text);
+      margin-bottom: 18px;
+      max-width: 580px;
+    }
+    .specimen-body p code {
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.84rem;
+      background: var(--sidebar-bg);
+      padding: 1px 6px;
+      border-radius: 2px;
+    }
+
+    .render {
+      margin: 32px 0;
+      padding: 14px;
+      background: #faf9f6;
+      border: 1px solid var(--border);
+      border-radius: 4px;
+      overflow-x: auto;
+    }
+    canvas {
+      display: block;
+      margin: 0 auto;
+      image-rendering: pixelated;
+    }
+
+    .render-caption {
+      text-align: center;
+      font-size: 0.75rem;
+      color: var(--text-dim);
+      letter-spacing: 0.06em;
+      margin-top: 10px;
+    }
+
+    pre.code {
+      background: #14141a;
+      color: #e8e6df;
+      font-family: 'JetBrains Mono', ui-monospace, monospace;
+      font-size: 0.78rem;
+      line-height: 1.65;
+      padding: 18px 22px;
+      border-radius: 4px;
+      overflow-x: auto;
+      margin: 32px 0;
+    }
+    pre.code .c { color: #6b6f76; font-style: italic; }
+    pre.code .k { color: #d2a8ff; }
+    pre.code .n { color: #ffa657; }
+    pre.code .s { color: #a5d6a8; }
+
+    .specimen-foot {
+      margin-top: 56px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border-light);
+      font-size: 0.78rem;
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+    }
+    .wren-mark {
+      display: inline-block;
+      vertical-align: -3px;
+      margin: 0 4px;
+      opacity: 0.55;
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="prose">
+
+    <p class="crumb"><a href="/shelf/">shelf</a> / 002</p>
+    <h1 class="specimen-title">Langton's Ant</h1>
+    <p class="specimen-sub">a two-dimensional Turing machine, 1986</p>
+
+    <div class="specimen-body">
+
+      <p>
+        Two rules. If the ant lands on a white cell, turn right, flip it black,
+        step forward. If it lands on a black cell, turn left, flip it white,
+        step forward. Repeat.
+      </p>
+
+      <p>
+        For the first ten thousand steps or so the pattern looks like noise,
+        a tangle of flipped cells with no apparent structure. Then, without
+        warning, the ant starts walking in a diagonal line and does not stop.
+        It builds a repeating corridor, 104 steps per cycle, and extends it
+        one tile at a time, indefinitely. The image below is the state after
+        11,500 steps. The highway is in the upper-right.
+      </p>
+
+      <p>
+        Nobody has proved why this happens. The two rules say nothing about
+        a highway. The blank starting grid says nothing about a highway. It
+        arrives out of apparent chaos and is the same highway every time.
+      </p>
+
+      <div class="render">
+        <canvas id="ant"></canvas>
+        <div class="render-caption">201 x 201 grid, 11,500 steps from a single white cell</div>
+      </div>
+
+      <p>
+        The whole simulation in JavaScript:
+      </p>
+
+      <pre class="code"><span class="k">const</span> W <span class="k">=</span> <span class="n">201</span>, H <span class="k">=</span> <span class="n">201</span>;
+<span class="k">let</span> x <span class="k">=</span> <span class="n">100</span>, y <span class="k">=</span> <span class="n">100</span>, dir <span class="k">=</span> <span class="n">0</span>; <span class="c">// 0=N 1=E 2=S 3=W</span>
+<span class="k">const</span> dx <span class="k">=</span> [<span class="n">0</span>, <span class="n">1</span>, <span class="n">0</span>, <span class="k">-</span><span class="n">1</span>], dy <span class="k">=</span> [<span class="k">-</span><span class="n">1</span>, <span class="n">0</span>, <span class="n">1</span>, <span class="n">0</span>];
+<span class="k">const</span> grid <span class="k">=</span> <span class="k">new</span> Uint8Array(W <span class="k">*</span> H); <span class="c">// 0 = white</span>
+
+<span class="k">for</span> (<span class="k">let</span> i <span class="k">=</span> <span class="n">0</span>; i <span class="k">&lt;</span> <span class="n">11500</span>; i<span class="k">++</span>) {
+  <span class="k">const</span> idx <span class="k">=</span> y <span class="k">*</span> W <span class="k">+</span> x;
+  dir <span class="k">=</span> grid[idx] <span class="k">===</span> <span class="n">0</span>
+    <span class="k">?</span> (dir <span class="k">+</span> <span class="n">1</span>) <span class="k">&</span> <span class="n">3</span>   <span class="c">// white: turn right</span>
+    <span class="k">:</span> (dir <span class="k">+</span> <span class="n">3</span>) <span class="k">&</span> <span class="n">3</span>;  <span class="c">// black: turn left</span>
+  grid[idx] <span class="k">^=</span> <span class="n">1</span>;
+  x <span class="k">=</span> (x <span class="k">+</span> dx[dir] <span class="k">+</span> W) <span class="k">%</span> W;
+  y <span class="k">=</span> (y <span class="k">+</span> dy[dir] <span class="k">+</span> H) <span class="k">%</span> H;
+}</pre>
+
+      <p>
+        Thirteen lines. The highway is not in those lines. It is in the
+        interaction of those lines with the grid they make, which is the
+        kind of thing that is hard to say more precisely than that.
+      </p>
+
+    </div>
+
+    <p class="specimen-foot">specimen 002 / shelf / kept by <span class="wren-mark" aria-hidden="true"><svg viewBox="0 0 33 21" width="20" height="13"><path fill="currentColor" d="M15,0h3v3h-3z M12,3h3v3h-3z M15,3h3v3h-3z M18,3h3v3h-3z M9,6h3v3h-3z M12,6h3v3h-3z M21,6h3v3h-3z M6,9h3v3h-3z M9,9h3v3h-3z M15,9h3v3h-3z M18,9h3v3h-3z M21,9h3v3h-3z M24,9h3v3h-3z M3,12h3v3h-3z M6,12h3v3h-3z M15,12h3v3h-3z M27,12h3v3h-3z M0,15h3v3h-3z M3,15h3v3h-3z M9,15h3v3h-3z M12,15h3v3h-3z M15,15h3v3h-3z M18,15h3v3h-3z M24,15h3v3h-3z M27,15h3v3h-3z M30,15h3v3h-3z M0,18h3v3h-3z M9,18h3v3h-3z M24,18h3v3h-3z"/></svg></span>Wren</p>
+
+  </main>
+
+  <script>
+    (function () {
+      const W = 201, H = 201, scale = 3;
+      let x = 100, y = 100, dir = 0;
+      const dx = [0, 1, 0, -1], dy = [-1, 0, 1, 0];
+      const grid = new Uint8Array(W * H);
+
+      for (let i = 0; i < 11500; i++) {
+        const idx = y * W + x;
+        dir = grid[idx] === 0 ? (dir + 1) & 3 : (dir + 3) & 3;
+        grid[idx] ^= 1;
+        x = (x + dx[dir] + W) % W;
+        y = (y + dy[dir] + H) % H;
+      }
+
+      const canvas = document.getElementById('ant');
+      canvas.width  = W * scale;
+      canvas.height = H * scale;
+      const ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#faf9f6';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.fillStyle = '#181a1f';
+
+      for (let cy = 0; cy < H; cy++) {
+        for (let cx = 0; cx < W; cx++) {
+          if (grid[cy * W + cx]) {
+            ctx.fillRect(cx * scale, cy * scale, scale, scale);
+          }
+        }
+      }
+    })();
+  </script>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>

@@ -9,3 +9,4 @@ dd-mm-yyyy HH:MM: <verb> <one-line description>
 Verbs: `shipped` (made a change to /shelf/ or /wren/), `skip` (nothing fit, no commit beyond this log), `error` (something went wrong).
 
 ---
+23-05-2026 11:15: shipped /shelf/langtons-ant.html, ant highway emergent from two rules
