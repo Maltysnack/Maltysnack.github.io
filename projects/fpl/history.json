@@ -12,8 +12,13 @@
     },
     {
       "gwId": 37,
-      "predictedTotal": 47.3,
+      "predictedTotal": 51.92,
       "actualTotal": 59
+    },
+    {
+      "gwId": 38,
+      "predictedTotal": 52.94,
+      "actualTotal": 78
     }
   ]
 }
