@@ -2,7 +2,7 @@
   "model_version": "elo-v4a-flat-mild+squad35+form",
   "elo_version": "elo-v4a-flat-mild",
   "elo_weight": 0.65,
-  "generated_at": "2026-05-29T21:19:11Z",
+  "generated_at": "2026-05-30T20:17:23Z",
   "bracket_format": "fifa-2026",
   "flags": {
     "Algeria": "dz",
@@ -65,7 +65,7 @@
           "goal_diff": 4,
           "goals_for": 6,
           "predicted_points": 6.4,
-          "predicted_goal_diff": 3.94,
+          "predicted_goal_diff": 3.95,
           "predicted_goals_for": 6.06,
           "position": 1,
           "qualifies_as": "winner"
@@ -113,13 +113,13 @@
       "standings": [
         {
           "team": "Canada",
-          "rating": 1821,
+          "rating": 1816,
           "points": 6,
           "goal_diff": 3,
           "goals_for": 5,
-          "predicted_points": 5.8,
-          "predicted_goal_diff": 2.74,
-          "predicted_goals_for": 5.34,
+          "predicted_points": 5.7,
+          "predicted_goal_diff": 2.68,
+          "predicted_goals_for": 5.3,
           "position": 1,
           "qualifies_as": "winner"
         },
@@ -130,7 +130,7 @@
           "goal_diff": 1,
           "goals_for": 3,
           "predicted_points": 5.4,
-          "predicted_goal_diff": 2.12,
+          "predicted_goal_diff": 2.13,
           "predicted_goals_for": 5.07,
           "position": 2,
           "qualifies_as": "runner_up"
@@ -142,20 +142,20 @@
           "goal_diff": 0,
           "goals_for": 4,
           "predicted_points": 3.3,
-          "predicted_goal_diff": -1.3,
+          "predicted_goal_diff": -1.29,
           "predicted_goals_for": 3.22,
           "position": 3,
           "qualifies_as": "best_third"
         },
         {
           "team": "Qatar",
-          "rating": 1582,
+          "rating": 1583,
           "points": 0,
           "goal_diff": -4,
           "goals_for": 0,
           "predicted_points": 2.1,
-          "predicted_goal_diff": -3.56,
-          "predicted_goals_for": 2.4,
+          "predicted_goal_diff": -3.53,
+          "predicted_goals_for": 2.41,
           "position": 4,
           "qualifies_as": "eliminated"
         }
@@ -190,7 +190,7 @@
         },
         {
           "team": "Scotland",
-          "rating": 1735,
+          "rating": 1736,
           "points": 4,
           "goal_diff": -1,
           "goals_for": 1,
@@ -202,7 +202,7 @@
         },
         {
           "team": "Haiti",
-          "rating": 1660,
+          "rating": 1661,
           "points": 1,
           "goal_diff": -3,
           "goals_for": 3,
@@ -249,13 +249,13 @@
           "goals_for": 4,
           "predicted_points": 3.6,
           "predicted_goal_diff": -0.71,
-          "predicted_goals_for": 3.37,
+          "predicted_goals_for": 3.36,
           "position": 3,
           "qualifies_as": "best_third"
         },
         {
           "team": "Australia",
-          "rating": 1795,
+          "rating": 1796,
           "points": 1,
           "goal_diff": -5,
           "goals_for": 0,
@@ -508,7 +508,7 @@
         },
         {
           "team": "Norway",
-          "rating": 1873,
+          "rating": 1874,
           "points": 2,
           "goal_diff": -3,
           "goals_for": 4,
@@ -520,7 +520,7 @@
         },
         {
           "team": "Iraq",
-          "rating": 1683,
+          "rating": 1684,
           "points": 1,
           "goal_diff": -6,
           "goals_for": 2,
@@ -573,7 +573,7 @@
         },
         {
           "team": "Jordan",
-          "rating": 1703,
+          "rating": 1704,
           "points": 0,
           "goal_diff": -11,
           "goals_for": 0,
@@ -590,7 +590,7 @@
       "standings": [
         {
           "team": "Portugal",
-          "rating": 1974,
+          "rating": 1975,
           "points": 6,
           "goal_diff": 4,
           "goals_for": 7,
@@ -798,7 +798,7 @@
         "team_a": "Mexico",
         "team_b": "Scotland",
         "rating_a": 1916,
-        "rating_b": 1735,
+        "rating_b": 1736,
         "winner": "Scotland",
         "score_a": 0,
         "score_b": 1,
@@ -837,7 +837,7 @@
       {
         "team_a": "Canada",
         "team_b": "Egypt",
-        "rating_a": 1821,
+        "rating_a": 1816,
         "rating_b": 1728,
         "winner": "Canada",
         "score_a": 2,
@@ -847,7 +847,7 @@
       {
         "team_a": "Portugal",
         "team_b": "Panama",
-        "rating_a": 1974,
+        "rating_a": 1975,
         "rating_b": 1733,
         "winner": "Portugal",
         "score_a": 2,
@@ -909,7 +909,7 @@
       {
         "team_a": "Scotland",
         "team_b": "England",
-        "rating_a": 1735,
+        "rating_a": 1736,
         "rating_b": 1947,
         "winner": "England",
         "score_a": 1,
@@ -929,8 +929,8 @@
       {
         "team_a": "Canada",
         "team_b": "Portugal",
-        "rating_a": 1821,
-        "rating_b": 1974,
+        "rating_a": 1816,
+        "rating_b": 1975,
         "winner": "Portugal",
         "score_a": 0,
         "score_b": 0,
@@ -972,7 +972,7 @@
         "team_a": "Argentina",
         "team_b": "Portugal",
         "rating_a": 1988,
-        "rating_b": 1974,
+        "rating_b": 1975,
         "winner": "Argentina",
         "score_a": 2,
         "score_b": 2,
