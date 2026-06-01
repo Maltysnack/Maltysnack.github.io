@@ -97,7 +97,7 @@ for n in N_CANDIDATES:
     yl = labels[mask]
     if len(set(yl)) < 2:
         continue
-    clf = LogisticRegression(max_iter=2000, multi_class="multinomial", n_jobs=1)
+    clf = LogisticRegression(max_iter=2000, n_jobs=1)
     score = cross_val_score(clf, Wl, yl, cv=5, n_jobs=1).mean()
     recon = nmf.reconstruction_err_
     results.append((n, score, recon, W, H))
