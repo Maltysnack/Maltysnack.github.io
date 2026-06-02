@@ -1,322 +1,322 @@
 {
-  "generated_at": "2026-05-25",
-  "n_clusters": 20,
-  "n_decks_used": 248,
-  "archetype_classification_accuracy": 0.809,
+  "generated_at": "2026-06-01",
+  "n_clusters": 17,
+  "n_decks_used": 251,
+  "archetype_classification_accuracy": 0.807,
   "clusters": [
     {
       "id": "c0",
       "members": [
         {
-          "name": "Stormchaser's Talent",
-          "weight": 4.343
-        },
-        {
-          "name": "Slickshot Show-Off",
-          "weight": 4.311
-        },
-        {
-          "name": "Sleight of Hand",
-          "weight": 4.112
-        },
-        {
-          "name": "Opt",
-          "weight": 3.866
+          "name": "Burst Lightning",
+          "weight": 2.987
         },
         {
           "name": "Boomerang Basics",
-          "weight": 3.709
+          "weight": 2.974
+        },
+        {
+          "name": "Stormchaser's Talent",
+          "weight": 2.95
         },
         {
           "name": "Flow State",
-          "weight": 3.066
+          "weight": 2.921
         },
         {
-          "name": "Burst Lightning",
-          "weight": 2.812
+          "name": "Opt",
+          "weight": 2.898
+        },
+        {
+          "name": "Slickshot Show-Off",
+          "weight": 2.887
+        },
+        {
+          "name": "Sleight of Hand",
+          "weight": 2.881
         },
         {
           "name": "Eddymurk Crab",
-          "weight": 2.088
+          "weight": 1.993
+        },
+        {
+          "name": "Colorstorm Stallion",
+          "weight": 0.856
+        },
+        {
+          "name": "Spell Pierce",
+          "weight": 0.675
         },
         {
           "name": "Elusive Otter",
-          "weight": 1.719
+          "weight": 0.673
         },
         {
-          "name": "Wild Ride",
-          "weight": 1.436
+          "name": "Get Out",
+          "weight": 0.666
         },
         {
-          "name": "Ancestral Anger",
-          "weight": 1.337
+          "name": "Roaring Furnace // Steaming Sauna",
+          "weight": 0.579
         },
         {
-          "name": "Turn Inside Out",
-          "weight": 1.273
-        },
-        {
-          "name": "Secret Identity",
-          "weight": 1.194
-        },
-        {
-          "name": "Drake Hatcher",
-          "weight": 0.969
+          "name": "Impractical Joke",
+          "weight": 0.573
         }
       ],
-      "top_weight": 4.343,
-      "member_count": 24
+      "top_weight": 2.987,
+      "member_count": 20
     },
     {
       "id": "c1",
       "members": [
         {
-          "name": "Sazh's Chocobo",
-          "weight": 5.621
-        },
-        {
           "name": "Earthbender Ascension",
-          "weight": 5.603
+          "weight": 4.45
         },
         {
           "name": "Mightform Harmonizer",
-          "weight": 5.551
+          "weight": 4.45
         },
         {
-          "name": "Badgermole Cub",
-          "weight": 5.501
+          "name": "Sazh's Chocobo",
+          "weight": 4.45
         },
         {
           "name": "Llanowar Elves",
-          "weight": 5.483
+          "weight": 4.382
+        },
+        {
+          "name": "Badgermole Cub",
+          "weight": 4.36
         },
         {
           "name": "Icetill Explorer",
-          "weight": 3.836
+          "weight": 3.21
         },
         {
           "name": "Erode",
-          "weight": 3.454
-        },
-        {
-          "name": "Dyadrine, Synthesis Amalgam",
-          "weight": 1.701
-        },
-        {
-          "name": "Bushwhack",
-          "weight": 1.494
-        },
-        {
-          "name": "Mossborn Hydra",
-          "weight": 1.446
+          "weight": 2.427
         },
         {
           "name": "Meltstrider's Resolve",
-          "weight": 1.367
+          "weight": 1.376
         },
         {
-          "name": "Surrak, Elusive Hunter",
-          "weight": 1.283
-        },
-        {
-          "name": "Lumbering Worldwagon",
-          "weight": 1.226
+          "name": "Dyadrine, Synthesis Amalgam",
+          "weight": 1.195
         },
         {
           "name": "Keen-Eyed Curator",
-          "weight": 1.201
+          "weight": 1.155
+        },
+        {
+          "name": "Lumbering Worldwagon",
+          "weight": 1.071
+        },
+        {
+          "name": "Bushwhack",
+          "weight": 1.051
+        },
+        {
+          "name": "Surrak, Elusive Hunter",
+          "weight": 1.026
+        },
+        {
+          "name": "Mossborn Hydra",
+          "weight": 1.012
         }
       ],
-      "top_weight": 5.621,
-      "member_count": 17
+      "top_weight": 4.45,
+      "member_count": 18
     },
     {
       "id": "c2",
       "members": [
         {
           "name": "Tablet of Discovery",
-          "weight": 8.436
+          "weight": 7.999
         },
         {
           "name": "Stock Up",
-          "weight": 8.417
+          "weight": 7.973
         },
         {
           "name": "Jeskai Revelation",
-          "weight": 8.264
+          "weight": 7.663
         },
         {
           "name": "Consult the Star Charts",
-          "weight": 7.44
+          "weight": 6.963
         },
         {
           "name": "Thunder Magic",
-          "weight": 4.513
+          "weight": 4.304
         },
         {
           "name": "Flashback",
-          "weight": 3.872
+          "weight": 3.622
         },
         {
           "name": "Sear",
-          "weight": 2.903
+          "weight": 2.682
         },
         {
           "name": "Broadside Barrage",
-          "weight": 2.857
+          "weight": 2.644
         },
         {
           "name": "Pyroclasm",
-          "weight": 2.82
+          "weight": 2.609
         },
         {
           "name": "Firebending Lesson",
-          "weight": 2.5
+          "weight": 2.244
         },
         {
           "name": "Inevitable Defeat",
-          "weight": 2.047
-        },
-        {
-          "name": "Abrade",
-          "weight": 1.881
+          "weight": 2.104
         },
         {
           "name": "Three Steps Ahead",
-          "weight": 1.85
+          "weight": 1.805
+        },
+        {
+          "name": "Abrade",
+          "weight": 1.79
         },
         {
           "name": "Into the Flood Maw",
-          "weight": 1.591
+          "weight": 1.515
         }
       ],
-      "top_weight": 8.436,
-      "member_count": 25
+      "top_weight": 7.999,
+      "member_count": 27
     },
     {
       "id": "c3",
       "members": [
         {
-          "name": "Opt",
-          "weight": 1.595
-        },
-        {
-          "name": "Eddymurk Crab",
-          "weight": 1.592
+          "name": "Prismari Charm",
+          "weight": 1.734
         },
         {
           "name": "Hearth Elemental",
-          "weight": 1.592
+          "weight": 1.714
+        },
+        {
+          "name": "Eddymurk Crab",
+          "weight": 1.693
+        },
+        {
+          "name": "Opt",
+          "weight": 1.688
         },
         {
           "name": "Sunderflock",
-          "weight": 1.591
+          "weight": 1.682
         },
         {
           "name": "Sleight of Hand",
-          "weight": 1.59
-        },
-        {
-          "name": "Prismari Charm",
-          "weight": 1.579
+          "weight": 1.681
         },
         {
           "name": "Traumatic Critique",
-          "weight": 1.444
+          "weight": 1.558
         },
         {
           "name": "Burst Lightning",
-          "weight": 1.045
+          "weight": 1.267
         },
         {
           "name": "Get Out",
-          "weight": 0.963
+          "weight": 0.992
         },
         {
           "name": "Impractical Joke",
-          "weight": 0.784
+          "weight": 0.819
         },
         {
           "name": "Spell Snare",
-          "weight": 0.672
+          "weight": 0.712
         },
         {
           "name": "Spell Pierce",
-          "weight": 0.495
+          "weight": 0.527
         },
         {
           "name": "Winternight Stories",
-          "weight": 0.384
+          "weight": 0.424
         },
         {
           "name": "Flow State",
-          "weight": 0.213
+          "weight": 0.233
         }
       ],
-      "top_weight": 1.595,
+      "top_weight": 1.734,
       "member_count": 16
     },
     {
       "id": "c4",
       "members": [
         {
-          "name": "Cool but Rude",
-          "weight": 1.762
-        },
-        {
           "name": "Marauding Mako",
-          "weight": 1.76
+          "weight": 1.623
         },
         {
           "name": "Hardened Academic",
-          "weight": 1.759
+          "weight": 1.623
+        },
+        {
+          "name": "Cool but Rude",
+          "weight": 1.621
         },
         {
           "name": "Moonshadow",
-          "weight": 1.758
-        },
-        {
-          "name": "Practiced Offense",
-          "weight": 1.702
+          "weight": 1.608
         },
         {
           "name": "Bloodghast",
-          "weight": 1.698
+          "weight": 1.565
+        },
+        {
+          "name": "Practiced Offense",
+          "weight": 1.554
         },
         {
           "name": "Iron-Shield Elf",
-          "weight": 1.669
+          "weight": 1.539
         },
         {
           "name": "Tersa Lightshatter",
-          "weight": 1.1
+          "weight": 1.008
         },
         {
           "name": "Requiting Hex",
-          "weight": 0.783
-        },
-        {
-          "name": "Erode",
-          "weight": 0.577
-        },
-        {
-          "name": "Carnage, Crimson Chaos",
-          "weight": 0.491
+          "weight": 0.685
         },
         {
           "name": "Burst Lightning",
-          "weight": 0.369
+          "weight": 0.585
+        },
+        {
+          "name": "Erode",
+          "weight": 0.504
+        },
+        {
+          "name": "Carnage, Crimson Chaos",
+          "weight": 0.464
         },
         {
           "name": "Inti, Seneschal of the Sun",
-          "weight": 0.312
+          "weight": 0.3
         },
         {
           "name": "Cecil, Dark Knight",
-          "weight": 0.178
+          "weight": 0.172
         }
       ],
-      "top_weight": 1.762,
+      "top_weight": 1.623,
       "member_count": 14
     },
     {
@@ -324,125 +324,125 @@
       "members": [
         {
           "name": "Keen-Eyed Curator",
-          "weight": 3.827
-        },
-        {
-          "name": "Seam Rip",
-          "weight": 2.743
-        },
-        {
-          "name": "Brightglass Gearhulk",
-          "weight": 1.651
-        },
-        {
-          "name": "Sage of the Skies",
-          "weight": 1.476
-        },
-        {
-          "name": "Gene Pollinator",
-          "weight": 1.113
-        },
-        {
-          "name": "Nurturing Pixie",
-          "weight": 0.944
-        },
-        {
-          "name": "Meltstrider's Resolve",
-          "weight": 0.928
-        },
-        {
-          "name": "Badgermole Cub",
-          "weight": 0.506
-        },
-        {
-          "name": "Nature's Rhythm",
-          "weight": 0.328
+          "weight": 2.326
         },
         {
           "name": "Llanowar Elves",
-          "weight": 0.314
+          "weight": 2.023
+        },
+        {
+          "name": "Sage of the Skies",
+          "weight": 2.017
+        },
+        {
+          "name": "Ouroboroid",
+          "weight": 2.004
+        },
+        {
+          "name": "Badgermole Cub",
+          "weight": 1.994
+        },
+        {
+          "name": "Pawpatch Recruit",
+          "weight": 1.856
+        },
+        {
+          "name": "Brightglass Gearhulk",
+          "weight": 1.527
+        },
+        {
+          "name": "Seam Rip",
+          "weight": 1.518
+        },
+        {
+          "name": "Gene Pollinator",
+          "weight": 1.499
+        },
+        {
+          "name": "Meltstrider's Resolve",
+          "weight": 0.989
+        },
+        {
+          "name": "Nurturing Pixie",
+          "weight": 0.548
+        },
+        {
+          "name": "Erode",
+          "weight": 0.203
         },
         {
           "name": "Spider Manifestation",
-          "weight": 0.305
+          "weight": 0.074
         },
         {
-          "name": "Sheltered by Ghosts",
-          "weight": 0.201
-        },
-        {
-          "name": "Elspeth, Storm Slayer",
-          "weight": 0.134
-        },
-        {
-          "name": "Voice of Victory",
-          "weight": 0.091
+          "name": "Nature's Rhythm",
+          "weight": 0.068
         }
       ],
-      "top_weight": 3.827,
-      "member_count": 13
+      "top_weight": 2.326,
+      "member_count": 12
     },
     {
       "id": "c6",
       "members": [
         {
-          "name": "Superior Spider-Man",
-          "weight": 2.136
+          "name": "Requiting Hex",
+          "weight": 1.908
         },
         {
           "name": "Deceit",
-          "weight": 2.118
+          "weight": 1.899
         },
         {
-          "name": "Requiting Hex",
-          "weight": 2.067
+          "name": "Superior Spider-Man",
+          "weight": 1.898
         },
         {
           "name": "Bitter Triumph",
-          "weight": 1.623
-        },
-        {
-          "name": "Doomsday Excruciator",
-          "weight": 1.417
+          "weight": 1.444
         },
         {
           "name": "Duress",
-          "weight": 1.342
+          "weight": 1.293
         },
         {
-          "name": "Stock Up",
-          "weight": 1.238
+          "name": "Doomsday Excruciator",
+          "weight": 1.27
         },
         {
           "name": "Winternight Stories",
-          "weight": 1.225
+          "weight": 1.132
+        },
+        {
+          "name": "Stock Up",
+          "weight": 1.117
         },
         {
           "name": "Day of Black Sun",
-          "weight": 1.207
+          "weight": 1.092
         },
         {
           "name": "Emeritus of Ideation",
-          "weight": 0.976
+          "weight": 0.886
         },
         {
           "name": "Strategic Betrayal",
-          "weight": 0.57
+          "weight": 0.55
         },
         {
           "name": "Insatiable Avarice",
-          "weight": 0.507
+          "weight": 0.44
         },
         {
           "name": "Deadly Cover-Up",
-          "weight": 0.447
+          "weight": 0.381
         },
         {
-          "name": "Ancient Cornucopia",
+          "name": "Shoot the Sheriff",
           "weight": 0.102
         }
       ],
-      "top_weight": 2.136,
+      "top_weight": 1.908,
       "member_count": 14
     },
     {
@@ -450,232 +450,232 @@
       "members": [
         {
           "name": "Quantum Riddler",
-          "weight": 2.171
+          "weight": 2.048
         },
         {
           "name": "Momo, Friendly Flier",
-          "weight": 2.149
+          "weight": 2.009
         },
         {
           "name": "Springleaf Drum",
-          "weight": 2.091
+          "weight": 1.997
         },
         {
           "name": "Daydream",
-          "weight": 2.08
+          "weight": 1.97
         },
         {
           "name": "Starfield Shepherd",
-          "weight": 2.068
+          "weight": 1.933
         },
         {
           "name": "Sage of the Skies",
-          "weight": 2.03
+          "weight": 1.919
         },
         {
           "name": "Seam Rip",
-          "weight": 1.15
+          "weight": 1.172
         },
         {
           "name": "Haliya, Guided by Light",
-          "weight": 1.134
+          "weight": 1.048
         },
         {
           "name": "Nurturing Pixie",
-          "weight": 1.082
+          "weight": 1.036
         },
         {
           "name": "Practiced Offense",
-          "weight": 0.994
+          "weight": 0.976
         },
         {
           "name": "Erode",
-          "weight": 0.839
+          "weight": 0.771
         },
         {
           "name": "Cosmogrand Zenith",
-          "weight": 0.802
+          "weight": 0.757
         },
         {
           "name": "Aang, Swift Savior",
-          "weight": 0.738
+          "weight": 0.699
         },
         {
           "name": "Gran-Gran",
-          "weight": 0.393
+          "weight": 0.363
         }
       ],
-      "top_weight": 2.171,
-      "member_count": 16
+      "top_weight": 2.048,
+      "member_count": 15
     },
     {
       "id": "c8",
       "members": [
         {
-          "name": "Formidable Speaker",
-          "weight": 1.539
-        },
-        {
-          "name": "Kona, Rescue Beastie",
-          "weight": 1.531
-        },
-        {
-          "name": "Omniscience",
-          "weight": 1.514
-        },
-        {
-          "name": "Stock Up",
-          "weight": 1.17
-        },
-        {
-          "name": "North Wind Avatar",
-          "weight": 1.1
-        },
-        {
-          "name": "Ashling, Rekindled",
-          "weight": 1.083
-        },
-        {
-          "name": "Marang River Regent",
-          "weight": 0.987
-        },
-        {
-          "name": "Winternight Stories",
-          "weight": 0.767
-        },
-        {
-          "name": "Bounce Off",
-          "weight": 0.564
-        },
-        {
-          "name": "Into the Flood Maw",
-          "weight": 0.472
-        },
-        {
-          "name": "Spell Pierce",
-          "weight": 0.43
-        },
-        {
-          "name": "Spider-Sense",
-          "weight": 0.355
-        },
-        {
-          "name": "Pyroclasm",
-          "weight": 0.289
-        },
-        {
-          "name": "Ill-Timed Explosion",
-          "weight": 0.248
-        }
-      ],
-      "top_weight": 1.539,
-      "member_count": 15
-    },
-    {
-      "id": "c9",
-      "members": [
-        {
           "name": "Firebending Lesson",
-          "weight": 1.426
+          "weight": 1.499
         },
         {
           "name": "Gran-Gran",
-          "weight": 1.41
+          "weight": 1.481
         },
         {
           "name": "Accumulate Wisdom",
-          "weight": 1.403
+          "weight": 1.48
         },
         {
           "name": "Combustion Technique",
-          "weight": 1.403
+          "weight": 1.48
         },
         {
           "name": "Monument to Endurance",
-          "weight": 1.205
+          "weight": 1.285
         },
         {
           "name": "Artist's Talent",
-          "weight": 1.199
-        },
-        {
-          "name": "Boomerang Basics",
-          "weight": 1.189
+          "weight": 1.279
         },
         {
           "name": "Abandon Attachments",
-          "weight": 1.179
+          "weight": 1.257
+        },
+        {
+          "name": "Boomerang Basics",
+          "weight": 1.211
         },
         {
           "name": "Stormchaser's Talent",
-          "weight": 1.028
+          "weight": 1.003
         },
         {
           "name": "It'll Quench Ya!",
-          "weight": 0.6
-        },
-        {
-          "name": "Eddymurk Crab",
-          "weight": 0.111
+          "weight": 0.64
         },
         {
           "name": "Three Steps Ahead",
-          "weight": 0.097
+          "weight": 0.143
+        },
+        {
+          "name": "Eddymurk Crab",
+          "weight": 0.108
         },
         {
           "name": "Consult the Star Charts",
-          "weight": 0.064
+          "weight": 0.104
         },
         {
           "name": "Soul-Guide Lantern",
           "weight": 0.064
         }
       ],
-      "top_weight": 1.426,
-      "member_count": 11
+      "top_weight": 1.499,
+      "member_count": 13
+    },
+    {
+      "id": "c9",
+      "members": [
+        {
+          "name": "Formidable Speaker",
+          "weight": 1.491
+        },
+        {
+          "name": "Kona, Rescue Beastie",
+          "weight": 1.485
+        },
+        {
+          "name": "Omniscience",
+          "weight": 1.482
+        },
+        {
+          "name": "Ashling, Rekindled",
+          "weight": 1.16
+        },
+        {
+          "name": "Stock Up",
+          "weight": 1.137
+        },
+        {
+          "name": "North Wind Avatar",
+          "weight": 1.078
+        },
+        {
+          "name": "Marang River Regent",
+          "weight": 0.968
+        },
+        {
+          "name": "Winternight Stories",
+          "weight": 0.774
+        },
+        {
+          "name": "Bounce Off",
+          "weight": 0.493
+        },
+        {
+          "name": "Into the Flood Maw",
+          "weight": 0.465
+        },
+        {
+          "name": "Spell Pierce",
+          "weight": 0.386
+        },
+        {
+          "name": "Spider-Sense",
+          "weight": 0.351
+        },
+        {
+          "name": "Pyroclasm",
+          "weight": 0.283
+        },
+        {
+          "name": "Ill-Timed Explosion",
+          "weight": 0.253
+        }
+      ],
+      "top_weight": 1.491,
+      "member_count": 14
     },
     {
       "id": "c10",
       "members": [
         {
           "name": "Voice of Victory",
-          "weight": 1.388
-        },
-        {
-          "name": "High Noon",
-          "weight": 1.281
+          "weight": 1.341
         },
         {
           "name": "Aang, Swift Savior",
-          "weight": 1.269
+          "weight": 1.248
+        },
+        {
+          "name": "High Noon",
+          "weight": 1.245
         },
         {
           "name": "Aven Interrupter",
-          "weight": 1.255
+          "weight": 1.22
         },
         {
           "name": "Skycoach Conductor",
-          "weight": 1.11
+          "weight": 1.092
         },
         {
           "name": "Floodpits Drowner",
-          "weight": 1.109
+          "weight": 1.064
         },
         {
           "name": "Avatar's Wrath",
-          "weight": 0.805
+          "weight": 0.752
         },
         {
           "name": "Quantum Riddler",
-          "weight": 0.709
-        },
-        {
-          "name": "Get Lost",
-          "weight": 0.556
+          "weight": 0.625
         },
         {
           "name": "Seam Rip",
-          "weight": 0.494
+          "weight": 0.516
+        },
+        {
+          "name": "Get Lost",
+          "weight": 0.513
         },
         {
           "name": "Spell Snare",
@@ -683,530 +683,377 @@
         },
         {
           "name": "Beza, the Bounding Spring",
-          "weight": 0.221
-        },
-        {
-          "name": "Ajani, Outland Chaperone",
-          "weight": 0.157
+          "weight": 0.192
         },
         {
           "name": "Erode",
-          "weight": 0.1
+          "weight": 0.07
         }
       ],
-      "top_weight": 1.388,
-      "member_count": 14
+      "top_weight": 1.341,
+      "member_count": 12
     },
     {
       "id": "c11",
       "members": [
         {
-          "name": "Consult the Star Charts",
-          "weight": 1.777
+          "name": "Ancestral Anger",
+          "weight": 1.178
         },
         {
-          "name": "Deadly Cover-Up",
-          "weight": 1.688
+          "name": "Wild Ride",
+          "weight": 1.161
         },
         {
-          "name": "Three Steps Ahead",
-          "weight": 1.437
+          "name": "Slickshot Show-Off",
+          "weight": 1.128
         },
         {
-          "name": "Shoot the Sheriff",
-          "weight": 1.359
+          "name": "Turn Inside Out",
+          "weight": 1.109
         },
         {
-          "name": "Professor Dellian Fel",
-          "weight": 1.238
+          "name": "Stormchaser's Talent",
+          "weight": 1.098
         },
         {
-          "name": "Maelstrom Pulse",
-          "weight": 1.235
+          "name": "Sleight of Hand",
+          "weight": 0.956
         },
         {
-          "name": "Requiting Hex",
-          "weight": 1.229
+          "name": "Elusive Otter",
+          "weight": 0.911
         },
         {
-          "name": "Ancient Cornucopia",
-          "weight": 0.914
+          "name": "Callous Sell-Sword",
+          "weight": 0.852
         },
         {
-          "name": "Flow State",
-          "weight": 0.895
+          "name": "Opt",
+          "weight": 0.722
         },
         {
-          "name": "Witherbloom Charm",
-          "weight": 0.471
+          "name": "Drake Hatcher",
+          "weight": 0.627
         },
         {
-          "name": "Wan Shi Tong, Librarian",
-          "weight": 0.421
+          "name": "Secret Identity",
+          "weight": 0.564
         },
         {
-          "name": "Decorum Dissertation",
-          "weight": 0.419
+          "name": "Boomerang Basics",
+          "weight": 0.53
         },
         {
-          "name": "Strategic Betrayal",
-          "weight": 0.414
-        },
-        {
-          "name": "Bitter Triumph",
-          "weight": 0.367
+          "name": "Balmor, Battlemage Captain",
+          "weight": 0.215
         }
       ],
-      "top_weight": 1.777,
-      "member_count": 16
+      "top_weight": 1.178,
+      "member_count": 13
     },
     {
       "id": "c12",
       "members": [
         {
-          "name": "Spider Manifestation",
-          "weight": 1.456
+          "name": "Requiting Hex",
+          "weight": 1.196
         },
         {
-          "name": "Nature's Rhythm",
-          "weight": 1.428
+          "name": "Deadly Cover-Up",
+          "weight": 1.14
         },
         {
-          "name": "Llanowar Elves",
-          "weight": 1.348
+          "name": "Professor Dellian Fel",
+          "weight": 1.095
         },
         {
-          "name": "Gene Pollinator",
-          "weight": 1.302
+          "name": "Shoot the Sheriff",
+          "weight": 1.092
         },
         {
-          "name": "Badgermole Cub",
-          "weight": 1.301
+          "name": "Consult the Star Charts",
+          "weight": 1.065
         },
         {
-          "name": "Quantum Riddler",
-          "weight": 0.744
+          "name": "Maelstrom Pulse",
+          "weight": 0.984
         },
         {
-          "name": "Seam Rip",
-          "weight": 0.665
+          "name": "Three Steps Ahead",
+          "weight": 0.877
         },
         {
-          "name": "Ouroboroid",
-          "weight": 0.646
+          "name": "Ancient Cornucopia",
+          "weight": 0.589
         },
         {
-          "name": "Brightglass Gearhulk",
-          "weight": 0.628
+          "name": "Flow State",
+          "weight": 0.57
         },
         {
-          "name": "Mockingbird",
-          "weight": 0.575
+          "name": "Duress",
+          "weight": 0.454
         },
         {
-          "name": "Meltstrider's Resolve",
-          "weight": 0.549
+          "name": "Strategic Betrayal",
+          "weight": 0.412
         },
         {
-          "name": "Craterhoof Behemoth",
-          "weight": 0.368
+          "name": "Witherbloom Charm",
+          "weight": 0.321
         },
         {
-          "name": "Soul-Guide Lantern",
-          "weight": 0.178
+          "name": "Bitter Triumph",
+          "weight": 0.284
         },
         {
-          "name": "Keen-Eyed Curator",
-          "weight": 0.054
+          "name": "Decorum Dissertation",
+          "weight": 0.276
         }
       ],
-      "top_weight": 1.456,
-      "member_count": 13
+      "top_weight": 1.196,
+      "member_count": 17
     },
     {
       "id": "c13",
       "members": [
         {
-          "name": "Unholy Annex // Ritual Chamber",
-          "weight": 2.815
+          "name": "Spider Manifestation",
+          "weight": 1.276
+        },
+        {
+          "name": "Nature's Rhythm",
+          "weight": 1.244
+        },
+        {
+          "name": "Gene Pollinator",
+          "weight": 1.081
         },
         {
           "name": "Llanowar Elves",
-          "weight": 2.573
-        },
-        {
-          "name": "Requiting Hex",
-          "weight": 2.505
+          "weight": 1.067
         },
         {
           "name": "Badgermole Cub",
-          "weight": 2.326
+          "weight": 1.049
         },
         {
-          "name": "Duress",
-          "weight": 1.954
+          "name": "Seam Rip",
+          "weight": 0.766
         },
         {
-          "name": "Professor Dellian Fel",
-          "weight": 1.856
+          "name": "Quantum Riddler",
+          "weight": 0.597
+        },
+        {
+          "name": "Brightglass Gearhulk",
+          "weight": 0.588
+        },
+        {
+          "name": "Mockingbird",
+          "weight": 0.501
+        },
+        {
+          "name": "Meltstrider's Resolve",
+          "weight": 0.482
+        },
+        {
+          "name": "Ouroboroid",
+          "weight": 0.422
         },
         {
           "name": "Keen-Eyed Curator",
-          "weight": 1.351
+          "weight": 0.32
         },
         {
-          "name": "Maelstrom Pulse",
-          "weight": 1.213
+          "name": "Craterhoof Behemoth",
+          "weight": 0.317
         },
         {
-          "name": "Shoot the Sheriff",
-          "weight": 0.912
-        },
-        {
-          "name": "Strategic Betrayal",
-          "weight": 0.72
-        },
-        {
-          "name": "Bitter Triumph",
-          "weight": 0.618
-        },
-        {
-          "name": "Witherbloom Charm",
-          "weight": 0.257
-        },
-        {
-          "name": "Deadly Cover-Up",
-          "weight": 0.053
+          "name": "Soul-Guide Lantern",
+          "weight": 0.141
         }
       ],
-      "top_weight": 2.815,
-      "member_count": 12
+      "top_weight": 1.276,
+      "member_count": 14
     },
     {
       "id": "c14",
       "members": [
         {
-          "name": "Esper Origins",
-          "weight": 4.632
+          "name": "Lightning Helix",
+          "weight": 2.253
         },
         {
-          "name": "Lumbering Worldwagon",
-          "weight": 1.317
+          "name": "No More Lies",
+          "weight": 2.103
         },
         {
-          "name": "Bitter Triumph",
-          "weight": 0.848
-        },
-        {
-          "name": "Meltstrider's Resolve",
-          "weight": 0.441
-        },
-        {
-          "name": "Llanowar Elves",
-          "weight": 0.392
-        },
-        {
-          "name": "Aang's Iceberg",
-          "weight": 0.361
-        },
-        {
-          "name": "Inevitable Defeat",
-          "weight": 0.315
+          "name": "Consult the Star Charts",
+          "weight": 1.543
         },
         {
           "name": "Jeskai Revelation",
-          "weight": 0.269
+          "weight": 1.386
         },
         {
-          "name": "Kona, Rescue Beastie",
-          "weight": 0.266
+          "name": "Stock Up",
+          "weight": 1.192
         },
         {
-          "name": "Formidable Speaker",
-          "weight": 0.26
-        },
-        {
-          "name": "Strategic Betrayal",
-          "weight": 0.201
-        },
-        {
-          "name": "Erode",
-          "weight": 0.173
-        },
-        {
-          "name": "Gene Pollinator",
-          "weight": 0.146
+          "name": "Day of Judgment",
+          "weight": 0.845
         },
         {
           "name": "Get Lost",
-          "weight": 0.116
+          "weight": 0.51
+        },
+        {
+          "name": "Three Steps Ahead",
+          "weight": 0.446
+        },
+        {
+          "name": "Traumatic Critique",
+          "weight": 0.367
+        },
+        {
+          "name": "Spell Snare",
+          "weight": 0.344
+        },
+        {
+          "name": "Firebending Lesson",
+          "weight": 0.261
+        },
+        {
+          "name": "Pyroclasm",
+          "weight": 0.25
+        },
+        {
+          "name": "Fire Magic",
+          "weight": 0.233
+        },
+        {
+          "name": "Negate",
+          "weight": 0.168
         }
       ],
-      "top_weight": 4.632,
-      "member_count": 17
+      "top_weight": 2.253,
+      "member_count": 20
     },
     {
       "id": "c15",
       "members": [
         {
-          "name": "Wistfulness",
-          "weight": 1.367
+          "name": "Llanowar Elves",
+          "weight": 1.146
         },
         {
-          "name": "Ashling, Rekindled",
-          "weight": 1.248
+          "name": "Badgermole Cub",
+          "weight": 1.024
         },
         {
-          "name": "Deceit",
-          "weight": 1.093
+          "name": "Aang, Swift Savior",
+          "weight": 0.759
         },
         {
-          "name": "Sunderflock",
-          "weight": 0.777
+          "name": "Aang, at the Crossroads",
+          "weight": 0.398
         },
         {
-          "name": "Bounce Off",
-          "weight": 0.749
+          "name": "Michelangelo's Technique",
+          "weight": 0.378
         },
         {
-          "name": "Ill-Timed Explosion",
-          "weight": 0.737
+          "name": "Skycoach Conductor",
+          "weight": 0.346
         },
         {
-          "name": "Burst Lightning",
-          "weight": 0.46
+          "name": "Aang's Iceberg",
+          "weight": 0.185
         },
         {
-          "name": "Winternight Stories",
-          "weight": 0.457
+          "name": "Professor Dellian Fel",
+          "weight": 0.17
         },
         {
-          "name": "Broadside Barrage",
-          "weight": 0.446
+          "name": "Duress",
+          "weight": 0.164
         },
         {
-          "name": "Quantum Riddler",
-          "weight": 0.105
+          "name": "Requiting Hex",
+          "weight": 0.147
         },
         {
-          "name": "Spider-Sense",
-          "weight": 0.099
+          "name": "Keen-Eyed Curator",
+          "weight": 0.118
         },
         {
-          "name": "Ancient Cornucopia",
-          "weight": 0.086
-        },
-        {
-          "name": "Superior Spider-Man",
-          "weight": 0.077
+          "name": "Maelstrom Pulse",
+          "weight": 0.059
         }
       ],
-      "top_weight": 1.367,
-      "member_count": 10
+      "top_weight": 1.146,
+      "member_count": 11
     },
     {
       "id": "c16",
       "members": [
         {
-          "name": "Aang, Swift Savior",
-          "weight": 1.875
+          "name": "Wistfulness",
+          "weight": 1.225
         },
         {
-          "name": "Llanowar Elves",
-          "weight": 1.611
+          "name": "Ashling, Rekindled",
+          "weight": 1.156
         },
         {
-          "name": "Badgermole Cub",
-          "weight": 1.507
+          "name": "Deceit",
+          "weight": 0.977
         },
-        {
-          "name": "Aang, at the Crossroads",
-          "weight": 0.903
-        },
-        {
-          "name": "Skycoach Conductor",
-          "weight": 0.879
-        },
-        {
-          "name": "Michelangelo's Technique",
-          "weight": 0.816
-        },
-        {
-          "name": "Aang's Iceberg",
-          "weight": 0.407
-        }
-      ],
-      "top_weight": 1.875,
-      "member_count": 7
-    },
-    {
-      "id": "c17",
-      "members": [
-        {
-          "name": "Lightning Helix",
-          "weight": 2.336
-        },
-        {
-          "name": "No More Lies",
-          "weight": 2.183
-        },
-        {
-          "name": "Consult the Star Charts",
-          "weight": 1.677
-        },
-        {
-          "name": "Stock Up",
-          "weight": 1.441
-        },
-        {
-          "name": "Jeskai Revelation",
-          "weight": 1.417
-        },
-        {
-          "name": "Day of Judgment",
-          "weight": 1.024
-        },
-        {
-          "name": "Get Lost",
-          "weight": 0.958
-        },
-        {
-          "name": "Three Steps Ahead",
-          "weight": 0.572
-        },
-        {
-          "name": "Spell Snare",
-          "weight": 0.489
-        },
-        {
-          "name": "Negate",
-          "weight": 0.326
-        },
-        {
-          "name": "Traumatic Critique",
-          "weight": 0.324
-        },
-        {
-          "name": "Improvisation Capstone",
-          "weight": 0.318
-        },
-        {
-          "name": "Abrade",
-          "weight": 0.257
-        },
-        {
-          "name": "Fire Magic",
-          "weight": 0.238
-        }
-      ],
-      "top_weight": 2.336,
-      "member_count": 20
-    },
-    {
-      "id": "c18",
-      "members": [
-        {
-          "name": "Ouroboroid",
-          "weight": 1.647
-        },
-        {
-          "name": "Pawpatch Recruit",
-          "weight": 1.511
-        },
-        {
-          "name": "Llanowar Elves",
-          "weight": 1.452
-        },
-        {
-          "name": "Badgermole Cub",
-          "weight": 1.323
-        },
-        {
-          "name": "Sage of the Skies",
-          "weight": 0.854
-        },
-        {
-          "name": "Gene Pollinator",
-          "weight": 0.654
-        },
-        {
-          "name": "Brightglass Gearhulk",
-          "weight": 0.416
-        },
-        {
-          "name": "Meltstrider's Resolve",
-          "weight": 0.337
-        },
-        {
-          "name": "Erode",
-          "weight": 0.167
-        }
-      ],
-      "top_weight": 1.647,
-      "member_count": 9
-    },
-    {
-      "id": "c19",
-      "members": [
         {
           "name": "Burst Lightning",
-          "weight": 2.096
+          "weight": 0.951
         },
         {
-          "name": "Colorstorm Stallion",
-          "weight": 0.957
+          "name": "Sunderflock",
+          "weight": 0.679
         },
         {
-          "name": "Tablet of Discovery",
-          "weight": 0.619
+          "name": "Ill-Timed Explosion",
+          "weight": 0.66
         },
         {
-          "name": "Stock Up",
-          "weight": 0.559
-        },
-        {
-          "name": "Voice of Victory",
-          "weight": 0.474
-        },
-        {
-          "name": "Prismari Charm",
-          "weight": 0.39
-        },
-        {
-          "name": "Improvisation Capstone",
-          "weight": 0.247
-        },
-        {
-          "name": "Momo, Friendly Flier",
-          "weight": 0.23
-        },
-        {
-          "name": "Into the Flood Maw",
-          "weight": 0.209
-        },
-        {
-          "name": "Fire Magic",
-          "weight": 0.143
-        },
-        {
-          "name": "Get Lost",
-          "weight": 0.111
-        },
-        {
-          "name": "Vibrant Outburst",
-          "weight": 0.085
+          "name": "Bounce Off",
+          "weight": 0.655
         },
         {
           "name": "Winternight Stories",
-          "weight": 0.075
+          "weight": 0.437
         },
         {
-          "name": "Inti, Seneschal of the Sun",
-          "weight": 0.058
+          "name": "Broadside Barrage",
+          "weight": 0.421
+        },
+        {
+          "name": "Quantum Riddler",
+          "weight": 0.088
+        },
+        {
+          "name": "Voice of Victory",
+          "weight": 0.079
+        },
+        {
+          "name": "Spider-Sense",
+          "weight": 0.078
+        },
+        {
+          "name": "Ancient Cornucopia",
+          "weight": 0.077
         }
       ],
-      "top_weight": 2.096,
-      "member_count": 11
+      "top_weight": 1.225,
+      "member_count": 9
     }
   ],
   "archetypes": [
@@ -1216,11 +1063,7 @@
       "cluster_mix": [
         {
           "cluster": "c0",
-          "weight": 0.907
-        },
-        {
-          "cluster": "c19",
-          "weight": 0.064
+          "weight": 0.945
         }
       ]
     },
@@ -1229,12 +1072,12 @@
       "deck_count": 15,
       "cluster_mix": [
         {
-          "cluster": "c9",
-          "weight": 0.896
+          "cluster": "c8",
+          "weight": 0.878
         },
         {
           "cluster": "c0",
-          "weight": 0.075
+          "weight": 0.081
         }
       ]
     },
@@ -1244,11 +1087,11 @@
       "cluster_mix": [
         {
           "cluster": "c2",
-          "weight": 0.768
+          "weight": 0.684
         },
         {
-          "cluster": "c17",
-          "weight": 0.166
+          "cluster": "c14",
+          "weight": 0.265
         }
       ]
     },
@@ -1257,8 +1100,8 @@
       "deck_count": 12,
       "cluster_mix": [
         {
-          "cluster": "c0",
-          "weight": 0.995
+          "cluster": "c11",
+          "weight": 0.962
         }
       ]
     },
@@ -1268,11 +1111,7 @@
       "cluster_mix": [
         {
           "cluster": "c3",
-          "weight": 0.886
-        },
-        {
-          "cluster": "c19",
-          "weight": 0.053
+          "weight": 0.91
         }
       ]
     },
@@ -1282,7 +1121,7 @@
       "cluster_mix": [
         {
           "cluster": "c1",
-          "weight": 0.961
+          "weight": 0.986
         }
       ]
     },
@@ -1292,11 +1131,7 @@
       "cluster_mix": [
         {
           "cluster": "c4",
-          "weight": 0.84
-        },
-        {
-          "cluster": "c19",
-          "weight": 0.123
+          "weight": 0.905
         }
       ]
     },
@@ -1306,11 +1141,11 @@
       "cluster_mix": [
         {
           "cluster": "c2",
-          "weight": 0.572
+          "weight": 0.582
         },
         {
-          "cluster": "c17",
-          "weight": 0.293
+          "cluster": "c14",
+          "weight": 0.292
         }
       ]
     },
@@ -1320,7 +1155,7 @@
       "cluster_mix": [
         {
           "cluster": "c6",
-          "weight": 0.953
+          "weight": 0.967
         }
       ]
     },
@@ -1329,16 +1164,12 @@
       "deck_count": 5,
       "cluster_mix": [
         {
-          "cluster": "c18",
-          "weight": 0.593
-        },
-        {
           "cluster": "c5",
-          "weight": 0.286
+          "weight": 0.77
         },
         {
-          "cluster": "c12",
-          "weight": 0.105
+          "cluster": "c13",
+          "weight": 0.212
         }
       ]
     },
@@ -1347,12 +1178,12 @@
       "deck_count": 5,
       "cluster_mix": [
         {
-          "cluster": "c8",
-          "weight": 0.92
+          "cluster": "c9",
+          "weight": 0.938
         },
         {
-          "cluster": "c15",
-          "weight": 0.07
+          "cluster": "c16",
+          "weight": 0.057
         }
       ]
     },
@@ -1362,7 +1193,7 @@
       "cluster_mix": [
         {
           "cluster": "c7",
-          "weight": 0.911
+          "weight": 0.914
         }
       ]
     },
@@ -1372,15 +1203,7 @@
       "cluster_mix": [
         {
           "cluster": "c1",
-          "weight": 0.848
-        },
-        {
-          "cluster": "c14",
-          "weight": 0.084
-        },
-        {
-          "cluster": "c5",
-          "weight": 0.051
+          "weight": 0.95
         }
       ]
     },
@@ -1389,16 +1212,16 @@
       "deck_count": 3,
       "cluster_mix": [
         {
-          "cluster": "c11",
-          "weight": 0.795
+          "cluster": "c12",
+          "weight": 0.822
         },
         {
           "cluster": "c6",
-          "weight": 0.114
+          "weight": 0.087
         },
         {
-          "cluster": "c15",
-          "weight": 0.073
+          "cluster": "c16",
+          "weight": 0.054
         }
       ]
     },
@@ -1408,7 +1231,11 @@
       "cluster_mix": [
         {
           "cluster": "c0",
-          "weight": 0.988
+          "weight": 0.915
+        },
+        {
+          "cluster": "c11",
+          "weight": 0.076
         }
       ]
     },
@@ -1418,7 +1245,7 @@
       "cluster_mix": [
         {
           "cluster": "c10",
-          "weight": 0.965
+          "weight": 0.979
         }
       ]
     },
@@ -1427,16 +1254,12 @@
       "deck_count": 2,
       "cluster_mix": [
         {
-          "cluster": "c12",
-          "weight": 0.631
+          "cluster": "c13",
+          "weight": 0.794
         },
         {
           "cluster": "c5",
-          "weight": 0.251
-        },
-        {
-          "cluster": "c18",
-          "weight": 0.071
+          "weight": 0.202
         }
       ]
     },
@@ -1446,11 +1269,7 @@
       "cluster_mix": [
         {
           "cluster": "c0",
-          "weight": 0.894
-        },
-        {
-          "cluster": "c19",
-          "weight": 0.077
+          "weight": 0.957
         }
       ]
     },
@@ -1459,8 +1278,8 @@
       "deck_count": 2,
       "cluster_mix": [
         {
-          "cluster": "c12",
-          "weight": 0.922
+          "cluster": "c13",
+          "weight": 0.944
         }
       ]
     },
@@ -1469,8 +1288,8 @@
       "deck_count": 2,
       "cluster_mix": [
         {
-          "cluster": "c16",
-          "weight": 0.941
+          "cluster": "c15",
+          "weight": 0.956
         }
       ]
     },
@@ -1480,7 +1299,7 @@
       "cluster_mix": [
         {
           "cluster": "c10",
-          "weight": 0.969
+          "weight": 0.965
         }
       ]
     },
@@ -1489,8 +1308,20 @@
       "deck_count": 1,
       "cluster_mix": [
         {
-          "cluster": "c13",
-          "weight": 0.91
+          "cluster": "c15",
+          "weight": 0.513
+        },
+        {
+          "cluster": "c12",
+          "weight": 0.295
+        },
+        {
+          "cluster": "c6",
+          "weight": 0.078
+        },
+        {
+          "cluster": "c5",
+          "weight": 0.052
         }
       ]
     },
@@ -1499,12 +1330,24 @@
       "deck_count": 1,
       "cluster_mix": [
         {
-          "cluster": "c19",
-          "weight": 0.822
+          "cluster": "c2",
+          "weight": 0.344
         },
         {
-          "cluster": "c2",
-          "weight": 0.121
+          "cluster": "c0",
+          "weight": 0.328
+        },
+        {
+          "cluster": "c16",
+          "weight": 0.137
+        },
+        {
+          "cluster": "c9",
+          "weight": 0.07
+        },
+        {
+          "cluster": "c3",
+          "weight": 0.063
         }
       ]
     },
@@ -1514,11 +1357,11 @@
       "cluster_mix": [
         {
           "cluster": "c2",
-          "weight": 0.925
+          "weight": 0.937
         },
         {
           "cluster": "c3",
-          "weight": 0.068
+          "weight": 0.058
         }
       ]
     },
@@ -1528,7 +1371,7 @@
       "cluster_mix": [
         {
           "cluster": "c0",
-          "weight": 0.957
+          "weight": 0.986
         }
       ]
     },
@@ -1538,11 +1381,7 @@
       "cluster_mix": [
         {
           "cluster": "c1",
-          "weight": 0.648
-        },
-        {
-          "cluster": "c14",
-          "weight": 0.342
+          "weight": 0.976
         }
       ]
     },
@@ -1552,7 +1391,7 @@
       "cluster_mix": [
         {
           "cluster": "c3",
-          "weight": 0.888
+          "weight": 0.908
         }
       ]
     },
@@ -1561,12 +1400,8 @@
       "deck_count": 1,
       "cluster_mix": [
         {
-          "cluster": "c15",
-          "weight": 0.848
-        },
-        {
-          "cluster": "c19",
-          "weight": 0.144
+          "cluster": "c16",
+          "weight": 0.987
         }
       ]
     }
@@ -1574,31 +1409,31 @@
   "cluster_pairings": [
     {
       "cluster": "c0",
-      "deck_count": 38,
+      "deck_count": 44,
       "partners": [
         {
-          "cluster": "c9",
-          "p_cond": 0.105
-        },
-        {
-          "cluster": "c19",
-          "p_cond": 0.105
-        },
-        {
-          "cluster": "c2",
-          "p_cond": 0.079
-        },
-        {
-          "cluster": "c8",
-          "p_cond": 0.079
+          "cluster": "c16",
+          "p_cond": 0.273
         },
         {
           "cluster": "c3",
-          "p_cond": 0.053
+          "p_cond": 0.159
         },
         {
-          "cluster": "c6",
-          "p_cond": 0.053
+          "cluster": "c10",
+          "p_cond": 0.159
+        },
+        {
+          "cluster": "c2",
+          "p_cond": 0.136
+        },
+        {
+          "cluster": "c4",
+          "p_cond": 0.114
+        },
+        {
+          "cluster": "c9",
+          "p_cond": 0.114
         }
       ]
     },
@@ -1607,243 +1442,213 @@
       "deck_count": 26,
       "partners": [
         {
-          "cluster": "c7",
-          "p_cond": 0.115
+          "cluster": "c2",
+          "p_cond": 0.077
         },
         {
-          "cluster": "c14",
-          "p_cond": 0.115
-        },
-        {
-          "cluster": "c18",
-          "p_cond": 0.115
+          "cluster": "c4",
+          "p_cond": 0.077
         },
         {
           "cluster": "c6",
           "p_cond": 0.077
         },
         {
-          "cluster": "c11",
+          "cluster": "c7",
           "p_cond": 0.077
         },
         {
-          "cluster": "c12",
+          "cluster": "c14",
+          "p_cond": 0.077
+        },
+        {
+          "cluster": "c15",
           "p_cond": 0.077
         }
       ]
     },
     {
       "cluster": "c2",
-      "deck_count": 33,
+      "deck_count": 37,
       "partners": [
         {
-          "cluster": "c17",
-          "p_cond": 0.576
-        },
-        {
-          "cluster": "c8",
-          "p_cond": 0.152
+          "cluster": "c14",
+          "p_cond": 0.514
         },
         {
           "cluster": "c0",
-          "p_cond": 0.091
+          "p_cond": 0.162
         },
         {
           "cluster": "c9",
-          "p_cond": 0.091
+          "p_cond": 0.162
         },
         {
-          "cluster": "c11",
-          "p_cond": 0.091
+          "cluster": "c8",
+          "p_cond": 0.081
         },
         {
-          "cluster": "c4",
-          "p_cond": 0.061
+          "cluster": "c10",
+          "p_cond": 0.081
+        },
+        {
+          "cluster": "c12",
+          "p_cond": 0.081
         }
       ]
     },
     {
       "cluster": "c3",
-      "deck_count": 15,
+      "deck_count": 21,
       "partners": [
         {
-          "cluster": "c19",
-          "p_cond": 0.2
-        },
-        {
           "cluster": "c0",
-          "p_cond": 0.133
+          "p_cond": 0.333
         },
         {
-          "cluster": "c5",
-          "p_cond": 0.067
+          "cluster": "c16",
+          "p_cond": 0.286
         },
         {
-          "cluster": "c7",
-          "p_cond": 0.067
+          "cluster": "c9",
+          "p_cond": 0.238
         },
         {
-          "cluster": "c8",
-          "p_cond": 0.067
+          "cluster": "c2",
+          "p_cond": 0.095
+        },
+        {
+          "cluster": "c4",
+          "p_cond": 0.095
         },
         {
           "cluster": "c10",
-          "p_cond": 0.067
+          "p_cond": 0.095
         }
       ]
     },
     {
       "cluster": "c4",
-      "deck_count": 21,
+      "deck_count": 26,
       "partners": [
         {
-          "cluster": "c19",
-          "p_cond": 0.381
+          "cluster": "c0",
+          "p_cond": 0.192
+        },
+        {
+          "cluster": "c16",
+          "p_cond": 0.192
         },
         {
           "cluster": "c6",
-          "p_cond": 0.19
+          "p_cond": 0.115
         },
         {
           "cluster": "c7",
-          "p_cond": 0.19
-        },
-        {
-          "cluster": "c11",
-          "p_cond": 0.19
-        },
-        {
-          "cluster": "c13",
-          "p_cond": 0.19
+          "p_cond": 0.115
         },
         {
           "cluster": "c10",
-          "p_cond": 0.143
+          "p_cond": 0.115
+        },
+        {
+          "cluster": "c12",
+          "p_cond": 0.115
         }
       ]
     },
     {
       "cluster": "c5",
-      "deck_count": 22,
+      "deck_count": 23,
       "partners": [
         {
-          "cluster": "c10",
-          "p_cond": 0.364
+          "cluster": "c13",
+          "p_cond": 0.522
         },
         {
-          "cluster": "c18",
-          "p_cond": 0.318
+          "cluster": "c10",
+          "p_cond": 0.391
         },
         {
           "cluster": "c7",
-          "p_cond": 0.227
+          "p_cond": 0.348
         },
         {
-          "cluster": "c19",
-          "p_cond": 0.182
+          "cluster": "c14",
+          "p_cond": 0.348
         },
         {
-          "cluster": "c12",
-          "p_cond": 0.136
+          "cluster": "c0",
+          "p_cond": 0.13
         },
         {
-          "cluster": "c17",
-          "p_cond": 0.136
+          "cluster": "c15",
+          "p_cond": 0.13
         }
       ]
     },
     {
       "cluster": "c6",
-      "deck_count": 24,
+      "deck_count": 28,
       "partners": [
         {
-          "cluster": "c11",
-          "p_cond": 0.333
+          "cluster": "c12",
+          "p_cond": 0.5
         },
         {
-          "cluster": "c13",
-          "p_cond": 0.25
+          "cluster": "c15",
+          "p_cond": 0.179
         },
         {
           "cluster": "c4",
-          "p_cond": 0.167
+          "p_cond": 0.107
         },
         {
-          "cluster": "c7",
-          "p_cond": 0.167
+          "cluster": "c0",
+          "p_cond": 0.071
         },
         {
-          "cluster": "c10",
-          "p_cond": 0.167
+          "cluster": "c1",
+          "p_cond": 0.071
         },
         {
-          "cluster": "c14",
-          "p_cond": 0.167
+          "cluster": "c2",
+          "p_cond": 0.071
         }
       ]
     },
     {
       "cluster": "c7",
-      "deck_count": 30,
+      "deck_count": 33,
       "partners": [
         {
           "cluster": "c10",
-          "p_cond": 0.467
+          "p_cond": 0.515
+        },
+        {
+          "cluster": "c13",
+          "p_cond": 0.333
         },
         {
           "cluster": "c5",
-          "p_cond": 0.167
+          "p_cond": 0.242
         },
         {
-          "cluster": "c4",
-          "p_cond": 0.133
+          "cluster": "c14",
+          "p_cond": 0.242
         },
         {
-          "cluster": "c6",
-          "p_cond": 0.133
+          "cluster": "c16",
+          "p_cond": 0.152
         },
         {
-          "cluster": "c12",
-          "p_cond": 0.133
-        },
-        {
-          "cluster": "c19",
-          "p_cond": 0.133
+          "cluster": "c0",
+          "p_cond": 0.121
         }
       ]
     },
     {
       "cluster": "c8",
-      "deck_count": 18,
-      "partners": [
-        {
-          "cluster": "c2",
-          "p_cond": 0.278
-        },
-        {
-          "cluster": "c0",
-          "p_cond": 0.167
-        },
-        {
-          "cluster": "c11",
-          "p_cond": 0.167
-        },
-        {
-          "cluster": "c12",
-          "p_cond": 0.167
-        },
-        {
-          "cluster": "c17",
-          "p_cond": 0.167
-        },
-        {
-          "cluster": "c6",
-          "p_cond": 0.111
-        }
-      ]
-    },
-    {
-      "cluster": "c9",
       "deck_count": 11,
       "partners": [
         {
@@ -1856,319 +1661,259 @@
         },
         {
           "cluster": "c6",
-          "p_cond": 0.273
+          "p_cond": 0.182
+        },
+        {
+          "cluster": "c9",
+          "p_cond": 0.182
         },
         {
           "cluster": "c10",
-          "p_cond": 0.273
-        },
-        {
-          "cluster": "c4",
           "p_cond": 0.182
-        },
-        {
-          "cluster": "c7",
-          "p_cond": 0.182
-        }
-      ]
-    },
-    {
-      "cluster": "c10",
-      "deck_count": 39,
-      "partners": [
-        {
-          "cluster": "c7",
-          "p_cond": 0.359
-        },
-        {
-          "cluster": "c19",
-          "p_cond": 0.333
-        },
-        {
-          "cluster": "c5",
-          "p_cond": 0.205
-        },
-        {
-          "cluster": "c16",
-          "p_cond": 0.179
         },
         {
           "cluster": "c11",
-          "p_cond": 0.128
-        },
-        {
-          "cluster": "c6",
-          "p_cond": 0.103
+          "p_cond": 0.182
         }
       ]
     },
     {
-      "cluster": "c11",
+      "cluster": "c9",
       "deck_count": 21,
       "partners": [
         {
-          "cluster": "c6",
-          "p_cond": 0.381
+          "cluster": "c2",
+          "p_cond": 0.286
         },
         {
-          "cluster": "c13",
-          "p_cond": 0.333
+          "cluster": "c0",
+          "p_cond": 0.238
+        },
+        {
+          "cluster": "c3",
+          "p_cond": 0.238
         },
         {
           "cluster": "c10",
           "p_cond": 0.238
         },
         {
-          "cluster": "c4",
+          "cluster": "c12",
           "p_cond": 0.19
         },
         {
-          "cluster": "c2",
-          "p_cond": 0.143
+          "cluster": "c16",
+          "p_cond": 0.19
+        }
+      ]
+    },
+    {
+      "cluster": "c10",
+      "deck_count": 42,
+      "partners": [
+        {
+          "cluster": "c7",
+          "p_cond": 0.405
+        },
+        {
+          "cluster": "c14",
+          "p_cond": 0.31
+        },
+        {
+          "cluster": "c13",
+          "p_cond": 0.286
+        },
+        {
+          "cluster": "c5",
+          "p_cond": 0.214
+        },
+        {
+          "cluster": "c0",
+          "p_cond": 0.167
+        },
+        {
+          "cluster": "c12",
+          "p_cond": 0.167
+        }
+      ]
+    },
+    {
+      "cluster": "c11",
+      "deck_count": 10,
+      "partners": [
+        {
+          "cluster": "c0",
+          "p_cond": 0.2
+        },
+        {
+          "cluster": "c4",
+          "p_cond": 0.2
         },
         {
           "cluster": "c7",
-          "p_cond": 0.143
+          "p_cond": 0.2
+        },
+        {
+          "cluster": "c8",
+          "p_cond": 0.2
+        },
+        {
+          "cluster": "c10",
+          "p_cond": 0.2
+        },
+        {
+          "cluster": "c2",
+          "p_cond": 0.1
         }
       ]
     },
     {
       "cluster": "c12",
-      "deck_count": 16,
+      "deck_count": 28,
       "partners": [
         {
-          "cluster": "c7",
-          "p_cond": 0.25
+          "cluster": "c6",
+          "p_cond": 0.5
+        },
+        {
+          "cluster": "c15",
+          "p_cond": 0.286
         },
         {
           "cluster": "c10",
           "p_cond": 0.25
         },
         {
-          "cluster": "c14",
-          "p_cond": 0.25
+          "cluster": "c9",
+          "p_cond": 0.143
         },
         {
-          "cluster": "c16",
-          "p_cond": 0.25
+          "cluster": "c2",
+          "p_cond": 0.107
         },
         {
-          "cluster": "c18",
-          "p_cond": 0.25
-        },
-        {
-          "cluster": "c5",
-          "p_cond": 0.188
+          "cluster": "c4",
+          "p_cond": 0.107
         }
       ]
     },
     {
       "cluster": "c13",
-      "deck_count": 18,
+      "deck_count": 26,
       "partners": [
         {
-          "cluster": "c11",
-          "p_cond": 0.389
+          "cluster": "c5",
+          "p_cond": 0.462
         },
         {
-          "cluster": "c6",
-          "p_cond": 0.333
+          "cluster": "c10",
+          "p_cond": 0.462
         },
         {
-          "cluster": "c4",
-          "p_cond": 0.222
+          "cluster": "c7",
+          "p_cond": 0.423
         },
         {
-          "cluster": "c18",
-          "p_cond": 0.222
+          "cluster": "c14",
+          "p_cond": 0.346
         },
         {
-          "cluster": "c12",
-          "p_cond": 0.167
+          "cluster": "c15",
+          "p_cond": 0.192
         },
         {
-          "cluster": "c16",
-          "p_cond": 0.167
+          "cluster": "c9",
+          "p_cond": 0.115
         }
       ]
     },
     {
       "cluster": "c14",
-      "deck_count": 11,
+      "deck_count": 37,
       "partners": [
         {
-          "cluster": "c6",
-          "p_cond": 0.364
+          "cluster": "c2",
+          "p_cond": 0.514
         },
         {
-          "cluster": "c12",
-          "p_cond": 0.364
+          "cluster": "c10",
+          "p_cond": 0.351
         },
         {
-          "cluster": "c1",
-          "p_cond": 0.273
+          "cluster": "c13",
+          "p_cond": 0.243
         },
         {
-          "cluster": "c4",
-          "p_cond": 0.182
+          "cluster": "c5",
+          "p_cond": 0.216
         },
         {
           "cluster": "c7",
-          "p_cond": 0.182
+          "p_cond": 0.216
         },
         {
-          "cluster": "c8",
-          "p_cond": 0.182
+          "cluster": "c0",
+          "p_cond": 0.108
         }
       ]
     },
     {
       "cluster": "c15",
-      "deck_count": 12,
+      "deck_count": 22,
       "partners": [
         {
-          "cluster": "c6",
-          "p_cond": 0.25
+          "cluster": "c12",
+          "p_cond": 0.364
         },
         {
-          "cluster": "c7",
-          "p_cond": 0.25
+          "cluster": "c6",
+          "p_cond": 0.227
         },
         {
           "cluster": "c10",
-          "p_cond": 0.25
+          "p_cond": 0.227
         },
         {
-          "cluster": "c11",
-          "p_cond": 0.167
+          "cluster": "c13",
+          "p_cond": 0.227
         },
         {
-          "cluster": "c12",
-          "p_cond": 0.167
+          "cluster": "c5",
+          "p_cond": 0.136
         },
         {
-          "cluster": "c19",
-          "p_cond": 0.167
+          "cluster": "c1",
+          "p_cond": 0.091
         }
       ]
     },
     {
       "cluster": "c16",
-      "deck_count": 16,
+      "deck_count": 23,
       "partners": [
         {
-          "cluster": "c10",
-          "p_cond": 0.438
-        },
-        {
-          "cluster": "c18",
-          "p_cond": 0.375
-        },
-        {
-          "cluster": "c12",
-          "p_cond": 0.25
-        },
-        {
-          "cluster": "c7",
-          "p_cond": 0.188
-        },
-        {
-          "cluster": "c13",
-          "p_cond": 0.188
-        },
-        {
-          "cluster": "c1",
-          "p_cond": 0.125
-        }
-      ]
-    },
-    {
-      "cluster": "c17",
-      "deck_count": 31,
-      "partners": [
-        {
-          "cluster": "c2",
-          "p_cond": 0.613
+          "cluster": "c0",
+          "p_cond": 0.522
         },
         {
           "cluster": "c10",
-          "p_cond": 0.129
+          "p_cond": 0.304
         },
         {
-          "cluster": "c19",
-          "p_cond": 0.129
-        },
-        {
-          "cluster": "c5",
-          "p_cond": 0.097
-        },
-        {
-          "cluster": "c8",
-          "p_cond": 0.097
-        },
-        {
-          "cluster": "c11",
-          "p_cond": 0.097
-        }
-      ]
-    },
-    {
-      "cluster": "c18",
-      "deck_count": 16,
-      "partners": [
-        {
-          "cluster": "c5",
-          "p_cond": 0.438
-        },
-        {
-          "cluster": "c16",
-          "p_cond": 0.375
-        },
-        {
-          "cluster": "c12",
-          "p_cond": 0.25
-        },
-        {
-          "cluster": "c13",
-          "p_cond": 0.25
-        },
-        {
-          "cluster": "c1",
-          "p_cond": 0.188
-        },
-        {
-          "cluster": "c8",
-          "p_cond": 0.125
-        }
-      ]
-    },
-    {
-      "cluster": "c19",
-      "deck_count": 34,
-      "partners": [
-        {
-          "cluster": "c10",
-          "p_cond": 0.382
+          "cluster": "c3",
+          "p_cond": 0.261
         },
         {
           "cluster": "c4",
-          "p_cond": 0.235
-        },
-        {
-          "cluster": "c0",
-          "p_cond": 0.118
-        },
-        {
-          "cluster": "c5",
-          "p_cond": 0.118
+          "p_cond": 0.217
         },
         {
           "cluster": "c7",
-          "p_cond": 0.118
+          "p_cond": 0.217
         },
         {
-          "cluster": "c17",
-          "p_cond": 0.118
+          "cluster": "c9",
+          "p_cond": 0.174
         }
       ]
     }
