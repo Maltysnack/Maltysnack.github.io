@@ -1,55 +1,38 @@
 {
-  "generated_at": "2026-06-02",
-  "current_week": "2026-06-01",
+  "generated_at": "2026-06-09",
+  "current_week": "2026-06-08",
   "window_weeks": [
-    "2026-05-18",
     "2026-05-19",
     "2026-05-20",
     "2026-05-22",
     "2026-05-23",
     "2026-05-24",
     "2026-05-25",
-    "2026-06-01"
+    "2026-06-01",
+    "2026-06-08"
   ],
   "candidate_count": 13,
   "candidates": [
     {
-      "kind": "pt-vs-ladder",
-      "key": "pt-vs-ladder",
-      "headline_hint": "6 cards over-indexed at the Pro Tour vs ladder",
+      "kind": "post-pt-shift",
+      "key": "shift:Slickshot Show-Off",
+      "headline_hint": "Slickshot Show-Off up +9pp on ladder (15% to 24%)",
       "is_shell": false,
       "cards": [
-        "Roaring Furnace",
-        "Snakeskin Veil",
-        "Interdimensional Web Watch",
-        "Doc Aurlock, Grizzled Genius",
-        "Appa, Steadfast Guardian",
-        "Brightglass Gearhulk"
+        "Slickshot Show-Off"
       ],
       "stats": [
         {
-          "label": "Roaring Furnace",
-          "value": "5% PT, 0.0% ladder"
+          "label": "Prior 8wk share",
+          "value": "14.9%"
         },
         {
-          "label": "Snakeskin Veil",
-          "value": "5% PT, 0.0% ladder"
+          "label": "Recent 8wk share",
+          "value": "24.1%"
         },
         {
-          "label": "Interdimensional Web Watch",
-          "value": "5% PT, 0.0% ladder"
-        },
-        {
-          "label": "Doc Aurlock, Grizzled Genius",
-          "value": "5% PT, 0.0% ladder"
-        },
-        {
-          "label": "Appa, Steadfast Guardian",
-          "value": "5% PT, 0.0% ladder"
-        },
-        {
-          "label": "Brightglass Gearhulk",
-          "value": "16% PT, 0.7% ladder"
+          "label": "Delta",
+          "value": "+9.2pp"
         }
       ],
       "already_in_stories": false
@@ -73,7 +56,7 @@
         },
         {
           "label": "Return",
-          "value": "54% (01-06-2026)"
+          "value": "52% (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -97,18 +80,18 @@
         },
         {
           "label": "Return",
-          "value": "27% (01-06-2026)"
+          "value": "32% (08-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Stock Up",
-      "headline_hint": "Stock Up back after a 5-week absence",
+      "key": "return-card:Boros Charm",
+      "headline_hint": "Boros Charm back after a 4-week absence",
       "is_shell": false,
       "cards": [
-        "Stock Up"
+        "Boros Charm"
       ],
       "stats": [
         {
@@ -117,11 +100,11 @@
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks, 0 appearances)"
+          "value": "22-05-2026 to 25-05-2026 (4 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "12% (01-06-2026)"
+          "value": "4% (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -145,7 +128,7 @@
         },
         {
           "label": "Return",
-          "value": "31% (01-06-2026)"
+          "value": "24% (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -169,18 +152,18 @@
         },
         {
           "label": "Return",
-          "value": "8% (01-06-2026)"
+          "value": "8% (08-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Spirebluff Canal",
-      "headline_hint": "Spirebluff Canal back after a 5-week absence",
+      "key": "return-card:Sunken Citadel",
+      "headline_hint": "Sunken Citadel back after a 5-week absence",
       "is_shell": false,
       "cards": [
-        "Spirebluff Canal"
+        "Sunken Citadel"
       ],
       "stats": [
         {
@@ -189,11 +172,11 @@
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks, 0 appearances)"
+          "value": "22-05-2026 to 01-06-2026 (5 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "15% (01-06-2026)"
+          "value": "4% (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -201,22 +184,22 @@
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c0",
-      "headline_hint": "Temur Control shell (c0) back after a 5-week gap",
+      "headline_hint": "Izzet Fling shell (c0) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Burst Lightning",
-        "Boomerang Basics",
         "Stormchaser's Talent",
-        "Flow State",
-        "Opt",
         "Slickshot Show-Off",
+        "Opt",
+        "Boomerang Basics",
         "Sleight of Hand",
-        "Eddymurk Crab"
+        "Flow State",
+        "Eddymurk Crab",
+        "Burst Lightning"
       ],
       "stats": [
         {
           "label": "Shell",
-          "value": "c0 (Temur Control), top 8 cards"
+          "value": "c0 (Izzet Fling), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -228,7 +211,7 @@
         },
         {
           "label": "Return",
-          "value": "7 of 8 cards (01-06-2026)"
+          "value": "8 of 8 cards (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -236,14 +219,14 @@
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c1",
-      "headline_hint": "Selesnya Landfall shell (c1) back after a 5-week gap",
+      "headline_hint": "DECKDECKDECK shell (c1) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Earthbender Ascension",
         "Mightform Harmonizer",
+        "Earthbender Ascension",
         "Sazh's Chocobo",
-        "Llanowar Elves",
         "Badgermole Cub",
+        "Llanowar Elves",
         "Icetill Explorer",
         "Erode",
         "Meltstrider's Resolve"
@@ -251,7 +234,7 @@
       "stats": [
         {
           "label": "Shell",
-          "value": "c1 (Selesnya Landfall), top 8 cards"
+          "value": "c1 (DECKDECKDECK), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -263,7 +246,7 @@
         },
         {
           "label": "Return",
-          "value": "7 of 8 cards (01-06-2026)"
+          "value": "8 of 8 cards (08-06-2026)"
         }
       ],
       "already_in_stories": true
@@ -271,22 +254,22 @@
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c2",
-      "headline_hint": "Jeskai Artifacts shell (c2) back after a 5-week gap",
+      "headline_hint": "Four-Color Control shell (c2) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Tablet of Discovery",
-        "Stock Up",
         "Jeskai Revelation",
+        "Stock Up",
+        "Tablet of Discovery",
+        "Inevitable Defeat",
         "Consult the Star Charts",
-        "Thunder Magic",
         "Flashback",
-        "Sear",
-        "Broadside Barrage"
+        "Lightning Helix",
+        "No More Lies"
       ],
       "stats": [
         {
           "label": "Shell",
-          "value": "c2 (Jeskai Artifacts), top 8 cards"
+          "value": "c2 (Four-Color Control), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -298,7 +281,7 @@
         },
         {
           "label": "Return",
-          "value": "7 of 8 cards (01-06-2026)"
+          "value": "8 of 8 cards (08-06-2026)"
         }
       ],
       "already_in_stories": false
@@ -306,22 +289,22 @@
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c3",
-      "headline_hint": "Izzet Spellementals shell (c3) back after a 5-week gap",
+      "headline_hint": "Mardu Aggro shell (c3) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Prismari Charm",
-        "Hearth Elemental",
-        "Eddymurk Crab",
-        "Opt",
-        "Sunderflock",
-        "Sleight of Hand",
-        "Traumatic Critique",
-        "Burst Lightning"
+        "Hardened Academic",
+        "Moonshadow",
+        "Cool but Rude",
+        "Marauding Mako",
+        "Iron-Shield Elf",
+        "Practiced Offense",
+        "Bloodghast",
+        "Tersa Lightshatter"
       ],
       "stats": [
         {
           "label": "Shell",
-          "value": "c3 (Izzet Spellementals), top 8 cards"
+          "value": "c3 (Mardu Aggro), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -333,7 +316,7 @@
         },
         {
           "label": "Return",
-          "value": "8 of 8 cards (01-06-2026)"
+          "value": "8 of 8 cards (08-06-2026)"
         }
       ],
       "already_in_stories": true
@@ -341,22 +324,22 @@
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c4",
-      "headline_hint": "Mardu Discard shell (c4) back after a 5-week gap",
+      "headline_hint": "Dimir Demons shell (c4) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Marauding Mako",
-        "Hardened Academic",
-        "Cool but Rude",
-        "Moonshadow",
-        "Bloodghast",
-        "Practiced Offense",
-        "Iron-Shield Elf",
-        "Tersa Lightshatter"
+        "Deceit",
+        "Superior Spider-Man",
+        "Requiting Hex",
+        "Bitter Triumph",
+        "Winternight Stories",
+        "Emeritus of Ideation",
+        "Day of Black Sun",
+        "Stock Up"
       ],
       "stats": [
         {
           "label": "Shell",
-          "value": "c4 (Mardu Discard), top 8 cards"
+          "value": "c4 (Dimir Demons), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -368,30 +351,30 @@
         },
         {
           "label": "Return",
-          "value": "8 of 8 cards (01-06-2026)"
+          "value": "8 of 8 cards (08-06-2026)"
         }
       ],
-      "already_in_stories": true
+      "already_in_stories": false
     },
     {
       "kind": "returning-cluster",
       "key": "return-cluster:c5",
-      "headline_hint": "Selesnya Ouroboroid shell (c5) back after a 5-week gap",
+      "headline_hint": "Izzet Spellelementals shell (c5) back after a 5-week gap",
       "is_shell": true,
       "cards": [
-        "Keen-Eyed Curator",
-        "Llanowar Elves",
-        "Sage of the Skies",
-        "Ouroboroid",
-        "Badgermole Cub",
-        "Pawpatch Recruit",
-        "Brightglass Gearhulk",
-        "Seam Rip"
+        "Hearth Elemental",
+        "Sunderflock",
+        "Prismari Charm",
+        "Opt",
+        "Eddymurk Crab",
+        "Sleight of Hand",
+        "Traumatic Critique",
+        "Burst Lightning"
       ],
       "stats": [
         {
           "label": "Shell",
-          "value": "c5 (Selesnya Ouroboroid), top 8 cards"
+          "value": "c5 (Izzet Spellelementals), top 8 cards"
         },
         {
           "label": "Peak density before gap",
@@ -403,10 +386,10 @@
         },
         {
           "label": "Return",
-          "value": "7 of 8 cards (01-06-2026)"
+          "value": "4 of 8 cards (08-06-2026)"
         }
       ],
-      "already_in_stories": false
+      "already_in_stories": true
     }
   ]
 }
