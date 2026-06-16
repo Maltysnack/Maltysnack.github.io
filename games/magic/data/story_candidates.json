@@ -1,22 +1,75 @@
 {
-  "generated_at": "2026-06-09",
-  "current_week": "2026-06-08",
+  "generated_at": "2026-06-16",
+  "current_week": "2026-06-15",
   "window_weeks": [
-    "2026-05-19",
     "2026-05-20",
     "2026-05-22",
     "2026-05-23",
     "2026-05-24",
     "2026-05-25",
     "2026-06-01",
-    "2026-06-08"
+    "2026-06-08",
+    "2026-06-15"
   ],
-  "candidate_count": 13,
+  "candidate_count": 12,
   "candidates": [
     {
       "kind": "post-pt-shift",
+      "key": "shift:Burst Lightning",
+      "headline_hint": "Burst Lightning up +16pp on ladder (21% to 37%)",
+      "is_shell": false,
+      "cards": [
+        "Burst Lightning"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "20.9%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "37.3%"
+        },
+        {
+          "label": "Delta",
+          "value": "+16.4pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Vibrant Outburst",
+      "headline_hint": "Vibrant Outburst up +13pp on ladder (4% to 17%)",
+      "is_shell": true,
+      "cards": [
+        "Vibrant Outburst",
+        "Shore Up",
+        "Drake Hatcher",
+        "Colorstorm Stallion",
+        "Secret Identity",
+        "Into the Flood Maw"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "3.6%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "16.7%"
+        },
+        {
+          "label": "Delta",
+          "value": "+13.1pp"
+        }
+      ],
+      "already_in_stories": true
+    },
+    {
+      "kind": "post-pt-shift",
       "key": "shift:Slickshot Show-Off",
-      "headline_hint": "Slickshot Show-Off up +9pp on ladder (15% to 24%)",
+      "headline_hint": "Slickshot Show-Off up +11pp on ladder (14% to 25%)",
       "is_shell": false,
       "cards": [
         "Slickshot Show-Off"
@@ -24,63 +77,92 @@
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "14.9%"
+          "value": "13.7%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "24.1%"
+          "value": "25.1%"
         },
         {
           "label": "Delta",
-          "value": "+9.2pp"
+          "value": "+11.4pp"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "returning-card",
-      "key": "return-card:Multiversal Passage",
-      "headline_hint": "Multiversal Passage back after a 5-week absence",
-      "is_shell": false,
+      "kind": "post-pt-shift",
+      "key": "shift:Flow State",
+      "headline_hint": "Flow State up +11pp on ladder (16% to 27%)",
+      "is_shell": true,
       "cards": [
-        "Multiversal Passage"
+        "Flow State",
+        "Shore Up",
+        "Vibrant Outburst",
+        "Roaring Furnace // Steaming Sauna",
+        "Sleight of Hand",
+        "Slickshot Show-Off"
       ],
       "stats": [
         {
-          "label": "Peak before gap",
-          "value": "92%"
+          "label": "Prior 8wk share",
+          "value": "16.2%"
         },
         {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks, 0 appearances)"
+          "label": "Recent 8wk share",
+          "value": "27.5%"
         },
         {
-          "label": "Return",
-          "value": "52% (08-06-2026)"
+          "label": "Delta",
+          "value": "+11.2pp"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "returning-card",
-      "key": "return-card:Swamp",
-      "headline_hint": "Swamp back after a 5-week absence",
+      "kind": "post-pt-shift",
+      "key": "shift:Stormchaser's Talent",
+      "headline_hint": "Stormchaser's Talent up +10pp on ladder (16% to 25%)",
       "is_shell": false,
       "cards": [
-        "Swamp"
+        "Stormchaser's Talent"
       ],
       "stats": [
         {
-          "label": "Peak before gap",
-          "value": "59%"
+          "label": "Prior 8wk share",
+          "value": "15.5%"
         },
         {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks, 0 appearances)"
+          "label": "Recent 8wk share",
+          "value": "25.4%"
         },
         {
-          "label": "Return",
-          "value": "32% (08-06-2026)"
+          "label": "Delta",
+          "value": "+9.8pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Opt",
+      "headline_hint": "Opt up +9pp on ladder (20% to 30%)",
+      "is_shell": false,
+      "cards": [
+        "Opt"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "20.2%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "29.6%"
+        },
+        {
+          "label": "Delta",
+          "value": "+9.4pp"
         }
       ],
       "already_in_stories": false
@@ -104,18 +186,18 @@
         },
         {
           "label": "Return",
-          "value": "4% (08-06-2026)"
+          "value": "4% (15-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Starting Town",
-      "headline_hint": "Starting Town back after a 5-week absence",
+      "key": "return-card:Boltwave",
+      "headline_hint": "Boltwave back after a 6-week absence",
       "is_shell": false,
       "cards": [
-        "Starting Town"
+        "Boltwave"
       ],
       "stats": [
         {
@@ -124,272 +206,110 @@
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks, 0 appearances)"
+          "value": "22-05-2026 to 08-06-2026 (6 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "24% (08-06-2026)"
+          "value": "8% (15-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Voice of Victory",
-      "headline_hint": "Voice of Victory back after a 4-week absence",
+      "key": "return-card:Virtue of Persistence",
+      "headline_hint": "Virtue of Persistence back after a 6-week absence",
       "is_shell": false,
       "cards": [
-        "Voice of Victory"
+        "Virtue of Persistence"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "50%"
+          "value": "19%"
         },
         {
           "label": "Gap",
-          "value": "20-05-2026 to 24-05-2026 (4 weeks, 0 appearances)"
+          "value": "19-05-2026 to 25-05-2026 (6 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "8% (08-06-2026)"
+          "value": "8% (15-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Sunken Citadel",
-      "headline_hint": "Sunken Citadel back after a 5-week absence",
+      "key": "return-card:Underground Mortuary",
+      "headline_hint": "Underground Mortuary back after a 8-week absence",
       "is_shell": false,
       "cards": [
-        "Sunken Citadel"
+        "Underground Mortuary"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "50%"
+          "value": "19%"
         },
         {
           "label": "Gap",
-          "value": "22-05-2026 to 01-06-2026 (5 weeks, 0 appearances)"
+          "value": "19-05-2026 to 08-06-2026 (8 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (08-06-2026)"
+          "value": "4% (15-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c0",
-      "headline_hint": "Izzet Fling shell (c0) back after a 5-week gap",
-      "is_shell": true,
+      "kind": "returning-card",
+      "key": "return-card:Beza, the Bounding Spring",
+      "headline_hint": "Beza, the Bounding Spring back after a 9-week absence",
+      "is_shell": false,
       "cards": [
-        "Stormchaser's Talent",
-        "Slickshot Show-Off",
-        "Opt",
-        "Boomerang Basics",
-        "Sleight of Hand",
-        "Flow State",
-        "Eddymurk Crab",
-        "Burst Lightning"
+        "Beza, the Bounding Spring"
       ],
       "stats": [
         {
-          "label": "Shell",
-          "value": "c0 (Izzet Fling), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
+          "label": "Peak before gap",
+          "value": "17%"
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
+          "value": "18-05-2026 to 08-06-2026 (9 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "8 of 8 cards (08-06-2026)"
+          "value": "4% (15-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c1",
-      "headline_hint": "DECKDECKDECK shell (c1) back after a 5-week gap",
-      "is_shell": true,
+      "kind": "returning-card",
+      "key": "return-card:Tragic Trajectory",
+      "headline_hint": "Tragic Trajectory back after a 8-week absence",
+      "is_shell": false,
       "cards": [
-        "Mightform Harmonizer",
-        "Earthbender Ascension",
-        "Sazh's Chocobo",
-        "Badgermole Cub",
-        "Llanowar Elves",
-        "Icetill Explorer",
-        "Erode",
-        "Meltstrider's Resolve"
+        "Tragic Trajectory"
       ],
       "stats": [
         {
-          "label": "Shell",
-          "value": "c1 (DECKDECKDECK), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
+          "label": "Peak before gap",
+          "value": "17%"
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
+          "value": "19-05-2026 to 08-06-2026 (8 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "8 of 8 cards (08-06-2026)"
-        }
-      ],
-      "already_in_stories": true
-    },
-    {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c2",
-      "headline_hint": "Four-Color Control shell (c2) back after a 5-week gap",
-      "is_shell": true,
-      "cards": [
-        "Jeskai Revelation",
-        "Stock Up",
-        "Tablet of Discovery",
-        "Inevitable Defeat",
-        "Consult the Star Charts",
-        "Flashback",
-        "Lightning Helix",
-        "No More Lies"
-      ],
-      "stats": [
-        {
-          "label": "Shell",
-          "value": "c2 (Four-Color Control), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
-        },
-        {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
-        },
-        {
-          "label": "Return",
-          "value": "8 of 8 cards (08-06-2026)"
+          "value": "4% (15-06-2026)"
         }
       ],
       "already_in_stories": false
-    },
-    {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c3",
-      "headline_hint": "Mardu Aggro shell (c3) back after a 5-week gap",
-      "is_shell": true,
-      "cards": [
-        "Hardened Academic",
-        "Moonshadow",
-        "Cool but Rude",
-        "Marauding Mako",
-        "Iron-Shield Elf",
-        "Practiced Offense",
-        "Bloodghast",
-        "Tersa Lightshatter"
-      ],
-      "stats": [
-        {
-          "label": "Shell",
-          "value": "c3 (Mardu Aggro), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
-        },
-        {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
-        },
-        {
-          "label": "Return",
-          "value": "8 of 8 cards (08-06-2026)"
-        }
-      ],
-      "already_in_stories": true
-    },
-    {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c4",
-      "headline_hint": "Dimir Demons shell (c4) back after a 5-week gap",
-      "is_shell": true,
-      "cards": [
-        "Deceit",
-        "Superior Spider-Man",
-        "Requiting Hex",
-        "Bitter Triumph",
-        "Winternight Stories",
-        "Emeritus of Ideation",
-        "Day of Black Sun",
-        "Stock Up"
-      ],
-      "stats": [
-        {
-          "label": "Shell",
-          "value": "c4 (Dimir Demons), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
-        },
-        {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
-        },
-        {
-          "label": "Return",
-          "value": "8 of 8 cards (08-06-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-cluster",
-      "key": "return-cluster:c5",
-      "headline_hint": "Izzet Spellelementals shell (c5) back after a 5-week gap",
-      "is_shell": true,
-      "cards": [
-        "Hearth Elemental",
-        "Sunderflock",
-        "Prismari Charm",
-        "Opt",
-        "Eddymurk Crab",
-        "Sleight of Hand",
-        "Traumatic Critique",
-        "Burst Lightning"
-      ],
-      "stats": [
-        {
-          "label": "Shell",
-          "value": "c5 (Izzet Spellelementals), top 8 cards"
-        },
-        {
-          "label": "Peak density before gap",
-          "value": "8 of 8 cards"
-        },
-        {
-          "label": "Gap",
-          "value": "19-05-2026 to 24-05-2026 (5 weeks)"
-        },
-        {
-          "label": "Return",
-          "value": "4 of 8 cards (08-06-2026)"
-        }
-      ],
-      "already_in_stories": true
     }
   ]
 }
