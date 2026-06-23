@@ -1,22 +1,22 @@
 {
-  "generated_at": "2026-06-16",
-  "current_week": "2026-06-15",
+  "generated_at": "2026-06-23",
+  "current_week": "2026-06-22",
   "window_weeks": [
-    "2026-05-20",
     "2026-05-22",
     "2026-05-23",
     "2026-05-24",
     "2026-05-25",
     "2026-06-01",
     "2026-06-08",
-    "2026-06-15"
+    "2026-06-15",
+    "2026-06-22"
   ],
   "candidate_count": 12,
   "candidates": [
     {
       "kind": "post-pt-shift",
       "key": "shift:Burst Lightning",
-      "headline_hint": "Burst Lightning up +16pp on ladder (21% to 37%)",
+      "headline_hint": "Burst Lightning up +19pp on ladder (17% to 36%)",
       "is_shell": false,
       "cards": [
         "Burst Lightning"
@@ -24,15 +24,92 @@
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "20.9%"
+          "value": "17.3%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "37.3%"
+          "value": "36.3%"
         },
         {
           "label": "Delta",
-          "value": "+16.4pp"
+          "value": "+19.0pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Flow State",
+      "headline_hint": "Flow State up +14pp on ladder (13% to 26%)",
+      "is_shell": true,
+      "cards": [
+        "Flow State",
+        "Shore Up",
+        "Vibrant Outburst",
+        "Roaring Furnace // Steaming Sauna",
+        "Sleight of Hand",
+        "Octopus Form"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "12.8%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "26.5%"
+        },
+        {
+          "label": "Delta",
+          "value": "+13.7pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Opt",
+      "headline_hint": "Opt up +13pp on ladder (15% to 29%)",
+      "is_shell": false,
+      "cards": [
+        "Opt"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "15.4%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "28.7%"
+        },
+        {
+          "label": "Delta",
+          "value": "+13.4pp"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "post-pt-shift",
+      "key": "shift:Sleight of Hand",
+      "headline_hint": "Sleight of Hand up +12pp on ladder (15% to 28%)",
+      "is_shell": false,
+      "cards": [
+        "Sleight of Hand"
+      ],
+      "stats": [
+        {
+          "label": "Prior 8wk share",
+          "value": "15.4%"
+        },
+        {
+          "label": "Recent 8wk share",
+          "value": "27.8%"
+        },
+        {
+          "label": "Delta",
+          "value": "+12.5pp"
         }
       ],
       "already_in_stories": false
@@ -40,7 +117,7 @@
     {
       "kind": "post-pt-shift",
       "key": "shift:Vibrant Outburst",
-      "headline_hint": "Vibrant Outburst up +13pp on ladder (4% to 17%)",
+      "headline_hint": "Vibrant Outburst up +12pp on ladder (4% to 16%)",
       "is_shell": true,
       "cards": [
         "Vibrant Outburst",
@@ -53,15 +130,15 @@
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "3.6%"
+          "value": "3.9%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "16.7%"
+          "value": "15.8%"
         },
         {
           "label": "Delta",
-          "value": "+13.1pp"
+          "value": "+12.0pp"
         }
       ],
       "already_in_stories": true
@@ -69,7 +146,7 @@
     {
       "kind": "post-pt-shift",
       "key": "shift:Slickshot Show-Off",
-      "headline_hint": "Slickshot Show-Off up +11pp on ladder (14% to 25%)",
+      "headline_hint": "Slickshot Show-Off up +12pp on ladder (12% to 24%)",
       "is_shell": false,
       "cards": [
         "Slickshot Show-Off"
@@ -77,116 +154,15 @@
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "13.7%"
+          "value": "12.2%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "25.1%"
+          "value": "24.1%"
         },
         {
           "label": "Delta",
-          "value": "+11.4pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "post-pt-shift",
-      "key": "shift:Flow State",
-      "headline_hint": "Flow State up +11pp on ladder (16% to 27%)",
-      "is_shell": true,
-      "cards": [
-        "Flow State",
-        "Shore Up",
-        "Vibrant Outburst",
-        "Roaring Furnace // Steaming Sauna",
-        "Sleight of Hand",
-        "Slickshot Show-Off"
-      ],
-      "stats": [
-        {
-          "label": "Prior 8wk share",
-          "value": "16.2%"
-        },
-        {
-          "label": "Recent 8wk share",
-          "value": "27.5%"
-        },
-        {
-          "label": "Delta",
-          "value": "+11.2pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "post-pt-shift",
-      "key": "shift:Stormchaser's Talent",
-      "headline_hint": "Stormchaser's Talent up +10pp on ladder (16% to 25%)",
-      "is_shell": false,
-      "cards": [
-        "Stormchaser's Talent"
-      ],
-      "stats": [
-        {
-          "label": "Prior 8wk share",
-          "value": "15.5%"
-        },
-        {
-          "label": "Recent 8wk share",
-          "value": "25.4%"
-        },
-        {
-          "label": "Delta",
-          "value": "+9.8pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "post-pt-shift",
-      "key": "shift:Opt",
-      "headline_hint": "Opt up +9pp on ladder (20% to 30%)",
-      "is_shell": false,
-      "cards": [
-        "Opt"
-      ],
-      "stats": [
-        {
-          "label": "Prior 8wk share",
-          "value": "20.2%"
-        },
-        {
-          "label": "Recent 8wk share",
-          "value": "29.6%"
-        },
-        {
-          "label": "Delta",
-          "value": "+9.4pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Boros Charm",
-      "headline_hint": "Boros Charm back after a 4-week absence",
-      "is_shell": false,
-      "cards": [
-        "Boros Charm"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "50%"
-        },
-        {
-          "label": "Gap",
-          "value": "22-05-2026 to 25-05-2026 (4 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (15-06-2026)"
+          "value": "+11.9pp"
         }
       ],
       "already_in_stories": false
@@ -210,103 +186,127 @@
         },
         {
           "label": "Return",
-          "value": "8% (15-06-2026)"
+          "value": "4% (22-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Virtue of Persistence",
-      "headline_hint": "Virtue of Persistence back after a 6-week absence",
+      "key": "return-card:Eclipsed Realms",
+      "headline_hint": "Eclipsed Realms back after a 9-week absence",
       "is_shell": false,
       "cards": [
-        "Virtue of Persistence"
+        "Eclipsed Realms"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "19%"
+          "value": "15%"
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 25-05-2026 (6 weeks, 0 appearances)"
+          "value": "19-05-2026 to 15-06-2026 (9 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "8% (15-06-2026)"
+          "value": "4% (22-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Underground Mortuary",
-      "headline_hint": "Underground Mortuary back after a 8-week absence",
+      "key": "return-card:Unstoppable Slasher",
+      "headline_hint": "Unstoppable Slasher back after a 9-week absence",
       "is_shell": false,
       "cards": [
-        "Underground Mortuary"
+        "Unstoppable Slasher"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "19%"
+          "value": "14%"
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 08-06-2026 (8 weeks, 0 appearances)"
+          "value": "19-05-2026 to 15-06-2026 (9 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (15-06-2026)"
+          "value": "8% (22-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Beza, the Bounding Spring",
-      "headline_hint": "Beza, the Bounding Spring back after a 9-week absence",
+      "key": "return-card:Unsummon",
+      "headline_hint": "Unsummon back after a 12-week absence",
       "is_shell": false,
       "cards": [
-        "Beza, the Bounding Spring"
+        "Unsummon"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "17%"
+          "value": "13%"
         },
         {
           "label": "Gap",
-          "value": "18-05-2026 to 08-06-2026 (9 weeks, 0 appearances)"
+          "value": "11-05-2026 to 15-06-2026 (12 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (15-06-2026)"
+          "value": "4% (22-06-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Tragic Trajectory",
-      "headline_hint": "Tragic Trajectory back after a 8-week absence",
+      "key": "return-card:Roxanne, Starfall Savant",
+      "headline_hint": "Roxanne, Starfall Savant back after a 24-week absence",
       "is_shell": false,
       "cards": [
-        "Tragic Trajectory"
+        "Roxanne, Starfall Savant"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "17%"
+          "value": "13%"
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 08-06-2026 (8 weeks, 0 appearances)"
+          "value": "16-02-2026 to 15-06-2026 (24 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (15-06-2026)"
+          "value": "4% (22-06-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Bloomvine Regent",
+      "headline_hint": "Bloomvine Regent back after a 16-week absence",
+      "is_shell": false,
+      "cards": [
+        "Bloomvine Regent"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "12%"
+        },
+        {
+          "label": "Gap",
+          "value": "13-04-2026 to 15-06-2026 (16 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (22-06-2026)"
         }
       ],
       "already_in_stories": false
