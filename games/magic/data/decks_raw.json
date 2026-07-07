@@ -379678,6 +379678,3288 @@
     "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-june-29-2026"
   },
   {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Thornspire Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Stomping Ground"
+      },
+      {
+        "qty": 4,
+        "name": "Forest"
+      },
+      {
+        "qty": 3,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 3,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 1,
+        "name": "Mountain"
+      },
+      {
+        "qty": 4,
+        "name": "Bushwhack"
+      },
+      {
+        "qty": 4,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 4,
+        "name": "Patchwork Beastie"
+      },
+      {
+        "qty": 4,
+        "name": "Rapid Rescue"
+      },
+      {
+        "qty": 4,
+        "name": "Wildfire Wickerfolk"
+      },
+      {
+        "qty": 4,
+        "name": "Break Out"
+      },
+      {
+        "qty": 4,
+        "name": "Tersa Lightshatter"
+      },
+      {
+        "qty": 4,
+        "name": "Fear of Missing Out"
+      },
+      {
+        "qty": 2,
+        "name": "Overprotect"
+      },
+      {
+        "qty": 2,
+        "name": "Violent Urge"
+      },
+      {
+        "qty": 2,
+        "name": "Nova Hellkite"
+      },
+      {
+        "qty": 1,
+        "name": "Itzquinth, Firstborn of Gishath"
+      },
+      {
+        "qty": 1,
+        "name": "Hellcat, Undying Vigilante"
+      },
+      {
+        "qty": 1,
+        "name": "Webstrike Elite"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Scrapshooter"
+      },
+      {
+        "qty": 3,
+        "name": "The Legend of Roku"
+      },
+      {
+        "qty": 2,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 2,
+        "name": "Scorching Shot"
+      },
+      {
+        "qty": 2,
+        "name": "Fire Magic"
+      },
+      {
+        "qty": 1,
+        "name": "Twinmaw Stormbrood"
+      },
+      {
+        "qty": 1,
+        "name": "Impractical Joke"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 6,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 4,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 3,
+        "name": "Inspiring Vantage"
+      },
+      {
+        "qty": 2,
+        "name": "Sundown Pass"
+      },
+      {
+        "qty": 1,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 1,
+        "name": "Abandoned Air Temple"
+      },
+      {
+        "qty": 1,
+        "name": "Petrified Hamlet"
+      },
+      {
+        "qty": 1,
+        "name": "Sunbillow Verge"
+      },
+      {
+        "qty": 1,
+        "name": "Mountain"
+      },
+      {
+        "qty": 4,
+        "name": "Quicksilver, Brash Blur"
+      },
+      {
+        "qty": 4,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 4,
+        "name": "Agent Maria Hill"
+      },
+      {
+        "qty": 3,
+        "name": "Daredevil, Man Without Fear"
+      },
+      {
+        "qty": 3,
+        "name": "Practiced Offense"
+      },
+      {
+        "qty": 3,
+        "name": "Arachne, Psionic Weaver"
+      },
+      {
+        "qty": 2,
+        "name": "The Sentry, Golden Guardian"
+      },
+      {
+        "qty": 2,
+        "name": "Case of the Crimson Pulse"
+      },
+      {
+        "qty": 2,
+        "name": "Jennifer Walters"
+      },
+      {
+        "qty": 2,
+        "name": "Origin of the Avengers"
+      },
+      {
+        "qty": 2,
+        "name": "Captain America, Super-Soldier"
+      },
+      {
+        "qty": 2,
+        "name": "Team Tactics"
+      },
+      {
+        "qty": 2,
+        "name": "Dawn's Truce"
+      },
+      {
+        "qty": 1,
+        "name": "Seam Rip"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Petrified Hamlet"
+      },
+      {
+        "qty": 3,
+        "name": "Exorcise"
+      },
+      {
+        "qty": 3,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 2,
+        "name": "Torpor Orb"
+      },
+      {
+        "qty": 2,
+        "name": "Sunspine Lynx"
+      },
+      {
+        "qty": 1,
+        "name": "Restoration Magic"
+      },
+      {
+        "qty": 1,
+        "name": "Erode"
+      },
+      {
+        "qty": 1,
+        "name": "Ultima"
+      },
+      {
+        "qty": 1,
+        "name": "High Noon"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Uthros, Titanic Godcore"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 3,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 3,
+        "name": "Kavaron, Memorial World"
+      },
+      {
+        "qty": 3,
+        "name": "Breeding Pool"
+      },
+      {
+        "qty": 2,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 2,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 1,
+        "name": "Dreamroot Cascade"
+      },
+      {
+        "qty": 1,
+        "name": "Stomping Ground"
+      },
+      {
+        "qty": 1,
+        "name": "Island"
+      },
+      {
+        "qty": 1,
+        "name": "Mountain"
+      },
+      {
+        "qty": 4,
+        "name": "Formidable Speaker"
+      },
+      {
+        "qty": 4,
+        "name": "Omniscience"
+      },
+      {
+        "qty": 4,
+        "name": "Kona, Rescue Beastie"
+      },
+      {
+        "qty": 4,
+        "name": "Ashling, Rekindled"
+      },
+      {
+        "qty": 3,
+        "name": "Prismari Charm"
+      },
+      {
+        "qty": 3,
+        "name": "Winternight Stories"
+      },
+      {
+        "qty": 3,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 3,
+        "name": "Marang River Regent"
+      },
+      {
+        "qty": 2,
+        "name": "North Wind Avatar"
+      },
+      {
+        "qty": 1,
+        "name": "Ill-Timed Explosion"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Bounce Off"
+      },
+      {
+        "qty": 1,
+        "name": "Lost in the Maze"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Snare"
+      }
+    ],
+    "side": [
+      {
+        "qty": 2,
+        "name": "Spider-Sense"
+      },
+      {
+        "qty": 2,
+        "name": "Voice of Victory"
+      },
+      {
+        "qty": 1,
+        "name": "Origin of Metalbending"
+      },
+      {
+        "qty": 1,
+        "name": "Marang River Regent"
+      },
+      {
+        "qty": 1,
+        "name": "Ill-Timed Explosion"
+      },
+      {
+        "qty": 1,
+        "name": "Pyroclasm"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Snare"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 1,
+        "name": "Omni-Changeling"
+      },
+      {
+        "qty": 1,
+        "name": "Avengers Disassembled"
+      },
+      {
+        "qty": 1,
+        "name": "Terror of the Peaks"
+      },
+      {
+        "qty": 1,
+        "name": "Fire Magic"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 7,
+        "name": "Swamp"
+      },
+      {
+        "qty": 4,
+        "name": "Wastewood Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Overgrown Tomb"
+      },
+      {
+        "qty": 4,
+        "name": "Deathcap Glade"
+      },
+      {
+        "qty": 3,
+        "name": "Restless Cottage"
+      },
+      {
+        "qty": 2,
+        "name": "Demolition Field"
+      },
+      {
+        "qty": 1,
+        "name": "Fountainport"
+      },
+      {
+        "qty": 1,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Professor Dellian Fel"
+      },
+      {
+        "qty": 4,
+        "name": "Deadly Cover-Up"
+      },
+      {
+        "qty": 4,
+        "name": "Unholy Annex // Ritual Chamber"
+      },
+      {
+        "qty": 4,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 3,
+        "name": "Duress"
+      },
+      {
+        "qty": 3,
+        "name": "Firdoch Core"
+      },
+      {
+        "qty": 2,
+        "name": "Cease // Desist"
+      },
+      {
+        "qty": 2,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 2,
+        "name": "Heritage Reclamation"
+      },
+      {
+        "qty": 2,
+        "name": "Cruelclaw's Heist"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Emeritus of Abundance"
+      },
+      {
+        "qty": 1,
+        "name": "Withering Curse"
+      },
+      {
+        "qty": 1,
+        "name": "Witherbloom Charm"
+      }
+    ],
+    "side": [
+      {
+        "qty": 3,
+        "name": "Intimidation Tactics"
+      },
+      {
+        "qty": 2,
+        "name": "Cruelclaw's Heist"
+      },
+      {
+        "qty": 2,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 2,
+        "name": "Heritage Reclamation"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "The End"
+      },
+      {
+        "qty": 1,
+        "name": "Withering Curse"
+      },
+      {
+        "qty": 1,
+        "name": "End of the Hunt"
+      },
+      {
+        "qty": 1,
+        "name": "Painful Quandary"
+      },
+      {
+        "qty": 1,
+        "name": "Nowhere to Run"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Godless Shrine"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 4,
+        "name": "Bleachbone Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Concealed Courtyard"
+      },
+      {
+        "qty": 2,
+        "name": "Fountainport"
+      },
+      {
+        "qty": 1,
+        "name": "Plains"
+      },
+      {
+        "qty": 1,
+        "name": "Swamp"
+      },
+      {
+        "qty": 4,
+        "name": "Hinterland Sanctifier"
+      },
+      {
+        "qty": 4,
+        "name": "Enduring Innocence"
+      },
+      {
+        "qty": 4,
+        "name": "Haliya, Guided by Light"
+      },
+      {
+        "qty": 4,
+        "name": "Essence Channeler"
+      },
+      {
+        "qty": 4,
+        "name": "Case of the Uneaten Feast"
+      },
+      {
+        "qty": 3,
+        "name": "Moseo, Vein's New Dean"
+      },
+      {
+        "qty": 3,
+        "name": "Lunar Convocation"
+      },
+      {
+        "qty": 3,
+        "name": "Amalia Benavides Aguirre"
+      },
+      {
+        "qty": 2,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 2,
+        "name": "Voice of Victory"
+      },
+      {
+        "qty": 1,
+        "name": "Leonardo, Cutting Edge"
+      },
+      {
+        "qty": 1,
+        "name": "Elspeth, Storm Slayer"
+      },
+      {
+        "qty": 1,
+        "name": "Get Lost"
+      },
+      {
+        "qty": 1,
+        "name": "Aunt May"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "High Noon"
+      },
+      {
+        "qty": 3,
+        "name": "Requisition Raid"
+      },
+      {
+        "qty": 2,
+        "name": "Zoraline, Cosmos Caller"
+      },
+      {
+        "qty": 2,
+        "name": "Withering Curse"
+      },
+      {
+        "qty": 1,
+        "name": "Curious Farm Animals"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Get Lost"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Demolition Field"
+      },
+      {
+        "qty": 4,
+        "name": "Mountain"
+      },
+      {
+        "qty": 3,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 3,
+        "name": "Plains"
+      },
+      {
+        "qty": 3,
+        "name": "Cori Mountain Monastery"
+      },
+      {
+        "qty": 3,
+        "name": "Sunken Citadel"
+      },
+      {
+        "qty": 1,
+        "name": "Volatile Fault"
+      },
+      {
+        "qty": 1,
+        "name": "Echoing Deeps"
+      },
+      {
+        "qty": 1,
+        "name": "Fountainport"
+      },
+      {
+        "qty": 4,
+        "name": "Ugin, Eye of the Storms"
+      },
+      {
+        "qty": 4,
+        "name": "Tablet of Discovery"
+      },
+      {
+        "qty": 4,
+        "name": "Arc Reactor"
+      },
+      {
+        "qty": 4,
+        "name": "Fountainport Bell"
+      },
+      {
+        "qty": 4,
+        "name": "Candy Trail"
+      },
+      {
+        "qty": 2,
+        "name": "Restoration Seminar"
+      },
+      {
+        "qty": 2,
+        "name": "Avengers Disassembled"
+      },
+      {
+        "qty": 2,
+        "name": "Abrade"
+      },
+      {
+        "qty": 2,
+        "name": "Ark of Hunger"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Boom Box"
+      },
+      {
+        "qty": 1,
+        "name": "The Ooze"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Clay-Fired Bricks"
+      },
+      {
+        "qty": 1,
+        "name": "Sandworm"
+      },
+      {
+        "qty": 1,
+        "name": "Tezzeret, Cruel Captain"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Price of Freedom"
+      },
+      {
+        "qty": 2,
+        "name": "Disenchant"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Avengers Disassembled"
+      },
+      {
+        "qty": 1,
+        "name": "Erode"
+      },
+      {
+        "qty": 1,
+        "name": "Pyroclasm"
+      },
+      {
+        "qty": 1,
+        "name": "Authority of the Consuls"
+      },
+      {
+        "qty": 1,
+        "name": "Lightning Helix"
+      },
+      {
+        "qty": 1,
+        "name": "Sandworm"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Wastewood Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Overgrown Tomb"
+      },
+      {
+        "qty": 4,
+        "name": "Blooming Marsh"
+      },
+      {
+        "qty": 3,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 3,
+        "name": "Swamp"
+      },
+      {
+        "qty": 2,
+        "name": "Fabled Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Restless Cottage"
+      },
+      {
+        "qty": 1,
+        "name": "Deathcap Glade"
+      },
+      {
+        "qty": 1,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Obsessive Pursuit"
+      },
+      {
+        "qty": 4,
+        "name": "Gene Pollinator"
+      },
+      {
+        "qty": 4,
+        "name": "Beseech the Mirror"
+      },
+      {
+        "qty": 3,
+        "name": "Tragic Trajectory"
+      },
+      {
+        "qty": 3,
+        "name": "Mutagen Man, Living Ooze"
+      },
+      {
+        "qty": 3,
+        "name": "Sentinel of the Nameless City"
+      },
+      {
+        "qty": 2,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 2,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 2,
+        "name": "Witherbloom Charm"
+      },
+      {
+        "qty": 1,
+        "name": "Elegy Acolyte"
+      },
+      {
+        "qty": 1,
+        "name": "The Ooze"
+      },
+      {
+        "qty": 1,
+        "name": "Nowhere to Run"
+      },
+      {
+        "qty": 1,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 1,
+        "name": "Phoenix Fleet Airship"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Duress"
+      },
+      {
+        "qty": 2,
+        "name": "Intimidation Tactics"
+      },
+      {
+        "qty": 2,
+        "name": "Defend the Rider"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Black Sun"
+      },
+      {
+        "qty": 2,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 1,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 1,
+        "name": "Ancient Vendetta"
+      },
+      {
+        "qty": 1,
+        "name": "Urgent Necropsy"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Blood Crypt"
+      },
+      {
+        "qty": 4,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 4,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 3,
+        "name": "Godless Shrine"
+      },
+      {
+        "qty": 2,
+        "name": "Inspiring Vantage"
+      },
+      {
+        "qty": 4,
+        "name": "Black Widow, Super Spy"
+      },
+      {
+        "qty": 4,
+        "name": "Timeline Culler"
+      },
+      {
+        "qty": 4,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 4,
+        "name": "Lightning Helix"
+      },
+      {
+        "qty": 4,
+        "name": "Leader's Talent"
+      },
+      {
+        "qty": 4,
+        "name": "Hired Claw"
+      },
+      {
+        "qty": 4,
+        "name": "Dream Beavers"
+      },
+      {
+        "qty": 4,
+        "name": "Raphael, the Nightwatcher"
+      },
+      {
+        "qty": 4,
+        "name": "Leonardo, Cutting Edge"
+      },
+      {
+        "qty": 3,
+        "name": "Quicksilver, Brash Blur"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Inevitable Defeat"
+      },
+      {
+        "qty": 4,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 4,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 3,
+        "name": "Boros Charm"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 4,
+        "name": "Blood Crypt"
+      },
+      {
+        "qty": 3,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 3,
+        "name": "Concealed Courtyard"
+      },
+      {
+        "qty": 2,
+        "name": "Godless Shrine"
+      },
+      {
+        "qty": 2,
+        "name": "Inspiring Vantage"
+      },
+      {
+        "qty": 2,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Mountain"
+      },
+      {
+        "qty": 1,
+        "name": "Blazemire Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Cool but Rude"
+      },
+      {
+        "qty": 4,
+        "name": "Iron-Shield Elf"
+      },
+      {
+        "qty": 4,
+        "name": "Practiced Offense"
+      },
+      {
+        "qty": 4,
+        "name": "Marauding Mako"
+      },
+      {
+        "qty": 4,
+        "name": "Moonshadow"
+      },
+      {
+        "qty": 4,
+        "name": "Hardened Academic"
+      },
+      {
+        "qty": 3,
+        "name": "Bloodghast"
+      },
+      {
+        "qty": 3,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 2,
+        "name": "Night Nurse, Healer of Heroes"
+      },
+      {
+        "qty": 2,
+        "name": "Tersa Lightshatter"
+      },
+      {
+        "qty": 1,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 1,
+        "name": "Inti, Seneschal of the Sun"
+      },
+      {
+        "qty": 1,
+        "name": "Erode"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Leyline of the Void"
+      },
+      {
+        "qty": 3,
+        "name": "Voice of Victory"
+      },
+      {
+        "qty": 2,
+        "name": "Seam Rip"
+      },
+      {
+        "qty": 2,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 2,
+        "name": "Abrade"
+      },
+      {
+        "qty": 1,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 1,
+        "name": "Shoot the Sheriff"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 7,
+        "name": "Swamp"
+      },
+      {
+        "qty": 4,
+        "name": "Gloomlake Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Restless Reef"
+      },
+      {
+        "qty": 4,
+        "name": "Watery Grave"
+      },
+      {
+        "qty": 3,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 2,
+        "name": "Undercity Sewers"
+      },
+      {
+        "qty": 1,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 4,
+        "name": "Deceit"
+      },
+      {
+        "qty": 4,
+        "name": "Duress"
+      },
+      {
+        "qty": 4,
+        "name": "Superior Spider-Man"
+      },
+      {
+        "qty": 4,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 3,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 3,
+        "name": "Doomsday Excruciator"
+      },
+      {
+        "qty": 3,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 2,
+        "name": "Winternight Stories"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Black Sun"
+      },
+      {
+        "qty": 2,
+        "name": "Emeritus of Ideation"
+      },
+      {
+        "qty": 1,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 1,
+        "name": "Quantum Riddler"
+      },
+      {
+        "qty": 1,
+        "name": "Deadly Cover-Up"
+      },
+      {
+        "qty": 1,
+        "name": "Strategic Betrayal"
+      }
+    ],
+    "side": [
+      {
+        "qty": 3,
+        "name": "Qarsi Revenant"
+      },
+      {
+        "qty": 2,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 2,
+        "name": "Oildeep Gearhulk"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Deadly Cover-Up"
+      },
+      {
+        "qty": 1,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 1,
+        "name": "Outrageous Robbery"
+      },
+      {
+        "qty": 1,
+        "name": "Quantum Riddler"
+      },
+      {
+        "qty": 1,
+        "name": "Deathmark"
+      },
+      {
+        "qty": 1,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 1,
+        "name": "Harvester of Misery"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 4,
+        "name": "Great Hall of the Biblioplex"
+      },
+      {
+        "qty": 4,
+        "name": "Spirebluff Canal"
+      },
+      {
+        "qty": 3,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Island"
+      },
+      {
+        "qty": 2,
+        "name": "Hallowed Fountain"
+      },
+      {
+        "qty": 2,
+        "name": "Sundown Pass"
+      },
+      {
+        "qty": 4,
+        "name": "Gran-Gran"
+      },
+      {
+        "qty": 4,
+        "name": "Tablet of Discovery"
+      },
+      {
+        "qty": 4,
+        "name": "Firebending Lesson"
+      },
+      {
+        "qty": 4,
+        "name": "Accumulate Wisdom"
+      },
+      {
+        "qty": 4,
+        "name": "Abandon Attachments"
+      },
+      {
+        "qty": 4,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 4,
+        "name": "Jeskai Revelation"
+      },
+      {
+        "qty": 4,
+        "name": "Combustion Technique"
+      },
+      {
+        "qty": 2,
+        "name": "Iroh's Demonstration"
+      },
+      {
+        "qty": 2,
+        "name": "It'll Quench Ya!"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Ral, Crackling Wit"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Price of Freedom"
+      },
+      {
+        "qty": 2,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 2,
+        "name": "Annul"
+      },
+      {
+        "qty": 2,
+        "name": "Splatter Technique"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Emeritus of Ideation"
+      },
+      {
+        "qty": 1,
+        "name": "Ral, Crackling Wit"
+      },
+      {
+        "qty": 1,
+        "name": "Avengers Disassembled"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 14,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Escape Tunnel"
+      },
+      {
+        "qty": 4,
+        "name": "Fabled Passage"
+      },
+      {
+        "qty": 3,
+        "name": "Ba Sing Se"
+      },
+      {
+        "qty": 1,
+        "name": "Promising Vein"
+      },
+      {
+        "qty": 4,
+        "name": "Esper Origins"
+      },
+      {
+        "qty": 4,
+        "name": "Icetill Explorer"
+      },
+      {
+        "qty": 4,
+        "name": "Mightform Harmonizer"
+      },
+      {
+        "qty": 4,
+        "name": "Earthbender Ascension"
+      },
+      {
+        "qty": 4,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Sazh's Chocobo"
+      },
+      {
+        "qty": 3,
+        "name": "Meltstrider's Resolve"
+      },
+      {
+        "qty": 1,
+        "name": "Surrak, Elusive Hunter"
+      },
+      {
+        "qty": 1,
+        "name": "Archdruid's Charm"
+      },
+      {
+        "qty": 1,
+        "name": "Lumbering Worldwagon"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Mossborn Hydra"
+      },
+      {
+        "qty": 3,
+        "name": "Sapling Nursery"
+      },
+      {
+        "qty": 2,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 2,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 2,
+        "name": "Torpor Orb"
+      },
+      {
+        "qty": 1,
+        "name": "Surrak, Elusive Hunter"
+      },
+      {
+        "qty": 1,
+        "name": "Meltstrider's Resolve"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 5,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 4,
+        "name": "Stomping Ground"
+      },
+      {
+        "qty": 3,
+        "name": "Wastewood Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Restless Cottage"
+      },
+      {
+        "qty": 3,
+        "name": "Overgrown Tomb"
+      },
+      {
+        "qty": 4,
+        "name": "Michelangelo's Technique"
+      },
+      {
+        "qty": 4,
+        "name": "Commune with Beavers"
+      },
+      {
+        "qty": 4,
+        "name": "The Unbeatable Squirrel Girl"
+      },
+      {
+        "qty": 4,
+        "name": "Thornvault Forager"
+      },
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 4,
+        "name": "Enduring Vitality"
+      },
+      {
+        "qty": 3,
+        "name": "Formidable Speaker"
+      },
+      {
+        "qty": 3,
+        "name": "Enduring Courage"
+      },
+      {
+        "qty": 2,
+        "name": "Valley Rotcaller"
+      },
+      {
+        "qty": 2,
+        "name": "Agatha's Soul Cauldron"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Duress"
+      },
+      {
+        "qty": 3,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 2,
+        "name": "Agatha's Soul Cauldron"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Blood Crypt"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Blazemire Verge"
+      },
+      {
+        "qty": 2,
+        "name": "Restless Vents"
+      },
+      {
+        "qty": 2,
+        "name": "Rockface Village"
+      },
+      {
+        "qty": 2,
+        "name": "Mudflat Village"
+      },
+      {
+        "qty": 2,
+        "name": "Mountain"
+      },
+      {
+        "qty": 1,
+        "name": "Swamp"
+      },
+      {
+        "qty": 4,
+        "name": "Valley Flamecaller"
+      },
+      {
+        "qty": 4,
+        "name": "Hired Claw"
+      },
+      {
+        "qty": 4,
+        "name": "Gastal Thrillseeker"
+      },
+      {
+        "qty": 4,
+        "name": "Gev, Scaled Scorch"
+      },
+      {
+        "qty": 4,
+        "name": "Iridescent Vinelasher"
+      },
+      {
+        "qty": 4,
+        "name": "Flamecache Gecko"
+      },
+      {
+        "qty": 4,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 3,
+        "name": "The Ruinous Wrecking Crew"
+      },
+      {
+        "qty": 1,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 1,
+        "name": "Laughing Jasper Flint"
+      },
+      {
+        "qty": 1,
+        "name": "Forsaken Miner"
+      },
+      {
+        "qty": 1,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 1,
+        "name": "Nova Hellkite"
+      },
+      {
+        "qty": 1,
+        "name": "Fireglass Mentor"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Ral Zarek, Guest Lecturer"
+      },
+      {
+        "qty": 1,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 1,
+        "name": "Long Goodbye"
+      },
+      {
+        "qty": 1,
+        "name": "Sear"
+      },
+      {
+        "qty": 1,
+        "name": "Intimidation Tactics"
+      },
+      {
+        "qty": 1,
+        "name": "Magebane Lizard"
+      },
+      {
+        "qty": 1,
+        "name": "Shredder's Technique"
+      },
+      {
+        "qty": 1,
+        "name": "End of the Hunt"
+      },
+      {
+        "qty": 1,
+        "name": "The Ruinous Wrecking Crew"
+      },
+      {
+        "qty": 1,
+        "name": "Thought-Stalker Warlock"
+      },
+      {
+        "qty": 1,
+        "name": "Deathmark"
+      },
+      {
+        "qty": 1,
+        "name": "Day of Black Sun"
+      },
+      {
+        "qty": 1,
+        "name": "Deep-Cavern Bat"
+      },
+      {
+        "qty": 1,
+        "name": "Abrade"
+      },
+      {
+        "qty": 1,
+        "name": "Duress"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 7,
+        "name": "Island"
+      },
+      {
+        "qty": 4,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 4,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Spirebluff Canal"
+      },
+      {
+        "qty": 1,
+        "name": "Stormcarved Coast"
+      },
+      {
+        "qty": 4,
+        "name": "Eddymurk Crab"
+      },
+      {
+        "qty": 4,
+        "name": "Flow State"
+      },
+      {
+        "qty": 4,
+        "name": "Sunderflock"
+      },
+      {
+        "qty": 4,
+        "name": "Sleight of Hand"
+      },
+      {
+        "qty": 4,
+        "name": "Hearth Elemental"
+      },
+      {
+        "qty": 4,
+        "name": "Opt"
+      },
+      {
+        "qty": 4,
+        "name": "Prismari Charm"
+      },
+      {
+        "qty": 3,
+        "name": "Impractical Joke"
+      },
+      {
+        "qty": 2,
+        "name": "Traumatic Critique"
+      },
+      {
+        "qty": 2,
+        "name": "Get Out"
+      },
+      {
+        "qty": 2,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Snare"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Petrified Hamlet"
+      },
+      {
+        "qty": 3,
+        "name": "Namor the Sub-Mariner"
+      },
+      {
+        "qty": 2,
+        "name": "Avengers Disassembled"
+      },
+      {
+        "qty": 2,
+        "name": "Octopus Form"
+      },
+      {
+        "qty": 2,
+        "name": "Sunspine Lynx"
+      },
+      {
+        "qty": 1,
+        "name": "Ill-Timed Explosion"
+      },
+      {
+        "qty": 1,
+        "name": "Broadside Barrage"
+      },
+      {
+        "qty": 1,
+        "name": "Ral, Crackling Wit"
+      },
+      {
+        "qty": 1,
+        "name": "Negate"
+      },
+      {
+        "qty": 1,
+        "name": "Disdainful Stroke"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 5,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Hallowed Fountain"
+      },
+      {
+        "qty": 4,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Floodfarm Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Island"
+      },
+      {
+        "qty": 1,
+        "name": "Fomori Vault"
+      },
+      {
+        "qty": 1,
+        "name": "Adagia, Windswept Bastion"
+      },
+      {
+        "qty": 1,
+        "name": "Meticulous Archive"
+      },
+      {
+        "qty": 4,
+        "name": "Perilous Snare"
+      },
+      {
+        "qty": 4,
+        "name": "Repurposing Bay"
+      },
+      {
+        "qty": 4,
+        "name": "Pinnacle Starcage"
+      },
+      {
+        "qty": 4,
+        "name": "Simulacrum Synthesizer"
+      },
+      {
+        "qty": 4,
+        "name": "United Battlefront"
+      },
+      {
+        "qty": 3,
+        "name": "Clay-Fired Bricks"
+      },
+      {
+        "qty": 3,
+        "name": "Cryogen Relic"
+      },
+      {
+        "qty": 2,
+        "name": "Erode"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Spring-Loaded Sawblades"
+      },
+      {
+        "qty": 1,
+        "name": "The Irencrag"
+      },
+      {
+        "qty": 1,
+        "name": "The Fire Crystal"
+      },
+      {
+        "qty": 1,
+        "name": "White Auracite"
+      },
+      {
+        "qty": 1,
+        "name": "Braided Net"
+      },
+      {
+        "qty": 1,
+        "name": "Phoenix Fleet Airship"
+      }
+    ],
+    "side": [
+      {
+        "qty": 3,
+        "name": "Voice of Victory"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Torpor Orb"
+      },
+      {
+        "qty": 2,
+        "name": "Authority of the Consuls"
+      },
+      {
+        "qty": 2,
+        "name": "No More Lies"
+      },
+      {
+        "qty": 1,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 1,
+        "name": "Dauntless Scrapbot"
+      },
+      {
+        "qty": 1,
+        "name": "Krang, Master Mind"
+      },
+      {
+        "qty": 1,
+        "name": "Spring-Loaded Sawblades"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Hushwood Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Plains"
+      },
+      {
+        "qty": 3,
+        "name": "Ba Sing Se"
+      },
+      {
+        "qty": 3,
+        "name": "Forest"
+      },
+      {
+        "qty": 2,
+        "name": "Abandoned Air Temple"
+      },
+      {
+        "qty": 2,
+        "name": "Fabled Passage"
+      },
+      {
+        "qty": 1,
+        "name": "Lush Portico"
+      },
+      {
+        "qty": 1,
+        "name": "Godless Shrine"
+      },
+      {
+        "qty": 1,
+        "name": "Gathering Place"
+      },
+      {
+        "qty": 1,
+        "name": "Overgrown Tomb"
+      },
+      {
+        "qty": 1,
+        "name": "Zanarkand, Ancient Metropolis"
+      },
+      {
+        "qty": 1,
+        "name": "Concealed Courtyard"
+      },
+      {
+        "qty": 1,
+        "name": "Blooming Marsh"
+      },
+      {
+        "qty": 1,
+        "name": "Swamp"
+      },
+      {
+        "qty": 4,
+        "name": "Ouroboroid"
+      },
+      {
+        "qty": 4,
+        "name": "Overlord of the Mistmoors"
+      },
+      {
+        "qty": 2,
+        "name": "Preacher of the Schism"
+      },
+      {
+        "qty": 2,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 2,
+        "name": "Terrasymbiosis"
+      },
+      {
+        "qty": 2,
+        "name": "Innkeeper's Talent"
+      },
+      {
+        "qty": 2,
+        "name": "Authority of the Consuls"
+      },
+      {
+        "qty": 2,
+        "name": "Elenda, Saint of Dusk"
+      },
+      {
+        "qty": 2,
+        "name": "Elspeth, Storm Slayer"
+      },
+      {
+        "qty": 2,
+        "name": "Warden of the Grove"
+      },
+      {
+        "qty": 2,
+        "name": "Vivien Reid"
+      },
+      {
+        "qty": 1,
+        "name": "Tender Wildguide"
+      },
+      {
+        "qty": 1,
+        "name": "Mikey & Leo, Chaos & Order"
+      },
+      {
+        "qty": 1,
+        "name": "Storm, Windrider"
+      },
+      {
+        "qty": 1,
+        "name": "Professor Dellian Fel"
+      },
+      {
+        "qty": 1,
+        "name": "Enduring Innocence"
+      },
+      {
+        "qty": 1,
+        "name": "Split Up"
+      },
+      {
+        "qty": 1,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 1,
+        "name": "Requisition Raid"
+      },
+      {
+        "qty": 1,
+        "name": "Yuna, Hope of Spira"
+      }
+    ],
+    "side": [
+      {
+        "qty": 2,
+        "name": "Ultima"
+      },
+      {
+        "qty": 2,
+        "name": "Pinnacle Starcage"
+      },
+      {
+        "qty": 2,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 2,
+        "name": "Jennifer Walters"
+      },
+      {
+        "qty": 1,
+        "name": "Erode"
+      },
+      {
+        "qty": 1,
+        "name": "Requisition Raid"
+      },
+      {
+        "qty": 1,
+        "name": "Storm, Windrider"
+      },
+      {
+        "qty": 1,
+        "name": "Authority of the Consuls"
+      },
+      {
+        "qty": 1,
+        "name": "Frenzied Baloth"
+      },
+      {
+        "qty": 1,
+        "name": "Split Up"
+      },
+      {
+        "qty": 1,
+        "name": "Ajani, Outland Chaperone"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 5,
+        "name": "Island"
+      },
+      {
+        "qty": 4,
+        "name": "Demolition Field"
+      },
+      {
+        "qty": 4,
+        "name": "Hallowed Fountain"
+      },
+      {
+        "qty": 4,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Floodfarm Verge"
+      },
+      {
+        "qty": 2,
+        "name": "Great Hall of the Biblioplex"
+      },
+      {
+        "qty": 2,
+        "name": "Restless Anchorage"
+      },
+      {
+        "qty": 1,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 4,
+        "name": "Flow State"
+      },
+      {
+        "qty": 4,
+        "name": "Consult the Star Charts"
+      },
+      {
+        "qty": 4,
+        "name": "No More Lies"
+      },
+      {
+        "qty": 3,
+        "name": "Three Steps Ahead"
+      },
+      {
+        "qty": 3,
+        "name": "Erode"
+      },
+      {
+        "qty": 3,
+        "name": "Wan Shi Tong, Librarian"
+      },
+      {
+        "qty": 2,
+        "name": "Sleight of Hand"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Beza, the Bounding Spring"
+      },
+      {
+        "qty": 2,
+        "name": "Get Lost"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Snare"
+      },
+      {
+        "qty": 2,
+        "name": "Seam Rip"
+      },
+      {
+        "qty": 1,
+        "name": "Emeritus of Ideation"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Petrified Hamlet"
+      },
+      {
+        "qty": 2,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 2,
+        "name": "Aang, Swift Savior"
+      },
+      {
+        "qty": 2,
+        "name": "Negate"
+      },
+      {
+        "qty": 2,
+        "name": "Disdainful Stroke"
+      },
+      {
+        "qty": 1,
+        "name": "High Noon"
+      },
+      {
+        "qty": 1,
+        "name": "Exorcise"
+      },
+      {
+        "qty": 1,
+        "name": "Ultima"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Beza, the Bounding Spring"
+      },
+      {
+        "qty": 1,
+        "name": "Ancient Vendetta"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 20,
+        "name": "Swamp"
+      },
+      {
+        "qty": 2,
+        "name": "Realm of Koh"
+      },
+      {
+        "qty": 4,
+        "name": "Bloodthorn Flail"
+      },
+      {
+        "qty": 4,
+        "name": "Corpses of the Lost"
+      },
+      {
+        "qty": 4,
+        "name": "Timeline Culler"
+      },
+      {
+        "qty": 4,
+        "name": "Moonshadow"
+      },
+      {
+        "qty": 4,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 4,
+        "name": "Bloodghast"
+      },
+      {
+        "qty": 4,
+        "name": "Iron-Shield Elf"
+      },
+      {
+        "qty": 4,
+        "name": "Snarling Gorehound"
+      },
+      {
+        "qty": 4,
+        "name": "Forsaken Miner"
+      },
+      {
+        "qty": 2,
+        "name": "Requiting Hex"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Intimidation Tactics"
+      },
+      {
+        "qty": 4,
+        "name": "Duress"
+      },
+      {
+        "qty": 2,
+        "name": "Feed the Swarm"
+      },
+      {
+        "qty": 2,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 2,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 1,
+        "name": "Lord Skitter, Sewer King"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Gloomlake Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Watery Grave"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 4,
+        "name": "Swamp"
+      },
+      {
+        "qty": 2,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 2,
+        "name": "Soulstone Sanctuary"
+      },
+      {
+        "qty": 2,
+        "name": "Island"
+      },
+      {
+        "qty": 4,
+        "name": "Dream Beavers"
+      },
+      {
+        "qty": 4,
+        "name": "Floodpits Drowner"
+      },
+      {
+        "qty": 4,
+        "name": "Kaito, Bane of Nightmares"
+      },
+      {
+        "qty": 4,
+        "name": "Oroku Saki, Shredder Rising"
+      },
+      {
+        "qty": 4,
+        "name": "Spyglass Siren"
+      },
+      {
+        "qty": 4,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 3,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 3,
+        "name": "Cecil, Dark Knight"
+      },
+      {
+        "qty": 2,
+        "name": "Tragic Trajectory"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 2,
+        "name": "Subterranean Schooner"
+      },
+      {
+        "qty": 2,
+        "name": "Phantom Interference"
+      }
+    ],
+    "side": [
+      {
+        "qty": 3,
+        "name": "Negate"
+      },
+      {
+        "qty": 3,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 3,
+        "name": "Duress"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Snare"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Black Sun"
+      },
+      {
+        "qty": 1,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 1,
+        "name": "The Ooze"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 22,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Starfield Shepherd"
+      },
+      {
+        "qty": 4,
+        "name": "Giada, Font of Hope"
+      },
+      {
+        "qty": 4,
+        "name": "Daydream"
+      },
+      {
+        "qty": 4,
+        "name": "Exemplar of Light"
+      },
+      {
+        "qty": 4,
+        "name": "Momo, Friendly Flier"
+      },
+      {
+        "qty": 4,
+        "name": "Youthful Valkyrie"
+      },
+      {
+        "qty": 3,
+        "name": "Practiced Offense"
+      },
+      {
+        "qty": 3,
+        "name": "Haliya, Guided by Light"
+      },
+      {
+        "qty": 3,
+        "name": "Lyra Dawnbringer"
+      },
+      {
+        "qty": 2,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 2,
+        "name": "Inspiring Overseer"
+      },
+      {
+        "qty": 1,
+        "name": "Lightstall Inquisitor"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Erode"
+      },
+      {
+        "qty": 2,
+        "name": "Ruin-Lurker Bat"
+      },
+      {
+        "qty": 2,
+        "name": "Curious Farm Animals"
+      },
+      {
+        "qty": 2,
+        "name": "Angel of Finality"
+      },
+      {
+        "qty": 2,
+        "name": "Sheltered by Ghosts"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 6,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Hushwood Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Temple Garden"
+      },
+      {
+        "qty": 2,
+        "name": "Abandoned Air Temple"
+      },
+      {
+        "qty": 2,
+        "name": "Gathering Place"
+      },
+      {
+        "qty": 1,
+        "name": "Plains"
+      },
+      {
+        "qty": 1,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 1,
+        "name": "Ba Sing Se"
+      },
+      {
+        "qty": 4,
+        "name": "Pawpatch Recruit"
+      },
+      {
+        "qty": 4,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Practiced Offense"
+      },
+      {
+        "qty": 4,
+        "name": "Spider Manifestation"
+      },
+      {
+        "qty": 3,
+        "name": "Brightglass Gearhulk"
+      },
+      {
+        "qty": 2,
+        "name": "Ouroboroid"
+      },
+      {
+        "qty": 2,
+        "name": "Figure of Fable"
+      },
+      {
+        "qty": 2,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 2,
+        "name": "Seam Rip"
+      },
+      {
+        "qty": 2,
+        "name": "Surrak, Elusive Hunter"
+      },
+      {
+        "qty": 2,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 1,
+        "name": "Bushwhack"
+      },
+      {
+        "qty": 1,
+        "name": "Meltstrider's Resolve"
+      },
+      {
+        "qty": 1,
+        "name": "Jennifer Walters"
+      },
+      {
+        "qty": 1,
+        "name": "Analyze the Pollen"
+      }
+    ],
+    "side": [
+      {
+        "qty": 2,
+        "name": "Sage of the Skies"
+      },
+      {
+        "qty": 2,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 2,
+        "name": "Frenzied Baloth"
+      },
+      {
+        "qty": 1,
+        "name": "Erode"
+      },
+      {
+        "qty": 1,
+        "name": "Restoration Magic"
+      },
+      {
+        "qty": 1,
+        "name": "Origin of Metalbending"
+      },
+      {
+        "qty": 1,
+        "name": "Kutzil, Malamet Exemplar"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Goldvein Hydra"
+      },
+      {
+        "qty": 1,
+        "name": "Elspeth, Storm Slayer"
+      },
+      {
+        "qty": 1,
+        "name": "Meltstrider's Resolve"
+      },
+      {
+        "qty": 1,
+        "name": "Balustrade Wurm"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 4,
+        "name": "Inspiring Vantage"
+      },
+      {
+        "qty": 4,
+        "name": "Sunbillow Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Maelstrom of the Spirit Dragon"
+      },
+      {
+        "qty": 3,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 3,
+        "name": "Mountain"
+      },
+      {
+        "qty": 2,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 1,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Clarion Conqueror"
+      },
+      {
+        "qty": 4,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 4,
+        "name": "Momo, Friendly Flier"
+      },
+      {
+        "qty": 4,
+        "name": "Nova Hellkite"
+      },
+      {
+        "qty": 4,
+        "name": "Sarkhan, Dragon Ascendant"
+      },
+      {
+        "qty": 4,
+        "name": "Magmatic Hellkite"
+      },
+      {
+        "qty": 2,
+        "name": "Voice of Victory"
+      },
+      {
+        "qty": 2,
+        "name": "Twinmaw Stormbrood"
+      },
+      {
+        "qty": 2,
+        "name": "Doc Ock's Tentacles"
+      },
+      {
+        "qty": 1,
+        "name": "Dragonhawk, Fate's Tempest"
+      },
+      {
+        "qty": 1,
+        "name": "Lorehold, the Historian"
+      },
+      {
+        "qty": 1,
+        "name": "Get Lost"
+      },
+      {
+        "qty": 1,
+        "name": "Ara\u00f1a, Heart of the Spider"
+      },
+      {
+        "qty": 1,
+        "name": "Spectacular Tactics"
+      },
+      {
+        "qty": 1,
+        "name": "Dragonlord's Servant"
+      }
+    ],
+    "side": [
+      {
+        "qty": 3,
+        "name": "Requisition Raid"
+      },
+      {
+        "qty": 3,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 3,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 2,
+        "name": "High Noon"
+      },
+      {
+        "qty": 2,
+        "name": "Magebane Lizard"
+      },
+      {
+        "qty": 2,
+        "name": "The Legend of Roku"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 20,
+        "name": "Island"
+      },
+      {
+        "qty": 2,
+        "name": "Jidoor, Aristocratic Capital"
+      },
+      {
+        "qty": 4,
+        "name": "Get Out"
+      },
+      {
+        "qty": 3,
+        "name": "Mana Sculpt"
+      },
+      {
+        "qty": 3,
+        "name": "Flow State"
+      },
+      {
+        "qty": 3,
+        "name": "Opt"
+      },
+      {
+        "qty": 3,
+        "name": "Riverchurn Monument"
+      },
+      {
+        "qty": 3,
+        "name": "Exhibition Tidecaller"
+      },
+      {
+        "qty": 3,
+        "name": "Unsummon"
+      },
+      {
+        "qty": 2,
+        "name": "Three Steps Ahead"
+      },
+      {
+        "qty": 2,
+        "name": "Sleight of Hand"
+      },
+      {
+        "qty": 2,
+        "name": "Negate"
+      },
+      {
+        "qty": 2,
+        "name": "Bounce Off"
+      },
+      {
+        "qty": 2,
+        "name": "Consult the Star Charts"
+      },
+      {
+        "qty": 2,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 2,
+        "name": "Into the Flood Maw"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Annul"
+      },
+      {
+        "qty": 1,
+        "name": "Kitsune's Technique"
+      },
+      {
+        "qty": 1,
+        "name": "Aetherize"
+      },
+      {
+        "qty": 1,
+        "name": "Boomerang Basics"
+      },
+      {
+        "qty": 1,
+        "name": "Disdainful Stroke"
+      }
+    ],
+    "side": [],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
+    "deck_title": "Platinum-Mythic Rank Player",
+    "subtitle": "",
+    "event_date": "July 6, 2026",
+    "event_name": "Traditional (Bo3)",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 8,
+        "name": "Island"
+      },
+      {
+        "qty": 4,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 4,
+        "name": "Spirebluff Canal"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 3,
+        "name": "Mountain"
+      },
+      {
+        "qty": 4,
+        "name": "Torch the Tower"
+      },
+      {
+        "qty": 4,
+        "name": "Stormchaser's Talent"
+      },
+      {
+        "qty": 4,
+        "name": "Boomerang Basics"
+      },
+      {
+        "qty": 4,
+        "name": "Quantum Riddler"
+      },
+      {
+        "qty": 4,
+        "name": "Tiger-Seal"
+      },
+      {
+        "qty": 4,
+        "name": "Fear of Missing Out"
+      },
+      {
+        "qty": 4,
+        "name": "Duelist of the Mind"
+      },
+      {
+        "qty": 3,
+        "name": "Frostcliff Siege"
+      },
+      {
+        "qty": 2,
+        "name": "Pyroclasm"
+      },
+      {
+        "qty": 2,
+        "name": "Cryogen Relic"
+      },
+      {
+        "qty": 2,
+        "name": "Into the Flood Maw"
+      }
+    ],
+    "side": [
+      {
+        "qty": 2,
+        "name": "Magebane Lizard"
+      },
+      {
+        "qty": 2,
+        "name": "Roaring Furnace // Steaming Sauna"
+      },
+      {
+        "qty": 2,
+        "name": "Annul"
+      },
+      {
+        "qty": 2,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 2,
+        "name": "Get Out"
+      },
+      {
+        "qty": 2,
+        "name": "Disdainful Stroke"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Abrade"
+      }
+    ],
+    "companion": [],
+    "week": "2026-07-06",
+    "weight": 1,
+    "source": "https://magic.gg/decklists/traditional-standard-ranked-decklists-july-6-2026"
+  },
+  {
     "deck_title": "Dillon Kikkawa",
     "subtitle": "Temur Prowess",
     "event_date": "May 24, 2026",
@@ -381642,1650 +384924,6 @@
     "week": "2026-05-24",
     "weight": 3,
     "source": "https://magic.gg/decklists/central-america-magic-series-regional-championship-mexico-city-may-2026-top-4-standard-decklists"
-  },
-  {
-    "deck_title": "Dawson Courson",
-    "subtitle": "Mardu Discard",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 1,
-        "name": "Inti, Seneschal of the Sun"
-      },
-      {
-        "qty": 1,
-        "name": "Erode"
-      },
-      {
-        "qty": 2,
-        "name": "Concealed Courtyard"
-      },
-      {
-        "qty": 2,
-        "name": "Burst Lightning"
-      },
-      {
-        "qty": 4,
-        "name": "Iron-Shield Elf"
-      },
-      {
-        "qty": 2,
-        "name": "Inspiring Vantage"
-      },
-      {
-        "qty": 1,
-        "name": "Cecil, Dark Knight"
-      },
-      {
-        "qty": 4,
-        "name": "Starting Town"
-      },
-      {
-        "qty": 4,
-        "name": "Practiced Offense"
-      },
-      {
-        "qty": 2,
-        "name": "Mountain"
-      },
-      {
-        "qty": 4,
-        "name": "Moonshadow"
-      },
-      {
-        "qty": 4,
-        "name": "Hardened Academic"
-      },
-      {
-        "qty": 4,
-        "name": "Marauding Mako"
-      },
-      {
-        "qty": 3,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 4,
-        "name": "Cool but Rude"
-      },
-      {
-        "qty": 2,
-        "name": "Requiting Hex"
-      },
-      {
-        "qty": 2,
-        "name": "Blazemire Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Bloodghast"
-      },
-      {
-        "qty": 2,
-        "name": "Tersa Lightshatter"
-      },
-      {
-        "qty": 1,
-        "name": "Carnage, Crimson Chaos"
-      },
-      {
-        "qty": 4,
-        "name": "Blood Crypt"
-      },
-      {
-        "qty": 3,
-        "name": "Godless Shrine"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Inti, Seneschal of the Sun"
-      },
-      {
-        "qty": 2,
-        "name": "Sheltered by Ghosts"
-      },
-      {
-        "qty": 3,
-        "name": "Strategic Betrayal"
-      },
-      {
-        "qty": 2,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 1,
-        "name": "Duel Tactics"
-      },
-      {
-        "qty": 1,
-        "name": "Leyline of the Void"
-      },
-      {
-        "qty": 2,
-        "name": "Case of the Crimson Pulse"
-      },
-      {
-        "qty": 3,
-        "name": "Voice of Victory"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Noah Michaud",
-    "subtitle": "Azorius Momo",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "Momo, Friendly Flier"
-      },
-      {
-        "qty": 2,
-        "name": "Erode"
-      },
-      {
-        "qty": 2,
-        "name": "Aang, Swift Savior"
-      },
-      {
-        "qty": 2,
-        "name": "Haliya, Guided by Light"
-      },
-      {
-        "qty": 4,
-        "name": "Floodfarm Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 2,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 4,
-        "name": "Springleaf Drum"
-      },
-      {
-        "qty": 2,
-        "name": "Practiced Offense"
-      },
-      {
-        "qty": 4,
-        "name": "Daydream"
-      },
-      {
-        "qty": 4,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Abandoned Air Temple"
-      },
-      {
-        "qty": 7,
-        "name": "Plains"
-      },
-      {
-        "qty": 4,
-        "name": "Sage of the Skies"
-      },
-      {
-        "qty": 4,
-        "name": "Starfield Shepherd"
-      },
-      {
-        "qty": 2,
-        "name": "Cosmogrand Zenith"
-      },
-      {
-        "qty": 2,
-        "name": "Nurturing Pixie"
-      },
-      {
-        "qty": 1,
-        "name": "Gran-Gran"
-      },
-      {
-        "qty": 4,
-        "name": "Quantum Riddler"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 2,
-        "name": "Pyrrhic Strike"
-      },
-      {
-        "qty": 2,
-        "name": "Hide on the Ceiling"
-      },
-      {
-        "qty": 2,
-        "name": "No More Lies"
-      },
-      {
-        "qty": 2,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 1,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 3,
-        "name": "Clarion Conqueror"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Ryan Primdahl",
-    "subtitle": "Izzet Prowess",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 6,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Opt"
-      },
-      {
-        "qty": 4,
-        "name": "Stormchaser's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Burst Lightning"
-      },
-      {
-        "qty": 4,
-        "name": "Boomerang Basics"
-      },
-      {
-        "qty": 4,
-        "name": "Colorstorm Stallion"
-      },
-      {
-        "qty": 3,
-        "name": "Secret Identity"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 3,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Into the Flood Maw"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 4,
-        "name": "Riverpyre Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Spirebluff Canal"
-      },
-      {
-        "qty": 4,
-        "name": "Sleight of Hand"
-      },
-      {
-        "qty": 2,
-        "name": "Vibrant Outburst"
-      },
-      {
-        "qty": 4,
-        "name": "Slickshot Show-Off"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "Get Out"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 2,
-        "name": "Into the Flood Maw"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 1,
-        "name": "Ral, Crackling Wit"
-      },
-      {
-        "qty": 2,
-        "name": "Vibrant Outburst"
-      },
-      {
-        "qty": 1,
-        "name": "Spell Snare"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Gavin Bennett",
-    "subtitle": "Four-Color Control",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Mistrise Village"
-      },
-      {
-        "qty": 1,
-        "name": "Cori Mountain Monastery"
-      },
-      {
-        "qty": 1,
-        "name": "Erode"
-      },
-      {
-        "qty": 1,
-        "name": "Traumatic Critique"
-      },
-      {
-        "qty": 2,
-        "name": "Shattered Sanctum"
-      },
-      {
-        "qty": 1,
-        "name": "Stormcarved Coast"
-      },
-      {
-        "qty": 3,
-        "name": "Inevitable Defeat"
-      },
-      {
-        "qty": 1,
-        "name": "Pyroclasm"
-      },
-      {
-        "qty": 2,
-        "name": "Flashback"
-      },
-      {
-        "qty": 4,
-        "name": "Great Hall of the Biblioplex"
-      },
-      {
-        "qty": 1,
-        "name": "Ill-Timed Explosion"
-      },
-      {
-        "qty": 3,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 4,
-        "name": "Jeskai Revelation"
-      },
-      {
-        "qty": 1,
-        "name": "Sundown Pass"
-      },
-      {
-        "qty": 2,
-        "name": "Consult the Star Charts"
-      },
-      {
-        "qty": 2,
-        "name": "No More Lies"
-      },
-      {
-        "qty": 2,
-        "name": "Sear"
-      },
-      {
-        "qty": 1,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Lightning Helix"
-      },
-      {
-        "qty": 1,
-        "name": "Day of Judgment"
-      },
-      {
-        "qty": 2,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 1,
-        "name": "Meticulous Archive"
-      },
-      {
-        "qty": 4,
-        "name": "Stock Up"
-      },
-      {
-        "qty": 1,
-        "name": "Plains"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Tablet of Discovery"
-      },
-      {
-        "qty": 1,
-        "name": "Sunbillow Verge"
-      },
-      {
-        "qty": 2,
-        "name": "Gloomlake Verge"
-      },
-      {
-        "qty": 1,
-        "name": "Godless Shrine"
-      },
-      {
-        "qty": 2,
-        "name": "Swallowed by Leviathan"
-      },
-      {
-        "qty": 1,
-        "name": "Fire Magic"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "High Noon"
-      },
-      {
-        "qty": 2,
-        "name": "Stoic Sphinx"
-      },
-      {
-        "qty": 2,
-        "name": "Pyroclasm"
-      },
-      {
-        "qty": 2,
-        "name": "Emeritus of Ideation // Ancestral Recall"
-      },
-      {
-        "qty": 2,
-        "name": "Arcane Omens"
-      },
-      {
-        "qty": 2,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 2,
-        "name": "Flashfreeze"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Alexander MacIsaac",
-    "subtitle": "Izzet Fling",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Opt"
-      },
-      {
-        "qty": 4,
-        "name": "Callous Sell-Sword"
-      },
-      {
-        "qty": 4,
-        "name": "Elusive Otter"
-      },
-      {
-        "qty": 4,
-        "name": "Stormchaser's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Starting Town"
-      },
-      {
-        "qty": 2,
-        "name": "Boomerang Basics"
-      },
-      {
-        "qty": 1,
-        "name": "Balmor, Battlemage Captain"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 2,
-        "name": "Secret Identity"
-      },
-      {
-        "qty": 4,
-        "name": "Wild Ride"
-      },
-      {
-        "qty": 4,
-        "name": "Turn Inside Out"
-      },
-      {
-        "qty": 3,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 4,
-        "name": "Ancestral Anger"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 3,
-        "name": "Riverpyre Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Spirebluff Canal"
-      },
-      {
-        "qty": 4,
-        "name": "Sleight of Hand"
-      },
-      {
-        "qty": 4,
-        "name": "Slickshot Show-Off"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Dreadmaw's Ire"
-      },
-      {
-        "qty": 2,
-        "name": "Burst Lightning"
-      },
-      {
-        "qty": 1,
-        "name": "Island"
-      },
-      {
-        "qty": 2,
-        "name": "Secret Identity"
-      },
-      {
-        "qty": 1,
-        "name": "Into the Flood Maw"
-      },
-      {
-        "qty": 3,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 1,
-        "name": "Poison Dart Frog"
-      },
-      {
-        "qty": 1,
-        "name": "Pyroclasm"
-      },
-      {
-        "qty": 2,
-        "name": "Soul-Guide Lantern"
-      },
-      {
-        "qty": 1,
-        "name": "Full Bore"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Michel Ma",
-    "subtitle": "Azorius Momo",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "Momo, Friendly Flier"
-      },
-      {
-        "qty": 2,
-        "name": "Aang, Swift Savior"
-      },
-      {
-        "qty": 2,
-        "name": "Haliya, Guided by Light"
-      },
-      {
-        "qty": 3,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 1,
-        "name": "Get Lost"
-      },
-      {
-        "qty": 4,
-        "name": "Floodfarm Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 4,
-        "name": "Springleaf Drum"
-      },
-      {
-        "qty": 2,
-        "name": "Skycoach Conductor"
-      },
-      {
-        "qty": 2,
-        "name": "Practiced Offense"
-      },
-      {
-        "qty": 1,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Daydream"
-      },
-      {
-        "qty": 4,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Abandoned Air Temple"
-      },
-      {
-        "qty": 4,
-        "name": "Sage of the Skies"
-      },
-      {
-        "qty": 4,
-        "name": "Starfield Shepherd"
-      },
-      {
-        "qty": 6,
-        "name": "Plains"
-      },
-      {
-        "qty": 2,
-        "name": "Nurturing Pixie"
-      },
-      {
-        "qty": 1,
-        "name": "Figure of Fable"
-      },
-      {
-        "qty": 4,
-        "name": "Quantum Riddler"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 1,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 2,
-        "name": "Pyrrhic Strike"
-      },
-      {
-        "qty": 2,
-        "name": "No More Lies"
-      },
-      {
-        "qty": 1,
-        "name": "Curious Farm Animals"
-      },
-      {
-        "qty": 3,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 1,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 3,
-        "name": "Clarion Conqueror"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Bennett Rasmussen",
-    "subtitle": "Izzet Prowess",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 7,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Opt"
-      },
-      {
-        "qty": 4,
-        "name": "Stormchaser's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Burst Lightning"
-      },
-      {
-        "qty": 2,
-        "name": "Bounce Off"
-      },
-      {
-        "qty": 4,
-        "name": "Boomerang Basics"
-      },
-      {
-        "qty": 4,
-        "name": "Colorstorm Stallion"
-      },
-      {
-        "qty": 3,
-        "name": "Secret Identity"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 2,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 4,
-        "name": "Riverpyre Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Spirebluff Canal"
-      },
-      {
-        "qty": 4,
-        "name": "Sleight of Hand"
-      },
-      {
-        "qty": 2,
-        "name": "Vibrant Outburst"
-      },
-      {
-        "qty": 4,
-        "name": "Slickshot Show-Off"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "Slagstorm"
-      },
-      {
-        "qty": 2,
-        "name": "Get Out"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 1,
-        "name": "Sear"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 2,
-        "name": "Into the Flood Maw"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 1,
-        "name": "Ral, Crackling Wit"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Willam Niwinski",
-    "subtitle": "Mardu Discard",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 1,
-        "name": "Swamp"
-      },
-      {
-        "qty": 4,
-        "name": "Concealed Courtyard"
-      },
-      {
-        "qty": 2,
-        "name": "Erode"
-      },
-      {
-        "qty": 4,
-        "name": "Iron-Shield Elf"
-      },
-      {
-        "qty": 2,
-        "name": "Inspiring Vantage"
-      },
-      {
-        "qty": 1,
-        "name": "Cecil, Dark Knight"
-      },
-      {
-        "qty": 4,
-        "name": "Starting Town"
-      },
-      {
-        "qty": 4,
-        "name": "Practiced Offense"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 1,
-        "name": "Shardmage's Rescue"
-      },
-      {
-        "qty": 4,
-        "name": "Moonshadow"
-      },
-      {
-        "qty": 4,
-        "name": "Hardened Academic"
-      },
-      {
-        "qty": 4,
-        "name": "Marauding Mako"
-      },
-      {
-        "qty": 3,
-        "name": "Requiting Hex"
-      },
-      {
-        "qty": 4,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 4,
-        "name": "Cool but Rude"
-      },
-      {
-        "qty": 1,
-        "name": "Blazemire Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Bloodghast"
-      },
-      {
-        "qty": 2,
-        "name": "Tersa Lightshatter"
-      },
-      {
-        "qty": 1,
-        "name": "Carnage, Crimson Chaos"
-      },
-      {
-        "qty": 4,
-        "name": "Blood Crypt"
-      },
-      {
-        "qty": 1,
-        "name": "Godless Shrine"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Inti, Seneschal of the Sun"
-      },
-      {
-        "qty": 3,
-        "name": "Strategic Betrayal"
-      },
-      {
-        "qty": 1,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 1,
-        "name": "Duel Tactics"
-      },
-      {
-        "qty": 1,
-        "name": "Shoot the Sheriff"
-      },
-      {
-        "qty": 1,
-        "name": "Leyline of the Void"
-      },
-      {
-        "qty": 2,
-        "name": "Case of the Crimson Pulse"
-      },
-      {
-        "qty": 1,
-        "name": "Erode"
-      },
-      {
-        "qty": 3,
-        "name": "Voice of Victory"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Omar Beldon",
-    "subtitle": "Izzet Lessons",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 6,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Gran-Gran"
-      },
-      {
-        "qty": 3,
-        "name": "Stormchaser's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Boomerang Basics"
-      },
-      {
-        "qty": 2,
-        "name": "Agna Qel'a"
-      },
-      {
-        "qty": 4,
-        "name": "Combustion Technique"
-      },
-      {
-        "qty": 1,
-        "name": "Iroh's Demonstration"
-      },
-      {
-        "qty": 2,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 4,
-        "name": "Firebending Lesson"
-      },
-      {
-        "qty": 4,
-        "name": "Monument to Endurance"
-      },
-      {
-        "qty": 4,
-        "name": "Accumulate Wisdom"
-      },
-      {
-        "qty": 4,
-        "name": "Abandon Attachments"
-      },
-      {
-        "qty": 2,
-        "name": "It'll Quench Ya!"
-      },
-      {
-        "qty": 4,
-        "name": "Riverpyre Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Artist's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Spirebluff Canal"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Slagstorm"
-      },
-      {
-        "qty": 1,
-        "name": "Mondo Gecko"
-      },
-      {
-        "qty": 1,
-        "name": "Sear"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 2,
-        "name": "Annul"
-      },
-      {
-        "qty": 2,
-        "name": "Ral, Crackling Wit"
-      },
-      {
-        "qty": 1,
-        "name": "Soul-Guide Lantern"
-      },
-      {
-        "qty": 1,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 1,
-        "name": "It'll Quench Ya!"
-      },
-      {
-        "qty": 1,
-        "name": "Spell Snare"
-      },
-      {
-        "qty": 1,
-        "name": "Broadside Barrage"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Andrew Kidston",
-    "subtitle": "Four-Color Control",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Mistrise Village"
-      },
-      {
-        "qty": 1,
-        "name": "Cori Mountain Monastery"
-      },
-      {
-        "qty": 1,
-        "name": "Erode"
-      },
-      {
-        "qty": 1,
-        "name": "Traumatic Critique"
-      },
-      {
-        "qty": 2,
-        "name": "Shattered Sanctum"
-      },
-      {
-        "qty": 3,
-        "name": "Inevitable Defeat"
-      },
-      {
-        "qty": 1,
-        "name": "Pyroclasm"
-      },
-      {
-        "qty": 1,
-        "name": "Stormcarved Coast"
-      },
-      {
-        "qty": 2,
-        "name": "Flashback"
-      },
-      {
-        "qty": 4,
-        "name": "Great Hall of the Biblioplex"
-      },
-      {
-        "qty": 1,
-        "name": "Ill-Timed Explosion"
-      },
-      {
-        "qty": 3,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 4,
-        "name": "Jeskai Revelation"
-      },
-      {
-        "qty": 1,
-        "name": "Sundown Pass"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 2,
-        "name": "Consult the Star Charts"
-      },
-      {
-        "qty": 1,
-        "name": "Sear"
-      },
-      {
-        "qty": 1,
-        "name": "No More Lies"
-      },
-      {
-        "qty": 1,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Firebending Lesson"
-      },
-      {
-        "qty": 2,
-        "name": "Lightning Helix"
-      },
-      {
-        "qty": 2,
-        "name": "Day of Judgment"
-      },
-      {
-        "qty": 2,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 1,
-        "name": "Meticulous Archive"
-      },
-      {
-        "qty": 4,
-        "name": "Stock Up"
-      },
-      {
-        "qty": 4,
-        "name": "Tablet of Discovery"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 1,
-        "name": "Sunbillow Verge"
-      },
-      {
-        "qty": 1,
-        "name": "Swallowed by Leviathan"
-      },
-      {
-        "qty": 2,
-        "name": "Gloomlake Verge"
-      },
-      {
-        "qty": 1,
-        "name": "Godless Shrine"
-      },
-      {
-        "qty": 1,
-        "name": "Fire Magic"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "High Noon"
-      },
-      {
-        "qty": 1,
-        "name": "Wan Shi Tong, Librarian"
-      },
-      {
-        "qty": 1,
-        "name": "Annul"
-      },
-      {
-        "qty": 1,
-        "name": "Pyroclasm"
-      },
-      {
-        "qty": 2,
-        "name": "Emeritus of Ideation // Ancestral Recall"
-      },
-      {
-        "qty": 2,
-        "name": "Flashfreeze"
-      },
-      {
-        "qty": 2,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 1,
-        "name": "Outrageous Robbery"
-      },
-      {
-        "qty": 1,
-        "name": "Riverchurn Monument"
-      },
-      {
-        "qty": 1,
-        "name": "Negate"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Lucas Worrell",
-    "subtitle": "Izzet Prowess",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 7,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Opt"
-      },
-      {
-        "qty": 4,
-        "name": "Stormchaser's Talent"
-      },
-      {
-        "qty": 4,
-        "name": "Burst Lightning"
-      },
-      {
-        "qty": 2,
-        "name": "Bounce Off"
-      },
-      {
-        "qty": 4,
-        "name": "Boomerang Basics"
-      },
-      {
-        "qty": 4,
-        "name": "Colorstorm Stallion"
-      },
-      {
-        "qty": 3,
-        "name": "Secret Identity"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 2,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 4,
-        "name": "Riverpyre Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 4,
-        "name": "Spirebluff Canal"
-      },
-      {
-        "qty": 4,
-        "name": "Sleight of Hand"
-      },
-      {
-        "qty": 2,
-        "name": "Vibrant Outburst"
-      },
-      {
-        "qty": 4,
-        "name": "Slickshot Show-Off"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 2,
-        "name": "Slagstorm"
-      },
-      {
-        "qty": 2,
-        "name": "Get Out"
-      },
-      {
-        "qty": 2,
-        "name": "Flow State"
-      },
-      {
-        "qty": 1,
-        "name": "Sear"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 2,
-        "name": "Into the Flood Maw"
-      },
-      {
-        "qty": 2,
-        "name": "Drake Hatcher"
-      },
-      {
-        "qty": 1,
-        "name": "Ral, Crackling Wit"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
-  },
-  {
-    "deck_title": "Maksym Gryn",
-    "subtitle": "Azorius Tempo",
-    "event_date": "May 17, 2026",
-    "event_name": "F2F Tour Championship: Ottawa",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "High Noon"
-      },
-      {
-        "qty": 3,
-        "name": "Floodpits Drowner"
-      },
-      {
-        "qty": 1,
-        "name": "Restless Anchorage"
-      },
-      {
-        "qty": 4,
-        "name": "Aang, Swift Savior"
-      },
-      {
-        "qty": 2,
-        "name": "Avatar's Wrath"
-      },
-      {
-        "qty": 4,
-        "name": "Starting Town"
-      },
-      {
-        "qty": 4,
-        "name": "Aven Interrupter"
-      },
-      {
-        "qty": 2,
-        "name": "Get Lost"
-      },
-      {
-        "qty": 4,
-        "name": "Floodfarm Verge"
-      },
-      {
-        "qty": 4,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 1,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 3,
-        "name": "Skycoach Conductor"
-      },
-      {
-        "qty": 4,
-        "name": "Island"
-      },
-      {
-        "qty": 4,
-        "name": "Voice of Victory"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Snare"
-      },
-      {
-        "qty": 2,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 1,
-        "name": "Beza, the Bounding Spring"
-      },
-      {
-        "qty": 1,
-        "name": "Airbender Ascension"
-      },
-      {
-        "qty": 2,
-        "name": "Abandoned Air Temple"
-      },
-      {
-        "qty": 4,
-        "name": "Plains"
-      },
-      {
-        "qty": 1,
-        "name": "Ajani, Outland Chaperone"
-      },
-      {
-        "qty": 3,
-        "name": "Quantum Riddler"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Disdainful Stroke"
-      },
-      {
-        "qty": 1,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 1,
-        "name": "Glen Elendra Guardian"
-      },
-      {
-        "qty": 1,
-        "name": "Annul"
-      },
-      {
-        "qty": 2,
-        "name": "Seam Rip"
-      },
-      {
-        "qty": 2,
-        "name": "Ghost Vacuum"
-      },
-      {
-        "qty": 1,
-        "name": "Beza, the Bounding Spring"
-      },
-      {
-        "qty": 2,
-        "name": "Avatar's Wrath"
-      },
-      {
-        "qty": 1,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 1,
-        "name": "Petrified Hamlet"
-      },
-      {
-        "qty": 1,
-        "name": "Spell Snare"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/decklists/f2f-tour-championship-ottawa-may-2026-top-12-standard-decklists"
   },
   {
     "deck_title": "Horiuchi Makoto",
@@ -395905,1396 +397543,6 @@
     "source": "https://magic.gg/decklists/united-states-regional-championships-washington-dc-may-2026-top-32-standard-decklists"
   },
   {
-    "deck_title": "Pickaxe",
-    "subtitle": "Rhinos",
-    "event_date": "May 24, 2026",
-    "event_name": "Modern Challenge 32 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 1,
-        "name": "Boseiju, Who Endures"
-      },
-      {
-        "qty": 1,
-        "name": "Breeding Pool"
-      },
-      {
-        "qty": 1,
-        "name": "Commercial District"
-      },
-      {
-        "qty": 4,
-        "name": "Crashing Footfalls"
-      },
-      {
-        "qty": 2,
-        "name": "Dead"
-      },
-      {
-        "qty": 1,
-        "name": "Dismember"
-      },
-      {
-        "qty": 1,
-        "name": "Endurance"
-      },
-      {
-        "qty": 4,
-        "name": "Fire // Ice"
-      },
-      {
-        "qty": 4,
-        "name": "Force of Negation"
-      },
-      {
-        "qty": 1,
-        "name": "Forest"
-      },
-      {
-        "qty": 1,
-        "name": "Hedge Maze"
-      },
-      {
-        "qty": 2,
-        "name": "Island"
-      },
-      {
-        "qty": 1,
-        "name": "L\u00f3rien Revealed"
-      },
-      {
-        "qty": 1,
-        "name": "Mistrise Village"
-      },
-      {
-        "qty": 4,
-        "name": "Misty Rainforest"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 3,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 3,
-        "name": "Scalding Tarn"
-      },
-      {
-        "qty": 4,
-        "name": "Shardless Agent"
-      },
-      {
-        "qty": 2,
-        "name": "Sink into Stupor"
-      },
-      {
-        "qty": 1,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 1,
-        "name": "Stomping Ground"
-      },
-      {
-        "qty": 4,
-        "name": "Subtlety"
-      },
-      {
-        "qty": 1,
-        "name": "Thundering Falls"
-      },
-      {
-        "qty": 2,
-        "name": "Vibrance"
-      },
-      {
-        "qty": 4,
-        "name": "Violent Outburst"
-      },
-      {
-        "qty": 2,
-        "name": "Wistfulness"
-      },
-      {
-        "qty": 3,
-        "name": "Wooded Foothills"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Blood Moon"
-      },
-      {
-        "qty": 3,
-        "name": "Brotherhood's End"
-      },
-      {
-        "qty": 2,
-        "name": "Endurance"
-      },
-      {
-        "qty": 2,
-        "name": "Force of Vigor"
-      },
-      {
-        "qty": 2,
-        "name": "Inevitable Betrayal"
-      },
-      {
-        "qty": 3,
-        "name": "Mystical Dispute"
-      },
-      {
-        "qty": 1,
-        "name": "Wistfulness"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-24",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "SanPop",
-    "subtitle": "Living End",
-    "event_date": "May 19, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 1,
-        "name": "Boseiju, Who Endures"
-      },
-      {
-        "qty": 1,
-        "name": "Breeding Pool"
-      },
-      {
-        "qty": 1,
-        "name": "Colossal Skyturtle"
-      },
-      {
-        "qty": 1,
-        "name": "Commercial District"
-      },
-      {
-        "qty": 4,
-        "name": "Curator of Mysteries"
-      },
-      {
-        "qty": 3,
-        "name": "Endurance"
-      },
-      {
-        "qty": 4,
-        "name": "Force of Negation"
-      },
-      {
-        "qty": 1,
-        "name": "Forest"
-      },
-      {
-        "qty": 4,
-        "name": "Generous Ent"
-      },
-      {
-        "qty": 1,
-        "name": "Hedge Maze"
-      },
-      {
-        "qty": 1,
-        "name": "Island"
-      },
-      {
-        "qty": 3,
-        "name": "Living End"
-      },
-      {
-        "qty": 1,
-        "name": "Mistrise Village"
-      },
-      {
-        "qty": 4,
-        "name": "Misty Rainforest"
-      },
-      {
-        "qty": 1,
-        "name": "Oliphaunt"
-      },
-      {
-        "qty": 1,
-        "name": "Otawara, Soaring City"
-      },
-      {
-        "qty": 4,
-        "name": "Shardless Agent"
-      },
-      {
-        "qty": 2,
-        "name": "Sink into Stupor"
-      },
-      {
-        "qty": 1,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 1,
-        "name": "Stomping Ground"
-      },
-      {
-        "qty": 4,
-        "name": "Street Wraith"
-      },
-      {
-        "qty": 2,
-        "name": "Striped Riverwinder"
-      },
-      {
-        "qty": 4,
-        "name": "Subtlety"
-      },
-      {
-        "qty": 1,
-        "name": "Thundering Falls"
-      },
-      {
-        "qty": 4,
-        "name": "Violent Outburst"
-      },
-      {
-        "qty": 1,
-        "name": "Waker of Waves"
-      },
-      {
-        "qty": 4,
-        "name": "Wistfulness"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Brazen Borrower"
-      },
-      {
-        "qty": 3,
-        "name": "Damping Matrix"
-      },
-      {
-        "qty": 2,
-        "name": "Dismember"
-      },
-      {
-        "qty": 1,
-        "name": "Endurance"
-      },
-      {
-        "qty": 2,
-        "name": "Force of Vigor"
-      },
-      {
-        "qty": 1,
-        "name": "Foundation Breaker"
-      },
-      {
-        "qty": 2,
-        "name": "Inevitable Betrayal"
-      },
-      {
-        "qty": 3,
-        "name": "Mystical Dispute"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-19",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "MayoDominaria",
-    "subtitle": "Boros Energy",
-    "event_date": "May 19, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "Ajani, Nacatl Pariah"
-      },
-      {
-        "qty": 1,
-        "name": "Arena of Glory"
-      },
-      {
-        "qty": 4,
-        "name": "Arid Mesa"
-      },
-      {
-        "qty": 1,
-        "name": "Blood Moon"
-      },
-      {
-        "qty": 1,
-        "name": "Boromir, Warden of the Tower"
-      },
-      {
-        "qty": 1,
-        "name": "Dalkovan Encampment"
-      },
-      {
-        "qty": 2,
-        "name": "Elegant Parlor"
-      },
-      {
-        "qty": 2,
-        "name": "Fable of the Mirror-Breaker"
-      },
-      {
-        "qty": 3,
-        "name": "Flooded Strand"
-      },
-      {
-        "qty": 4,
-        "name": "Galvanic Discharge"
-      },
-      {
-        "qty": 3,
-        "name": "Goblin Bombardment"
-      },
-      {
-        "qty": 4,
-        "name": "Guide of Souls"
-      },
-      {
-        "qty": 2,
-        "name": "Mana Tithe"
-      },
-      {
-        "qty": 3,
-        "name": "Marsh Flats"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 4,
-        "name": "Ocelot Pride"
-      },
-      {
-        "qty": 2,
-        "name": "Plains"
-      },
-      {
-        "qty": 3,
-        "name": "Ragavan, Nimble Pilferer"
-      },
-      {
-        "qty": 1,
-        "name": "Ranger-Captain of Eos"
-      },
-      {
-        "qty": 3,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 2,
-        "name": "Seasoned Pyromancer"
-      },
-      {
-        "qty": 1,
-        "name": "Solitude"
-      },
-      {
-        "qty": 1,
-        "name": "Static Prison"
-      },
-      {
-        "qty": 1,
-        "name": "The Legend of Roku"
-      },
-      {
-        "qty": 2,
-        "name": "Thraben Charm"
-      },
-      {
-        "qty": 2,
-        "name": "Voice of Victory"
-      },
-      {
-        "qty": 2,
-        "name": "Windswept Heath"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Blood Moon"
-      },
-      {
-        "qty": 1,
-        "name": "Celestial Purge"
-      },
-      {
-        "qty": 1,
-        "name": "Drannith Magistrate"
-      },
-      {
-        "qty": 2,
-        "name": "High Noon"
-      },
-      {
-        "qty": 3,
-        "name": "Obsidian Charmaw"
-      },
-      {
-        "qty": 1,
-        "name": "Orim's Chant"
-      },
-      {
-        "qty": 1,
-        "name": "Surgical Extraction"
-      },
-      {
-        "qty": 2,
-        "name": "Vexing Bauble"
-      },
-      {
-        "qty": 1,
-        "name": "Wear // Tear"
-      },
-      {
-        "qty": 2,
-        "name": "Wrath of the Skies"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-19",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "Yriel",
-    "subtitle": "Azorius Blink",
-    "event_date": "May 22, 2026",
-    "event_name": "Modern Challenge 32 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "Arid Mesa"
-      },
-      {
-        "qty": 2,
-        "name": "Consign to Memory"
-      },
-      {
-        "qty": 4,
-        "name": "Ephemerate"
-      },
-      {
-        "qty": 4,
-        "name": "Flooded Strand"
-      },
-      {
-        "qty": 4,
-        "name": "Guide of Souls"
-      },
-      {
-        "qty": 3,
-        "name": "Hallowed Fountain"
-      },
-      {
-        "qty": 1,
-        "name": "Island"
-      },
-      {
-        "qty": 1,
-        "name": "Meticulous Archive"
-      },
-      {
-        "qty": 1,
-        "name": "Mockingbird"
-      },
-      {
-        "qty": 4,
-        "name": "Ocelot Pride"
-      },
-      {
-        "qty": 4,
-        "name": "Phelia, Exuberant Shepherd"
-      },
-      {
-        "qty": 3,
-        "name": "Plains"
-      },
-      {
-        "qty": 4,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 1,
-        "name": "Sink into Stupor"
-      },
-      {
-        "qty": 1,
-        "name": "Skycoach Conductor"
-      },
-      {
-        "qty": 4,
-        "name": "Solitude"
-      },
-      {
-        "qty": 2,
-        "name": "Spell Pierce"
-      },
-      {
-        "qty": 4,
-        "name": "Starfield Shepherd"
-      },
-      {
-        "qty": 2,
-        "name": "Subtlety"
-      },
-      {
-        "qty": 3,
-        "name": "Teferi, Time Raveler"
-      },
-      {
-        "qty": 4,
-        "name": "Witch Enchanter"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Consign to Memory"
-      },
-      {
-        "qty": 1,
-        "name": "Force of Negation"
-      },
-      {
-        "qty": 2,
-        "name": "Harbinger of the Seas"
-      },
-      {
-        "qty": 3,
-        "name": "Mystical Dispute"
-      },
-      {
-        "qty": 3,
-        "name": "Prismatic Ending"
-      },
-      {
-        "qty": 1,
-        "name": "Subtlety"
-      },
-      {
-        "qty": 3,
-        "name": "Wrath of the Skies"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-22",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "Tetsubou",
-    "subtitle": "Domain Zoo",
-    "event_date": "May 23, 2026",
-    "event_name": "Modern Challenge 32 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Arena of Glory"
-      },
-      {
-        "qty": 4,
-        "name": "Arid Mesa"
-      },
-      {
-        "qty": 4,
-        "name": "Consign to Memory"
-      },
-      {
-        "qty": 4,
-        "name": "Flooded Strand"
-      },
-      {
-        "qty": 1,
-        "name": "Godless Shrine"
-      },
-      {
-        "qty": 1,
-        "name": "Indatha Triome"
-      },
-      {
-        "qty": 4,
-        "name": "Leyline Binding"
-      },
-      {
-        "qty": 4,
-        "name": "Leyline of the Guildpact"
-      },
-      {
-        "qty": 4,
-        "name": "Lightning Bolt"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 3,
-        "name": "Phelia, Exuberant Shepherd"
-      },
-      {
-        "qty": 1,
-        "name": "Plains"
-      },
-      {
-        "qty": 4,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 4,
-        "name": "Ragavan, Nimble Pilferer"
-      },
-      {
-        "qty": 4,
-        "name": "Scion of Draco"
-      },
-      {
-        "qty": 2,
-        "name": "Steam Vents"
-      },
-      {
-        "qty": 2,
-        "name": "Stubborn Denial"
-      },
-      {
-        "qty": 1,
-        "name": "Teferi, Time Raveler"
-      },
-      {
-        "qty": 1,
-        "name": "Temple Garden"
-      },
-      {
-        "qty": 4,
-        "name": "Territorial Kavu"
-      },
-      {
-        "qty": 1,
-        "name": "Thundering Falls"
-      },
-      {
-        "qty": 4,
-        "name": "Wooded Foothills"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Doorkeeper Thrull"
-      },
-      {
-        "qty": 3,
-        "name": "Mystical Dispute"
-      },
-      {
-        "qty": 1,
-        "name": "Nihil Spellbomb"
-      },
-      {
-        "qty": 2,
-        "name": "Obsidian Charmaw"
-      },
-      {
-        "qty": 1,
-        "name": "Stubborn Denial"
-      },
-      {
-        "qty": 1,
-        "name": "Surgical Extraction"
-      },
-      {
-        "qty": 2,
-        "name": "Wear // Tear"
-      },
-      {
-        "qty": 3,
-        "name": "Wrath of the Skies"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-23",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "LaRougeMTG",
-    "subtitle": "Boros Burn",
-    "event_date": "May 20, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Arid Mesa"
-      },
-      {
-        "qty": 2,
-        "name": "Barbarian Ring"
-      },
-      {
-        "qty": 1,
-        "name": "Bloodstained Mire"
-      },
-      {
-        "qty": 4,
-        "name": "Boltwave"
-      },
-      {
-        "qty": 4,
-        "name": "Boros Charm"
-      },
-      {
-        "qty": 4,
-        "name": "Eidolon of the Great Revel"
-      },
-      {
-        "qty": 4,
-        "name": "Goblin Guide"
-      },
-      {
-        "qty": 4,
-        "name": "Inspiring Vantage"
-      },
-      {
-        "qty": 4,
-        "name": "Lava Spike"
-      },
-      {
-        "qty": 4,
-        "name": "Lightning Bolt"
-      },
-      {
-        "qty": 4,
-        "name": "Monastery Swiftspear"
-      },
-      {
-        "qty": 3,
-        "name": "Mountain"
-      },
-      {
-        "qty": 2,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 1,
-        "name": "Scalding Tarn"
-      },
-      {
-        "qty": 4,
-        "name": "Searing Blaze"
-      },
-      {
-        "qty": 4,
-        "name": "Skewer the Critics"
-      },
-      {
-        "qty": 4,
-        "name": "Skullcrack"
-      },
-      {
-        "qty": 4,
-        "name": "Sunbaked Canyon"
-      },
-      {
-        "qty": 1,
-        "name": "Wooded Foothills"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Deflecting Palm"
-      },
-      {
-        "qty": 2,
-        "name": "Exquisite Firecraft"
-      },
-      {
-        "qty": 2,
-        "name": "Obsidian Charmaw"
-      },
-      {
-        "qty": 4,
-        "name": "Roiling Vortex"
-      },
-      {
-        "qty": 3,
-        "name": "Searing Blood"
-      },
-      {
-        "qty": 2,
-        "name": "Wear // Tear"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-20",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "Xfile",
-    "subtitle": "Hammer Time",
-    "event_date": "May 18, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Cavern of Souls"
-      },
-      {
-        "qty": 4,
-        "name": "Cloud, Midgar Mercenary"
-      },
-      {
-        "qty": 4,
-        "name": "Colossus Hammer"
-      },
-      {
-        "qty": 1,
-        "name": "Eiganjo Castle"
-      },
-      {
-        "qty": 1,
-        "name": "Eiganjo, Seat of the Empire"
-      },
-      {
-        "qty": 4,
-        "name": "Esper Sentinel"
-      },
-      {
-        "qty": 4,
-        "name": "Mox Opal"
-      },
-      {
-        "qty": 4,
-        "name": "Ornithopter"
-      },
-      {
-        "qty": 8,
-        "name": "Plains"
-      },
-      {
-        "qty": 2,
-        "name": "Portable Hole"
-      },
-      {
-        "qty": 4,
-        "name": "Puresteel Paladin"
-      },
-      {
-        "qty": 1,
-        "name": "Shadowspear"
-      },
-      {
-        "qty": 4,
-        "name": "Sigarda's Aid"
-      },
-      {
-        "qty": 1,
-        "name": "Skateboard"
-      },
-      {
-        "qty": 1,
-        "name": "Soul-Guide Lantern"
-      },
-      {
-        "qty": 1,
-        "name": "Springleaf Drum"
-      },
-      {
-        "qty": 4,
-        "name": "Stoneforge Mystic"
-      },
-      {
-        "qty": 4,
-        "name": "Sunbaked Canyon"
-      },
-      {
-        "qty": 1,
-        "name": "Umezawa's Jitte"
-      },
-      {
-        "qty": 4,
-        "name": "Urza's Saga"
-      },
-      {
-        "qty": 1,
-        "name": "Vexing Bauble"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Containment Priest"
-      },
-      {
-        "qty": 1,
-        "name": "Damping Sphere"
-      },
-      {
-        "qty": 1,
-        "name": "Flare of Fortitude"
-      },
-      {
-        "qty": 2,
-        "name": "Orim's Chant"
-      },
-      {
-        "qty": 1,
-        "name": "Pithing Needle"
-      },
-      {
-        "qty": 2,
-        "name": "Portable Hole"
-      },
-      {
-        "qty": 1,
-        "name": "Prismatic Ending"
-      },
-      {
-        "qty": 1,
-        "name": "Soulless Jailer"
-      },
-      {
-        "qty": 2,
-        "name": "Umezawa's Jitte"
-      },
-      {
-        "qty": 3,
-        "name": "Vexing Bauble"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-18",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "HouseOfManaMTG",
-    "subtitle": "Amulet Titan",
-    "event_date": "May 22, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 1,
-        "name": "Aftermath Analyst"
-      },
-      {
-        "qty": 4,
-        "name": "Amulet of Vigor"
-      },
-      {
-        "qty": 4,
-        "name": "Arboreal Grazer"
-      },
-      {
-        "qty": 2,
-        "name": "Boseiju, Who Endures"
-      },
-      {
-        "qty": 4,
-        "name": "Crumbling Vestige"
-      },
-      {
-        "qty": 1,
-        "name": "Cultivator Colossus"
-      },
-      {
-        "qty": 1,
-        "name": "Dryad Arbor"
-      },
-      {
-        "qty": 1,
-        "name": "Echoing Deeps"
-      },
-      {
-        "qty": 3,
-        "name": "Forest"
-      },
-      {
-        "qty": 4,
-        "name": "Green Sun's Zenith"
-      },
-      {
-        "qty": 4,
-        "name": "Gruul Turf"
-      },
-      {
-        "qty": 1,
-        "name": "Hanweir Battlements"
-      },
-      {
-        "qty": 1,
-        "name": "Mirrorpool"
-      },
-      {
-        "qty": 1,
-        "name": "Otawara, Soaring City"
-      },
-      {
-        "qty": 3,
-        "name": "Primeval Titan"
-      },
-      {
-        "qty": 3,
-        "name": "Scapeshift"
-      },
-      {
-        "qty": 1,
-        "name": "Shifting Woodland"
-      },
-      {
-        "qty": 4,
-        "name": "Simic Growth Chamber"
-      },
-      {
-        "qty": 4,
-        "name": "Spelunking"
-      },
-      {
-        "qty": 2,
-        "name": "Summoner's Pact"
-      },
-      {
-        "qty": 1,
-        "name": "Sylvan Safekeeper"
-      },
-      {
-        "qty": 1,
-        "name": "The Mycosynth Gardens"
-      },
-      {
-        "qty": 1,
-        "name": "Tolaria West"
-      },
-      {
-        "qty": 1,
-        "name": "Urza's Cave"
-      },
-      {
-        "qty": 4,
-        "name": "Urza's Saga"
-      },
-      {
-        "qty": 1,
-        "name": "Vesuva"
-      },
-      {
-        "qty": 1,
-        "name": "Vexing Bauble"
-      },
-      {
-        "qty": 1,
-        "name": "Zuran Orb"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Bojuka Bog"
-      },
-      {
-        "qty": 1,
-        "name": "Boseiju, Who Endures"
-      },
-      {
-        "qty": 1,
-        "name": "Collector Ouphe"
-      },
-      {
-        "qty": 2,
-        "name": "Dismember"
-      },
-      {
-        "qty": 2,
-        "name": "Firespout"
-      },
-      {
-        "qty": 2,
-        "name": "Force of Vigor"
-      },
-      {
-        "qty": 1,
-        "name": "Six"
-      },
-      {
-        "qty": 1,
-        "name": "Soul-Guide Lantern"
-      },
-      {
-        "qty": 1,
-        "name": "Tireless Tracker"
-      },
-      {
-        "qty": 1,
-        "name": "Titania, Protector of Argoth"
-      },
-      {
-        "qty": 2,
-        "name": "Vexing Bauble"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-22",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "jbl2311",
-    "subtitle": "Boros Land Destruction",
-    "event_date": "May 20, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 2,
-        "name": "Chandra, Torch of Defiance"
-      },
-      {
-        "qty": 4,
-        "name": "Cleansing Wildfire"
-      },
-      {
-        "qty": 4,
-        "name": "Cori Mountain Monastery"
-      },
-      {
-        "qty": 4,
-        "name": "Demolition Field"
-      },
-      {
-        "qty": 4,
-        "name": "Erode"
-      },
-      {
-        "qty": 4,
-        "name": "Field of Ruin"
-      },
-      {
-        "qty": 4,
-        "name": "Galvanic Discharge"
-      },
-      {
-        "qty": 1,
-        "name": "March of Otherworldly Light"
-      },
-      {
-        "qty": 1,
-        "name": "Mountain"
-      },
-      {
-        "qty": 4,
-        "name": "Path to Exile"
-      },
-      {
-        "qty": 5,
-        "name": "Plains"
-      },
-      {
-        "qty": 4,
-        "name": "Price of Freedom"
-      },
-      {
-        "qty": 3,
-        "name": "Sacred Foundry"
-      },
-      {
-        "qty": 4,
-        "name": "Solitude"
-      },
-      {
-        "qty": 1,
-        "name": "Sunbillow Verge"
-      },
-      {
-        "qty": 2,
-        "name": "Sunken Citadel"
-      },
-      {
-        "qty": 1,
-        "name": "The Legend of Roku"
-      },
-      {
-        "qty": 4,
-        "name": "White Orchid Phantom"
-      },
-      {
-        "qty": 4,
-        "name": "Wrath of the Skies"
-      }
-    ],
-    "side": [
-      {
-        "qty": 2,
-        "name": "Aven Mindcensor"
-      },
-      {
-        "qty": 1,
-        "name": "Celestial Purge"
-      },
-      {
-        "qty": 2,
-        "name": "High Noon"
-      },
-      {
-        "qty": 1,
-        "name": "March of Otherworldly Light"
-      },
-      {
-        "qty": 2,
-        "name": "Orim's Chant"
-      },
-      {
-        "qty": 2,
-        "name": "Rest in Peace"
-      },
-      {
-        "qty": 3,
-        "name": "Vexing Bauble"
-      },
-      {
-        "qty": 2,
-        "name": "Wear // Tear"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-20",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
-    "deck_title": "Denisevich",
-    "subtitle": "Eldrazi Ramp",
-    "event_date": "May 22, 2026",
-    "event_name": "Modern Challenge 64 on Magic Online",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 4,
-        "name": "Devourer of Destiny"
-      },
-      {
-        "qty": 4,
-        "name": "Disciple of Freyalise"
-      },
-      {
-        "qty": 1,
-        "name": "Dryad Arbor"
-      },
-      {
-        "qty": 4,
-        "name": "Eldrazi Temple"
-      },
-      {
-        "qty": 4,
-        "name": "Emrakul, the Promised End"
-      },
-      {
-        "qty": 4,
-        "name": "Fanatic of Rhonas"
-      },
-      {
-        "qty": 4,
-        "name": "Fight Rigging"
-      },
-      {
-        "qty": 5,
-        "name": "Forest"
-      },
-      {
-        "qty": 1,
-        "name": "Ghost Quarter"
-      },
-      {
-        "qty": 4,
-        "name": "Green Sun's Zenith"
-      },
-      {
-        "qty": 4,
-        "name": "Kozilek's Command"
-      },
-      {
-        "qty": 4,
-        "name": "Malevolent Rumble"
-      },
-      {
-        "qty": 1,
-        "name": "Mosswort Bridge"
-      },
-      {
-        "qty": 4,
-        "name": "Slumbering Trudge"
-      },
-      {
-        "qty": 4,
-        "name": "Sowing Mycospawn"
-      },
-      {
-        "qty": 4,
-        "name": "Turntimber Symbiosis"
-      },
-      {
-        "qty": 4,
-        "name": "Ugin's Labyrinth"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Chomping Changeling"
-      },
-      {
-        "qty": 1,
-        "name": "Collector Ouphe"
-      },
-      {
-        "qty": 3,
-        "name": "Endurance"
-      },
-      {
-        "qty": 3,
-        "name": "Fade from History"
-      },
-      {
-        "qty": 4,
-        "name": "Thought-Knot Seer"
-      },
-      {
-        "qty": 3,
-        "name": "Trinisphere"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-22",
-    "weight": 1,
-    "source": "https://magic.gg/news/metagame-mentor-biggest-changes-to-modern-after-the-may-2026-bans"
-  },
-  {
     "deck_title": "Masataka Hori",
     "subtitle": "Izzet Prowess",
     "event_date": "May 30, 2026",
@@ -398089,6 +398337,967 @@
     "source": "https://magic.gg/news/metagame-mentor-standard-developments-at-six-regional-championships-and-magic-spotlight-secrets"
   },
   {
+    "deck_title": "Linden_43",
+    "subtitle": "Izzet Spellementals",
+    "event_date": "June 25, 2026",
+    "event_name": "Standard Challenge on Magic Online",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 2,
+        "name": "Boomerang Basics"
+      },
+      {
+        "qty": 1,
+        "name": "Bounce Off"
+      },
+      {
+        "qty": 2,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 4,
+        "name": "Eddymurk Crab"
+      },
+      {
+        "qty": 3,
+        "name": "Flow State"
+      },
+      {
+        "qty": 1,
+        "name": "Hearth Elemental"
+      },
+      {
+        "qty": 1,
+        "name": "Impractical Joke"
+      },
+      {
+        "qty": 8,
+        "name": "Island"
+      },
+      {
+        "qty": 4,
+        "name": "Namor the Sub-Mariner"
+      },
+      {
+        "qty": 4,
+        "name": "Opt"
+      },
+      {
+        "qty": 1,
+        "name": "Prismari Charm"
+      },
+      {
+        "qty": 4,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 2,
+        "name": "Roaring Furnace // Steaming Sauna"
+      },
+      {
+        "qty": 4,
+        "name": "Sleight of Hand"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Snare"
+      },
+      {
+        "qty": 4,
+        "name": "Spirebluff Canal"
+      },
+      {
+        "qty": 1,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 1,
+        "name": "Stormcarved Coast"
+      },
+      {
+        "qty": 2,
+        "name": "Sunderflock"
+      },
+      {
+        "qty": 1,
+        "name": "Traumatic Critique"
+      },
+      {
+        "qty": 1,
+        "name": "Vibrant Outburst"
+      },
+      {
+        "qty": 2,
+        "name": "Winternight Stories"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Annul"
+      },
+      {
+        "qty": 1,
+        "name": "Ashling, Rekindled"
+      },
+      {
+        "qty": 1,
+        "name": "Disdainful Stroke"
+      },
+      {
+        "qty": 2,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Ral, Crackling Wit"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 2,
+        "name": "Stormchaser's Talent"
+      },
+      {
+        "qty": 1,
+        "name": "Sunderflock"
+      },
+      {
+        "qty": 1,
+        "name": "Sunspine Lynx"
+      },
+      {
+        "qty": 1,
+        "name": "The Legend of Kuruk"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-25",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "PedraStone",
+    "subtitle": "Selesnya Offense",
+    "event_date": "June 26, 2026",
+    "event_name": "Standard Challenge on Magic Online",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 3,
+        "name": "Abandoned Air Temple"
+      },
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Brightglass Gearhulk"
+      },
+      {
+        "qty": 1,
+        "name": "Bushwhack"
+      },
+      {
+        "qty": 6,
+        "name": "Forest"
+      },
+      {
+        "qty": 4,
+        "name": "Hushwood Verge"
+      },
+      {
+        "qty": 1,
+        "name": "Jennifer Walters"
+      },
+      {
+        "qty": 1,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 4,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 3,
+        "name": "Spider Manifestation"
+      },
+      {
+        "qty": 4,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 1,
+        "name": "Meltstrider's Resolve"
+      },
+      {
+        "qty": 2,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Ouroboroid"
+      },
+      {
+        "qty": 4,
+        "name": "Pawpatch Recruit"
+      },
+      {
+        "qty": 2,
+        "name": "Plains"
+      },
+      {
+        "qty": 4,
+        "name": "Practiced Offense"
+      },
+      {
+        "qty": 2,
+        "name": "Seam Rip"
+      },
+      {
+        "qty": 1,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 3,
+        "name": "Surrak, Elusive Hunter"
+      },
+      {
+        "qty": 4,
+        "name": "Temple Garden"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Axebane Ferox"
+      },
+      {
+        "qty": 2,
+        "name": "Elspeth, Storm Slayer"
+      },
+      {
+        "qty": 2,
+        "name": "Erode"
+      },
+      {
+        "qty": 1,
+        "name": "Meltstrider's Resolve"
+      },
+      {
+        "qty": 2,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 2,
+        "name": "Restoration Magic"
+      },
+      {
+        "qty": 4,
+        "name": "Sheltered by Ghosts"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-26",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "Arianne",
+    "subtitle": "Izzet Prowess",
+    "event_date": "June 26, 2026",
+    "event_name": "Standard Challenge on Magic Online",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Boomerang Basics"
+      },
+      {
+        "qty": 1,
+        "name": "Bounce Off"
+      },
+      {
+        "qty": 4,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 3,
+        "name": "Eddymurk Crab"
+      },
+      {
+        "qty": 4,
+        "name": "Flow State"
+      },
+      {
+        "qty": 7,
+        "name": "Island"
+      },
+      {
+        "qty": 2,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Namor the Sub-Mariner"
+      },
+      {
+        "qty": 4,
+        "name": "Opt"
+      },
+      {
+        "qty": 4,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 1,
+        "name": "Roaring Furnace // Steaming Sauna"
+      },
+      {
+        "qty": 1,
+        "name": "Secret Identity"
+      },
+      {
+        "qty": 4,
+        "name": "Sleight of Hand"
+      },
+      {
+        "qty": 4,
+        "name": "Slickshot Show-Off"
+      },
+      {
+        "qty": 2,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 4,
+        "name": "Spirebluff Canal"
+      },
+      {
+        "qty": 4,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 4,
+        "name": "Stormchaser's Talent"
+      },
+      {
+        "qty": 1,
+        "name": "Vibrant Outburst"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Annul"
+      },
+      {
+        "qty": 3,
+        "name": "Avengers Disassembled"
+      },
+      {
+        "qty": 1,
+        "name": "Broadside Barrage"
+      },
+      {
+        "qty": 1,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 1,
+        "name": "Get Out"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Namor the Sub-Mariner"
+      },
+      {
+        "qty": 1,
+        "name": "Ral, Crackling Wit"
+      },
+      {
+        "qty": 2,
+        "name": "Sear"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 1,
+        "name": "Spell Pierce"
+      },
+      {
+        "qty": 1,
+        "name": "Sunspine Lynx"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-26",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "VitorCarvalho01",
+    "subtitle": "Dimir Excruciator",
+    "event_date": "June 27, 2026",
+    "event_name": "Standard Challenge on Magic Online",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 3,
+        "name": "Bitter Triumph"
+      },
+      {
+        "qty": 1,
+        "name": "Cavern of Souls"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Black Sun"
+      },
+      {
+        "qty": 1,
+        "name": "Deadly Cover-Up"
+      },
+      {
+        "qty": 4,
+        "name": "Deceit"
+      },
+      {
+        "qty": 3,
+        "name": "Doomsday Excruciator"
+      },
+      {
+        "qty": 4,
+        "name": "Duress"
+      },
+      {
+        "qty": 2,
+        "name": "Emeritus of Ideation"
+      },
+      {
+        "qty": 4,
+        "name": "Gloomlake Verge"
+      },
+      {
+        "qty": 2,
+        "name": "Hidden Lair"
+      },
+      {
+        "qty": 4,
+        "name": "Superior Spider-Man"
+      },
+      {
+        "qty": 1,
+        "name": "M.O.D.O.K."
+      },
+      {
+        "qty": 4,
+        "name": "Requiting Hex"
+      },
+      {
+        "qty": 4,
+        "name": "Restless Reef"
+      },
+      {
+        "qty": 3,
+        "name": "Stock Up"
+      },
+      {
+        "qty": 1,
+        "name": "Strategic Betrayal"
+      },
+      {
+        "qty": 10,
+        "name": "Swamp"
+      },
+      {
+        "qty": 1,
+        "name": "Undercity Sewers"
+      },
+      {
+        "qty": 4,
+        "name": "Watery Grave"
+      },
+      {
+        "qty": 2,
+        "name": "Winternight Stories"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Deadly Cover-Up"
+      },
+      {
+        "qty": 1,
+        "name": "Emeritus of Ideation"
+      },
+      {
+        "qty": 3,
+        "name": "Flashfreeze"
+      },
+      {
+        "qty": 1,
+        "name": "Ghost Vacuum"
+      },
+      {
+        "qty": 1,
+        "name": "Island"
+      },
+      {
+        "qty": 3,
+        "name": "Oildeep Gearhulk"
+      },
+      {
+        "qty": 2,
+        "name": "Qarsi Revenant"
+      },
+      {
+        "qty": 2,
+        "name": "Shoot the Sheriff"
+      },
+      {
+        "qty": 1,
+        "name": "Strategic Betrayal"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-27",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "Taldoitalo",
+    "subtitle": "Jeskai Artifacts",
+    "event_date": "June 25, 2026",
+    "event_name": "Standard Challenge on Magic Online",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 2,
+        "name": "Castle Doom"
+      },
+      {
+        "qty": 2,
+        "name": "Cryogen Relic"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 3,
+        "name": "Dusk Rose Reliquary"
+      },
+      {
+        "qty": 1,
+        "name": "Elegant Parlor"
+      },
+      {
+        "qty": 1,
+        "name": "Floodfarm Verge"
+      },
+      {
+        "qty": 2,
+        "name": "Iron Man Armor"
+      },
+      {
+        "qty": 1,
+        "name": "Island"
+      },
+      {
+        "qty": 2,
+        "name": "Legion Extruder"
+      },
+      {
+        "qty": 1,
+        "name": "Meticulous Archive"
+      },
+      {
+        "qty": 1,
+        "name": "Mountain"
+      },
+      {
+        "qty": 3,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 2,
+        "name": "Perilous Snare"
+      },
+      {
+        "qty": 3,
+        "name": "Pinnacle Starcage"
+      },
+      {
+        "qty": 4,
+        "name": "Repurposing Bay"
+      },
+      {
+        "qty": 2,
+        "name": "Riverpyre Verge"
+      },
+      {
+        "qty": 1,
+        "name": "Sacred Foundry"
+      },
+      {
+        "qty": 4,
+        "name": "Simulacrum Synthesizer"
+      },
+      {
+        "qty": 1,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 4,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 3,
+        "name": "Steam Vents"
+      },
+      {
+        "qty": 1,
+        "name": "Sunbillow Verge"
+      },
+      {
+        "qty": 2,
+        "name": "The Enigma Jewel"
+      },
+      {
+        "qty": 1,
+        "name": "The Fire Crystal"
+      },
+      {
+        "qty": 1,
+        "name": "The Mind Stone"
+      },
+      {
+        "qty": 2,
+        "name": "Thundering Falls"
+      },
+      {
+        "qty": 4,
+        "name": "United Battlefront"
+      },
+      {
+        "qty": 3,
+        "name": "Weapons Manufacturing"
+      },
+      {
+        "qty": 1,
+        "name": "White Auracite"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Astelli Reclaimer"
+      },
+      {
+        "qty": 2,
+        "name": "Day of Judgment"
+      },
+      {
+        "qty": 2,
+        "name": "Disdainful Stroke"
+      },
+      {
+        "qty": 2,
+        "name": "High Noon"
+      },
+      {
+        "qty": 1,
+        "name": "Negate"
+      },
+      {
+        "qty": 2,
+        "name": "Rest in Peace"
+      },
+      {
+        "qty": 3,
+        "name": "Seam Rip"
+      },
+      {
+        "qty": 2,
+        "name": "Torpor Orb"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-25",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "Xfile",
+    "subtitle": "Simic Rhythm",
+    "event_date": "June 27, 2026",
+    "event_name": "Standard RC Super Qualifier",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Badgermole Cub"
+      },
+      {
+        "qty": 4,
+        "name": "Botanical Sanctum"
+      },
+      {
+        "qty": 4,
+        "name": "Breeding Pool"
+      },
+      {
+        "qty": 1,
+        "name": "Craterhoof Behemoth"
+      },
+      {
+        "qty": 6,
+        "name": "Forest"
+      },
+      {
+        "qty": 1,
+        "name": "Formidable Speaker"
+      },
+      {
+        "qty": 4,
+        "name": "Gene Pollinator"
+      },
+      {
+        "qty": 1,
+        "name": "Kang the Conqueror"
+      },
+      {
+        "qty": 1,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 1,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 4,
+        "name": "Spider Manifestation"
+      },
+      {
+        "qty": 4,
+        "name": "Llanowar Elves"
+      },
+      {
+        "qty": 1,
+        "name": "Marang River Regent"
+      },
+      {
+        "qty": 4,
+        "name": "Multiversal Passage"
+      },
+      {
+        "qty": 4,
+        "name": "Nature's Rhythm"
+      },
+      {
+        "qty": 4,
+        "name": "Ouroboroid"
+      },
+      {
+        "qty": 4,
+        "name": "Quantum Riddler"
+      },
+      {
+        "qty": 4,
+        "name": "Shang-Chi, Master of Kung Fu"
+      },
+      {
+        "qty": 4,
+        "name": "Willowrush Verge"
+      }
+    ],
+    "side": [
+      {
+        "qty": 4,
+        "name": "Detect Intrusion"
+      },
+      {
+        "qty": 2,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 3,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 4,
+        "name": "Negate"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-27",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
+    "deck_title": "OafMcNamara",
+    "subtitle": "Gruul Delirium",
+    "event_date": "June 27, 2026",
+    "event_name": "Standard RC Super Qualifier",
+    "format": "Standard",
+    "main": [
+      {
+        "qty": 4,
+        "name": "Break Out"
+      },
+      {
+        "qty": 2,
+        "name": "Burst Lightning"
+      },
+      {
+        "qty": 2,
+        "name": "Bushwhack"
+      },
+      {
+        "qty": 2,
+        "name": "Commercial District"
+      },
+      {
+        "qty": 2,
+        "name": "Esper Origins"
+      },
+      {
+        "qty": 4,
+        "name": "Fear of Missing Out"
+      },
+      {
+        "qty": 6,
+        "name": "Forest"
+      },
+      {
+        "qty": 1,
+        "name": "Inti, Seneschal of the Sun"
+      },
+      {
+        "qty": 4,
+        "name": "Keen-Eyed Curator"
+      },
+      {
+        "qty": 1,
+        "name": "Mountain"
+      },
+      {
+        "qty": 4,
+        "name": "Patchwork Beastie"
+      },
+      {
+        "qty": 4,
+        "name": "Rapid Rescue"
+      },
+      {
+        "qty": 2,
+        "name": "Royal Treatment"
+      },
+      {
+        "qty": 2,
+        "name": "Starting Town"
+      },
+      {
+        "qty": 4,
+        "name": "Stomping Ground"
+      },
+      {
+        "qty": 2,
+        "name": "Tersa Lightshatter"
+      },
+      {
+        "qty": 3,
+        "name": "Thornspire Verge"
+      },
+      {
+        "qty": 3,
+        "name": "Training Compound"
+      },
+      {
+        "qty": 4,
+        "name": "Violent Urge"
+      },
+      {
+        "qty": 4,
+        "name": "Wildfire Wickerfolk"
+      }
+    ],
+    "side": [
+      {
+        "qty": 1,
+        "name": "Inti, Seneschal of the Sun"
+      },
+      {
+        "qty": 2,
+        "name": "Leatherhead, Swamp Stalker"
+      },
+      {
+        "qty": 2,
+        "name": "Origin of Metalbending"
+      },
+      {
+        "qty": 2,
+        "name": "Ouroboroid"
+      },
+      {
+        "qty": 2,
+        "name": "Pyroclasm"
+      },
+      {
+        "qty": 2,
+        "name": "Sear"
+      },
+      {
+        "qty": 2,
+        "name": "Soul-Guide Lantern"
+      },
+      {
+        "qty": 2,
+        "name": "Surrak, Elusive Hunter"
+      }
+    ],
+    "companion": [],
+    "week": "2026-06-27",
+    "weight": 1,
+    "source": "https://magic.gg/news/metagame-mentor-the-standard-impact-of-marvel-super-heroes"
+  },
+  {
     "deck_title": "Jordan Selesnick",
     "subtitle": "Azorius Momo",
     "event_date": "May 31, 2026",
@@ -398401,136 +399610,5 @@
     "week": "2026-05-17",
     "weight": 1,
     "source": "https://magic.gg/news/the-week-that-was-a-generational-level-up-with-zachary-aymie"
-  },
-  {
-    "deck_title": "Rafael Kenji Marques Nishiyama",
-    "subtitle": "Dimir Excruciator",
-    "event_date": "May 17, 2026",
-    "event_name": "South America Regional Championship: S\u00e3o Paulo",
-    "format": "Standard",
-    "main": [
-      {
-        "qty": 3,
-        "name": "Doomsday Excruciator"
-      },
-      {
-        "qty": 4,
-        "name": "Restless Reef"
-      },
-      {
-        "qty": 4,
-        "name": "Deceit"
-      },
-      {
-        "qty": 3,
-        "name": "Duress"
-      },
-      {
-        "qty": 9,
-        "name": "Swamp"
-      },
-      {
-        "qty": 2,
-        "name": "Winternight Stories"
-      },
-      {
-        "qty": 3,
-        "name": "Bitter Triumph"
-      },
-      {
-        "qty": 4,
-        "name": "Superior Spider-Man"
-      },
-      {
-        "qty": 2,
-        "name": "Cavern of Souls"
-      },
-      {
-        "qty": 1,
-        "name": "Multiversal Passage"
-      },
-      {
-        "qty": 3,
-        "name": "Day of Black Sun"
-      },
-      {
-        "qty": 2,
-        "name": "Undercity Sewers"
-      },
-      {
-        "qty": 1,
-        "name": "Deadly Cover-Up"
-      },
-      {
-        "qty": 4,
-        "name": "Requiting Hex"
-      },
-      {
-        "qty": 3,
-        "name": "Stock Up"
-      },
-      {
-        "qty": 4,
-        "name": "Watery Grave"
-      },
-      {
-        "qty": 1,
-        "name": "Strategic Betrayal"
-      },
-      {
-        "qty": 4,
-        "name": "Gloomlake Verge"
-      },
-      {
-        "qty": 1,
-        "name": "Emeritus of Ideation"
-      },
-      {
-        "qty": 2,
-        "name": "Insatiable Avarice"
-      }
-    ],
-    "side": [
-      {
-        "qty": 1,
-        "name": "Strategic Betrayal"
-      },
-      {
-        "qty": 1,
-        "name": "Decorum Dissertation"
-      },
-      {
-        "qty": 2,
-        "name": "Qarsi Revenant"
-      },
-      {
-        "qty": 1,
-        "name": "Ghost Vacuum"
-      },
-      {
-        "qty": 3,
-        "name": "Oildeep Gearhulk"
-      },
-      {
-        "qty": 1,
-        "name": "Duress"
-      },
-      {
-        "qty": 2,
-        "name": "Quantum Riddler"
-      },
-      {
-        "qty": 2,
-        "name": "Flashfreeze"
-      },
-      {
-        "qty": 2,
-        "name": "Sunderflock"
-      }
-    ],
-    "companion": [],
-    "week": "2026-05-17",
-    "weight": 1,
-    "source": "https://magic.gg/news/the-week-that-was-an-excruciating-lesson-in-deck-selection"
   }
 ]

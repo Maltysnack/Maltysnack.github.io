@@ -1,174 +1,169 @@
 {
-  "generated_at": "2026-06-30",
-  "current_week": "2026-06-29",
+  "generated_at": "2026-07-07",
+  "current_week": "2026-07-06",
   "window_weeks": [
-    "2026-05-23",
-    "2026-05-24",
-    "2026-05-25",
-    "2026-06-01",
     "2026-06-08",
     "2026-06-15",
     "2026-06-22",
-    "2026-06-29"
+    "2026-06-25",
+    "2026-06-26",
+    "2026-06-27",
+    "2026-06-29",
+    "2026-07-06"
   ],
-  "candidate_count": 9,
+  "candidate_count": 7,
   "candidates": [
     {
       "kind": "post-pt-shift",
-      "key": "shift:Burst Lightning",
-      "headline_hint": "Burst Lightning up +11pp on ladder (23% to 34%)",
+      "key": "shift:Elspeth, Storm Slayer",
+      "headline_hint": "Elspeth, Storm Slayer up +9pp on ladder (2% to 11%)",
       "is_shell": false,
       "cards": [
-        "Burst Lightning"
+        "Elspeth, Storm Slayer"
       ],
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "23.5%"
+          "value": "2.2%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "34.2%"
+          "value": "11.4%"
         },
         {
           "label": "Delta",
-          "value": "+10.8pp"
+          "value": "+9.2pp"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "post-pt-shift",
-      "key": "shift:Meltstrider's Resolve",
-      "headline_hint": "Meltstrider's Resolve up +11pp on ladder (4% to 15%)",
+      "kind": "returning-card",
+      "key": "return-card:Pyroclasm",
+      "headline_hint": "Pyroclasm back after a 5-week absence",
       "is_shell": false,
       "cards": [
-        "Meltstrider's Resolve"
+        "Pyroclasm"
       ],
       "stats": [
         {
-          "label": "Prior 8wk share",
-          "value": "3.9%"
+          "label": "Peak before gap",
+          "value": "100%"
         },
         {
-          "label": "Recent 8wk share",
-          "value": "14.6%"
+          "label": "Gap",
+          "value": "15-06-2026 to 27-06-2026 (5 weeks, 0 appearances)"
         },
         {
-          "label": "Delta",
-          "value": "+10.7pp"
+          "label": "Return",
+          "value": "4% (06-07-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
-      "kind": "post-pt-shift",
-      "key": "shift:Vibrant Outburst",
-      "headline_hint": "Vibrant Outburst up +9pp on ladder (7% to 16%)",
-      "is_shell": true,
+      "kind": "returning-card",
+      "key": "return-card:Abrade",
+      "headline_hint": "Abrade back after a 7-week absence",
+      "is_shell": false,
       "cards": [
-        "Vibrant Outburst",
-        "Shore Up",
-        "Drake Hatcher",
-        "Colorstorm Stallion",
-        "Secret Identity",
+        "Abrade"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "100%"
+        },
+        {
+          "label": "Gap",
+          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (06-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Negate",
+      "headline_hint": "Negate back after a 7-week absence",
+      "is_shell": false,
+      "cards": [
+        "Negate"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "100%"
+        },
+        {
+          "label": "Gap",
+          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (06-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Restless Cottage",
+      "headline_hint": "Restless Cottage back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Restless Cottage"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "24%"
+        },
+        {
+          "label": "Gap",
+          "value": "25-06-2026 to 29-06-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "12% (06-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Torch the Tower",
+      "headline_hint": "Torch the Tower back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Torch the Tower"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "23%"
+        },
+        {
+          "label": "Gap",
+          "value": "22-06-2026 to 27-06-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (06-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Into the Flood Maw",
+      "headline_hint": "Into the Flood Maw back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
         "Into the Flood Maw"
-      ],
-      "stats": [
-        {
-          "label": "Prior 8wk share",
-          "value": "6.7%"
-        },
-        {
-          "label": "Recent 8wk share",
-          "value": "15.5%"
-        },
-        {
-          "label": "Delta",
-          "value": "+8.8pp"
-        }
-      ],
-      "already_in_stories": true
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Thundering Falls",
-      "headline_hint": "Thundering Falls back after a 5-week absence",
-      "is_shell": false,
-      "cards": [
-        "Thundering Falls"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "25-05-2026 to 22-06-2026 (5 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "3% (29-06-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Hedge Maze",
-      "headline_hint": "Hedge Maze back after a 5-week absence",
-      "is_shell": false,
-      "cards": [
-        "Hedge Maze"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "25-05-2026 to 22-06-2026 (5 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "3% (29-06-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Drake Hatcher",
-      "headline_hint": "Drake Hatcher back after a 11-week absence",
-      "is_shell": false,
-      "cards": [
-        "Drake Hatcher"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "29%"
-        },
-        {
-          "label": "Gap",
-          "value": "18-05-2026 to 22-06-2026 (11 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "3% (29-06-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Colorstorm Stallion",
-      "headline_hint": "Colorstorm Stallion back after a 10-week absence",
-      "is_shell": false,
-      "cards": [
-        "Colorstorm Stallion"
       ],
       "stats": [
         {
@@ -177,59 +172,11 @@
         },
         {
           "label": "Gap",
-          "value": "19-05-2026 to 22-06-2026 (10 weeks, 0 appearances)"
+          "value": "22-06-2026 to 27-06-2026 (4 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "6% (29-06-2026)"
-        }
-      ],
-      "already_in_stories": true
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Overlord of the Floodpits",
-      "headline_hint": "Overlord of the Floodpits back after a 10-week absence",
-      "is_shell": false,
-      "cards": [
-        "Overlord of the Floodpits"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "20%"
-        },
-        {
-          "label": "Gap",
-          "value": "19-05-2026 to 22-06-2026 (10 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "3% (29-06-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Sanguine Evangelist",
-      "headline_hint": "Sanguine Evangelist back after a 21-week absence",
-      "is_shell": false,
-      "cards": [
-        "Sanguine Evangelist"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "20%"
-        },
-        {
-          "label": "Gap",
-          "value": "16-03-2026 to 22-06-2026 (21 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "3% (29-06-2026)"
+          "value": "8% (06-07-2026)"
         }
       ],
       "already_in_stories": false
