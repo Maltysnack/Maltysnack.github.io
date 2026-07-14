@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-07-07",
-  "current_week": "2026-07-06",
+  "generated_at": "2026-07-14",
+  "current_week": "2026-07-13",
   "window_weeks": [
-    "2026-06-08",
     "2026-06-15",
     "2026-06-22",
     "2026-06-25",
     "2026-06-26",
     "2026-06-27",
     "2026-06-29",
-    "2026-07-06"
+    "2026-07-06",
+    "2026-07-13"
   ],
   "candidate_count": 7,
   "candidates": [
@@ -24,39 +24,15 @@
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "2.2%"
+          "value": "2.1%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "11.4%"
+          "value": "10.9%"
         },
         {
           "label": "Delta",
-          "value": "+9.2pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Pyroclasm",
-      "headline_hint": "Pyroclasm back after a 5-week absence",
-      "is_shell": false,
-      "cards": [
-        "Pyroclasm"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "15-06-2026 to 27-06-2026 (5 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (06-07-2026)"
+          "value": "+8.8pp"
         }
       ],
       "already_in_stories": false
@@ -80,18 +56,18 @@
         },
         {
           "label": "Return",
-          "value": "4% (06-07-2026)"
+          "value": "13% (13-07-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Negate",
-      "headline_hint": "Negate back after a 7-week absence",
+      "key": "return-card:Fire Magic",
+      "headline_hint": "Fire Magic back after a 8-week absence",
       "is_shell": false,
       "cards": [
-        "Negate"
+        "Fire Magic"
       ],
       "stats": [
         {
@@ -100,11 +76,83 @@
         },
         {
           "label": "Gap",
-          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
+          "value": "08-06-2026 to 06-07-2026 (8 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (06-07-2026)"
+          "value": "4% (13-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Flashback",
+      "headline_hint": "Flashback back after a 5-week absence",
+      "is_shell": false,
+      "cards": [
+        "Flashback"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "100%"
+        },
+        {
+          "label": "Gap",
+          "value": "25-06-2026 to 06-07-2026 (5 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (13-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Sear",
+      "headline_hint": "Sear back after a 6-week absence",
+      "is_shell": false,
+      "cards": [
+        "Sear"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "100%"
+        },
+        {
+          "label": "Gap",
+          "value": "22-06-2026 to 06-07-2026 (6 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (13-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:The Mind Stone",
+      "headline_hint": "The Mind Stone back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "The Mind Stone"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "50%"
+        },
+        {
+          "label": "Gap",
+          "value": "26-06-2026 to 06-07-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "9% (13-07-2026)"
         }
       ],
       "already_in_stories": false
@@ -128,55 +176,7 @@
         },
         {
           "label": "Return",
-          "value": "12% (06-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Torch the Tower",
-      "headline_hint": "Torch the Tower back after a 4-week absence",
-      "is_shell": false,
-      "cards": [
-        "Torch the Tower"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "23%"
-        },
-        {
-          "label": "Gap",
-          "value": "22-06-2026 to 27-06-2026 (4 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (06-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Into the Flood Maw",
-      "headline_hint": "Into the Flood Maw back after a 4-week absence",
-      "is_shell": false,
-      "cards": [
-        "Into the Flood Maw"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "21%"
-        },
-        {
-          "label": "Gap",
-          "value": "22-06-2026 to 27-06-2026 (4 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "8% (06-07-2026)"
+          "value": "4% (13-07-2026)"
         }
       ],
       "already_in_stories": false
