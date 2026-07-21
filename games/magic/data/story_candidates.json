@@ -1,145 +1,49 @@
 {
-  "generated_at": "2026-07-14",
-  "current_week": "2026-07-13",
+  "generated_at": "2026-07-21",
+  "current_week": "2026-07-20",
   "window_weeks": [
-    "2026-06-15",
     "2026-06-22",
     "2026-06-25",
     "2026-06-26",
     "2026-06-27",
     "2026-06-29",
     "2026-07-06",
-    "2026-07-13"
+    "2026-07-13",
+    "2026-07-20"
   ],
   "candidate_count": 7,
   "candidates": [
     {
       "kind": "post-pt-shift",
-      "key": "shift:Elspeth, Storm Slayer",
-      "headline_hint": "Elspeth, Storm Slayer up +9pp on ladder (2% to 11%)",
+      "key": "shift:Bitter Triumph",
+      "headline_hint": "Bitter Triumph up +8pp on ladder (8% to 17%)",
       "is_shell": false,
       "cards": [
-        "Elspeth, Storm Slayer"
+        "Bitter Triumph"
       ],
       "stats": [
         {
           "label": "Prior 8wk share",
-          "value": "2.1%"
+          "value": "8.1%"
         },
         {
           "label": "Recent 8wk share",
-          "value": "10.9%"
+          "value": "16.6%"
         },
         {
           "label": "Delta",
-          "value": "+8.8pp"
+          "value": "+8.5pp"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Abrade",
-      "headline_hint": "Abrade back after a 7-week absence",
+      "key": "return-card:Dusk Rose Reliquary",
+      "headline_hint": "Dusk Rose Reliquary back after a 5-week absence",
       "is_shell": false,
       "cards": [
-        "Abrade"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "13% (13-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Fire Magic",
-      "headline_hint": "Fire Magic back after a 8-week absence",
-      "is_shell": false,
-      "cards": [
-        "Fire Magic"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "08-06-2026 to 06-07-2026 (8 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (13-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Flashback",
-      "headline_hint": "Flashback back after a 5-week absence",
-      "is_shell": false,
-      "cards": [
-        "Flashback"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "25-06-2026 to 06-07-2026 (5 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (13-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Sear",
-      "headline_hint": "Sear back after a 6-week absence",
-      "is_shell": false,
-      "cards": [
-        "Sear"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "100%"
-        },
-        {
-          "label": "Gap",
-          "value": "22-06-2026 to 06-07-2026 (6 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (13-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:The Mind Stone",
-      "headline_hint": "The Mind Stone back after a 4-week absence",
-      "is_shell": false,
-      "cards": [
-        "The Mind Stone"
+        "Dusk Rose Reliquary"
       ],
       "stats": [
         {
@@ -148,11 +52,11 @@
         },
         {
           "label": "Gap",
-          "value": "26-06-2026 to 06-07-2026 (4 weeks, 0 appearances)"
+          "value": "26-06-2026 to 13-07-2026 (5 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "9% (13-07-2026)"
+          "value": "7% (20-07-2026)"
         }
       ],
       "already_in_stories": false
@@ -176,7 +80,103 @@
         },
         {
           "label": "Return",
-          "value": "4% (13-07-2026)"
+          "value": "11% (20-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Abrade",
+      "headline_hint": "Abrade back after a 7-week absence",
+      "is_shell": false,
+      "cards": [
+        "Abrade"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "17%"
+        },
+        {
+          "label": "Gap",
+          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (20-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Momentum Breaker",
+      "headline_hint": "Momentum Breaker back after a 10-week absence",
+      "is_shell": false,
+      "cards": [
+        "Momentum Breaker"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "15%"
+        },
+        {
+          "label": "Gap",
+          "value": "25-05-2026 to 06-07-2026 (10 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "7% (20-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Eclipsed Realms",
+      "headline_hint": "Eclipsed Realms back after a 6-week absence",
+      "is_shell": false,
+      "cards": [
+        "Eclipsed Realms"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "15%"
+        },
+        {
+          "label": "Gap",
+          "value": "25-06-2026 to 13-07-2026 (6 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (20-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Aclazotz, Deepest Betrayal",
+      "headline_hint": "Aclazotz, Deepest Betrayal back after a 11-week absence",
+      "is_shell": false,
+      "cards": [
+        "Aclazotz, Deepest Betrayal"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "15%"
+        },
+        {
+          "label": "Gap",
+          "value": "25-05-2026 to 13-07-2026 (11 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "4% (20-07-2026)"
         }
       ],
       "already_in_stories": false

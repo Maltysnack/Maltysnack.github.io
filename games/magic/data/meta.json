@@ -1,18 +1,18 @@
 {
-  "n_decks": 3220,
+  "n_decks": 3227,
   "n_decks_by_weight": {
-    "1": 3115,
-    "3": 105
+    "1": 3141,
+    "3": 86
   },
-  "total_weighted_decks": 3430,
-  "n_weeks": 110,
+  "total_weighted_decks": 3399,
+  "n_weeks": 109,
   "first_week": "2024-07-22",
-  "last_week": "2026-07-13",
+  "last_week": "2026-07-20",
   "pair_window_weeks": 12,
-  "pair_window_first_week": "2026-05-30",
-  "pair_window_total_weighted": 435.0,
-  "n_cards_total": 4012,
-  "n_cards_above_support": 191,
+  "pair_window_first_week": "2026-05-31",
+  "pair_window_total_weighted": 444.0,
+  "n_cards_total": 4029,
+  "n_cards_above_support": 204,
   "min_support_decks": 30,
   "tier_boundaries": [
     {
