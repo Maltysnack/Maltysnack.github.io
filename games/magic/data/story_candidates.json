@@ -1,121 +1,49 @@
 {
-  "generated_at": "2026-07-21",
-  "current_week": "2026-07-20",
+  "generated_at": "2026-07-28",
+  "current_week": "2026-07-27",
   "window_weeks": [
+    "2026-06-08",
+    "2026-06-15",
     "2026-06-22",
-    "2026-06-25",
-    "2026-06-26",
-    "2026-06-27",
     "2026-06-29",
     "2026-07-06",
     "2026-07-13",
-    "2026-07-20"
+    "2026-07-20",
+    "2026-07-27"
   ],
-  "candidate_count": 7,
+  "candidate_count": 6,
   "candidates": [
     {
-      "kind": "post-pt-shift",
-      "key": "shift:Bitter Triumph",
-      "headline_hint": "Bitter Triumph up +8pp on ladder (8% to 17%)",
-      "is_shell": false,
-      "cards": [
-        "Bitter Triumph"
-      ],
-      "stats": [
-        {
-          "label": "Prior 8wk share",
-          "value": "8.1%"
-        },
-        {
-          "label": "Recent 8wk share",
-          "value": "16.6%"
-        },
-        {
-          "label": "Delta",
-          "value": "+8.5pp"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
       "kind": "returning-card",
-      "key": "return-card:Dusk Rose Reliquary",
-      "headline_hint": "Dusk Rose Reliquary back after a 5-week absence",
+      "key": "return-card:Virtue of Persistence",
+      "headline_hint": "Virtue of Persistence back after a 5-week absence",
       "is_shell": false,
       "cards": [
-        "Dusk Rose Reliquary"
+        "Virtue of Persistence"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "50%"
+          "value": "19%"
         },
         {
           "label": "Gap",
-          "value": "26-06-2026 to 13-07-2026 (5 weeks, 0 appearances)"
+          "value": "22-06-2026 to 20-07-2026 (5 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "7% (20-07-2026)"
+          "value": "3% (27-07-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Restless Cottage",
-      "headline_hint": "Restless Cottage back after a 4-week absence",
+      "key": "return-card:Restless Fortress",
+      "headline_hint": "Restless Fortress back after a 4-week absence",
       "is_shell": false,
       "cards": [
-        "Restless Cottage"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "24%"
-        },
-        {
-          "label": "Gap",
-          "value": "25-06-2026 to 29-06-2026 (4 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "11% (20-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Abrade",
-      "headline_hint": "Abrade back after a 7-week absence",
-      "is_shell": false,
-      "cards": [
-        "Abrade"
-      ],
-      "stats": [
-        {
-          "label": "Peak before gap",
-          "value": "17%"
-        },
-        {
-          "label": "Gap",
-          "value": "08-06-2026 to 29-06-2026 (7 weeks, 0 appearances)"
-        },
-        {
-          "label": "Return",
-          "value": "4% (20-07-2026)"
-        }
-      ],
-      "already_in_stories": false
-    },
-    {
-      "kind": "returning-card",
-      "key": "return-card:Momentum Breaker",
-      "headline_hint": "Momentum Breaker back after a 10-week absence",
-      "is_shell": false,
-      "cards": [
-        "Momentum Breaker"
+        "Restless Fortress"
       ],
       "stats": [
         {
@@ -124,59 +52,107 @@
         },
         {
           "label": "Gap",
-          "value": "25-05-2026 to 06-07-2026 (10 weeks, 0 appearances)"
+          "value": "29-06-2026 to 20-07-2026 (4 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "7% (20-07-2026)"
+          "value": "3% (27-07-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Eclipsed Realms",
-      "headline_hint": "Eclipsed Realms back after a 6-week absence",
+      "key": "return-card:Airbender Ascension",
+      "headline_hint": "Airbender Ascension back after a 5-week absence",
       "is_shell": false,
       "cards": [
-        "Eclipsed Realms"
+        "Airbender Ascension"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "15%"
+          "value": "12%"
         },
         {
           "label": "Gap",
-          "value": "25-06-2026 to 13-07-2026 (6 weeks, 0 appearances)"
+          "value": "22-06-2026 to 20-07-2026 (5 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (20-07-2026)"
+          "value": "3% (27-07-2026)"
         }
       ],
       "already_in_stories": false
     },
     {
       "kind": "returning-card",
-      "key": "return-card:Aclazotz, Deepest Betrayal",
-      "headline_hint": "Aclazotz, Deepest Betrayal back after a 11-week absence",
+      "key": "return-card:Tishana's Tidebinder",
+      "headline_hint": "Tishana's Tidebinder back after a 12-week absence",
       "is_shell": false,
       "cards": [
-        "Aclazotz, Deepest Betrayal"
+        "Tishana's Tidebinder"
       ],
       "stats": [
         {
           "label": "Peak before gap",
-          "value": "15%"
+          "value": "12%"
         },
         {
           "label": "Gap",
-          "value": "25-05-2026 to 13-07-2026 (11 weeks, 0 appearances)"
+          "value": "04-05-2026 to 20-07-2026 (12 weeks, 0 appearances)"
         },
         {
           "label": "Return",
-          "value": "4% (20-07-2026)"
+          "value": "3% (27-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:High Noon",
+      "headline_hint": "High Noon back after a 5-week absence",
+      "is_shell": false,
+      "cards": [
+        "High Noon"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "11%"
+        },
+        {
+          "label": "Gap",
+          "value": "22-06-2026 to 20-07-2026 (5 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (27-07-2026)"
+        }
+      ],
+      "already_in_stories": false
+    },
+    {
+      "kind": "returning-card",
+      "key": "return-card:Monument to Endurance",
+      "headline_hint": "Monument to Endurance back after a 4-week absence",
+      "is_shell": false,
+      "cards": [
+        "Monument to Endurance"
+      ],
+      "stats": [
+        {
+          "label": "Peak before gap",
+          "value": "11%"
+        },
+        {
+          "label": "Gap",
+          "value": "29-06-2026 to 20-07-2026 (4 weeks, 0 appearances)"
+        },
+        {
+          "label": "Return",
+          "value": "3% (27-07-2026)"
         }
       ],
       "already_in_stories": false
