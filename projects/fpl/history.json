@@ -1,6 +1,11 @@
 {
   "weeks": [
     {
+      "gwId": 1,
+      "predictedTotal": 30.51,
+      "actualTotal": 41
+    },
+    {
       "gwId": 31,
       "predictedTotal": 72.44,
       "actualTotal": 40
@@ -14,11 +19,6 @@
       "gwId": 37,
       "predictedTotal": 51.92,
       "actualTotal": 59
-    },
-    {
-      "gwId": 38,
-      "predictedTotal": 52.94,
-      "actualTotal": 78
     }
   ]
 }
