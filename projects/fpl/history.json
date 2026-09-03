@@ -1,24 +1,34 @@
 {
   "weeks": [
     {
-      "gwId": 2,
-      "predictedTotal": 18.74,
-      "actualTotal": 94
-    },
-    {
+      "season": "2025-26",
       "gwId": 31,
       "predictedTotal": 72.44,
       "actualTotal": 40
     },
     {
+      "season": "2025-26",
       "gwId": 36,
       "predictedTotal": 77.02,
       "actualTotal": 64
     },
     {
+      "season": "2025-26",
       "gwId": 37,
       "predictedTotal": 51.92,
       "actualTotal": 59
+    },
+    {
+      "season": "2026-27",
+      "gwId": 1,
+      "predictedTotal": 44.45,
+      "actualTotal": 41
+    },
+    {
+      "season": "2026-27",
+      "gwId": 2,
+      "predictedTotal": 46.85,
+      "actualTotal": 94
     }
   ]
 }
