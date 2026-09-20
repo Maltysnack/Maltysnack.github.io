@@ -14,7 +14,7 @@ A mobile app for groups to agree on a film. Live at filmclub.watch.
 ### Projects
 
 **FPL Predicted XI:**<br>
-Premier League fantasy predictions for the upcoming gameweek, refreshed daily from the public FPL API.
+Malty's Team: an autonomous Fantasy Premier League bot. Live season log, model accuracy, next gameweek predictions.
 
 **Happy Hour:**<br>
 It's happy hour somewhere.
