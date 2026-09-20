@@ -108,6 +108,7 @@
     .h2h-row .bar { height: 10px; background: var(--surface); position: relative; }
     .h2h-row .bar > i { position: absolute; top: 0; bottom: 0; }
     .h2h-row .bar.l > i { right: 0; background: var(--bot); } .h2h-row .bar.rt > i { left: 0; background: var(--rival); }
+    .h2h-row .bar > em { position: absolute; top: -3px; bottom: -3px; width: 2px; background: var(--text); opacity: .7; }
     .h2h-row .gw { text-align: center; color: var(--text-dim); letter-spacing: .06em; }
 
     /* Pitch */
@@ -225,6 +226,7 @@
           <div class="h2h" id="h2h"></div>
           <div class="h2h-bars" id="h2h-bars"></div>
           <div class="note">Head to head against Red Rebels, Milo's own team in the same mini-league. Per-gameweek bars from the first week both teams played.</div>
+          <div class="note" id="h2h-luck"></div>
         </div>
       </div>
     </section>
@@ -412,7 +414,13 @@
       <div class="vs">vs</div>
       <div class="side rival"><div class="n">${esc(rival.name)}</div><div class="s num">${rs}</div><div class="dim" style="font-size:var(--text-xs)">${esc(rival.manager)}</div></div>`;
     const mx = Math.max(1, ...shared.map(g => Math.max(g.pts, rb[g.gw])));
-    $('h2h-bars').innerHTML = shared.map(g => `<div class="h2h-row"><span class="num" style="text-align:right">${g.pts}</span><div class="bar l"><i style="width:${g.pts / mx * 100}%"></i></div><span class="gw">GW${g.gw}</span><div class="bar rt"><i style="width:${rb[g.gw] / mx * 100}%"></i></div><span class="num">${rb[g.gw]}</span></div>`).join('');
+    const ex = D.expected || { bot: {}, rival: {} };
+    const tick = (v, side) => v == null ? '' : `<em style="${side === 'l' ? 'right' : 'left'}:${v / mx * 100}%" title="model expected ${v}"></em>`;
+    $('h2h-bars').innerHTML = shared.map(g => `<div class="h2h-row"><span class="num" style="text-align:right">${g.pts}</span><div class="bar l"><i style="width:${g.pts / mx * 100}%"></i>${tick(ex.bot[g.gw], 'l')}</div><span class="gw">GW${g.gw}</span><div class="bar rt"><i style="width:${rb[g.gw] / mx * 100}%"></i>${tick(ex.rival[g.gw], 'r')}</div><span class="num">${rb[g.gw]}</span></div>`).join('');
+    const eb = shared.filter(g => ex.bot[g.gw] != null), er = shared.filter(g => ex.rival[g.gw] != null);
+    const luck = (rows, who, key) => rows.length ? rows.reduce((s2, g) => s2 + ((who === 'bot' ? g.pts : rb[g.gw]) - ex[who][g.gw]), 0) : null;
+    const lb = luck(eb, 'bot'), lr = luck(er, 'rival');
+    $('h2h-luck').innerHTML = (lb != null || lr != null) ? `Ticks mark what the model expected of each squad before kick-off. Over the shared weeks: Malty's Team <b class="${lb >= 0 ? 'pos' : 'neg'}">${sgn(lb)}</b> vs expectation, Red Rebels <b class="${lr >= 0 ? 'pos' : 'neg'}">${sgn(lr)}</b>.` : '';
   })();
 
   // Squad pitch
