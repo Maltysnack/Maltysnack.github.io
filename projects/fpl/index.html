@@ -252,6 +252,12 @@
     </section>
 
     <section class="sec">
+      <div class="sec-head"><h2>Where the points came from</h2><span class="meta" id="bd-meta"></span></div>
+      <svg class="chart" id="bd-chart" viewBox="0 0 640 220" preserveAspectRatio="none" role="img" aria-label="Points by position per gameweek"></svg>
+      <div class="legend" id="bd-legend"></div>
+    </section>
+
+    <section class="sec">
       <div class="sec-head"><h2>What the bot was thinking</h2><span class="meta">decision logs, released after each deadline</span></div>
       <div id="decisions" class="decisions"></div>
     </section>
@@ -450,6 +456,33 @@
     $('ledger').innerHTML = `<tr><th>GW</th><th>Out</th><th>In</th><th class="r">£</th></tr>` +
       (rows.length ? rows.map(t => `<tr><td class="num">${t.gw}${hitsBy[t.gw] ? `<div class="sub neg">-${hitsBy[t.gw]}</div>` : ''}</td><td><span class="name">${esc(t.out)}</span><div class="sub">${t.outCost.toFixed(1)}</div></td><td><span class="name">${esc(t.in)}</span><div class="sub">${t.inCost.toFixed(1)}</div></td><td class="r num ${t.inCost - t.outCost > 0 ? 'neg' : 'pos'}">${sgn(t.inCost - t.outCost)}</td></tr>`).join('')
        : `<tr><td colspan="4" class="dim">No transfers yet.</td></tr>`);
+  })();
+
+  // Breakdown: stacked bars by position + captain bonus, hits shown below zero.
+  (function () {
+    const B = D.breakdown || [];
+    if (!B.length) return;
+    const keys = [['GKP', 'var(--text-dim)'], ['DEF', 'var(--accent-blue)'], ['MID', 'var(--bot)'], ['FWD', 'var(--accent-gold)'], ['captain', 'var(--text)']];
+    const W = 640, H = 220, L = 34, R = 12, T = 14, Bm = 34;
+    const tot = r => keys.reduce((s2, [k]) => s2 + r[k], 0);
+    const ymax = Math.ceil((Math.max(...B.map(tot)) + 10) / 20) * 20;
+    const bw = (W - L - R) / B.length, pad = bw * 0.22;
+    const y = v => T + (H - T - Bm) * (1 - v / ymax);
+    let s = '';
+    for (let v = 0; v <= ymax; v += 20) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
+    B.forEach((r, i) => {
+      const x0 = L + i * bw + pad, w = bw - pad * 2; let acc = 0;
+      for (const [k, c] of keys) { if (!r[k]) continue; s += `<rect x="${x0}" y="${y(acc + r[k])}" width="${w}" height="${y(acc) - y(acc + r[k])}" fill="${c}"><title>GW${r.gw} ${k}: ${r[k]}</title></rect>`; acc += r[k]; }
+      s += `<text class="lbl" x="${x0 + w / 2}" y="${y(acc) - 5}" text-anchor="middle">${acc}</text>`;
+      s += `<text x="${x0 + w / 2}" y="${H - 20}" text-anchor="middle">GW${r.gw}</text>`;
+      if (r.hits) s += `<text x="${x0 + w / 2}" y="${H - 8}" text-anchor="middle" style="fill:var(--neg)">-${r.hits}</text>`;
+      else if (r.bench) s += `<text x="${x0 + w / 2}" y="${H - 8}" text-anchor="middle">bench ${r.bench}</text>`;
+    });
+    $('bd-chart').innerHTML = s;
+    $('bd-legend').innerHTML = keys.map(([k, c]) => `<span><i style="border-color:${c}"></i>${k === 'captain' ? 'Captain bonus' : k}</span>`).join('') + '<span class="dim">hits below, bench points under the bar</span>';
+    const sum = {}; for (const [k] of keys) sum[k] = B.reduce((s2, r) => s2 + r[k], 0);
+    const best = Object.entries(sum).filter(([k]) => k !== 'captain').sort((a, b) => b[1] - a[1])[0];
+    $('bd-meta').textContent = `${best[0]} carried the season so far (${best[1]} pts); captaincy added ${sum.captain}`;
   })();
 
   // Decisions
