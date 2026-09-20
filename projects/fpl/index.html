@@ -113,7 +113,8 @@
     /* Pitch */
     .pitch-wrap { display: flex; gap: 10px; align-items: center; margin-bottom: 10px; }
     .toggle { display: inline-flex; border: 1px solid var(--text); border-radius: 999px; overflow: hidden; font-size: var(--text-xs); }
-    .toggle button { background: transparent; border: 0; color: var(--text); padding: 5px 12px; cursor: pointer; font: inherit; letter-spacing: .06em; text-transform: uppercase; }
+    .toggle button { background: transparent; border: 0; color: var(--text); padding: 5px 12px; cursor: pointer; font: inherit; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
+    .pitch-wrap { flex-wrap: wrap; }
     .toggle button.on { background: var(--text); color: var(--bg); }
     .pitch { background: var(--pitch); border-radius: 6px; padding: 18px 10px 12px; position: relative; overflow: hidden;
              background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 28px, transparent 28px 56px); }
@@ -214,7 +215,7 @@
 
     <section class="sec">
       <div class="sec-head"><h2>Season line</h2><span class="meta" id="line-meta"></span></div>
-      <div class="pitch-wrap"><div class="toggle" id="line-toggle"><button class="on" data-mode="gw">Per gameweek</button><button data-mode="cum">Cumulative</button></div><span class="dim" style="font-size:var(--text-xs)" id="line-sub">points each gameweek</span></div>
+      <div class="pitch-wrap"><div class="toggle" id="line-toggle"><button class="on" data-mode="gw">Per gameweek</button><button data-mode="cum">Cumulative</button><button data-mode="rank">Overall rank</button></div><span class="dim" style="font-size:var(--text-xs)" id="line-sub">points each gameweek</span></div>
       <div class="cols">
         <div>
           <svg class="chart" id="line-chart" viewBox="0 0 640 260" preserveAspectRatio="none" role="img" aria-label="Points per gameweek"></svg>
@@ -348,9 +349,11 @@
     const W = 640, H = 260, L = 40, R = 12, T = 18, B = 28;
     const rivalBy = {}; for (const g of rival.gws) rivalBy[g.gw] = g.pts;
     const series = { bot: [], rival: [], avg: [] };
+    const rivalRank = {}; for (const g of rival.gws) rivalRank[g.gw] = g.rank;
     let cb = 0, cr = 0, ca = 0;
     gws.forEach((g, i) => {
       const b = bot.gws[i].pts, r = rivalBy[g], a = avgBy[g];
+      if (mode === 'rank') { series.bot.push(bot.gws[i].rank); series.rival.push(rivalRank[g] ?? null); series.avg.push(null); return; }
       if (mode === 'cum') {
         cb += b; series.bot.push(cb);
         ca += a || 0; series.avg.push(a == null ? null : ca);
@@ -358,12 +361,18 @@
       } else { series.bot.push(b); series.rival.push(r ?? null); series.avg.push(a ?? null); }
     });
     const all = [...series.bot, ...series.rival, ...series.avg].filter(v => v != null);
+    const isRank = mode === 'rank';
     const step = mode === 'cum' ? 100 : 20;
-    const ymax = Math.max(step * 3, Math.ceil((Math.max(...all) + step * 0.4) / step) * step);
+    const ymax = isRank ? 0 : Math.max(step * 3, Math.ceil((Math.max(...all) + step * 0.4) / step) * step);
     const x = i => L + (gws.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (gws.length - 1));
-    const y = v => T + (H - T - B) * (1 - v / ymax);
+    // Rank: log scale, top of the chart is rank 1, floor is 10M (roughly the
+    // number of managers). Lower is better, so it is drawn inverted.
+    const LO = 4, HI = 7;   // log10(10k) .. log10(10M)
+    const y = v => isRank ? T + (H - T - B) * ((Math.log10(Math.min(1e7, Math.max(1e4, v))) - LO) / (HI - LO)) : T + (H - T - B) * (1 - v / ymax);
+    const fmtAxis = v => isRank ? (v >= 1e6 ? (v / 1e6) + 'M' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : v) : v;
     let s = '';
-    for (let v = 0; v <= ymax; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
+    if (isRank) { for (const v of [1e4, 1e5, 1e6, 1e7]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${fmtAxis(v)}</text>`; }
+    else for (let v = 0; v <= ymax; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${fmtAxis(v)}</text>`;
     gws.forEach((g, i) => { s += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">GW${g}</text>`; });
     const path = (vals, cls) => {
       const pts = vals.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean);
@@ -371,13 +380,14 @@
     };
     s += path(series.avg, 'l-avg') + path(series.rival, 'l-rival') + path(series.bot, 'l-bot');
     gws.forEach((g, i) => {
-      const b = series.bot[i]; s += `<circle class="p-bot" cx="${x(i)}" cy="${y(b)}" r="3.5"/><text class="lbl" x="${x(i)}" y="${y(b) - 8}" text-anchor="middle">${b}</text>`;
+      const b = series.bot[i]; s += `<circle class="p-bot" cx="${x(i)}" cy="${y(b)}" r="3.5"/><text class="lbl" x="${x(i)}" y="${y(b) - 8}" text-anchor="middle">${isRank ? (b >= 1e6 ? (b / 1e6).toFixed(2) + 'M' : Math.round(b / 1e3) + 'k') : b}</text>`;
       if (series.rival[i] != null) s += `<circle class="p-rival" cx="${x(i)}" cy="${y(series.rival[i])}" r="3"/>`;
       if (series.avg[i] != null) s += `<circle class="p-avg" cx="${x(i)}" cy="${y(series.avg[i])}" r="2.2"/>`;
     });
     $('line-chart').innerHTML = s;
     let last = gws.length - 1;
     while (last > 0 && series.avg[last] == null) last--;
+    if (isRank) { $('line-sub').textContent = `overall rank after each gameweek (top is better); now ${fmt(bot.rank)}`; return; }
     $('line-sub').textContent = mode === 'cum' && series.avg[last] != null
       ? `${sgn(series.bot[last] - series.avg[last])} vs the average manager after GW${gws[last]}`
       : mode === 'cum' ? 'running totals' : 'points each gameweek';
