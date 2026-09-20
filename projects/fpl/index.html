@@ -526,7 +526,10 @@
     });
     const P = D.pooled || {};
     const order = ['ALL', 'GKP', 'DEF', 'MID', 'FWD'];
-    $('bias').innerHTML = `<tr><th>Position</th><th class="r">n</th><th class="r">MAE</th><th class="r">Bias</th></tr>` + order.filter(k => P[k]).map(k => `<tr><td class="${k === 'ALL' ? 'name' : ''}">${k === 'ALL' ? 'All players' : k}</td><td class="r num">${P[k].n}</td><td class="r num">${P[k].mae.toFixed(2)}</td><td class="r num ${Math.abs(P[k].bias) < 0.2 ? '' : P[k].bias > 0 ? 'pos' : 'neg'}">${sgn(P[k].bias)}</td></tr>`).join('');
+    const E = D.pooledEp || {};
+    const hasEp = !!E.ALL;
+    $('bias').innerHTML = `<tr><th>Position</th><th class="r">n</th><th class="r">MAE</th>${hasEp ? '<th class="r" title="FPL\'s own ep_next, same players">FPL MAE</th>' : ''}<th class="r">Bias</th></tr>` + order.filter(k => P[k]).map(k => `<tr><td class="${k === 'ALL' ? 'name' : ''}">${k === 'ALL' ? 'All players' : k}</td><td class="r num">${P[k].n}</td><td class="r num">${P[k].mae.toFixed(2)}</td>${hasEp ? `<td class="r num ${E[k] && E[k].mae > P[k].mae ? 'pos' : E[k] ? 'neg' : ''}">${E[k] ? E[k].mae.toFixed(2) : '–'}</td>` : ''}<td class="r num ${Math.abs(P[k].bias) < 0.2 ? '' : P[k].bias > 0 ? 'pos' : 'neg'}">${sgn(P[k].bias)}</td></tr>`).join('');
+    if (hasEp) $('bias').insertAdjacentHTML('afterend', `<div class="note">FPL MAE is the game's own expected-points number scored on the same players. Green means the model beat it.</div>`);
     const capCost = A.reduce((s, a) => s + (a.captainCost || 0), 0);
     $('captains').innerHTML = `<tr><th>GW</th><th>Captain</th><th class="r">Pts</th><th>Best</th><th class="r">Pts</th></tr>` + A.map(a => `<tr><td class="num dim">${a.gw}</td><td class="name">${esc(a.captain)}</td><td class="r num">${a.captainPts}</td><td>${a.bestCaptain === a.captain ? '<span class="pos">same</span>' : esc(a.bestCaptain)}</td><td class="r num">${a.bestCaptainPts}</td></tr>`).join('') + `<tr><td colspan="5" class="sub">Captaincy left ${capCost} points on the table (before doubling).</td></tr>`;
     $('acc-meta').textContent = A.length ? `${A.length} scored gameweeks` : 'no scored gameweeks yet';
