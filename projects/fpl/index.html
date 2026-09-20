@@ -349,6 +349,20 @@
     { v: 8 - chipsUsed, sub: '/8', k: 'chips in hand', d: `<span class="dim">${bot.chips.map(c => c.name + ' GW' + c.gw).join(', ') || 'none played'}</span>` },
     { v: '£' + (lastGw.value != null ? lastGw.value.toFixed(1) : '–') + 'm', k: 'team value', d: `<span class="dim">bank £${lastGw.bank != null ? lastGw.bank.toFixed(1) : '–'}m</span>` }
   ];
+  // On pace for: total so far + remaining GWs x the model's mean expected XI,
+  // with a range from how far actuals have strayed from expectation so far.
+  (function () {
+    const ex = (D.expected && D.expected.bot) || {};
+    const rows = bot.gws.filter(g => ex[g.gw] != null);
+    if (rows.length < 2) return;
+    const meanEx = rows.reduce((s2, g) => s2 + ex[g.gw], 0) / rows.length;
+    const resid = rows.map(g => g.pts - ex[g.gw]);
+    const sd = Math.sqrt(resid.reduce((s2, r) => s2 + r * r, 0) / resid.length);
+    const remaining = 38 - lastGw.gw;
+    const pace = Math.round(bot.total + remaining * meanEx);
+    const band = Math.round(1.64 * sd * Math.sqrt(remaining));
+    tiles.splice(2, 0, { v: fmt(pace), k: 'on pace for', d: `<span class="dim">${fmt(pace - band)} to ${fmt(pace + band)}, 90% band</span>` });
+  })();
   $('tiles').innerHTML = tiles.map(t => `<div class="tile"><div class="v num">${esc(t.v)}${t.sub ? `<sub>${esc(t.sub)}</sub>` : ''}</div><div class="k">${t.k}</div><div class="d">${t.d || ''}</div></div>`).join('');
 
   // Season line chart: per-GW points, or cumulative totals.
@@ -551,7 +565,8 @@
       <p><b>Prediction.</b> A per-player points formula (variant <span class="num">${esc(M.variant || '')}</span>) built from underlying stats, minutes, fixture strength and bookmaker odds for the next round, with per-position calibration refit weekly${cal ? ` (currently ${esc(cal)})` : ''}. Predictions are published for eight gameweeks ahead; only the next round has odds, the rest fall back to fixture difficulty.</p>
       <p><b>Planning.</b> A beam search over the coming gameweeks (${esc(M.planner || '')}) decides transfers, including holding a free transfer for a bigger move next week. Hits are paid only when the sequenced gain clears a threshold fitted in a three-season tournament.</p>
       <p><b>Chips.</b> ${esc(M.chipsPolicy || '')}. Free Hit and Wildcard squads are rebuilt by a local search under the real budget and club limits.</p>
-      <p><b>Honesty.</b> Predictions are frozen before each deadline and scored after it, so the accuracy panel cannot be flattered in hindsight. Rank and points come straight from the FPL API. Built ${D.builtAt ? ddmmyyyy(D.builtAt) : ''}.</p>`;
+      <p><b>Honesty.</b> Predictions are frozen before each deadline and scored after it, so the accuracy panel cannot be flattered in hindsight. Rank and points come straight from the FPL API. Built ${D.builtAt ? ddmmyyyy(D.builtAt) : ''}.</p>
+      <p><b>Elsewhere.</b> <a href="https://fantasy.premierleague.com/entry/${bot.entry}/history" target="_blank" rel="noopener" style="text-decoration:underline">Team on FPL</a> · <a href="https://github.com/Maltysnack/fpl/issues/81" target="_blank" rel="noopener" style="text-decoration:underline">gameweek reports</a> (the engine itself is a private repo).</p>`;
     $('model-meta').textContent = 'what is under the hood';
   })();
 })();
