@@ -25,6 +25,20 @@
 
     .fpl { padding: 28px 36px 96px 40px; flex: 1; min-width: 0; max-width: 1240px; }
     @media (max-width: 900px) { .fpl { padding: 18px 16px 72px; } }
+    @media (max-width: 480px) {
+      .fpl { overflow-x: hidden; }
+      table.t { font-size: var(--text-xs); }
+      .t td, .t th { padding-right: 6px; }
+      .t .sub { display: none; }
+      .pl { width: 64px; }
+      .pl .shirt { width: 34px; height: 34px; font-size: 13px; }
+      .pitch { padding: 12px 4px 8px; }
+      .row, .bench { gap: 4px; }
+      .h2h-row { grid-template-columns: 34px 1fr 40px 1fr 34px; }
+      .acc-row { grid-template-columns: 38px 1fr 84px; }
+      .cards { grid-template-columns: repeat(2, 1fr); }
+      .fx { grid-template-columns: 1fr; }
+    }
 
     .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
     .muted { color: var(--text-muted); }

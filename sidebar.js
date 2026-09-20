@@ -96,7 +96,7 @@
         <div class="nav-section">
           <span class="nav-label">Projects</span>
           <ul>
-            <li><a href="/projects/fpl/" ${path.startsWith('/projects/fpl/') ? 'class="nav-active"' : ''}>FPL Predicted XI</a></li>
+            <li><a href="/projects/fpl/" ${path.startsWith('/projects/fpl/') ? 'class="nav-active"' : ''}>FPL bot</a></li>
             <li><a href="/projects/happyhour/" ${path.startsWith('/projects/happyhour') || path.startsWith('/projects/coffeetime') ? 'class="nav-active"' : ''}>Happy Hour</a></li>
             <li><a href="/projects/worldcup/" ${path.startsWith('/projects/worldcup') ? 'class="nav-active"' : ''}>World Cup 2026</a></li>
             <li><a href="/projects/flox/" ${path.startsWith('/projects/flox') ? 'class="nav-active"' : ''}>Flox</a></li>
