@@ -29,7 +29,7 @@ SECTIONS = [
         ("/films/filmclub.html",       "Filmclub"),
     ]),
     ("Projects", [
-        ("/projects/fpl/index.html",     "FPL Predicted XI"),
+        ("/projects/fpl/index.html",     "FPL bot"),
         ("/projects/happyhour/index.html",   "Happy Hour"),
         ("/projects/coffeetime/index.html",  "Coffee Time"),
         ("/projects/worldcup/index.html",    "World Cup 2026"),
