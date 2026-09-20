@@ -139,6 +139,8 @@
     .acc-row .bars .p { top: 1px; background: var(--text-dim); }
     .acc-row .bars .a { top: 10px; background: var(--bot); }
     .acc-row .delta { text-align: right; }
+    .acc-row { cursor: pointer; } .acc-row:hover { background: var(--bg-soft); }
+    .acc-detail { padding: 6px 0 10px; border-bottom: 1px solid var(--rule); }
 
     /* Player cards */
     .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
@@ -212,6 +214,7 @@
 
     <section class="sec">
       <div class="sec-head"><h2>Season line</h2><span class="meta" id="line-meta"></span></div>
+      <div class="pitch-wrap"><div class="toggle" id="line-toggle"><button class="on" data-mode="gw">Per gameweek</button><button data-mode="cum">Cumulative</button></div><span class="dim" style="font-size:var(--text-xs)" id="line-sub">points each gameweek</span></div>
       <div class="cols">
         <div>
           <svg class="chart" id="line-chart" viewBox="0 0 640 260" preserveAspectRatio="none" role="img" aria-label="Points per gameweek"></svg>
@@ -339,34 +342,56 @@
   ];
   $('tiles').innerHTML = tiles.map(t => `<div class="tile"><div class="v num">${esc(t.v)}${t.sub ? `<sub>${esc(t.sub)}</sub>` : ''}</div><div class="k">${t.k}</div><div class="d">${t.d || ''}</div></div>`).join('');
 
-  // Season line chart (points per GW, three series)
-  (function () {
+  // Season line chart: per-GW points, or cumulative totals.
+  function renderLine(mode) {
     const gws = bot.gws.map(g => g.gw);
-    const W = 640, H = 260, L = 34, R = 12, T = 18, B = 28;
+    const W = 640, H = 260, L = 40, R = 12, T = 18, B = 28;
     const rivalBy = {}; for (const g of rival.gws) rivalBy[g.gw] = g.pts;
-    const all = [...bot.gws.map(g => g.pts), ...rival.gws.map(g => g.pts), ...gws.map(g => avgBy[g] || 0)];
-    const ymax = Math.max(60, Math.ceil((Math.max(...all) + 8) / 20) * 20);
+    const series = { bot: [], rival: [], avg: [] };
+    let cb = 0, cr = 0, ca = 0;
+    gws.forEach((g, i) => {
+      const b = bot.gws[i].pts, r = rivalBy[g], a = avgBy[g];
+      if (mode === 'cum') {
+        cb += b; series.bot.push(cb);
+        ca += a || 0; series.avg.push(a == null ? null : ca);
+        if (r != null) { cr += r; series.rival.push(cr); } else series.rival.push(null);
+      } else { series.bot.push(b); series.rival.push(r ?? null); series.avg.push(a ?? null); }
+    });
+    const all = [...series.bot, ...series.rival, ...series.avg].filter(v => v != null);
+    const step = mode === 'cum' ? 100 : 20;
+    const ymax = Math.max(step * 3, Math.ceil((Math.max(...all) + step * 0.4) / step) * step);
     const x = i => L + (gws.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (gws.length - 1));
     const y = v => T + (H - T - B) * (1 - v / ymax);
     let s = '';
-    for (let v = 0; v <= ymax; v += 20) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
+    for (let v = 0; v <= ymax; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
     gws.forEach((g, i) => { s += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">GW${g}</text>`; });
     const path = (vals, cls) => {
       const pts = vals.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean);
       return pts.length ? `<polyline class="${cls}" points="${pts.join(' ')}"/>` : '';
     };
-    s += path(gws.map(g => avgBy[g] ?? null), 'l-avg');
-    s += path(gws.map(g => rivalBy[g] ?? null), 'l-rival');
-    s += path(bot.gws.map(g => g.pts), 'l-bot');
+    s += path(series.avg, 'l-avg') + path(series.rival, 'l-rival') + path(series.bot, 'l-bot');
     gws.forEach((g, i) => {
-      const b = bot.gws[i].pts; s += `<circle class="p-bot" cx="${x(i)}" cy="${y(b)}" r="3.5"/><text class="lbl" x="${x(i)}" y="${y(b) - 8}" text-anchor="middle">${b}</text>`;
-      if (rivalBy[g] != null) s += `<circle class="p-rival" cx="${x(i)}" cy="${y(rivalBy[g])}" r="3"/>`;
-      if (avgBy[g] != null) s += `<circle class="p-avg" cx="${x(i)}" cy="${y(avgBy[g])}" r="2.2"/>`;
+      const b = series.bot[i]; s += `<circle class="p-bot" cx="${x(i)}" cy="${y(b)}" r="3.5"/><text class="lbl" x="${x(i)}" y="${y(b) - 8}" text-anchor="middle">${b}</text>`;
+      if (series.rival[i] != null) s += `<circle class="p-rival" cx="${x(i)}" cy="${y(series.rival[i])}" r="3"/>`;
+      if (series.avg[i] != null) s += `<circle class="p-avg" cx="${x(i)}" cy="${y(series.avg[i])}" r="2.2"/>`;
     });
     $('line-chart').innerHTML = s;
+    let last = gws.length - 1;
+    while (last > 0 && series.avg[last] == null) last--;
+    $('line-sub').textContent = mode === 'cum' && series.avg[last] != null
+      ? `${sgn(series.bot[last] - series.avg[last])} vs the average manager after GW${gws[last]}`
+      : mode === 'cum' ? 'running totals' : 'points each gameweek';
+  }
+  renderLine('gw');
+  (function () {
     const beat = bot.gws.filter(g => avgBy[g.gw] != null && g.pts > avgBy[g.gw]).length;
     $('line-meta').textContent = `beat the average in ${beat} of ${bot.gws.filter(g => avgBy[g.gw] != null).length} gameweeks`;
   })();
+  $('line-toggle').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b) return;
+    $('line-toggle').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
+    renderLine(b.dataset.mode);
+  });
 
   // Head to head
   (function () {
@@ -423,7 +448,16 @@
   (function () {
     const A = D.accuracy;
     const mx = Math.max(1, ...A.map(a => Math.max(a.squadPred || 0, a.squadAct || 0)));
-    $('acc-bars').innerHTML = A.map(a => `<div class="acc-row"><span class="num dim">GW${a.gw}</span><div class="bars"><i class="p" style="width:${(a.squadPred || 0) / mx * 100}%"></i><i class="a" style="width:${(a.squadAct || 0) / mx * 100}%"></i></div><span class="delta num"><span class="dim">${Math.round(a.squadPred || 0)}</span> → <b>${a.squadAct}</b> <span class="${(a.squadAct - a.squadPred) >= 0 ? 'pos' : 'neg'}">${sgn(a.squadAct - a.squadPred)}</span></span></div>`).join('');
+    $('acc-bars').innerHTML = A.map(a => `<div class="acc-row" data-gw="${a.gw}" role="button" tabindex="0" title="Show the fifteen"><span class="num dim">GW${a.gw}</span><div class="bars"><i class="p" style="width:${(a.squadPred || 0) / mx * 100}%"></i><i class="a" style="width:${(a.squadAct || 0) / mx * 100}%"></i></div><span class="delta num"><span class="dim">${Math.round(a.squadPred || 0)}</span> → <b>${a.squadAct}</b> <span class="${(a.squadAct - a.squadPred) >= 0 ? 'pos' : 'neg'}">${sgn(a.squadAct - a.squadPred)}</span></span></div><div class="acc-detail" id="acc-d-${a.gw}" hidden></div>`).join('');
+    $('acc-bars').addEventListener('click', e => {
+      const row = e.target.closest('.acc-row'); if (!row) return;
+      const gw = +row.dataset.gw, box = $(`acc-d-${gw}`), a = A.find(x => x.gw === gw);
+      if (!box.hidden) { box.hidden = true; return; }
+      document.querySelectorAll('.acc-detail').forEach(d => d.hidden = true);
+      const rows = (a.players || []).slice().sort((p, q) => (q.mult > 0) - (p.mult > 0) || q.act - p.act);
+      box.innerHTML = `<table class="t"><tr><th>Player</th><th class="r">Pred</th><th class="r">Got</th></tr>` + rows.map(p => `<tr class="${p.mult === 0 ? 'dim' : ''}"><td>${esc(p.name)}${p.captain ? ' <b>C</b>' : ''}${p.mult === 0 ? ' <span class="sub">bench</span>' : ''}</td><td class="r num">${p.pred.toFixed(1)}</td><td class="r num ${p.act - p.pred >= 2 ? 'pos' : p.act - p.pred <= -2 ? 'neg' : ''}">${p.act}</td></tr>`).join('') + `</table>` + (a.biggestMisses && a.biggestMisses.length ? `<div class="note">Biggest misses league-wide: ${a.biggestMisses.map(m => `${esc(m.name)} ${m.pred.toFixed ? m.pred.toFixed(1) : m.pred}→${m.actual}`).join(', ')}</div>` : '');
+      box.hidden = false;
+    });
     const P = D.pooled || {};
     const order = ['ALL', 'GKP', 'DEF', 'MID', 'FWD'];
     $('bias').innerHTML = `<tr><th>Position</th><th class="r">n</th><th class="r">MAE</th><th class="r">Bias</th></tr>` + order.filter(k => P[k]).map(k => `<tr><td class="${k === 'ALL' ? 'name' : ''}">${k === 'ALL' ? 'All players' : k}</td><td class="r num">${P[k].n}</td><td class="r num">${P[k].mae.toFixed(2)}</td><td class="r num ${Math.abs(P[k].bias) < 0.2 ? '' : P[k].bias > 0 ? 'pos' : 'neg'}">${sgn(P[k].bias)}</td></tr>`).join('');
