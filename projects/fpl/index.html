@@ -505,7 +505,8 @@
     $('decisions').innerHTML = L.length ? L.map(d => {
       const moves = d.transfers.length ? d.transfers.map(t => `${esc(t.out)} → ${esc(t.in)}`).join(', ') : 'No transfers';
       const lines = (d.reasoning || []).filter(r => !/^OUT |^gain |^chip: |^overrides/.test(r)).map(r => `<li>${esc(r)}</li>`).join('');
-      return `<div class="dec"><div class="hd"><b>GW${d.gw}</b><span>${d.stage || ''} · ${ddmmyyyy(d.decidedAt)}${d.dryRun ? ' · dry run' : ''}</span></div><div><b>${moves}</b>${d.chip ? `<span class="chip">${esc(d.chip)}</span>` : ''}</div><ul>${lines}</ul></div>`;
+      const odds = d.teamsInGw ? `<li class="${d.oddsTeams < d.teamsInGw / 2 ? 'neg' : ''}">bookmaker odds for ${d.oddsTeams}/${d.teamsInGw} teams</li>` : '';
+      return `<div class="dec"><div class="hd"><b>GW${d.gw}</b><span>${d.stage || ''} · ${ddmmyyyy(d.decidedAt)}${d.dryRun ? ' · dry run' : ''}</span></div><div><b>${moves}</b>${d.chip ? `<span class="chip">${esc(d.chip)}</span>` : ''}</div><ul>${lines}${odds}</ul></div>`;
     }).join('') : '<div class="dim" style="font-size:var(--text-sm)">The first logged decision appears after the next deadline.</div>';
   })();
 
