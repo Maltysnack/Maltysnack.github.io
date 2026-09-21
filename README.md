@@ -14,7 +14,7 @@ A mobile app for groups to agree on a film. Live at filmclub.watch.
 ### Projects
 
 **FPL bot:**<br>
-Malty's Team: an autonomous Fantasy Premier League bot. Live season log, model accuracy, next gameweek predictions.
+An autonomous Fantasy Premier League bot: season log, model accuracy, and what it plans next.
 
 **Happy Hour:**<br>
 It's happy hour somewhere.
