@@ -467,8 +467,14 @@
   (function () {
     const rows = bot.transfers.slice().reverse();
     const hitsBy = {}; for (const g of bot.gws) hitsBy[g.gw] = g.hits;
+    const R = D.rationale || {};
+    const seenGw = new Set();
     $('ledger').innerHTML = `<tr><th>GW</th><th>Out</th><th>In</th><th class="r">£</th></tr>` +
-      (rows.length ? rows.map(t => `<tr><td class="num">${t.gw}${hitsBy[t.gw] ? `<div class="sub neg">-${hitsBy[t.gw]}</div>` : ''}</td><td><span class="name">${esc(t.out)}</span><div class="sub">${t.outCost.toFixed(1)}</div></td><td><span class="name">${esc(t.in)}</span><div class="sub">${t.inCost.toFixed(1)}</div></td><td class="r num ${t.inCost - t.outCost > 0 ? 'neg' : 'pos'}">${sgn(t.inCost - t.outCost)}</td></tr>`).join('')
+      (rows.length ? rows.map(t => {
+        const r = R[t.gw]; const first = !seenGw.has(t.gw); seenGw.add(t.gw);
+        const why = first && r ? `<div class="sub" title="planner's projected gain over the next eight gameweeks, net of hits">${r.dead ? 'dead asset cleared' : `+${r.net.toFixed(1)} over 8 gw`}${r.hit ? `, -${r.hit} hit` : ''}</div>` : '';
+        return `<tr><td class="num">${t.gw}${hitsBy[t.gw] ? `<div class="sub neg">-${hitsBy[t.gw]}</div>` : ''}</td><td><span class="name">${esc(t.out)}</span><div class="sub">${t.outCost.toFixed(1)}</div></td><td><span class="name">${esc(t.in)}</span><div class="sub">${t.inCost.toFixed(1)}</div>${why}</td><td class="r num ${t.inCost - t.outCost > 0 ? 'neg' : 'pos'}">${sgn(t.inCost - t.outCost)}</td></tr>`;
+      }).join('')
        : `<tr><td colspan="4" class="dim">No transfers yet.</td></tr>`);
   })();
 
