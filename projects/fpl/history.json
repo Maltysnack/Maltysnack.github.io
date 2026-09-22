@@ -41,6 +41,12 @@
       "gwId": 4,
       "predictedTotal": 52.68,
       "actualTotal": 61
+    },
+    {
+      "season": "2026-27",
+      "gwId": 5,
+      "predictedTotal": 57.01,
+      "actualTotal": 39
     }
   ]
 }
