@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>maltysnack</title>
+  <meta name="description" content="A workshop site by maltysnack. Football models, a small language, algorithm visualisations, and a couple of games." />
+  <link rel="stylesheet" href="/style.css" />
+  <script>
+    /* Apply theme before paint to avoid flash. */
+    (function () {
+      try {
+        var t = localStorage.getItem('theme');
+        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
+      } catch (e) {}
+    })();
+  </script>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main">
+
+    <section class="intro">
+      <span class="intro-eyebrow">maltysnack</span>
+      <h1 class="intro-heading">Hello.</h1>
+      <p class="intro-body">
+        A place to build things for the fun of it. Some <em>football</em> models,
+        a <em>language</em>, some <em>algorithms</em>, a couple of <em>games</em>.
+      </p>
+    </section>
+
+    <div class="divider"></div>
+
+    <section class="home-links">
+
+      <a class="home-card" href="/projects/fpl/">
+        <span class="home-card-label">Project</span>
+        <span class="home-card-title">FPL bot</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/projects/worldcup/">
+        <span class="home-card-label">Project</span>
+        <span class="home-card-title">World Cup 2026</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/projects/flox/">
+        <span class="home-card-label">Project</span>
+        <span class="home-card-title">Flox</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/projects/algorithms/">
+        <span class="home-card-label">Project</span>
+        <span class="home-card-title">Algorithms</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/games/duoclue/">
+        <span class="home-card-label">Game</span>
+        <span class="home-card-title">Duoclue</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+      <a class="home-card" href="/games/dnd/">
+        <span class="home-card-label">Game</span>
+        <span class="home-card-title">dnd</span>
+        <span class="home-card-arrow">&rarr;</span>
+      </a>
+
+    </section>
+
+    <footer class="colophon">
+      <span>set in <em>Inter</em></span>
+      <span class="colophon-divider">&middot;</span>
+      <span>plain HTML, no framework</span>
+      <span class="colophon-divider">&middot;</span>
+      <a href="https://github.com/Maltysnack/Maltysnack.github.io">source</a>
+    </footer>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+</body>
+</html>

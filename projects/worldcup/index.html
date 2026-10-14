@@ -1,0 +1,2829 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding." />
+  <title>World Cup 2026 - maltysnack</title>
+  <link rel="stylesheet" href="/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&display=swap" rel="stylesheet" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+  <style>
+    /* Compact the page header. The shared .intro styles assume a
+       narrative page (prose width 540px, 64px bottom gap); here we
+       want the description full-width, slightly smaller, and snug
+       against the tabs so the actual data lands above the fold. */
+    .intro { margin-bottom: 1rem; }
+    .intro-heading { margin-bottom: 0.6rem; }
+    .intro-body {
+      max-width: none;
+      font-size: var(--text-sm);
+      line-height: 1.45;
+    }
+    .intro p[style*="italic"] { margin-top: 0.5rem; }
+    .wc-method-link {
+      font-style: italic;
+      color: var(--accent);
+      white-space: nowrap;
+    }
+    .wc-method-link:hover { text-decoration: underline; }
+    .wc-pane { margin-top: 0.5rem; }
+    .wc-pane .intro { margin-bottom: 0.5rem; }
+    .wc-tournament-bar { margin-top: 0.3rem; margin-bottom: 0.3rem; }
+
+    /* Trim default tab/data spacing too. */
+    .wc-paths { margin-top: 0.4rem; font-size: 0.8rem; }
+    .wc-paths .header { padding-bottom: 0.2rem; font-size: 0.7rem; }
+    .wc-group { padding: 0.45rem 0.6rem; }
+    .wc-group h4 { font-size: 0.95rem; margin: 0 0 0.3rem 0; }
+    .wc-group-row { padding: 0.08rem 0; }
+    .wc-bracket-wrap { margin-top: 0.6rem; }
+    .wc-match { padding: 0.18rem 0.4rem; font-size: 0.74rem; }
+    .wc-scorers { font-size: 0.88rem; }
+
+    /* Pre-tournament bracket */
+    .wc-bracket-wrap {
+      overflow-x: auto;
+      margin-top: 1.5rem;
+      padding-bottom: 0.5rem;
+    }
+    .wc-bracket {
+      display: flex;
+      gap: 1.25rem;
+      align-items: stretch;
+      min-width: max-content;
+    }
+    .wc-round {
+      display: flex;
+      flex-direction: column;
+      width: 145px;
+      flex-shrink: 0;
+      flex-grow: 0;
+    }
+    .wc-round-label {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.4rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .wc-round-matches {
+      flex: 1;
+      display: grid;
+      align-items: center;
+      grid-template-rows: repeat(var(--n, 1), 1fr);
+    }
+    .wc-match {
+      border: 1px solid currentColor;
+      border-color: rgba(128,128,128,0.28);
+      border-radius: 3px;
+      padding: 0.25rem 0.45rem;
+      font-size: 0.78rem;
+      background: transparent;
+      align-self: center;
+      width: 100%;
+      position: relative;
+    }
+    .wc-team {
+      padding: 0.1rem 0;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .wc-flag {
+      width: 16px;
+      height: 12px;
+      object-fit: cover;
+      border-radius: 1px;
+      flex-shrink: 0;
+      box-shadow: 0 0 0 1px rgba(128,128,128,0.15);
+    }
+    .wc-team-name {
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-score {
+      margin-left: auto;
+      padding-left: 0.4rem;
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+      color: var(--text-muted);
+    }
+    .wc-team.winner .wc-score { color: var(--text-body, inherit); }
+    /* Per-team-row inline pens tag (legacy from Single-sim mode).
+       Kept for backwards compat but no longer used by renderBracketInto;
+       pens are shown via .wc-pen-footer below the two team rows so
+       they don't push the winning team's score column out of alignment. */
+    .wc-pen-tag {
+      font-size: 0.6rem;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      color: rgba(180,150,80,0.8);
+      margin-left: 0.3rem;
+    }
+    /* Pens indicator: "P" badge just outside the card's right edge,
+       vertically centered so it never overlaps the team rows.
+       Hover for full text. Doesn't add to the card's vertical footprint. */
+    .wc-pen-marker {
+      position: absolute;
+      top: 50%;
+      right: -0.95rem;
+      transform: translateY(-50%);
+      font-size: 0.78rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      color: #d23a3a;
+      line-height: 1;
+      pointer-events: auto;
+      cursor: help;
+    }
+    .wc-team.winner {
+      color: var(--text-body, inherit);
+      font-weight: 600;
+    }
+    .wc-final .wc-match {
+      border-color: rgba(180,150,80,0.6);
+    }
+    .wc-champion-banner {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid rgba(180,150,80,0.6);
+      border-radius: 3px;
+      font-weight: 600;
+      letter-spacing: -0.01em;
+      margin-top: 0.5rem;
+    }
+    .wc-champion-banner .wc-flag {
+      width: 22px;
+      height: 16px;
+    }
+
+    /* Group stage cards */
+    .wc-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+    .wc-group {
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.85rem;
+    }
+    .wc-group h4 {
+      font-weight: 600;
+      font-size: 1rem;
+      margin: 0 0 0.4rem 0;
+      letter-spacing: -0.01em;
+    }
+    .wc-group-row {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      padding: 0.12rem 0;
+      color: var(--text-muted);
+    }
+    .wc-group-row .team-block {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-group-row .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-group-row.advancing {
+      color: var(--text-body, inherit);
+    }
+    .wc-group-row .pos {
+      display: inline-block;
+      width: 1.1em;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-group-row.eliminated {
+      opacity: 0.55;
+    }
+
+    /* Championship odds + dark horse table */
+    .wc-odds {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.4rem;
+      margin-top: 1rem;
+    }
+    .wc-odds-row {
+      display: grid;
+      grid-template-columns: 1.6em 24px minmax(110px, 0.8fr) 1fr 4em;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .wc-odds-row .pos {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+    }
+    .wc-odds-row .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-odds-bar {
+      height: 14px;
+      border-radius: 2px;
+      background: rgba(180,150,80,0.45);
+    }
+    .wc-odds-row .pct {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+
+    .wc-paths {
+      display: grid;
+      /* Team | dark-horse tag | R16 | QF | SF | F | Champion
+         (Elo, Market and Δ columns intentionally removed: Elo is a
+         model input that confuses next to champion%, and Market/Δ are
+         placeholders for a Polymarket feed that's not wired up.) */
+      grid-template-columns: minmax(160px, 1.4fr) 6.5em repeat(5, 1fr);
+      column-gap: 0.3rem;
+      row-gap: 0.4rem;
+      font-size: 0.85rem;
+      margin-top: 1rem;
+    }
+    .wc-paths .name {
+      min-width: 0; /* let the row truncate cleanly */
+    }
+    .wc-paths .header {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.3rem;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    .wc-paths .header.right { text-align: right; }
+    .wc-paths .name {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+    }
+    .wc-paths .cell-num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    /* Text colour ramps with column-normalised intensity, no background.
+       --fill is set inline by the renderer (0..1). At fill=0 the number
+       sits in muted body text; at fill=1 it lifts into a saturated brand
+       gold + bold weight. Smooth interpolation via color-mix so it works
+       in light + dark themes. */
+    .wc-paths .v {
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
+      );
+      font-weight: calc(400 + var(--fill, 0) * 300);
+      transition: color 120ms ease, font-weight 120ms ease;
+    }
+
+    /* Top scorers list: rank | flag | name | badge | goals, packed
+       tight. Grid is capped at a comfortable max-width and centered
+       in the pane so there's whitespace on either side rather than
+       stretched cells. The name column is the only flexible one but
+       sized to content rather than greedily taking all spare space. */
+    .wc-scorers {
+      display: grid;
+      grid-template-columns: 2.2em auto 1fr auto auto;
+      column-gap: 0.7rem;
+      row-gap: 0.55rem;
+      margin: 0.8rem auto 0;
+      max-width: 460px;
+      font-size: 0.92rem;
+      align-items: center;
+    }
+    .wc-scorers .rank {
+      text-align: right;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-scorers .team-flag {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    /* Smaller flag, higher-res source. flagcdn w80 gives a crisp
+       image at 18px display on 2x-DPR screens. */
+    .wc-scorers .team-flag .wc-flag {
+      width: 18px;
+      height: 13px;
+      flex-shrink: 0;
+    }
+    .wc-scorers .player-name {
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      padding-right: 0.5rem;
+    }
+    .wc-scorers .club-badge {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .wc-scorers .club-badge img {
+      width: 20px;
+      height: 20px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+    .wc-scorers .club-badge .fallback {
+      width: 20px;
+      height: 14px;
+    }
+    .wc-scorers .predicted {
+      min-width: 1.6em;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      color: color-mix(
+        in oklab,
+        var(--text-muted) calc((1 - var(--fill, 0)) * 100%),
+        rgb(85, 160, 100) calc(var(--fill, 0) * 100%)
+      );
+    }
+    .wc-paths .name .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-paths .team-rating {
+      font-size: 0.72rem;
+      font-style: italic;
+      color: var(--text-muted);
+      opacity: 0.75;
+      font-variant-numeric: tabular-nums;
+      text-align: right;
+      align-self: center;
+    }
+    .wc-paths .dh-cell {
+      align-self: center;
+    }
+    .wc-darkhorse-tag {
+      display: inline-block;
+      flex-shrink: 0;
+      font-size: 0.6rem;
+      padding: 0.05rem 0.3rem;
+      border: 1px solid rgba(180,150,80,0.5);
+      border-radius: 2px;
+      color: rgba(180,150,80,0.9);
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      line-height: 1.4;
+    }
+
+    /* Search input shared between the two probability tables */
+    .wc-search {
+      width: 100%;
+      max-width: 280px;
+      margin-top: 0.6rem;
+      padding: 0.35rem 0.55rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: transparent;
+      color: inherit;
+      font-size: 0.85rem;
+      font-family: inherit;
+    }
+    .wc-search:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-hidden { display: none !important; }
+
+    /* Pin intro paragraph height across Live/Prediction so flipping
+       between top tabs doesn't push content below up or down by a line. */
+    .wc-pane-intro {
+      min-height: 3.6em;
+    }
+    /* Meta line under the sub-tab nav described Mode/Model state.
+       Those toggles are benched; hide the meta entirely so it doesn't
+       add a line on Prediction that Live doesn't have. */
+    .wc-tournament-meta { display: none; }
+
+    /* Match list (Live > Upcoming sub-view).
+       Two-column layout: Recent results on the left, Next up on the
+       right. Each column is a flex stack of compact rows. */
+    .wc-match-filter {
+      width: 100%;
+      max-width: 320px;
+      font: inherit;
+      font-size: 0.85rem;
+      padding: 0.35rem 0.5rem;
+      margin: 0.5rem 0 0.7rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: transparent;
+      color: inherit;
+    }
+    .wc-match-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    @media (max-width: 720px) {
+      .wc-match-list { grid-template-columns: 1fr; gap: 0.5rem; }
+    }
+    .wc-match-col {
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .wc-match-col .header {
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding-bottom: 0.25rem;
+      border-bottom: 1px solid rgba(128,128,128,0.2);
+    }
+    .wc-match-col .empty {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      padding: 0.5rem 0.2rem;
+      font-style: italic;
+    }
+    /* Two-column rows: date on the left spans both visual rows; teams
+       sit top-right; meta (predicted + W/D/L or Elo deltas) sits
+       bottom-right under the teams. Keeps each card narrow enough for
+       the two-column outer grid. */
+    .wc-row {
+      display: grid;
+      grid-template-columns: 3.2em 1fr;
+      grid-template-rows: auto auto;
+      column-gap: 0.55rem;
+      row-gap: 0.15rem;
+      align-items: center;
+      padding: 0.4rem 0.55rem;
+      border: 1px solid rgba(128,128,128,0.22);
+      border-radius: 3px;
+      font-size: 0.78rem;
+    }
+    .wc-row.next { border-color: rgba(85,160,100,0.5); }
+    .wc-row .date {
+      grid-row: 1 / span 2;
+      align-self: center;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      line-height: 1.1;
+    }
+    .wc-row .date small {
+      display: block;
+      font-size: 0.6rem;
+      text-transform: none;
+      letter-spacing: 0;
+      opacity: 0.7;
+    }
+    .wc-row .teams {
+      grid-column: 2;
+      grid-row: 1;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-row .teams .team {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .wc-row .teams .team.right { justify-content: flex-end; }
+    .wc-row .teams .team .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      font-weight: 600;
+    }
+    .wc-row .teams .team .wc-flag { width: 18px; height: 13px; }
+    .wc-row .teams .score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      padding: 0 0.2rem;
+    }
+    .wc-row .teams .score.vs {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-size: 0.7rem;
+      text-transform: uppercase;
+    }
+    .wc-row .meta {
+      grid-column: 2;
+      grid-row: 2;
+      font-size: 0.66rem;
+      color: var(--text-muted);
+      line-height: 1.35;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: baseline;
+      gap: 0.5rem;
+    }
+    .wc-row .meta .tag {
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+    }
+    .wc-row .meta .pred {
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-row .meta .pred.hit { color: var(--text-body, inherit); }
+    .wc-row .meta .wdl {
+      display: inline-flex;
+      gap: 0.4rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-row .meta .delta {
+      font-variant-numeric: tabular-nums;
+      font-weight: 600;
+    }
+    .wc-row .meta .delta.up   { color: rgb(85, 160, 100); }
+    .wc-row .meta .delta.down { color: rgb(200, 95, 95); }
+    /* Next match hero card */
+    .wc-next-wrap {
+      margin-top: 1rem;
+      padding: 1rem 1.25rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 4px;
+    }
+    .wc-next-meta {
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--text-muted);
+      margin-bottom: 0.8rem;
+    }
+    .wc-next-row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 1rem;
+    }
+    .wc-next-team {
+      display: flex;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 1.05rem;
+      font-weight: 600;
+    }
+    .wc-next-team.right { justify-content: flex-end; }
+    .wc-next-team .wc-flag { width: 28px; height: 20px; }
+    .wc-next-score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--text-strong, inherit);
+      letter-spacing: -0.02em;
+    }
+    .wc-next-bar {
+      display: grid;
+      grid-template-columns: var(--ph, 33%) var(--pd, 34%) var(--pa, 33%);
+      height: 10px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 0.85rem;
+    }
+    .wc-next-bar > span { display: block; }
+    .wc-next-bar .ph { background: rgba(180,150,80,0.65); }
+    .wc-next-bar .pd { background: rgba(128,128,128,0.4); }
+    .wc-next-bar .pa { background: rgba(120,140,180,0.6); }
+    .wc-next-pct {
+      display: grid;
+      grid-template-columns: var(--ph, 33%) var(--pd, 34%) var(--pa, 33%);
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.3rem;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-next-pct > .ph { text-align: left; }
+    .wc-next-pct > .pd { text-align: center; }
+    .wc-next-pct > .pa { text-align: right; }
+
+    /* Upcoming: condensed cards for the matches after the next hero. */
+    .wc-upcoming {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.6rem;
+      margin-top: 0.7rem;
+    }
+    .wc-upcoming-card {
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      padding: 0.55rem 0.85rem 0.6rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .wc-upcoming-card .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.68rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+    }
+    .wc-upcoming-card .meta .tag { font-weight: 600; }
+    .wc-upcoming-card .row {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.9rem;
+      font-weight: 600;
+    }
+    .wc-upcoming-card .team {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-upcoming-card .team.right { justify-content: flex-end; }
+    .wc-upcoming-card .team .wc-flag { width: 20px; height: 14px; }
+    .wc-upcoming-card .team .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-upcoming-card .score {
+      font-variant-numeric: tabular-nums;
+      font-weight: 700;
+      font-size: 1.05rem;
+      letter-spacing: -0.02em;
+      color: var(--text-strong, inherit);
+    }
+    .wc-upcoming-card .bar {
+      display: grid;
+      grid-template-columns: var(--ph, 33%) var(--pd, 34%) var(--pa, 33%);
+      height: 6px;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .wc-upcoming-card .bar > span { display: block; }
+    .wc-upcoming-card .bar .ph { background: rgba(180,150,80,0.65); }
+    .wc-upcoming-card .bar .pd { background: rgba(128,128,128,0.4); }
+    .wc-upcoming-card .bar .pa { background: rgba(120,140,180,0.6); }
+    .wc-upcoming-card .pct {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-upcoming-card .pct > .pa { text-align: right; }
+    .wc-upcoming-card .pct > .pd { text-align: center; }
+
+    /* Lookup form: pick any upcoming fixture by team name. */
+    .wc-lookup {
+      margin-top: 0.9rem;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      align-items: center;
+      font-size: 0.78rem;
+      color: var(--text-muted);
+    }
+    .wc-lookup label {
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      font-weight: 600;
+    }
+    .wc-lookup select, .wc-lookup input {
+      font: inherit;
+      padding: 0.25rem 0.4rem;
+      border: 1px solid rgba(128,128,128,0.4);
+      border-radius: 2px;
+      background: transparent;
+      color: inherit;
+    }
+    .wc-lookup-result {
+      margin-top: 0.55rem;
+    }
+    .wc-lookup-result:empty { display: none; }
+    @media (max-width: 540px) {
+      .wc-upcoming { grid-template-columns: 1fr; }
+    }
+
+    /* Recent results: one teams-row at top with the actual scoreline,
+       elo deltas underneath each team, and a small predicted-score
+       caption below. Flags + team names appear once per card. */
+    .wc-recent {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 0.85rem;
+      margin-top: 0.6rem;
+    }
+    .wc-recent-card {
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      padding: 0.6rem 0.9rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .wc-recent-card .meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .wc-recent-card .meta .tag { font-weight: 600; }
+
+    /* Actual result row: team / flag / score / flag / team. */
+    .wc-recent-actual {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 0.6rem;
+      font-size: 0.95rem;
+      font-weight: 600;
+    }
+    .wc-recent-actual .team {
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      min-width: 0;
+    }
+    .wc-recent-actual .team.right { justify-content: flex-end; }
+    .wc-recent-actual .team .wc-flag { width: 22px; height: 16px; }
+    .wc-recent-actual .team .name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-recent-actual .score {
+      font-weight: 700;
+      font-size: 1.25rem;
+      color: var(--text-strong, inherit);
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Elo delta row: one number under each team, color coded. */
+    .wc-recent-elo {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: baseline;
+      gap: 0.6rem;
+      font-size: 0.72rem;
+      font-variant-numeric: tabular-nums;
+      color: var(--text-muted);
+    }
+    .wc-recent-elo .delta { font-weight: 600; }
+    .wc-recent-elo .delta.right { text-align: right; }
+    .wc-recent-elo .delta.up   { color: rgb(85, 160, 100); }
+    .wc-recent-elo .delta.down { color: rgb(200, 95, 95); }
+    .wc-recent-elo .center {
+      font-size: 0.62rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+
+    /* Predicted scoreline: small caption, centered, no flags. */
+    .wc-recent-pred {
+      display: flex;
+      justify-content: center;
+      align-items: baseline;
+      gap: 0.5rem;
+      padding-top: 0.45rem;
+      border-top: 1px solid rgba(128,128,128,0.2);
+      font-size: 0.74rem;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+    }
+    .wc-recent-pred .pred-score {
+      font-weight: 700;
+      font-size: 0.95rem;
+      letter-spacing: -0.01em;
+      text-transform: none;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-recent-pred.hit .pred-score { color: var(--text-body, inherit); }
+
+    /* Customise panel: sits right under the Custom toggle, right-aligned */
+    .wc-customise {
+      width: 210px;
+      margin-left: auto;
+      margin-top: 0.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.35rem;
+    }
+    .wc-customise[hidden] { display: none; }
+    .wc-customise input.wc-team-add {
+      font: inherit;
+      font-size: 0.78rem;
+      font-family: inherit;
+      padding: 0.28rem 0.45rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 3px;
+      background: var(--bg, rgba(255,255,255,0.6));
+      color: inherit;
+      width: 100%;
+      box-sizing: border-box;
+      backdrop-filter: blur(2px);
+    }
+    .wc-customise input.wc-team-add:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-adjustments {
+      display: flex;
+      flex-direction: column;
+      gap: 0.3rem;
+    }
+    .wc-adjust {
+      display: grid;
+      grid-template-columns: 16px 1fr 3em 56px 1em;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.22rem 0.4rem;
+      border: 1px solid rgba(180,150,80,0.5);
+      border-radius: 3px;
+      font-size: 0.75rem;
+      font-variant-numeric: tabular-nums;
+      background: var(--bg, rgba(255,255,255,0.7));
+      backdrop-filter: blur(2px);
+    }
+    .wc-adjust .wc-flag { width: 14px; height: 10px; }
+    .wc-adjust .name {
+      color: var(--text-body, inherit);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-adjust .rating {
+      color: var(--text-muted);
+      font-size: 0.7rem;
+      font-style: italic;
+      text-align: right;
+    }
+    .wc-adjust input.boost {
+      width: 100%;
+      padding: 0.08rem 0.25rem;
+      border: 1px solid rgba(128,128,128,0.35);
+      border-radius: 2px;
+      background: transparent;
+      color: inherit;
+      font: inherit;
+      font-size: 0.75rem;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+      box-sizing: border-box;
+    }
+    .wc-adjust input.boost:focus {
+      outline: none;
+      border-color: rgba(180,150,80,0.8);
+    }
+    .wc-adjust .x {
+      cursor: pointer;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1;
+      text-align: center;
+    }
+    .wc-adjust .x:hover { color: inherit; }
+    .wc-customise-hint {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Tournament view controls: separated square-ish buttons */
+    .wc-tournament-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem 0.7rem;
+      align-items: center;
+      margin-top: 1rem;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-toggle {
+      display: inline-flex;
+      gap: 0.3rem;
+    }
+    /* Explicit override: CSS display rules above defeat the HTML
+       `hidden` attribute, so re-establish hide-when-hidden here. */
+    .wc-toggle[hidden] { display: none; }
+    .wc-toggle.right { margin-left: auto; }
+    .wc-btn {
+      font: inherit;
+      font-size: 0.82rem;
+      font-family: inherit;
+      padding: 0.3rem 0.7rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wc-btn:hover { background: rgba(180,150,80,0.08); }
+    .wc-btn.active {
+      background: rgba(180,150,80,0.14);
+      border-color: rgba(180,150,80,0.55);
+      color: var(--text-body, inherit);
+      font-weight: 500;
+    }
+    .wc-btn[hidden] { display: none; }
+
+    /* Top-level tab nav (Match Centre / Tournament / Table). Slightly
+       larger + bolder than sub-toggles, sits at the top of the page,
+       and stays visible while you browse a pane. */
+    .wc-tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      margin: 1.2rem 0 0;
+      padding-bottom: 0.7rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-tab {
+      font: inherit;
+      font-size: 0.95rem;
+      font-family: inherit;
+      padding: 0.45rem 0.95rem;
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .wc-tab:hover { background: rgba(180,150,80,0.08); }
+    .wc-tab.active {
+      background: rgba(180,150,80,0.14);
+      border-color: rgba(180,150,80,0.55);
+      color: var(--text-body, inherit);
+      font-weight: 600;
+    }
+    .wc-pane[hidden] { display: none; }
+    .wc-pane { margin-top: 1rem; }
+
+    /* Status badges next to section headings. */
+    .wc-live-status, .wc-pred-badge {
+      display: inline-block;
+      margin-left: 0.55rem;
+      vertical-align: middle;
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 0.18rem 0.5rem;
+      border-radius: 2px;
+      border: 1px solid currentColor;
+    }
+    /* Don't render an empty pill (used while pre-freeze when there's
+       nothing meaningful to badge). */
+    .wc-live-status:empty, .wc-pred-badge:empty { display: none; }
+    .wc-live-status.upcoming { color: rgba(180,150,80,0.85); }
+    .wc-live-status.live { color: rgb(85,160,100); }
+    .wc-pred-badge.forecast { color: rgba(180,150,80,0.85); }
+    .wc-pred-badge.archived { color: var(--text-muted); }
+    .wc-live-placeholder {
+      margin-top: 1rem;
+      padding: 1.5rem;
+      border: 1px dashed rgba(128,128,128,0.3);
+      border-radius: 3px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+    }
+    .wc-live-placeholder strong {
+      display: block;
+      font-size: 1.05rem;
+      color: var(--text-body, inherit);
+      margin-bottom: 0.3rem;
+      font-weight: 600;
+    }
+
+    /* Live tournament: status banner + group cards + match list */
+    .wc-live-banner {
+      margin-top: 1rem;
+      padding: 0.7rem 1rem;
+      border-radius: 3px;
+      font-size: 0.95rem;
+      border: 1px solid rgba(128,128,128,0.25);
+    }
+    .wc-live-banner strong { font-weight: 600; color: var(--text-body, inherit); }
+    .wc-live-banner .muted { color: var(--text-muted); }
+    .wc-live-banner.upcoming { border-color: rgba(180,150,80,0.4); }
+    .wc-live-banner.live { border-color: rgba(85,160,100,0.45); }
+
+    .wc-live-groups {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 0.85rem;
+      margin-top: 1rem;
+    }
+    .wc-live-group {
+      border: 1px solid rgba(128,128,128,0.3);
+      border-radius: 3px;
+      padding: 0.6rem 0.85rem 0.7rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .wc-live-group h4 {
+      font-weight: 600;
+      font-size: 0.95rem;
+      margin: 0;
+      letter-spacing: -0.01em;
+    }
+    .wc-live-table { display: flex; flex-direction: column; gap: 0.05rem; }
+    .wc-live-row {
+      display: grid;
+      grid-template-columns: 1.3em 1fr 2em 2.4em 2em;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.82rem;
+      padding: 0.08rem 0;
+      color: var(--text-muted);
+    }
+    .wc-live-row.header {
+      color: var(--text-muted);
+      font-size: 0.65rem;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding-bottom: 0.2rem;
+      border-bottom: 1px solid rgba(128,128,128,0.18);
+    }
+    .wc-live-row .pos {
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+      text-align: center;
+    }
+    .wc-live-row .team-block {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      min-width: 0;
+    }
+    .wc-live-row .team-name {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-row .num {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-live-row .num.bold { font-weight: 600; }
+    .wc-live-row.advancing { color: var(--text-body, inherit); }
+    .wc-live-row.advancing .pos { color: rgb(85,160,100); font-weight: 600; }
+
+    .wc-live-matches {
+      margin-top: 0.4rem;
+      padding-top: 0.4rem;
+      border-top: 1px solid rgba(128,128,128,0.18);
+      display: flex;
+      flex-direction: column;
+      gap: 0.15rem;
+    }
+    .wc-live-match {
+      display: grid;
+      grid-template-columns: 2.8em 1fr auto 1fr 3em;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      padding: 0.05rem 0;
+    }
+    .wc-live-match .date { font-variant-numeric: tabular-nums; }
+    .wc-live-match .team-cell.home {
+      text-align: right;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-match .team-cell.away {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .wc-live-match .score {
+      font-variant-numeric: tabular-nums;
+      padding: 0 0.2rem;
+    }
+    .wc-live-match .score.muted { color: var(--text-muted); font-size: 0.65rem; }
+    .wc-live-match.played {
+      color: var(--text-body, inherit);
+    }
+    .wc-live-match.played .score { font-weight: 600; }
+    .wc-live-match .pred-mini {
+      font-size: 0.62rem;
+      color: var(--text-muted);
+      text-align: right;
+      letter-spacing: -0.02em;
+      font-variant-numeric: tabular-nums;
+    }
+    .wc-live-ko { margin-top: 1.5rem; }
+    .wc-live-ko h3 {
+      font-size: 1rem;
+      font-weight: 600;
+      margin: 0 0 0.3rem 0;
+    }
+    .wc-live-ko .small { font-size: 0.85rem; margin: 0; }
+    .wc-tournament-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.4rem;
+      min-height: 1.1em;
+    }
+    /* Force the sandbox panel to actually hide when [hidden]; the
+       earlier display:flex was overriding the attribute. */
+    .wc-sandbox-controls[hidden],
+    .wc-sandbox-active[hidden] { display: none !important; }
+    .wc-sandbox-loading {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      font-style: italic;
+    }
+
+    /* Probability table: keep its desktop column widths and let the
+       wrapper scroll horizontally on narrow screens. */
+    .wc-paths-wrap {
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .wc-paths { min-width: 540px; }
+
+    /* Next-match team names should not wrap onto two lines. */
+    .wc-next-team > span:not(.wc-flag) {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      min-width: 0;
+    }
+    .wc-next-team { min-width: 0; }
+
+    /* Mobile (<= 600px) */
+    @media (max-width: 600px) {
+      /* Stack the toggle groups so each one takes its own row */
+      .wc-tournament-bar {
+        flex-direction: column;
+        align-items: stretch;
+      }
+      .wc-toggle.right { margin-left: 0; }
+      .wc-customise { width: 100%; margin-left: 0; }
+
+      /* Next match: tighter and slightly smaller so long names fit */
+      .wc-next-team {
+        font-size: 0.92rem;
+        gap: 0.4rem;
+      }
+      .wc-next-team .wc-flag { width: 22px; height: 16px; }
+      .wc-next-score { font-size: 1.25rem; }
+      .wc-next-row { gap: 0.5rem; }
+      .wc-next-pct { font-size: 0.7rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="wide">
+
+    <section class="intro">
+      <h1 class="intro-heading">World Cup 2026.</h1>
+      <p class="intro-body">
+        A model that simulates the 2026 World Cup
+        <span id="wc-nsims">10,000</span> times. The Table shows each
+        team's probability of reaching each round, averaged across all
+        runs. The Group and Knockouts tabs show one representative
+        tournament, picked from the runs the model actually generated
+        and sitting near the median chaos level so a typical
+        tournament's number of upsets is preserved. Top scorers are
+        predicted separately from club form. Frozen the day before
+        kickoff so the prediction stands on its own.
+        <a class="wc-method-link" href="/projects/worldcup/methodology.html">How the model works &rarr;</a>
+        <span class="wc-pred-badge" id="wc-pred-badge"></span>
+      </p>
+      <p style="font-style:italic;color:var(--text-muted);font-size:0.95rem;margin-top:1rem;">
+        Kickoff: 11 June 2026.
+      </p>
+    </section>
+
+    <!-- Single pane (live tab removed May 2026). The intro above carries
+         all the context; tabs sit directly under it. -->
+    <section class="wc-pane" data-pane="prediction" role="tabpanel" aria-label="Prediction">
+      <div class="intro">
+        <div class="wc-tournament-bar">
+          <div class="wc-toggle" role="tablist" aria-label="View">
+            <button class="wc-btn active" data-tab="table" data-scope="prediction" type="button">Table</button>
+            <button class="wc-btn" data-tab="groups" data-scope="prediction" type="button">Group stage</button>
+            <button class="wc-btn" data-tab="knockouts" data-scope="prediction" type="button">Knockouts</button>
+            <button class="wc-btn" data-tab="scorers" data-scope="prediction" type="button">Top scorers</button>
+          </div>
+          <!-- Mode + Model toggles are benched for now. The defaults
+               (average aggregation, latest model) run as before; the
+               buttons stay in the DOM so re-enabling later is just
+               removing the `hidden` attribute from these two divs. -->
+          <div class="wc-toggle" id="wc-mode-toggle" role="tablist" aria-label="Mode" hidden>
+            <button class="wc-btn active" data-mode="average" type="button">Average</button>
+            <button class="wc-btn" data-mode="single" type="button">Single sim</button>
+          </div>
+          <button class="wc-btn" id="wc-roll-btn" type="button" hidden>New</button>
+          <div class="wc-toggle right" role="tablist" aria-label="Model" hidden>
+            <button class="wc-btn active" data-source="latest" type="button">Latest model</button>
+            <button class="wc-btn" data-source="custom" type="button">Custom model</button>
+          </div>
+        </div>
+
+        <div class="wc-customise" id="wc-customise" hidden>
+          <input list="wc-team-list" id="wc-add-team" type="search"
+                 class="wc-team-add" placeholder="Add a team..." autocomplete="off" />
+          <datalist id="wc-team-list"></datalist>
+          <div id="wc-adjustments" class="wc-adjustments"></div>
+        </div>
+        <div class="wc-tournament-meta" id="wc-tournament-meta"></div>
+      </div>
+
+      <!-- Tournament view: bracket or group cards. -->
+      <div id="wc-tournament-view"></div>
+
+      <!-- Table view: probability of reaching each round.
+           Toggled visible when STATE.tab === 'table'. -->
+      <div id="wc-table-view" hidden>
+        <input type="search" class="wc-search" id="wc-paths-search" placeholder="Filter teams..." autocomplete="off" />
+        <div class="wc-paths-wrap">
+          <div class="wc-paths" id="wc-paths"></div>
+        </div>
+      </div>
+
+      <!-- Top scorers view: predicted WC golden boot contenders. -->
+      <div id="wc-scorers-view" hidden>
+        <div class="wc-scorers" id="wc-scorers"></div>
+      </div>
+    </section>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+
+  <script>
+    (function () {
+      // ── Constants ────────────────────────────────────────────────
+      const FLAGS = {};
+      const N_VISIBLE_TABLE = 24;
+      const CUSTOM_AVG_SIMS = 2000;   // sims to average for Custom + Average view
+
+      const CAL = {
+        LAMBDA_HOME: 1.41, LAMBDA_AWAY: 1.07,
+        SLOPE_HOME: 0.00204, SLOPE_AWAY: -0.00255,
+        HOME_ADV: 50, PEN_DIVISOR: 600,
+      };
+
+      const R32_PAIRINGS_JS = [
+        [['R','A'],['R','B']],   [['W','E'],['3','ABCDF']],
+        [['W','F'],['R','C']],   [['W','C'],['R','F']],
+        [['W','I'],['3','CDFGH']], [['R','E'],['R','I']],
+        [['W','A'],['3','CEFHI']], [['W','L'],['3','EHIJK']],
+        [['W','D'],['3','BEFIJ']], [['W','G'],['3','AEHIJ']],
+        [['R','K'],['R','L']],   [['W','H'],['R','J']],
+        [['W','B'],['3','EFGIJ']], [['W','J'],['R','H']],
+        [['W','K'],['3','DEIJL']], [['R','D'],['R','G']],
+      ];
+      const R16_FEEDS_JS = [[89,74,77],[90,73,75],[91,76,78],[92,79,80],
+                            [93,83,84],[94,81,82],[95,86,88],[96,85,87]];
+      const QF_FEEDS_JS = [[97,89,90],[98,93,94],[99,91,92],[100,95,96]];
+      const SF_FEEDS_JS = [[101,97,98],[102,99,100]];
+      const FINAL_FEED_JS = [104,101,102];
+      const R32_VISUAL_ORDER_JS = [74,77,73,75,83,84,81,82,76,78,79,80,86,88,85,87];
+      const R16_VISUAL_ORDER_JS = [89,90,93,94,91,92,95,96];
+      const QF_VISUAL_ORDER_JS  = [97,98,99,100];
+      const SF_VISUAL_ORDER_JS  = [101,102];
+
+      // ── State ────────────────────────────────────────────────────
+      const STATE = {
+        // Default sub-tab. Table sits leftmost because it explains the
+        // most upfront (round-by-round probabilities, market column,
+        // dark horses), then groups and knockouts as the narrative
+        // continuation, and top scorers as a separate slice.
+        // Hydrated from URL hash or localStorage on init (see initApp).
+        tab: 'table',         // 'table' | 'groups' | 'knockouts' | 'scorers'
+        mode: 'average',      // 'average' | 'single'
+        source: 'latest',     // 'latest' | 'custom'
+        bumps: {},
+        currentSim: null,
+        customAggregate: null,
+      };
+      const DATA = { bracket: null, sim: null };
+      const SANDBOX = { groups: {}, baseRatings: {}, fixtures: [] };
+      // Raw Elo per team (before our squad-value and form blends).
+      // We rank teams by this for dark-horse selection so we don't
+      // double-count corrections we already applied.
+      const RAW_RATINGS = {};
+
+      // ── Helpers ──────────────────────────────────────────────────
+      function flagSrc(team) {
+        const code = FLAGS[team];
+        // Request a larger source so flags stay sharp on retina displays
+        // (we display at 14-28px, so 80px source = comfortable 2-5x).
+        return code ? `https://flagcdn.com/w80/${code}.png` : null;
+      }
+      function flagImg(team) {
+        const src = flagSrc(team);
+        return src ? `<img class="wc-flag" src="${src}" alt="" loading="lazy" />` : '';
+      }
+      // Display-only overrides for the canonical names that come out of
+      // the match-data feed (martj42/international_results). The
+      // canonical string is the key for every join in the data
+      // pipeline (ratings, matches, bracket joins, host bonuses, etc.)
+      // so we can't rename it without breaking joins. Overriding here
+      // only changes what the user sees.
+      //
+      // Source: official FIFA WC 2026 nation list.
+      const TEAM_DISPLAY = {
+        "Iran":           "IR Iran",
+        "South Korea":    "Korea Republic",
+        "Cape Verde":     "Cabo Verde",
+        "DR Congo":       "Congo DR",
+        "Ivory Coast":    "Côte d'Ivoire",
+        "Czech Republic": "Czechia",
+        "Turkey":         "Türkiye",
+      };
+      function displayName(team) { return TEAM_DISPLAY[team] || team; }
+
+      // Display names compressed for the narrow bracket cards. The
+      // probability table and group cards use the full display names.
+      // Keys are canonical names (the data-feed strings).
+      const TEAM_SHORT = {
+        "Bosnia and Herzegovina": "Bosnia",
+        "United States":          "USA",
+        "South Korea":            "Korea",
+        "South Africa":           "S. Africa",
+        "Czech Republic":         "Czechia",
+        "New Zealand":            "N. Zealand",
+        "Saudi Arabia":           "S. Arabia",
+      };
+      // Bracket cards: prefer the short form, falling back to the
+      // display-name override (so e.g. Türkiye renders Türkiye when no
+      // short form is registered, and renamed teams still respect their
+      // override if a short form is later added for them).
+      function shortName(team) { return TEAM_SHORT[team] || displayName(team); }
+      function poisson(lambda) {
+        const L = Math.exp(-lambda);
+        let k = 0, p = 1;
+        do { k++; p *= Math.random(); } while (p > L);
+        return k - 1;
+      }
+      function expectedGoals(effGap) {
+        return [
+          CAL.LAMBDA_HOME * Math.exp(CAL.SLOPE_HOME * effGap),
+          CAL.LAMBDA_AWAY * Math.exp(CAL.SLOPE_AWAY * effGap),
+        ];
+      }
+      function simMatch(rA, rB, neutral, ko) {
+        const effA = rA + (neutral ? 0 : CAL.HOME_ADV);
+        const [lh, la] = expectedGoals(effA - rB);
+        const sa = poisson(lh);
+        const sb = poisson(la);
+        if (sa > sb) return { sa, sb, win: 0, pens: false };
+        if (sb > sa) return { sa, sb, win: 1, pens: false };
+        if (!ko) return { sa, sb, win: -1, pens: false };
+        const pA = 1 / (1 + Math.pow(10, (rB - effA) / CAL.PEN_DIVISOR));
+        return { sa, sb, win: Math.random() < pA ? 0 : 1, pens: true };
+      }
+      function getRatings() {
+        const r = { ...SANDBOX.baseRatings };
+        if (STATE.source === 'custom') {
+          Object.entries(STATE.bumps).forEach(([t, b]) => {
+            r[t] = (r[t] || 1500) + b;
+          });
+        }
+        return r;
+      }
+
+      // ── Single sample ────────────────────────────────────────────
+      function simulateOnce(ratings) {
+        const groupStandings = [];
+        const winners = {}, runners = {}, thirdsByGroup = {};
+        const teamRound = {};
+
+        Object.entries(SANDBOX.groups).forEach(([letter, teams]) => {
+          const members = new Set(teams);
+          const pts = Object.fromEntries(teams.map(t => [t, 0]));
+          const gd  = Object.fromEntries(teams.map(t => [t, 0]));
+          const gf  = Object.fromEntries(teams.map(t => [t, 0]));
+          SANDBOX.fixtures.forEach(f => {
+            if (!members.has(f.home_team) || !members.has(f.away_team)) return;
+            const r = simMatch(
+              ratings[f.home_team] || 1500,
+              ratings[f.away_team] || 1500,
+              f.neutral, false
+            );
+            if (r.win === 0) pts[f.home_team] += 3;
+            else if (r.win === 1) pts[f.away_team] += 3;
+            else { pts[f.home_team] += 1; pts[f.away_team] += 1; }
+            gd[f.home_team] += r.sa - r.sb;
+            gd[f.away_team] += r.sb - r.sa;
+            gf[f.home_team] += r.sa;
+            gf[f.away_team] += r.sb;
+          });
+          const sorted = [...teams].sort((a, b) =>
+            (pts[b] - pts[a]) || (gd[b] - gd[a]) || (gf[b] - gf[a]) ||
+            ((ratings[b] || 1500) - (ratings[a] || 1500))
+          );
+          const standings = sorted.map((t, i) => ({
+            team: t, points: pts[t], gd: gd[t], gf: gf[t], position: i + 1,
+          }));
+          groupStandings.push({ name: letter, standings });
+          winners[letter] = sorted[0];
+          runners[letter] = sorted[1];
+          thirdsByGroup[letter] = standings[2];
+        });
+
+        const thirdsRanked = Object.entries(thirdsByGroup)
+          .sort(([, a], [, b]) =>
+            (b.points - a.points) || (b.gd - a.gd) || (b.gf - a.gf)
+          );
+        const advancingThirds = new Set(thirdsRanked.slice(0, 8).map(([l]) => l));
+
+        groupStandings.forEach(g => {
+          g.standings.forEach(s => {
+            if (s.position === 1) s.qualifies_as = 'winner';
+            else if (s.position === 2) s.qualifies_as = 'runner_up';
+            else if (s.position === 3 && advancingThirds.has(g.name)) s.qualifies_as = 'best_third';
+            else s.qualifies_as = 'eliminated';
+            s.predicted_points = s.points;
+            // initialize team_round
+            if (s.qualifies_as === 'eliminated') teamRound[s.team] = 'group_stage';
+            else teamRound[s.team] = 'round_of_32';
+          });
+        });
+
+        const used = new Set();
+        const thirdAssignments = {};
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          [a, b].forEach(spec => {
+            if (spec[0] !== '3') return;
+            const allowed = new Set(spec[1].split(''));
+            let cands = [...advancingThirds].filter(l => allowed.has(l) && !used.has(l));
+            if (cands.length === 0) {
+              cands = [...advancingThirds].filter(l => !used.has(l));
+            }
+            const best = cands.reduce((p, q) => {
+              const sp = thirdsByGroup[p], sq = thirdsByGroup[q];
+              if (sp.points !== sq.points) return sp.points > sq.points ? p : q;
+              if (sp.gd !== sq.gd) return sp.gd > sq.gd ? p : q;
+              return sp.gf >= sq.gf ? p : q;
+            });
+            thirdAssignments[matchNo] = thirdsByGroup[best].team;
+            used.add(best);
+          });
+        });
+
+        function resolve(spec, matchNo) {
+          if (spec[0] === 'W') return winners[spec[1]];
+          if (spec[0] === 'R') return runners[spec[1]];
+          return thirdAssignments[matchNo];
+        }
+
+        const ko = {};
+        function playMatch(matchNo, ta, tb) {
+          const r = simMatch(ratings[ta] || 1500, ratings[tb] || 1500, true, true);
+          const winner = r.win === 0 ? ta : tb;
+          const loser = r.win === 0 ? tb : ta;
+          ko[matchNo] = {
+            team_a: ta, team_b: tb,
+            score_a: r.sa, score_b: r.sb,
+            winner, pens: r.pens,
+          };
+          return { winner, loser };
+        }
+
+        R32_PAIRINGS_JS.forEach(([a, b], i) => {
+          const matchNo = 73 + i;
+          const ta = resolve(a, matchNo), tb = resolve(b, matchNo);
+          const { loser } = playMatch(matchNo, ta, tb);
+          teamRound[loser] = 'round_of_32';
+        });
+        function playFeeds(feeds, loserLabel) {
+          feeds.forEach(([m, fa, fb]) => {
+            const ta = ko[fa].winner, tb = ko[fb].winner;
+            const { loser } = playMatch(m, ta, tb);
+            teamRound[loser] = loserLabel;
+          });
+        }
+        playFeeds(R16_FEEDS_JS, 'round_of_16');
+        playFeeds(QF_FEEDS_JS, 'quarter_finals');
+        playFeeds(SF_FEEDS_JS, 'semi_finals');
+        const [fno, ffa, ffb] = FINAL_FEED_JS;
+        const fa = ko[ffa].winner, fb = ko[ffb].winner;
+        const { winner: champ, loser: ru } = playMatch(fno, fa, fb);
+        teamRound[champ] = 'champion';
+        teamRound[ru] = 'runner_up';
+
+        return {
+          groups: groupStandings,
+          knockout: {
+            round_of_32: R32_VISUAL_ORDER_JS.map(i => ko[i]),
+            round_of_16: R16_VISUAL_ORDER_JS.map(i => ko[i]),
+            quarter_finals: QF_VISUAL_ORDER_JS.map(i => ko[i]),
+            semi_finals: SF_VISUAL_ORDER_JS.map(i => ko[i]),
+            final: [ko[fno]],
+            champion: ko[fno].winner,
+          },
+          team_round: teamRound,
+        };
+      }
+
+      // ── Custom-model aggregator: run N sims, build team_stats ────
+      function aggregateCustom(ratings, n) {
+        const allTeams = Object.keys(SANDBOX.baseRatings);
+        const counts = {};
+        allTeams.forEach(t => {
+          counts[t] = { group_stage: 0, round_of_32: 0, round_of_16: 0,
+                        quarter_finals: 0, semi_finals: 0, runner_up: 0, champion: 0 };
+        });
+        for (let i = 0; i < n; i++) {
+          const sim = simulateOnce(ratings);
+          Object.entries(sim.team_round).forEach(([t, r]) => {
+            if (counts[t]) counts[t][r]++;
+          });
+        }
+        // Convert to team_stats with cumulative probabilities
+        const team_stats = allTeams.map(t => {
+          const c = counts[t];
+          const total = Object.values(c).reduce((a, b) => a + b, 0) || 1;
+          const pct = (k) => 100 * c[k] / total;
+          const p_champion = pct('champion');
+          const p_final = p_champion + pct('runner_up');
+          const p_semis = p_final + pct('semi_finals');
+          const p_quarters = p_semis + pct('quarter_finals');
+          const p_round_of_16 = p_quarters + pct('round_of_16');
+          return {
+            team: t,
+            rating: Math.round(ratings[t] || 1500),
+            // raw rating + boost: this is what we rank by for dark horse,
+            // so the user's boost moves the team's "expected" position.
+            raw_rating: Math.round((RAW_RATINGS[t] || 1500) + (STATE.bumps[t] || 0)),
+            p_champion, p_final, p_semis, p_quarters, p_round_of_16,
+            p_advance_from_groups: 100 - pct('group_stage'),
+          };
+        }).sort((a, b) => b.p_champion - a.p_champion);
+        return { team_stats, n_simulations: n };
+      }
+
+      // ── Renderer: unified match list (Live > Upcoming sub-view) ──
+      // Combines recent results + upcoming fixtures into one tight,
+      // chronologically-sorted list. Replaces the previous "next match
+      // hero + two half-cards + lookup + recent results" layout which
+      // had too many disconnected visual treatments.
+      function renderMatchList() {
+        const container = document.getElementById('wc-match-list');
+        if (!container) return;
+        const recent = (DATA.sim.recent_matches || []);
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
+
+        // Take the latest 8 recent + the next 8 upcoming
+        const recentTrimmed = recent.slice(0, 8).reverse(); // oldest first
+        const upcomingTrimmed = upcoming.slice(0, 8);
+
+        const fmtDate = (s) => {
+          try {
+            const d = new Date(s + 'T12:00:00');
+            const day = d.toLocaleDateString('en-US', { weekday: 'short' });
+            const md  = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            return `<small>${day}</small>${md}`;
+          } catch (e) { return s; }
+        };
+        // Crucial-only card: date + teams + score (or vs) + predicted.
+        // No tournament tag, W/D/L percentages, or Elo deltas - those
+        // surface in tooltips instead so the visible card stays clean.
+        const playedRow = (m) => {
+          const exactHit =
+            m.modal_score && m.modal_score[0] === m.actual_home_goals
+                          && m.modal_score[1] === m.actual_away_goals;
+          const pred = m.modal_score
+            ? `<span class="pred${exactHit ? ' hit' : ''}">pred ${m.modal_score[0]}–${m.modal_score[1]}</span>`
+            : '';
+          const dh = m.elo_delta_home != null ? Math.round(m.elo_delta_home) : null;
+          const da = m.elo_delta_away != null ? Math.round(m.elo_delta_away) : null;
+          const tooltip = `${m.tournament || ''}${dh != null && da != null
+            ? '\nElo Δ: ' + m.home_team + ' ' + (dh >= 0 ? '+' : '') + dh
+              + ', ' + m.away_team + ' ' + (da >= 0 ? '+' : '') + da
+            : ''}`;
+          return `
+            <div class="wc-row" data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}"
+                 title="${tooltip}">
+              <div class="date">${fmtDate(m.match_date)}</div>
+              <div class="teams">
+                <span class="team">
+                  ${flagImg(m.home_team)}
+                  <span class="name">${m.home_team}</span>
+                </span>
+                <span class="score">${m.actual_home_goals}–${m.actual_away_goals}</span>
+                <span class="team right">
+                  <span class="name">${m.away_team}</span>
+                  ${flagImg(m.away_team)}
+                </span>
+              </div>
+              <div class="meta">${pred}</div>
+            </div>`;
+        };
+        const upcomingRow = (m, isNext) => {
+          const modal = m.modal_score || ['?', '?'];
+          const ph = Math.round((m.p_home_win || 0) * 100);
+          const pd = Math.round((m.p_draw || 0) * 100);
+          const pa = Math.round((m.p_away_win || 0) * 100);
+          const tooltip = `${m.tournament || ''}\nH ${ph}% · D ${pd}% · A ${pa}%`;
+          return `
+            <div class="wc-row${isNext ? ' next' : ''}"
+                 data-teams="${(m.home_team + ' ' + m.away_team).toLowerCase()}"
+                 title="${tooltip}">
+              <div class="date">${fmtDate(m.match_date)}</div>
+              <div class="teams">
+                <span class="team">
+                  ${flagImg(m.home_team)}
+                  <span class="name">${m.home_team}</span>
+                </span>
+                <span class="score vs">vs</span>
+                <span class="team right">
+                  <span class="name">${m.away_team}</span>
+                  ${flagImg(m.away_team)}
+                </span>
+              </div>
+              <div class="meta">
+                <span class="pred">pred ${modal[0]}–${modal[1]}</span>
+              </div>
+            </div>`;
+        };
+
+        // Two columns: Recent results (left) and Next up (right).
+        // Recent shows newest first; upcoming shows soonest first.
+        const recentNewestFirst = recentTrimmed.slice().reverse();
+        const recentHtml = recentNewestFirst.length
+          ? recentNewestFirst.map(playedRow).join('')
+          : '<div class="empty">No recent results yet.</div>';
+        const upcomingHtml = upcomingTrimmed.length
+          ? upcomingTrimmed.map((m, i) => upcomingRow(m, i === 0)).join('')
+          : '<div class="empty">No upcoming fixtures.</div>';
+        container.innerHTML = `
+          <div class="wc-match-col">
+            <div class="header">Recent results</div>
+            ${recentHtml}
+          </div>
+          <div class="wc-match-col">
+            <div class="header">Next up</div>
+            ${upcomingHtml}
+          </div>
+        `;
+
+        // Filter wiring
+        const filter = document.getElementById('wc-match-filter');
+        if (filter && !filter._wired) {
+          filter.addEventListener('input', (e) => {
+            const q = e.target.value.trim().toLowerCase();
+            container.querySelectorAll('.wc-row').forEach(row => {
+              const teams = row.dataset.teams || '';
+              row.classList.toggle('wc-hidden', q !== '' && !teams.includes(q));
+            });
+          });
+          filter._wired = true;
+        }
+      }
+
+      // ── Renderers: Next match (legacy, no longer surfaced) ───────
+      function renderNext() {
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
+        if (!upcoming.length) {
+          document.getElementById('wc-next').innerHTML =
+            '<div class="wc-next-meta">No upcoming fixtures</div>';
+          return;
+        }
+        const m = upcoming[0];
+        const dateStr = new Date(m.match_date + 'T12:00:00').toLocaleDateString(
+          'en-GB', { weekday: 'short', day: 'numeric', month: 'long' }
+        );
+        const ph = (m.p_home_win * 100).toFixed(0);
+        const pd = (m.p_draw * 100).toFixed(0);
+        const pa = (m.p_away_win * 100).toFixed(0);
+        const venueParts = [m.city, m.country].filter(Boolean);
+        const venueLabel = venueParts.length
+          ? venueParts.join(', ')
+          : (m.neutral ? 'neutral venue' : `${m.home_team} at home`);
+        const tag = m.tournament === 'Friendly'
+          ? ' &middot; <span style="color:rgba(180,150,80,0.85);text-transform:uppercase;letter-spacing:0.06em;font-size:0.7rem;font-weight:600;">Friendly</span>'
+          : '';
+        document.getElementById('wc-next').innerHTML = `
+          <div class="wc-next-meta">${dateStr} &middot; ${venueLabel}${tag}</div>
+          <div class="wc-next-row">
+            <div class="wc-next-team">
+              ${flagImg(m.home_team)}
+              <span>${m.home_team}</span>
+            </div>
+            <div class="wc-next-score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</div>
+            <div class="wc-next-team right">
+              <span>${m.away_team}</span>
+              ${flagImg(m.away_team)}
+            </div>
+          </div>
+          <div class="wc-next-bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+            <span class="ph"></span><span class="pd"></span><span class="pa"></span>
+          </div>
+          <div class="wc-next-pct" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+            <span class="ph">${m.home_team} win ${ph}%</span>
+            <span class="pd">Draw ${pd}%</span>
+            <span class="pa">${m.away_team} win ${pa}%</span>
+          </div>
+        `;
+      }
+
+      // ── Renderers: Upcoming (next +1, +2 as half-width cards) ────
+      function renderUpcoming() {
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
+        const container = document.getElementById('wc-upcoming');
+        if (!container) return;
+        container.innerHTML = '';
+        // Skip [0] (the hero), show next 2.
+        const slice = upcoming.slice(1, 3);
+        slice.forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'wc-upcoming-card';
+          const dateStr = new Date(m.match_date + 'T12:00:00').toLocaleDateString(
+            'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }
+          );
+          const ph = (m.p_home_win * 100).toFixed(0);
+          const pd = (m.p_draw * 100).toFixed(0);
+          const pa = (m.p_away_win * 100).toFixed(0);
+          const tag = m.tournament === 'Friendly'
+            ? '<span class="tag" style="color:rgba(180,150,80,0.85);">Friendly</span>'
+            : '<span class="tag">World Cup</span>';
+          card.innerHTML = `
+            <div class="meta">
+              ${tag}
+              <span>${dateStr}</span>
+            </div>
+            <div class="row">
+              <span class="team">
+                ${flagImg(m.home_team)}
+                <span class="name">${m.home_team}</span>
+              </span>
+              <span class="score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</span>
+              <span class="team right">
+                <span class="name">${m.away_team}</span>
+                ${flagImg(m.away_team)}
+              </span>
+            </div>
+            <div class="bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+              <span class="ph"></span><span class="pd"></span><span class="pa"></span>
+            </div>
+            <div class="pct">
+              <span class="ph">${ph}%</span>
+              <span class="pd">D ${pd}%</span>
+              <span class="pa">${pa}%</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // ── Renderers: Fixture lookup (any upcoming fixture by team) ──
+      function renderLookup() {
+        const upcoming = (DATA.sim.match_predictions || []).filter(m => !m.played);
+        const select = document.getElementById('wc-lookup-team');
+        const result = document.getElementById('wc-lookup-result');
+        if (!select || !result) return;
+
+        // Populate the dropdown with every team that has at least one
+        // upcoming fixture, alphabetically.
+        const teamSet = new Set();
+        upcoming.forEach(m => { teamSet.add(m.home_team); teamSet.add(m.away_team); });
+        const teams = [...teamSet].sort();
+        select.innerHTML = '<option value="">(pick a team)</option>' +
+          teams.map(t => `<option value="${t}">${t}</option>`).join('');
+
+        const renderFor = (team) => {
+          if (!team) { result.innerHTML = ''; return; }
+          const fixtures = upcoming.filter(
+            m => m.home_team === team || m.away_team === team
+          ).slice(0, 4);
+          if (!fixtures.length) {
+            result.innerHTML = `<div style="font-size:0.8rem;color:var(--text-muted);">No upcoming fixtures for ${team}.</div>`;
+            return;
+          }
+          // Render in the same .wc-upcoming grid style.
+          result.innerHTML = `<div class="wc-upcoming">${
+            fixtures.map(m => {
+              const dateStr = new Date(m.match_date + 'T12:00:00').toLocaleDateString(
+                'en-GB', { weekday: 'short', day: 'numeric', month: 'short' }
+              );
+              const ph = (m.p_home_win * 100).toFixed(0);
+              const pd = (m.p_draw * 100).toFixed(0);
+              const pa = (m.p_away_win * 100).toFixed(0);
+              const tag = m.tournament === 'Friendly'
+                ? '<span class="tag" style="color:rgba(180,150,80,0.85);">Friendly</span>'
+                : '<span class="tag">World Cup</span>';
+              return `
+                <div class="wc-upcoming-card">
+                  <div class="meta">${tag}<span>${dateStr}</span></div>
+                  <div class="row">
+                    <span class="team">
+                      ${flagImg(m.home_team)}
+                      <span class="name">${m.home_team}</span>
+                    </span>
+                    <span class="score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</span>
+                    <span class="team right">
+                      <span class="name">${m.away_team}</span>
+                      ${flagImg(m.away_team)}
+                    </span>
+                  </div>
+                  <div class="bar" style="--ph:${ph}%;--pd:${pd}%;--pa:${pa}%;">
+                    <span class="ph"></span><span class="pd"></span><span class="pa"></span>
+                  </div>
+                  <div class="pct">
+                    <span class="ph">${ph}%</span>
+                    <span class="pd">D ${pd}%</span>
+                    <span class="pa">${pa}%</span>
+                  </div>
+                </div>
+              `;
+            }).join('')
+          }</div>`;
+        };
+
+        select.onchange = (e) => renderFor(e.target.value);
+      }
+
+      // ── Renderers: Recent results (stacked cards, group-card style) ───────────
+      function renderRecent() {
+        const recent = (DATA.sim.recent_matches || []);
+        const container = document.getElementById('wc-recent');
+        if (!container) return;
+        if (!recent.length) {
+          container.innerHTML = '';
+          return;
+        }
+        container.innerHTML = '';
+        const fmtDate = (s) => {
+          // YYYY-MM-DD -> "May 22"
+          try {
+            const d = new Date(s + 'T00:00:00');
+            return d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          } catch (e) { return s; }
+        };
+        const tagFor = (m) => {
+          const t = (m.tournament || '').toLowerCase();
+          if (t === 'friendly') return 'Friendly';
+          if (t.includes('world cup')) return 'World Cup';
+          if (t.includes('nations league')) return 'Nations Lg';
+          if (t.includes('qualif')) return 'Qualifier';
+          return m.tournament || '';
+        };
+        // Format an Elo delta as "+4" / "−6" / "0" with sign and class.
+        const fmtDelta = (v) => {
+          if (v == null) return { text: '', cls: '' };
+          const r = Math.round(v);
+          if (r === 0) return { text: '0', cls: '' };
+          const sign = r > 0 ? '+' : '−'; // proper minus sign
+          const cls = r > 0 ? 'up' : 'down';
+          return { text: `${sign}${Math.abs(r)}`, cls };
+        };
+        recent.slice(0, 12).forEach(m => {
+          const card = document.createElement('div');
+          card.className = 'wc-recent-card';
+          card.title = `${m.home_team} vs ${m.away_team}, ${m.match_date}`;
+          const exactHit =
+            m.modal_score[0] === m.actual_home_goals &&
+            m.modal_score[1] === m.actual_away_goals;
+          const dh = fmtDelta(m.elo_delta_home);
+          const da = fmtDelta(m.elo_delta_away);
+          const eloRow = (m.elo_delta_home != null && m.elo_delta_away != null)
+            ? `
+              <div class="wc-recent-elo">
+                <span class="delta ${dh.cls}">${dh.text}</span>
+                <span class="center">elo</span>
+                <span class="delta right ${da.cls}">${da.text}</span>
+              </div>`
+            : '';
+          card.innerHTML = `
+            <div class="meta">
+              <span class="tag">${tagFor(m)}</span>
+              <span>${fmtDate(m.match_date)}</span>
+            </div>
+            <div class="wc-recent-actual">
+              <span class="team">
+                ${flagImg(m.home_team)}
+                <span class="name">${m.home_team}</span>
+              </span>
+              <span class="score">${m.actual_home_goals} &ndash; ${m.actual_away_goals}</span>
+              <span class="team right">
+                <span class="name">${m.away_team}</span>
+                ${flagImg(m.away_team)}
+              </span>
+            </div>
+            ${eloRow}
+            <div class="wc-recent-pred${exactHit ? ' hit' : ''}">
+              <span>predicted</span>
+              <span class="pred-score">${m.modal_score[0]} &ndash; ${m.modal_score[1]}</span>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      }
+
+      // ── Renderers: Tournament view ───────────────────────────────
+      function renderBracketInto(container, ko, withScores) {
+        container.innerHTML = '';
+        const rounds = [
+          ['Round of 32', ko.round_of_32, false],
+          ['Round of 16', ko.round_of_16, false],
+          ['Quarter-finals', ko.quarter_finals, false],
+          ['Semi-finals', ko.semi_finals, false],
+          ['Final', ko.final, true],
+        ];
+        rounds.forEach(([label, matches, isFinal]) => {
+          const col = document.createElement('div');
+          col.className = 'wc-round' + (isFinal ? ' wc-final' : '');
+          const lbl = document.createElement('div');
+          lbl.className = 'wc-round-label';
+          lbl.textContent = label;
+          col.appendChild(lbl);
+          const wrap = document.createElement('div');
+          wrap.className = 'wc-round-matches';
+          wrap.style.setProperty('--n', matches.length);
+          matches.forEach(m => {
+            const card = document.createElement('div');
+            card.className = 'wc-match';
+            // Show scores whenever they are present on the match.
+            const showScores = m.score_a != null;
+            const scoreA = showScores ? `<span class="wc-score">${m.score_a}</span>` : '';
+            const scoreB = showScores ? `<span class="wc-score">${m.score_b}</span>` : '';
+            // Pens: tiny "P" marker in the card's top-right corner.
+            // Title attribute carries the full "winner on penalties"
+            // text on hover. Absolute-positioned so it doesn't make
+            // the card any taller.
+            const pensMarker = m.pens
+              ? `<span class="wc-pen-marker" title="${m.winner} on penalties">P</span>`
+              : '';
+            card.innerHTML = `
+              ${pensMarker}
+              <div class="wc-team ${m.winner === m.team_a ? 'winner' : ''}" title="${displayName(m.team_a)}">
+                ${flagImg(m.team_a)}
+                <span class="wc-team-name">${shortName(m.team_a)}</span>
+                ${scoreA}
+              </div>
+              <div class="wc-team ${m.winner === m.team_b ? 'winner' : ''}" title="${displayName(m.team_b)}">
+                ${flagImg(m.team_b)}
+                <span class="wc-team-name">${shortName(m.team_b)}</span>
+                ${scoreB}
+              </div>
+            `;
+            wrap.appendChild(card);
+          });
+          col.appendChild(wrap);
+          container.appendChild(col);
+        });
+      }
+
+      function renderGroupsInto(container, groups, decimal) {
+        container.innerHTML = '';
+        groups.forEach(g => {
+          const card = document.createElement('div');
+          card.className = 'wc-group';
+          const rows = g.standings.map(s => {
+            const cls = s.qualifies_as === 'eliminated' ? 'eliminated' : 'advancing';
+            const ptsValue = decimal
+              ? (s.predicted_points != null ? s.predicted_points.toFixed(1) : s.points)
+              : s.points;
+            return `
+              <div class="wc-group-row ${cls}">
+                <span class="team-block">
+                  <span class="pos">${s.position}.</span>
+                  ${flagImg(s.team)}
+                  <span class="team-name">${displayName(s.team)}</span>
+                </span>
+                <span>${ptsValue}</span>
+              </div>`;
+          }).join('');
+          card.innerHTML = `<h4>Group ${g.name}</h4>${rows}`;
+          container.appendChild(card);
+        });
+      }
+
+      // Custom is "active" once any boost has a non-zero value. Adding a
+      // team with boost 0 is a no-op until the user actually changes it.
+      function customActive() {
+        return STATE.source === 'custom' &&
+               Object.values(STATE.bumps).some(v => v !== 0);
+      }
+
+      // Pick the data source to render.
+      function activeDataset() {
+        if (STATE.mode === 'average') {
+          // Average view: show pre-built data unless the user has actually
+          // applied boosts under Custom. Standings come from a single
+          // representative trial that matches the predicted knockout
+          // bracket, so points/GD/GF are integers and consistent with
+          // the bracket below (set decimal:false to render integers).
+          if (!customActive()) {
+            return { knockout: DATA.bracket.knockout, groups: DATA.bracket.groups,
+                     decimal: false, withScores: false };
+          }
+          if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
+          return { knockout: STATE.currentSim.knockout,
+                   groups: STATE.currentSim.groups,
+                   decimal: false, withScores: false };
+        }
+        // Single-sim view: always one rolled sample
+        if (!STATE.currentSim) STATE.currentSim = simulateOnce(getRatings());
+        return { knockout: STATE.currentSim.knockout,
+                 groups: STATE.currentSim.groups,
+                 decimal: false, withScores: true };
+      }
+
+      function renderTournamentView() {
+        const root = document.getElementById('wc-tournament-view');
+        const tableView = document.getElementById('wc-table-view');
+        const scorersView = document.getElementById('wc-scorers-view');
+
+        // STATE.tab is shared with the Live pane. If it's 'upcoming'
+        // (Live-only), Prediction defaults to 'knockouts'.
+        const predValid = ['groups', 'knockouts', 'scorers', 'table'];
+        let activeTab = STATE.tab;
+        if (!predValid.includes(activeTab)) activeTab = 'table';
+
+        // Highlight Prediction's own sub-tab buttons
+        document.querySelectorAll('.wc-toggle button[data-scope="prediction"]')
+          .forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+
+        const isTable = activeTab === 'table';
+        const isScorers = activeTab === 'scorers';
+        root.hidden = isTable || isScorers;
+        if (tableView) tableView.hidden = !isTable;
+        if (scorersView) scorersView.hidden = !isScorers;
+
+        if (isTable) {
+          renderPaths();
+          root.innerHTML = '';
+          return;
+        }
+        if (isScorers) {
+          renderScorers();
+          root.innerHTML = '';
+          return;
+        }
+
+        root.innerHTML = '';
+        const { knockout, groups, decimal, withScores } = activeDataset();
+        if (activeTab === 'knockouts') {
+          const wrap = document.createElement('div');
+          wrap.className = 'wc-bracket-wrap';
+          const inner = document.createElement('div');
+          inner.className = 'wc-bracket';
+          wrap.appendChild(inner);
+          root.appendChild(wrap);
+          renderBracketInto(inner, knockout, withScores);
+        } else {
+          const groupsContainer = document.createElement('div');
+          groupsContainer.className = 'wc-groups';
+          groupsContainer.style.marginTop = '1rem';
+          root.appendChild(groupsContainer);
+          renderGroupsInto(groupsContainer, groups, decimal);
+        }
+      }
+
+      // ── Renderers: paths table ──────────────────────────────────
+      function activeStats() {
+        if (!customActive()) return DATA.sim;
+        return STATE.customAggregate || DATA.sim;
+      }
+      function renderPaths() {
+        const sim = activeStats();
+        const stats = sim.team_stats;
+        // Rank by BOOSTED rating (the one the simulator actually uses,
+        // after host + altitude + NT-trophy + form layers). The dark-horse
+        // logic below compares this to champion% rank, using the boosted
+        // rating means a team's host/altitude bonus is already priced in,
+        // so the only way to surface as a dark horse is to have a tournament
+        // path that lifts you beyond what your full model strength predicts.
+        const byRating = [...stats].sort((a, b) => b.rating - a.rating);
+        const ratingRank = new Map();
+        byRating.forEach((s, i) => ratingRank.set(s.team, i + 1));
+
+        // Dark-horse selection: a team whose champion% rank is meaningfully
+        // higher than its boosted-Elo rank. We use the boosted rating (which
+        // already includes host, altitude, NT-trophy and form bumps) so the
+        // signal is not just "we gave them a bonus, now they outperform raw
+        // Elo", it's "even after layering on every known adjustment, this
+        // team's tournament path makes them punch above their strength."
+        // Hosts are also explicitly excluded as belt-and-braces.
+        // Cap at 2; require a minimum rank jump and a non-trivial champion%.
+        const WC2026_HOSTS = new Set(['United States', 'Mexico', 'Canada']);
+        const champRank = new Map();
+        [...stats].sort((a, b) => b.p_champion - a.p_champion)
+          .forEach((s, i) => champRank.set(s.team, i + 1));
+        const darkHorseSet = new Set(
+          [...stats]
+            .filter(s => !WC2026_HOSTS.has(s.team))
+            .filter(s => s.p_champion >= 1.0)
+            .map(s => ({
+              team: s.team,
+              gap: ratingRank.get(s.team) - champRank.get(s.team),
+              p_champion: s.p_champion,
+            }))
+            .filter(x => x.gap >= 1)
+            .sort((a, b) => b.gap - a.gap || b.p_champion - a.p_champion)
+            .slice(0, 2)
+            .map(x => x.team)
+        );
+
+        const container = document.getElementById('wc-paths');
+        // 10 columns: team | rating | DH | R16 | QF | SF | F | Champion | Market | Δ
+        // Market column = Polymarket-implied de-vigged probability.
+        // Δ column = model - market. Positive = we're more bullish.
+        container.innerHTML = `
+          <div class="header">Team</div>
+          <div class="header"></div>
+          <div class="header right">R16</div>
+          <div class="header right">QF</div>
+          <div class="header right">SF</div>
+          <div class="header right">Final</div>
+          <div class="header right">Champion</div>
+        `;
+
+        // Per-column max across all teams (not just visible top 24) so
+        // the colour scale stays stable when the user filters. Floor so
+        // a single tiny value doesn't max out the column.
+        const probKeys = ['p_round_of_16','p_quarters','p_semis','p_final','p_champion'];
+        const colMax = {};
+        probKeys.forEach(k => {
+          const m = Math.max(...stats.map(s => s[k] || 0));
+          colMax[k] = Math.max(m, 5);
+        });
+
+        stats.forEach((s, i) => {
+          const dh = darkHorseSet.has(s.team);
+          // dataset.team lets the search input filter by either the
+          // canonical name (e.g. "Turkey") or the display override
+          // (e.g. "Türkiye"), plus the 'dark horse' tag.
+          const searchKey = [
+            s.team.toLowerCase(),
+            displayName(s.team).toLowerCase(),
+            dh ? 'dark horse' : '',
+          ].filter(Boolean).join(' ');
+          const meta = { 'data-team': searchKey, 'data-rank': String(i) };
+          const addCell = (className, html) => {
+            const c = document.createElement('div');
+            c.className = 'wc-paths-row ' + className;
+            for (const [k, v] of Object.entries(meta)) c.setAttribute(k, v);
+            c.innerHTML = html;
+            container.appendChild(c);
+          };
+          // 1. Team (flag + name)
+          addCell('name', `${flagImg(s.team)}<span class="team-name">${displayName(s.team)}</span>`);
+          // 2. Dark horse tag (always renders the cell so the column lines up)
+          addCell('dh-cell', dh ? '<span class="wc-darkhorse-tag">dark horse</span>' : '');
+          // 4-8. Probabilities. Square-root scale on the fill so low-but-
+          // nonzero values still get visible tint instead of looking like 0.
+          probKeys.forEach(k => {
+            const v = s[k] || 0;
+            const frac = Math.min(v / colMax[k], 1);
+            const fill = Math.sqrt(frac).toFixed(3);
+            addCell('cell-num',
+              `<span class="v" style="--fill: ${fill}">${v.toFixed(1)}%</span>`);
+          });
+        });
+        applyPathsFilter('');
+      }
+      function applyPathsFilter(query) {
+        const q = query.trim().toLowerCase();
+        document.querySelectorAll('#wc-paths .wc-paths-row').forEach(el => {
+          const team = el.dataset.team || '';
+          const rank = parseInt(el.dataset.rank || '0', 10);
+          const show = q.length === 0 ? rank < N_VISIBLE_TABLE : team.includes(q);
+          el.classList.toggle('wc-hidden', !show);
+        });
+      }
+
+      // ── Renderers: Top scorers ───────────────────────────────────
+      function renderScorers() {
+        const container = document.getElementById('wc-scorers');
+        if (!container) return;
+        const data = DATA.scorers;
+        if (!data || !data.top_20 || data.top_20.length === 0) {
+          container.innerHTML =
+            '<p style="color:var(--text-muted);font-size:0.85rem;">' +
+            'Top-scorer prediction needs (1) WC squads to be announced and ' +
+            '(2) club season stats to be scraped. Both are filling in over ' +
+            'the next 2-3 weeks as more squads land.</p>';
+          return;
+        }
+        // Filter to players whose prediction rounds to >= 1 goal, then
+        // cap at 10. Below 1 is noise; below the top 10 is uninteresting
+        // for a "golden boot contenders" view.
+        const top = data.top_20
+          .filter(p => Math.round(p.predicted_wc_goals) >= 1)
+          .slice(0, 10);
+        if (top.length === 0) {
+          container.innerHTML =
+            '<p style="color:var(--text-muted);font-size:0.85rem;">' +
+            'No players currently project to 1+ goals. Coverage will ' +
+            'fill out as more WC squads are announced.</p>';
+          return;
+        }
+        const max = Math.max(...top.map(p => p.predicted_wc_goals)) || 1;
+        // Country flag fallback if no club badge available.
+        const clubFlagFallback = (iso) => iso
+          ? `<img class="wc-flag fallback" src="https://flagcdn.com/w80/${iso}.png" alt="" loading="lazy" />`
+          : '';
+        container.innerHTML = top.map((p, i) => {
+          const fill = Math.sqrt(p.predicted_wc_goals / max).toFixed(3);
+          const rounded = Math.round(p.predicted_wc_goals);
+          const exact = (p.predicted_wc_goals_raw ?? p.predicted_wc_goals).toFixed(2);
+          // Prefer the actual club crest from Wikipedia; fall back to
+          // the league-country flag if we don't have a badge for that club.
+          const badgeHtml = p.club_badge
+            ? `<img src="${p.club_badge}" alt="${p.club}" loading="lazy" title="${p.club}" />`
+            : clubFlagFallback(p.club_country);
+          const playerTitle = `${p.name}${p.position ? ' (' + p.position + ')' : ''}`;
+          return `
+            <div class="rank">${i + 1}</div>
+            <div class="team-flag" title="${displayName(p.team)}">
+              ${flagImg(p.team)}
+            </div>
+            <div class="player-name" title="${playerTitle}">${p.name}</div>
+            <div class="club-badge">${badgeHtml}</div>
+            <div class="predicted" style="--fill: ${fill}" title="exact projection: ${exact}">${rounded}</div>
+          `;
+        }).join('');
+      }
+
+      // ── Controls ─────────────────────────────────────────────────
+      function renderControls() {
+        document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
+          b.classList.toggle('active', b.dataset.tab === STATE.tab);
+        });
+        document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
+          b.classList.toggle('active', b.dataset.mode === STATE.mode);
+        });
+        document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
+          b.classList.toggle('active', b.dataset.source === STATE.source);
+        });
+        // New button: visible whenever there's randomness to re-sample.
+        // Hidden in (Latest + Average) and (Custom + Average + no boosts).
+        const rollBtn = document.getElementById('wc-roll-btn');
+        const rollable = STATE.mode === 'single' ||
+                         (STATE.mode === 'average' && customActive());
+        rollBtn.hidden = !rollable;
+        // The customise panel is only visible when Custom is selected.
+        document.getElementById('wc-customise').hidden = STATE.source !== 'custom';
+      }
+
+      function renderMeta() {
+        const meta = document.getElementById('wc-tournament-meta');
+        const n = (DATA.sim.n_simulations || 10000).toLocaleString('en-US');
+        const boostCount = Object.keys(STATE.bumps).length;
+        if (!customActive()) {
+          // Either Latest, or Custom with no boosts (effectively Latest)
+          if (STATE.mode === 'average') {
+            meta.textContent = STATE.source === 'custom'
+              ? 'No boosts yet. Identical to the latest model until you apply one.'
+              : `Showing average across ${n} simulations of the latest model.`;
+          } else {
+            meta.textContent = 'Showing one random simulation. Click New for another.';
+          }
+          return;
+        }
+        const boostNote = `${boostCount} active boost${boostCount === 1 ? '' : 's'}`;
+        meta.textContent = STATE.mode === 'average'
+          ? `Custom model with ${boostNote}. Averaged across ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} client-side sims; click New to resample.`
+          : `Custom model with ${boostNote}. One sim per New.`;
+      }
+
+      function rollSimulation() {
+        STATE.currentSim = simulateOnce(getRatings());
+        if (customActive() && STATE.mode === 'average') {
+          recomputeCustomAggregate();
+        }
+        renderTournamentView();
+        renderPaths();
+      }
+
+      function recomputeCustomAggregate() {
+        const meta = document.getElementById('wc-tournament-meta');
+        meta.innerHTML = `<span class="wc-customise-hint">Running ${CUSTOM_AVG_SIMS.toLocaleString('en-US')} simulations...</span>`;
+        // Yield to the browser so the loading text actually renders
+        setTimeout(() => {
+          STATE.customAggregate = aggregateCustom(getRatings(), CUSTOM_AVG_SIMS);
+          renderMeta();
+          renderTournamentView();
+          renderPaths();
+        }, 30);
+      }
+
+      // Add a team to the active customise list (boost defaults to 0
+      // so it's a no-op until the user types a number).
+      function addCustomiseTeam(team) {
+        if (!team || !SANDBOX.baseRatings.hasOwnProperty(team)) return;
+        if (STATE.bumps.hasOwnProperty(team)) return; // already in list
+        STATE.bumps[team] = 0;
+        renderAdjustments();
+      }
+
+      // Set/update a team's boost. Live: triggers an immediate recompute.
+      function setBoost(team, value) {
+        STATE.bumps[team] = value;
+        scheduleRecompute();
+        renderControls();
+        renderMeta();
+      }
+
+      function removeCustomiseTeam(team) {
+        delete STATE.bumps[team];
+        renderAdjustments();
+        scheduleRecompute();
+        renderControls();
+        renderMeta();
+      }
+
+      function effectiveLabel(team, bump) {
+        return Math.round((SANDBOX.baseRatings[team] || 1500) + bump);
+      }
+
+      function renderAdjustments() {
+        const wrap = document.getElementById('wc-adjustments');
+        wrap.innerHTML = '';
+        Object.entries(STATE.bumps).forEach(([team, bump]) => {
+          const pill = document.createElement('span');
+          pill.className = 'wc-adjust';
+          pill.innerHTML = `
+            ${flagImg(team)}
+            <span class="name">${team}</span>
+            <span class="rating" data-team="${team}">${effectiveLabel(team, bump)}</span>
+            <input class="boost" type="number" step="25" value="${bump}" data-team="${team}" />
+            <span class="x" data-team="${team}" title="Remove">&times;</span>
+          `;
+          wrap.appendChild(pill);
+        });
+        // Wire input + remove handlers. The rating span next to each input
+        // updates live so the user sees the effective rating they're moving.
+        wrap.querySelectorAll('input.boost').forEach(el => {
+          el.addEventListener('input', e => {
+            const t = e.currentTarget.dataset.team;
+            const v = parseFloat(e.currentTarget.value);
+            const bump = isNaN(v) ? 0 : v;
+            setBoost(t, bump);
+            const ratingEl = e.currentTarget.parentElement.querySelector('.rating');
+            if (ratingEl) ratingEl.textContent = effectiveLabel(t, bump);
+          });
+        });
+        wrap.querySelectorAll('.x').forEach(el => {
+          el.addEventListener('click', e => removeCustomiseTeam(e.currentTarget.dataset.team));
+        });
+      }
+
+      // Throttle: collapse a burst of boost changes into one recompute.
+      let _recomputeTimer = null;
+      function scheduleRecompute() {
+        if (_recomputeTimer) clearTimeout(_recomputeTimer);
+        _recomputeTimer = setTimeout(() => {
+          _recomputeTimer = null;
+          if (customActive()) {
+            // Roll a fresh single sim immediately and re-render so the
+            // bracket/groups feel responsive; recompute the 2k-sim
+            // aggregate after, which updates the table.
+            STATE.currentSim = simulateOnce(getRatings());
+            renderTournamentView();
+            recomputeCustomAggregate();
+          } else {
+            // No customisation in effect -> fall back to Latest data
+            STATE.currentSim = null;
+            STATE.customAggregate = null;
+            renderTournamentView();
+            renderPaths();
+          }
+        }, 220);
+      }
+
+      // Top-level pane switching. Persists active pane in URL hash so
+      // links like #tournament drop you straight onto that view.
+      function showPane(name) {
+        const panes = document.querySelectorAll('.wc-pane');
+        const tabs = document.querySelectorAll('.wc-tab');
+        let matched = false;
+        panes.forEach(p => {
+          const isMe = p.dataset.pane === name;
+          p.hidden = !isMe;
+          if (isMe) matched = true;
+        });
+        if (!matched) {
+          panes.forEach((p, i) => p.hidden = i !== 0);
+          name = panes[0]?.dataset.pane;
+        }
+        tabs.forEach(t => t.classList.toggle('active', t.dataset.pane === name));
+        if (name && history.replaceState) {
+          history.replaceState(null, '', `#${name}`);
+        }
+        // Refresh the now-visible pane's sub-view so its active sub-tab
+        // + content matches STATE.tab.
+        if (name === 'prediction') renderTournamentView();
+      }
+      function wireTabs() {
+        document.querySelectorAll('.wc-tab').forEach(b => {
+          b.addEventListener('click', () => showPane(b.dataset.pane));
+        });
+        // Hash is also used for sub-tab persistence (#table, #groups, etc.),
+        // so we only treat it as a pane name when it literally matches a
+        // pane. Otherwise leave the active pane alone; sub-tab hydration
+        // handled separately in init.
+        const paneNames = new Set(
+          [...document.querySelectorAll('.wc-pane')].map(p => p.dataset.pane)
+        );
+        const initial = (location.hash || '').replace(/^#/, '');
+        if (initial && paneNames.has(initial)) showPane(initial);
+        window.addEventListener('hashchange', () => {
+          const h = (location.hash || '').replace(/^#/, '');
+          if (paneNames.has(h)) showPane(h);
+        });
+      }
+
+      // ── Live / archived status badges ────────────────────────────
+      // Today (pre-kickoff) the Prediction tab is a "live forecast" that
+      // still updates nightly. Once we freeze the pre-kickoff snapshot
+      // it becomes an "archived" forecast. Detection: if the JSON includes
+      // a `frozen_at` field (added by the freeze script), treat the data
+      // as archived. Otherwise we're still in forecast mode.
+      const WC_KICKOFF = new Date('2026-06-11T00:00:00');
+      function renderStatusBadges() {
+        const today = new Date();
+        const kickedOff = today >= WC_KICKOFF;
+        const frozen = !!(DATA.sim && DATA.sim.frozen_at);
+
+        const liveBadge = document.getElementById('wc-live-status');
+        if (liveBadge) {
+          if (kickedOff) {
+            liveBadge.className = 'wc-live-status live';
+            liveBadge.textContent = 'Live';
+          } else {
+            liveBadge.className = 'wc-live-status upcoming';
+            liveBadge.textContent = 'Begins 11 June';
+          }
+        }
+        const predBadge = document.getElementById('wc-pred-badge');
+        if (predBadge) {
+          if (frozen) {
+            predBadge.className = 'wc-pred-badge archived';
+            predBadge.textContent = 'Pre-kickoff archive';
+          } else {
+            // No badge before freeze. "Live forecast" is an oxymoron;
+            // the Live tab covers what's actually live.
+            predBadge.className = 'wc-pred-badge';
+            predBadge.textContent = '';
+          }
+        }
+
+        renderLiveSubview();
+      }
+
+      // ── Live sub-view dispatcher ──────────────────────────────────
+      // The Live pane has 4 sub-tabs (Group stage / Knockouts / Top
+      // scorers / Upcoming). STATE.tab is shared with the Prediction
+      // pane so flipping top-tabs keeps the same sub-view if available.
+      // If STATE.tab isn't a valid Live sub-tab (e.g., 'table'), we
+      // default to 'upcoming' which is the Live-only sub-tab.
+      function renderLiveSubview() {
+        const liveValid = ['groups', 'knockouts', 'scorers', 'upcoming'];
+        let activeTab = STATE.tab;
+        if (!liveValid.includes(activeTab)) activeTab = 'upcoming';
+
+        const views = {
+          groups:    'wc-live-groups-view',
+          knockouts: 'wc-live-knockouts-view',
+          scorers:   'wc-live-scorers-view',
+          upcoming:  'wc-live-upcoming-view',
+        };
+        for (const [tab, id] of Object.entries(views)) {
+          const el = document.getElementById(id);
+          if (el) el.hidden = tab !== activeTab;
+        }
+        // Highlight the active sub-tab button in Live's nav
+        document.querySelectorAll('.wc-toggle button[data-scope="live"]')
+          .forEach(b => b.classList.toggle('active', b.dataset.tab === activeTab));
+
+        // Render the active sub-view's content
+        if (activeTab === 'groups')    renderLiveGroups();
+        if (activeTab === 'knockouts') renderLiveKnockouts();
+        if (activeTab === 'scorers')   renderLiveScorers();
+        // upcoming: nothing to render here; renderNext/renderUpcoming/
+        // renderLookup/renderRecent are called once at page load and
+        // their content is already in the upcoming-view container.
+      }
+
+      // ── Renderer: Live tournament (legacy unified renderer; kept
+      //    for callers that just want the status banner). ────────────
+      function renderLiveTournament() {
+        // No-op now; the sub-view renderers do the work. Status badges
+        // are handled by renderStatusBadges. Leaving this as a stub so
+        // old call sites don't break.
+      }
+
+      function _liveDataOrEmpty() {
+        const root = document.getElementById('wc-live-groups-content');
+        const live = DATA.live;
+        if (!live) {
+          if (root) root.innerHTML =
+            '<div class="wc-live-placeholder">Live tournament data not yet generated.</div>';
+          return null;
+        }
+        return live;
+      }
+
+      // ── Renderer: Live > Group stage (matches Prediction format) ──
+      function renderLiveGroups() {
+        const live = _liveDataOrEmpty();
+        if (!live) return;
+        const container = document.getElementById('wc-live-groups-content');
+        if (!container) return;
+
+        // Render as 12 cards using the SAME .wc-group CSS class as the
+        // Prediction tab so flipping between tabs gives an apples-to-
+        // apples comparison.
+        const cardsHtml = live.groups.map(g => {
+          const rows = g.standings.map(s => {
+            const cls = s.position && s.position <= 2 ? 'advancing'
+                       : (s.played > 0 ? 'eliminated' : '');
+            const posStr = s.position ?? '·';
+            return `
+              <div class="wc-group-row ${cls}">
+                <span class="team-block">
+                  <span class="pos">${posStr}.</span>
+                  ${flagImg(s.team)}
+                  <span class="team-name">${s.team}</span>
+                </span>
+                <span>${s.points}</span>
+              </div>`;
+          }).join('');
+          return `
+            <div class="wc-group">
+              <h4>Group ${g.name}</h4>
+              ${rows}
+            </div>`;
+        }).join('');
+        container.innerHTML = `<div class="wc-groups">${cardsHtml}</div>`;
+      }
+
+      // ── Renderer: Live > Knockouts (matches Prediction bracket format) ──
+      function renderLiveKnockouts() {
+        const container = document.getElementById('wc-live-knockouts-content');
+        if (!container) return;
+        const live = DATA.live;
+        if (!live) {
+          container.innerHTML =
+            '<div class="wc-live-placeholder">Live tournament data not yet generated.</div>';
+          return;
+        }
+        const status = live.tournament_status;
+        if (status === 'pre' || status === 'groups') {
+          const days = Math.max(0, live.days_to_kickoff || 0);
+          container.innerHTML = `
+            <div class="wc-live-placeholder">
+              <strong>Knockout bracket is not yet set</strong>
+              ${status === 'pre'
+                ? `Begins after the group stage. Tournament kicks off in ${days} day${days===1?'':'s'}.`
+                : `Group stage is in progress (${live.n_group_matches_played}/${live.n_group_matches_total} matches done). Bracket fills in once groups conclude.`}
+              See the <a href="#prediction">Prediction</a> tab for our pre-tournament forecast bracket.
+            </div>`;
+          return;
+        }
+        // Status is 'knockouts' or 'complete': render the bracket
+        // from live.knockout (pre-bucketed by live_tournament.py into
+        // round_of_32 / round_of_16 / quarter_finals / semi_finals /
+        // final). Reuses the same renderBracketInto used by Prediction.
+        const ko = live.knockout || {
+          round_of_32: [], round_of_16: [],
+          quarter_finals: [], semi_finals: [], final: [],
+          champion: null,
+        };
+        const wrap = document.createElement('div');
+        wrap.className = 'wc-bracket-wrap';
+        const inner = document.createElement('div');
+        inner.className = 'wc-bracket';
+        wrap.appendChild(inner);
+        container.innerHTML = '';
+        container.appendChild(wrap);
+        renderBracketInto(inner, ko, true);
+      }
+
+      // ── Renderer: Live > Top scorers (actual goals when available) ──
+      function renderLiveScorers() {
+        const container = document.getElementById('wc-live-scorers-content');
+        if (!container) return;
+        const live = DATA.live;
+        if (!live || live.tournament_status === 'pre') {
+          container.innerHTML = `
+            <div class="wc-live-placeholder">
+              <strong>No goals scored yet</strong>
+              Live top scorers appear here as goals go in during the
+              tournament. See the <a href="#prediction">Prediction</a>
+              tab for our pre-tournament golden-boot forecast.
+            </div>`;
+          return;
+        }
+        container.innerHTML = `
+          <div class="wc-live-placeholder">
+            Live top scorers will populate from the next data refresh.
+          </div>`;
+      }
+
+      function wireControls() {
+        // Sub-tab buttons appear in BOTH the Live and Prediction panes
+        // (data-scope="live" or "prediction"). STATE.tab is shared so
+        // clicking a sub-tab in either pane re-renders the active one.
+        document.querySelectorAll('.wc-toggle button[data-tab]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.tab = b.dataset.tab;
+            // Persist for refresh / share-link.
+            try { localStorage.setItem('worldcup.tab', STATE.tab); } catch (_) {}
+            if (history.replaceState) {
+              history.replaceState(null, '', `#${STATE.tab}`);
+            }
+            renderControls();
+            // Re-render the currently-visible pane's sub-view
+            const activePane = document.querySelector('.wc-pane:not([hidden])');
+            if (!activePane) return;
+            if (activePane.dataset.pane === 'live') {
+              renderLiveSubview();
+            } else {
+              renderTournamentView();
+            }
+          });
+        });
+        document.querySelectorAll('.wc-toggle button[data-mode]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.mode = b.dataset.mode;
+            if (STATE.mode === 'single' && !STATE.currentSim) {
+              STATE.currentSim = simulateOnce(getRatings());
+            }
+            renderControls();
+            renderMeta();
+            renderTournamentView();
+          });
+        });
+        document.querySelectorAll('.wc-toggle button[data-source]').forEach(b => {
+          b.addEventListener('click', () => {
+            STATE.source = b.dataset.source;
+            renderControls();
+            renderMeta();
+            // Switching source with no active boosts is a UI-only change;
+            // keep using the cached Latest data. Only re-run anything when
+            // there are actual customizations to apply.
+            if (customActive() && STATE.mode === 'average' && !STATE.customAggregate) {
+              recomputeCustomAggregate();
+            }
+            renderTournamentView();
+            renderPaths();
+          });
+        });
+        document.getElementById('wc-roll-btn').addEventListener('click', rollSimulation);
+
+        // Customise: type or pick a team in the datalist input to add it
+        // to the adjustment list. Boost defaults to 0; user adjusts inline.
+        const addInput = document.getElementById('wc-add-team');
+        const handleAdd = () => {
+          const team = addInput.value.trim();
+          if (SANDBOX.baseRatings.hasOwnProperty(team)) {
+            // Auto-switch to Custom source so the user sees their changes
+            if (STATE.source !== 'custom') {
+              STATE.source = 'custom';
+              renderControls();
+              renderMeta();
+            }
+            addCustomiseTeam(team);
+            addInput.value = '';
+            addInput.focus();
+          }
+        };
+        addInput.addEventListener('change', handleAdd);
+        addInput.addEventListener('keydown', e => {
+          if (e.key === 'Enter') handleAdd();
+        });
+
+        document.getElementById('wc-paths-search').addEventListener('input', e =>
+          applyPathsFilter(e.target.value)
+        );
+      }
+
+      // ── Init ─────────────────────────────────────────────────────
+      // Top scorers JSON is optional; older builds won't have it. We
+      // fetch it lazily and don't fail the whole page if 404.
+      Promise.all([
+        fetch('/projects/worldcup/bracket.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup/simulation.json', { cache: 'no-cache' }).then(r => r.json()),
+        fetch('/projects/worldcup/top-scorers.json', { cache: 'no-cache' })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null),
+        fetch('/projects/worldcup/live.json', { cache: 'no-cache' })
+          .then(r => r.ok ? r.json() : null)
+          .catch(() => null),
+      ])
+        .then(([bracket, sim, scorers, live]) => {
+          DATA.bracket = bracket;
+          DATA.sim = sim;
+          DATA.scorers = scorers;
+          DATA.live = live;
+          Object.assign(FLAGS, sim.flags || {});
+
+          bracket.groups.forEach(g => {
+            SANDBOX.groups[g.name] = g.standings.map(s => s.team);
+          });
+          sim.team_stats.forEach(s => {
+            SANDBOX.baseRatings[s.team] = s.rating;
+            RAW_RATINGS[s.team] = s.raw_rating != null ? s.raw_rating : s.rating;
+          });
+          SANDBOX.fixtures = (sim.match_predictions || []).map(m => ({
+            home_team: m.home_team,
+            away_team: m.away_team,
+            neutral: m.neutral,
+          }));
+
+          document.getElementById('wc-nsims').textContent =
+            (sim.n_simulations || 10000).toLocaleString('en-US');
+
+          const datalist = document.getElementById('wc-team-list');
+          const wcTeams = new Set(Object.values(SANDBOX.groups).flat());
+          [...wcTeams].sort().forEach(team => {
+            const opt = document.createElement('option');
+            opt.value = team;
+            opt.label = `${displayName(team)} (${Math.round(SANDBOX.baseRatings[team] || 1500)})`;
+            datalist.appendChild(opt);
+          });
+
+          // Persist the active sub-tab across refresh + share-link. URL
+          // hash wins (so `#groups` loads straight onto Groups, and is
+          // shareable). localStorage is the fallback for return visits
+          // where the user landed without a hash.
+          const VALID_TABS = ['table', 'groups', 'knockouts', 'scorers'];
+          const fromHash = (location.hash || '').replace(/^#/, '');
+          if (VALID_TABS.includes(fromHash)) {
+            STATE.tab = fromHash;
+          } else {
+            try {
+              const stored = localStorage.getItem('worldcup.tab');
+              if (VALID_TABS.includes(stored)) STATE.tab = stored;
+            } catch (_) {}
+          }
+
+          wireControls();
+          wireTabs();
+          renderStatusBadges();
+          // renderMatchList / renderNext / renderUpcoming / renderLookup /
+          // renderRecent are all dead since the Live pane was removed;
+          // their target containers (wc-next, wc-upcoming, wc-lookup,
+          // wc-recent, wc-match-list) no longer exist and calling them
+          // crashes init and surfaces "Tournament data not available".
+          renderPaths();
+          renderControls();
+          renderMeta();
+          renderTournamentView();
+          renderLiveSubview();
+        })
+        .catch(err => {
+          document.getElementById('wc-tournament-view').innerHTML =
+            '<p style="color:var(--text-muted)">Tournament data not available.</p>';
+          console.error(err);
+        });
+    })();
+  </script>
+</body>
+</html>

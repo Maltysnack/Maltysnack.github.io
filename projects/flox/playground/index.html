@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Flox Playground - maltysnack</title>
+  <meta name="description" content="Flox playground: write a flow-network program and see it run live in the browser." />
+  <link rel="stylesheet" href="/style.css" />
+  <style>
+
+    .pg-eyebrow {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      margin-bottom: 14px;
+    }
+    .pg-eyebrow a {
+      color: var(--text-dim);
+      text-decoration: none;
+      border-bottom: 1px solid transparent;
+    }
+    .pg-eyebrow a:hover { color: var(--text); border-bottom-color: var(--text-dim); }
+    .pg-eyebrow .sep { padding: 0 8px; opacity: 0.5; }
+
+    .pg-meta {
+      font-size: var(--text-xs);
+      color: var(--text-dim);
+      letter-spacing: 0.04em;
+      margin-bottom: 32px;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+    }
+    .pg-meta span + span::before { content: " / "; opacity: 0.5; padding: 0 6px; }
+
+    .pg-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .pg-pane {
+      display: flex;
+      flex-direction: column;
+      border: 1px solid var(--border-light);
+      border-radius: 4px;
+      overflow: hidden;
+      background: var(--bg);
+    }
+    /* Editor fills most of the visible viewport. Graph sits beneath
+       (fixed-height SVG canvas). Output flows below; the user scrolls. */
+    .pg-pane.pg-pane-editor { height: calc(100vh - 280px); min-height: 420px; }
+    .pg-pane.pg-pane-graph  { height: 420px; }
+    .pg-pane.pg-pane-hydro  { height: 260px; }
+    .pg-pane.pg-pane-hydro.pg-hidden { display: none; }
+    .pg-pane.pg-pane-output { min-height: 280px; }
+    #pg-graph,
+    #pg-hydro {
+      flex: 1 1 auto;
+      display: block;
+      width: 100%;
+      height: 100%;
+      background: var(--bg);
+    }
+    #pg-hydro text {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 10px;
+      fill: var(--text-dim);
+      pointer-events: none;
+      user-select: none;
+    }
+    #pg-hydro .pg-hydro-axis {
+      stroke: var(--border-light);
+      stroke-width: 1;
+    }
+    #pg-hydro .pg-hydro-gridline {
+      stroke: var(--border-light);
+      stroke-width: 1;
+      stroke-dasharray: 2 3;
+      opacity: 0.5;
+    }
+    #pg-hydro .pg-hydro-line {
+      fill: none;
+      stroke-width: 1.6;
+      opacity: 0.9;
+    }
+    #pg-hydro .pg-hydro-dot {
+      stroke: none;
+    }
+    #pg-hydro .pg-hydro-label {
+      font-size: 10px;
+      fill: var(--text);
+    }
+    #pg-hydro .pg-hydro-axis-label {
+      font-size: 10px;
+      fill: var(--text-dim);
+      font-style: italic;
+    }
+    #pg-graph text {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 11px;
+      fill: var(--text);
+      pointer-events: none;
+      user-select: none;
+    }
+    #pg-graph .pg-graph-empty {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 12px;
+      fill: var(--text-dim);
+      font-style: italic;
+    }
+    #pg-graph .pg-edge {
+      stroke: var(--text-dim);
+      stroke-width: 1.4;
+      fill: none;
+      opacity: 0.75;
+    }
+    #pg-graph .pg-edge-label {
+      font-size: 10px;
+      fill: var(--text-dim);
+      font-style: italic;
+    }
+    #pg-graph .pg-edge-label-bg {
+      fill: var(--bg);
+      stroke: none;
+      opacity: 0.85;
+    }
+    #pg-graph g.pg-node circle,
+    #pg-graph g.pg-node rect {
+      stroke-width: 1.5;
+      cursor: grab;
+    }
+    #pg-graph g.pg-node:active circle,
+    #pg-graph g.pg-node:active rect { cursor: grabbing; }
+    /* node-kind palette */
+    #pg-graph g.pg-node-river   circle { fill: #4a82d4; stroke: #2c5fa0; }
+    #pg-graph g.pg-node-dam     rect   { fill: #4a82d4; stroke: #2c5fa0; }
+    #pg-graph g.pg-node-outlet  circle { fill: var(--bg); stroke: var(--text-dim); stroke-width: 2.4; }
+    #pg-graph g.pg-node-state   circle { fill: var(--border-light); stroke: var(--text-dim); }
+    #pg-graph g.pg-node-generator circle { fill: #4caf6f; stroke: #2e7a4b; }
+    #pg-graph g.pg-node-load      circle { fill: #d04848; stroke: #962e2e; }
+    #pg-graph g.pg-node-relay     circle { fill: var(--border-light); stroke: var(--text-dim); }
+    #pg-graph g.pg-faded { opacity: 0.18; }
+    /* Disabled (via 'disable' statement): dimmed + dashed stroke. */
+    #pg-graph g.pg-node-disabled { opacity: 0.3; }
+    #pg-graph g.pg-node-disabled circle,
+    #pg-graph g.pg-node-disabled rect {
+      stroke-dasharray: 3 2;
+    }
+    #pg-graph .pg-edge.pg-edge-disabled {
+      opacity: 0.25;
+      stroke-dasharray: 4 3;
+    }
+    .pg-pane-header {
+      font-size: var(--text-xs);
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      text-transform: uppercase;
+      color: var(--text-dim);
+      padding: 10px 14px;
+      border-bottom: 1px solid var(--border-light);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 14px;
+    }
+    .pg-pane-header-left {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      min-width: 0;
+    }
+    .pg-pane-header select {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: var(--text-xs);
+      letter-spacing: 0.06em;
+      text-transform: none;
+      font-weight: 500;
+      background: var(--border-light);
+      color: var(--text);
+      border: 1px solid var(--border-light);
+      border-radius: 3px;
+      padding: 4px 8px;
+      cursor: pointer;
+    }
+    .pg-pane-header select:hover { border-color: var(--text-dim); }
+    .pg-pane-header select:focus { outline: 2px solid var(--accent-red); outline-offset: 1px; }
+    .pg-pane-header .pg-status {
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      letter-spacing: 0.04em;
+      text-transform: none;
+      font-weight: 400;
+      color: var(--text-dim);
+    }
+    .pg-pane-header .pg-status.pg-status-error { color: var(--accent-red); }
+    .pg-pane-header .pg-status.pg-status-ok    { color: var(--text-muted); }
+
+    #pg-editor {
+      flex: 1 1 auto;
+      min-height: 0;
+    }
+
+    #pg-output {
+      flex: 1 1 auto;
+      margin: 0;
+      padding: 14px 16px;
+      overflow: auto;
+      font-family: var(--font-mono, JetBrains Mono, monospace);
+      font-size: 0.82em;
+      line-height: 1.55;
+      color: var(--text);
+      white-space: pre;
+      tab-size: 2;
+    }
+    #pg-output .pg-err {
+      color: var(--accent-red);
+    }
+
+    @media (max-width: 640px) {
+      .pg-pane.pg-pane-editor { height: 300px; }
+      .pg-pane.pg-pane-graph  { height: 320px; }
+    }
+  </style>
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
+  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
+  <link rel="manifest" href="/manifest.json?v=3" />
+  <meta name="theme-color" content="#13110d" />
+
+</head>
+<body>
+
+  <aside class="sidebar"></aside>
+
+  <main class="main" data-layout="full">
+
+    <header class="page-header">
+      <p class="pg-eyebrow"><a href="/projects/flox/">Flox</a><span class="sep">/</span>Playground</p>
+      <h1 class="page-title">Playground</h1>
+      <p class="pg-meta">
+        <span>v0.2</span><span>auto-runs as you type</span>
+      </p>
+    </header>
+
+    <div class="pg-grid">
+      <div class="pg-pane pg-pane-editor">
+        <div class="pg-pane-header">
+          <div class="pg-pane-header-left">
+            <span>Program</span>
+            <select id="pg-loader" aria-label="Load example">
+              <option value="" disabled selected>Load example...</option>
+            </select>
+          </div>
+          <span class="pg-status" id="pg-status">ready</span>
+        </div>
+        <div id="pg-editor"></div>
+      </div>
+      <div class="pg-pane pg-pane-graph">
+        <div class="pg-pane-header">
+          <span>Graph</span>
+          <span class="pg-status" id="pg-graph-status"></span>
+        </div>
+        <svg id="pg-graph" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="pg-pane pg-pane-hydro pg-hidden" id="pg-hydro-pane">
+        <div class="pg-pane-header">
+          <span>Hydrograph</span>
+          <span class="pg-status" id="pg-hydro-status"></span>
+        </div>
+        <svg id="pg-hydro" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+      <div class="pg-pane pg-pane-output">
+        <div class="pg-pane-header">
+          <span>Output</span>
+        </div>
+        <pre id="pg-output"></pre>
+      </div>
+    </div>
+
+  </main>
+
+  <script src="/sidebar.js"></script>
+
+  <!-- Monaco loader (AMD) from CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs/loader.js"></script>
+  <script>
+    require.config({ paths: { vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.50.0/min/vs' } });
+    require(['vs/editor/editor.main'], async () => {
+      const { interpret, parseGraph } = await import('./flox.js');
+
+      // Flox language definition (Monarch tokenizer)
+      monaco.languages.register({ id: 'flox' });
+      monaco.languages.setLanguageConfiguration('flox', {
+        comments: { lineComment: '//', blockComment: ['/*', '*/'] },
+        brackets: [['{', '}'], ['[', ']']],
+        autoClosingPairs: [
+          { open: '{', close: '}' },
+          { open: '[', close: ']' },
+          { open: '/*', close: '*/' },
+        ],
+      });
+      monaco.languages.setMonarchTokensProvider('flox', {
+        keywords: ['system', 'river', 'dam', 'outlet', 'node', 'list', 'map', 'print', 'help', 'mode', 'start', 'disable'],
+        tokenizer: {
+          root: [
+            [/\/\/.*$/, 'comment'],
+            [/\/\*/, { token: 'comment', next: '@blockcomment' }],
+            [/[a-zA-Z][a-zA-Z0-9_]*/, {
+              cases: { '@keywords': 'keyword', '@default': 'identifier' },
+            }],
+            [/\d+(\.\d+)?/, 'number'],
+            [/->|<-/, 'operator'],
+            [/[:;,%]/, 'delimiter'],
+            [/-/, 'operator'],
+            [/[{}[\]]/, '@brackets'],
+            [/\s+/, 'white'],
+          ],
+          blockcomment: [
+            [/\*\//, { token: 'comment', next: '@pop' }],
+            [/[^*]+/, 'comment'],
+            [/./, 'comment'],
+          ],
+        },
+      });
+
+      // Pick a Monaco theme that matches the site's current data-theme.
+      function syncTheme() {
+        const isLight = document.documentElement.getAttribute('data-theme') === 'light';
+        monaco.editor.setTheme(isLight ? 'vs' : 'vs-dark');
+      }
+      // Re-sync if the user toggles the site theme.
+      const obs = new MutationObserver(syncTheme);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      syncTheme();
+
+      // Example programs available from the dropdown.
+      // The first entry (id: "blank") is also the new-program template.
+      const EXAMPLES = [
+
+        {
+          id: "blank",
+          category: "blank",
+          label: "Blank template",
+          source: `// Flox: a small language for describing flow networks.
+//
+// Quick reference:
+//
+//   mode river;   mode markov;   mode grid;   (default: river)
+//
+//   system Name;                                       declare a network
+//   river  Name { base: N, peak: N, decay: N }         decay optional, default 0.7
+//   dam    Name { capacity: N, threshold: N%,
+//                 normalRate: N, openRate: N }
+//   outlet Name;                                       zero-flow accumulator
+//   node   Name { supply: N }                          generic state (markov/grid)
+//
+//   A -> B -> C;                                       connect nodes (chain)
+//   A -[w]-> B                                         weighted forward arrow
+//   A <- B          A <-[w]- B                         backward arrows
+//
+//   start NodeName 1.0;                                markov: initial mass
+//   disable NodeName;                                  remove a node from this run
+//   disable A -> B;                                    remove a specific edge
+//
+//   list  Name;                                        print connections
+//   map   Name;                                        print ASCII diagram
+//   print Name;                                        simulate (river: 1mm; markov: 30 ticks)
+//   print Name N;                                      simulate (river: N mm; markov: N ticks)
+//   print Name [r1, r2, r3, ...];                      river: per-day rainfall series
+
+system Untitled;
+
+// Add chains (the network shape), e.g.:
+// Source -> Outlet;
+
+// Add declarations (bare names referenced above), e.g.:
+// river  Source { base: 1, peak: 1.0 }
+// outlet Outlet;
+
+// map   Untitled;
+// print Untitled 5;
+`,
+        },
+
+        {
+          id: "demo",
+          category: "river",
+          label: "Demo: two sources, a confluence, an outlet",
+          source: `// A small two-source demo system.
+// Two upland creeks meet at a confluence and flow to an outlet.
+system Demo;
+
+// Chains: pure references, so the network shape reads at a glance.
+Spring    -> Confluence -> Outlet;
+Tributary -> Confluence;
+
+/* Declarations: rich blocks, order doesn't matter.
+   River params:
+     base  - baseline flow (L/s) with no rainfall
+     peak  - multiplier on rainfall (mm) for the peak surge
+     decay - fraction of the surge retained each subsequent day */
+
+river  Spring     { base: 2, peak: 2.0, decay: 0.7 }
+river  Tributary  { base: 1, peak: 1.5, decay: 0.6 }
+river  Confluence { base: 3, peak: 1.8 }
+outlet Outlet;
+
+map Demo;
+print Demo 5;   // simulate at 5mm of rainfall
+`,
+        },
+
+        {
+          id: "canberra",
+          category: "river",
+          label: "Canberra: three rivers, two dams",
+          source: `system Canberra;
+
+Googong       -> googongDam       -> Queanbeyan -> centralMongolo;
+upperMongolo  -> Queanbeyan;
+jerrabombarra -> centralMongolo;
+centralMongolo -> burleyGriffinDam -> lowerMongolo;
+
+river Googong       { base: 2, peak: 2.0, decay: 0.7 }
+river upperMongolo  { base: 3, peak: 1.8, decay: 0.6 }
+river jerrabombarra { base: 2, peak: 2.0 }
+river Queanbeyan    { base: 3, peak: 1.5 }
+
+dam googongDam       { capacity: 1000, threshold: 80%, normalRate: 0.8, openRate: 1.2 }
+dam burleyGriffinDam { capacity: 5000, threshold: 60%, normalRate: 0.9, openRate: 1.5 }
+
+outlet centralMongolo;
+outlet lowerMongolo;
+
+map  Canberra;
+print Canberra 10;
+`,
+        },
+
+        {
+          id: "passes",
+          category: "markov",
+          label: "Markov: pass-or-shoot decision (football)",
+          source: `mode markov;
+system PassOrShoot;
+
+Pass  -[0.85]-> Pass;
+Pass  -[0.15]-> Shoot;
+
+Shoot -[0.10]-> Goal;
+Shoot -[0.90]-> Miss;
+
+node Pass;
+node Shoot;
+node Goal;
+node Miss;
+
+start Pass 1.0;
+
+map  PassOrShoot;
+print PassOrShoot 200;
+`,
+        },
+
+        {
+          id: "passes_buildup",
+          category: "markov",
+          label: "Markov: pass-then-shoot with build-up (football)",
+          source: `// PassThenShoot: the deeper football Markov. Each Build state
+// represents how many passes have already happened. From each Build
+// state, the next action is one of: pass again (advance), lose
+// possession, or shoot from here (a Shoot state matching the build
+// count). Shot conversion improves with build-up: 10% from Shoot0,
+// 40% from Shoot3.
+mode markov;
+system PassThenShoot;
+
+Build0 -[0.7]-> Build1;
+Build0 -[0.1]-> Lost;
+Build0 -[0.2]-> Shoot0;
+
+Build1 -[0.6]-> Build2;
+Build1 -[0.1]-> Lost;
+Build1 -[0.3]-> Shoot1;
+
+Build2 -[0.5]-> Build3;
+Build2 -[0.1]-> Lost;
+Build2 -[0.4]-> Shoot2;
+
+Build3 -[0.5]-> Lost;
+Build3 -[0.5]-> Shoot3;
+
+Shoot0 -[0.10]-> Goal;   Shoot0 -[0.90]-> Miss;
+Shoot1 -[0.20]-> Goal;   Shoot1 -[0.80]-> Miss;
+Shoot2 -[0.30]-> Goal;   Shoot2 -[0.70]-> Miss;
+Shoot3 -[0.40]-> Goal;   Shoot3 -[0.60]-> Miss;
+
+node Build0; node Build1; node Build2; node Build3;
+node Shoot0; node Shoot1; node Shoot2; node Shoot3;
+node Goal;   node Miss;   node Lost;
+
+start Build0 1.0;
+
+map  PassThenShoot;
+print PassThenShoot 50;
+`,
+        },
+
+        {
+          id: "weather",
+          category: "markov",
+          label: "Markov: Sydney weather (sunny / cloudy / rainy)",
+          source: `// Sydney weather: a tiny three-state Markov chain. The textbook intro
+// to Markov chains since the 1960s. Transitions are calibrated to
+// Sydney's general pattern (BoM long-run averages: sunny days
+// dominate; rainy spells persist a couple of days when they arrive).
+//
+// The interesting question: in the long run, what fraction of days
+// are sunny / cloudy / rainy? The chain answers that as its
+// stationary distribution.
+mode markov;
+system Sydney;
+
+Sunny  -[0.75]-> Sunny;
+Sunny  -[0.20]-> Cloudy;
+Sunny  -[0.05]-> Rainy;
+
+Cloudy -[0.35]-> Sunny;
+Cloudy -[0.45]-> Cloudy;
+Cloudy -[0.20]-> Rainy;
+
+Rainy  -[0.30]-> Sunny;
+Rainy  -[0.30]-> Cloudy;
+Rainy  -[0.40]-> Rainy;
+
+node Sunny;
+node Cloudy;
+node Rainy;
+
+start Sunny 1.0;
+
+map  Sydney;
+print Sydney 200;
+`,
+        },
+
+        {
+          id: "powergrid",
+          category: "grid",
+          label: "Grid: tiny power grid (one plant, two cities, a tie line)",
+          source: `// MiniGrid: a tiny power network. One generator at the centre
+// supplies two cities through a hub, with a tie-line between the
+// cities for redundancy. "supply" is power injected (generator, +)
+// or consumed (load, -). Edge weights are conductances.
+//
+// In grid mode, arrow direction is ignored: every edge is
+// bidirectional and flow direction is determined by the levels that
+// emerge from the simulation.
+//
+// Total supply must balance to zero (generators = loads).
+mode grid;
+system MiniGrid;
+
+Plant     -[5]-> Hub;
+Hub       -[3]-> NorthCity;
+Hub       -[3]-> SouthCity;
+NorthCity -[1]-> SouthCity;
+
+node Plant     { supply:  100 }
+node Hub;
+node NorthCity { supply:  -40 }
+node SouthCity { supply:  -60 }
+
+map MiniGrid;
+print MiniGrid 500;
+`,
+        },
+        {
+          id: "scenarios",
+          category: "grid",
+          label: "Grid: scenario comparison (compare + disable)",
+          source: `// Same power network, four operating scenarios run side by side.
+// 'compare' clones the system for each scenario, applies its
+// overrides, runs the equilibrium solver, and prints a combined
+// table. Disabled nodes/edges show as '(off)' in their column.
+mode grid;
+system PowerGrid;
+
+Plant     -[5]-> Hub;
+Backup    -[2]-> Hub;
+Hub       -[3]-> NorthCity;
+Hub       -[3]-> SouthCity;
+NorthCity -[1]-> SouthCity;
+
+node Plant     { supply:  100 }
+node Backup    { supply:   30 }
+node Hub;
+node NorthCity { supply:  -65 }
+node SouthCity { supply:  -65 }
+
+compare PowerGrid 500 as
+    "Baseline",
+    "Plant offline"   with disable Plant,
+    "Backup boosted"  with Backup.supply = 80,
+    "Tie line cut"    with disable NorthCity -> SouthCity;
+`,
+        },
+        {
+          id: "citytraffic",
+          category: "grid",
+          label: "Grid: morning commute (suburbs, highways, downtown)",
+          source: `mode grid;
+system MorningCommute;
+
+EastSub  -[20]-> EastHwy;
+WestSub  -[20]-> WestHwy;
+EastHwy  -[30]-> Downtown;
+WestHwy  -[30]-> Downtown;
+Downtown -[15]-> Office;
+Downtown -[15]-> Industrial;
+EastHwy  -[10]-> Office;
+
+node EastSub    { supply:  40 }
+node WestSub    { supply:  50 }
+node EastHwy;
+node WestHwy;
+node Downtown;
+node Office     { supply: -45 }
+node Industrial { supply: -45 }
+
+// Scenario: the express shortcut from EastHwy to Office is closed for
+// roadworks today. Comment out the next line to see normal flow.
+disable EastHwy -> Office;
+
+map MorningCommute;
+print MorningCommute 500;
+`,
+        },
+      ];
+
+      // Default landing program: the demo (named in EXAMPLES above).
+      // Default landing program. ?example=<id> on the URL overrides it
+      // (used by deep-links from the project page's mode cards). Falls
+      // back to the Demo if the id is unknown or absent.
+      const params = new URLSearchParams(window.location.search);
+      const requestedId = params.get('example');
+      const initialExample =
+        EXAMPLES.find((e) => e.id === requestedId) ||
+        EXAMPLES.find((e) => e.id === 'demo');
+      const DEFAULT_PROGRAM = initialExample.source;
+
+      const editor = monaco.editor.create(document.getElementById('pg-editor'), {
+        value: DEFAULT_PROGRAM,
+        language: 'flox',
+        fontFamily: 'JetBrains Mono, monospace',
+        fontSize: 13,
+        lineNumbers: 'on',
+        minimap: { enabled: false },
+        scrollBeyondLastLine: false,
+        automaticLayout: true,
+        renderLineHighlight: 'all',
+        scrollbar: { verticalScrollbarSize: 8, horizontalScrollbarSize: 8 },
+      });
+
+      const outputEl = document.getElementById('pg-output');
+      const statusEl = document.getElementById('pg-status');
+      const graphEl = document.getElementById('pg-graph');
+      const graphStatusEl = document.getElementById('pg-graph-status');
+      const hydroPaneEl = document.getElementById('pg-hydro-pane');
+      const hydroEl = document.getElementById('pg-hydro');
+      const hydroStatusEl = document.getElementById('pg-hydro-status');
+
+      // ─── Graph renderer ──────────────────────────────────────────────
+      // Pure SVG, no library. Two layouts, auto-selected: layered for
+      // DAGs (clear top-down flow), force-directed for cyclic graphs.
+      // Per-mode node styles via CSS classes.
+
+      const SVG_NS = 'http://www.w3.org/2000/svg';
+      const NODE_R = 22;
+      const CHAR_W = 6.6;       // approximate width of one character at 11px
+      const MIN_NODE_GAP = 14;  // horizontal pixels between node label edges
+      const LABEL_MAX = 15;     // chars before truncating with ellipsis
+
+      function clearGraph() {
+        while (graphEl.firstChild) graphEl.removeChild(graphEl.firstChild);
+      }
+      function clearHydro() {
+        while (hydroEl.firstChild) hydroEl.removeChild(hydroEl.firstChild);
+      }
+      function hideHydro() {
+        clearHydro();
+        hydroPaneEl.classList.add('pg-hidden');
+        hydroStatusEl.textContent = '';
+      }
+
+      // ─── Hydrograph ──────────────────────────────────────────────────
+      // Renders per-day flow time series for river-mode nodes. One line
+      // per node that has a series (skips zero-everywhere lines so the
+      // chart isn't dominated by inert nodes). Pure SVG, palette cycled.
+      const HYDRO_PALETTE = [
+        '#4a82d4', '#d04848', '#4caf6f', '#c98a2e',
+        '#7a5cd0', '#2ea3a3', '#b04a8e', '#5a6a78',
+      ];
+      function drawHydrograph(sys) {
+        clearHydro();
+        if (!sys || sys.mode !== 'river') { hideHydro(); return; }
+        // Pull (name, series) pairs. Drop all-zero series (e.g. pure
+        // outlets that just pass-through and report identical numbers,
+        // or upstream sources before they fire).
+        const series = [];
+        for (const n of sys.nodes) {
+          if (!n.series || n.series.length === 0) continue;
+          let maxAbs = 0;
+          for (const v of n.series) if (Math.abs(v) > maxAbs) maxAbs = Math.abs(v);
+          if (maxAbs < 1e-6) continue;
+          series.push({ name: n.name, kind: n.kind, values: n.series.slice() });
+        }
+        if (series.length === 0) { hideHydro(); return; }
+
+        hydroPaneEl.classList.remove('pg-hidden');
+        const days = series[0].values.length;
+        let yMax = 0;
+        for (const s of series) for (const v of s.values) if (v > yMax) yMax = v;
+        if (yMax <= 0) yMax = 1;
+        // Round yMax up to a nicer tick.
+        const niceMax = niceUpper(yMax);
+
+        const rect = hydroEl.getBoundingClientRect();
+        const W = Math.max(360, rect.width);
+        const H = Math.max(200, rect.height);
+        hydroEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+        const padL = 42, padR = 110, padT = 14, padB = 28;
+        const innerW = W - padL - padR;
+        const innerH = H - padT - padB;
+        const xFor = d => padL + (days === 1 ? innerW / 2 : (d * innerW) / (days - 1));
+        const yFor = v => padT + innerH - (v / niceMax) * innerH;
+
+        // Axes
+        const axisX = document.createElementNS(SVG_NS, 'line');
+        axisX.setAttribute('class', 'pg-hydro-axis');
+        axisX.setAttribute('x1', padL); axisX.setAttribute('y1', padT + innerH);
+        axisX.setAttribute('x2', padL + innerW); axisX.setAttribute('y2', padT + innerH);
+        hydroEl.appendChild(axisX);
+        const axisY = document.createElementNS(SVG_NS, 'line');
+        axisY.setAttribute('class', 'pg-hydro-axis');
+        axisY.setAttribute('x1', padL); axisY.setAttribute('y1', padT);
+        axisY.setAttribute('x2', padL); axisY.setAttribute('y2', padT + innerH);
+        hydroEl.appendChild(axisY);
+
+        // Y-axis ticks (5 levels)
+        for (let i = 0; i <= 4; i++) {
+          const v = (niceMax * i) / 4;
+          const y = yFor(v);
+          const gl = document.createElementNS(SVG_NS, 'line');
+          gl.setAttribute('class', 'pg-hydro-gridline');
+          gl.setAttribute('x1', padL); gl.setAttribute('y1', y);
+          gl.setAttribute('x2', padL + innerW); gl.setAttribute('y2', y);
+          hydroEl.appendChild(gl);
+          const t = document.createElementNS(SVG_NS, 'text');
+          t.setAttribute('x', padL - 6); t.setAttribute('y', y + 3);
+          t.setAttribute('text-anchor', 'end');
+          t.textContent = formatTick(v);
+          hydroEl.appendChild(t);
+        }
+        // X-axis ticks (every day)
+        for (let d = 0; d < days; d++) {
+          const x = xFor(d);
+          const t = document.createElementNS(SVG_NS, 'text');
+          t.setAttribute('x', x); t.setAttribute('y', padT + innerH + 14);
+          t.setAttribute('text-anchor', 'middle');
+          t.textContent = String(d);
+          hydroEl.appendChild(t);
+        }
+        // Axis label
+        const xLab = document.createElementNS(SVG_NS, 'text');
+        xLab.setAttribute('class', 'pg-hydro-axis-label');
+        xLab.setAttribute('x', padL + innerW / 2);
+        xLab.setAttribute('y', H - 4);
+        xLab.setAttribute('text-anchor', 'middle');
+        xLab.textContent = 'day';
+        hydroEl.appendChild(xLab);
+        const yLab = document.createElementNS(SVG_NS, 'text');
+        yLab.setAttribute('class', 'pg-hydro-axis-label');
+        yLab.setAttribute('x', 8);
+        yLab.setAttribute('y', padT - 2);
+        yLab.textContent = 'flow';
+        hydroEl.appendChild(yLab);
+
+        // One polyline per node
+        series.forEach((s, idx) => {
+          const color = HYDRO_PALETTE[idx % HYDRO_PALETTE.length];
+          const pts = s.values.map((v, d) => `${xFor(d)},${yFor(v)}`).join(' ');
+          const poly = document.createElementNS(SVG_NS, 'polyline');
+          poly.setAttribute('class', 'pg-hydro-line');
+          poly.setAttribute('points', pts);
+          poly.setAttribute('stroke', color);
+          hydroEl.appendChild(poly);
+          // Dots on each sample
+          s.values.forEach((v, d) => {
+            const c = document.createElementNS(SVG_NS, 'circle');
+            c.setAttribute('class', 'pg-hydro-dot');
+            c.setAttribute('cx', xFor(d));
+            c.setAttribute('cy', yFor(v));
+            c.setAttribute('r', '2');
+            c.setAttribute('fill', color);
+            hydroEl.appendChild(c);
+          });
+          // Legend dot + label, right column
+          const legY = padT + 8 + idx * 14;
+          const legX = padL + innerW + 10;
+          const ld = document.createElementNS(SVG_NS, 'circle');
+          ld.setAttribute('cx', legX); ld.setAttribute('cy', legY);
+          ld.setAttribute('r', '4'); ld.setAttribute('fill', color);
+          hydroEl.appendChild(ld);
+          const lt = document.createElementNS(SVG_NS, 'text');
+          lt.setAttribute('class', 'pg-hydro-label');
+          lt.setAttribute('x', legX + 8); lt.setAttribute('y', legY + 3);
+          const peakDay = s.values.indexOf(Math.max(...s.values));
+          lt.textContent = `${truncate(s.name, 12)} (peak d${peakDay})`;
+          hydroEl.appendChild(lt);
+        });
+
+        hydroStatusEl.textContent =
+          `${sys.name} / ${series.length} node${series.length === 1 ? '' : 's'} / ${days} days`;
+      }
+
+      function niceUpper(v) {
+        if (v <= 0) return 1;
+        const exp = Math.floor(Math.log10(v));
+        const base = Math.pow(10, exp);
+        const mant = v / base;
+        let nice;
+        if      (mant <= 1) nice = 1;
+        else if (mant <= 2) nice = 2;
+        else if (mant <= 5) nice = 5;
+        else                nice = 10;
+        return nice * base;
+      }
+      function formatTick(v) {
+        if (v === 0) return '0';
+        if (v >= 100) return v.toFixed(0);
+        if (v >= 10)  return v.toFixed(1);
+        return v.toFixed(2);
+      }
+      function truncate(s, n) {
+        return s.length <= n ? s : s.slice(0, n - 1) + '…';
+      }
+
+      function drawGraph(parseResult) {
+        clearGraph();
+        if (parseResult.hadError) {
+          graphStatusEl.textContent = '';
+          hideHydro();
+          showMessage('parse error');
+          return;
+        }
+        const systems = parseResult.systems;
+        if (systems.length === 0) {
+          graphStatusEl.textContent = '';
+          hideHydro();
+          showMessage('no system declared');
+          return;
+        }
+        const sys = systems[0];
+        if (sys.nodes.length === 0) {
+          graphStatusEl.textContent = `${sys.name} / ${sys.mode}`;
+          hideHydro();
+          showMessage('system declared but has no nodes yet');
+          return;
+        }
+        drawHydrograph(sys);
+
+        const rect = graphEl.getBoundingClientRect();
+        const W = Math.max(320, rect.width);
+        const H = Math.max(240, rect.height);
+        graphEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+        // Arrowhead marker is shared across all sub-groups.
+        const defs = document.createElementNS(SVG_NS, 'defs');
+        const marker = document.createElementNS(SVG_NS, 'marker');
+        marker.setAttribute('id', 'arrow');
+        marker.setAttribute('viewBox', '0 0 10 10');
+        marker.setAttribute('refX', '9');
+        marker.setAttribute('refY', '5');
+        marker.setAttribute('markerWidth', '7');
+        marker.setAttribute('markerHeight', '7');
+        marker.setAttribute('orient', 'auto-start-reverse');
+        const arrowPath = document.createElementNS(SVG_NS, 'path');
+        arrowPath.setAttribute('d', 'M 0 0 L 10 5 L 0 10 z');
+        arrowPath.setAttribute('fill', 'var(--text-dim)');
+        arrowPath.setAttribute('opacity', '0.85');
+        marker.appendChild(arrowPath);
+        defs.appendChild(marker);
+        graphEl.appendChild(defs);
+
+        // Compare scenarios: render N small multiples side-by-side. Each
+        // sub-canvas applies the scenario's overrides to the base system
+        // and renders it independently.
+        if (sys.scenarios && sys.scenarios.length > 0) {
+          drawScenarios(sys, W, H);
+          return;
+        }
+
+        graphStatusEl.textContent =
+          `${sys.name} / ${sys.mode} / ${sys.nodes.length} nodes / ${sys.edges.length} edges`;
+        drawSingleSystem(graphEl, sys, W, H);
+      }
+
+      function drawScenarios(sys, W, H) {
+        const N = sys.scenarios.length;
+        const titleH = 26;
+        const colW = W / N;
+        const innerH = H - titleH;
+
+        graphStatusEl.textContent =
+          `${sys.name} / ${sys.mode} / ${N} scenarios side-by-side`;
+
+        for (let i = 0; i < N; i++) {
+          const scenario = sys.scenarios[i];
+          const variant = applyScenario(sys, scenario);
+
+          // Wrapper group offset to this column.
+          const wrap = document.createElementNS(SVG_NS, 'g');
+          wrap.setAttribute('transform', `translate(${i * colW}, 0)`);
+          graphEl.appendChild(wrap);
+
+          // Vertical separator between columns.
+          if (i > 0) {
+            const sep = document.createElementNS(SVG_NS, 'line');
+            sep.setAttribute('x1', '0');
+            sep.setAttribute('y1', '8');
+            sep.setAttribute('x2', '0');
+            sep.setAttribute('y2', String(H - 8));
+            sep.setAttribute('stroke', 'var(--border-light)');
+            sep.setAttribute('stroke-width', '1');
+            wrap.appendChild(sep);
+          }
+
+          // Scenario label.
+          const lbl = document.createElementNS(SVG_NS, 'text');
+          lbl.setAttribute('x', String(colW / 2));
+          lbl.setAttribute('y', '16');
+          lbl.setAttribute('text-anchor', 'middle');
+          lbl.setAttribute('font-weight', '600');
+          lbl.setAttribute('font-size', '11');
+          lbl.textContent = truncateLabel(scenario.label, 28);
+          wrap.appendChild(lbl);
+
+          // Sub-canvas that holds this scenario's graph below the label.
+          const inner = document.createElementNS(SVG_NS, 'g');
+          inner.setAttribute('transform', `translate(0, ${titleH})`);
+          wrap.appendChild(inner);
+          drawSingleSystem(inner, variant, colW, innerH);
+        }
+      }
+
+      function applyScenario(baseSys, scenario) {
+        // Build a copy of the system with the scenario's overrides
+        // applied. Attaches per-scenario level / flow values to the
+        // nodes and edges so the renderer can label them with their
+        // equilibrium values.
+        const disabledNodes = new Set();
+        const disabledEdges = new Set();   // "from|to"
+        const supplyOverrides = new Map();
+        for (const o of scenario.overrides) {
+          if (o.kind === 'disable-node') disabledNodes.add(o.name);
+          else if (o.kind === 'disable-edge') disabledEdges.add(o.from + '|' + o.to);
+          else if (o.kind === 'supply') supplyOverrides.set(o.name, o.value);
+        }
+        const levels = scenario.levels || {};
+        const flows = scenario.flows || {};
+        const nodes = baseSys.nodes.map(n => {
+          let kind = n.kind;
+          let supply = n.supply;
+          if (supplyOverrides.has(n.name)) {
+            supply = supplyOverrides.get(n.name);
+            if (baseSys.mode === 'grid') {
+              if (supply > 0) kind = 'generator';
+              else if (supply < 0) kind = 'load';
+              else kind = 'relay';
+            }
+          }
+          return {
+            ...n,
+            kind,
+            supply,
+            disabled: n.disabled || disabledNodes.has(n.name),
+            level: levels[n.name],
+          };
+        });
+        const edges = baseSys.edges.map(e => ({
+          ...e,
+          disabled: e.disabled
+            || disabledEdges.has(e.from + '|' + e.to)
+            || disabledNodes.has(e.from)
+            || disabledNodes.has(e.to),
+          flow: flows[`${e.from}->${e.to}`],
+        }));
+        return { ...baseSys, nodes, edges };
+      }
+
+      function drawSingleSystem(target, sys, W, H) {
+        const isDag = !hasCycle(sys);
+        const positions = isDag
+          ? layeredLayout(sys, W, H)
+          : forceLayout(sys, W, H);
+
+        const edgeGroup = document.createElementNS(SVG_NS, 'g');
+        edgeGroup.setAttribute('class', 'pg-edges');
+        target.appendChild(edgeGroup);
+
+        const edgeKey = (e) => `${e.from}|${e.to}`;
+        const pairs = new Set();
+        for (const e of sys.edges) {
+          const rev = `${e.to}|${e.from}`;
+          if (sys.edges.some(x => edgeKey(x) === rev)) pairs.add(edgeKey(e));
+        }
+
+        for (const e of sys.edges) {
+          renderEdge(edgeGroup, e, positions, pairs.has(edgeKey(e)));
+        }
+
+        const nodeGroup = document.createElementNS(SVG_NS, 'g');
+        nodeGroup.setAttribute('class', 'pg-nodes');
+        target.appendChild(nodeGroup);
+
+        const nodeEls = new Map();
+        for (const n of sys.nodes) {
+          const el = renderNode(nodeGroup, n, positions.get(n.name));
+          nodeEls.set(n.name, el);
+        }
+
+        // Interactivity is only attached for the main (single) graph;
+        // small-multiples skip drag/hover to keep them lightweight.
+        if (target === graphEl) {
+          attachInteractions(sys, positions, nodeEls, edgeGroup, pairs);
+        }
+      }
+
+      function showMessage(text) {
+        clearGraph();
+        const rect = graphEl.getBoundingClientRect();
+        const W = Math.max(320, rect.width);
+        const H = Math.max(160, rect.height);
+        graphEl.setAttribute('viewBox', `0 0 ${W} ${H}`);
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('x', W / 2);
+        t.setAttribute('y', H / 2);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('class', 'pg-graph-empty');
+        t.textContent = text;
+        graphEl.appendChild(t);
+      }
+
+      function hasCycle(sys) {
+        // DFS three-coloring on directed edges. Undirected (grid) treats
+        // any edge as a cycle except for a single-edge graph.
+        if (sys.mode === 'grid') {
+          // Grid is undirected. If there are more edges than n-1, there's a
+          // cycle. Otherwise treat as a tree.
+          return sys.edges.length > sys.nodes.length - 1;
+        }
+        const adj = new Map();
+        for (const n of sys.nodes) adj.set(n.name, []);
+        for (const e of sys.edges) {
+          const list = adj.get(e.from);
+          if (list) list.push(e.to);
+        }
+        const color = new Map();
+        for (const n of sys.nodes) color.set(n.name, 'white');
+        function visit(v) {
+          color.set(v, 'gray');
+          for (const w of (adj.get(v) || [])) {
+            if (color.get(w) === 'gray') return true;
+            if (color.get(w) === 'white' && visit(w)) return true;
+          }
+          color.set(v, 'black');
+          return false;
+        }
+        for (const n of sys.nodes) {
+          if (color.get(n.name) === 'white' && visit(n.name)) return true;
+        }
+        return false;
+      }
+
+      function layeredLayout(sys, W, H) {
+        // Longest-path layering: each node's rank is the max distance
+        // from any source. Nodes with no incoming edges are sources.
+        const inDegree = new Map();
+        const adj = new Map();
+        for (const n of sys.nodes) {
+          inDegree.set(n.name, 0);
+          adj.set(n.name, []);
+        }
+        for (const e of sys.edges) {
+          inDegree.set(e.to, (inDegree.get(e.to) || 0) + 1);
+          adj.get(e.from).push(e.to);
+        }
+        const rank = new Map();
+        const queue = [];
+        for (const n of sys.nodes) {
+          if (inDegree.get(n.name) === 0) {
+            rank.set(n.name, 0);
+            queue.push(n.name);
+          }
+        }
+        const remain = new Map(inDegree);
+        while (queue.length > 0) {
+          const v = queue.shift();
+          for (const w of adj.get(v)) {
+            rank.set(w, Math.max(rank.get(w) || 0, (rank.get(v) || 0) + 1));
+            remain.set(w, remain.get(w) - 1);
+            if (remain.get(w) === 0) queue.push(w);
+          }
+        }
+        // Fallback for nodes never reached (e.g. isolated): put at rank 0.
+        for (const n of sys.nodes) if (!rank.has(n.name)) rank.set(n.name, 0);
+
+        // Group nodes by rank, then space within each rank by the wider
+        // of (label width + gap) and (canvas width / nodes-in-rank). For
+        // very crowded ranks we let nodes go closer together than their
+        // labels would prefer; hover-to-isolate makes them readable.
+        const byRank = new Map();
+        for (const n of sys.nodes) {
+          const r = rank.get(n.name);
+          if (!byRank.has(r)) byRank.set(r, []);
+          byRank.get(r).push(n.name);
+        }
+        const maxRank = Math.max(...rank.values(), 0);
+        const positions = new Map();
+        const pad = 60;
+        const layerH = (H - 2 * pad) / Math.max(1, maxRank);
+        for (const [r, names] of byRank) {
+          const usable = W - 2 * pad;
+          // Min spacing to keep labels apart: widest label in this row + gap.
+          let widest = 0;
+          for (const n of names) {
+            const truncated = truncateLabel(n);
+            widest = Math.max(widest, truncated.length * CHAR_W);
+          }
+          const preferred = widest + MIN_NODE_GAP;
+          const fits = preferred * names.length;
+          const spacing = fits <= usable
+            ? preferred
+            : usable / names.length;
+          const totalW = spacing * (names.length - 1);
+          const startX = (W - totalW) / 2;
+          names.forEach((name, i) => {
+            const x = names.length === 1 ? W / 2 : startX + spacing * i;
+            const y = pad + layerH * r;
+            positions.set(name, { x, y });
+          });
+        }
+        return positions;
+      }
+
+      function truncateLabel(name, max) {
+        const m = max ?? LABEL_MAX;
+        if (name.length <= m) return name;
+        return name.slice(0, m - 1) + '…';
+      }
+
+      function forceLayout(sys, W, H) {
+        // Fruchterman-Reingold force-directed layout. Random init,
+        // converges in ~150 iterations for small graphs.
+        const positions = new Map();
+        const n = sys.nodes.length;
+        const area = W * H;
+        const k = Math.sqrt(area / Math.max(1, n)) * 0.7;
+        const cx = W / 2;
+        const cy = H / 2;
+        // Initial positions on a circle to avoid degeneracies.
+        sys.nodes.forEach((node, i) => {
+          const angle = (i / n) * Math.PI * 2;
+          positions.set(node.name, {
+            x: cx + Math.cos(angle) * Math.min(W, H) * 0.3,
+            y: cy + Math.sin(angle) * Math.min(W, H) * 0.3,
+          });
+        });
+
+        let temp = Math.min(W, H) / 8;
+        const iters = 200;
+        const pad = 50;
+
+        for (let step = 0; step < iters; step++) {
+          const disp = new Map();
+          for (const node of sys.nodes) disp.set(node.name, { x: 0, y: 0 });
+
+          // Repulsion: every pair.
+          for (let i = 0; i < sys.nodes.length; i++) {
+            for (let j = i + 1; j < sys.nodes.length; j++) {
+              const a = sys.nodes[i].name;
+              const b = sys.nodes[j].name;
+              const pa = positions.get(a);
+              const pb = positions.get(b);
+              let dx = pa.x - pb.x;
+              let dy = pa.y - pb.y;
+              let d = Math.hypot(dx, dy) || 0.01;
+              const f = (k * k) / d;
+              dx /= d; dy /= d;
+              disp.get(a).x += dx * f;
+              disp.get(a).y += dy * f;
+              disp.get(b).x -= dx * f;
+              disp.get(b).y -= dy * f;
+            }
+          }
+
+          // Attraction along edges.
+          for (const e of sys.edges) {
+            if (e.from === e.to) continue;  // self-loop, no attraction
+            const pa = positions.get(e.from);
+            const pb = positions.get(e.to);
+            let dx = pa.x - pb.x;
+            let dy = pa.y - pb.y;
+            let d = Math.hypot(dx, dy) || 0.01;
+            const f = (d * d) / k;
+            dx /= d; dy /= d;
+            disp.get(e.from).x -= dx * f;
+            disp.get(e.from).y -= dy * f;
+            disp.get(e.to).x += dx * f;
+            disp.get(e.to).y += dy * f;
+          }
+
+          // Apply, with temperature cap and bounding.
+          for (const node of sys.nodes) {
+            const d = disp.get(node.name);
+            const mag = Math.hypot(d.x, d.y) || 0.01;
+            const limit = Math.min(mag, temp);
+            const p = positions.get(node.name);
+            p.x += (d.x / mag) * limit;
+            p.y += (d.y / mag) * limit;
+            p.x = Math.max(pad, Math.min(W - pad, p.x));
+            p.y = Math.max(pad, Math.min(H - pad, p.y));
+          }
+
+          temp *= 0.96;
+        }
+        return positions;
+      }
+
+      function renderEdge(parent, edge, positions, hasReverse) {
+        const a = positions.get(edge.from);
+        const b = positions.get(edge.to);
+        if (!a || !b) return;
+
+        const path = document.createElementNS(SVG_NS, 'path');
+        path.setAttribute('class', 'pg-edge' + (edge.disabled ? ' pg-edge-disabled' : ''));
+        path.dataset.from = edge.from;
+        path.dataset.to = edge.to;
+
+        let d;
+        let midX, midY;
+
+        if (edge.from === edge.to) {
+          // Self-loop: small arc.
+          const r = NODE_R;
+          d = `M ${a.x} ${a.y - r} ` +
+              `C ${a.x + r * 2.5} ${a.y - r * 2.5}, ` +
+              `${a.x + r * 2.5} ${a.y + r * 0.5}, ` +
+              `${a.x + r} ${a.y}`;
+          midX = a.x + r * 2;
+          midY = a.y - r * 0.8;
+        } else if (hasReverse) {
+          // Curve perpendicular to the line midpoint.
+          const dx = b.x - a.x;
+          const dy = b.y - a.y;
+          const dist = Math.hypot(dx, dy) || 1;
+          const nx = -dy / dist;
+          const ny = dx / dist;
+          const curve = Math.min(dist * 0.2, 30);
+          const cx = (a.x + b.x) / 2 + nx * curve;
+          const cy = (a.y + b.y) / 2 + ny * curve;
+          // End point pulled back to node edge for arrowhead positioning.
+          const end = pullBackToNodeEdge(b, cx, cy, NODE_R + 4);
+          d = `M ${a.x} ${a.y} Q ${cx} ${cy} ${end.x} ${end.y}`;
+          midX = cx;
+          midY = cy;
+        } else {
+          const end = pullBackToNodeEdge(b, a.x, a.y, NODE_R + 4);
+          d = `M ${a.x} ${a.y} L ${end.x} ${end.y}`;
+          midX = (a.x + b.x) / 2;
+          midY = (a.y + b.y) / 2;
+        }
+
+        path.setAttribute('d', d);
+        if (edge.directed && !edge.disabled) path.setAttribute('marker-end', 'url(#arrow)');
+        parent.appendChild(path);
+
+        // Label. When the scenario provides a flow value, label the edge
+        // with that (signed); otherwise fall back to the conductance /
+        // weight from the source. Disabled edges show "(off)".
+        if (edge.disabled) {
+          renderEdgeLabel(parent, midX, midY, '(off)');
+        } else if (typeof edge.flow === 'number') {
+          renderEdgeLabel(parent, midX, midY, signedFmt(edge.flow));
+        } else if (edge.weight !== 1 || edge.directed === false) {
+          renderEdgeLabel(parent, midX, midY, formatWeight(edge.weight));
+        }
+      }
+
+      // Match Java/TS signedFmt: always show sign on non-zero values.
+      function signedFmt(v) {
+        if (v > 0) return '+' + v.toFixed(1);
+        if (v < 0) return v.toFixed(1);
+        return '0.0';
+      }
+
+      function pullBackToNodeEdge(target, fromX, fromY, r) {
+        const dx = target.x - fromX;
+        const dy = target.y - fromY;
+        const d = Math.hypot(dx, dy) || 1;
+        return { x: target.x - (dx / d) * r, y: target.y - (dy / d) * r };
+      }
+
+      function renderEdgeLabel(parent, x, y, text) {
+        const len = text.length;
+        const bg = document.createElementNS(SVG_NS, 'rect');
+        bg.setAttribute('x', x - len * 3.2);
+        bg.setAttribute('y', y - 6.5);
+        bg.setAttribute('width', len * 6.4);
+        bg.setAttribute('height', 12);
+        bg.setAttribute('rx', '2');
+        bg.setAttribute('class', 'pg-edge-label-bg');
+        parent.appendChild(bg);
+        const t = document.createElementNS(SVG_NS, 'text');
+        t.setAttribute('x', x);
+        t.setAttribute('y', y + 3.5);
+        t.setAttribute('text-anchor', 'middle');
+        t.setAttribute('class', 'pg-edge-label');
+        t.textContent = text;
+        parent.appendChild(t);
+      }
+
+      function formatWeight(w) {
+        if (Number.isInteger(w)) return String(w);
+        // Trim trailing zeros.
+        let s = w.toFixed(3);
+        while (s.endsWith('0')) s = s.slice(0, -1);
+        if (s.endsWith('.')) s += '0';
+        return s;
+      }
+
+      function renderNode(parent, node, pos) {
+        const g = document.createElementNS(SVG_NS, 'g');
+        let cls = `pg-node pg-node-${node.kind}`;
+        if (node.disabled) cls += ' pg-node-disabled';
+        g.setAttribute('class', cls);
+        g.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+        g.dataset.name = node.name;
+
+        let shape;
+        if (node.kind === 'dam') {
+          shape = document.createElementNS(SVG_NS, 'rect');
+          shape.setAttribute('x', -NODE_R);
+          shape.setAttribute('y', -NODE_R);
+          shape.setAttribute('width', NODE_R * 2);
+          shape.setAttribute('height', NODE_R * 2);
+          shape.setAttribute('rx', '4');
+        } else {
+          shape = document.createElementNS(SVG_NS, 'circle');
+          shape.setAttribute('r', NODE_R);
+        }
+        g.appendChild(shape);
+
+        // Generator / load badge: a small +/- in the centre.
+        if (node.kind === 'generator' || node.kind === 'load') {
+          const badge = document.createElementNS(SVG_NS, 'text');
+          badge.setAttribute('x', 0);
+          badge.setAttribute('y', 4);
+          badge.setAttribute('text-anchor', 'middle');
+          badge.setAttribute('fill', 'white');
+          badge.setAttribute('font-weight', 'bold');
+          badge.setAttribute('font-size', '14');
+          badge.textContent = node.kind === 'generator' ? '+' : '−';
+          g.appendChild(badge);
+        }
+
+        // Native tooltip with the full name (helpful when truncated).
+        const title = document.createElementNS(SVG_NS, 'title');
+        title.textContent = node.name;
+        g.appendChild(title);
+
+        // Name label below the node. Truncated for long names; the
+        // <title> above shows the full thing on hover.
+        const label = document.createElementNS(SVG_NS, 'text');
+        label.setAttribute('x', 0);
+        label.setAttribute('y', NODE_R + 14);
+        label.setAttribute('text-anchor', 'middle');
+        label.textContent = truncateLabel(node.name);
+        g.appendChild(label);
+
+        // Supply value beneath the name, for grid generators/loads.
+        // In scenario mode (when a level is provided) we show the level
+        // instead. The level is the equilibrium answer the user wants to see.
+        const hasLevel = typeof node.level === 'number';
+        if (hasLevel) {
+          const v = document.createElementNS(SVG_NS, 'text');
+          v.setAttribute('x', 0);
+          v.setAttribute('y', NODE_R + 26);
+          v.setAttribute('text-anchor', 'middle');
+          v.setAttribute('class', 'pg-edge-label');
+          v.textContent = signedFmt(node.level);
+          g.appendChild(v);
+        } else if (node.kind === 'generator' || node.kind === 'load') {
+          const v = document.createElementNS(SVG_NS, 'text');
+          v.setAttribute('x', 0);
+          v.setAttribute('y', NODE_R + 26);
+          v.setAttribute('text-anchor', 'middle');
+          v.setAttribute('class', 'pg-edge-label');
+          v.textContent = (node.supply > 0 ? '+' : '') + node.supply;
+          g.appendChild(v);
+        }
+
+        parent.appendChild(g);
+        return g;
+      }
+
+      function attachInteractions(sys, positions, nodeEls, edgeGroup, pairs) {
+        // Hover: dim everything except the hovered node and its neighbours.
+        for (const [name, el] of nodeEls) {
+          el.addEventListener('mouseenter', () => {
+            const incident = new Set([name]);
+            for (const e of sys.edges) {
+              if (e.from === name) incident.add(e.to);
+              if (e.to === name) incident.add(e.from);
+            }
+            for (const [otherName, otherEl] of nodeEls) {
+              otherEl.classList.toggle('pg-faded', !incident.has(otherName));
+            }
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              const f = edgeEl.dataset.from;
+              const t = edgeEl.dataset.to;
+              const touches = f === name || t === name;
+              edgeEl.style.opacity = touches ? '1' : '0.15';
+            }
+          });
+          el.addEventListener('mouseleave', () => {
+            for (const otherEl of nodeEls.values()) {
+              otherEl.classList.remove('pg-faded');
+            }
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              edgeEl.style.opacity = '';
+            }
+          });
+
+          // Drag.
+          let dragging = false;
+          let offsetX, offsetY;
+          el.addEventListener('mousedown', (ev) => {
+            dragging = true;
+            const pt = svgPoint(ev.clientX, ev.clientY);
+            const pos = positions.get(name);
+            offsetX = pt.x - pos.x;
+            offsetY = pt.y - pos.y;
+            ev.preventDefault();
+          });
+          window.addEventListener('mousemove', (ev) => {
+            if (!dragging) return;
+            const pt = svgPoint(ev.clientX, ev.clientY);
+            const pos = positions.get(name);
+            pos.x = pt.x - offsetX;
+            pos.y = pt.y - offsetY;
+            el.setAttribute('transform', `translate(${pos.x},${pos.y})`);
+            // Redraw edges touching this node.
+            for (const edgeEl of edgeGroup.querySelectorAll('.pg-edge')) {
+              const f = edgeEl.dataset.from;
+              const t = edgeEl.dataset.to;
+              if (f !== name && t !== name) continue;
+            }
+            // Simpler: redraw all edges.
+            redrawEdges(sys, positions, edgeGroup, pairs);
+          });
+          window.addEventListener('mouseup', () => { dragging = false; });
+        }
+      }
+
+      function redrawEdges(sys, positions, edgeGroup, pairs) {
+        while (edgeGroup.firstChild) edgeGroup.removeChild(edgeGroup.firstChild);
+        const edgeKey = (e) => `${e.from}|${e.to}`;
+        for (const e of sys.edges) {
+          renderEdge(edgeGroup, e, positions, pairs.has(edgeKey(e)));
+        }
+      }
+
+      function svgPoint(clientX, clientY) {
+        const pt = graphEl.createSVGPoint();
+        pt.x = clientX;
+        pt.y = clientY;
+        const ctm = graphEl.getScreenCTM();
+        return ctm ? pt.matrixTransform(ctm.inverse()) : { x: clientX, y: clientY };
+      }
+
+      // ─── End graph renderer ──────────────────────────────────────────
+
+      let timer = null;
+      function run() {
+        const source = editor.getValue();
+        // Graph: render whatever can be parsed, even on simulation error.
+        try {
+          drawGraph(parseGraph(source));
+        } catch (e) {
+          showMessage('graph render failed: ' + (e && e.message || String(e)));
+        }
+        // Text output: full interpret pass.
+        try {
+          const result = interpret(source);
+          if (result.hadError) {
+            outputEl.innerHTML = '';
+            const errSpan = document.createElement('span');
+            errSpan.className = 'pg-err';
+            errSpan.textContent = result.stderr;
+            outputEl.appendChild(errSpan);
+            if (result.stdout) {
+              outputEl.appendChild(document.createTextNode('\n' + result.stdout));
+            }
+            statusEl.textContent = 'error';
+            statusEl.className = 'pg-status pg-status-error';
+          } else {
+            outputEl.textContent = result.stdout;
+            statusEl.textContent = 'ok';
+            statusEl.className = 'pg-status pg-status-ok';
+          }
+        } catch (e) {
+          outputEl.textContent = String(e);
+          statusEl.textContent = 'crash';
+          statusEl.className = 'pg-status pg-status-error';
+        }
+      }
+
+      // Re-render the graph on window resize so the SVG viewBox stays sane.
+      let resizeTimer = null;
+      window.addEventListener('resize', () => {
+        if (resizeTimer) clearTimeout(resizeTimer);
+        resizeTimer = setTimeout(() => {
+          try { drawGraph(parseGraph(editor.getValue())); } catch (e) {}
+        }, 150);
+      });
+
+      editor.onDidChangeModelContent(() => {
+        if (timer) clearTimeout(timer);
+        timer = setTimeout(run, 200);
+      });
+
+      // Populate the loader dropdown, grouped by mode (river / markov /
+      // grid). The Blank template sits at the top, ungrouped, since it
+      // isn't a mode demo per se.
+      const loader = document.getElementById('pg-loader');
+      const groupOrder = ['blank', 'river', 'markov', 'grid'];
+      const groupLabels = {
+        blank: null,            // no optgroup; show inline
+        river:  'River mode',
+        markov: 'Markov mode',
+        grid:   'Grid mode',
+      };
+      for (const cat of groupOrder) {
+        const examples = EXAMPLES.filter((e) => e.category === cat);
+        if (examples.length === 0) continue;
+        const parent = groupLabels[cat]
+          ? Object.assign(document.createElement('optgroup'), { label: groupLabels[cat] })
+          : loader;
+        for (const ex of examples) {
+          const opt = document.createElement('option');
+          opt.value = ex.id;
+          opt.textContent = ex.label;
+          parent.appendChild(opt);
+        }
+        if (parent !== loader) loader.appendChild(parent);
+      }
+      loader.addEventListener('change', (e) => {
+        const id = e.target.value;
+        const ex = EXAMPLES.find((x) => x.id === id);
+        if (!ex) return;
+        editor.setValue(ex.source);
+        editor.setPosition({ lineNumber: 1, column: 1 });
+        editor.revealLine(1);
+        // Reset the dropdown back to its placeholder so picking the same
+        // example twice in a row still works.
+        loader.value = '';
+      });
+
+      run();
+    });
+  </script>
+</body>
+</html>

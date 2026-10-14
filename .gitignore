@@ -1,0 +1,6 @@
+.DS_Store
+.vercel
+.claude/launch.json
+
+# CodeGraph index (local only)
+.codegraph/
