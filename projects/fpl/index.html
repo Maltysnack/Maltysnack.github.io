@@ -222,6 +222,12 @@
     </section>
 
     <section class="sec">
+      <div class="sec-head"><h2>Is the model honest?</h2><span class="meta" id="health-meta"></span></div>
+      <div id="health"></div>
+      <div class="note">Each gameweek the squad is resampled 20,000 times from this season's own prediction-to-outcome pairs, and the bar shows where the real score landed in that range. A model that flatters its own picks would sit low every week. Scattered marks, averaging near the middle, mean the predictions are honest and the swings are variance.</div>
+    </section>
+
+    <section class="sec">
       <div class="sec-head"><h2>Next gameweek</h2><span class="meta" id="next-meta"></span></div>
       <div class="status" id="status"></div>
       <div class="cols">
@@ -423,6 +429,26 @@
     const capCost = A.reduce((s, a) => s + (a.captainCost || 0), 0);
     $('captains').innerHTML = `<tr><th>GW</th><th>Captain</th><th class="r">Pts</th><th>Best available</th></tr>` + A.map(a => `<tr><td class="num dim">${a.gw}</td><td class="name">${esc(a.captain)}</td><td class="r num">${a.captainPts}</td><td>${a.bestCaptain === a.captain ? '<span class="pos">same</span>' : `${esc(a.bestCaptain)} <span class="dim num">${a.bestCaptainPts}</span>`}</td></tr>`).join('') + `<tr><td colspan="4" class="sub">Captaincy left ${capCost} points on the table, before doubling.</td></tr>`;
     $('acc-meta').textContent = A.length ? `${A.length} scored gameweeks` : 'nothing scored yet';
+  })();
+
+  // Model honesty: squad percentile per gameweek
+  (function () {
+    const H = D.health;
+    if (!H || !H.gws || !H.gws.length) { $('health').innerHTML = '<div class="dim" style="font-size:var(--text-sm)">No scored gameweeks yet.</div>'; return; }
+    $('health').innerHTML = H.gws.map(g => {
+      const p = g.squadPct;
+      const col = p < 25 ? 'var(--neg)' : p > 75 ? 'var(--pos)' : 'var(--text)';
+      return `<div class="acc-row" style="cursor:default;grid-template-columns:44px 1fr 150px">
+        <span class="num dim">GW${g.gw}</span>
+        <div class="bars" style="height:14px;background:var(--surface);position:relative">
+          <i style="position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--text-dim);height:14px"></i>
+          <i style="position:absolute;left:calc(${p}% - 2px);top:0;bottom:0;width:4px;background:${col};height:14px"></i>
+        </div>
+        <span class="delta num"><b>${p}%</b> <span class="dim">${g.squadPred}→${g.squadAct}</span></span>
+      </div>`;
+    }).join('');
+    const v = H.summary;
+    $('health-meta').textContent = `mean ${v.meanPct}% over ${v.n} gameweeks · ${v.verdict}`;
   })();
 
   // Next gameweek
