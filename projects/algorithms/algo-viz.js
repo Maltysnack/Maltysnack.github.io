@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=9';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=9';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=9';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=9';
+} from './algo-core.mjs?v=12';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=12';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=12';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=12';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -28,7 +28,10 @@ const GRID_HEUR_LABELS = {
 
 const $ = (id) => document.getElementById(id);
 
-const TILE_FRAME_MS = 150;
+// 150ms was too quick to follow: the board redraws wholesale, so at that
+// rate you see results rather than moves. Slow enough to track which tile
+// went where, without being tedious over a long solution.
+const TILE_FRAME_MS = 380;
 // Grid animation targets a roughly fixed total time; per-cell delay is
 // computed from the visited count so big searches don't take forever.
 const GRID_TARGET_TOTAL_MS = 3000;
@@ -471,16 +474,39 @@ function gridClearWalls() {
   gEls.run.disabled = false;
 }
 
+// Walls are grown as short straight runs rather than scattered per cell.
+// Uniform noise at a useful density reads as clutter and makes the search
+// hard to follow; segments look like walls, leave open corridors, and still
+// force the interesting detours.
+const WALL_COVERAGE = 0.16;
+const WALL_RUN_MIN = 2;
+const WALL_RUN_MAX = 5;
+
 function gridRandomWalls() {
   walls = new Set();
-  const density = 0.25;
-  for (let r = 0; r < ROWS; r++) {
-    for (let c = 0; c < COLS; c++) {
+  const target = Math.round(ROWS * COLS * WALL_COVERAGE);
+  // Keep the cells next to start and goal clear so neither is walled in.
+  const protectedCells = new Set([START, GOAL]);
+  [START, GOAL].forEach((k) => {
+    const [r, c] = fromKey(k);
+    [[-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => protectedCells.add(key(r + dr, c + dc)));
+  });
+
+  let guard = 0;
+  while (walls.size < target && guard++ < target * 20) {
+    const horizontal = Math.random() < 0.5;
+    const len = WALL_RUN_MIN + Math.floor(Math.random() * (WALL_RUN_MAX - WALL_RUN_MIN + 1));
+    let r = Math.floor(Math.random() * ROWS);
+    let c = Math.floor(Math.random() * COLS);
+
+    for (let i = 0; i < len; i++) {
+      if (r < 0 || r >= ROWS || c < 0 || c >= COLS) break;
       const k = key(r, c);
-      if (k === START || k === GOAL) continue;
-      if (Math.random() < density) walls.add(k);
+      if (!protectedCells.has(k)) walls.add(k);
+      if (horizontal) c++; else r++;
     }
   }
+
   refreshWalls();
   gridSetStats({});
   gridSetStatus('');
@@ -509,6 +535,10 @@ const SVG_NS = 'http://www.w3.org/2000/svg';
 // answer being constructed, the way the grid pathfinder reveals its path.
 const ITERATIONS_PER_RUN = { ga: 200, aco: 80 };
 const COMPUTE_BUDGET_MS = 12;
+// The search phase is paced to roughly this long so the population is
+// actually visible converging, rather than finishing inside one frame.
+const SEARCH_TARGET_TOTAL_MS = 4000;
+const SEARCH_FRAME_MS = 40;
 const REVEAL_EDGE_MS = 280;       // ms per segment when interpolating
 const REVEAL_INITIAL_PAUSE_MS = 500;
 
@@ -569,6 +599,49 @@ function appendPoints() {
 
 function rebuildCanvas() {
   drawPointsOnly();
+}
+
+// Draw the whole population: every candidate tour faintly, the current best
+// on top. This is the actual demonstration. Watching thirty ants converge
+// says far more about what a metaheuristic does than a single finished line.
+function tourPointsAttr(tour) {
+  let s = '';
+  for (let i = 0; i < tour.length; i++) {
+    const p = points[tour[i]];
+    s += `${p.x},${p.y} `;
+  }
+  const first = points[tour[0]];
+  return `${s}${first.x},${first.y}`;
+}
+
+function drawPopulation(tours, best) {
+  rEls.canvas.innerHTML = '';
+
+  // Cap the number drawn: beyond this the canvas turns into a smudge and
+  // tells you less, not more.
+  const shown = tours.slice(0, 40);
+  for (const tour of shown) {
+    if (!tour || tour.length < 2) continue;
+    const poly = document.createElementNS(SVG_NS, 'polyline');
+    poly.setAttribute('points', tourPointsAttr(tour));
+    poly.classList.add('al-ghost');
+    rEls.canvas.appendChild(poly);
+  }
+
+  if (best && best.length > 1) {
+    const poly = document.createElementNS(SVG_NS, 'polyline');
+    poly.setAttribute('points', tourPointsAttr(best));
+    poly.classList.add('al-ghost-best');
+    rEls.canvas.appendChild(poly);
+  }
+
+  appendPoints();
+}
+
+/** The candidate tours for whichever algorithm is running. */
+function currentPopulation() {
+  if (!tourAlgo) return [];
+  return tourAlgo.lastTours || tourAlgo.population || [];
 }
 
 function tourClearAlgo() {
@@ -644,16 +717,32 @@ function rotateTourToStart(tour, startCity) {
 // Phase 1: run the algorithm in time-budgeted chunks, yielding to the UI
 // between chunks so the iteration counter ticks up smoothly.
 function runIterations(target, onDone) {
+  // Pace the search so convergence is watchable. On a small problem the whole
+  // run finishes in well under a frame, so the population flashes past and you
+  // learn nothing from it. Spread the iterations over a fixed wall-clock
+  // budget instead, the same approach the grid search already uses.
+  const perFrame = Math.max(1, Math.ceil(target / (SEARCH_TARGET_TOTAL_MS / SEARCH_FRAME_MS)));
+
   function tick() {
     if (!tourAlgo) return;                // stopped
     if (tourAlgo.iteration >= target) { onDone(); return; }
     const t0 = performance.now();
-    while (tourAlgo.iteration < target && performance.now() - t0 < COMPUTE_BUDGET_MS) {
+    let steps = 0;
+    while (
+      tourAlgo.iteration < target &&
+      steps < perFrame &&
+      performance.now() - t0 < COMPUTE_BUDGET_MS
+    ) {
       tourAlgo.step();
+      steps++;
     }
     tourSetStats();
-    tourSetStatus(`searching... iteration ${tourAlgo.iteration} / ${target}`);
-    tourTimer = setTimeout(tick, 0);
+    drawPopulation(currentPopulation(), tourAlgo.best);
+    tourSetStatus(
+      `searching... iteration ${tourAlgo.iteration} / ${target}, ` +
+      `${currentPopulation().length} candidate tours`
+    );
+    tourTimer = setTimeout(tick, SEARCH_FRAME_MS);
   }
   tick();
 }
