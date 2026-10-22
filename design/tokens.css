@@ -1,0 +1,229 @@
+/* ============================================================
+   Design tokens.
+
+   Light is warm paper, dark is deep ink. Every colour is a token;
+   never hardcode one in a component. The data palette is separate
+   from the UI palette because most of this site is charts, and
+   chart colour needs to stay stable while UI colour changes.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-display: "Fraunces", Georgia, "Times New Roman", serif;
+  --font-body: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  /* Fluid scale. Clamped so a no-scroll pane never overflows on a
+     small viewport and never looks lost on a large one. */
+  --text-xs: clamp(0.69rem, 0.66rem + 0.14vw, 0.78rem);
+  --text-sm: clamp(0.81rem, 0.77rem + 0.19vw, 0.92rem);
+  --text-base: clamp(0.94rem, 0.89rem + 0.24vw, 1.06rem);
+  --text-md: clamp(1.09rem, 1.01rem + 0.38vw, 1.3rem);
+  --text-lg: clamp(1.33rem, 1.19rem + 0.67vw, 1.75rem);
+  --text-xl: clamp(1.7rem, 1.42rem + 1.33vw, 2.6rem);
+  --text-2xl: clamp(2.1rem, 1.6rem + 2.4vw, 4rem);
+
+  --leading-tight: 1.12;
+  --leading-snug: 1.3;
+  --leading-body: 1.6;
+
+  /* Optical correction: the serif is set tighter than the sans. */
+  --tracking-display: -0.021em;
+  --tracking-label: 0.14em;
+
+  /* ---- spacing, on a 4px base ---- */
+  --s1: 0.25rem;  --s2: 0.5rem;   --s3: 0.75rem;  --s4: 1rem;
+  --s5: 1.5rem;   --s6: 2rem;     --s7: 3rem;     --s8: 4rem;
+
+  /* ---- measure ---- */
+  --measure: 64ch;
+  --measure-tight: 46ch;
+
+  /* ---- chrome ---- */
+  --bar-h: 3.25rem;
+  --radius: 3px;
+  --radius-lg: 8px;
+  --border-w: 1px;
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dur: 260ms;
+
+  /* ---- light: warm paper ---- */
+  --bg: #faf7f1;
+  --bg-sunk: #f2ede3;
+  --bg-raised: #ffffff;
+  --text: #211d18;
+  --text-muted: #574f45;
+  --text-dim: #857b6e;
+  --border: #ddd4c6;
+  --border-strong: #c4b8a6;
+  --accent: #a83b2a;
+  --accent-soft: #c76b58;
+  --accent-wash: #f3e3de;
+
+  /* Data palette. Categorical order is deliberate: each successive
+     pair stays distinguishable in greyscale and under deuteranopia. */
+  --d1: #a83b2a;  --d2: #2f6f7e;  --d3: #c08a2e;
+  --d4: #4a5e8c;  --d5: #6b7f3f;  --d6: #8a5071;
+
+  /* Sequential, low to high. */
+  --seq1: #f4ebe2; --seq2: #e3cdb8; --seq3: #cfa98a;
+  --seq4: #b58060; --seq5: #915540; --seq6: #632f24;
+
+  /* Diverging, negative through neutral to positive. */
+  --div-neg: #2f6f7e;
+  --div-mid: #ece5da;
+  --div-pos: #a83b2a;
+
+  --good: #3f6b46;
+  --bad: #a83b2a;
+
+  --shadow: 0 1px 2px rgb(33 29 24 / 0.05), 0 4px 16px rgb(33 29 24 / 0.06);
+  color-scheme: light;
+}
+
+/* Dark is authored, not derived. A mechanically inverted palette
+   reads muddy, so the hues are re-picked for a dark ground. */
+:root[data-theme="dark"] {
+  --bg: #14120f;
+  --bg-sunk: #0d0c0a;
+  --bg-raised: #1e1b17;
+  --text: #f0ebe1;
+  --text-muted: #b8ad9d;
+  --text-dim: #857b6e;
+  --border: #2e2a24;
+  --border-strong: #464037;
+  --accent: #e0705a;
+  --accent-soft: #b85442;
+  --accent-wash: #2a1c18;
+
+  --d1: #e0705a;  --d2: #5fa9ba;  --d3: #e0b254;
+  --d4: #8098cc;  --d5: #9dbf65;  --d6: #c288a6;
+
+  --seq1: #231f1a; --seq2: #3d3027; --seq3: #5c4333;
+  --seq4: #80593f; --seq5: #a87552; --seq6: #d49a73;
+
+  --div-neg: #5fa9ba;
+  --div-mid: #35302a;
+  --div-pos: #e0705a;
+
+  --good: #6fa878;
+  --bad: #e0705a;
+
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.35);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14120f;
+    --bg-sunk: #0d0c0a;
+    --bg-raised: #1e1b17;
+    --text: #f0ebe1;
+    --text-muted: #b8ad9d;
+    --text-dim: #857b6e;
+    --border: #2e2a24;
+    --border-strong: #464037;
+    --accent: #e0705a;
+    --accent-soft: #b85442;
+    --accent-wash: #2a1c18;
+
+    --d1: #e0705a;  --d2: #5fa9ba;  --d3: #e0b254;
+    --d4: #8098cc;  --d5: #9dbf65;  --d6: #c288a6;
+
+    --seq1: #231f1a; --seq2: #3d3027; --seq3: #5c4333;
+    --seq4: #80593f; --seq5: #a87552; --seq6: #d49a73;
+
+    --div-neg: #5fa9ba;
+    --div-mid: #35302a;
+    --div-pos: #e0705a;
+
+    --good: #6fa878;
+    --bad: #e0705a;
+
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.3), 0 4px 16px rgb(0 0 0 / 0.35);
+    color-scheme: dark;
+  }
+}
+
+/* ============================================================
+   Base. The page itself never scrolls: that is the ground rule
+   of this site. Panes fit the viewport or the deck paginates.
+   ============================================================ */
+
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  /* Belt and braces: no scrollbar, no rubber-band, no overscroll. */
+  overflow: hidden;
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: var(--text-base);
+  line-height: var(--leading-body);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-synthesis-weight: none;
+}
+
+h1, h2, h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+  margin: 0;
+  text-wrap: balance;
+}
+
+h1 { font-size: var(--text-2xl); }
+h2 { font-size: var(--text-xl); }
+h3 { font-size: var(--text-lg); }
+
+p { margin: 0; text-wrap: pretty; }
+
+a { color: inherit; text-decoration-color: var(--border-strong); text-underline-offset: 0.18em; }
+a:hover { text-decoration-color: var(--accent); }
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: var(--radius);
+}
+
+/* Every number on this site is mono with tabular figures, so columns
+   of probabilities and scores line up down the page. */
+.num, code, kbd, pre, time, .mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
+}
+
+.label {
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: var(--tracking-label);
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.measure { max-width: var(--measure); }
+
+.visually-hidden {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip-path: inset(50%); white-space: nowrap; border: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

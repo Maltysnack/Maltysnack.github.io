@@ -4,7 +4,7 @@
    Type: Inter only. No frameworks.
 ═══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── THEME VARIABLES ─────────────────────── */
 
@@ -32,7 +32,7 @@
   --nav-icon:     #45413a;
 
   /* Accents - drawn from shark/ocean palette + a quiet red */
-  --accent-red:   #b3402f;   /* deep brick - your favorite */
+  --accent-red:   #a83b2a;   /* deep brick */
   --accent-gold:  #c89a3e;   /* antique gold */
   --accent-blue:  #1f3a5f;   /* deep ocean */
 
@@ -43,7 +43,10 @@
 
   /* Type families */
   --font-body:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --font-display: var(--font-body);   /* same family, hierarchy via weight + size */
+  /* An editorial serif over a neutral sans. Setting the whole site in one
+     family at three sizes is what made it read as undesigned. */
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --tracking-display: -0.021em;
   --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Type scale (Major Third 1.25) */
@@ -123,7 +126,7 @@
   --text-dim:     #6a6660;
 
   /* Accents in dark - slightly brighter for contrast */
-  --accent-red:   #d8553f;
+  --accent-red:   #e0705a;
   --accent-gold:  #d9a948;
   --accent-blue:  #5a86b8;
 
@@ -152,7 +155,7 @@
     --text-strong:  #fbf9f4;
     --text-muted:   #a39e91;
     --text-dim:     #6a6660;
-    --accent-red:   #d8553f;
+    --accent-red:   #e0705a;
     --accent-gold:  #d9a948;
     --accent-blue:  #5a86b8;
     --accent:       var(--accent-red);
@@ -462,7 +465,7 @@ ul {
 }
 
 .intro-heading {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--text-3xl);
   font-weight: 600;
   line-height: 1.0;
@@ -558,7 +561,7 @@ ul {
 }
 
 .home-card-title {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--text-md);
   font-weight: 600;
   color: var(--text-strong);
@@ -600,7 +603,7 @@ ul {
 }
 
 .page-title {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-size: var(--text-2xl);
   font-weight: 600;
   line-height: 1.05;
@@ -620,7 +623,7 @@ ul {
 /* ── DROP CAP UTILITY ─────────────────────── */
 .drop-cap::first-letter,
 .drop::first-letter {
-  font-family: var(--font-body);
+  font-family: var(--font-display);
   font-weight: 600;
   font-size: 3.6em;
   line-height: 0.85;
@@ -792,4 +795,24 @@ ul {
   .page-title {
     font-size: 2rem;
   }
+}
+
+
+/* ── BASE HEADINGS ───────────────────────────────────────────────
+   No element-level heading rules existed, so every heading simply
+   inherited the body sans. Per-page <style> blocks still override
+   these, since they come later in the cascade. */
+
+h1, h2, h3, h4 {
+  font-family: var(--font-display);
+  letter-spacing: var(--tracking-display);
+  font-weight: 500;
+  line-height: 1.14;
+  text-wrap: balance;
+}
+
+/* Numbers line up wherever they are tabulated. */
+code, kbd, pre, time, .num, .mono {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum" 1;
 }
