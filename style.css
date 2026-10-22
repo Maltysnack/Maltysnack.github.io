@@ -182,7 +182,9 @@ html {
 }
 
 body {
+  /* Column, because the nav is a top bar now, not a left sidebar. */
   display: flex;
+  flex-direction: column;
   min-height: 100vh;
   background-color: var(--bg);
   color: var(--text);
@@ -815,4 +817,107 @@ h1, h2, h3, h4 {
 code, kbd, pre, time, .num, .mono {
   font-variant-numeric: tabular-nums;
   font-feature-settings: "tnum" 1;
+}
+
+
+/* ── TOP BAR ─────────────────────────────────────────────────────
+   Pages still ship <aside class="sidebar">; sidebar.js fills it with
+   the bar markup and this styles it horizontally. That way the chrome
+   changed everywhere without editing a single page. */
+
+.sidebar {
+  width: 100%;
+  min-height: 0;
+  height: auto;
+  flex-shrink: 0;
+  display: flex;
+  /* Explicit: the earlier .sidebar rule sets column, and a later rule only
+     overrides the properties it actually declares. */
+  flex-direction: row;
+  align-items: center;
+  gap: clamp(0.75rem, 2vw, 1.75rem);
+  padding: 0 clamp(1rem, 3.5vmin, 3rem);
+  height: 3.25rem;
+  overflow: visible;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg);
+  border-right: 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.bar-wordmark {
+  margin-right: auto;
+  text-decoration: none;
+  color: var(--text);
+}
+.bar-name {
+  font-family: var(--font-display);
+  font-size: var(--text-md);
+  font-weight: 600;
+  letter-spacing: var(--tracking-display);
+}
+.bar-name-short { display: none; }
+
+.bar-nav { display: flex; gap: clamp(0.6rem, 1.6vw, 1.5rem); }
+.bar-nav a {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 2px 0;
+  border-bottom: 2px solid transparent;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-color 0.2s ease;
+}
+.bar-nav a:hover { color: var(--text); }
+.bar-nav a[aria-current="page"] { color: var(--text); border-bottom-color: var(--accent); }
+
+.bar-icon {
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  border-radius: 50%;
+  color: var(--text-dim);
+  cursor: pointer;
+  text-decoration: none;
+}
+.bar-icon:hover { color: var(--text); background: var(--bg-soft); }
+.bar-icon .icon { width: 1.05rem; height: 1.05rem; }
+
+.icon-sun { display: none; }
+[data-theme="dark"] .icon-moon { display: none; }
+[data-theme="dark"] .icon-sun { display: block; }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .icon-moon { display: none; }
+  :root:not([data-theme="light"]) .icon-sun { display: block; }
+}
+
+/* Main sits under the bar and is centred, since there is no longer a
+   sidebar taking up the left. */
+.main { margin-inline: auto; width: 100%; }
+
+@media (max-width: 720px) {
+  .sidebar {
+    flex-direction: row;
+    width: 100%;
+    height: 3.25rem;
+    padding-inline: 1rem;
+  }
+}
+
+@media (max-width: 620px) {
+  .bar-name { display: none; }
+  .bar-name-short {
+    display: block;
+    font-family: var(--font-display);
+    font-size: var(--text-md);
+    font-weight: 600;
+  }
+  .bar-nav { gap: 0.6rem; }
+  .bar-nav a { font-size: var(--text-xs); }
 }
