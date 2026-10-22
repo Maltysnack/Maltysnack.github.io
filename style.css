@@ -822,6 +822,16 @@ code, kbd, pre, time, .num, .mono {
   margin-right: auto;
   text-decoration: none;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.bar-avatar {
+  width: 1.55rem;
+  height: 1.55rem;
+  border-radius: 50%;
+  display: block;
+  flex-shrink: 0;
 }
 .bar-name {
   font-family: var(--font-display);
@@ -829,7 +839,6 @@ code, kbd, pre, time, .num, .mono {
   font-weight: 600;
   letter-spacing: var(--tracking-display);
 }
-.bar-name-short { display: none; }
 
 .bar-nav { display: flex; gap: clamp(0.6rem, 1.6vw, 1.5rem); }
 .bar-nav a {
@@ -882,13 +891,59 @@ code, kbd, pre, time, .num, .mono {
 }
 
 @media (max-width: 620px) {
+  /* The avatar carries the identity when the name will not fit. */
   .bar-name { display: none; }
-  .bar-name-short {
-    display: block;
-    font-family: var(--font-display);
-    font-size: var(--text-md);
-    font-weight: 600;
-  }
   .bar-nav { gap: 0.6rem; }
   .bar-nav a { font-size: var(--text-xs); }
 }
+
+
+/* ── NO-SCROLL HOME ──────────────────────────────────────────────
+   The front door fits the viewport. The page itself never scrolls:
+   the bar is fixed height and the content below it is sized to what
+   remains, with the cards laid out as a grid rather than a long list.
+
+   Scoped to the home page via <body class="fit"> so the longer inner
+   pages are not clipped. Those need their own pass. */
+
+body.fit { height: 100dvh; overflow: hidden; }
+
+body.fit .main {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: clamp(0.75rem, 2.5vh, 2rem);
+  padding: clamp(1rem, 4vh, 3rem) clamp(1rem, 4vw, 4rem);
+  max-width: min(1100px, 100%);
+  margin-inline: auto;
+  width: 100%;
+}
+
+body.fit .intro { margin-bottom: 0; }
+body.fit .divider { margin: 0; }
+
+body.fit .home-links {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+  gap: clamp(0.5rem, 1.6vh, 1rem);
+  min-height: 0;
+}
+
+body.fit .home-card {
+  grid-template-columns: 1fr;
+  align-items: start;
+  align-content: start;
+  gap: 2px;
+  padding: clamp(0.7rem, 1.8vh, 1.1rem);
+  border: 1px solid var(--border-light);
+  border-radius: 8px;
+}
+body.fit .home-card:hover { padding-left: clamp(0.7rem, 1.8vh, 1.1rem); }
+
+/* The arrow earns no space in a card grid. */
+body.fit .home-card-arrow { display: none; }
+
+body.fit .colophon { margin-top: 0; }

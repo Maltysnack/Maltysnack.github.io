@@ -92,8 +92,8 @@
 
   const html = `
     <a class="bar-wordmark" href="/" aria-label="maltysnack, home">
+      <img src="https://github.com/maltysnack.png" alt="" class="bar-avatar" />
       <span class="bar-name">maltysnack</span>
-      <span class="bar-name-short" aria-hidden="true">m</span>
     </a>
 
     <nav class="bar-nav" aria-label="Sections">${navLinks}</nav>

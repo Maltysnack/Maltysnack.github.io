@@ -1,81 +1,145 @@
 # HANDOFF
 
-Site-wide scratchpad. Read first thing each session, update last thing.
+Site-wide scratchpad. Read `CLAUDE.md` first, then this, then the HANDOFF for
+whatever folder you are touching.
 
-Project-specific state lives in each project's own HANDOFF. This doc covers cross-cutting concerns only. Never add an "In flight" or "Decisions pending" item to this doc for a specific page; put it in that page's HANDOFF.
+Project-specific state lives in each project's own HANDOFF. This doc covers
+cross-cutting concerns only.
 
-## Project handoffs
+## There are two sites
 
-- [`games/HANDOFF.md`](games/HANDOFF.md): games index
-  - [`games/magic/HANDOFF.md`](games/magic/HANDOFF.md): Magic meta-explorer (Archetypes live)
-  - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
-  - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): character sheet subsystem
-- [`projects/HANDOFF.md`](projects/HANDOFF.md): projects index
-  - [`projects/fpl/HANDOFF.md`](projects/fpl/HANDOFF.md): FPL Predicted XI
-  - [`projects/happyhour/HANDOFF.md`](projects/happyhour/HANDOFF.md): Happy Hour
-  - [`projects/coffeetime/HANDOFF.md`](projects/coffeetime/HANDOFF.md): Coffee Time
-  - [`projects/worldcup/HANDOFF.md`](projects/worldcup/HANDOFF.md): World Cup 2026
-  - [`projects/algorithms/HANDOFF.md`](projects/algorithms/HANDOFF.md): algorithm visualisations
-  - [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): Flox docs
-- [`wren/HANDOFF.md`](wren/HANDOFF.md): Wren persona, runlog, cron (covers `/shelf/` too)
-- [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions
+| | This repo | The portfolio |
+|---|---|---|
+| What | maltysnack's hobby site | The professional portfolio |
+| URL | `maltysnack.github.io`, live | Local only, no domain yet |
+| Repo | Public, `Maltysnack/Maltysnack.github.io` | `~/Documents/portfolio`, not pushed anywhere |
+| Identity | `maltysnack`, never the real name | Real name, never `maltysnack` |
+| Stack | Plain HTML, no framework, GitHub Pages | Astro 5, static |
+| Layout | Normal scrolling pages | Every page is a no-scroll deck |
+| Contents | Everything | A curated subset |
 
-## Current state (as of 18-05-2026)
+**They share one design** (palette, type, top bar) and are meant to look like
+one person made them. They do not share layout: this site scrolls, that one
+does not.
 
-- Site is in good shape and linked in job applications.
-- Tone bar: see `CLAUDE.md` "Context".
-- Repo lives at `/Users/milo/Documents/Maltysnack.github.io` (moved 18-05-2026 from `/Documents/GitHub/`; old `~/maltysnack-site` clone retired).
+**Git identity is set per repo.** That is the mechanism that stops the two
+mixing, and it matters: 30 commits in this repo's history once carried the
+real name and a personal Gmail. The repo was deleted and recreated on
+15-10-2026 with a single clean commit to remove them. Do not undo that.
 
-## Design system (shared with the portfolio site)
+Nothing in this repo may reference the portfolio. The dependency runs one
+way: the portfolio reaches across to here, never the reverse.
+
+## Design system
 
 `design/palette.css` is the **canonical source of colour and type for both
 sites**. Edit colours or fonts there, never in `style.css`, or the two sites
-drift. `style.css` imports it and holds only site-specific tokens (sidebar
-colours, type scale, spacing, layout widths).
+drift. `style.css` imports it and holds only site-specific tokens: sidebar
+colours, type scale, spacing, layout widths.
 
-The portfolio site copies this file in with its own `npm run sync:design`.
-The direction is deliberate: this repo is public and contains no reference
-to that site. Only that side reaches across.
+The portfolio copies the file in with its own `npm run sync:design`
+(`--check` verifies it is current without writing, for CI).
 
-Chrome is a **top bar**, not a sidebar. Pages still ship
-`<aside class="sidebar">`; `sidebar.js` fills it with bar markup and
-`style.css` lays it out horizontally, so the chrome can change site-wide
-without editing any page.
+- Display: Fraunces. Body: Inter. Figures: JetBrains Mono, tabular.
+- Accent `#a83b2a` light, `#e0705a` dark.
+- Chrome is a **top bar**, not a sidebar. Pages still ship
+  `<aside class="sidebar">`; `sidebar.js` fills it with bar markup and
+  `style.css` lays it out horizontally, so site-wide chrome changes need no
+  page edits.
 
-### Cache-busting is mandatory
+## Cache-busting is mandatory
 
-`style.css`, `sidebar.js` and the algorithm modules all carry `?v=N`.
-**Bump the version in every referencing page whenever you change one.**
-Without it a returning visitor keeps the cached file and never sees the
-change. This has silently hidden work three times now: once for the D&D
-sheet engine, once for the algorithms modules, and once for a whole
-redesign that looked like it had not deployed.
+`style.css`, `sidebar.js`, `sheet.js` and the algorithm modules all carry
+`?v=N`. **Bump the version in every referencing page whenever you change
+one.**
+
+This has silently hidden finished work three times: the D&D sheet engine, the
+algorithm modules, and an entire redesign that looked like it had never
+deployed. If a change "isn't live", check this before anything else. Confirm
+with `curl` what the server actually serves rather than trusting a browser.
+
+## Project handoffs
+
+- [`projects/HANDOFF.md`](projects/HANDOFF.md): projects index
+  - [`projects/fpl/HANDOFF.md`](projects/fpl/HANDOFF.md): FPL bot dashboard
+  - [`projects/worldcup/HANDOFF.md`](projects/worldcup/HANDOFF.md): World Cup 2026
+  - [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): Flox language
+  - [`projects/algorithms/HANDOFF.md`](projects/algorithms/HANDOFF.md): algorithm visualisations
+- [`games/HANDOFF.md`](games/HANDOFF.md): games index
+  - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): D&D character sheet
+  - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
+- [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions (D&D upload only)
+
+## Current state (23-10-2026)
+
+Live and working. Six pages in the nav: FPL, World Cup, Flox, Algorithms,
+dnd, Duoclue.
+
+**Removed 15-10-2026** and recoverable only from the pre-reset archive:
+Wren (persona, runlog, weekly cron), the Shelf and its writings,
+`negative-space.html`, Magic: The Gathering, Happy Hour, Coffee Time,
+Filmclub, and Flox's dormant Stripe/Supabase layer. The README generator
+(`scripts/build-readme.py`) still exists; `README.md` is generated from each
+page's `<meta name="description">`.
+
+**Archive of everything before the reset:** `~/Documents/maltysnack-archive/`
+holds two verified git bundles with the full 666-commit history and a
+worktree snapshot. Local branch `archive/pre-reset-history` has the old
+commits too.
 
 ## Site-wide infrastructure
 
-- Pages auto-listed in `README.md` from `<meta name="description">` per page. Run `python3 scripts/build-readme.py` after adding or renaming a sidebar page.
-- Layout system: `data-layout="prose|page|wide|full"` on `<main>`. Don't hardcode max-widths.
-- Favicons: `sidebar.js` injects them via `FAVICON_VERSION`. Bump there when icons change.
-- Pre-commit hook: `scripts/hooks/pre-commit`. Activate per clone with `git config core.hooksPath scripts/hooks`.
-- Sanitize: `scripts/sanitize.sh` runs in CI and pre-commit.
+- Layout system: `data-layout="prose|page|wide|full"` on `<main>`. Do not
+  hardcode max-widths.
+- Favicons: `sidebar.js` injects them via `FAVICON_VERSION`. Bump there when
+  icons change.
+- Pre-commit hook: `scripts/hooks/pre-commit`. Activate per clone with
+  `git config core.hooksPath scripts/hooks`.
+- Sanitise: `scripts/sanitize.sh` runs in CI and pre-commit. Check `[9]`
+  resolves every JS module import, which plain link-checking misses: a page
+  can return 200 while being broken at runtime.
 
-## Decisions pending (cross-cutting)
+## Decisions pending
 
-- ~~Loose-page reorg.~~ Done 18-05-2026.
-- ~~`widgets/` orphaned.~~ Done 18-05-2026: both Scriptable widgets moved into `projects/happyhour/` (coffeetime is its sister page). Root `widgets/` folder deleted.
-- ~~`vercel-out/index.html` stale.~~ Done 18-05-2026: it isn't a build artifact (declared as Vercel deployment root in `vercel.json`); fixed its `/dnd/` link to point at the new `/games/dnd/`.
-- ~~`projects/test_perm.txt` stale.~~ Deleted 18-05-2026.
-- `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose. See `projects/fpl/HANDOFF.md` (awaiting maltysnack's call on re-enabling).
-- ~~Magic Archetypes "LOCAL ONLY" stale note.~~ Cleared 18-05-2026: tab confirmed live, magic HANDOFF moved it from "In flight" to "Live".
+- `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose.
+  See `projects/fpl/HANDOFF.md`.
+- Whether the hobby pages should become no-scroll decks like the portfolio.
+  Current position: share the chrome and type everywhere, but World Cup,
+  Duoclue and the D&D sheet are apps rather than documents and should keep
+  their own layouts.
+- Flox cut to a single page, and the FPL single-screen dashboard. Both
+  specified, neither started.
 
 ## Recent session log
 
-- **18-05-2026 (this session):** Big reorg pass. Magic (with synergy-score + data), Duoclue, and dnd moved under `/games/`. All loose `projects/*.html` moved into per-project folders. Every project now owns a folder + HANDOFF. Root HANDOFF link list flattened to one tree. CLAUDE.md overhauled: deduped (188 to 136 lines), Wren-folders block moved to `wren/HANDOFF.md`, added rules for "stay in your folder", "write to HANDOFF as you go", "do not open the preview panel", sharpened response-style. Five commits pushed: `2f0cc12` `0f8ff96` `e2cae15` `ba6d803` `bfc0b2b` `78d2930`. No redirect stubs (site has no inbound traffic from old URLs).
+- **23-10-2026:** Shared design system. `design/palette.css` made canonical
+  for both sites; duplicate declarations stripped from `style.css` (they came
+  after the import and would have silently won). Sidebar replaced by the
+  portfolio's top bar across all pages. `style.css` and `sidebar.js`
+  versioned.
+- **22-10-2026:** D&D persistence fixed: editable fields committed only on
+  blur, which does not fire on tab close, app switch or phone sleep, so a
+  session's HP was lost. Unsubmitted add-item text now persists too.
+  Algorithms: TSP draws the whole population (it ran invisibly and drew only
+  the final tour), search paced so convergence is watchable, wall generation
+  changed from uniform noise to grown segments, tile playback slowed with a
+  speed control and step-through. FPL `PUBLISH_PAT` re-granted after the repo
+  recreate; sync healthy again.
+- **15-10-2026:** Repo deleted and recreated to scrub 30 commits carrying the
+  real name and personal email, plus 9 pull requests. Sections removed per
+  the list above. Flox gallery deleted (it imported a module removed with the
+  cloud layer, so the page returned 200 while broken).
 
 ## Cross-cutting gotchas
 
-- **macOS case-insensitive FS silently merges `handoff.md` and `HANDOFF.md`.** Always uppercase.
-- **Multiple Claude sessions push in parallel.** Pull-rebase before non-trivial edits to shared files (`sidebar.js`, `index.html`, `style.css`, `CLAUDE.md`, root `HANDOFF.md`, `README.md`).
-- **Force-pushed identity rewrites** happen when consolidating author/committer history. If local is stale: `git fetch && git reset --hard origin/main`.
-- **Co-author trailer is Wren**, not Claude: `Co-Authored-By: Wren <wren@maltysnack.dev>`. CLAUDE.md spells this out.
-- A handful of past commits show maltysnack's profile display name as the author rather than `maltysnack`. Same email, same account on GitHub.
+- **macOS case-insensitive FS silently merges `handoff.md` and
+  `HANDOFF.md`.** Always uppercase.
+- **Multiple Claude sessions push in parallel.** Pull-rebase before
+  non-trivial edits to shared files (`sidebar.js`, `index.html`, `style.css`,
+  `design/palette.css`, `CLAUDE.md`, this file, `README.md`).
+- **`.claude/launch.json` is gitignored but was once tracked.** It holds a
+  local path to the portfolio. Never commit it; that would publish the link
+  between the two sites.
+- A later CSS rule only overrides the properties it actually declares. The
+  top bar needed an explicit `flex-direction: row` because the earlier
+  `.sidebar` rule set `column`.
