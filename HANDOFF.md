@@ -103,15 +103,20 @@ commits too.
 
 - `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose.
   See `projects/fpl/HANDOFF.md`.
-- Whether the hobby pages should become no-scroll decks like the portfolio.
-  Current position: share the chrome and type everywhere, but World Cup,
-  Duoclue and the D&D sheet are apps rather than documents and should keep
-  their own layouts.
-- Flox cut to a single page, and the FPL single-screen dashboard. Both
-  specified, neither started.
+
+## Decided
+
+- **No-scroll is per page, not site-wide (23-10-2026).** The home page and
+  the FPL dashboard fit the viewport. World Cup, Duoclue and the D&D sheet are
+  apps with their own layouts, and Flox and Algorithms are reading pages; all
+  of those scroll. Making a page fit is a redesign of that page (drop panels,
+  do not shrink them), never a global CSS switch.
 
 ## Recent session log
 
+- **23-10-2026 (later):** FPL rebuilt as a single-screen dashboard. Flox cut
+  to one page of live examples; playground and docs routes deleted. No-scroll
+  settled as per page (see Decided).
 - **23-10-2026:** Home page made no-scroll (`<body class="fit">`), cards laid
   out as a grid; avatar restored to the bar. All docs and HANDOFFs brought
   up to date. Shared design system. `design/palette.css` made canonical
