@@ -19,10 +19,7 @@ Recoverable only from the pre-reset archive in
 
 ## In flight
 
-- **Flox cut to a single page.** Specified, not started. One page: a short
-  description, two or three worked examples, the river flow, then Markov
-  chains. The playground, grammar reference and gallery collapse into it as
-  inline examples. Scope stays small.
+Nothing. FPL single-screen dashboard and Flox single page both shipped 23-10-2026.
 
 ## Gotchas
 
