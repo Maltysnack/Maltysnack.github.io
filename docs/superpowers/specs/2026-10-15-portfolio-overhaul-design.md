@@ -1,7 +1,26 @@
 # Portfolio overhaul: design
 
 **Date:** 15-10-2026
-**Status:** awaiting approval
+**Status: SUPERSEDED 23-10-2026. Kept for the reasoning, not the plan.**
+
+> This spec assumed **one site**, pseudonymous, with the overhaul applied to
+> this repo. That is no longer the plan. What actually happened:
+>
+> - **Two sites.** This repo stayed the hobby site; a separate portfolio
+>   repo (`~/Documents/portfolio`, Astro, real name) was created. See
+>   `CLAUDE.md` and the root `HANDOFF.md`.
+> - **The pseudonym was already broken.** 30 commits carried the real name
+>   and a personal Gmail, so the repo was deleted and recreated.
+> - **Filmclub is excluded for a different reason** than recorded below:
+>   it is no longer deployed and the link is dead.
+> - **World Cup is out of scope**; maltysnack handles it separately.
+> - **Both sites share one design** (`design/palette.css`), which this spec
+>   did not anticipate.
+> - **No-scroll is a ground rule** for the portfolio and for this site's
+>   home page. The rest of this site still scrolls.
+>
+> Sections 6 to 9 (Flox, Algorithms, FPL, tooling) are still the live plan
+> and most of Algorithms and the tooling work is done.
 **Scope:** site shell, Flox, Algorithms, FPL. World Cup and the Lab experiments are out of scope.
 
 ---

@@ -1,5 +1,10 @@
 # api HANDOFF
 
+> **These exist only for the D&D character upload.** The Flox checkout,
+> portal and webhook functions were deleted 15-10-2026 along with the rest
+> of Flox's dormant commercial layer. If D&D's upload flow is ever
+> reworked, this whole folder and `vercel.json` can probably go.
+
 Scratchpad for `/api/` Vercel serverless functions. Root `HANDOFF.md` covers site-wide.
 
 ## Functions

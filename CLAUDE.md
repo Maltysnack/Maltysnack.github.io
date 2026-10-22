@@ -4,6 +4,30 @@ Read this and then `HANDOFF.md` before doing anything. Then read the HANDOFF for
 
 This is maltysnack's personal site (`maltysnack.github.io`). Plain HTML, no framework, served by GitHub Pages from `main`. Multiple Claude sessions work on it in parallel.
 
+## There are two sites, and they must not mix
+
+| | This repo | The portfolio |
+|---|---|---|
+| What | The hobby site | The professional portfolio |
+| URL | `maltysnack.github.io`, live | Local only, no domain yet |
+| Where | here | `~/Documents/portfolio` |
+| Identity | `maltysnack`, **never the real name** | Real name, **never `maltysnack`** |
+| Stack | Plain HTML, GitHub Pages | Astro 5, static |
+| Layout | Scrolling pages (home fits the viewport) | Every page a no-scroll deck |
+
+They **share one design** and should look like one person made them. They do
+not share layout.
+
+**Git identity is set per repo.** That is what keeps them apart. It matters:
+30 commits in this repo's history once carried the real name and a personal
+Gmail, and the repo had to be deleted and recreated on 15-10-2026 to remove
+them. Check `git config user.email` before committing if anything looks off.
+
+**Nothing here may reference the portfolio.** The dependency runs one way:
+the portfolio reaches across to this repo for the shared palette, never the
+reverse. `.claude/launch.json` holds a local path to it and is gitignored;
+never commit it.
+
 ## Response style
 
 Short. Blunt. Almost rude. Straight to the point. State the result, stop.
@@ -50,7 +74,13 @@ After any bulk sed, grep for both the old form (should be zero hits) and patholo
 
 ## Context bar
 
-The site is linked in job applications. Tone is honest, considered, personal.
+This is the **hobby site**, not the portfolio. The portfolio is a separate
+repo (`~/Documents/portfolio`, real name, no-scroll Astro) and is what gets
+linked in job applications. This site is still public and still findable
+from the same GitHub account, so it should be something maltysnack is happy
+for a stranger to see, but it is a playground, not a CV.
+
+Tone is honest, considered, personal.
 
 - **OK**: quirky voice, drop caps, opinions about typography, personal projects with a clear point.
 - **Not OK**: profanity in user-facing copy, politics, hot takes, slurs, oversharing, edgy humor without payoff, anything that wouldn't survive a stranger evaluating maltysnack as a candidate.
@@ -63,7 +93,7 @@ Sanitize has a soft profanity warning. Editorial judgment beyond that is the wri
 1. **No em dashes anywhere.** Use a comma, period, semicolon, or restructure. The script greps for the unicode em dash and fails the build.
 2. **No personal info on public pages.** Refer to the user as `maltysnack`, never their real name. No city, region, or location identifiers. No personal emails or phone numbers. (City-name data inside an app's content, e.g. a world-clock list, is fine; identifying maltysnack as living somewhere isn't.)
 3. **No `.DS_Store` or junk files committed.** `.gitignore` covers them; don't fight it.
-4. **No broken internal links** from `sidebar.js` or `index.html`.
+4. **No broken internal links**, and every JS module import must resolve. A page can return 200 while being broken at runtime; `sanitize.sh` check `[9]` catches that.
 5. **All user-facing dates are `dd-mm-yyyy`.** Internal data files can stay ISO `yyyy-mm-dd` for sortability; convert at the render layer.
 
 ## HANDOFF discipline
@@ -83,7 +113,7 @@ When a session is about one project, edit only inside that project's folder. Ide
 
 Touching anything outside the project folder requires an explicit reason:
 
-- shared files (`sidebar.js`, `index.html`, `style.css`, `scripts/build-readme.py`, root `HANDOFF.md`, `README.md`) only when the change genuinely needs to be visible site-wide (new page, new layout token, sidebar entry, README regen).
+- shared files (`sidebar.js`, `index.html`, `style.css`, `design/palette.css`, `scripts/build-readme.py`, root `HANDOFF.md`, `README.md`) only when the change genuinely needs to be visible site-wide (new page, new layout token, sidebar entry, README regen).
 - another project's folder only if the user asks for cross-project work.
 
 If you find yourself about to create a file outside the project folder, stop and ask. Cross-cutting edits are the most common source of merge conflicts between parallel sessions.
@@ -94,26 +124,47 @@ Compaction is lossy. Fresh + layered handoffs beats long conversation + auto-sum
 
 1. Create the HTML page inside its own folder (`<folder>/index.html`). Don't drop loose `.html` files at a parent level.
 2. Include `<meta name="description" content="...">` in `<head>`. One sentence. Used by the README generator and search snippets.
-3. Add it to `sidebar.js` in the right section.
+3. Add it to the `NAV` array in `sidebar.js`.
 4. Add a card to `index.html`'s `home-links` section.
 5. Add it to the `SECTIONS` list in `scripts/build-readme.py`.
 6. Run `python3 scripts/build-readme.py` to regenerate `README.md`.
-7. Include `<script src="/sidebar.js"></script>` before `</body>`. Sidebar.js injects the canonical favicon links into `<head>` automatically; don't hand-roll the icon block.
+7. Include `<script src="/sidebar.js?v=N"></script>` before `</body>`, matching the version other pages use. It injects the canonical favicon links into `<head>` automatically; don't hand-roll the icon block.
 8. `git add` the page and the regenerated `README.md`. CI fails if either is missing or stale.
 9. If the page is non-trivial (in-flight features, decisions pending, own wiring like a Vercel function or cron), create `<folder>/HANDOFF.md` and add it to the root HANDOFF link list. Otherwise, mention it under the closest parent index HANDOFF.
 
-Self-contained pages with their own design system can skip `/style.css` and the icon block. They still need a sidebar entry and home card.
+Self-contained pages with their own design system can skip `/style.css` and the icon block. They still need a nav entry and a home card.
 
 ## Design system
 
-- Body and display font: **Inter** (single family, hierarchy via weight and size)
-- Mono: JetBrains Mono
-- All colors are CSS variables in `/style.css`
-- Light/dark via `[data-theme="light|dark"]` on `<html>`
-- Accent: red (`var(--accent-red)`)
-- Sidebar is darker than main, contrasting hue in dark mode
+**Shared with the portfolio site.** `design/palette.css` is the canonical
+source of colour and type for both. **Edit colours and fonts there, never in
+`style.css`**, or the two sites drift. `style.css` imports it and holds only
+site-specific tokens: sidebar colours, type scale, spacing, layout widths.
 
-Prefer CSS variables (`var(--text)`, `var(--bg)`, etc.) over hardcoded colors so themes work for free.
+- Display: **Fraunces**. Body: **Inter**. Figures: **JetBrains Mono**, tabular.
+- Accent `#a83b2a` light, `#e0705a` dark, as `var(--accent)`.
+- Light/dark via `[data-theme="light|dark"]` on `<html>`.
+- A separate data palette (`--d1`..`--d6`, sequential and diverging ramps)
+  exists for charts, which most of this site is.
+
+Prefer CSS variables (`var(--text)`, `var(--bg)`) over hardcoded colours so
+themes work for free.
+
+### Chrome is a top bar
+
+`sidebar.js` injects a horizontal top bar. Pages still ship
+`<aside class="sidebar">` and `style.css` lays it out horizontally, so
+site-wide chrome changes need no page edits. The class name is historical;
+do not rename it without touching every page.
+
+### Cache-busting is mandatory
+
+`style.css`, `sidebar.js`, `sheet.js` and the algorithm modules carry `?v=N`.
+**Bump it in every referencing page whenever you change one.** This has
+silently hidden finished work three times, including an entire redesign that
+looked like it had never deployed. If something "isn't live", check this
+first, and confirm with `curl` what the server actually serves rather than
+trusting a browser.
 
 ### Layout widths
 
@@ -139,10 +190,11 @@ git config user.email "39046911+Maltysnack@users.noreply.github.com"
 Co-author trailer for AI-assisted commits:
 
 ```
-Co-Authored-By: Wren <wren@maltysnack.dev>
+Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>
 ```
 
-Do not use `Claude <noreply@anthropic.com>`. The curator persona on this repo is Wren.
+The old `Wren <wren@maltysnack.dev>` trailer is retired. Wren was a curator
+persona that no longer exists; it and all its pages were removed 15-10-2026.
 
 ## Sanitize + pre-commit
 
@@ -160,7 +212,7 @@ git config core.hooksPath scripts/hooks
 
 ## Coordination with other sessions
 
-Pull-rebase before non-trivial edits to shared files (`sidebar.js`, `index.html`, `style.css`, `CLAUDE.md`, root `HANDOFF.md`, `README.md`):
+Pull-rebase before non-trivial edits to shared files (`sidebar.js`, `index.html`, `style.css`, `design/palette.css`, `CLAUDE.md`, root `HANDOFF.md`, `README.md`):
 
 ```sh
 git pull --rebase origin main

@@ -1,21 +1,35 @@
 # projects HANDOFF
 
-Index for `/projects/`. Every project owns its own folder + HANDOFF.
+Index for `/projects/`. Every project owns its own folder and HANDOFF.
+Root `HANDOFF.md` covers site-wide concerns.
 
 ## Subprojects
 
-- [`fpl/HANDOFF.md`](fpl/HANDOFF.md): FPL Predicted XI
-- [`flox/HANDOFF.md`](flox/HANDOFF.md): Flox docs
-- [`happyhour/HANDOFF.md`](happyhour/HANDOFF.md): Happy Hour (with sister page Coffee Time)
-- [`coffeetime/HANDOFF.md`](coffeetime/HANDOFF.md): Coffee Time (easter-egg sister of Happy Hour)
-- [`worldcup/HANDOFF.md`](worldcup/HANDOFF.md): World Cup 2026 simulator
+- [`fpl/HANDOFF.md`](fpl/HANDOFF.md): FPL bot dashboard, fed twice daily by a private engine
+- [`worldcup/HANDOFF.md`](worldcup/HANDOFF.md): World Cup 2026 model. Stale; maltysnack is handling it separately
+- [`flox/HANDOFF.md`](flox/HANDOFF.md): Flox, a small language for flow networks
 - [`algorithms/HANDOFF.md`](algorithms/HANDOFF.md): algorithm visualisations
 
-## Current state (as of 18-05-2026)
+## Removed 15-10-2026
 
-- Loose-page reorg completed 18-05-2026: happyhour, coffeetime, worldcup, algorithms each got their own folder with `index.html` + assets + HANDOFF. No redirect stubs (site has no inbound traffic from the old URLs).
+`happyhour/` and `coffeetime/` were deleted along with their Scriptable
+widgets and the `happyhour-proxy.vercel.app` image proxy they shared.
+Recoverable only from the pre-reset archive in
+`~/Documents/maltysnack-archive/`.
+
+## In flight
+
+- **Flox cut to a single page.** Specified, not started. One page: a short
+  description, two or three worked examples, the river flow, then Markov
+  chains. The playground, grammar reference and gallery collapse into it as
+  inline examples. Scope stays small.
+- **FPL single-screen dashboard.** Specified, not started. Must fit the
+  viewport with no scrolling, sized by importance. Drop panels rather than
+  shrink them.
 
 ## Gotchas
 
-- happyhour and coffeetime share the `happyhour-proxy.vercel.app` image proxy and the same inline city list. Treat them as one project for design decisions; per-page state lives in each HANDOFF.
-- Scriptable widgets at `projects/happyhour/widget-{happyhour,coffeetime}.js` are FROZEN (see happyhour HANDOFF).
+- `projects/fpl/dashboard.json` is written by an external workflow. Do not
+  hand-edit it; it will be overwritten twice a day.
+- Both football projects are framed as **forecast calibration against market
+  odds**, not betting. Same maths, better framing.

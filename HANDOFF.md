@@ -112,7 +112,9 @@ commits too.
 
 ## Recent session log
 
-- **23-10-2026:** Shared design system. `design/palette.css` made canonical
+- **23-10-2026:** Home page made no-scroll (`<body class="fit">`), cards laid
+  out as a grid; avatar restored to the bar. All docs and HANDOFFs brought
+  up to date. Shared design system. `design/palette.css` made canonical
   for both sites; duplicate declarations stripped from `style.css` (they came
   after the import and would have silently won). Sidebar replaced by the
   portfolio's top bar across all pages. `style.css` and `sidebar.js`
