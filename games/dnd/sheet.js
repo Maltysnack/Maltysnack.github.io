@@ -111,8 +111,14 @@ function makeDefaultState() {
     buffs: [],
     inventory: structuredClone(CHARACTER.defaultInventory || []),
     notes: '',
+    drafts: {},
   };
 }
+
+/* Text typed into the add-item and add-buff forms but never submitted.
+   Mid-session that is usually loot written down in a hurry, and losing it
+   on reload is the whole reason items go missing between sessions. */
+const DRAFT_FIELDS = ['inv-name', 'inv-notes', 'buff-name', 'buff-notes'];
 
 function padArr(arr, len) {
   const a = Array.isArray(arr) ? arr : [];
@@ -149,13 +155,47 @@ function loadState() {
     });
 
     parsed.deathSaves = parsed.deathSaves || def.deathSaves;
+    parsed.drafts = (parsed.drafts && typeof parsed.drafts === 'object') ? parsed.drafts : {};
     return parsed;
   } catch {
     return def;
   }
 }
 
-function saveState() { localStorage.setItem(STORAGE_KEY(), JSON.stringify(state)); }
+function saveState() {
+  try {
+    localStorage.setItem(STORAGE_KEY(), JSON.stringify(state));
+  } catch (err) {
+    // A full or disabled store must not take the sheet down mid-session.
+    console.warn('Could not save sheet state', err);
+  }
+}
+
+/* Commit whatever is being edited right now, then save.
+
+   Editable fields commit on blur, but blur is not guaranteed when a tab is
+   closed, an app is switched, or a phone goes to sleep. Without this, an HP
+   change typed and left on screen is simply lost: the DOM shows the new
+   value while storage still holds the old one. Blurring runs the existing
+   setter, so clamping and validation stay in one place. */
+function commitPendingEdits() {
+  const commit = commits.get(document.activeElement);
+  if (commit) commit();
+  else saveState();
+}
+
+/* Put unsubmitted form text back after a reload. Done once on load rather
+   than inside render(), so re-rendering never moves the caret mid-typing. */
+function restoreDrafts() {
+  DRAFT_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && state.drafts[id]) el.value = state.drafts[id];
+  });
+}
+
+function clearDrafts(...ids) {
+  ids.forEach(id => delete state.drafts[id]);
+}
 
 /* =====================================================================
    Layout (built once on init)
@@ -881,15 +921,23 @@ function renderInventory() {
    Events
    ===================================================================== */
 
+/* Every editable field registers how to commit itself, so a pending edit can
+   be forced through without relying on a blur event. blur() does not fire
+   when a tab closes or a phone sleeps, which is exactly when an unsaved HP
+   change used to disappear. */
+const commits = new Map();
+
 function bindEditableNumber(id, setter, opts = {}) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.addEventListener('blur', () => {
+  const commit = () => {
     const v = parseInt(el.textContent, 10);
     if (isNaN(v) || v < (opts.min ?? 0)) { render(); return; }
     setter(v);
     render();
-  });
+  };
+  commits.set(el, commit);
+  el.addEventListener('blur', commit);
   el.addEventListener('keydown', e => {
     if (e.key === 'Enter') { e.preventDefault(); el.blur(); }
   });
@@ -898,7 +946,9 @@ function bindEditableNumber(id, setter, opts = {}) {
 function bindEditableText(id, setter) {
   const el = document.getElementById(id);
   if (!el) return;
-  el.addEventListener('blur', () => { setter(el.textContent.trim()); render(); });
+  const commit = () => { setter(el.textContent.trim()); render(); };
+  commits.set(el, commit);
+  el.addEventListener('blur', commit);
   el.addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); el.blur(); } });
 }
 
@@ -960,6 +1010,7 @@ function wireEvents() {
     state.buffs.push({ name, notes });
     document.getElementById('buff-name').value = '';
     document.getElementById('buff-notes').value = '';
+    clearDrafts('buff-name', 'buff-notes');
     render();
   });
 
@@ -971,8 +1022,24 @@ function wireEvents() {
     state.inventory.push({ name, notes });
     document.getElementById('inv-name').value = '';
     document.getElementById('inv-notes').value = '';
+    clearDrafts('inv-name', 'inv-notes');
     render();
   });
+
+  DRAFT_FIELDS.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('input', () => {
+      state.drafts[id] = el.value;
+      saveState();
+    });
+  });
+
+  // Blur is unreliable on tab close, app switch and phone sleep.
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden) commitPendingEdits();
+  });
+  window.addEventListener('pagehide', commitPendingEdits);
 
   document.getElementById('update-submit').addEventListener('click', async () => {
     const desc = document.getElementById('update-description').value.trim();
@@ -1108,6 +1175,7 @@ async function init() {
   buildLayout();
   state = loadState();
   wireEvents();
+  restoreDrafts();
   render();
 }
 

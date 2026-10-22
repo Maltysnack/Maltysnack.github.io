@@ -33,7 +33,7 @@ const SHIM_TEMPLATE = (id, name) => `<!DOCTYPE html>
 </head>
 <body>
   <script>window.CHARACTER_ID = '${id}';</script>
-  <script src="/games/dnd/sheet.js"></script>
+  <script src="/games/dnd/sheet.js?v=3"></script>
 </body>
 </html>
 `;
