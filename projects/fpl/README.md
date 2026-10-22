@@ -58,7 +58,7 @@ It fetches from `fantasy.premierleague.com/api/` (no auth needed) and overwrites
 
 ## What's outside this folder that does NOT belong to FPL
 
-Everything else. The site's stylesheet (`/style.css`), sidebar (`/sidebar.js`), other pages (`/games/dnd/`, `/shelf/`, etc.) are someone else's work. Don't touch them. If `index.html`'s rendering looks broken because of a sidebar or stylesheet change, raise it with maltysnack rather than fixing it here.
+Everything else. The site's stylesheet (`/style.css`), top bar (`/sidebar.js`, historical class name), other pages (`/games/dnd/`, `/projects/flox/`, etc.) are someone else's work. Don't touch them. If `index.html`'s rendering looks broken because of a sidebar or stylesheet change, raise it with maltysnack rather than fixing it here.
 
 ## Conventions inherited from the parent repo
 
@@ -67,4 +67,4 @@ These also apply inside this folder:
 - **No em dashes anywhere.** Use commas, periods, semicolons, or restructure. `scripts/sanitize.sh` will fail the build if any em dash appears.
 - **All user-facing dates are dd-mm-yyyy.** Internal data files (timestamps in JSON) can stay ISO `yyyy-mm-dd` for sortability; convert at the render layer.
 - **Refer to the user as `maltysnack`** in any user-facing copy.
-- **Sign commits** with `git config user.name=maltysnack`, `user.email=39046911+Maltysnack@users.noreply.github.com`. AI-assisted commits should add `Co-Authored-By: Wren <wren@maltysnack.dev>`.
+- **Sign commits** with `git config user.name=maltysnack`, `user.email=39046911+Maltysnack@users.noreply.github.com`. AI-assisted commits should add `Co-Authored-By: Claude Opus 5 <noreply@anthropic.com>`. The old Wren trailer is retired.

@@ -1,6 +1,8 @@
-# Wren's polish process for D&D character submissions
+# Polish process for D&D character submissions
 
-Reference document. The process is uniform across submissions so two characters get treated the same way given the same inputs. Maltysnack reads this when reviewing PRs to confirm Wren followed it.
+Reference document. The process is uniform across submissions so two characters get treated the same way given the same inputs. maltysnack reads this when reviewing PRs to confirm it was followed.
+(Historically this was done by a persona called Wren, retired 15-10-2026.
+The process is unchanged; whoever polishes a submission follows it.)
 
 ## When this applies
 
@@ -185,10 +187,10 @@ Before pushing the polish:
 
 ## Step 15: Push and merge
 
-For uploads (Wren creates polish on the upload PR's branch):
+For uploads (polish is committed on the upload PR's branch):
 - `git checkout <pr-branch>`
 - Edit the JSON
-- Commit with message `polish(dnd): wren rewrites <name>` (or `polish(dnd): integrate <name> session update PR` for updates)
+- Commit with message `polish(dnd): rewrite <name>` (or `polish(dnd): integrate <name> session update PR` for updates)
 - Push
 - Comment on the PR
 
