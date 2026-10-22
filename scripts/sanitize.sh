@@ -174,6 +174,45 @@ else
   note_ok "no profanity flagged"
 fi
 
+# ── 9. JS module imports resolve ─────────────────────────────────────────────
+# Catches the class of bug that href/src checks miss entirely: a deleted module
+# still imported from inside <script type="module"> or another .js/.mjs file.
+# The page keeps returning 200 while being completely broken at runtime.
+echo ""
+echo "[9] js module imports resolve"
+bad_imports=""
+while IFS= read -r f; do
+  dir=$(dirname "$f")
+  grep -oE "(from|import\()[[:space:]]*['\"][^'\"]+['\"]" "$f" 2>/dev/null \
+    | grep -oE "['\"][^'\"]+['\"]" | tr -d "'\"" | while read -r spec; do
+      # Skip remote URLs, template-literal interpolation, and bare
+      # specifiers (npm packages). Only relative and root-absolute
+      # paths resolve to files in this repo.
+      case "$spec" in
+        http*|//*|data:*) continue ;;
+        *'${'*) continue ;;
+        ./*|../*|/*) ;;
+        *) continue ;;
+      esac
+      base="${spec%%\?*}"
+      case "$base" in
+        /*) target=".$base" ;;
+        *)  target="$dir/$base" ;;
+      esac
+      [[ -e "$target" ]] || echo "        ${f#./} -> $spec"
+    done
+done < <(find . -type f \( -name "*.html" -o -name "*.js" -o -name "*.mjs" \) \
+  -not -path "./.git/*" -not -path "*/node_modules/*" -not -path "*/_next/*" \
+  -not -path "*/duoclue/*") > /tmp/sanitize-imports.$$ 2>/dev/null
+
+bad_imports=$(cat /tmp/sanitize-imports.$$ 2>/dev/null); rm -f /tmp/sanitize-imports.$$
+if [[ -n "$bad_imports" ]]; then
+  note_fail "js imports pointing at missing files:"
+  echo "$bad_imports"
+else
+  note_ok "every js module import resolves"
+fi
+
 # ── Summary ──────────────────────────────────────────────────────────────────
 echo ""
 echo "=== Summary ==="
