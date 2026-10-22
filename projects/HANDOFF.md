@@ -23,9 +23,6 @@ Recoverable only from the pre-reset archive in
   description, two or three worked examples, the river flow, then Markov
   chains. The playground, grammar reference and gallery collapse into it as
   inline examples. Scope stays small.
-- **FPL single-screen dashboard.** Specified, not started. Must fit the
-  viewport with no scrolling, sized by importance. Drop panels rather than
-  shrink them.
 
 ## Gotchas
 
