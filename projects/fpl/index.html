@@ -399,7 +399,10 @@
     new ResizeObserver(fill).observe(wrap); fill();
   })();
 
-  $('built').innerHTML = `${D.builtAt ? `Updated ${ddmmyyyy(D.builtAt)}` : ''} · <a href="https://fantasy.premierleague.com/entry/${bot.entry}/history" target="_blank" rel="noopener">Team on FPL</a>`;
+  // Publishing runs twice a day; data over 3 days old means it has stopped.
+  const ageDays = D.builtAt ? (Date.now() - Date.parse(D.builtAt)) / 86400000 : 0;
+  const stale = ageDays > 3 ? ` <strong style="color:var(--accent-gold)">(data ${Math.floor(ageDays)} days old, updates have paused)</strong>` : '';
+  $('built').innerHTML = `${D.builtAt ? `Updated ${ddmmyyyy(D.builtAt)}${stale}` : ''} · <a href="https://fantasy.premierleague.com/entry/${bot.entry}/history" target="_blank" rel="noopener">Team on FPL</a>`;
 })();
 </script>
 </body>
