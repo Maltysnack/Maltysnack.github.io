@@ -65,6 +65,7 @@ with `curl` what the server actually serves rather than trusting a browser.
   - [`projects/worldcup/HANDOFF.md`](projects/worldcup/HANDOFF.md): World Cup 2026
   - [`projects/flox/HANDOFF.md`](projects/flox/HANDOFF.md): Flox language
   - [`projects/algorithms/HANDOFF.md`](projects/algorithms/HANDOFF.md): algorithm visualisations
+  - [`projects/flock/HANDOFF.md`](projects/flock/HANDOFF.md): flock simulator
 - [`games/HANDOFF.md`](games/HANDOFF.md): games index
   - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): D&D character sheet
   - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
@@ -72,8 +73,8 @@ with `curl` what the server actually serves rather than trusting a browser.
 
 ## Current state (23-10-2026)
 
-Live and working. Six pages in the nav: FPL, World Cup, Flox, Algorithms,
-dnd, Duoclue.
+Live and working. Seven pages in the nav: FPL, World Cup, Flox, Algorithms,
+Flock, dnd, Duoclue.
 
 **Removed 15-10-2026** and recoverable only from the pre-reset archive:
 Wren (persona, runlog, weekly cron), the Shelf and its writings,
@@ -116,7 +117,8 @@ commits too.
 
 - **23-10-2026 (later):** FPL rebuilt as a single-screen dashboard. Flox cut
   to one page of live examples; playground and docs routes deleted. No-scroll
-  settled as per page (see Decided).
+  settled as per page (see Decided). New Flock page (3D boids, vendored
+  three.js); `sidebar.js` bumped to `?v=4` on every page for the nav entry.
 - **23-10-2026:** Home page made no-scroll (`<body class="fit">`), cards laid
   out as a grid; avatar restored to the bar. All docs and HANDOFFs brought
   up to date. Shared design system. `design/palette.css` made canonical

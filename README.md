@@ -20,6 +20,9 @@ A small language for describing flow networks.
 **Algorithms:**<br>
 Two small problems, three classical search algorithms, four heuristics, all running live in the browser.
 
+**Flock:**<br>
+A flock in three dimensions from three local rules and no leader, with a hawk to run from.
+
 ### Games
 
 **dnd:**<br>
