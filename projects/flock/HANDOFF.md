@@ -1,0 +1,27 @@
+# flock HANDOFF
+
+Scratchpad for `/projects/flock/`. Root `HANDOFF.md` covers site-wide.
+
+## Current state (23-10-2026)
+
+Boids in 3D. Separation, alignment and cohesion only, no leader, plus a hawk
+that chases the nearest bird and that birds flee. Fills the viewport, never
+scrolls; the controls sit in a `<details>` panel (folded by default on phones).
+
+- **three.js r160 is vendored** at `vendor/three.module.min.js` (MIT, no
+  imports of its own). No CDN, so the page works offline and cannot break
+  when a CDN changes. Upgrade by replacing the file and checking the page.
+- Simulation is plain typed arrays with a counting-sort spatial hash sized to
+  the vision radius; each bird checks 27 cells, not all N. Fixed 60 Hz physics
+  step, decoupled from frame rate. 1,600 birds at about 57 fps on a laptop.
+- One `InstancedMesh` of cones. Colours come from `--bg`, `--text` and
+  `--accent`, and follow the theme toggle.
+- Presets: Murmuration (default), School, Swarm. Moving a weight slider
+  clears the preset highlight.
+- Camera: drag to orbit, wheel or pinch to zoom, slow drift after 3 s idle
+  (off under reduced motion).
+
+## Ideas not taken
+
+- Obstacles, wind, a second species. Keep it to the three rules unless one
+  of these earns its place.
