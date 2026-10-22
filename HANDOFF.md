@@ -26,6 +26,31 @@ Project-specific state lives in each project's own HANDOFF. This doc covers cros
 - Tone bar: see `CLAUDE.md` "Context".
 - Repo lives at `/Users/milo/Documents/Maltysnack.github.io` (moved 18-05-2026 from `/Documents/GitHub/`; old `~/maltysnack-site` clone retired).
 
+## Design system (shared with the portfolio site)
+
+`design/palette.css` is the **canonical source of colour and type for both
+sites**. Edit colours or fonts there, never in `style.css`, or the two sites
+drift. `style.css` imports it and holds only site-specific tokens (sidebar
+colours, type scale, spacing, layout widths).
+
+The portfolio site copies this file in with its own `npm run sync:design`.
+The direction is deliberate: this repo is public and contains no reference
+to that site. Only that side reaches across.
+
+Chrome is a **top bar**, not a sidebar. Pages still ship
+`<aside class="sidebar">`; `sidebar.js` fills it with bar markup and
+`style.css` lays it out horizontally, so the chrome can change site-wide
+without editing any page.
+
+### Cache-busting is mandatory
+
+`style.css`, `sidebar.js` and the algorithm modules all carry `?v=N`.
+**Bump the version in every referencing page whenever you change one.**
+Without it a returning visitor keeps the cached file and never sees the
+change. This has silently hidden work three times now: once for the D&D
+sheet engine, once for the algorithms modules, and once for a whole
+redesign that looked like it had not deployed.
+
 ## Site-wide infrastructure
 
 - Pages auto-listed in `README.md` from `<meta name="description">` per page. Run `python3 scripts/build-readme.py` after adding or renaming a sidebar page.
