@@ -6,22 +6,19 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
 
+/* Shared palette and type primitives, canonical in /design/palette.css and
+   copied into the portfolio site. Edit colours and fonts THERE, not here,
+   or the two sites drift. */
+@import url('/design/palette.css?v=1');
+
 /* ── THEME VARIABLES ─────────────────────── */
 
 :root {
   /* Surfaces */
-  --bg:           #faf7f0;   /* warm paper */
-  --bg-soft:      #f4f0e6;
   --bg-island:    #11110e;
-  --surface:      #efeadd;
-  --border:       #e3dcc9;
   --border-light: #efeadd;
 
   /* Text - warm near-black */
-  --text:         #1a1814;
-  --text-strong:  #0d0c0a;
-  --text-muted:   #5b5750;
-  --text-dim:     #9c988a;
 
   /* Sidebar (always darker than main) */
   --nav-bg:       #11110e;
@@ -32,22 +29,16 @@
   --nav-icon:     #45413a;
 
   /* Accents - drawn from shark/ocean palette + a quiet red */
-  --accent-red:   #a83b2a;   /* deep brick */
   --accent-gold:  #c89a3e;   /* antique gold */
   --accent-blue:  #1f3a5f;   /* deep ocean */
 
   /* Functional accent variables */
-  --accent:       var(--accent-red);
   --selection:    #e8c97a;   /* warm gold highlight */
   --selection-fg: #1a1814;
 
   /* Type families */
-  --font-body:    'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   /* An editorial serif over a neutral sans. Setting the whole site in one
      family at three sizes is what made it read as undesigned. */
-  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
-  --tracking-display: -0.021em;
-  --font-mono:    'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
 
   /* Type scale (Major Third 1.25) */
   --text-xs:      0.74rem;
@@ -105,11 +96,7 @@
 
 [data-theme="dark"] {
   /* Main: warm dark with brown undertone */
-  --bg:           #1a1612;
-  --bg-soft:      #221d18;
   --bg-island:    #0b0d11;
-  --surface:      #2a241e;
-  --border:       #322c25;
   --border-light: #25201a;
 
   /* Sidebar in dark: cool blue-ink, contrasting hue with main warm dark */
@@ -120,17 +107,11 @@
   --nav-label:    #393b40;
   --nav-icon:     #4a4d52;
 
-  --text:         #f3eee0;
-  --text-strong:  #fbf9f4;
-  --text-muted:   #a39e91;
-  --text-dim:     #6a6660;
 
   /* Accents in dark - slightly brighter for contrast */
-  --accent-red:   #e0705a;
   --accent-gold:  #d9a948;
   --accent-blue:  #5a86b8;
 
-  --accent:       var(--accent-red);
   --selection:    #6a4a14;
   --selection-fg: #fbf9f4;
 
@@ -139,11 +120,7 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg:           #1a1612;
-    --bg-soft:      #221d18;
     --bg-island:    #0b0d11;
-    --surface:      #2a241e;
-    --border:       #322c25;
     --border-light: #25201a;
     --nav-bg:       #0b0d11;
     --nav-text:     #6f6e6a;
@@ -151,14 +128,8 @@
     --nav-border:   #1a1d23;
     --nav-label:    #393b40;
     --nav-icon:     #4a4d52;
-    --text:         #f3eee0;
-    --text-strong:  #fbf9f4;
-    --text-muted:   #a39e91;
-    --text-dim:     #6a6660;
-    --accent-red:   #e0705a;
     --accent-gold:  #d9a948;
     --accent-blue:  #5a86b8;
-    --accent:       var(--accent-red);
     --selection:    #6a4a14;
     --selection-fg: #fbf9f4;
     --sidebar-border: rgba(60, 65, 75, 0.4);

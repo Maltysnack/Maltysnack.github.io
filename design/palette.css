@@ -1,0 +1,125 @@
+/* ============================================================
+   Shared palette and type primitives.
+
+   CANONICAL SOURCE for both sites. This file lives here, in the
+   public repo, and the portfolio site copies it in. The direction
+   matters: this repo holds no reference to the portfolio, only the
+   other way round.
+
+   Only put things here that BOTH sites need: colour and type
+   primitives. Anything specific to one site (sidebar colours here,
+   deck and pane metrics there) stays in that site's own stylesheet.
+
+   Change a value here and both sites move together. Change it
+   anywhere else and they drift.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-body: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Fraunces', Georgia, 'Times New Roman', serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-display: -0.021em;
+  --tracking-label: 0.14em;
+
+  /* ---- light: warm paper ---- */
+  --bg: #faf7f0;
+  --bg-soft: #f4f0e6;
+  --surface: #efeadd;
+  --border: #e3dcc9;
+  --border-strong: #c4b8a6;
+
+  --text: #1a1814;
+  --text-strong: #0d0c0a;
+  --text-muted: #5b5750;
+  --text-dim: #857b6e;
+
+  --accent-red: #a83b2a;
+  --accent: var(--accent-red);
+
+  /* Data palette. Separate from the UI palette because most of both
+     sites is charts, and chart colour has to stay stable while UI
+     colour changes. Ordered so each successive pair stays apart in
+     greyscale and under deuteranopia. */
+  --d1: #a83b2a;  --d2: #2f6f7e;  --d3: #c08a2e;
+  --d4: #4a5e8c;  --d5: #6b7f3f;  --d6: #8a5071;
+
+  --seq1: #f4ebe2; --seq2: #e3cdb8; --seq3: #cfa98a;
+  --seq4: #b58060; --seq5: #915540; --seq6: #632f24;
+
+  --div-neg: #2f6f7e;
+  --div-mid: #ece5da;
+  --div-pos: #a83b2a;
+
+  --good: #3f6b46;
+  --bad: #a83b2a;
+
+  color-scheme: light;
+}
+
+/* Dark is authored rather than derived: a mechanically inverted palette
+   reads muddy, so the hues are re-picked against a dark ground. */
+:root[data-theme="dark"] {
+  --bg: #14120f;
+  --bg-soft: #1e1b17;
+  --surface: #1e1b17;
+  --border: #2e2a24;
+  --border-strong: #464037;
+
+  --text: #f0ebe1;
+  --text-strong: #fbf9f4;
+  --text-muted: #b8ad9d;
+  --text-dim: #857b6e;
+
+  --accent-red: #e0705a;
+  --accent: var(--accent-red);
+
+  --d1: #e0705a;  --d2: #5fa9ba;  --d3: #e0b254;
+  --d4: #8098cc;  --d5: #9dbf65;  --d6: #c288a6;
+
+  --seq1: #231f1a; --seq2: #3d3027; --seq3: #5c4333;
+  --seq4: #80593f; --seq5: #a87552; --seq6: #d49a73;
+
+  --div-neg: #5fa9ba;
+  --div-mid: #35302a;
+  --div-pos: #e0705a;
+
+  --good: #6fa878;
+  --bad: #e0705a;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #14120f;
+    --bg-soft: #1e1b17;
+    --surface: #1e1b17;
+    --border: #2e2a24;
+    --border-strong: #464037;
+
+    --text: #f0ebe1;
+    --text-strong: #fbf9f4;
+    --text-muted: #b8ad9d;
+    --text-dim: #857b6e;
+
+    --accent-red: #e0705a;
+    --accent: var(--accent-red);
+
+    --d1: #e0705a;  --d2: #5fa9ba;  --d3: #e0b254;
+    --d4: #8098cc;  --d5: #9dbf65;  --d6: #c288a6;
+
+    --seq1: #231f1a; --seq2: #3d3027; --seq3: #5c4333;
+    --seq4: #80593f; --seq5: #a87552; --seq6: #d49a73;
+
+    --div-neg: #5fa9ba;
+    --div-mid: #35302a;
+    --div-pos: #e0705a;
+
+    --good: #6fa878;
+    --bad: #e0705a;
+
+    color-scheme: dark;
+  }
+}
