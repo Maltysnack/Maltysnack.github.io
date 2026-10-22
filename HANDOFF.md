@@ -119,6 +119,9 @@ commits too.
   to one page of live examples; playground and docs routes deleted. No-scroll
   settled as per page (see Decided). New Flock page (3D boids, vendored
   three.js); `sidebar.js` bumped to `?v=4` on every page for the nav entry.
+  `style.css` to `?v=7`: on phones the nav scrolls sideways inside the bar
+  (seven links overflowed the page) and home cards go two per row so all
+  seven fit.
 - **23-10-2026:** Home page made no-scroll (`<body class="fit">`), cards laid
   out as a grid; avatar restored to the bar. All docs and HANDOFFs brought
   up to date. Shared design system. `design/palette.css` made canonical

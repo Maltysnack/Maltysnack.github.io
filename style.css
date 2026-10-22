@@ -895,6 +895,11 @@ code, kbd, pre, time, .num, .mono {
   .bar-name { display: none; }
   .bar-nav { gap: 0.6rem; }
   .bar-nav a { font-size: var(--text-xs); }
+  /* Seven links do not fit a phone. The nav scrolls sideways inside the
+     bar rather than pushing the whole page wider than the screen. */
+  .bar-nav { min-width: 0; flex-shrink: 1; overflow-x: auto; scrollbar-width: none; }
+  .bar-nav::-webkit-scrollbar { display: none; }
+  .bar-nav a { flex-shrink: 0; white-space: nowrap; }
 }
 
 
@@ -947,3 +952,8 @@ body.fit .home-card:hover { padding-left: clamp(0.7rem, 1.8vh, 1.1rem); }
 body.fit .home-card-arrow { display: none; }
 
 body.fit .colophon { margin-top: 0; }
+
+/* One card per row runs off a phone. Two per row fits. */
+@media (max-width: 520px) {
+  body.fit .home-links { grid-template-columns: 1fr 1fr; }
+}
