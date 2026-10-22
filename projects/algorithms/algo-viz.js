@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=12';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=12';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=12';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=12';
+} from './algo-core.mjs?v=13';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=13';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=13';
+import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=13';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -49,7 +49,9 @@ const tEls = {
   algoTag: $('t-algoTag'), algoDesc: $('t-algoDesc'),
   heurTag: $('t-heurTag'), heurDesc: $('t-heurDesc'),
   beam: $('t-beam'), beamVal: $('t-beamVal'),
+  speed: $('t-speed'), speedVal: $('t-speedVal'),
   run: $('t-run'), rand: $('t-rand'),
+  playpause: $('t-playpause'), prev: $('t-prev'), next: $('t-next'),
   board: $('t-board'),
   step: $('t-step'), totalSteps: $('t-totalSteps'), cost: $('t-cost'),
   explored: $('t-explored'), generated: $('t-generated'),
@@ -115,27 +117,80 @@ function tileClearAnim() {
   tileTimer = null;
 }
 
-function tileAnimate(path) {
+/* Playback.
+
+   The solution is kept so it can be paused and walked a move at a time.
+   Watching it at full tilt shows you the answer; stepping through it is
+   what actually shows you the algorithm's choices. */
+const TILE_SPEEDS = [700, 380, 200, 100, 40];
+const TILE_SPEED_LABELS = ['slowest', 'slow', 'normal', 'fast', 'fastest'];
+
+let tilePath = null;
+let tileIdx = 0;
+let tileCosts = [];
+let tilePlaying = false;
+
+function tileSpeedMs() {
+  return TILE_SPEEDS[+tEls.speed.value] ?? TILE_FRAME_MS;
+}
+
+function tileAtEnd() {
+  return !tilePath || tileIdx >= tilePath.length - 1;
+}
+
+function tileUpdateTransport() {
+  tEls.prev.disabled = !tilePath || tileIdx <= 0;
+  tEls.next.disabled = tileAtEnd();
+  tEls.playpause.disabled = !tilePath;
+  tEls.playpause.textContent = tilePlaying ? 'Pause' : (tileAtEnd() ? 'Replay' : 'Play');
+}
+
+function tileShow(i) {
+  if (!tilePath) return;
+  tileIdx = Math.max(0, Math.min(tilePath.length - 1, i));
+  // Highlight where the blank was, which is the square the tile moved into.
+  const movedInto = tileIdx > 0 ? tilePath[tileIdx - 1].indexOf('_') : -1;
+  renderTile(tilePath[tileIdx], movedInto);
+  tileSetStep(tileIdx, tilePath.length - 1, tileCosts[tileIdx]);
+  tileUpdateTransport();
+}
+
+function tilePause() {
+  tilePlaying = false;
   tileClearAnim();
-  let i = 0, runningCost = 0;
+  tileUpdateTransport();
+}
+
+function tilePlay() {
+  if (!tilePath) return;
+  if (tileAtEnd()) tileShow(0);          // replay from the start
+  tilePlaying = true;
+  tileUpdateTransport();
+
   const tick = () => {
-    if (i >= path.length) {
+    if (!tilePlaying) return;
+    if (tileAtEnd()) {
+      tilePlaying = false;
       tileTimer = null;
       tEls.run.disabled = false;
+      tileUpdateTransport();
       return;
     }
-    if (i > 0) {
-      const prev = path[i - 1].indexOf('_');
-      runningCost += tileMoveCost(path[i - 1], path[i]);
-      renderTile(path[i], prev);
-    } else {
-      renderTile(path[i]);
-    }
-    tileSetStep(i, path.length - 1, runningCost);
-    i++;
-    tileTimer = setTimeout(tick, TILE_FRAME_MS);
+    tileShow(tileIdx + 1);
+    tileTimer = setTimeout(tick, tileSpeedMs());
   };
-  tick();
+  tileTimer = setTimeout(tick, tileSpeedMs());
+}
+
+function tileAnimate(path) {
+  tileClearAnim();
+  tilePath = path;
+  tileCosts = [0];
+  for (let i = 1; i < path.length; i++) {
+    tileCosts[i] = tileCosts[i - 1] + tileMoveCost(path[i - 1], path[i]);
+  }
+  tileShow(0);
+  tilePlay();
 }
 
 function tilePickAlgo() {
@@ -163,7 +218,7 @@ function tileUpdateDescriptions() {
 }
 
 function tileRun() {
-  tileClearAnim();
+  tileResetPlayback();
   const algoFn = tilePickAlgo();
   tileSetStatus('running...');
   tEls.run.disabled = true;
@@ -192,8 +247,17 @@ function tileRun() {
   });
 }
 
-function tileRandomise() {
+function tileResetPlayback() {
   tileClearAnim();
+  tilePlaying = false;
+  tilePath = null;
+  tileIdx = 0;
+  tileCosts = [];
+  tileUpdateTransport();
+}
+
+function tileRandomise() {
+  tileResetPlayback();
   tileState = randomTileState(+tEls.n.value, COLORS);
   renderTile(tileState);
   tileSetStep(0, 0, 0);
@@ -217,6 +281,15 @@ tEls.algo.addEventListener('change', () => { tileUpdateVisibility(); tileUpdateD
 tEls.heur.addEventListener('change', tileUpdateDescriptions);
 tEls.run.addEventListener('click', tileRun);
 tEls.rand.addEventListener('click', tileRandomise);
+
+tEls.speed.addEventListener('input', () => {
+  tEls.speedVal.textContent = TILE_SPEED_LABELS[+tEls.speed.value];
+  // Take the new speed immediately rather than after the current move.
+  if (tilePlaying) { tileClearAnim(); tilePlaying = false; tilePlay(); }
+});
+tEls.playpause.addEventListener('click', () => (tilePlaying ? tilePause() : tilePlay()));
+tEls.prev.addEventListener('click', () => { tilePause(); tileShow(tileIdx - 1); });
+tEls.next.addEventListener('click', () => { tilePause(); tileShow(tileIdx + 1); });
 tEls.nVal.textContent = tEls.n.value;
 tEls.beamVal.textContent = tEls.beam.value;
 tileUpdateVisibility();

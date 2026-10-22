@@ -430,9 +430,16 @@
           <span>Beam width <span class="val" id="t-beamVal">5</span></span>
           <input id="t-beam" type="range" min="1" max="20" value="5" />
         </label>
+        <label>
+          <span>Speed <span class="val" id="t-speedVal">slow</span></span>
+          <input id="t-speed" type="range" min="0" max="4" value="1" />
+        </label>
         <div class="al-buttons">
           <button id="t-run" class="al-btn primary">Run</button>
           <button id="t-rand" class="al-btn">Randomise</button>
+          <button id="t-playpause" class="al-btn" disabled>Play</button>
+          <button id="t-prev" class="al-btn" disabled title="Previous move" aria-label="Previous move">&#9664;</button>
+          <button id="t-next" class="al-btn" disabled title="Next move" aria-label="Next move">&#9654;</button>
         </div>
       </div>
 
@@ -579,7 +586,7 @@
 
   </main>
 
-  <script type="module" src="/projects/algorithms/algo-viz.js?v=12"></script>
+  <script type="module" src="/projects/algorithms/algo-viz.js?v=13"></script>
   <script src="/sidebar.js"></script>
 </body>
 </html>
