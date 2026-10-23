@@ -33,3 +33,10 @@ restructure this page without asking.**
 
 Doing the scorecard needs real 2026 results fetched and committed as a dated
 snapshot, so it stays reproducible rather than depending on a live API.
+
+## v2 build, branch `worldcup-v2` (24-10-2026, worldcup queue item 12)
+
+- New page at `projects/worldcup/v2/` (index.html, bankroll.json, capsule.json). The old 2026 page is untouched, per the note above.
+- Built from the worldcup repo's `design/wireframes.html`. Self-contained design (own fonts and tokens), no-scroll, 3 tabs, methodology modal. Verified no overflow at 1440x900 and 390x844.
+- Data written by `uv run python scripts/export_site_v2.py <this folder>/v2` in the worldcup repo. Bankroll is the synthetic-odds backtest (no_edge scenario, flat $10, min edge 0.03) until the ledger goes live; `source` field switches the labels.
+- Not yet done: sidebar.js include, NAV entry, home card, README (shared files, outside this folder; needed before merge, since the page currently has no site chrome by design choice for the no-scroll layout). Not pushed, not merged.
