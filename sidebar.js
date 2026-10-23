@@ -130,6 +130,13 @@
   if (el) {
     el.innerHTML = html;
 
+    // On a phone the nav scrolls sideways; make sure the current page's
+    // link is on screen rather than cut off at the edge.
+    const nav = el.querySelector('.bar-nav');
+    const here = nav && nav.querySelector('[aria-current]');
+    if (here && nav.scrollWidth > nav.clientWidth) {
+      nav.scrollLeft = here.offsetLeft - nav.offsetLeft - (nav.clientWidth - here.offsetWidth) / 2;
+    }
 
     const themeBtn = document.getElementById('theme-toggle');
     if (themeBtn) {

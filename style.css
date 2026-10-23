@@ -897,7 +897,11 @@ code, kbd, pre, time, .num, .mono {
   .bar-nav a { font-size: var(--text-xs); }
   /* Seven links do not fit a phone. The nav scrolls sideways inside the
      bar rather than pushing the whole page wider than the screen. */
-  .bar-nav { min-width: 0; flex-shrink: 1; overflow-x: auto; scrollbar-width: none; }
+  .bar-nav { min-width: 0; flex-shrink: 1; overflow-x: auto; scrollbar-width: none;
+             padding-right: 1.25rem;
+             /* Fade the right edge so a cut-off link reads as "more this way". */
+             -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent);
+                     mask-image: linear-gradient(to right, #000 calc(100% - 1.5rem), transparent); }
   .bar-nav::-webkit-scrollbar { display: none; }
   .bar-nav a { flex-shrink: 0; white-space: nowrap; }
 }
