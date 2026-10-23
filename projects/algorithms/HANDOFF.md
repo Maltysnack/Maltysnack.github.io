@@ -11,7 +11,7 @@ Scratchpad for `/projects/algorithms/`.
 
 ## Gotchas
 
-- All algo files use a cache-buster (currently `?v=13`) in their import URLs. Bump the version in `index.html` and every `import` in `algo-viz.js` together when you change behaviour, or browsers serve stale modules.
+- All algo files use a cache-buster (currently `?v=15`) in their import URLs. Bump the version in `index.html` and every `import` in `algo-viz.js` together when you change behaviour, or browsers serve stale modules.
 
 
 ## 22-10-2026 rebuild
@@ -40,11 +40,24 @@ replayed and walked in either direction. `tileResetPlayback()` must be called
 by anything that invalidates the current solution, or the transport acts on a
 stale path.
 
-## Still to do
+## 23-10-2026: framing and structure
 
-maltysnack's framing note: the page should state plainly that GA and ACO are
-metaheuristics with **no optimality guarantee**, and report the gap to the
-best known tour as a percentage. Reaching within a few percent in
-milliseconds, where exact search is factorial, is the achievement. Framing
-the limitation as the lesson turns the page's weakest moment into its most
-informative one. Not implemented yet.
+The rest of the 15-10 spec, section 7.
+
+- **Reference tour.** `referenceTour(points)` in `algo-tsp.mjs`: the proven
+  optimum by Held-Karp dynamic programming up to 15 points (checked against
+  brute force up to 9; 15 points takes about 8 ms), and the best of 60 2-opt
+  descents beyond that, labelled "best known" rather than optimal. Computed
+  at the start of each run, drawn dashed under the final tour, and reported
+  as a "Gap to optimum" / "Gap to best known" stat and in the status line.
+- **No-guarantee framing** is in the tour prose, the status line and the
+  closing line. The old prose claimed 240 million orderings at 12 points;
+  the real count of distinct tours is about 20 million, fixed.
+- **Structure.** Each demo opens with a one-sentence `.al-intro` naming the
+  problem and closes with a `.al-proves` line on what it shows.
+- **Runs on its own.** Each demo runs once when its board is half on
+  screen (`AUTORUN` and an `IntersectionObserver` at the bottom of
+  `algo-viz.js`; grid gets random walls first). It watches the board, not
+  the section, because on a phone a section is taller than the screen. Any
+  pointer, key or input in a section first cancels its autorun, so it never
+  starts on top of a run the reader began.

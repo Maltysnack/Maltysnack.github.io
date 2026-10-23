@@ -278,3 +278,84 @@ export const tspAlgorithmLabels = {
   ga: 'Genetic algorithm',
   aco: 'Ant colony',
 };
+
+// ---------- reference tour ----------
+// The yardstick the metaheuristics are measured against. Up to EXACT_MAX
+// points it is the proven optimum, by Held-Karp dynamic programming:
+// O(n^2 2^n), which is instant at 15 points and hopeless not long after.
+// Beyond that it is the best of many 2-opt descents: a strong tour, but only
+// the best known, not a proof.
+const EXACT_MAX = 15;
+const TWO_OPT_RESTARTS = 60;
+
+export function referenceTour(points) {
+  const n = points.length;
+  const d = distanceMatrix(points);
+  if (n < 4) {
+    const tour = Array.from({ length: n }, (_, i) => i);
+    return { tour, length: tourLength(tour, d), exact: true };
+  }
+  if (n <= EXACT_MAX) return heldKarp(n, d);
+  let best = null, bestLen = Infinity;
+  for (let r = 0; r < TWO_OPT_RESTARTS; r++) {
+    const tour = twoOpt(randomPermutation(n), d);
+    const len = tourLength(tour, d);
+    if (len < bestLen) { best = tour; bestLen = len; }
+  }
+  return { tour: best, length: bestLen, exact: false };
+}
+
+// City 0 is the fixed start. dp[mask * m + j] is the shortest path from 0
+// through exactly the cities in mask (over cities 1..n-1), ending at j + 1.
+function heldKarp(n, d) {
+  const m = n - 1, full = (1 << m) - 1;
+  const dp = new Float64Array((full + 1) * m).fill(Infinity);
+  const parent = new Int8Array((full + 1) * m).fill(-1);
+  for (let j = 0; j < m; j++) dp[(1 << j) * m + j] = d[0][j + 1];
+  for (let mask = 1; mask <= full; mask++) {
+    for (let j = 0; j < m; j++) {
+      if (!(mask & (1 << j))) continue;
+      const cur = dp[mask * m + j];
+      if (cur === Infinity) continue;
+      for (let k = 0; k < m; k++) {
+        if (mask & (1 << k)) continue;
+        const next = mask | (1 << k), v = cur + d[j + 1][k + 1];
+        if (v < dp[next * m + k]) { dp[next * m + k] = v; parent[next * m + k] = j; }
+      }
+    }
+  }
+  let end = 0, length = Infinity;
+  for (let j = 0; j < m; j++) {
+    const v = dp[full * m + j] + d[j + 1][0];
+    if (v < length) { length = v; end = j; }
+  }
+  const tour = [];
+  for (let mask = full, j = end; j !== -1;) {
+    tour.push(j + 1);
+    const p = parent[mask * m + j];
+    mask &= ~(1 << j); j = p;
+  }
+  tour.push(0);
+  tour.reverse();
+  return { tour, length, exact: true };
+}
+
+// Reverse any segment that shortens the tour, until none does.
+function twoOpt(tour, d) {
+  const n = tour.length;
+  let improved = true;
+  while (improved) {
+    improved = false;
+    for (let i = 0; i < n - 1; i++) {
+      for (let k = i + 2; k < n; k++) {
+        if (i === 0 && k === n - 1) continue;
+        const a = tour[i], b = tour[i + 1], c = tour[k], e = tour[(k + 1) % n];
+        if (d[a][c] + d[b][e] < d[a][b] + d[c][e] - 1e-9) {
+          for (let lo = i + 1, hi = k; lo < hi; lo++, hi--) [tour[lo], tour[hi]] = [tour[hi], tour[lo]];
+          improved = true;
+        }
+      }
+    }
+  }
+  return tour;
+}

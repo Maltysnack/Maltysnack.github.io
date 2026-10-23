@@ -1,10 +1,10 @@
 import {
   iterativeDeepening, aStar, beamSearch, bfs, greedyBestFirst,
   algorithmDescriptions,
-} from './algo-core.mjs?v=13';
-import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=13';
-import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=13';
-import { createGA, createACO, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=13';
+} from './algo-core.mjs?v=15';
+import { randomTileState, tileProblem, tileHeuristicDescriptions } from './algo-tile.mjs?v=15';
+import { key, fromKey, gridProblem, gridHeuristicDescriptions } from './algo-grid.mjs?v=15';
+import { createGA, createACO, referenceTour, tspAlgorithmDescriptions, tspAlgorithmLabels } from './algo-tsp.mjs?v=15';
 
 const ALGO_LABELS = {
   ids: 'Iterative deepening',
@@ -626,6 +626,7 @@ const rEls = {
   algoTag: $('r-algoTag'), algoDesc: $('r-algoDesc'),
   iter: $('r-iter'), best: $('r-best'),
   improve: $('r-improve'),
+  gap: $('r-gap'), gapLabel: $('r-gapLabel'),
   status: $('r-status'),
 };
 
@@ -634,6 +635,7 @@ let tourAlgo = null;
 let tourTimer = null;
 let tourStartTime = 0;
 let tourInitialBest = 0;
+let tourRef = null;   // { tour, length, exact } for the current points
 
 function rerollPoints(count) {
   const margin = 30;
@@ -720,6 +722,7 @@ function currentPopulation() {
 function tourClearAlgo() {
   if (tourTimer) { clearTimeout(tourTimer); tourTimer = null; }
   tourAlgo = null;
+  tourRef = null;
 }
 
 function tourSetStats() {
@@ -727,6 +730,7 @@ function tourSetStats() {
     rEls.iter.textContent = '0';
     rEls.best.textContent = '0';
     rEls.improve.textContent = '0%';
+    rEls.gap.textContent = '–';
     return;
   }
   rEls.iter.textContent = tourAlgo.iteration.toLocaleString();
@@ -735,6 +739,25 @@ function tourSetStats() {
     ? ((tourInitialBest - tourAlgo.bestLength) / tourInitialBest * 100)
     : 0;
   rEls.improve.textContent = `${improvement.toFixed(1)}%`;
+  rEls.gap.textContent = tourRef ? fmtGap(tourGap()) : '–';
+}
+
+// How far above the reference tour the search's best is, in percent.
+function tourGap() {
+  return Math.max(0, (tourAlgo.bestLength / tourRef.length - 1) * 100);
+}
+function fmtGap(g) {
+  return g < 0.05 ? (tourRef.exact ? 'optimal' : 'matched') : `+${g.toFixed(1)}%`;
+}
+
+// The reference tour, dashed under the search's answer, so the gap is
+// something you can see as well as read.
+function drawReference() {
+  if (!tourRef) return;
+  const poly = document.createElementNS(SVG_NS, 'polyline');
+  poly.setAttribute('points', tourPointsAttr(tourRef.tour));
+  poly.classList.add('al-ref');
+  rEls.canvas.insertBefore(poly, rEls.canvas.firstChild);
 }
 
 function tourSetStatus(msg, isError = false) {
@@ -902,6 +925,8 @@ function tourRun() {
   tourClearAlgo();
   tourAlgo = tourBuildAlgo();
   tourInitialBest = tourAlgo.bestLength;
+  tourRef = referenceTour(points);
+  rEls.gapLabel.textContent = tourRef.exact ? 'Gap to optimum' : 'Gap to best known';
   tourStartTime = performance.now();
   rEls.run.disabled = true;
   rEls.stop.disabled = false;
@@ -914,8 +939,12 @@ function tourRun() {
     if (!tourAlgo) return;
     revealTour(tourAlgo.best, () => {
       const length = tourAlgo.bestLength.toFixed(0);
-      const improvement = ((tourInitialBest - tourAlgo.bestLength) / tourInitialBest * 100).toFixed(1);
-      tourSetStatus(`done. best tour length ${length}, ${improvement}% better than the random starting tour.`);
+      const gap = tourGap();
+      const ref = tourRef.exact ? 'the proven optimum' : 'the best known tour';
+      drawReference();
+      tourSetStatus(gap < 0.05
+        ? `done. tour length ${length}: ${ref}, so the dashed line is hidden underneath it.`
+        : `done. tour length ${length}, ${gap.toFixed(1)}% longer than ${ref} (dashed). No guarantee was ever on offer.`);
       rEls.run.disabled = false;
       rEls.stop.disabled = true;
     });
@@ -1011,3 +1040,33 @@ drawPointsOnly();
 tourSetStats();
 tourUpdateVisibility();
 tourUpdateDescriptions();
+
+// ============================================================================
+// Each demo runs once on its own the first time it scrolls into view, so a
+// reader sees it working before touching a control.
+// ============================================================================
+
+const AUTORUN = {
+  tile: () => tileRun(),
+  grid: () => { gridRandomWalls(); gridRun(); },
+  tour: () => tourRun(),
+};
+// Watch each demo's board rather than its whole section: on a phone a
+// section is taller than the screen and would never cross a threshold.
+const AUTORUN_TARGET = { tile: '#t-board', grid: '.al-grid-wrap', tour: '.al-canvas-wrap' };
+const autorunObserver = new IntersectionObserver((entries) => {
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    autorunObserver.unobserve(e.target);
+    AUTORUN[e.target.closest('.al-section').dataset.section]?.();
+  }
+}, { threshold: 0.5 });
+for (const sec of document.querySelectorAll('.al-section[data-section]')) {
+  const target = sec.querySelector(AUTORUN_TARGET[sec.dataset.section]);
+  if (!target) continue;
+  autorunObserver.observe(target);
+  // Anyone who has already touched a demo gets no surprise run on top of theirs.
+  for (const ev of ['pointerdown', 'keydown', 'input']) {
+    sec.addEventListener(ev, () => autorunObserver.unobserve(target), { capture: true, once: true });
+  }
+}
