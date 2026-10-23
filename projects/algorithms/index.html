@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Algorithms - maltysnack</title>
   <meta name="description" content="Two small problems, three classical search algorithms, four heuristics, all running live in the browser." />
-  <link rel="stylesheet" href="/style.css?v=7" />
+  <link rel="stylesheet" href="/style.css?v=8" />
   <style>
     .al-eyebrow {
       font-size: var(--text-xs);
@@ -346,6 +346,8 @@
       grid-column: 1 / -1;
       flex-wrap: nowrap;
     }
+    /* Four buttons do not fit a phone on one line. */
+    @media (max-width: 480px) { .al-buttons-row { flex-wrap: wrap; } }
     .al-start-marker {
       fill: var(--accent-red);
       stroke: var(--bg);
@@ -598,6 +600,6 @@
   </main>
 
   <script type="module" src="/projects/algorithms/algo-viz.js?v=15"></script>
-  <script src="/sidebar.js?v=4"></script>
+  <script src="/sidebar.js?v=5"></script>
 </body>
 </html>
