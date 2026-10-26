@@ -69,7 +69,6 @@ with `curl` what the server actually serves rather than trusting a browser.
 - [`games/HANDOFF.md`](games/HANDOFF.md): games index
   - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): D&D character sheet
   - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
-- [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions (D&D upload only)
 
 ## Current state (26-10-2026)
 
@@ -130,6 +129,11 @@ commits too.
   do not shrink them), never a global CSS switch.
 
 ## Recent session log
+
+- **26-10-2026 (later):** D&D rebuilt: characters made with a form and kept in
+  the browser, save files for backup, sheet on the site palette. `api/`,
+  Vercel config and the upload pipeline deleted; nothing on this site runs on
+  Vercel any more. See `games/dnd/HANDOFF.md`.
 
 - **26-10-2026:** Algorithms reframed: an intro line and a "What it shows"
   line per demo, TSP now draws a dashed reference tour (Held-Karp, proven
