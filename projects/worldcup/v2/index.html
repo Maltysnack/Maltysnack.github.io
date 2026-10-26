@@ -219,7 +219,7 @@ dialog p b { color: var(--ink); }
   <p><b>Bets.</b> When our chance beats Sportsbet's price (margin removed) by 3% or more, the bot puts $10 of fake money on it, once per match, up to 48 hours before kickoff.</p>
   <p><b>Beat the close.</b> Did we get a better price than the final one before kickoff? The fairest test of skill. Bankroll is mostly luck over a few dozen bets.</p>
   <p><b>Ledger.</b> Each bet is hashed and chained to the last, with the raw odds saved as evidence. Anyone can re-verify it.</p>
-  <p><b>Until it goes live.</b> The Bankroll tab replays the 2022 and 2026 World Cups, Euro 2024 and Copa América 2024 against made-up Sportsbet prices with a 6% margin. It proves the plumbing works, not that the model wins.</p>
+  <p><b>Until it goes live.</b> The bankroll sits at $1,000. No backtest numbers are shown, because we have no real past Sportsbet prices to test against.</p>
   <form method="dialog"><button class="ghost">Close</button></form>
 </dialog>
 
@@ -233,10 +233,20 @@ if (new URLSearchParams(location.search).has('frames')) {
   document.body.style.overflow = 'auto';
 } else {
   const $ = id => document.getElementById(id);
+  // Footer stamp follows the open tab: [text, extra class].
+  let current = 'bankroll';
+  const stamps = { bankroll: ['Loading', ''], capsule: ['Loading', ''], odds: ['Not open yet', ''] };
+  const paintStamp = () => {
+    const [text, cls] = stamps[current];
+    $('stamp').textContent = text;
+    $('stamp').className = 'stamp' + (cls ? ' ' + cls : '');
+  };
   const show = id => {
+    current = id;
     document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === id));
     document.querySelectorAll('[data-tab]').forEach(b => b.setAttribute('aria-selected', b.dataset.tab === id));
     try { localStorage.setItem('wc-tab', id); } catch (e) {}
+    paintStamp();
   };
   document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => show(b.dataset.tab));
   try { const t = localStorage.getItem('wc-tab'); if (t) show(t); } catch (e) {}
@@ -249,6 +259,19 @@ if (new URLSearchParams(location.search).has('frames')) {
   const tone = (el, v) => el.className = v >= 0 ? 'up' : 'down';
 
   fetch('bankroll.json').then(r => r.json()).then(b => {
+    stamps.bankroll = b.source === 'ledger' ? ['Live · paper money', 'live'] : ['Paper money · not started', ''];
+    if (b.source !== 'ledger') {
+      // No bets yet: flat $1,000, empty chart with a baseline, no made-up numbers.
+      $('curve').innerHTML = `
+        <line x1="0" x2="700" y1="180" y2="180" stroke="var(--ink-3)" stroke-dasharray="4 5" vector-effect="non-scaling-stroke"/>
+        <text x="0" y="168" fill="var(--ink-3)" style="font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase">$1,000 · first bet pending</text>`;
+      $('bkd').textContent = '0 bets placed';
+      $('bkd').className = 'delta muted';
+      $('bk-sub').textContent = 'Fake money, real Sportsbet prices. The bot starts betting once its odds feed is connected. Every bet is hash-chained before kickoff.';
+      $('next').textContent = 'Waiting on the odds feed.';
+      paintStamp();
+      return;
+    }
     const pts = b.curve, start = b.start, last = pts[pts.length - 1];
     const W = 700, H = 360, lo = Math.min(...pts, start) - 10, hi = Math.max(...pts, start) + 10;
     const x = i => (i / Math.max(pts.length - 1, 1)) * W, y = v => H - ((v - lo) / (hi - lo)) * H;
@@ -260,25 +283,24 @@ if (new URLSearchParams(location.search).has('frames')) {
       <path d="${line}" fill="none" stroke="var(--ink)" stroke-width="2.5" stroke-linejoin="round" vector-effect="non-scaling-stroke"/>`;
     const live = b.source === 'ledger';
     $('bk').innerHTML = `<small>$</small>${Math.round(last).toLocaleString('en-AU')}`;
-    $('bk-tag').textContent = `${live ? 'Paper bankroll' : 'Backtest bankroll'} · started $${start.toLocaleString('en-AU')}`;
     const d = last - start;
     $('bkd').textContent = `${sign(d)}$${Math.abs(d).toFixed(2)} · ${b.n_bets} bets · since ${dmy(b.first_kickoff)}`;
     $('bkd').className = 'delta ' + (d >= 0 ? 'up' : 'down');
-    if (!live) $('bk-sub').textContent = 'Four tournaments replayed against made-up Sportsbet prices. Real prices and a hash-chained ledger take over when the bot goes live.';
     $('clv').textContent = pct(b.mean_clv); tone($('clv'), b.mean_clv);
     $('roi').textContent = pct(b.roi); tone($('roi'), b.roi);
     $('won').textContent = `${b.n_won} / ${b.n_bets}`;
     const n = b.next_bet;
     $('next').innerHTML = n
       ? `${n.home} v ${n.away}, ${dmy(n.kickoff)}<br>${n.pick_name} <em>${n.odds.toFixed(2)}</em> · $${n.stake}`
-      : 'None yet. The bot goes live for the November 2026 window.';
-    $('stamp').textContent = live ? 'Live · paper money' : 'Backtest · synthetic odds';
-    if (live) $('stamp').classList.add('live');
-  }).catch(() => { $('stamp').textContent = 'Data failed to load'; });
+      : 'None this week.';
+    paintStamp();
+  }).catch(() => { stamps.bankroll = ['Data failed to load', '']; paintStamp(); });
 
   fetch('capsule.json').then(r => r.json()).then(c => {
     const [h, a] = [c.final.home, c.final.away], [hg, ag] = c.final.score;
-    $('cap-tag').textContent = `Frozen ${dmy(c.frozen_at)}`;
+    $('cap-tag').textContent = `Built ${dmy(c.frozen_at)} · before kickoff`;
+    stamps.capsule = [`Scored · ${c.n_matches} matches`, 'live'];
+    paintStamp();
     $('cap-team').textContent = `${c.champion.team}.`;
     $('cap-sub').textContent = `Our #${c.champion.rank_by_p_champion} pick at ${c.champion.p_champion.toFixed(1)}%. Final: ${h} ${hg}-${ag} ${a}. Log-loss over ${c.n_matches} matches, lower is better: the model ${c.log_loss.model < c.log_loss.plain_elo ? 'edged' : 'trailed'} plain Elo.`;
     $('ll-model').textContent = c.log_loss.model.toFixed(3);
