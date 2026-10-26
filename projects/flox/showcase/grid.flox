@@ -1,0 +1,19 @@
+mode grid;
+system PowerGrid;
+
+Plant     -[5]-> Hub;
+Backup    -[2]-> Hub;
+Hub       -[3]-> NorthCity;
+Hub       -[3]-> SouthCity;
+NorthCity -[1]-> SouthCity;
+
+node Plant     { supply:  100 }
+node Backup    { supply:   30 }
+node Hub;
+node NorthCity { supply:  -65 }
+node SouthCity { supply:  -65 }
+
+compare PowerGrid 500 as
+  "Baseline",
+  "Plant offline" with disable Plant,
+  "Tie line cut"  with disable NorthCity -> SouthCity;

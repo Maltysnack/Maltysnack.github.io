@@ -15,7 +15,7 @@ An autonomous Fantasy Premier League bot: how it is doing, where the points went
 A paper-money betting bot that bets Elo model chances against Sportsbet 1X2 prices, plus the scored 2026 World Cup forecast.
 
 **Flox:**<br>
-A small language for describing flow networks.
+A small language for flow networks: write nodes and arrows, and it simulates how something moves through them.
 
 **Algorithms:**<br>
 Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle and a travelling salesman tour.

@@ -2,7 +2,21 @@
 
 Scratchpad for `/projects/flox/`. Root `HANDOFF.md` covers site-wide.
 
-## Layout (23-10-2026)
+## 26-10-2026: rebuilt to the Flox repo's DISPLAY.md
+
+The Flox repo owns this page's content (`~/Documents/flox/DISPLAY.md`).
+Read it before touching anything here. The page is now: headline, River,
+Markov, Grid, grammar table, nothing else. "What it is", the Creek hero, the
+try hints and the meta line are gone.
+
+Vendored verbatim, never edited here: `flox.js` (from `ts/dist/flox.js`) and
+`showcase/{river,markov,grid}.flox` (from `examples/showcase/`), fetched
+same-origin as the initial program text. To re-vendor, copy those four files
+and `cmp` them. On 26-10 the brief, the showcase files and the engine build
+were all uncommitted in the Flox repo (engine build dated 29-06); vendored
+from its working tree.
+
+## Layout (23-10-2026) (superseded)
 
 One page, `data-layout="wide"`. The playground, docs index, grammar reference
 and gallery are gone; `flox.js` moved from `playground/` to this folder,

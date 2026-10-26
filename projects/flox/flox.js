@@ -385,6 +385,106 @@ function printGridState(o, system) {
   }
   o.println("");
 }
+function printMoneyMap(o, system) {
+  o.println("");
+  o.println("=== BUDGET: " + system.name + " ===\n");
+  let nameWidth = 4;
+  for (const n of system.moneyMeta.keys()) {
+    if (n.length > nameWidth) nameWidth = n.length;
+  }
+  o.println("Nodes (" + system.moneyMeta.size + "):");
+  for (const [name, m] of system.moneyMeta) {
+    let tag;
+    if (m.nodeType === "income") tag = "income   " + moneyFmt(m.amount);
+    else if (m.nodeType === "account") tag = "account  " + moneyFmt(Number.isNaN(m.balance) ? 0 : m.balance);
+    else if (m.nodeType === "bill") tag = "bill     " + moneyFmt(m.amount);
+    else tag = "pot      " + moneyFmt(m.amount) + " -> " + moneyFmt(m.target);
+    const suffix = system.disabledNodes.has(name) ? "  (disabled)" : "";
+    o.println("  " + padRight(name, nameWidth) + "  " + tag + suffix);
+  }
+  o.println("");
+  o.println("Routing:");
+  for (const [from, edges] of system.connections) {
+    for (const e of edges) {
+      o.println("  " + padRight(from, nameWidth) + " -> " + e.target);
+    }
+  }
+  o.println("");
+}
+function printMoneyResult(o, system) {
+  o.println("");
+  o.println(
+    "=== BUDGET: " + system.name + " (" + system.moneyDays + " days) ===\n"
+  );
+  let nameWidth = 8;
+  for (const a of system.moneyAccounts) nameWidth = Math.max(nameWidth, a.name.length);
+  for (const p of system.moneyPots) nameWidth = Math.max(nameWidth, p.name.length);
+  o.println("Accounts:");
+  for (const a of system.moneyAccounts) {
+    const flag = a.overdraft ? "  OVERDRAFT" : "";
+    o.println(
+      "  " + padRight(a.name, nameWidth) + "  start " + moneyFmt(a.start) + "  end " + moneyFmt(a.end) + "  low " + moneyFmt(a.low) + " (day " + a.lowDay + ")" + flag
+    );
+  }
+  o.println("");
+  if (system.moneyPots.length > 0) {
+    o.println("Pots:");
+    for (const p of system.moneyPots) {
+      const pct = p.target > 0 ? p.end / p.target * 100 : 0;
+      o.println(
+        "  " + padRight(p.name, nameWidth) + "  start " + moneyFmt(p.start) + "  end " + moneyFmt(p.end) + "  target " + moneyFmt(p.target) + "  (" + fmtFixed(pct, 1) + "%)"
+      );
+    }
+    o.println("");
+  }
+  o.println(system.moneyOverdraft ? "Status: OVERDRAFT - an account went below zero." : "Status: OK - no account went below zero.");
+  o.println("");
+}
+function printSettleMap(o, system) {
+  o.println("");
+  o.println("=== SETTLE: " + system.name + " ===\n");
+  o.println("People (" + system.people.length + "):");
+  o.println("  " + system.people.join(", "));
+  o.println("");
+  o.println("Debts:");
+  for (const [from, edges] of system.connections) {
+    for (const e of edges) {
+      o.println("  " + from + " owes " + e.target + " " + fmtFixed(e.weight, 2));
+    }
+  }
+  o.println("");
+}
+function printSettleResult(o, system) {
+  o.println("");
+  o.println("=== SETTLE: " + system.name + " ===\n");
+  let nameWidth = 4;
+  for (const p of system.people) nameWidth = Math.max(nameWidth, p.length);
+  o.println("Net balances (positive = owed, negative = owes):");
+  for (const p of system.people) {
+    o.println("  " + padRight(p, nameWidth) + "  " + settleSigned(system.settleNet.get(p) ?? 0));
+  }
+  o.println("");
+  o.println("Settlement:");
+  if (system.settleTransfers.length === 0) {
+    o.println("  (nothing to settle)");
+  } else {
+    for (const t of system.settleTransfers) {
+      o.println("  " + t.from + " pays " + t.to + " " + fmtFixed(t.amount, 2));
+    }
+  }
+  o.println("");
+  o.println("Transfers: " + system.settleTransfers.length);
+  o.println("");
+}
+function moneyFmt(v) {
+  if (Number.isNaN(v)) return "-";
+  return fmtFixed(v, 2);
+}
+function settleSigned(v) {
+  if (v > 0) return "+" + fmtFixed(v, 2);
+  if (v < 0) return fmtFixed(v, 2);
+  return " 0.00";
+}
 function signedFmt(v) {
   if (v > 0) return "+" + fmtFixed(v, 2);
   if (v < 0) return fmtFixed(v, 2);
@@ -589,10 +689,74 @@ var grid = {
     printGridState(o, s);
   }
 };
+var money = {
+  validate(s, errs) {
+    const accounts = /* @__PURE__ */ new Set();
+    for (const [name, m] of s.moneyMeta) {
+      if (m.nodeType === "account") accounts.add(name);
+    }
+    for (const [name, m] of s.moneyMeta) {
+      if (m.nodeType === "account") continue;
+      let connected = false;
+      const outs = s.connections.get(name);
+      if (outs) {
+        for (const e of outs) if (accounts.has(e.target)) {
+          connected = true;
+          break;
+        }
+      }
+      if (!connected) {
+        for (const [from, edges] of s.connections) {
+          if (!accounts.has(from)) continue;
+          for (const e of edges) if (e.target === name) {
+            connected = true;
+            break;
+          }
+          if (connected) break;
+        }
+      }
+      if (!connected) {
+        errs.push(
+          `Note: ${m.nodeType} '${name}' in budget '${s.name}' is not connected to any account.
+`
+        );
+      }
+    }
+  },
+  run(s, arg) {
+    const days = arg.length > 0 ? arg[0] : 30;
+    s.simulateMoney(days);
+  },
+  defaultArg() {
+    return [30];
+  },
+  printMap(o, s) {
+    printMoneyMap(o, s);
+  },
+  printResult(o, s, _arg) {
+    printMoneyResult(o, s);
+  }
+};
+var settle = {
+  validate(_s, _errs) {
+  },
+  run(s, _arg) {
+    s.simulateSettle();
+  },
+  defaultArg() {
+    return [];
+  },
+  printMap(o, s) {
+    printSettleMap(o, s);
+  },
+  printResult(o, s, _arg) {
+    printSettleResult(o, s);
+  }
+};
 function formatTotal(n) {
   return Number.isInteger(n) ? n.toFixed(1) : String(n);
 }
-var STRATEGIES = { river, markov, grid };
+var STRATEGIES = { river, markov, grid, money, settle };
 
 // src/runtime.ts
 var River = class {
@@ -693,6 +857,21 @@ var RiverSystem = class {
   // "A->B" -> flow A→B
   gridTicksRun = 0;
   gridConverged = false;
+  // Money state
+  moneyMeta = /* @__PURE__ */ new Map();
+  moneySeries = /* @__PURE__ */ new Map();
+  // per-day balance, accounts + pots
+  moneyAccounts = [];
+  moneyPots = [];
+  moneyDays = 0;
+  moneyOverdraft = false;
+  // Settle state
+  people = [];
+  settleNet = /* @__PURE__ */ new Map();
+  settleTransfers = [];
+  addMoneyMeta(name, meta) {
+    this.moneyMeta.set(name, meta);
+  }
   addRiver(river2) {
     this.rivers.set(river2.name, river2);
   }
@@ -875,6 +1054,167 @@ var RiverSystem = class {
       this.gridFlow.set(`${ends[0]}->${ends[1]}`, flow);
     }
   }
+  // Money-mode simulation. Days d = 1..N. Income deposits into the
+  // accounts it points to; bills are drawn from the accounts that point
+  // to them; pots receive transfers from the account that points to them.
+  // Builds a per-day balance series for every account and pot.
+  simulateMoney(days) {
+    const N = Math.max(1, Math.round(days));
+    this.moneyDays = N;
+    this.moneySeries.clear();
+    this.moneyAccounts = [];
+    this.moneyPots = [];
+    this.moneyOverdraft = false;
+    const meta = this.moneyMeta;
+    const accounts = [];
+    const pots = [];
+    for (const [name, m] of meta) {
+      if (this.disabledNodes.has(name)) continue;
+      if (m.nodeType === "account") accounts.push(name);
+      else if (m.nodeType === "pot") pots.push(name);
+    }
+    const balance = /* @__PURE__ */ new Map();
+    const series = /* @__PURE__ */ new Map();
+    const startBal = /* @__PURE__ */ new Map();
+    const low = /* @__PURE__ */ new Map();
+    const lowDay = /* @__PURE__ */ new Map();
+    for (const a of accounts) {
+      const b = Number.isNaN(meta.get(a).balance) ? 0 : meta.get(a).balance;
+      balance.set(a, b);
+      startBal.set(a, b);
+      series.set(a, new Array(N).fill(0));
+      low.set(a, Infinity);
+      lowDay.set(a, 1);
+    }
+    for (const p of pots) {
+      const b = Number.isNaN(meta.get(p).balance) ? 0 : meta.get(p).balance;
+      balance.set(p, b);
+      startBal.set(p, b);
+      series.set(p, new Array(N).fill(0));
+    }
+    const targetsOf = (node) => {
+      const outs = this.connections.get(node);
+      if (!outs) return [];
+      return outs.filter((e) => e.enabled && accounts.includes(e.target)).map((e) => e.target);
+    };
+    const sourcesInto = (node) => {
+      const res = [];
+      for (const [from, edges] of this.connections) {
+        if (!accounts.includes(from)) continue;
+        for (const e of edges) {
+          if (e.enabled && e.target === node) {
+            res.push(from);
+            break;
+          }
+        }
+      }
+      return res;
+    };
+    for (let day = 1; day <= N; day++) {
+      for (const [name, m] of meta) {
+        if (this.disabledNodes.has(name) || m.nodeType !== "income") continue;
+        const on = Number.isNaN(m.on) ? 1 : m.on;
+        if (on !== day) continue;
+        const amount = Number.isNaN(m.amount) ? 0 : m.amount;
+        const dests = targetsOf(name);
+        if (dests.length === 0) continue;
+        const each = amount / dests.length;
+        for (const a of dests) balance.set(a, balance.get(a) + each);
+      }
+      for (const [name, m] of meta) {
+        if (this.disabledNodes.has(name) || m.nodeType !== "bill") continue;
+        const amount = Number.isNaN(m.amount) ? 0 : m.amount;
+        let due = 0;
+        if (m.spread) {
+          due = amount / N;
+        } else {
+          const on = Number.isNaN(m.on) ? 1 : m.on;
+          if (on === day) due = amount;
+        }
+        if (due === 0) continue;
+        const srcs = sourcesInto(name);
+        if (srcs.length === 0) continue;
+        const each = due / srcs.length;
+        for (const a of srcs) balance.set(a, balance.get(a) - each);
+      }
+      for (const [name, m] of meta) {
+        if (this.disabledNodes.has(name) || m.nodeType !== "pot") continue;
+        const on = Number.isNaN(m.on) ? 1 : m.on;
+        if (on !== day) continue;
+        const amount = Number.isNaN(m.amount) ? 0 : m.amount;
+        if (amount === 0) continue;
+        const srcs = sourcesInto(name);
+        if (srcs.length === 0) continue;
+        const each = amount / srcs.length;
+        for (const a of srcs) balance.set(a, balance.get(a) - each);
+        balance.set(name, balance.get(name) + amount);
+      }
+      for (const a of accounts) {
+        const v = balance.get(a);
+        series.get(a)[day - 1] = v;
+        if (v < low.get(a)) {
+          low.set(a, v);
+          lowDay.set(a, day);
+        }
+        if (v < 0) this.moneyOverdraft = true;
+      }
+      for (const p of pots) {
+        series.get(p)[day - 1] = balance.get(p);
+      }
+    }
+    for (const [name, s] of series) this.moneySeries.set(name, s);
+    for (const a of accounts) {
+      const overdraft = low.get(a) < 0;
+      this.moneyAccounts.push({
+        name: a,
+        start: startBal.get(a),
+        end: balance.get(a),
+        low: low.get(a),
+        lowDay: lowDay.get(a),
+        overdraft
+      });
+    }
+    for (const p of pots) {
+      this.moneyPots.push({
+        name: p,
+        start: startBal.get(p),
+        end: balance.get(p),
+        target: Number.isNaN(meta.get(p).target) ? 0 : meta.get(p).target
+      });
+    }
+  }
+  // Settle-mode: compute per-person net (owed - owes) from the declared
+  // debt edges, then greedily match the largest creditor with the largest
+  // debtor to produce a minimal set of transfers.
+  simulateSettle() {
+    this.settleNet.clear();
+    this.settleTransfers = [];
+    for (const p of this.people) this.settleNet.set(p, 0);
+    for (const [from, edges] of this.connections) {
+      for (const e of edges) {
+        if (!e.enabled) continue;
+        if (this.settleNet.has(from)) {
+          this.settleNet.set(from, this.settleNet.get(from) - e.weight);
+        }
+        if (this.settleNet.has(e.target)) {
+          this.settleNet.set(e.target, this.settleNet.get(e.target) + e.weight);
+        }
+      }
+    }
+    const EPS = 1e-9;
+    const work = [...this.settleNet.entries()].map(([name, net]) => ({ name, net }));
+    const sortStable = () => work.sort((a, b) => a.net - b.net || (a.name < b.name ? -1 : a.name > b.name ? 1 : 0));
+    while (true) {
+      sortStable();
+      const debtor = work[0];
+      const creditor = work[work.length - 1];
+      if (creditor.net <= EPS || debtor.net >= -EPS) break;
+      const amount = Math.min(creditor.net, -debtor.net);
+      this.settleTransfers.push({ from: debtor.name, to: creditor.name, amount });
+      creditor.net -= amount;
+      debtor.net += amount;
+    }
+  }
   getTopologicalOrder() {
     const order = [];
     const inDegree = /* @__PURE__ */ new Map();
@@ -989,9 +1329,11 @@ var Interpreter = class {
         if (name === "river") this.fileMode = "river";
         else if (name === "markov") this.fileMode = "markov";
         else if (name === "grid") this.fileMode = "grid";
+        else if (name === "money") this.fileMode = "money";
+        else if (name === "settle") this.fileMode = "settle";
         else {
           throw new Error(
-            `Unknown mode '${name}' (line ${stmt.mode.line}). Known modes: river, markov, grid.`
+            `Unknown mode '${name}' (line ${stmt.mode.line}). Known modes: river, markov, grid, money, settle.`
           );
         }
         return;
@@ -1043,6 +1385,37 @@ var Interpreter = class {
           );
         }
         sys.addRiver(new River(stmt.name.lexeme, 0, 0, 0.7, stmt.supply));
+        return;
+      }
+      case "MoneyDecl": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const sys = this.requireSystem(stmt.name);
+        if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
+          throw new Error(
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
+          );
+        }
+        sys.addRiver(new River(stmt.name.lexeme, 0, 0, 0.7, 0));
+        sys.addMoneyMeta(stmt.name.lexeme, {
+          nodeType: stmt.nodeType,
+          amount: stmt.amount,
+          on: stmt.on,
+          balance: stmt.balance,
+          target: stmt.target,
+          spread: stmt.spread
+        });
+        return;
+      }
+      case "PersonDecl": {
+        if (this.phase !== 0 /* COLLECT */) return;
+        const sys = this.requireSystem(stmt.name);
+        if (sys.rivers.has(stmt.name.lexeme) || sys.dams.has(stmt.name.lexeme)) {
+          throw new Error(
+            `Node '${stmt.name.lexeme}' (line ${stmt.name.line}) is declared more than once in system '${sys.name}'.`
+          );
+        }
+        sys.addRiver(new River(stmt.name.lexeme, 0, 0, 0.7, 0));
+        sys.people.push(stmt.name.lexeme);
         return;
       }
       case "OutletDecl": {
@@ -1313,6 +1686,11 @@ var Parser = class {
       if (this.match("DAM" /* DAM */)) return this.damDeclaration();
       if (this.match("OUTLET" /* OUTLET */)) return this.outletDeclaration();
       if (this.match("NODE" /* NODE */)) return this.nodeDeclaration();
+      if (this.match("INCOME" /* INCOME */)) return this.moneyDeclaration("income");
+      if (this.match("ACCOUNT" /* ACCOUNT */)) return this.moneyDeclaration("account");
+      if (this.match("BILL" /* BILL */)) return this.moneyDeclaration("bill");
+      if (this.match("POT" /* POT */)) return this.moneyDeclaration("pot");
+      if (this.match("PERSON" /* PERSON */)) return this.personDeclaration();
       if (this.match("START" /* START */)) return this.startStatement();
       if (this.match("DISABLE" /* DISABLE */)) return this.disableStatement();
       if (this.match("COMPARE" /* COMPARE */)) return this.compareStatement();
@@ -1494,6 +1872,27 @@ var Parser = class {
     const supply = attrs.get("supply") ?? 0;
     return { kind: "NodeDecl", name, supply };
   }
+  moneyDeclaration(nodeType) {
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, `Expect ${nodeType} name.`);
+    const attrs = this.check("LEFT_BRACE" /* LEFT_BRACE */) ? this.parseBlock(name) : /* @__PURE__ */ new Map();
+    this.consumeOptional("SEMICOLON" /* SEMICOLON */);
+    this.validateAttrs(name, attrs, [], ["amount", "on", "balance", "target"]);
+    return {
+      kind: "MoneyDecl",
+      nodeType,
+      name,
+      amount: attrs.get("amount") ?? NaN,
+      on: attrs.get("on") ?? NaN,
+      balance: attrs.get("balance") ?? NaN,
+      target: attrs.get("target") ?? NaN,
+      spread: nodeType === "bill" && !attrs.has("on")
+    };
+  }
+  personDeclaration() {
+    const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect person name.");
+    this.consumeOptional("SEMICOLON" /* SEMICOLON */);
+    return { kind: "PersonDecl", name };
+  }
   outletDeclaration() {
     const name = this.consume("IDENTIFIER" /* IDENTIFIER */, "Expect outlet name.");
     if (this.check("LEFT_BRACE" /* LEFT_BRACE */)) {
@@ -1659,6 +2058,11 @@ var Parser = class {
         case "DAM" /* DAM */:
         case "OUTLET" /* OUTLET */:
         case "NODE" /* NODE */:
+        case "INCOME" /* INCOME */:
+        case "ACCOUNT" /* ACCOUNT */:
+        case "BILL" /* BILL */:
+        case "POT" /* POT */:
+        case "PERSON" /* PERSON */:
         case "START" /* START */:
         case "DISABLE" /* DISABLE */:
         case "COMPARE" /* COMPARE */:
@@ -1690,7 +2094,12 @@ var KEYWORDS = {
   compare: "COMPARE" /* COMPARE */,
   as: "AS" /* AS */,
   with: "WITH" /* WITH */,
-  units: "UNITS" /* UNITS */
+  units: "UNITS" /* UNITS */,
+  income: "INCOME" /* INCOME */,
+  account: "ACCOUNT" /* ACCOUNT */,
+  bill: "BILL" /* BILL */,
+  pot: "POT" /* POT */,
+  person: "PERSON" /* PERSON */
 };
 var Scanner = class {
   constructor(source, errs) {
@@ -1968,6 +2377,14 @@ function parseGraph(source) {
     } catch (_e) {
     }
   }
+  for (const sys of interp.getSystems().values()) {
+    if (sys.mode !== "money") continue;
+    try {
+      sys.identifyRoots();
+      sys.simulateMoney(30);
+    } catch (_e) {
+    }
+  }
   const systems = [];
   for (const sys of interp.getSystems().values()) {
     const graph = systemToGraph(sys);
@@ -1980,15 +2397,20 @@ function parseGraph(source) {
 function systemToGraph(sys) {
   const nodes = [];
   const isRiver = sys.mode === "river";
+  const isMoney = sys.mode === "money";
   for (const r of sys.rivers.values()) {
     const node = {
       name: r.name,
-      kind: classifyRiver(r, sys.mode),
+      kind: classifyNode(r, sys),
       supply: r.supply,
       disabled: sys.disabledNodes.has(r.name)
     };
     if (isRiver && r.dailyFlow && r.dailyFlow.length > 0) {
       node.series = r.dailyFlow.slice();
+    }
+    if (isMoney) {
+      const s = sys.moneySeries.get(r.name);
+      if (s && s.length > 0) node.series = s.slice();
     }
     nodes.push(node);
   }
@@ -2020,13 +2442,19 @@ function systemToGraph(sys) {
   }
   return { name: sys.name, mode: sys.mode, nodes, edges };
 }
-function classifyRiver(r, mode) {
+function classifyNode(r, sys) {
+  const mode = sys.mode;
   if (mode === "grid") {
     if (r.supply > 0) return "generator";
     if (r.supply < 0) return "load";
     return "relay";
   }
   if (mode === "markov") return "state";
+  if (mode === "money") {
+    const meta = sys.moneyMeta.get(r.name);
+    return meta ? meta.nodeType : "relay";
+  }
+  if (mode === "settle") return "person";
   if (r.baseFlow === 0 && r.peakMultiplier === 0) return "outlet";
   return "river";
 }

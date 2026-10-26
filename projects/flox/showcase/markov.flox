@@ -1,0 +1,14 @@
+mode markov;
+system PassOrShoot;
+
+Pass  -[0.85]-> Pass;
+Pass  -[0.15]-> Shoot;
+Shoot -[0.10]-> Goal;
+Shoot -[0.90]-> Miss;
+Goal  -[1.0]-> Goal;
+Miss  -[1.0]-> Miss;
+
+node Pass;  node Shoot;  node Goal;  node Miss;
+
+start Pass 1.0;
+print PassOrShoot 200;
