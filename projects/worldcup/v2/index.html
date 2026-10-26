@@ -216,7 +216,7 @@ dialog p b { color: var(--ink); }
 <dialog id="method">
   <h2>How it works</h2>
   <p><b>Model.</b> Elo ratings from every international since 1872, turned into win/draw/loss chances by a goals model.</p>
-  <p><b>Bets.</b> When our chance beats Sportsbet's price (margin removed) by 3% or more, the bot puts $10 of fake money on it, once per match, up to 48 hours before kickoff.</p>
+  <p><b>Bets.</b> When our chance times Sportsbet's price promises 3% profit or more, the bot puts $10 of fake money on it, once per match, up to 48 hours before kickoff. No prices above 6.0: on longshots a small disagreement looks like a huge edge.</p>
   <p><b>Beat the close.</b> Did we get a better price than the final one before kickoff? The fairest test of skill. Bankroll is mostly luck over a few dozen bets.</p>
   <p><b>Ledger.</b> Each bet is hashed and chained to the last, with the raw odds saved as evidence. Anyone can re-verify it.</p>
   <p><b>Until it goes live.</b> The bankroll sits at $1,000. No backtest numbers are shown, because we have no real past Sportsbet prices to test against.</p>
@@ -255,8 +255,8 @@ if (new URLSearchParams(location.search).has('frames')) {
   // Dates: data files are ISO, the page shows dd-mm-yyyy (site rule).
   const dmy = iso => iso ? iso.slice(0, 10).split('-').reverse().join('-') : '';
   const sign = v => (v >= 0 ? '+' : '-');
-  const pct = v => `${sign(v)}${Math.abs(v * 100).toFixed(1)}%`;
-  const tone = (el, v) => el.className = v >= 0 ? 'up' : 'down';
+  const pct = v => v == null ? '-' : `${sign(v)}${Math.abs(v * 100).toFixed(1)}%`;
+  const tone = (el, v) => el.className = v == null ? '' : v >= 0 ? 'up' : 'down';
 
   fetch('bankroll.json').then(r => r.json()).then(b => {
     stamps.bankroll = b.source === 'ledger' ? ['Live · paper money', 'live'] : ['Paper money · not started', ''];
@@ -288,7 +288,7 @@ if (new URLSearchParams(location.search).has('frames')) {
     $('bkd').className = 'delta ' + (d >= 0 ? 'up' : 'down');
     $('clv').textContent = pct(b.mean_clv); tone($('clv'), b.mean_clv);
     $('roi').textContent = pct(b.roi); tone($('roi'), b.roi);
-    $('won').textContent = `${b.n_won} / ${b.n_bets}`;
+    $('won').textContent = `${b.n_won} / ${b.n_settled}`;
     const n = b.next_bet;
     $('next').innerHTML = n
       ? `${n.home} v ${n.away}, ${dmy(n.kickoff)}<br>${n.pick_name} <em>${n.odds.toFixed(2)}</em> · $${n.stake}`
