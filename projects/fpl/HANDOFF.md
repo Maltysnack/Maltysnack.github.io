@@ -2,14 +2,9 @@
 
 Scratchpad for `/projects/fpl/`. Root `HANDOFF.md` covers site-wide.
 
-## Current state (23-10-2026)
+## Current state (26-10-2026)
 
-- Page rebuilt as the bot's dashboard ("Malty's Team runs itself"): season
-  line vs game average and Red Rebels, head-to-head, locked squad on a pitch
-  (toggle bot / Red Rebels), transfer ledger, decision logs, model accuracy
-  (predicted vs actual, pooled bias by position, captaincy hindsight), next
-  GW top predictions + captain candidates + fixtures with bookmaker win
-  probability, model card.
+- Page is the bot's dashboard; see Layout below for what it shows now.
 - Data: `dashboard.json`, built by the private engine (`Maltysnack/fpl`
   `public-dashboard.js`) and pushed here twice daily by its sync-and-publish
   workflow together with `api-cache.json` and `history.json`. The page reads
@@ -17,40 +12,19 @@ Scratchpad for `/projects/fpl/`. Root `HANDOFF.md` covers site-wide.
 - Privacy rule: the bot's planned transfers, captain and chip for the
   UPCOMING gameweek are never published; squads, transfers and decision logs
   appear only for gameweeks whose deadline has passed.
-- Layout: `<aside class="sidebar">` + `/sidebar.js`, `<main data-layout="full">`.
+- Layout: `<aside class="sidebar">` + `/sidebar.js`, `<main data-layout="wide">`.
   Stylesheet is `../../style.css` (site tokens; light and dark).
 - The old browser-side prediction formula, captain card and `sync.js` in this
   folder are retired; predictions come from the private engine only.
 
-## Status of the page (26-10-2026)
+## Layout (26-10-2026)
 
-The single-screen layout below shipped but was judged incoherent: it showed
-data with no through-line. The user is rebuilding the page from the FPL
-engine repo, which should own a `DISPLAY.md` (what to show and why; see root
-HANDOFF, Decided). Do not iterate on the current layout from this repo.
+Rebuilt to the brief in the engine repo's `DISPLAY.md` (`Maltysnack/fpl`). Read that before changing the page; the page adds nothing the brief does not ask for.
 
-## Single-screen layout (23-10-2026)
-
-The page fits the viewport with no scrolling (`body { height: 100dvh; overflow: hidden }`,
-page-scoped). Panels sized by importance per the 15-10 spec:
-
-- **Model accuracy, largest**: predicted vs actual squad columns per GW, the
-  honesty strip (percentile of the real score among 20,000 resamples) on the
-  same x positions, per-position error table, captaincy and totals.
-- **Season**: line vs game average, cumulative and rank toggles.
-- **Squad**: starting XI on a pitch sized with container query units. Bench dropped.
-- **Next gameweek**: deadline and the model's league-wide top picks, as many
-  rows as fit, never a clipped row.
-- Footer states the privacy rule.
-
-Dropped from the page: transfer ledger, decision log cards, model card,
-points-by-position chart, fixtures with bookmaker odds, accuracy drill-down.
-The data is still in `dashboard.json` if any comes back.
-
-Charts draw at real pixel size via a `ResizeObserver` (`sized()`), so text
-never stretches. Breakpoints: at 1100px the squad and chips tile drop; at
-720px it is one column, accuracy over season, everything else dropped.
-Under 540px tall it falls back to scrolling rather than clipping.
+- Four ideas, each a generated sentence heading plus one figure: gap to the average manager (cumulative line), where the points went (captaincy, bench, transfers, hits), model error vs FPL's own xP plus squad honesty sentence, next GW deadline and top five model picks.
+- Masthead: total, rank, verdict sentence, last GW and chips as small print.
+- Scrolling page, `data-layout="wide"`, two columns, one under 720px.
+- Dropped: squad pitch, per-position error table, honesty strip, predicted vs actual chart, line toggles, pace tile. Data still in `dashboard.json`.
 
 ## Wiring
 

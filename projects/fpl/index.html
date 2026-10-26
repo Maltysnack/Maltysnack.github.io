@@ -3,198 +3,103 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="An autonomous Fantasy Premier League bot: season log, model accuracy, and what it plans next." />
+  <meta name="description" content="An autonomous Fantasy Premier League bot: how it is doing, where the points went, and whether its model can be trusted." />
   <title>FPL bot - maltysnack</title>
   <link rel="stylesheet" href="/style.css?v=8" />
   <style>
-    /* One screen, no scroll. Panels are sized by importance: model accuracy
-       largest, season next, squad and next gameweek compact. Smaller
-       viewports drop panels rather than shrink them. */
-    :root {
-      --bot: var(--accent-red);
-      --avg: var(--text-dim);
-      --pitch: #2f6b3a;
-      --pitch-line: rgba(255,255,255,.55);
-      --pos: #2e7d4f;
-      --neg: #b3402f;
-      --rule: var(--border);
-    }
-    @media (prefers-color-scheme: dark) {
-      :root:not([data-theme="light"]) { --pitch: #244d2c; --pos: #6fcf97; --neg: #ef8a78; }
-    }
-    :root[data-theme="dark"] { --pitch: #244d2c; --pos: #6fcf97; --neg: #ef8a78; }
+    /* Four ideas, each a sentence with one figure behind it. Brief: DISPLAY.md
+       in the private engine repo. */
+    :root { --bot: var(--accent-red); --avg: var(--text-dim); --pos: #2e7d4f; --neg: #b3402f; --rule: var(--border); }
+    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pos: #6fcf97; --neg: #ef8a78; } }
+    :root[data-theme="dark"] { --pos: #6fcf97; --neg: #ef8a78; }
 
-    body { height: 100dvh; overflow: hidden; }
-    .fpl {
-      flex: 1; min-height: 0; width: 100%; max-width: 1440px; margin-inline: auto;
-      display: grid; grid-template-rows: auto 1fr auto; gap: clamp(8px, 1.6vh, 16px);
-      padding: clamp(10px, 2vh, 22px) clamp(14px, 2.5vw, 36px);
-    }
-    /* Too short to fit anything useful: let it scroll rather than clip. */
-    @media (max-height: 540px) { body { height: auto; overflow: auto; } .fpl { grid-template-rows: auto auto auto; } .board { grid-auto-rows: 320px; } }
-
+    .fpl { width: 100%; padding: clamp(16px, 3vh, 36px) 16px 40px; }
     .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
     .dim { color: var(--text-dim); }
     .pos { color: var(--pos); } .neg { color: var(--neg); }
 
-    /* Masthead: title, tiles and score on one line */
-    .mast { display: grid; grid-template-columns: auto 1fr auto; gap: clamp(12px, 2.5vw, 32px); align-items: end; padding-bottom: 10px; border-bottom: 3px double var(--text); }
-    .mast-eyebrow { font-size: var(--text-xs); letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
-    .mast-title { font-size: clamp(1.5rem, 3.4vh, 2.3rem); font-weight: 700; letter-spacing: -.035em; line-height: 1; margin: 4px 0 0; white-space: nowrap; }
-    .mast-title small { font-size: .45em; font-weight: 500; letter-spacing: 0; color: var(--text-muted); margin-left: 8px; }
-    .mast-score { text-align: right; }
-    .mast-score .big { font-size: clamp(2rem, 5vh, 3.2rem); font-weight: 700; letter-spacing: -.04em; line-height: .9; }
-    .mast-score .lab { font-size: var(--text-xs); letter-spacing: .12em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; white-space: nowrap; }
-    .tiles { display: flex; justify-content: center; min-width: 0; overflow: hidden; }
-    .tile { padding: 0 clamp(10px, 1.6vw, 22px); border-left: 1px solid var(--rule); white-space: nowrap; }
-    .tile .v { font-size: var(--text-lg); font-weight: 700; letter-spacing: -.02em; line-height: 1; }
-    .tile .v sub { font-size: .5em; font-weight: 500; color: var(--text-muted); vertical-align: baseline; margin-left: 3px; }
-    .tile .k { font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
-    .tile .d { font-size: var(--text-xs); margin-top: 2px; }
+    .mast { padding-bottom: 16px; border-bottom: 3px double var(--text); margin-bottom: 28px; }
+    .eyebrow { font-size: var(--text-xs); letter-spacing: .14em; text-transform: uppercase; color: var(--text-muted); }
+    .mast-row { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; margin-top: 6px; }
+    .mast h1 { font-size: clamp(1.6rem, 4vw, 2.4rem); font-weight: 700; letter-spacing: -.035em; line-height: 1; margin: 0; }
+    .score { text-align: right; }
+    .score .big { font-size: clamp(2.2rem, 6vw, 3.4rem); font-weight: 700; letter-spacing: -.04em; line-height: .9; }
+    .score .lab { font-size: var(--text-xs); letter-spacing: .1em; text-transform: uppercase; color: var(--text-muted); margin-top: 4px; }
+    .verdict { font-size: var(--text-lg); line-height: 1.35; margin: 14px 0 0; max-width: 40em; }
+    .small { font-size: var(--text-xs); color: var(--text-muted); margin-top: 6px; }
 
-    /* Board */
-    .board { min-height: 0; display: grid; gap: clamp(12px, 2vh, 22px) clamp(16px, 2vw, 32px);
-             grid-template-columns: 1.45fr 1fr 1fr; grid-template-rows: 1.1fr 1fr;
-             grid-template-areas: "acc season season" "acc squad next"; }
-    .p { min-height: 0; min-width: 0; display: flex; flex-direction: column; overflow: hidden; }
-    .p-acc { grid-area: acc; } .p-season { grid-area: season; } .p-squad { grid-area: squad; } .p-next { grid-area: next; }
-    .sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; border-bottom: 1px solid var(--text); padding-bottom: 4px; margin-bottom: 8px; flex-shrink: 0; }
-    .sec-head h2 { font-size: var(--text-md); font-weight: 700; letter-spacing: -.01em; margin: 0; white-space: nowrap; }
-    .sec-head .meta { font-size: var(--text-xs); color: var(--text-muted); letter-spacing: .06em; text-transform: uppercase; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .plot { flex: 1; min-height: 0; position: relative; }
-    .plot svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
-    .strip { height: clamp(44px, 7vh, 64px); flex-shrink: 0; position: relative; margin-top: 4px; }
-    .strip svg { position: absolute; inset: 0; width: 100%; height: 100%; }
-    .cap { font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); flex-shrink: 0; }
-
+    .ideas { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 32px 40px; }
+    .idea h2 { font-size: var(--text-md); font-weight: 700; letter-spacing: -.01em; line-height: 1.3; margin: 0 0 4px; padding-top: 8px; border-top: 1px solid var(--text); }
+    .idea .sub { font-size: var(--text-xs); color: var(--text-muted); margin: 0 0 12px; line-height: 1.45; }
+    .plot { position: relative; height: 200px; }
+    .plot svg { position: absolute; inset: 0; width: 100%; height: 100%; }
     svg text { font-family: var(--font-mono); font-size: 10px; fill: var(--text-muted); }
-    svg .grid { stroke: var(--rule); stroke-width: 1; }
+    svg .grid { stroke: var(--rule); }
+    svg .zero { stroke: var(--text-dim); stroke-dasharray: 3 3; }
     svg .l-bot { stroke: var(--bot); stroke-width: 2.2; fill: none; }
-    svg .l-avg { stroke: var(--avg); stroke-width: 1.2; stroke-dasharray: 3 3; fill: none; }
-    svg .p-bot { fill: var(--bot); }
     svg .lbl { font-weight: 600; fill: var(--text); }
-    .legend { display: flex; gap: 16px; font-size: var(--text-xs); color: var(--text-muted); margin-top: 4px; flex-wrap: wrap; flex-shrink: 0; }
-    .legend i { display: inline-block; width: 16px; height: 0; border-top: 2px solid; vertical-align: middle; margin-right: 6px; }
-    .legend i.box { height: 8px; border: 0; }
 
-    .acc-foot { display: grid; grid-template-columns: 1fr 1fr; gap: clamp(12px, 1.6vw, 24px); margin-top: 10px; flex-shrink: 0; }
-    table.t { width: 100%; border-collapse: collapse; font-size: var(--text-xs); }
-    .t th { text-align: left; font-size: 10px; letter-spacing: .08em; text-transform: uppercase; color: var(--text-muted); font-weight: 600; padding: 3px 6px 3px 0; border-bottom: 1px solid var(--text); }
-    .t td { padding: 3px 6px 3px 0; border-bottom: 1px solid var(--rule); white-space: nowrap; }
-    .t td.r, .t th.r { text-align: right; }
+    /* Horizontal bars in plain HTML: label, bar, value */
+    .bars { display: grid; grid-template-columns: max-content 1fr max-content; gap: 8px 12px; align-items: center; font-size: var(--text-sm); }
+    .bars .track { height: 12px; position: relative; }
+    .bars .fill { position: absolute; top: 0; bottom: 0; border-radius: 2px; }
+    .bars .v { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; }
+
+    table.t { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+    .t td { padding: 5px 8px 5px 0; border-bottom: 1px solid var(--rule); }
     .t tr:last-child td { border-bottom: 0; }
-    .t .name { font-weight: 600; }
-    .t .sub { font-size: 10px; color: var(--text-dim); }
-    .facts { font-size: var(--text-xs); color: var(--text-muted); line-height: 1.45; }
-    .facts p { margin: 0 0 6px; }
-    .facts b { color: var(--text); }
+    .t td.r { text-align: right; }
+    .t .s { font-size: var(--text-xs); color: var(--text-dim); }
 
-    .toggle { display: inline-flex; border: 1px solid var(--text); border-radius: 999px; overflow: hidden; font-size: 10px; flex-shrink: 0; }
-    .toggle button { background: transparent; border: 0; color: var(--text); padding: 3px 10px; cursor: pointer; font: inherit; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; }
-    .toggle button.on { background: var(--text); color: var(--bg); }
-
-    /* Pitch: sized off its own box, so it fits whatever height the grid gives it */
-    .pitch { flex: 1; min-height: 0; container-type: size; background: var(--pitch); border-radius: 6px; position: relative; overflow: hidden;
-             display: flex; flex-direction: column; justify-content: space-evenly; padding: 4px;
-             background-image: repeating-linear-gradient(0deg, rgba(255,255,255,.04) 0 24px, transparent 24px 48px); }
-    .pitch::before { content: ""; position: absolute; inset: 6px; border: 1px solid var(--pitch-line); border-radius: 4px; pointer-events: none; }
-    .row { display: flex; justify-content: center; gap: 2cqw; position: relative; z-index: 1; }
-    .pl { width: 18cqw; max-width: 76px; text-align: center; color: #fff; }
-    .pl .shirt { display: inline-grid; place-items: center; width: min(34px, 13cqh); height: min(34px, 13cqh); border-radius: 6px 6px 10px 10px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.35); font-family: var(--font-mono); font-size: min(13px, 5.5cqh); font-weight: 700; position: relative; }
-    .pl .shirt.c::after { content: "C"; position: absolute; top: -6px; right: -6px; width: 13px; height: 13px; border-radius: 50%; background: #fff; color: #111; font-size: 9px; font-weight: 700; display: grid; place-items: center; }
-    .pl .shirt.dnp { opacity: .45; }
-    .pl .nm { font-size: min(10px, 4.5cqh); font-weight: 600; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-
-    .status { font-size: var(--text-xs); color: var(--text-muted); margin-bottom: 6px; flex-shrink: 0; }
-    .status b { color: var(--text); font-weight: 600; }
-    .fitlist { flex: 1; min-height: 0; overflow: hidden; }
-    .live { display: inline-block; width: 7px; height: 7px; border-radius: 50%; background: var(--pos); margin-right: 6px; animation: pulse 2.2s infinite; }
-    @keyframes pulse { 0% { box-shadow: 0 0 0 0 rgba(46,125,79,.5) } 70% { box-shadow: 0 0 0 7px rgba(46,125,79,0) } 100% { box-shadow: 0 0 0 0 rgba(46,125,79,0) } }
-
-    .foot { font-size: var(--text-xs); color: var(--text-dim); line-height: 1.45; border-top: 1px solid var(--rule); padding-top: 6px; display: flex; gap: 8px 24px; justify-content: space-between; flex-wrap: wrap; }
+    .foot { font-size: var(--text-xs); color: var(--text-dim); line-height: 1.5; border-top: 1px solid var(--rule); padding-top: 8px; margin-top: 40px; display: flex; gap: 6px 24px; justify-content: space-between; flex-wrap: wrap; }
     .foot a { text-decoration: underline; color: inherit; }
     .err { padding: 24px; border: 1px solid var(--neg); color: var(--neg); font-size: var(--text-sm); }
 
-    .mast, .p { opacity: 0; animation: in .45s var(--ease) forwards; }
-    .p-acc { animation-delay: .06s } .p-season { animation-delay: .12s } .p-squad { animation-delay: .18s } .p-next { animation-delay: .24s }
-    @keyframes in { to { opacity: 1 } }
-    @media (prefers-reduced-motion: reduce) { .mast, .p { animation: none; opacity: 1 } .live { animation: none } }
-
-    /* Medium: squad goes first */
-    @media (max-width: 1100px) {
-      .board { grid-template-columns: 1.3fr 1fr; grid-template-rows: 1fr 1fr; grid-template-areas: "acc season" "acc next"; }
-      .p-squad { display: none; }
-      .tile.t-lo { display: none; }
-    }
-    /* Narrow: one column, accuracy then season. Everything else drops. */
-    @media (max-width: 720px) {
-      .fpl { grid-template-columns: minmax(0, 1fr); }
-      .mast { grid-template-columns: minmax(0, 1fr) auto; gap: 12px; }
-      .mast-eyebrow { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-      .mast-title small { display: none; }
-      .mast-score .lab { letter-spacing: .06em; }
-      .tiles { display: none; }
-      .board { grid-template-columns: minmax(0, 1fr); grid-template-rows: 1.25fr 1fr; grid-template-areas: "acc" "season"; }
-      .p-next, .strip, .cap, .acc-foot { display: none; }
-      .sec-head h2 { font-size: var(--text-sm); }
-      .sec-head .meta { font-size: 10px; }
-      .toggle + span { display: none; }
-      .foot .f-lo { display: none; }
-    }
+    @media (max-width: 720px) { .ideas { grid-template-columns: minmax(0, 1fr); } .score { text-align: left; } }
   </style>
 </head>
 <body>
   <aside class="sidebar"></aside>
   <script src="/sidebar.js?v=5"></script>
-  <main class="main fpl" data-layout="full">
+  <main class="main fpl" data-layout="wide">
 
     <header class="mast">
-      <div>
-        <div class="mast-eyebrow">Autonomous FPL bot · <span id="season">2026-27</span></div>
-        <h1 class="mast-title" id="team-name">Malty's Team <small>runs itself</small></h1>
+      <div class="eyebrow">Autonomous FPL bot · <span id="season"></span></div>
+      <div class="mast-row">
+        <h1 id="team-name">Malty's Team</h1>
+        <div class="score"><div class="big num" id="total">–</div><div class="lab">points · rank <span class="num" id="rank">–</span></div></div>
       </div>
-      <div class="tiles" id="tiles"></div>
-      <div class="mast-score">
-        <div class="big num" id="total">–</div>
-        <div class="lab">points · rank <span class="num" id="rank">–</span></div>
-      </div>
+      <p class="verdict" id="verdict"></p>
+      <div class="small" id="small"></div>
     </header>
 
-    <div class="board" id="board">
-      <section class="p p-acc">
-        <div class="sec-head"><h2>How well the model saw it coming</h2><span class="meta" id="acc-meta"></span></div>
-        <div class="plot" id="acc-plot"><svg role="img" aria-label="Predicted against actual squad points each gameweek"></svg></div>
-        <div class="legend"><span><i class="box" style="background:var(--text-dim)"></i>Predicted</span><span><i class="box" style="background:var(--bot)"></i>Actual</span></div>
-        <div class="strip" id="honesty"><svg role="img" aria-label="Where each real score landed among 20,000 resamples"></svg></div>
-        <div class="cap" id="honesty-cap">Honesty: where the real score fell among 20,000 resamples, 50% is honest</div>
-        <div class="acc-foot">
-          <table class="t" id="bias"></table>
-          <div class="facts" id="facts"></div>
-        </div>
+    <div class="ideas" id="ideas">
+      <section class="idea">
+        <h2 id="season-h">Season</h2>
+        <p class="sub" id="season-sub"></p>
+        <div class="plot" id="gap-plot"><svg role="img" aria-label="Cumulative points ahead of or behind the average manager"></svg></div>
       </section>
-
-      <section class="p p-season">
-        <div class="sec-head"><h2>Season</h2><span class="meta" id="line-meta"></span></div>
-        <div style="display:flex;gap:10px;align-items:center;margin-bottom:4px;flex-shrink:0"><div class="toggle" id="line-toggle"><button class="on" data-mode="gw">Per gameweek</button><button data-mode="cum">Cumulative</button><button data-mode="rank">Rank</button></div><span class="dim" style="font-size:var(--text-xs)" id="line-sub"></span></div>
-        <div class="plot" id="line-plot"><svg role="img" aria-label="Season against the game average"></svg></div>
-        <div class="legend"><span><i style="border-color:var(--bot)"></i>Malty's Team</span><span><i style="border-color:var(--avg); border-top-style:dashed"></i>Game average</span></div>
+      <section class="idea">
+        <h2 id="leak-h">Where the points went</h2>
+        <p class="sub">Points lost against the best choice available at the time, over scored gameweeks.</p>
+        <div class="bars" id="leaks"></div>
       </section>
-
-      <section class="p p-squad">
-        <div class="sec-head"><h2>Squad</h2><span class="meta" id="squad-meta"></span></div>
-        <div class="pitch" id="pitch"></div>
+      <section class="idea">
+        <h2 id="model-h">Can the model be trusted?</h2>
+        <p class="sub" id="model-sub"></p>
+        <div class="bars" id="model"></div>
+        <p class="sub" id="honesty" style="margin-top:12px"></p>
       </section>
-
-      <section class="p p-next">
-        <div class="sec-head"><h2>Next gameweek</h2><span class="meta" id="next-meta"></span></div>
-        <div class="status" id="status"></div>
-        <div class="fitlist" id="top-wrap"><table class="t" id="top-players"></table></div>
+      <section class="idea">
+        <h2 id="next-h">Next gameweek</h2>
+        <p class="sub">The model's top picks across the league. The bot's own moves stay private until the deadline.</p>
+        <table class="t" id="top"></table>
       </section>
     </div>
 
     <footer class="foot">
-      <span>Predictions are frozen before each deadline and scored after it. The bot's transfers, captain and chip stay private until the deadline passes, so nothing here can be edited in hindsight.</span>
-      <span class="f-lo" id="built"></span>
+      <span>Predictions are frozen before each deadline and scored after it, so nothing here can be edited in hindsight.</span>
+      <span id="built"></span>
     </footer>
   </main>
 
@@ -203,16 +108,20 @@
   const $ = id => document.getElementById(id);
   const esc = s => String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const fmt = n => n == null ? '–' : Number(n).toLocaleString('en-AU');
-  const sgn = n => n == null ? '–' : (n > 0 ? '+' : '') + (Math.round(n * 10) / 10);
+  const sgn = n => (n > 0 ? '+' : '') + Math.round(n);
   const POS = { 1: 'GK', 2: 'DEF', 3: 'MID', 4: 'FWD' };
-  const dt = s => new Date(s);
-  const ddmmyyyy = s => { const d = dt(s); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`; };
+  const pl = (n, w) => `${fmt(Math.abs(n))} point${Math.abs(n) === 1 ? '' : 's'}${w ? ' ' + w : ''}`;
+  const ddmmyyyy = s => { const d = new Date(s); return `${String(d.getDate()).padStart(2, '0')}-${String(d.getMonth() + 1).padStart(2, '0')}-${d.getFullYear()}`; };
+  const rk = v => v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? Math.round(v / 1e3) + 'k' : String(v);
   // Draw into an svg at its real pixel size, and again whenever that changes.
   const sized = (box, draw) => {
     const svg = box.querySelector('svg');
-    const go = () => { const r = box.getBoundingClientRect(); if (r.width < 10 || r.height < 10) return; svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`); svg.innerHTML = draw(r.width, r.height); };
+    const go = () => { const r = box.getBoundingClientRect(); if (r.width < 10) return; svg.setAttribute('viewBox', `0 0 ${r.width} ${r.height}`); svg.innerHTML = draw(r.width, r.height); };
     new ResizeObserver(go).observe(box); go();
-    return go;
+  };
+  const bars = rows => {
+    const mx = Math.max(1, ...rows.map(r => Math.abs(r.v)));
+    return rows.map(r => `<span>${r.k}</span><span class="track"><span class="fill" style="left:0;width:${100 * Math.abs(r.v) / mx}%;background:${r.c}"></span></span><span class="v">${r.t}</span>`).join('');
   };
 
   let D;
@@ -221,182 +130,98 @@
     if (!r.ok) throw new Error(`dashboard.json ${r.status}`);
     D = await r.json();
   } catch (e) {
-    $('board').innerHTML = `<div class="err">Could not load dashboard data (${esc(e.message)}). The publisher runs twice a day; try again later.</div>`;
+    $('ideas').innerHTML = `<div class="err">Could not load dashboard data (${esc(e.message)}). The publisher runs twice a day; try again later.</div>`;
     return;
   }
 
   const bot = D.bot;
   const avgBy = {}; for (const a of D.averages) avgBy[a.gw] = a.avg;
-  const lastGw = bot.gws[bot.gws.length - 1] || {};
-  const prevGw = bot.gws[bot.gws.length - 2] || null;
+  const last = bot.gws[bot.gws.length - 1] || {};
   const gp = D.gwProgress;
-  const inPlay = gp && gp.finished < gp.total;
+  const live = gp && gp.gw === last.gw && gp.finished < gp.total;
 
-  $('team-name').innerHTML = `${esc(bot.name)} <small>runs itself</small>`;
+  $('team-name').textContent = bot.name;
   $('season').textContent = D.season || '';
   $('total').textContent = fmt(bot.total);
-  $('rank').textContent = fmt(bot.rank);
+  $('rank').textContent = rk(bot.rank);
 
-  // Tiles: four that say how it is going. t-lo drops first.
-  const rankDelta = prevGw ? prevGw.rank - lastGw.rank : null;
-  const tiles = [
-    { v: lastGw.pts, sub: `GW${lastGw.gw}${inPlay && gp.gw === lastGw.gw ? ' live' : ''}`, k: 'last gameweek', d: avgBy[lastGw.gw] != null ? `<span class="${lastGw.pts >= avgBy[lastGw.gw] ? 'pos' : 'neg'}">${sgn(lastGw.pts - avgBy[lastGw.gw])} vs average</span>` : '' },
-    { v: rankDelta == null ? '–' : (rankDelta > 0 ? '▲' : rankDelta < 0 ? '▼' : '='), k: 'rank move', d: rankDelta == null ? '' : `<span class="${rankDelta > 0 ? 'pos' : 'neg'}">${fmt(Math.abs(rankDelta))}</span>` },
-    { v: 8 - bot.chips.length, sub: '/8', k: 'chips in hand', d: `<span class="dim">${bot.chips.map(c => c.name + ' GW' + c.gw).join(', ') || 'none played'}</span>`, lo: true }
-  ];
-  (function () {
-    const ex = (D.expected && D.expected.bot) || {};
-    const rows = bot.gws.filter(g => ex[g.gw] != null);
-    if (rows.length < 2) return;
-    const meanEx = rows.reduce((s, g) => s + ex[g.gw], 0) / rows.length;
-    const resid = rows.map(g => g.pts - ex[g.gw]);
-    const sd = Math.sqrt(resid.reduce((s, r) => s + r * r, 0) / resid.length);
-    const remaining = 38 - lastGw.gw;
-    const pace = Math.round(bot.total + remaining * meanEx);
-    const band = Math.round(1.64 * sd * Math.sqrt(remaining));
-    tiles.splice(1, 0, { v: fmt(pace), k: 'on pace for', d: `<span class="dim">${fmt(pace - band)} to ${fmt(pace + band)}</span>` });
-  })();
-  $('tiles').innerHTML = tiles.map(t => `<div class="tile${t.lo ? ' t-lo' : ''}"><div class="v num">${esc(t.v)}${t.sub ? `<sub>${esc(t.sub)}</sub>` : ''}</div><div class="k">${t.k}</div><div class="d">${t.d || ''}</div></div>`).join('');
+  // Headline and panel 1: the gap to the average manager over finished gameweeks.
+  const fin = bot.gws.filter(g => avgBy[g.gw] != null);
+  let run = 0; const gap = fin.map(g => ({ gw: g.gw, v: run += g.pts - avgBy[g.gw] }));
+  const beat = fin.filter(g => g.pts > avgBy[g.gw]).length;
+  if (gap.length) {
+    const g = gap[gap.length - 1].v;
+    const where = g === 0 ? 'level with the average manager' : pl(g, g > 0 ? 'ahead of the average manager' : 'behind the average manager');
+    $('verdict').textContent = `After ${fin.length} finished gameweek${fin.length === 1 ? '' : 's'}, ${where}.`;
+    $('season-h').textContent = where.charAt(0).toUpperCase() + where.slice(1);
+    $('season-sub').textContent = `Beat the average in ${beat} of ${fin.length} gameweeks. Line above zero means ahead.`;
+  }
+  const lastTxt = live ? `GW${last.gw} in play: ${last.pts} so far` : last.gw ? `GW${last.gw}: ${last.pts}${avgBy[last.gw] != null ? `, ${sgn(last.pts - avgBy[last.gw])} vs average` : ''}` : '';
+  $('small').textContent = [lastTxt, bot.chips.length ? `Chips played: ${bot.chips.map(c => `${({ wildcard: 'Wildcard', freehit: 'Free Hit', bboost: 'Bench Boost', '3xc': 'Triple Captain' })[c.name] || c.name} GW${c.gw}`).join(', ')}` : 'No chips played'].filter(Boolean).join(' · ');
 
-  // Accuracy: predicted against actual squad points, one pair per gameweek.
-  // The honesty strip below shares its x positions so the two read as one.
-  const A = D.accuracy || [];
-  const AL = 34, AR = 8;
-  const colX = (W, i) => AL + (i + 0.5) * (W - AL - AR) / A.length;
-  sized($('acc-plot'), (W, H) => {
-    if (!A.length) return `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">Nothing scored yet</text>`;
-    const T = 16, B = 20;
-    const mx = Math.max(1, ...A.map(a => Math.max(a.squadPred || 0, a.squadAct || 0)));
-    const step = mx > 120 ? 40 : 20;
-    const ymax = Math.ceil((mx + step * 0.3) / step) * step;
-    const y = v => T + (H - T - B) * (1 - v / ymax);
-    const cw = (W - AL - AR) / A.length, bw = Math.min(22, cw * 0.32);
-    const every = Math.ceil(28 / cw);
+  sized($('gap-plot'), (W, H) => {
+    if (!gap.length) return `<text x="${W / 2}" y="${H / 2}" text-anchor="middle">No finished gameweeks yet</text>`;
+    const L = 36, R = 28, T = 14, B = 20;
+    const vals = [0, ...gap.map(p => p.v)];
+    const step = Math.max(10, Math.ceil((Math.max(...vals) - Math.min(...vals)) / 4 / 10) * 10);
+    const lo = Math.floor(Math.min(...vals) / step) * step, hi = Math.ceil(Math.max(...vals) / step) * step || step;
+    const y = v => T + (H - T - B) * (hi - v) / (hi - lo || 1);
+    const x = i => L + (gap.length === 1 ? (W - L - R) / 2 : i * (W - L - R) / (gap.length - 1));
     let s = '';
-    for (let v = 0; v <= ymax; v += step) s += `<line class="grid" x1="${AL}" x2="${W - AR}" y1="${y(v)}" y2="${y(v)}"/><text x="${AL - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
-    A.forEach((a, i) => {
-      const cx = colX(W, i), p = a.squadPred || 0, q = a.squadAct || 0;
-      s += `<rect x="${cx - bw - 1}" y="${y(p)}" width="${bw}" height="${y(0) - y(p)}" fill="var(--text-dim)" opacity=".55"><title>GW${a.gw} predicted ${Math.round(p)}</title></rect>`;
-      s += `<rect x="${cx + 1}" y="${y(q)}" width="${bw}" height="${y(0) - y(q)}" fill="var(--bot)"><title>GW${a.gw} actual ${q} (${sgn(q - p)})</title></rect>`;
-      if (cw > 34) s += `<text class="lbl" x="${cx + 1 + bw / 2}" y="${y(q) - 4}" text-anchor="middle">${q}</text>`;
-      if (i % every === 0) s += `<text x="${cx}" y="${H - 5}" text-anchor="middle">${cw > 34 ? 'GW' : ''}${a.gw}</text>`;
-    });
+    for (let v = lo; v <= hi; v += step) s += `<line class="${v === 0 ? 'zero' : 'grid'}" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${sgn(v)}</text>`;
+    const every = Math.ceil(gap.length / Math.max(1, Math.floor((W - L - R) / 36)));
+    gap.forEach((p, i) => { if (i % every === 0 || i === gap.length - 1) s += `<text x="${x(i)}" y="${H - 4}" text-anchor="middle">GW${p.gw}</text>`; });
+    s += `<polyline class="l-bot" points="${gap.map((p, i) => `${x(i)},${y(p.v)}`).join(' ')}"/>`;
+    gap.forEach((p, i) => s += `<circle cx="${x(i)}" cy="${y(p.v)}" r="3" fill="var(--bot)"><title>GW${p.gw}: ${sgn(p.v)}</title></circle>`);
+    const e = gap[gap.length - 1];
+    s += `<text class="lbl" x="${x(gap.length - 1) + 6}" y="${y(e.v) + 3}">${sgn(e.v)}</text>`;
     return s;
   });
-  const Hl = D.health && D.health.gws ? D.health.gws : [];
-  const pctBy = {}; for (const g of Hl) pctBy[g.gw] = g.squadPct;
-  sized($('honesty'), (W, H) => {
-    const T = 4, B = 4, y = p => T + (H - T - B) * (1 - p / 100);
-    let s = `<rect x="${AL}" y="${T}" width="${W - AL - AR}" height="${H - T - B}" fill="var(--surface)"/>`;
-    s += `<line class="grid" x1="${AL}" x2="${W - AR}" y1="${y(50)}" y2="${y(50)}" style="stroke:var(--text-dim);stroke-dasharray:2 3"/>`;
-    s += `<text x="${AL - 6}" y="${y(100) + 8}" text-anchor="end">100</text><text x="${AL - 6}" y="${y(0)}" text-anchor="end">0</text>`;
-    A.forEach((a, i) => {
-      const p = pctBy[a.gw]; if (p == null) return;
-      const col = p < 25 ? 'var(--neg)' : p > 75 ? 'var(--pos)' : 'var(--text)';
-      s += `<circle cx="${colX(W, i)}" cy="${y(p)}" r="3.5" fill="${col}"><title>GW${a.gw}: real score at the ${p}th percentile</title></circle>`;
-    });
-    return s;
-  });
-  if (D.health && D.health.summary) $('honesty-cap').textContent = `Honesty: real score's percentile among 20,000 resamples. Mean ${D.health.summary.meanPct}%, ${D.health.summary.verdict}`;
+
+  // Panel 2: where the points went, summed over scored gameweeks.
+  const HG = (D.health && D.health.gws) || [];
   (function () {
-    const P = D.pooled || {}, E = D.pooledEp || {}, hasEp = !!E.ALL;
-    const order = ['ALL', 'GKP', 'DEF', 'MID', 'FWD'];
-    $('bias').innerHTML = `<tr><th>Per player</th><th class="r">Error</th>${hasEp ? '<th class="r">FPL</th>' : ''}<th class="r">Bias</th></tr>` + order.filter(k => P[k]).map(k => `<tr><td class="${k === 'ALL' ? 'name' : ''}">${k === 'ALL' ? `All <span class="sub">n=${P[k].n}</span>` : k}</td><td class="r num">${P[k].mae.toFixed(2)}</td>${hasEp ? `<td class="r num ${E[k] && E[k].mae > P[k].mae ? 'pos' : E[k] ? 'neg' : ''}">${E[k] ? E[k].mae.toFixed(2) : '–'}</td>` : ''}<td class="r num ${Math.abs(P[k].bias) < 0.2 ? '' : P[k].bias > 0 ? 'pos' : 'neg'}">${sgn(P[k].bias)}</td></tr>`).join('');
-    const capCost = A.reduce((s, a) => s + (a.captainCost || 0), 0);
-    const capHit = A.filter(a => a.bestCaptain === a.captain).length;
-    const totP = A.reduce((s, a) => s + (a.squadPred || 0), 0), totA = A.reduce((s, a) => s + (a.squadAct || 0), 0);
-    $('facts').innerHTML = A.length ? `
-      <p><b>${fmt(Math.round(totP))} predicted, ${fmt(totA)} scored</b> across ${A.length} gameweeks, ${sgn(totA - totP)} in total.</p>
-      <p><b>Captaincy</b> picked the best option ${capHit} of ${A.length} times and left ${capCost} points on the table.</p>
-      ${hasEp ? `<p>The FPL column is the game's own expected points, scored the same way. Lower error wins.</p>` : ''}` : '';
-    $('acc-meta').textContent = A.length ? `${A.length} scored gameweeks` : 'nothing scored yet';
+    if (!HG.length) { $('leaks').innerHTML = '<span class="dim">Nothing scored yet.</span>'; return; }
+    const scored = new Set(HG.map(g => g.gw));
+    const sum = f => HG.reduce((s, g) => s + (g[f] || 0), 0);
+    const rows = [
+      { k: 'Captaincy', v: sum('capLoss') },
+      { k: 'Bench selection', v: sum('xiLoss') },
+      { k: 'Transfers', v: -sum('txDelta') },
+      { k: 'Hits', v: bot.gws.filter(g => scored.has(g.gw)).reduce((s, g) => s + (g.hits || 0), 0) }
+    ].sort((a, b) => b.v - a.v);
+    for (const r of rows) { r.c = r.v > 0 ? 'var(--neg)' : 'var(--pos)'; r.t = r.v > 0 ? `-${r.v}` : r.v < 0 ? `+${-r.v}` : '0'; }
+    $('leaks').innerHTML = bars(rows);
+    const top = rows[0];
+    $('leak-h').textContent = top.v > 0 ? `${top.k} has cost the most: ${pl(top.v)}` : 'Nothing has cost points yet';
   })();
 
-  // Season line
-  let lineMode = 'gw';
-  const drawLine = sized($('line-plot'), (W, H) => {
-    const mode = lineMode;
-    const gws = bot.gws.map(g => g.gw);
-    if (!gws.length) return '';
-    const L = 40, R = 12, T = 16, B = 20;
-    const series = { bot: [], avg: [] };
-    let cb = 0, ca = 0;
-    gws.forEach((g, i) => {
-      const b = bot.gws[i].pts, a = avgBy[g];
-      if (mode === 'rank') { series.bot.push(bot.gws[i].rank); series.avg.push(null); return; }
-      if (mode === 'cum') { cb += b; series.bot.push(cb); ca += a || 0; series.avg.push(a == null ? null : ca); }
-      else { series.bot.push(b); series.avg.push(a ?? null); }
-    });
-    const all = [...series.bot, ...series.avg].filter(v => v != null);
-    const isRank = mode === 'rank';
-    const step = mode === 'cum' ? (Math.max(...all) > 1000 ? 400 : 200) : 20;
-    const ymax = isRank ? 0 : Math.max(step * 3, Math.ceil((Math.max(...all) + step * 0.4) / step) * step);
-    const cw = (W - L - R) / Math.max(1, gws.length - 1);
-    const x = i => L + (gws.length === 1 ? (W - L - R) / 2 : i * cw);
-    const LO = 4, HI = 7;   // log10(10k) .. log10(10M); top of the chart is rank 1
-    const y = v => isRank ? T + (H - T - B) * ((Math.log10(Math.min(1e7, Math.max(1e4, v))) - LO) / (HI - LO)) : T + (H - T - B) * (1 - v / ymax);
-    const rk = v => v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : Math.round(v / 1e3) + 'k';
-    let s = '';
-    if (isRank) { for (const v of [1e4, 1e5, 1e6, 1e7]) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v >= 1e6 ? (v / 1e6) + 'M' : Math.round(v / 1e3) + 'k'}</text>`; }
-    else for (let v = 0; v <= ymax; v += step) s += `<line class="grid" x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}"/><text x="${L - 6}" y="${y(v) + 3}" text-anchor="end">${v}</text>`;
-    const every = Math.ceil(30 / cw);
-    gws.forEach((g, i) => { if (i % every === 0 || i === gws.length - 1) s += `<text x="${x(i)}" y="${H - 5}" text-anchor="middle">${cw > 34 ? 'GW' : ''}${g}</text>`; });
-    const path = (vals, cls) => { const pts = vals.map((v, i) => v == null ? null : `${x(i)},${y(v)}`).filter(Boolean); return pts.length ? `<polyline class="${cls}" points="${pts.join(' ')}"/>` : ''; };
-    s += path(series.avg, 'l-avg') + path(series.bot, 'l-bot');
-    gws.forEach((g, i) => {
-      const b = series.bot[i], last = i === gws.length - 1;
-      s += `<circle class="p-bot" cx="${x(i)}" cy="${y(b)}" r="${cw > 20 ? 3.5 : 2.5}"><title>GW${g}: ${isRank ? rk(b) : b}</title></circle>`;
-      if (cw > 34 || last) s += `<text class="lbl" x="${x(i)}" y="${y(b) - 7}" text-anchor="${last && cw <= 34 ? 'end' : 'middle'}">${isRank ? rk(b) : b}</text>`;
-    });
-    let li = gws.length - 1;
-    while (li > 0 && series.avg[li] == null) li--;
-    $('line-sub').textContent = isRank ? 'overall rank, top is better'
-      : mode === 'cum' && series.avg[li] != null ? `${sgn(series.bot[li] - series.avg[li])} vs the average manager`
-      : 'points each gameweek';
-    return s;
-  });
+  // Panel 3: per-player error against FPL's own expected points.
   (function () {
-    const n = bot.gws.filter(g => avgBy[g.gw] != null);
-    $('line-meta').textContent = `beat the average in ${n.filter(g => g.pts > avgBy[g.gw]).length} of ${n.length}`;
-  })();
-  $('line-toggle').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    $('line-toggle').querySelectorAll('button').forEach(x => x.classList.toggle('on', x === b));
-    lineMode = b.dataset.mode; drawLine();
-  });
-
-  // Squad: the starting eleven only. The bench earns no space here.
-  (function () {
-    const P = bot.picks;
-    if (!P) { $('pitch').innerHTML = '<div style="color:#fff;padding:24px;text-align:center">No locked squad yet.</div>'; return; }
-    const xi = P.picks.filter(p => p.position <= 11);
-    const cell = p => `<div class="pl"><div class="shirt ${p.captain ? 'c' : ''} ${p.mins === 0 ? 'dnp' : ''}">${p.pts == null ? '·' : p.pts * (p.multiplier || 1)}</div><div class="nm" title="${esc(p.name)} · ${esc(p.team)}">${esc(p.name)}</div></div>`;
-    $('pitch').innerHTML = [1, 2, 3, 4].map(pos => `<div class="row">${xi.filter(p => p.pos === pos).map(cell).join('')}</div>`).join('');
-    const tot = xi.reduce((s, p) => s + (p.pts || 0) * (p.multiplier || 1), 0);
-    const shape = [2, 3, 4].map(pos => xi.filter(p => p.pos === pos).length).join('-');
-    $('squad-meta').innerHTML = `GW${P.gw} · ${shape} · ${tot} pts${P.hits ? ` (-${P.hits})` : ''}${P.activeChip ? ` · ${esc(P.activeChip)}` : ''}${inPlay && gp.gw === P.gw ? ' · <span class="live"></span>live' : ''}`;
+    const P = D.pooled && D.pooled.ALL, E = D.pooledEp && D.pooledEp.ALL;
+    if (!P) { $('model-h').textContent = 'Nothing scored yet'; return; }
+    if (E) {
+      const d = Math.round(100 * (E.mae - P.mae) / E.mae);
+      $('model-h').textContent = d > 0 ? `Predictions beat FPL's own by ${d}%` : d < 0 ? `FPL's own predictions are ${-d}% better` : 'Level with FPL\'s own predictions';
+      $('model').innerHTML = bars([
+        { k: 'This model', v: P.mae, t: P.mae.toFixed(2), c: 'var(--bot)' },
+        { k: 'FPL expected points', v: E.mae, t: E.mae.toFixed(2), c: 'var(--avg)' }
+      ]);
+    } else $('model-h').textContent = `Predictions miss by ${P.mae.toFixed(2)} points a player`;
+    $('model-sub').textContent = `Average miss per player per gameweek, in points, over ${fmt(P.n)} predictions. Lower is better.`;
+    const S = D.health && D.health.summary;
+    if (S) $('honesty').textContent = `Our own squad scored below the model's median forecast in ${S.belowMedian} of ${S.n} gameweeks. ${S.n < 10 ? 'Too early to say whether that is bad luck or the model rating our picks too highly.' : /OVER-RATING/.test(S.verdict) ? 'That is too often to be luck: the model is rating our picks too highly.' : 'That is within normal luck.'}`;
   })();
 
-  // Next gameweek: the model's view of the league, not the bot's plan.
+  // Panel 4: the model's view of the league next gameweek, never the bot's plan.
   (function () {
-    const N = D.next || { topByPos: {} };
-    const dl = D.nextDeadline ? dt(D.nextDeadline) : null;
-    const h = dl ? Math.floor((dl - Date.now()) / 3600000) : null;
-    $('next-meta').textContent = D.nextGw ? `GW${D.nextGw}` : '';
-    $('status').innerHTML = dl ? `<b>Deadline</b> ${ddmmyyyy(D.nextDeadline)} ${dl.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}${h != null && h > 0 ? ` · ${h > 48 ? Math.floor(h / 24) + ' days' : h + ' h'} away` : ''}. Model's top picks across the league; the bot's own moves stay private.` : '';
-    const all = [];
-    for (const pos of [1, 2, 3, 4]) for (const p of (N.topByPos[pos] || []).slice(0, 5)) all.push(p);
-    all.sort((a, b) => b.pred - a.pred);
-    const head = `<tr><th>Player</th><th class="r">Next</th><th class="r">8 gw</th></tr>`;
-    const row = p => `<tr><td><span class="name">${esc(p.name)}</span> <span class="sub">${esc(p.team)} · ${POS[p.pos]}${p.chance != null && p.chance < 100 ? ` · <span class="neg">${p.chance}%</span>` : ''}</span></td><td class="r num">${p.pred.toFixed(1)}</td><td class="r num dim">${p.lookahead}</td></tr>`;
-    // As many rows as fit, never a clipped one.
-    const wrap = $('top-wrap'), tbl = $('top-players');
-    const fill = () => {
-      let n = Math.min(all.length, 16);
-      tbl.innerHTML = head + all.slice(0, n).map(row).join('');
-      while (n > 1 && tbl.offsetHeight > wrap.clientHeight) { n--; tbl.innerHTML = head + all.slice(0, n).map(row).join(''); }
-    };
-    new ResizeObserver(fill).observe(wrap); fill();
+    const N = (D.next && D.next.topByPos) || {};
+    const all = [1, 2, 3, 4].flatMap(k => N[k] || []).sort((a, b) => b.pred - a.pred).slice(0, 5);
+    if (D.nextDeadline) {
+      const dl = new Date(D.nextDeadline), h = Math.floor((dl - Date.now()) / 3600000);
+      $('next-h').textContent = `GW${D.nextGw} deadline ${ddmmyyyy(D.nextDeadline)} ${dl.toLocaleTimeString('en-AU', { hour: '2-digit', minute: '2-digit' })}${h > 0 ? `, ${h > 48 ? Math.floor(h / 24) + ' days' : h + ' hours'} away` : ''}`;
+    }
+    $('top').innerHTML = all.map(p => `<tr><td><b>${esc(p.name)}</b> <span class="s">${esc(p.team)} · ${POS[p.pos]}${p.chance != null && p.chance < 100 ? ` · <span class="neg">${p.chance}% to play</span>` : ''}</span></td><td class="r num">${p.pred.toFixed(1)} <span class="s">pts</span></td></tr>`).join('');
   })();
 
   // Publishing runs twice a day; data over 3 days old means it has stopped.
