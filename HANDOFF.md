@@ -104,9 +104,6 @@ commits too.
 - **Duoclue has no top bar.** It is a Next.js export with its own chrome, so
   on every screen size there is no way back to the rest of the site except
   the browser. Add the bar, or leave it a standalone full-screen game.
-- **World Cup clips at the right edge on phones** (bracket and header). The
-  v2 page at `projects/worldcup/v2/` is the redesign; it is the user's, built
-  from the worldcup repo, not here.
 - `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose.
   See `projects/fpl/HANDOFF.md`.
 
