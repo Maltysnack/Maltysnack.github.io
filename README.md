@@ -12,7 +12,7 @@
 An autonomous Fantasy Premier League bot: how it is doing, where the points went, and whether its model can be trusted.
 
 **World Cup 2026:**<br>
-A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
+A paper-money betting bot that bets Elo model chances against Sportsbet 1X2 prices, plus the scored 2026 World Cup forecast.
 
 **Flox:**<br>
 A small language for describing flow networks.
