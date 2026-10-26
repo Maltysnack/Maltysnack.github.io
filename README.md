@@ -18,7 +18,7 @@ A paper-money betting bot that bets Elo model chances against Sportsbet 1X2 pric
 A small language for describing flow networks.
 
 **Algorithms:**<br>
-Two small problems, three classical search algorithms, four heuristics, all running live in the browser.
+Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle and a travelling salesman tour.
 
 **Flock:**<br>
 A flock in three dimensions from three local rules and no leader, with a hawk to run from.

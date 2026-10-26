@@ -61,3 +61,25 @@ The rest of the 15-10 spec, section 7.
   the section, because on a phone a section is taller than the screen. Any
   pointer, key or input in a section first cancels its autorun, so it never
   starts on top of a run the reader began.
+
+## 26-10-2026: one-screen redesign
+
+Agreed with maltysnack: `body.fit`, three tabs (Path, Tiles, Tour), one
+canvas, one bar (algorithm picker, Run, New board, stat line), one line of
+text per tab. Path: A*, BFS, Greedy, drag to draw walls. Tiles: A*, Greedy,
+IDDFS, n=4, fixed Manhattan, plays once at a fixed pace (IDDFS gives up on
+about 20% of boards; kept, it is the point). Tour: GA, ACO, 12 cities, gap
+to the Held-Karp optimum. Beam, heuristic pickers, transport and prose cut.
+Colours from the palette (seq ramp by visit order, accent for path/tour).
+`index.html` and `algo-viz.js` rewritten, modules untouched (still `?v=15`),
+viz at `?v=16`. The old prose, `.al-intro`/`.al-proves`, autorun-on-scroll
+and the 22-10 transport described above are gone.
+
+- Tab is in the hash (`#path`, `#tiles`, `#tour`); `hashchange` switches it.
+- `epoch` cancels in-flight animations on tab switch or rerun.
+- Path grid size comes from the stage: cell 8..22 px, so phones get a tall
+  grid. Resizing to a new cell count deals a new board.
+- Explored ramp is `--seq4..2`; `--seq5` was too close to the accent route.
+- Tiles deals only boards with Manhattan h >= 5 (about 90% of deals).
+- Checked in headless Chromium at 1280x800 and 375x812, light and dark: no
+  scroll, no console errors.
