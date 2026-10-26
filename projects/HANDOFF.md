@@ -19,7 +19,10 @@ Recoverable only from the pre-reset archive in
 
 ## In flight
 
-Nothing. FPL single-screen dashboard and Flox single page both shipped 23-10-2026.
+- **FPL page to be rebuilt by the user** from the FPL engine repo, driven by
+  a `DISPLAY.md` there. The 23-10-2026 single-screen dashboard was judged
+  incoherent: panels chosen without a brief. Do not iterate on it here.
+- **World Cup** is likewise the user's; v2 lives at `worldcup/v2/`.
 
 ## Gotchas
 

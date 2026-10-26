@@ -71,7 +71,7 @@ with `curl` what the server actually serves rather than trusting a browser.
   - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
 - [`api/HANDOFF.md`](api/HANDOFF.md): Vercel functions (D&D upload only)
 
-## Current state (23-10-2026)
+## Current state (26-10-2026)
 
 Live and working. Seven pages in the nav: FPL, World Cup, Flox, Algorithms,
 Flock, dnd, Duoclue.
@@ -102,10 +102,26 @@ commits too.
 
 ## Decisions pending
 
+- **Duoclue has no top bar.** It is a Next.js export with its own chrome, so
+  on every screen size there is no way back to the rest of the site except
+  the browser. Add the bar, or leave it a standalone full-screen game.
+- **World Cup clips at the right edge on phones** (bracket and header). The
+  v2 page at `projects/worldcup/v2/` is the redesign; it is the user's, built
+  from the worldcup repo, not here.
 - `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose.
   See `projects/fpl/HANDOFF.md`.
 
 ## Decided
+
+- **Data repos own a `DISPLAY.md` (26-10-2026).** Any repo that publishes to
+  this site (FPL engine, worldcup) keeps a `DISPLAY.md` at its root saying
+  what the page shows and why: the point, the headline, panels in priority
+  order, what never to show, the data contract, the voice. The rule lives in
+  the global `~/.claude/CLAUDE.md`, so new sessions in those repos maintain it.
+  Before building or redesigning a data page here, read the source repo's
+  `DISPLAY.md` first; this repo owns only the design. If there is none, ask
+  for one rather than guessing. This came from the FPL single-screen
+  dashboard, which picked panels without a brief and read as random data.
 
 - **No-scroll is per page, not site-wide (23-10-2026).** The home page and
   the FPL dashboard fit the viewport. World Cup, Duoclue and the D&D sheet are
@@ -114,6 +130,15 @@ commits too.
   do not shrink them), never a global CSS switch.
 
 ## Recent session log
+
+- **26-10-2026:** Algorithms reframed: an intro line and a "What it shows"
+  line per demo, TSP now draws a dashed reference tour (Held-Karp, proven
+  optimal up to 15 cities, 2-opt above) and reports the gap, demos autorun
+  when their board scrolls into view; modules at `?v=15`. Phone audit of the
+  whole site: Algorithms buttons wrap under 480px, everything else fits
+  except the two items in Decisions pending. Flox repo `CLAUDE.md` now points
+  at `projects/flox/` here. DISPLAY.md rule added (see Decided). World Cup v2
+  merged by its own session.
 
 - **23-10-2026 (later):** FPL rebuilt as a single-screen dashboard. Flox cut
   to one page of live examples; playground and docs routes deleted. No-scroll

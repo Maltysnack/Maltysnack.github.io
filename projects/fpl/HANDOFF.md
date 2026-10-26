@@ -22,6 +22,13 @@ Scratchpad for `/projects/fpl/`. Root `HANDOFF.md` covers site-wide.
 - The old browser-side prediction formula, captain card and `sync.js` in this
   folder are retired; predictions come from the private engine only.
 
+## Status of the page (26-10-2026)
+
+The single-screen layout below shipped but was judged incoherent: it showed
+data with no through-line. The user is rebuilding the page from the FPL
+engine repo, which should own a `DISPLAY.md` (what to show and why; see root
+HANDOFF, Decided). Do not iterate on the current layout from this repo.
+
 ## Single-screen layout (23-10-2026)
 
 The page fits the viewport with no scrolling (`body { height: 100dvh; overflow: hidden }`,
