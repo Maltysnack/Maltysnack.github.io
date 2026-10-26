@@ -30,3 +30,12 @@ Rebuilt to the brief in the engine repo's `DISPLAY.md` (`Maltysnack/fpl`). Read 
 
 - `.github/workflows/sync-fpl.yml*` here are stale; the private repo's
   `sync-and-publish.yml` is the only publisher.
+
+## 27-10-2026: fits one screen again
+
+- At 721px+ wide and 640px+ tall the page is one screen: panels share two
+  rows and the chart flexes. Phones and short windows scroll.
+- Panel 1 heading adds the turn ("down from 35 points ahead at GW2") when the
+  peak differs by 10+ points, so it no longer repeats the headline verbatim.
+  The brief asks for the gap in both places; raise it in the FPL repo's
+  DISPLAY.md if the wording should change there.

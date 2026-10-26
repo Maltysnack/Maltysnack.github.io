@@ -55,6 +55,17 @@
     .foot a { text-decoration: underline; color: inherit; }
     .err { padding: 24px; border: 1px solid var(--neg); color: var(--neg); font-size: var(--text-sm); }
 
+    /* Fits one screen where there is room; phones and short windows scroll. */
+    @media (min-width: 721px) and (min-height: 640px) {
+      body { height: 100dvh; overflow: hidden; }
+      .fpl { flex: 1; min-height: 0; display: flex; flex-direction: column; padding-bottom: 12px; }
+      .mast { margin-bottom: clamp(12px, 2.5vh, 28px); padding-bottom: 12px; }
+      .ideas { flex: 1; min-height: 0; grid-template-rows: repeat(2, minmax(0, 1fr)); gap: clamp(14px, 2.5vh, 32px) 40px; }
+      .idea { min-height: 0; display: flex; flex-direction: column; overflow: hidden; }
+      .plot { flex: 1; height: auto; min-height: 100px; }
+      .t td { padding: 3px 8px 3px 0; }
+      .foot { margin-top: 10px; }
+    }
     @media (max-width: 720px) { .ideas { grid-template-columns: minmax(0, 1fr); } .score { text-align: left; } }
   </style>
 </head>
@@ -153,7 +164,12 @@
     const g = gap[gap.length - 1].v;
     const where = g === 0 ? 'level with the average manager' : pl(g, g > 0 ? 'ahead of the average manager' : 'behind the average manager');
     $('verdict').textContent = `After ${fin.length} finished gameweek${fin.length === 1 ? '' : 's'}, ${where}.`;
-    $('season-h').textContent = where.charAt(0).toUpperCase() + where.slice(1);
+    // The headline already says where it stands; the panel heading adds how it got there.
+    const peak = gap.reduce((a, p) => (g < 0 ? p.v > a.v : p.v < a.v) ? p : a, gap[0]);
+    const was = v => v === 0 ? 'level' : pl(v, v > 0 ? 'ahead' : 'behind');
+    const path = Math.abs(peak.v - g) >= 10 ? `, ${g < peak.v ? 'down' : 'up'} from ${was(peak.v)} at GW${peak.gw}` : '';
+    const head = where + path;
+    $('season-h').textContent = head.charAt(0).toUpperCase() + head.slice(1);
     $('season-sub').textContent = `Beat the average in ${beat} of ${fin.length} gameweeks. Line above zero means ahead.`;
   }
   const lastTxt = live ? `GW${last.gw} in play: ${last.pts} so far` : last.gw ? `GW${last.gw}: ${last.pts}${avgBy[last.gw] != null ? `, ${sgn(last.pts - avgBy[last.gw])} vs average` : ''}` : '';
