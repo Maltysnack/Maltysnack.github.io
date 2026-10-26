@@ -1,16 +1,17 @@
 {
- "source": "not-started",
- "note": "No bets yet. The bot needs a Sportsbet odds feed (free Odds API key).",
  "generated_at": "2026-10-26",
  "rule": {
   "staking": "flat",
-  "stake": 10,
-  "min_edge": 0.03
+  "stake": 10.0,
+  "min_edge": 0.03,
+  "max_odds": 6.0
  },
  "start": 1000.0,
+ "source": "not-started",
+ "note": "No bets yet.",
  "first_kickoff": null,
- "last_kickoff": null,
  "n_bets": 0,
+ "n_settled": 0,
  "n_won": 0,
  "staked": 0.0,
  "pnl": 0.0,

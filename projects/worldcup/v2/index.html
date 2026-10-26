@@ -73,7 +73,15 @@ section.on { display: grid; }
 .up { color: var(--up); } .down { color: var(--down); }
 .sub { margin-top: 8px; color: var(--ink-2); font-size: 14px; max-width: 34ch; line-height: 1.45; }
 .chart { position: relative; min-height: 0; align-self: stretch; border-left: 1px solid var(--rule); padding-left: clamp(16px, 2vw, 32px); }
+.chart { display: grid; grid-template-rows: minmax(0, 1fr) auto; gap: 12px; }
 .chart svg { width: 100%; height: 100%; display: block; overflow: visible; }
+.recent { display: grid; gap: 4px; font: 500 12px/1.3 var(--mono); }
+.recent[hidden] { display: none; }
+.recent div { display: grid; grid-template-columns: 11ch 1fr 6ch 8ch; gap: 8px; color: var(--ink-2); }
+.recent div b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.recent div span:last-child { text-align: right; }
+.stat[hidden] { display: none; }
+.rules { margin-top: 14px; line-height: 1.5; }
 .stats { grid-column: 1 / -1; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 2px solid var(--ink); padding-top: 14px; gap: 16px; }
 .stat b { display: block; font: 600 clamp(20px, 2.2vw, 32px)/1 var(--mono); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .next { grid-column: span 1; }
@@ -123,6 +131,7 @@ dialog p b { color: var(--ink); }
   #bankroll, #capsule { grid-template-columns: 1fr; grid-template-rows: auto minmax(0, 1fr) auto; }
   .chart { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 8px; margin: 12px 0; }
   .stats { grid-template-columns: repeat(3, 1fr); }
+  .recent { display: none; }
   #capsule .stats { grid-template-columns: repeat(4, 1fr); gap: 8px; }
   .stats .next { grid-column: 1 / -1; }
   .stat b { font-size: 20px; }
@@ -166,11 +175,13 @@ dialog p b { color: var(--ink); }
         <div class="big" id="bk"><small>$</small>1,000</div>
         <div class="delta" id="bkd">&nbsp;</div>
         <p class="sub" id="bk-sub">Fake money, real Sportsbet prices. Every bet is hash-chained before kickoff, so nothing gets quietly deleted.</p>
+        <div class="tag rules" id="bk-rules"></div>
       </div>
-      <div class="chart"><svg id="curve" viewBox="0 0 700 360" preserveAspectRatio="none" aria-label="Bankroll over bets"></svg></div>
+      <div class="chart"><svg id="curve" viewBox="0 0 700 360" preserveAspectRatio="none" aria-label="Bankroll over bets"></svg>
+        <div class="recent" id="recent" hidden><span class="tag">Last settled</span></div></div>
       <div class="stats">
-        <div class="stat"><span class="tag">Beat the close</span><b id="clv">-</b></div>
-        <div class="stat"><span class="tag">ROI</span><b id="roi">-</b></div>
+        <div class="stat" id="clv-stat" hidden><span class="tag">Beat the close</span><b id="clv">-</b></div>
+        <div class="stat" id="roi-stat" hidden><span class="tag">ROI</span><b id="roi">-</b></div>
         <div class="stat"><span class="tag">Won</span><b id="won">-</b></div>
         <div class="stat next"><span class="tag">Next bet</span><b id="next">-</b></div>
       </div>
@@ -186,7 +197,7 @@ dialog p b { color: var(--ink); }
       <div class="stats">
         <div class="stat"><span class="tag">Model</span><b id="ll-model">-</b></div>
         <div class="stat"><span class="tag">Plain Elo</span><b id="ll-elo">-</b></div>
-        <div class="stat"><span class="tag">Coin flip</span><b id="ll-uni">-</b></div>
+        <div class="stat"><span class="tag">Guessing</span><b id="ll-uni">-</b></div>
         <div class="stat"><span class="tag">Called</span><b id="acc">-</b></div>
       </div>
     </section>
@@ -259,6 +270,8 @@ if (new URLSearchParams(location.search).has('frames')) {
   const tone = (el, v) => el.className = v == null ? '' : v >= 0 ? 'up' : 'down';
 
   fetch('bankroll.json').then(r => r.json()).then(b => {
+    const ru = b.rule;
+    $('bk-rules').textContent = `Locked rules: $${ru.stake} flat · edge ${Math.round(ru.min_edge * 100)}%+ · odds up to ${ru.max_odds.toFixed(1)}`;
     stamps.bankroll = b.source === 'ledger' ? ['Live · paper money', 'live'] : ['Paper money · not started', ''];
     if (b.source !== 'ledger') {
       // No bets yet: flat $1,000, empty chart with a baseline, no made-up numbers.
@@ -267,8 +280,9 @@ if (new URLSearchParams(location.search).has('frames')) {
         <text x="0" y="168" fill="var(--ink-3)" style="font: 500 12px var(--mono); letter-spacing: .08em; text-transform: uppercase">$1,000 · first bet pending</text>`;
       $('bkd').textContent = '0 bets placed';
       $('bkd').className = 'delta muted';
-      $('bk-sub').textContent = 'Fake money, real Sportsbet prices. The bot starts betting once its odds feed is connected. Every bet is hash-chained before kickoff.';
-      $('next').textContent = 'Waiting on the odds feed.';
+      $('bk-sub').textContent = 'Fake money, real Sportsbet prices. No bets yet: the bot checks prices daily and bets inside 48 hours of kickoff. Every bet is hash-chained before the game.';
+      $('won').textContent = '0 / 0';
+      $('next').textContent = 'None inside 48 hours yet.';
       paintStamp();
       return;
     }
@@ -286,7 +300,15 @@ if (new URLSearchParams(location.search).has('frames')) {
     const d = last - start;
     $('bkd').textContent = `${sign(d)}$${Math.abs(d).toFixed(2)} · ${b.n_bets} bets · since ${dmy(b.first_kickoff)}`;
     $('bkd').className = 'delta ' + (d >= 0 ? 'up' : 'down');
+    $('clv-stat').hidden = b.mean_clv == null;
     $('clv').textContent = pct(b.mean_clv); tone($('clv'), b.mean_clv);
+    if (b.recent.length) {
+      const name = r => r.pick === 'draw' ? 'Draw' : r[r.pick];
+      $('recent').insertAdjacentHTML('beforeend', b.recent.slice().reverse().map(r =>
+        `<div><span>${dmy(r.kickoff)}</span><b>${r.home} v ${r.away}: ${name(r)}</b><span>${r.odds.toFixed(2)}</span><span class="${r.pnl >= 0 ? 'up' : 'down'}">${sign(r.pnl)}$${Math.abs(r.pnl).toFixed(2)}</span></div>`).join(''));
+      $('recent').hidden = false;
+    }
+    $('roi-stat').hidden = b.roi == null;
     $('roi').textContent = pct(b.roi); tone($('roi'), b.roi);
     $('won').textContent = `${b.n_won} / ${b.n_settled}`;
     const n = b.next_bet;
