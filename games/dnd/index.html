@@ -3,424 +3,55 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Live D&D 5e character sheets for an ongoing campaign." />
+  <meta name="description" content="D&D 5e character sheets that save in your browser: track HP, slots, spells and loot." />
   <title>D&amp;D - Characters</title>
   <link rel="stylesheet" href="/style.css?v=8" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600&display=swap" rel="stylesheet" />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
-  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
-  <link rel="manifest" href="/manifest.json?v=3" />
-  <meta name="theme-color" content="#13110d" />
-  <style>
-    .browse-controls {
-      display: flex;
-      gap: 8px;
-      margin: 0 0 16px;
-      flex-wrap: wrap;
-      align-items: center;
-    }
-    .browse-controls input[type="search"] {
-      flex: 1 1 220px;
-      min-width: 160px;
-      padding: 6px 10px;
-      font-family: inherit;
-      font-size: 14px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      background: var(--bg, #fff);
-      color: var(--text, #1f2328);
-    }
-    .browse-controls input[type="search"]:focus {
-      outline: none;
-      border-color: var(--text, #1f2328);
-    }
-    .browse-controls select {
-      padding: 6px 8px;
-      font-family: inherit;
-      font-size: 13px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      background: var(--bg, #fff);
-      color: var(--text, #1f2328);
-    }
-    .browse-controls select:focus {
-      outline: none;
-      border-color: var(--text, #1f2328);
-    }
-    .card-descriptors {
-      display: block;
-      font-size: 11px;
-      color: var(--muted, #57606a);
-      letter-spacing: 0.4px;
-      margin-top: 2px;
-      font-style: italic;
-    }
-    .home-card .home-card-arrow {
-      align-self: center;
-    }
-    .empty-state {
-      text-align: center;
-      color: var(--muted, #57606a);
-      font-size: 14px;
-      padding: 32px 16px;
-      font-style: italic;
-    }
-    .pagination {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      justify-content: center;
-      margin: 16px 0 0;
-      font-size: 13px;
-      color: var(--muted, #57606a);
-    }
-    .pagination button {
-      padding: 4px 10px;
-      font-family: inherit;
-      font-size: 13px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      background: var(--bg, #fff);
-      color: var(--text, #1f2328);
-      cursor: pointer;
-    }
-    .pagination button:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .pagination button:not(:disabled):hover {
-      background: var(--subtle, #f6f8fa);
-    }
-    @media (max-width: 700px) {
-      .browse-controls {
-        gap: 6px;
-      }
-      .browse-controls select {
-        flex: 1 1 calc(50% - 4px);
-      }
-    }
-    /* Upload panel */
-    .upload-toggle-btn {
-      padding: 6px 12px;
-      font-family: inherit;
-      font-size: 13px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      background: var(--bg, #fff);
-      color: var(--text, #1f2328);
-      cursor: pointer;
-      white-space: nowrap;
-    }
-    .upload-toggle-btn:hover {
-      background: var(--subtle, #f6f8fa);
-    }
-    /* Character cards: skip the label column, give info room to breathe */
-    .home-card.character-card {
-      grid-template-columns: 1fr 28px;
-      gap: 0 16px;
-    }
-    .character-card .character-info {
-      display: flex;
-      flex-direction: column;
-      gap: 4px;
-      min-width: 0;
-    }
-    .character-card .home-card-title {
-      font-size: var(--text-md, 18px);
-      line-height: 1.2;
-      text-transform: capitalize;
-    }
-    .character-card .card-descriptors {
-      margin-top: 0;
-      letter-spacing: 0.4px;
-    }
-    .character-card .char-meta {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: baseline;
-      gap: 8px;
-      letter-spacing: 0;
-      text-transform: none;
-      font-size: 13px;
-      color: var(--text-muted, #8a8a8a);
-    }
-    .character-card .char-head {
-      color: var(--text, #fff);
-      font-weight: 600;
-      font-size: 14px;
-    }
-    .character-card .char-level {
-      color: var(--text-muted, #8a8a8a);
-      font-size: 13px;
-    }
-    .character-card .char-subclass {
-      font-style: italic;
-      font-size: 12px;
-      opacity: 0.85;
-    }
-    .upload-panel {
-      margin: 0 0 24px;
-      padding: 16px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 6px;
-      background: var(--subtle, #f6f8fa);
-    }
-    .upload-panel h2 {
-      margin: 0 0 6px;
-      font-size: 16px;
-    }
-    .upload-panel p {
-      margin: 0 0 12px;
-      font-size: 13px;
-      color: var(--muted, #57606a);
-      line-height: 1.5;
-    }
-    .upload-step {
-      margin: 12px 0;
-      padding-top: 12px;
-      border-top: 1px solid var(--border, #d0d7de);
-    }
-    .upload-step h3 {
-      margin: 0 0 6px;
-      font-size: 13px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--muted, #57606a);
-    }
-    .upload-pdf-link {
-      display: inline-block;
-      padding: 8px 14px;
-      background: var(--text, #1f2328);
-      color: var(--bg, #fff);
-      border-radius: 4px;
-      text-decoration: none;
-      font-size: 13px;
-      font-weight: 600;
-    }
-    .upload-pdf-link:hover {
-      background: #000;
-    }
-    .upload-drop {
-      border: 2px dashed var(--border, #d0d7de);
-      border-radius: 6px;
-      padding: 28px 16px;
-      text-align: center;
-      cursor: pointer;
-      color: var(--muted, #57606a);
-      font-size: 13px;
-      transition: border-color 0.15s, background 0.15s;
-    }
-    .upload-drop:hover, .upload-drop.dragover {
-      border-color: var(--text, #1f2328);
-      background: var(--bg, #fff);
-    }
-    .upload-form-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 8px;
-      margin-bottom: 8px;
-    }
-    .upload-form-grid label,
-    .upload-form-row label {
-      display: block;
-      font-size: 11px;
-      text-transform: uppercase;
-      letter-spacing: 0.6px;
-      color: var(--muted, #57606a);
-      margin-bottom: 4px;
-    }
-    .upload-form-grid input,
-    .upload-form-row input,
-    .upload-form-row textarea {
-      width: 100%;
-      padding: 6px 8px;
-      font-family: inherit;
-      font-size: 13px;
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      background: var(--bg, #fff);
-      color: var(--text, #1f2328);
-      box-sizing: border-box;
-    }
-    .upload-form-row {
-      margin-bottom: 8px;
-    }
-    .upload-form-row textarea {
-      min-height: 100px;
-      resize: vertical;
-      font-family: inherit;
-    }
-    .upload-status {
-      margin: 8px 0;
-      padding: 8px 10px;
-      border-radius: 4px;
-      font-size: 13px;
-    }
-    .upload-status.info { background: rgba(80, 120, 200, 0.12); }
-    .upload-status.ok { background: rgba(60, 180, 100, 0.18); }
-    .upload-status.warn { background: rgba(220, 170, 60, 0.18); }
-    .upload-status.error { background: rgba(220, 80, 80, 0.18); }
-    .preview-output {
-      max-height: 320px;
-      overflow: auto;
-      background: var(--bg, #fff);
-      border: 1px solid var(--border, #d0d7de);
-      border-radius: 4px;
-      padding: 10px;
-      font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      font-size: 11px;
-      line-height: 1.4;
-      white-space: pre-wrap;
-      word-break: break-word;
-    }
-    .preview-slug {
-      font-family: ui-monospace, "SF Mono", Menlo, monospace;
-      font-size: 12px;
-      color: var(--muted, #57606a);
-    }
-    .download-btn {
-      padding: 8px 16px;
-      font-family: inherit;
-      font-size: 14px;
-      font-weight: 600;
-      background: var(--text, #1f2328);
-      color: var(--bg, #fff);
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .download-btn:disabled {
-      opacity: 0.4;
-      cursor: not-allowed;
-    }
-    .download-btn:not(:disabled):hover {
-      background: #000;
-    }
-    @media (max-width: 700px) {
-      .upload-form-grid {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+  <link rel="stylesheet" href="/games/dnd/dnd.css?v=1" />
 </head>
 <body>
-
   <aside class="sidebar"></aside>
-
-  <main class="main" data-layout="wide">
-
-    <section class="intro">
-      <h1 class="intro-heading">Characters.</h1>
-      <p class="intro-body">
-        D&amp;D 5E character sheets. Click a character to open their sheet.
-      </p>
-    </section>
-
-    <div class="divider"></div>
-
-    <section class="upload-panel" id="upload-panel" hidden>
-      <h2>Upload your character</h2>
-      <p>
-        Uploads are reviewed by maltysnack before going live. Use the <strong>notes box</strong> for anything the auto-reader might miss: homebrew rules, magic item descriptions, spell overflow, or anything you want emphasized. Nothing leaves your browser unless you click Download.
-      </p>
-
-      <div class="upload-step">
-        <h3>1. Get the official sheet</h3>
-        <p>Fill in the WotC fillable PDF (or use one you already have). All form fields stay client-side.</p>
-        <a class="upload-pdf-link" href="/games/dnd/assets/5E_CharacterSheet_Fillable.pdf" download>Download the WotC fillable PDF</a>
-      </div>
-
-      <div class="upload-step">
-        <h3>2. Drop your filled PDF</h3>
-        <input type="file" id="upload-file" accept="application/pdf" hidden>
-        <div class="upload-drop" id="upload-drop">
-          Click or drop your filled <code>.pdf</code> here
-        </div>
-        <div class="upload-status info" id="upload-status">Waiting for a PDF.</div>
-      </div>
-
-      <div class="upload-step" id="upload-form-section" hidden>
-        <h3>3. Describe your character in two words</h3>
-        <p style="margin:0 0 10px;font-size:12px;color:var(--muted,#57606a);line-height:1.5">
-          Pick two single words that capture something about who they are: a job, a quirk, a piece of gear, a vibe. These show up under the name on the browse page and become part of the URL, so two Bobs the Cleric never collide. Grosh's are <em>chef</em> and <em>lifeguard</em>.
-        </p>
-        <div class="upload-form-grid">
-          <div>
-            <label for="descriptor-1">First word</label>
-            <input id="descriptor-1" type="text" placeholder="chef" autocomplete="off" />
-          </div>
-          <div>
-            <label for="descriptor-2">Second word</label>
-            <input id="descriptor-2" type="text" placeholder="lifeguard" autocomplete="off" />
-          </div>
-        </div>
-        <div class="upload-form-row">
-          <label for="slug-override">Name slug (filename base, edit if the auto-slug feels long)</label>
-          <input id="slug-override" type="text" placeholder="grosh" autocomplete="off" />
-          <p style="font-size:11px;color:var(--muted,#57606a);margin:4px 0 0">
-            Final filename: <span class="preview-slug" id="preview-slug">(needs name + 2 descriptors)</span>
-          </p>
-        </div>
-
-        <h3 style="margin-top:14px">4. Notes for the human reviewer</h3>
-        <div class="upload-form-row">
-          <label for="upload-notes">Anything the parser missed, homebrew, magic items, spell overflow, flags</label>
-          <textarea id="upload-notes" placeholder="e.g. trident uses DEX not STR. Cloak of Protection +1 to AC and saves. Spell list: Magic Missile, Shield, ..."></textarea>
-        </div>
-      </div>
-
-      <div class="upload-step" id="upload-preview-section" hidden>
-        <h3>5. Preview the parsed JSON</h3>
-        <p>This is what will be sent. Catches parse mistakes before download.</p>
-        <pre class="preview-output" id="preview-output"></pre>
-        <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
-          <button type="button" class="download-btn" id="submit-btn" disabled>Submit for review</button>
-          <button type="button" class="download-btn" id="download-btn" style="background:transparent;color:var(--text);border:1px solid var(--border,#d0d7de)" disabled>Download .json instead</button>
-          <span style="font-size:12px;color:var(--muted,#57606a)">submit opens a PR maltysnack reviews. download lets you send it manually.</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="browse-controls">
-      <input type="search" id="search" placeholder="Search by name, descriptor, class..." aria-label="Search characters" />
-      <select id="sort" aria-label="Sort by">
-        <option value="name-asc">Name A&ndash;Z</option>
-        <option value="name-desc">Name Z&ndash;A</option>
-        <option value="level-desc">Level high&ndash;low</option>
-        <option value="level-asc">Level low&ndash;high</option>
-        <option value="class-asc">Class A&ndash;Z</option>
-      </select>
-      <select id="filter-class" aria-label="Filter by class">
-        <option value="">Any class</option>
-      </select>
-      <select id="filter-level" aria-label="Filter by level">
-        <option value="">Any level</option>
-        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
-        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
-        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
-        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
-      </select>
-      <button type="button" class="upload-toggle-btn" id="upload-toggle" aria-expanded="false" aria-controls="upload-panel">
-        + upload
-      </button>
-    </section>
-
-    <section class="home-links" id="character-grid"></section>
-
-    <nav class="pagination" id="pagination" style="display:none">
-      <button id="prev-page" type="button">&larr; prev</button>
-      <span id="page-info"></span>
-      <button id="next-page" type="button">next &rarr;</button>
-    </nav>
-
+  <main class="main dnd" data-layout="page">
+    <div class="dnd-head">
+      <h1>Characters</h1>
+      <label class="btn" for="import">Import</label>
+      <input type="file" id="import" accept=".json,application/json" hidden />
+      <a class="btn primary" href="/games/dnd/edit.html">New character</a>
+    </div>
+    <p class="dnd-note">Saved in this browser only. Export a save file from a sheet to back up or move to another device.</p>
+    <ul class="roster" id="roster"></ul>
   </main>
-
+  <script src="/games/dnd/store.js?v=1"></script>
+  <script>
+    function renderRoster() {
+      const ul = document.getElementById('roster');
+      const all = DND.list();
+      ul.innerHTML = all.length ? '' : '<li class="roster-empty">No characters yet.</li>';
+      all.forEach(({ character: c, state }) => {
+        const li = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = `/games/dnd/sheet.html?id=${encodeURIComponent(c.id)}`;
+        a.innerHTML = '<span class="r-name"></span><span class="r-class"></span><span class="r-hp"></span>';
+        a.children[0].textContent = c.identity.name;
+        a.children[1].textContent = c.identity.classLine || '';
+        const hp = state?.hp || { current: c.combat.hpMax, max: c.combat.hpMax };
+        a.children[2].textContent = `${hp.current}/${hp.max} HP`;
+        li.appendChild(a);
+        ul.appendChild(li);
+      });
+    }
+    document.getElementById('import').addEventListener('change', async e => {
+      const file = e.target.files[0];
+      e.target.value = '';
+      if (!file) return;
+      try {
+        const id = await DND.importFile(file);
+        if (id) location.href = `/games/dnd/sheet.html?id=${encodeURIComponent(id)}`;
+      } catch (err) {
+        alert('Could not import: ' + err.message);
+      }
+    });
+    renderRoster();
+  </script>
   <script src="/sidebar.js?v=5"></script>
-  <script src="/games/dnd/index.js"></script>
-  <script src="/games/dnd/class-resources.js"></script>
-  <script type="module" src="/games/dnd/upload.js"></script>
 </body>
 </html>

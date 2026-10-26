@@ -2,8 +2,8 @@
    class-resources.js
 
    Lookup tables for class + level => spell slots and class resources.
-   Used by the upload parser to auto-fill data the WotC sheet doesn't
-   carry directly. Best-effort coverage of standard 5E classes.
+   Used by the character form to pre-fill slots and resources.
+   Best-effort coverage of standard 5E classes.
 
    Returns an object: { spellSlots: { '1': N, ... }, resources: [...] }
    ===================================================================== */

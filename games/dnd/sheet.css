@@ -1,13 +1,15 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('/design/palette.css?v=1');
+
+/* Site palette mapped onto the sheet's own names. Light/dark follows the
+   palette (system setting, or the theme chosen elsewhere on the site). */
 :root {
-  --bg: #ffffff;
-  --text: #1f2328;
-  --muted: #57606a;
-  --faint: #8c959f;
-  --border: #d0d7de;
-  --rule: #eaeef2;
-  --subtle: #f6f8fa;
-  --used: #afb8c1;
-  --highlight: #f6f8fa;
+  --muted: var(--text-muted);
+  --faint: var(--text-dim);
+  --rule: var(--border);
+  --subtle: var(--bg-soft);
+  --used: var(--border-strong);
+  --highlight: var(--surface);
 }
 
 * { box-sizing: border-box; }
@@ -17,7 +19,7 @@ html, body {
   padding: 0;
   background: var(--bg);
   color: var(--text);
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", Helvetica, Arial, sans-serif;
+  font-family: var(--font-body);
   font-size: 12px;
   line-height: 1.4;
 }
@@ -454,11 +456,9 @@ textarea#notes:focus { outline: none; border-color: var(--text); }
   display: inline-block;
   width: 14px;
   height: 14px;
-  background-color: transparent;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="%231f2328" stroke="%231f2328" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 12 L12 22 M12 12 L2 7 M12 12 L22 7" stroke="%23ffffff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background: var(--accent);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7"/></svg>') center / contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7"/></svg>') center / contain no-repeat;
   border: none;
   border-radius: 0;
   padding: 0;
@@ -469,7 +469,9 @@ textarea#notes:focus { outline: none; border-color: var(--text); }
 .pip::before { content: none; }
 
 .pip.used {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="none" stroke="%23afb8c1" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 12 L12 22 M12 12 L2 7 M12 12 L22 7" stroke="%23afb8c1" stroke-width="1" fill="none" stroke-linecap="round"/></svg>');
+  background: var(--used);
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,3 21,7.5 21,16.5 12,21 3,16.5 3,7.5" fill="none" stroke="black" stroke-width="2"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,3 21,7.5 21,16.5 12,21 3,16.5 3,7.5" fill="none" stroke="black" stroke-width="2"/></svg>');
 }
 
 .pip.used::before { content: none; }
@@ -483,11 +485,9 @@ textarea#notes:focus { outline: none; border-color: var(--text); }
   display: inline-block;
   width: 14px;
   height: 14px;
-  background-color: transparent;
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="none" stroke="%23afb8c1" stroke-width="1.4" stroke-linejoin="round"/><path d="M12 12 L12 22 M12 12 L2 7 M12 12 L22 7" stroke="%23afb8c1" stroke-width="1" fill="none" stroke-linecap="round"/></svg>');
-  background-size: contain;
-  background-repeat: no-repeat;
-  background-position: center;
+  background: var(--used);
+  -webkit-mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,3 21,7.5 21,16.5 12,21 3,16.5 3,7.5" fill="none" stroke="black" stroke-width="2"/></svg>') center / contain no-repeat;
+  mask: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,3 21,7.5 21,16.5 12,21 3,16.5 3,7.5" fill="none" stroke="black" stroke-width="2"/></svg>') center / contain no-repeat;
   border: none;
   padding: 0;
   cursor: pointer;
@@ -497,11 +497,14 @@ textarea#notes:focus { outline: none; border-color: var(--text); }
 .pip-toggle::before { content: none; }
 
 .pip-toggle.on {
-  background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7" fill="%231f2328" stroke="%231f2328" stroke-width="1.2" stroke-linejoin="round"/><path d="M12 12 L12 22 M12 12 L2 7 M12 12 L22 7" stroke="%23ffffff" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>');
+  background: var(--accent);
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><polygon points="12,2 22,7 22,17 12,22 2,17 2,7"/></svg>');
 }
 
 .pip-toggle.on::before { content: none; }
-.pip-toggle:hover { transform: scale(1.2); }
+.pip-toggle:hover { transform: scale(1.2); background: var(--used); }
+.pip-toggle.on:hover { background: var(--accent); }
 
 /* ---------- Buttons ---------- */
 button {
@@ -521,11 +524,17 @@ button:hover { background: var(--subtle); }
 button.ghost { border-color: transparent; color: var(--muted); }
 button.ghost:hover { color: var(--text); border-color: var(--border); background: var(--subtle); }
 
-button.primary { background: var(--text); color: var(--bg); border-color: var(--text); }
-button.primary:hover { background: #000; }
+button.primary { background: var(--accent); color: var(--bg); border-color: var(--accent); }
+button.primary:hover { filter: brightness(1.1); }
 
-button.danger:hover { color: #cf222e; }
-button.big { padding: 5px 14px; font-size: 12px; }
+button.danger:hover { color: var(--bad); }
+button.big, .footer a.big { padding: 5px 14px; font-size: 12px; }
+.footer a.big { border: 1px solid var(--border); border-radius: 3px; text-decoration: none; color: var(--text); cursor: pointer; }
+.footer a.big:hover { background: var(--subtle); }
+
+.load-error { max-width: 600px; margin: 80px auto; padding: 24px; border: 1px solid var(--border); border-radius: 6px; }
+.load-error h1 { font-size: 18px; margin-bottom: 12px; }
+.load-error p { margin: 0; font-size: 13px; }
 
 /* ---------- Editable ---------- */
 .editable {
@@ -646,45 +655,10 @@ button.big { padding: 5px 14px; font-size: 12px; }
   font-size: 10px;
 }
 
-/* Update sheet block */
-.update-block textarea#update-description {
-  width: 100%;
-  min-height: 60px;
-  padding: 4px 6px;
-  font-family: inherit;
-  font-size: 11px;
-  border: 1px solid var(--border);
-  border-radius: 3px;
-  background: var(--bg);
-  color: var(--text);
-  resize: vertical;
-  box-sizing: border-box;
-}
-.update-block textarea#update-description:focus { outline: none; border-color: var(--text); }
-.update-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-top: 6px;
-  flex-wrap: wrap;
-}
-.update-status {
-  font-size: 10px;
-  line-height: 1.3;
-  flex: 1;
-  min-width: 0;
-  word-break: break-word;
-}
-.update-status.info { color: var(--muted); }
-.update-status.warn { color: #b58200; }
-.update-status.error { color: #cf222e; }
-.update-status.ok { color: #1a7f37; }
-.update-status a { color: inherit; }
 
 /* =====================================================================
    Print styles. Triggered when the user clicks Print or hits Cmd/Ctrl+P.
-   Hides interactive bits (forms, rest buttons, the update-sheet block,
-   conc drop button) and tightens spacing so the sheet fits on a page or
+   Hides interactive bits (forms, rest buttons, conc drop button) and tightens spacing so the sheet fits on a page or
    two. Wiki link underlines stay so the printed PDF retains URLs.
    ===================================================================== */
 @media print {
@@ -696,7 +670,6 @@ button.big { padding: 5px 14px; font-size: 12px; }
   }
   /* Hide interactive forms */
   .add-form,
-  .update-block,
   .footer,
   .remove-btn,
   #conc-clear,

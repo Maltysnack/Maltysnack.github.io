@@ -1,0 +1,70 @@
+/* Roster + character form. The sheet has its own sheet.css. */
+
+.dnd-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 8px; }
+.dnd-head h1 { margin: 0; flex: 1; }
+.dnd-note { color: var(--text-muted); margin: 0 0 24px; }
+
+.btn, .dnd button {
+  font: inherit; font-size: 14px; padding: 7px 14px; cursor: pointer;
+  border: 1px solid var(--border-strong); border-radius: 4px;
+  background: var(--bg); color: var(--text); text-decoration: none;
+}
+.btn:hover, .dnd button:hover { border-color: var(--text); }
+.btn.primary, .dnd button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
+.dnd button.ghost { border-color: transparent; background: none; color: var(--text-dim); padding: 4px 8px; }
+.dnd button.ghost:hover { color: var(--accent); }
+.dnd button.danger { color: var(--bad); border-color: var(--bad); }
+
+/* Roster */
+.roster { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.roster a {
+  display: flex; align-items: baseline; gap: 12px; padding: 14px 16px;
+  border: 1px solid var(--border); border-radius: 6px; text-decoration: none; color: var(--text);
+}
+.roster a:hover { border-color: var(--accent); }
+.roster .r-name { font-family: var(--font-display); font-size: 20px; }
+.roster .r-class { color: var(--text-muted); flex: 1; }
+.roster .r-hp { font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--text-muted); }
+.roster-empty { color: var(--text-dim); font-style: italic; }
+
+/* Form */
+.dnd fieldset { border: 0; border-top: 1px solid var(--border); margin: 0; padding: 18px 0 22px; }
+.dnd legend {
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: var(--tracking-label);
+  text-transform: uppercase; color: var(--accent); padding: 0 8px 0 0;
+}
+.dnd .hint { color: var(--text-dim); font-size: 13px; margin: 0 0 10px; }
+.dnd label { display: flex; flex-direction: column; gap: 4px; font-size: 13px; color: var(--text-muted); }
+.dnd input, .dnd select, .dnd textarea {
+  font: inherit; font-size: 14px; padding: 6px 8px; min-width: 0;
+  border: 1px solid var(--border); border-radius: 4px; background: var(--bg); color: var(--text);
+}
+.dnd input:focus, .dnd select:focus { outline: none; border-color: var(--accent); }
+.dnd input[type="checkbox"] { padding: 0; accent-color: var(--accent); }
+
+.grid { display: grid; gap: 12px; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); }
+.grid.six { grid-template-columns: repeat(6, 1fr); }
+.grid.nine { grid-template-columns: repeat(9, 1fr); gap: 6px; }
+.ab input, .slot input { text-align: center; font-family: var(--font-mono); }
+.ab span, .slot span { text-align: center; }
+.checks { display: grid; gap: 6px 16px; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); }
+.dnd label.check { flex-direction: row; align-items: center; gap: 8px; color: var(--text); }
+.inline { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; margin-top: 12px; }
+.dnd label.check.inline-check { flex-direction: row; }
+
+.rows { display: grid; gap: 6px; margin-bottom: 8px; }
+.row { display: flex; gap: 6px; align-items: center; }
+.row > * { min-width: 0; }
+
+.form-actions {
+  position: sticky; bottom: 0; display: flex; gap: 10px; align-items: center;
+  padding: 14px 0; background: var(--bg); border-top: 1px solid var(--border);
+}
+.form-actions .spacer { flex: 1; }
+
+@media (max-width: 640px) {
+  .grid.six { grid-template-columns: repeat(3, 1fr); }
+  .grid.nine { grid-template-columns: repeat(5, 1fr); }
+  .row { flex-wrap: wrap; }
+  .row > input, .row > select { flex: 1 1 40% !important; }
+}

@@ -9,7 +9,7 @@
 ### Projects
 
 **FPL bot:**<br>
-An autonomous Fantasy Premier League bot: season log, model accuracy, and what it plans next.
+An autonomous Fantasy Premier League bot: how it is doing, where the points went, and whether its model can be trusted.
 
 **World Cup 2026:**<br>
 A simulation of the 2026 World Cup, predictions and bracket. Currently scaffolding.
@@ -26,7 +26,7 @@ A flock in three dimensions from three local rules and no leader, with a hawk to
 ### Games
 
 **dnd:**<br>
-Live D&D 5e character sheets for an ongoing campaign.
+D&D 5e character sheets that save in your browser: track HP, slots, spells and loot.
 
 **Duoclue:**<br>
 Describe the word using exactly two words. A party game for one phone.

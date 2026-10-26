@@ -1,19 +1,15 @@
 /* =====================================================================
    sheet.js - generic D&D 5E character sheet engine
 
-   Reads window.CHARACTER_ID, fetches /games/dnd/characters/<id>.json, builds
-   the entire DOM, manages localStorage state.
-
-   To add a new character: drop a JSON in /games/dnd/characters/, run the
-   build script, the engine handles the rest.
+   Reads ?id=<id>, loads that character from this browser (store.js),
+   builds the entire DOM, and saves the whole sheet on every change.
    ===================================================================== */
 
-const SLUG = window.CHARACTER_ID;
+const SLUG = new URLSearchParams(location.search).get('id');
 const WIKI_BASE = 'https://dnd5e.wikidot.com/spell:';
 
 let CHARACTER = null;
 let state = null;
-const STORAGE_KEY = () => `sheet-${SLUG}-v1`;
 
 function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
@@ -125,12 +121,13 @@ function padArr(arr, len) {
   return Array(len).fill(false).map((_, i) => !!a[i]);
 }
 
-function loadState() {
+/* Pads saved state to the character's current shape, so an edit that adds
+   a slot or resource never breaks a sheet mid-campaign. */
+function loadState(saved) {
   const def = makeDefaultState();
   try {
-    const raw = localStorage.getItem(STORAGE_KEY());
-    if (!raw) return def;
-    const parsed = { ...def, ...JSON.parse(raw) };
+    if (!saved) return def;
+    const parsed = { ...def, ...structuredClone(saved) };
 
     parsed.spellSlots = parsed.spellSlots || {};
     Object.entries(CHARACTER.spellSlots || {}).forEach(([k, n]) => {
@@ -164,7 +161,7 @@ function loadState() {
 
 function saveState() {
   try {
-    localStorage.setItem(STORAGE_KEY(), JSON.stringify(state));
+    DND.put(SLUG, { character: CHARACTER, state });
   } catch (err) {
     // A full or disabled store must not take the sheet down mid-session.
     console.warn('Could not save sheet state', err);
@@ -331,14 +328,6 @@ function buildLayout() {
           <textarea id="notes" placeholder="session notes, NPCs, plot threads"></textarea>
         </div>
 
-        <div class="block update-block">
-          <h2>Update sheet <span class="hint">level-ups, loot, spell swaps</span></h2>
-          <textarea id="update-description"></textarea>
-          <div class="update-row">
-            <button id="update-submit" type="button">Submit changes</button>
-            <span id="update-status" class="update-status muted"></span>
-          </div>
-        </div>
       </section>
 
     </main>
@@ -347,17 +336,19 @@ function buildLayout() {
       <button id="short-rest" class="big">Short Rest</button>
       <button id="long-rest" class="big primary">Long Rest</button>
       <span class="spacer"></span>
+      <a class="big" href="/games/dnd/">Characters</a>
+      <a class="big" id="edit-link">Edit</a>
+      <button id="export-btn" class="big">Save file</button>
       <button id="print-btn" class="big">Print</button>
-      <button id="download-pdf-btn" class="big">Sheet PDF</button>
     </footer>
   `;
 }
 
 function showError(msg) {
   document.body.innerHTML = `
-    <div style="max-width:600px;margin:80px auto;padding:24px;border:1px solid #d0d7de;border-radius:6px;font-family:-apple-system,BlinkMacSystemFont,sans-serif">
-      <h1 style="margin:0 0 12px;font-size:18px">Couldn't load this character</h1>
-      <p style="margin:0;color:#57606a;font-size:13px">${msg}</p>
+    <div class="load-error">
+      <h1>Couldn't load this character</h1>
+      <p class="muted">${msg}</p>
       <p style="margin:16px 0 0;font-size:12px"><a href="/games/dnd/">&larr; back to characters</a></p>
     </div>
   `;
@@ -693,6 +684,7 @@ function buildSpellRow({ lvlLabel, name, slug, tags = [], used, onClickRow, extr
 }
 
 function castPreparedSpell(spell) {
+  if (!spell.lvl) return; // cantrips cost nothing
   let useLvl = null;
   for (let l = spell.lvl; l <= 9; l++) {
     const slots = state.spellSlots[l];
@@ -1041,42 +1033,6 @@ function wireEvents() {
   });
   window.addEventListener('pagehide', commitPendingEdits);
 
-  document.getElementById('update-submit').addEventListener('click', async () => {
-    const desc = document.getElementById('update-description').value.trim();
-    const status = document.getElementById('update-status');
-    const btn = document.getElementById('update-submit');
-    if (desc.length < 5) {
-      status.textContent = 'Describe what changed (at least a few words).';
-      status.className = 'update-status warn';
-      return;
-    }
-    btn.disabled = true;
-    status.textContent = 'Submitting...';
-    status.className = 'update-status info';
-    try {
-      const res = await fetch('https://dnd-upload-maltysnacks-projects.vercel.app/api/update', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          slug: SLUG,
-          description: desc,
-          state,
-          website: '',
-        }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) throw new Error(data?.error || `HTTP ${res.status}`);
-      status.innerHTML = `Submitted &rarr; <a href="${data.prUrl}" target="_blank" rel="noopener">PR #${data.prNumber}</a>. Wren will polish, maltysnack merges.`;
-      status.className = 'update-status ok';
-      document.getElementById('update-description').value = '';
-    } catch (err) {
-      status.textContent = `Submit failed: ${err.message}`;
-      status.className = 'update-status error';
-    } finally {
-      btn.disabled = false;
-    }
-  });
-
   document.getElementById('short-rest').addEventListener('click', () => {
     if (!confirm('Short rest? Restores resources marked 1/short, any limited spells with restoresOn=short, and (Pact Magic) spell slots if spellSlotsRestoresOn=short.')) return;
     (CHARACTER.resources || []).forEach(r => {
@@ -1122,58 +1078,25 @@ function wireEvents() {
     render();
   });
 
-  document.getElementById('download-pdf-btn').addEventListener('click', downloadPdf);
+  document.getElementById('export-btn').addEventListener('click', () => { commitPendingEdits(); DND.exportFile(SLUG); });
   document.getElementById('print-btn').addEventListener('click', () => window.print());
-}
-
-/* Lazy-loads pdf-lib + pdf-export on click. First-page-load weight unchanged. */
-async function downloadPdf() {
-  const btn = document.getElementById('download-pdf-btn');
-  const orig = btn.textContent;
-  btn.disabled = true;
-  btn.textContent = 'Building...';
-  try {
-    const [pdfLib, exporter] = await Promise.all([
-      import('https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/+esm'),
-      import('/games/dnd/pdf-export.js'),
-    ]);
-    const tplBuf = await fetch('/games/dnd/assets/5E_CharacterSheet_Fillable.pdf').then(r => r.arrayBuffer());
-    const bytes = await exporter.fillCharacterPdf(CHARACTER, state, tplBuf, pdfLib.PDFDocument);
-    const blob = new Blob([bytes], { type: 'application/pdf' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `${SLUG}-${new Date().toISOString().slice(0, 10)}.pdf`;
-    a.click();
-    URL.revokeObjectURL(url);
-  } catch (err) {
-    console.error(err);
-    alert('PDF generation failed: ' + err.message);
-  } finally {
-    btn.disabled = false;
-    btn.textContent = orig;
-  }
+  document.getElementById('edit-link').href = `/games/dnd/edit.html?id=${encodeURIComponent(SLUG)}`;
 }
 
 /* =====================================================================
    Init
    ===================================================================== */
 
-async function init() {
-  if (!SLUG) {
-    showError('No CHARACTER_ID set on this page.');
+function init() {
+  const rec = SLUG && DND.get(SLUG);
+  if (!rec) {
+    showError('This character is not saved in this browser. Import its save file from the character list.');
     return;
   }
-  try {
-    const res = await fetch(`/games/dnd/characters/${SLUG}.json`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    CHARACTER = await res.json();
-  } catch (err) {
-    showError(`Could not load /games/dnd/characters/${SLUG}.json. (${err.message})`);
-    return;
-  }
+  CHARACTER = rec.character;
+  document.title = `${CHARACTER.identity.name} - D&D`;
   buildLayout();
-  state = loadState();
+  state = loadState(rec.state);
   wireEvents();
   restoreDrafts();
   render();

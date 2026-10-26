@@ -4,7 +4,7 @@ Index for `/games/`. Root `HANDOFF.md` covers site-wide concerns.
 
 ## Subprojects
 
-- [`dnd/HANDOFF.md`](dnd/HANDOFF.md): D&D character sheet engine
+- [`dnd/HANDOFF.md`](dnd/HANDOFF.md): D&D character sheets, saved in the browser
 - [`duoclue/HANDOFF.md`](duoclue/HANDOFF.md): Duoclue, a Next.js static export
 
 ## Removed 15-10-2026

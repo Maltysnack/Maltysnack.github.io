@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Create or edit a D&D 5e character, saved in this browser." />
+  <title>Character - D&amp;D</title>
+  <link rel="stylesheet" href="/style.css?v=8" />
+  <link rel="stylesheet" href="/games/dnd/dnd.css?v=1" />
+</head>
+<body>
+  <aside class="sidebar"></aside>
+  <main class="main dnd" data-layout="wide">
+    <form id="form" autocomplete="off">
+      <div class="dnd-head"><h1 id="title">New character</h1></div>
+
+      <fieldset>
+        <legend>Who</legend>
+        <div class="grid">
+          <label>Name <input id="name" required></label>
+          <label>Race <input id="race" placeholder="Triton"></label>
+          <label>Class <select id="class"></select></label>
+          <label>Subclass <input id="subclass" placeholder="Ancients"></label>
+          <label>Level <select id="level"></select></label>
+          <label>Background <input id="background"></label>
+          <label>Speed <input id="speed" placeholder="30 ft, swim 30"></label>
+          <label>Languages <input id="languages" placeholder="Common"></label>
+        </div>
+        <label style="margin-top:12px">Other proficiencies <input id="profs" placeholder="armour, weapons, tools"></label>
+      </fieldset>
+
+      <fieldset>
+        <legend>Abilities</legend>
+        <div class="grid six" id="abilities"></div>
+        <div class="inline"><label>Spellcasting ability <select id="cast-ability"></select></label></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Proficient saves and skills</legend>
+        <div class="checks" id="saves"></div>
+        <div class="checks" id="skills" style="margin-top:14px"></div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Combat</legend>
+        <div class="grid">
+          <label>AC <input id="ac" type="number" min="1" max="40"></label>
+          <label>Max HP <input id="hp" type="number" min="1"></label>
+          <label>Hit die <select id="hit-die"><option>d6</option><option>d8</option><option>d10</option><option>d12</option></select></label>
+          <label>Reaction <input id="reaction-title" placeholder="Shield, Interception"></label>
+        </div>
+        <label style="margin-top:12px">Reaction effect <input id="reaction-desc"></label>
+        <div data-rows="attacks" style="margin-top:16px">
+          <p class="hint">Attacks</p>
+          <div class="rows"></div><button type="button" class="add-row">Add attack</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Spell slots and resources</legend>
+        <p class="hint">Filled from class and level. Change anything.</p>
+        <div class="grid nine" id="slots"></div>
+        <div class="inline">
+          <label class="check"><input type="checkbox" id="pact"> Slots come back on a short rest</label>
+          <button type="button" id="refill">Fill from class and level</button>
+        </div>
+        <div data-rows="resources" style="margin-top:16px">
+          <p class="hint">Class resources: rage, ki, channel divinity, anything you tick off</p>
+          <div class="rows"></div><button type="button" class="add-row">Add resource</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Spells</legend>
+        <div data-rows="spells">
+          <p class="hint">Prepared and known. Level 0 is a cantrip. Tag conc or BA.</p>
+          <div class="rows"></div><button type="button" class="add-row">Add spell</button>
+        </div>
+        <div data-rows="limited" style="margin-top:16px">
+          <p class="hint">Limited-use spells: racial, from items, scrolls</p>
+          <div class="rows"></div><button type="button" class="add-row">Add limited spell</button>
+        </div>
+      </fieldset>
+
+      <fieldset>
+        <legend>Features</legend>
+        <div data-rows="features">
+          <p class="hint">Class features and feats</p>
+          <div class="rows"></div><button type="button" class="add-row">Add feature</button>
+        </div>
+        <div data-rows="traits" style="margin-top:16px">
+          <p class="hint">Racial traits</p>
+          <div class="rows"></div><button type="button" class="add-row">Add trait</button>
+        </div>
+      </fieldset>
+
+      <fieldset id="inventory-box">
+        <legend>Starting equipment</legend>
+        <div data-rows="inventory">
+          <div class="rows"></div><button type="button" class="add-row">Add item</button>
+        </div>
+      </fieldset>
+
+      <div class="form-actions">
+        <button type="submit" class="primary">Save</button>
+        <a class="btn" id="cancel" href="/games/dnd/">Cancel</a>
+        <span class="spacer"></span>
+        <button type="button" class="danger" id="delete" hidden>Delete</button>
+      </div>
+    </form>
+  </main>
+  <script src="/games/dnd/store.js?v=1"></script>
+  <script src="/games/dnd/class-resources.js?v=2"></script>
+  <script src="/games/dnd/edit.js?v=1"></script>
+  <script src="/sidebar.js?v=5"></script>
+</body>
+</html>
