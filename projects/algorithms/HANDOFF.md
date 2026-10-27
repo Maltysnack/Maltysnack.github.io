@@ -83,3 +83,14 @@ and the 22-10 transport described above are gone.
 - Tiles deals only boards with Manhattan h >= 5 (about 90% of deals).
 - Checked in headless Chromium at 1280x800 and 375x812, light and dark: no
   scroll, no console errors.
+
+## 28-10-2026: feedback fixes
+
+- The algorithm pick survives New board and tab switches (`mode.algo`); New
+  board used to rebuild the select and reset it to A*.
+- Tiles line states the goal ("every yellow tile left of every blue one").
+  No Wikipedia link: this is not the 15 puzzle, and no page matches it.
+- Tour runs slower (GA 5 s, ACO 8 s) and the board is clickable: empty space
+  adds a city, a city removes it (4 to 40 cities). Above 15 the gap is to the
+  best known tour, not a proven optimum.
+- Viz at `?v=17`.

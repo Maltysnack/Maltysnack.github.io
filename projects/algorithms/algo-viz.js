@@ -179,7 +179,7 @@ const COLORS = ['Y', 'B'];
 const MOVE_MS = 380, PAUSE_MS = 260;
 
 const tiles = {
-  line: 'Sort the colours. A tile jumps into the gap from up to three places away, paying the distance.',
+  line: 'Goal: every yellow tile left of every blue one. A tile jumps into the gap from up to three places away; the move costs the distance jumped.',
   algos: [['astar', 'A*'], ['greedy', 'Greedy best-first'], ['ids', 'Iterative deepening']],
   state: '', moving: null,
 
@@ -258,10 +258,11 @@ const tiles = {
 
 const CITIES = 12;           // Held-Karp proves the optimum up to 15
 const ITERATIONS = { ga: 200, aco: 80 };
-const TOUR_ANIM_MS = 3000;
+const TOUR_ANIM_MS = { ga: 5000, aco: 8000 };
+const MAX_CITIES = 40;
 
 const tour = {
-  line: 'Visit every city once and come home by the shortest loop. Neither method promises the best one.',
+  line: 'Visit every city once and come home by the shortest loop. Click to add or remove a city. Neither method promises the best one.',
   algos: [['ga', 'Genetic algorithm'], ['aco', 'Ant colony']],
   points: [], solver: null, ref: null, showRef: false,
 
@@ -285,7 +286,7 @@ const tour = {
     const solver = (algo === 'ga' ? createGA : createACO)(this.points);
     this.solver = solver;
     const target = ITERATIONS[algo];
-    const perFrame = Math.max(1, Math.ceil(target / (TOUR_ANIM_MS / 16)));
+    const perFrame = Math.max(1, Math.ceil(target / (TOUR_ANIM_MS[algo] / 16)));
     const label = this.ref.exact ? 'optimum' : 'best known';
     const show = () => {
       const gap = (solver.bestLength / this.ref.length - 1) * 100;
@@ -306,9 +307,27 @@ const tour = {
     draw();
   },
 
-  draw() {
+  frame() {
     const s = Math.min(W / this.aspect, H);
-    const ox = (W - s * this.aspect) / 2, oy = (H - s) / 2;
+    return { s, ox: (W - s * this.aspect) / 2, oy: (H - s) / 2 };
+  },
+
+  // Click empty space to plant a city, click a city to remove it.
+  pointerdown(e) {
+    const { s, ox, oy } = this.frame();
+    const rect = canvas.getBoundingClientRect();
+    const x = (e.clientX - rect.left - ox) / s, y = (e.clientY - rect.top - oy) / s;
+    if (x < 0 || y < 0 || x > this.aspect || y > 1) return;
+    const hit = this.points.findIndex((p) => Math.hypot(p.x - x, p.y - y) < 0.03);
+    if (hit >= 0) { if (this.points.length > 4) this.points.splice(hit, 1); }
+    else if (this.points.length < MAX_CITIES) this.points.push({ x, y });
+    else return;
+    this.solver = null;
+    start();
+  },
+
+  draw() {
+    const { s, ox, oy } = this.frame();
     const P = (i) => [ox + this.points[i].x * s, oy + this.points[i].y * s];
     const loop = (t) => {
       ctx.beginPath();
@@ -370,6 +389,7 @@ function select(name, { fresh = false } = {}) {
   document.querySelectorAll('.al-tabs button').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === name));
   els.line.textContent = mode.line;
   els.algo.innerHTML = mode.algos.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
+  els.algo.value = mode.algo || mode.algos[0][0]; // keep the pick across New board and tab switches
   els.stats.textContent = '';
   if (fresh || !mode.ready) { mode.newBoard(); mode.ready = true; }
   history.replaceState(null, '', '#' + name);
@@ -389,7 +409,8 @@ function resize() {
 }
 
 document.querySelectorAll('.al-tabs button').forEach((b) => b.addEventListener('click', () => select(b.dataset.tab)));
-els.algo.addEventListener('change', () => { if (mode.clearTrace) mode.clearTrace(); start(); });
+els.algo.addEventListener('change', () => {
+  mode.algo = els.algo.value; if (mode.clearTrace) mode.clearTrace(); start(); });
 els.run.addEventListener('click', () => { if (mode.clearTrace) mode.clearTrace(); start(); });
 els.fresh.addEventListener('click', () => select(Object.keys(MODES).find((k) => MODES[k] === mode), { fresh: true }));
 for (const ev of ['pointerdown', 'pointermove', 'pointerup', 'pointerleave']) {
