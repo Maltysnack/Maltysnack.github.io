@@ -7,35 +7,14 @@
 <meta name="description" content="A paper-money betting bot that bets Elo model chances against Sportsbet 1X2 prices, plus the scored 2026 World Cup forecast.">
 <!-- Built to DISPLAY.md in the worldcup repo. Data: bankroll.json, capsule.json, written by scripts/export_site_v2.py in the worldcup repo.
      Open with ?frames to see 1440x900 and 390x844 side by side. -->
-<link rel="stylesheet" href="/style.css?v=8">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=IBM+Plex+Mono:wght@400;500;600&family=Instrument+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/style.css?v=9">
 <style>
 :root {
-  --paper: #f3efe6;
-  --paper-2: #e9e3d6;
-  --ink: #15130f;
-  --ink-2: #5d574c;
-  --ink-3: #9a9384;
-  --rule: #cfc7b6;
-  --up: #0f7a4a;
-  --down: #c2361d;
-  --hi: #e8b500;
-  --display: "Big Shoulders Display", "Arial Narrow", sans-serif;
-  --mono: "IBM Plex Mono", ui-monospace, monospace;
-  --sans: "Instrument Sans", system-ui, sans-serif;
-  color-scheme: light;
-}
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --paper: #12110e; --paper-2: #1c1a16; --ink: #f1ece0; --ink-2: #b3ab9b; --ink-3: #6e685c;
-    --rule: #2f2b25; --up: #3fcf8a; --down: #ff6b4f; --hi: #f5c518; color-scheme: dark;
-  }
-}
-:root[data-theme="dark"] {
-  --paper: #12110e; --paper-2: #1c1a16; --ink: #f1ece0; --ink-2: #b3ab9b; --ink-3: #6e685c;
-  --rule: #2f2b25; --up: #3fcf8a; --down: #ff6b4f; --hi: #f5c518; color-scheme: dark;
+  /* The page's names, mapped onto the site palette and type. */
+  --paper: var(--bg); --paper-2: var(--bg-soft);
+  --ink: var(--text); --ink-2: var(--text-muted); --ink-3: var(--text-dim);
+  --rule: var(--border); --up: var(--good); --down: var(--bad); --hi: var(--accent);
+  --display: var(--font-display); --mono: var(--font-mono); --sans: var(--font-body);
 }
 * { box-sizing: border-box; margin: 0; }
 html, body { height: 100%; }
@@ -87,7 +66,7 @@ section.on { display: grid; }
 .stat b { display: block; font: 600 clamp(20px, 2.2vw, 32px)/1 var(--mono); margin-top: 8px; font-variant-numeric: tabular-nums; }
 .next { grid-column: span 1; }
 .next b { font: 500 14px/1.35 var(--sans); }
-.next b em { font-style: normal; font-family: var(--mono); background: var(--hi); color: #15130f; padding: 1px 6px; border-radius: 3px; }
+.next b em { font-style: normal; font-family: var(--mono); background: var(--hi); color: #fff; padding: 1px 6px; border-radius: 3px; }
 
 /* 2026 */
 #capsule { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); grid-template-rows: 1fr auto; gap: 0 clamp(24px, 4vw, 72px); }
@@ -122,7 +101,7 @@ section.on { display: grid; }
 .g .p { text-align: right; font-variant-numeric: tabular-nums; }
 .g .p.pick { color: var(--ink); font-weight: 600; }
 .g .why { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.g .why em { font-style: normal; background: var(--hi); color: #15130f; padding: 1px 6px; border-radius: 3px; }
+.g .why em { font-style: normal; background: var(--hi); color: #fff; padding: 1px 6px; border-radius: 3px; }
 
 footer { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
 .stamp { font: 600 11px/1 var(--mono); letter-spacing: .1em; text-transform: uppercase; color: var(--down); border: 1px dashed currentColor; padding: 5px 8px; }
@@ -378,6 +357,6 @@ if (new URLSearchParams(location.search).has('frames')) {
   });
 }
 </script>
-<script src="/sidebar.js?v=5"></script>
+<script src="/sidebar.js?v=6"></script>
 </body>
 </html>

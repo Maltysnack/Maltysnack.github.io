@@ -1,44 +1,43 @@
 /* ═══════════════════════════════════════
    MALTYSNACK.GITHUB.IO - STYLESHEET
-   Modernist sans. Considered. Light & dark.
-   Type: Inter only. No frameworks.
+   Black and white, one red. Light & dark.
+   Type: Big Shoulders, Instrument Sans, IBM Plex Mono. No frameworks.
 ═══════════════════════════════════════ */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;700;800;900&family=Instrument+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
 
 /* Shared palette and type primitives, canonical in /design/palette.css and
    copied into the portfolio site. Edit colours and fonts THERE, not here,
    or the two sites drift. */
-@import url('/design/palette.css?v=1');
+@import url('/design/palette.css?v=2');
 
 /* ── THEME VARIABLES ─────────────────────── */
 
 :root {
   /* Surfaces */
-  --bg-island:    #11110e;
-  --border-light: #efeadd;
+  --bg-island:    #111111;
+  --border-light: #ececeb;
 
   /* Text - warm near-black */
 
   /* Sidebar (always darker than main) */
-  --nav-bg:       #11110e;
-  --nav-text:     #8a877d;
-  --nav-active:   #fbf9f4;
-  --nav-border:   #2a2722;
-  --nav-label:    #4a463d;
-  --nav-icon:     #45413a;
+  --nav-bg:       #111111;
+  --nav-text:     #8a8a8a;
+  --nav-active:   #ffffff;
+  --nav-border:   #2a2a2a;
+  --nav-label:    #4a4a4a;
+  --nav-icon:     #454545;
 
-  /* Accents - drawn from shark/ocean palette + a quiet red */
-  --accent-gold:  #c89a3e;   /* antique gold */
-  --accent-blue:  #1f3a5f;   /* deep ocean */
+  /* Secondary accents, kept for the pages that use them */
+  --accent-gold:  var(--bad);
+  --accent-blue:  var(--d2);
 
-  /* Functional accent variables */
-  --selection:    #e8c97a;   /* warm gold highlight */
-  --selection-fg: #1a1814;
+  /* Selection is the red, like everything else that is marked */
+  --selection:    var(--accent);
+  --selection-fg: #ffffff;
 
   /* Type families */
-  /* An editorial serif over a neutral sans. Setting the whole site in one
-     family at three sizes is what made it read as undesigned. */
+  /* A condensed display face over a plain sans, figures in mono. */
 
   /* Type scale (Major Third 1.25) */
   --text-xs:      0.74rem;
@@ -95,43 +94,31 @@
 }
 
 [data-theme="dark"] {
-  /* Main: warm dark with brown undertone */
-  --bg-island:    #0b0d11;
-  --border-light: #25201a;
+  --bg-island:    #000000;
+  --border-light: #222222;
 
-  /* Sidebar in dark: cool blue-ink, contrasting hue with main warm dark */
-  --nav-bg:       #0b0d11;
-  --nav-text:     #6f6e6a;
-  --nav-active:   #fbf9f4;
-  --nav-border:   #1a1d23;
-  --nav-label:    #393b40;
-  --nav-icon:     #4a4d52;
+  --nav-bg:       #000000;
+  --nav-text:     #707070;
+  --nav-active:   #ffffff;
+  --nav-border:   #1c1c1c;
+  --nav-label:    #3a3a3a;
+  --nav-icon:     #4a4a4a;
 
 
-  /* Accents in dark - slightly brighter for contrast */
-  --accent-gold:  #d9a948;
-  --accent-blue:  #5a86b8;
-
-  --selection:    #6a4a14;
-  --selection-fg: #fbf9f4;
 
   --sidebar-border: rgba(60, 65, 75, 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg-island:    #0b0d11;
-    --border-light: #25201a;
-    --nav-bg:       #0b0d11;
-    --nav-text:     #6f6e6a;
-    --nav-active:   #fbf9f4;
-    --nav-border:   #1a1d23;
-    --nav-label:    #393b40;
-    --nav-icon:     #4a4d52;
-    --accent-gold:  #d9a948;
-    --accent-blue:  #5a86b8;
-    --selection:    #6a4a14;
-    --selection-fg: #fbf9f4;
+    --bg-island:    #000000;
+    --border-light: #222222;
+    --nav-bg:       #000000;
+    --nav-text:     #707070;
+    --nav-active:   #ffffff;
+    --nav-border:   #1c1c1c;
+    --nav-label:    #3a3a3a;
+    --nav-icon:     #4a4a4a;
     --sidebar-border: rgba(60, 65, 75, 0.4);
   }
 }
@@ -239,7 +226,7 @@ ul {
   width: 28px;
   height: 28px;
   border-radius: 50%;
-  border: 1.5px solid #2c2922;
+  border: 1.5px solid #2a2a2a;
   object-fit: cover;
   flex-shrink: 0;
 }
@@ -439,12 +426,12 @@ ul {
 
 .intro-heading {
   font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: 600;
-  line-height: 1.0;
+  font-size: clamp(3rem, 9vw, 6.5rem);
+  font-weight: 900;
+  line-height: 0.88;
   color: var(--text-strong);
   margin-bottom: 24px;
-  letter-spacing: -0.035em;
+  letter-spacing: -0.01em;
 }
 
 .intro-body {
@@ -456,9 +443,9 @@ ul {
 }
 
 .intro-body em {
-  font-style: italic;
-  font-weight: 500;
-  color: var(--text);
+  font-style: normal;
+  font-weight: 600;
+  color: var(--accent);
 }
 
 
@@ -535,10 +522,10 @@ ul {
 
 .home-card-title {
   font-family: var(--font-display);
-  font-size: var(--text-md);
-  font-weight: 600;
+  font-size: var(--text-lg);
+  font-weight: 800;
   color: var(--text-strong);
-  letter-spacing: -0.01em;
+  letter-spacing: var(--tracking-display);
   transition: color var(--transition);
 }
 
@@ -577,10 +564,10 @@ ul {
 
 .page-title {
   font-family: var(--font-display);
-  font-size: var(--text-2xl);
-  font-weight: 600;
-  line-height: 1.05;
-  letter-spacing: -0.03em;
+  font-size: var(--text-3xl);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.01em;
   color: var(--text-strong);
   margin-bottom: 14px;
 }
@@ -779,7 +766,7 @@ ul {
 h1, h2, h3, h4 {
   font-family: var(--font-display);
   letter-spacing: var(--tracking-display);
-  font-weight: 500;
+  font-weight: 800;
   line-height: 1.14;
   text-wrap: balance;
 }
@@ -836,7 +823,8 @@ code, kbd, pre, time, .num, .mono {
 .bar-name {
   font-family: var(--font-display);
   font-size: var(--text-md);
-  font-weight: 600;
+  font-weight: 900;
+  text-transform: uppercase;
   letter-spacing: var(--tracking-display);
 }
 

@@ -88,7 +88,7 @@ and the 22-10 transport described above are gone.
 
 - The algorithm pick survives New board and tab switches (`mode.algo`); New
   board used to rebuild the select and reset it to A*.
-- Tiles line states the goal ("every yellow tile left of every blue one").
+- Tiles line states the goal ("every red tile left of every black one").
   No Wikipedia link: this is not the 15 puzzle, and no page matches it.
 - Tour runs slower (GA 5 s, ACO 8 s) and the board is clickable: empty space
   adds a city, a city removes it (4 to 40 cities). Above 15 the gap is to the

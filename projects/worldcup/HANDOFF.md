@@ -20,5 +20,8 @@ Scratchpad for `/projects/worldcup/`.
   both are empty. Neither field is in `bankroll.json` yet; tested with sample
   data injected in a headless browser. Reasons map "no edge" to "prices fair
   or model not confident enough".
+- 28-10: the site took this page's design. The page's own palette and font
+  links are gone; `--paper`, `--ink`, `--hi` and friends are now aliases for
+  site tokens at the top of its `<style>`. Its yellow is now the site red.
 - Elo leaderboard (panel 8) not built: the worldcup repo does not export
   `elo.json` yet.

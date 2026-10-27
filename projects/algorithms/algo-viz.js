@@ -179,7 +179,7 @@ const COLORS = ['Y', 'B'];
 const MOVE_MS = 380, PAUSE_MS = 260;
 
 const tiles = {
-  line: 'Goal: every yellow tile left of every blue one. A tile jumps into the gap from up to three places away; the move costs the distance jumped.',
+  line: 'Goal: every red tile left of every black one. A tile jumps into the gap from up to three places away; the move costs the distance jumped.',
   algos: [['astar', 'A*'], ['greedy', 'Greedy best-first'], ['ids', 'Iterative deepening']],
   state: '', moving: null,
 
@@ -228,7 +228,7 @@ const tiles = {
     const gap = Math.max(3, size * 0.08);
     const total = n * size - gap;
     const ox = (W - total) / 2, oy = (H - size) / 2;
-    const fill = { Y: css('--d3'), B: css('--d4') };
+    const fill = { Y: css('--accent'), B: css('--text') };
     ctx.strokeStyle = css('--border-strong');
     ctx.lineWidth = 1.5;
     for (let i = 0; i < n; i++) {

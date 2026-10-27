@@ -5,13 +5,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description" content="An autonomous Fantasy Premier League bot: how it is doing, where the points went, and whether its model can be trusted." />
   <title>FPL bot - maltysnack</title>
-  <link rel="stylesheet" href="/style.css?v=8" />
+  <link rel="stylesheet" href="/style.css?v=9" />
   <style>
     /* Four ideas, each a sentence with one figure behind it. Brief: DISPLAY.md
        in the private engine repo. */
-    :root { --bot: var(--accent-red); --avg: var(--text-dim); --pos: #2e7d4f; --neg: #b3402f; --rule: var(--border); }
-    @media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --pos: #6fcf97; --neg: #ef8a78; } }
-    :root[data-theme="dark"] { --pos: #6fcf97; --neg: #ef8a78; }
+    :root { --bot: var(--accent-red); --avg: var(--text-dim); --pos: var(--good); --neg: var(--bad); --rule: var(--border); }
 
     .fpl { width: 100%; padding: clamp(16px, 3vh, 36px) 16px 40px; }
     .num { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
@@ -71,7 +69,7 @@
 </head>
 <body>
   <aside class="sidebar"></aside>
-  <script src="/sidebar.js?v=5"></script>
+  <script src="/sidebar.js?v=6"></script>
   <main class="main fpl" data-layout="wide">
 
     <header class="mast">

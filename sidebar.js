@@ -33,7 +33,7 @@
     if (!document.querySelector('meta[name="theme-color"]')) {
       const m = document.createElement('meta');
       m.name = 'theme-color';
-      m.content = '#13110d';
+      m.content = '#0c0c0c';
       document.head.appendChild(m);
     }
   }

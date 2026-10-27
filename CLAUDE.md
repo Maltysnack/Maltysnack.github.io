@@ -141,8 +141,8 @@ source of colour and type for both. **Edit colours and fonts there, never in
 `style.css`**, or the two sites drift. `style.css` imports it and holds only
 site-specific tokens: sidebar colours, type scale, spacing, layout widths.
 
-- Display: **Fraunces**. Body: **Inter**. Figures: **JetBrains Mono**, tabular.
-- Accent `#a83b2a` light, `#e0705a` dark, as `var(--accent)`.
+- Display: **Big Shoulders Display** (heavy, condensed). Body: **Instrument Sans**. Figures: **IBM Plex Mono**, tabular.
+- Black and white with one red: accent `#d7261e` light, `#ff4a3d` dark, as `var(--accent)`. No browns or yellows (maltysnack's call, 28-10-2026).
 - Light/dark via `[data-theme="light|dark"]` on `<html>`.
 - A separate data palette (`--d1`..`--d6`, sequential and diverging ramps)
   exists for charts, which most of this site is.

@@ -40,8 +40,13 @@ colours, type scale, spacing, layout widths.
 The portfolio copies the file in with its own `npm run sync:design`
 (`--check` verifies it is current without writing, for CI).
 
-- Display: Fraunces. Body: Inter. Figures: JetBrains Mono, tabular.
-- Accent `#a83b2a` light, `#e0705a` dark.
+- Display: Big Shoulders Display. Body: Instrument Sans. Figures: IBM Plex
+  Mono, tabular. Taken from the World Cup page on 28-10-2026.
+- Black and white, one red: accent `#d7261e` light, `#ff4a3d` dark. The
+  sequential data ramp is grey so accent marks read on top of it.
+- **The portfolio has not been resynced.** Its `sync:design --check` will
+  fail until it copies the new `palette.css`, and it must load the three new
+  font families itself.
 - Chrome is a **top bar**, not a sidebar. Pages still ship
   `<aside class="sidebar">`; `sidebar.js` fills it with bar markup and
   `style.css` lays it out horizontally, so site-wide chrome changes need no
@@ -126,6 +131,12 @@ commits too.
   do not shrink them), never a global CSS switch.
 
 ## Recent session log
+
+- **28-10-2026:** Site retheme to the World Cup look: palette and fonts in
+  `design/palette.css` (`?v=2`), warm tokens in `style.css` neutralised,
+  headings 800 to 900 weight. `style.css` `?v=9`, `sidebar.js` `?v=6` on
+  every page. World Cup now maps its own names onto site tokens. Algorithms
+  feedback fixes (see its HANDOFF).
 
 - **26-10-2026 (later):** D&D rebuilt: characters made with a form and kept in
   the browser, save files for backup, sheet on the site palette. `api/`,
