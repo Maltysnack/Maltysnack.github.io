@@ -25,3 +25,10 @@ scrolls; the controls sit in a `<details>` panel (folded by default on phones).
 
 - Obstacles, wind, a second species. Keep it to the three rules unless one
   of these earns its place.
+
+## 28-10-2026: quieter controls
+
+The boxed panel is gone. Title and one paragraph top left (paragraph hidden
+on phones), one uppercase text bar bottom left (presets, Hawk, Scatter,
+Pause, Tune). Tune opens the six sliders above the bar; thin track, square
+red thumb. Element ids unchanged, so the script is untouched.

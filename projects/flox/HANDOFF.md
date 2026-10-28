@@ -46,3 +46,10 @@ The `gallery/` page went with it: it imported `../playground/cloud/store.js`,
 so once that module was deleted the page returned 200 while being completely
 broken at runtime. That is the bug that prompted sanitation check `[9]`,
 which resolves every JS module import.
+
+## 28-10-2026: one screen
+
+maltysnack wanted no page scroll. Tabs (River, Markov, Grid, Grammar), the
+open one fills the screen; programs and outputs scroll inside their panes.
+Hash picks the tab. Content is unchanged, but the Flox repo's DISPLAY.md
+still says "One scroll"; update it there to match.

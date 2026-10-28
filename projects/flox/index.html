@@ -25,12 +25,29 @@
     .ex-bar button:hover { color: var(--accent); }
     @media (max-width: 760px) {
       .ex { grid-template-columns: minmax(0, 1fr); }
+      .fx-sec .ex { grid-template-rows: minmax(0, 1fr) minmax(0, 1fr) auto; }
+      .fx-tabs button { font-size: 16px; padding: 4px 8px 8px; }
+      .fx-sub { display: none; }
+      .fx-lede { font-size: var(--text-sm); margin: 4px 0 0; }
       .ex-code { border-right: 0; border-bottom: 1px solid var(--border); }
     }
 
-    .fx-sec { margin-top: 44px; }
-    .fx-sec h2 { font-size: var(--text-xl); margin: 0 0 10px; }
-    .fx-sec p { color: var(--text-muted); line-height: 1.65; max-width: 66ch; margin: 0 0 14px; }
+    /* One screen: a tab per example, the open one fills what is left.
+       Long programs and outputs scroll inside their pane, not the page. */
+    body.fit .main.fx { justify-content: flex-start; gap: 10px; padding: clamp(0.75rem, 2vh, 1.5rem) clamp(1rem, 3vw, 2.5rem); max-width: min(1200px, 100%); }
+    .fx-head { display: flex; align-items: baseline; gap: 6px 20px; flex-wrap: wrap; }
+    .fx-head .page-title { margin: 0; }
+    .fx-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--border); }
+    .fx-tabs button { font: inherit; font-family: var(--font-display); font-weight: 800; font-size: 18px; background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 12px 8px; margin-bottom: -1px; color: var(--text-muted); cursor: pointer; }
+    .fx-tabs button:hover { color: var(--text); }
+    .fx-tabs button[aria-selected="true"] { color: var(--text); border-bottom-color: var(--accent); }
+    .fx-sec { display: none; flex: 1; min-height: 0; flex-direction: column; gap: 10px; }
+    .fx-sec.on { display: flex; }
+    .fx-sec p { color: var(--text-muted); line-height: 1.5; max-width: 80ch; margin: 0; font-size: var(--text-sm); }
+    .fx-sec .ex { flex: 1; min-height: 0; grid-template-rows: minmax(0, 1fr) auto; }
+    .fx-sec .ex-code { overflow: auto; min-height: 0; }
+    .fx-sec .ex-out { max-height: none; min-height: 0; }
+    .gram-wrap { flex: 1; min-height: 0; overflow: auto; }
     .fx-sec code, .gram code { font-variant-ligatures: none; font-family: var(--font-mono); font-size: .9em; background: var(--surface); padding: 1px 5px; border-radius: 3px; }
 
     .gram { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
@@ -39,38 +56,39 @@
     .gram tr:last-child td { border-bottom: 0; }
   </style>
 </head>
-<body>
+<body class="fit">
   <aside class="sidebar"></aside>
-  <main class="main" data-layout="wide">
+  <main class="main fx" data-layout="full">
 
     <header>
-      <span class="fx-eyebrow">Project</span>
-      <h1 class="page-title">Flox</h1>
+      <div class="fx-head"><h1 class="page-title">Flox</h1><p class="fx-sub">Every example is live. Edit the program and the output reruns.</p></div>
       <p class="fx-lede">A small language for flow networks. You write nodes and arrows, and it simulates how something moves through them over time.</p>
-      <p class="fx-sub">Every example is live. Edit the program and the output reruns.</p>
     </header>
 
-    <section class="fx-sec">
-      <h2>River</h2>
+    <div class="fx-tabs" role="tablist">
+      <button role="tab" data-tab="river">River</button>
+      <button role="tab" data-tab="markov">Markov</button>
+      <button role="tab" data-tab="grid">Grid</button>
+      <button role="tab" data-tab="grammar">Grammar</button>
+    </div>
+
+    <section class="fx-sec" id="river">
       <p>The default mode. Two rivers, one dam and an outlet take a five-day rainfall pulse; the table is the flow each day.</p>
       <div class="ex" data-ex="river"></div>
     </section>
 
-    <section class="fx-sec">
-      <h2>Markov</h2>
+    <section class="fx-sec" id="markov">
       <p>The same arrows carry probabilities. A footballer passes again or shoots, and within 200 ticks the chain settles into a goal or miss split.</p>
       <div class="ex" data-ex="markov"></div>
     </section>
 
-    <section class="fx-sec">
-      <h2>Grid</h2>
+    <section class="fx-sec" id="grid">
       <p><code>compare</code> runs one network under several scenarios side by side: the baseline, the main plant offline, and the tie line cut.</p>
       <div class="ex" data-ex="grid"></div>
     </section>
 
-    <section class="fx-sec">
-      <h2>Grammar</h2>
-      <table class="gram">
+    <section class="fx-sec" id="grammar">
+      <div class="gram-wrap"><table class="gram">
         <tr><td><code>mode river|markov|grid;</code></td><td>Picks the simulator. River if absent.</td></tr>
         <tr><td><code>system Name;</code></td><td>Starts a system. Everything after attaches to it.</td></tr>
         <tr><td><code>A -&gt; B -&gt; C;</code></td><td>A chain of edges, weight 1. <code>A -[w]-&gt; B</code> sets a weight; <code>&lt;-</code> points the other way.</td></tr>
@@ -82,7 +100,7 @@
         <tr><td><code>print Name n;</code></td><td>Runs it. River: <i>n</i> mm of rain on day 1, or <code>[r1, r2, ...]</code> per day. Markov and grid: tick budget.</td></tr>
         <tr><td><code>compare Name n as ...;</code></td><td>Scenarios side by side, each <code>"Label" with disable X</code> or <code>disable A -&gt; B</code>.</td></tr>
         <tr><td><code>list Name;</code> <code>map Name;</code></td><td>Lists the nodes and their edges, or draws the network.</td></tr>
-      </table>
+      </table></div>
     </section>
 
   </main>
@@ -95,6 +113,16 @@
     [n, (await fetch(`./showcase/${n}.flox`).then(r => r.text())).trimEnd()])));
 
   const esc = s => s.replace(/[&<>]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c]));
+
+  const show = (id) => {
+    if (!document.getElementById(id)) id = 'river';
+    document.querySelectorAll('.fx-sec').forEach((s) => s.classList.toggle('on', s.id === id));
+    document.querySelectorAll('.fx-tabs button').forEach((b) => b.setAttribute('aria-selected', b.dataset.tab === id));
+    history.replaceState(null, '', '#' + id);
+  };
+  document.querySelectorAll('.fx-tabs button').forEach((b) => b.addEventListener('click', () => show(b.dataset.tab)));
+  addEventListener('hashchange', () => show(location.hash.slice(1)));
+  show(location.hash.slice(1));
 
   for (const box of document.querySelectorAll('.ex')) {
     const src = EX[box.dataset.ex];
