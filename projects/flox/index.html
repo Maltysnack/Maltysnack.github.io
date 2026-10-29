@@ -73,17 +73,17 @@
     </div>
 
     <section class="fx-sec" id="river">
-      <p>The default mode. Two rivers, one dam and an outlet take a five-day rainfall pulse; the table is the flow each day.</p>
+      <p>The default mode. Two rivers, one dam and an outlet take two bursts of rain. Each row is a day, every flow is in ML/day, and the dam opens up once it passes 80% full.</p>
       <div class="ex" data-ex="river"></div>
     </section>
 
     <section class="fx-sec" id="markov">
-      <p>The same arrows carry probabilities. A footballer passes again or shoots, and within 200 ticks the chain settles into a goal or miss split.</p>
+      <p>The same arrows carry probabilities. The ball moves between defence, midfield, attack, a shot and a goal, and the chain settles on how much of the game is spent in each.</p>
       <div class="ex" data-ex="markov"></div>
     </section>
 
     <section class="fx-sec" id="grid">
-      <p><code>compare</code> runs one network under several scenarios side by side: the baseline, the main plant offline, and the tie line cut.</p>
+      <p><code>compare</code> runs one network under several scenarios side by side. One plant feeds three towns round a ring; cut a line and the power takes the long way, reversing the North to East line.</p>
       <div class="ex" data-ex="grid"></div>
     </section>
 

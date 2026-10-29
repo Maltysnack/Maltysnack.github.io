@@ -1,14 +1,20 @@
 mode markov;
-system PassOrShoot;
+system Possession;
 
-Pass  -[0.85]-> Pass;
-Pass  -[0.15]-> Shoot;
-Shoot -[0.10]-> Goal;
-Shoot -[0.90]-> Miss;
-Goal  -[1.0]-> Goal;
-Miss  -[1.0]-> Miss;
+Defence  -[0.4]-> Defence;
+Defence  -[0.6]-> Midfield;
+Midfield -[0.3]-> Defence;
+Midfield -[0.3]-> Midfield;
+Midfield -[0.4]-> Attack;
+Attack   -[0.3]-> Defence;
+Attack   -[0.3]-> Midfield;
+Attack   -[0.2]-> Attack;
+Attack   -[0.2]-> Shot;
+Shot     -[0.9]-> Defence;
+Shot     -[0.1]-> Goal;
+Goal     -[1.0]-> Midfield;
 
-node Pass;  node Shoot;  node Goal;  node Miss;
+node Defence;  node Midfield;  node Attack;  node Shot;  node Goal;
 
-start Pass 1.0;
-print PassOrShoot 200;
+start Defence 1.0;
+print Possession 200;

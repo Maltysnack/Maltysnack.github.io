@@ -53,3 +53,13 @@ maltysnack wanted no page scroll. Tabs (River, Markov, Grid, Grammar), the
 open one fills the screen; programs and outputs scroll inside their panes.
 Hash picks the tab. Content is unchanged, but the Flox repo's DISPLAY.md
 still says "One scroll"; update it there to match.
+
+## 29-10-2026: panel feedback acted on
+
+Re-vendored Flox ae06c9c via `scripts/sync-data.sh flox`. River output is now
+days as rows, every flow in ML/day, with the dam's stored volume and the
+outlet's running total; the flat Reservoir run was the dam at openRate, not a
+bug. Markov showcase is `Possession` (ergodic cycle). Grid showcase is `Ring`
+with two line cuts; its scenarios stay balanced, so the plant-offline
+"supplies do not balance" note above no longer appears. Panel copy updated to
+match.

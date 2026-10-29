@@ -1,19 +1,17 @@
 mode grid;
-system PowerGrid;
+system Ring;
 
-Plant     -[5]-> Hub;
-Backup    -[2]-> Hub;
-Hub       -[3]-> NorthCity;
-Hub       -[3]-> SouthCity;
-NorthCity -[1]-> SouthCity;
+Plant -[4]-> North;
+Plant -[4]-> South;
+North -[2]-> East;
+South -[2]-> East;
 
-node Plant     { supply:  100 }
-node Backup    { supply:   30 }
-node Hub;
-node NorthCity { supply:  -65 }
-node SouthCity { supply:  -65 }
+node Plant { supply:  100 }
+node North { supply:  -25 }
+node East  { supply:  -40 }
+node South { supply:  -35 }
 
-compare PowerGrid 500 as
+compare Ring 500 as
   "Baseline",
-  "Plant offline" with disable Plant with Backup.supply = 130,
-  "Tie line cut"  with disable NorthCity -> SouthCity;
+  "North line cut" with disable Plant -> North,
+  "East line cut"  with disable South -> East;
