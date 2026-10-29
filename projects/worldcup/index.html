@@ -35,7 +35,8 @@ nav button, .ghost {
   font: 500 13px/1 var(--sans); color: var(--ink-2); background: none; border: 0;
   padding: 10px 14px; border-radius: 999px; cursor: pointer; letter-spacing: .02em;
 }
-nav button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--hi); border-radius: 0; }
+/* Gradient, not an inset shadow: the shadow left a hairline on fractional-width tabs. */
+nav button[aria-selected="true"] { color: var(--ink); background: linear-gradient(var(--hi), var(--hi)) bottom / 100% 2px no-repeat; border-radius: 0; }
 nav button:hover:not([aria-selected="true"]), .ghost:hover { color: var(--ink); }
 .ghost { border: 1px solid var(--rule); }
 .tag { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); }
@@ -134,10 +135,13 @@ dialog p b { color: var(--ink); }
   .bars { align-self: stretch; align-content: center; }
   .bar { grid-template-columns: 8ch 1fr 4ch; font-size: 13px; }
   .bar .stage { font-size: 10px; }
+  .called { font-size: 48px; }
+  .bars { gap: 6px; }
+  .bar .track { height: 16px; }
   .soon { grid-template-columns: 1fr; gap: 20px; }
   .g { grid-template-columns: minmax(0, 1fr) repeat(3, 6ch); gap: 8px; }
   .g .d, .g .why { display: none; }
-  .glist .g:nth-of-type(n+5) { display: none; }
+  .glist .g:nth-of-type(n+10) { display: none; } /* tag div is type 1: 8 games */
   .card .ghostbars { display: none; }
   footer .tag.hide-sm { display: none; }
   .sub { font-size: 13px; }
@@ -163,10 +167,12 @@ dialog p b { color: var(--ink); }
 .e .r { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
 @media (max-width: 700px) {
   .elist { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
-  .e:nth-child(n+11) { display: none; }
+  .e:nth-child(n+11), .elo .all { display: none; }
+  .elo .tag .ten { display: inline; }
   .e { padding: 5px 0; }
 }
 .muted { color: var(--ink-3); }
+.elo .ten { display: none; }
 </style>
 </head>
 <body class="fit">
@@ -211,7 +217,7 @@ dialog p b { color: var(--ink); }
       <div class="bars" id="bars"><div class="tag">Pre-tournament title odds · how far they got</div></div>
       <div class="stats verdict">
         <div class="stat"><span class="tag">Results called right</span><b id="acc">-</b><span class="tag" id="acc-sub"></span></div>
-        <div class="scale"><span class="tag">Typical chance it gave what actually happened</span><svg id="scale" viewBox="0 0 600 56" preserveAspectRatio="none" aria-label="Model versus plain Elo versus guessing"></svg></div>
+        <div class="scale"><span class="tag">Typical chance it gave what actually happened</span><svg id="scale" aria-label="Model versus plain Elo versus guessing"></svg></div>
         <p class="sub" id="verdict"></p>
       </div>
     </section>
@@ -386,7 +392,7 @@ if (new URLSearchParams(location.search).has('frames')) {
 
   fetch('elo.json').then(r => r.json()).then(e => {
     $('elist').innerHTML = e.top.map(t => `<div class="e"><span>${t.rank}</span>${flag(t.team)}<b>${t.team}</b><span class="r">${t.rating}</span></div>`).join('');
-    $('elo-tag').textContent = `Elo ratings · top ${e.top.length} active teams · results to ${dmy(e.as_of)}`;
+    $('elo-tag').innerHTML = `Elo ratings · top <span class="all">${e.top.length}</span><span class="ten">10</span> active teams · results to ${dmy(e.as_of)}`;
     stamps.ratings = [`Ratings as of ${dmy(e.as_of)}`, ''];
     paintStamp();
   }).catch(() => { stamps.ratings = ['Data failed to load', '']; paintStamp(); });
@@ -403,10 +409,10 @@ if (new URLSearchParams(location.search).has('frames')) {
     $('acc').textContent = `${hit} / ${c.n_matches}`;
     $('acc-sub').textContent = `${Math.round(c.accuracy * 100)}% · guessing gets 1 in 3`;
     const pts = [['Guessing', ch('uniform')], ['Plain Elo', ch('plain_elo')], ['Model', ch('model')]];
-    const lo = .30, hi = .50, x = v => ((v - lo) / (hi - lo)) * 600;
-    $('scale').innerHTML = `<line x1="0" x2="600" y1="20" y2="20" stroke="var(--rule)" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
+    const lo = .30, hi = .50, x = v => ((v - lo) / (hi - lo)) * 100 + '%'; // percentages keep text unscaled at any width
+    $('scale').innerHTML = `<line x1="0" x2="100%" y1="20" y2="20" stroke="var(--rule)" stroke-width="2"/>` +
       pts.map(([n, v], i) => `<circle cx="${x(v)}" cy="20" r="6" fill="${i === 2 ? 'var(--hi)' : 'var(--ink-3)'}"/>
-        <text x="${x(v)}" y="${i === 1 ? 6 : 46}" text-anchor="${i === 1 ? 'end' : i === 2 ? 'start' : 'middle'}" fill="${i === 2 ? 'var(--ink)' : 'var(--ink-3)'}" style="font: 500 12px var(--mono)">${n} ${Math.round(v * 100)}%</text>`).join('');
+        <text x="${x(v)}" y="${i === 1 ? 6 : 46}" text-anchor="${['start', 'end', 'start'][i]}" dx="${i === 1 ? 4 : -4}" fill="${i === 2 ? 'var(--ink)' : 'var(--ink-3)'}" style="font: 500 12px var(--mono)">${n} ${Math.round(v * 100)}%</text>`).join('');
     const gap = (ch('model') - ch('plain_elo')) * 100;
     $('verdict').textContent = `Over ${c.n_matches} games the model typically gave the real result a ${Math.round(ch('model') * 100)}% chance, against 33% for guessing. That is a clear edge over guessing and ${gap > 0 ? `a small one (${gap.toFixed(1)} points) over` : 'no better than'} plain Elo, the simple ratings it starts from. Football is noisy: even a perfect model would miss plenty.`;
     const max = Math.max(...c.top.map(t => t.p_champion));
