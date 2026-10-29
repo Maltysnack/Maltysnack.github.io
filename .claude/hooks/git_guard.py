@@ -10,7 +10,7 @@ SWEEP = re.compile(
     # git at command position only, so the words inside a heredoc or message don't trip it.
     r"(?:^|[;&|(]|\n)\s*git\b[^;&|\n]*?\s("
     r"add\s+(-A|--all|-u|--update|\.(\s|$))"
-    r"|commit\s+[^;&|]*(-a\b|--all\b|-[a-zA-Z]*a[a-zA-Z]*\s)"
+    r"|commit\b[^;&|]*?\s(-a\b|--all\b|-[a-zA-Z]*a[a-zA-Z]*\s)"
     r"|stash\b"
     r"|reset\s+[^;&|]*--hard"
     r"|checkout\s+(--\s+)?\.(\s|$)"

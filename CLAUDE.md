@@ -210,6 +210,23 @@ Install the pre-commit hook once per clone so violations block locally:
 git config core.hooksPath scripts/hooks
 ```
 
+## Discuss before build
+
+Every session in this repo, page or master, works in this order for any
+change to a page or engine:
+
+1. **Brainstorm**: what maltysnack wants and why (`brainstorming` skill).
+2. **Grill**: stress-test it with pointed questions (`grilling` skill).
+3. **Plan**: a short written plan of files and steps (`writing-plans` skill).
+4. **Execute** only after maltysnack explicitly says go.
+
+No file edits, commits, pushes or paid API calls before that go-ahead.
+Reading, investigating and drafting are fine. A trivial fix (typo, one-line
+copy change) can skip to the plan, but still waits for the go-ahead. This
+overrides the global "fill gaps with your own judgement" default for site
+and engine work; the cloud autopilot routines in engine repos keep their
+own rules.
+
 ## Parallel page sessions
 
 Each page has its own long-lived session, all in this one checkout. The
