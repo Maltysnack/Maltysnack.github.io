@@ -390,6 +390,7 @@ function select(name, { fresh = false } = {}) {
   els.line.textContent = mode.line;
   els.algo.innerHTML = mode.algos.map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
   els.algo.value = mode.algo || mode.algos[0][0]; // keep the pick across New board and tab switches
+  buildDd();
   els.stats.textContent = '';
   if (fresh || !mode.ready) { mode.newBoard(); mode.ready = true; }
   history.replaceState(null, '', '#' + name);
@@ -409,6 +410,34 @@ function resize() {
 }
 
 document.querySelectorAll('.al-tabs button').forEach((b) => b.addEventListener('click', () => select(b.dataset.tab)));
+// Custom listbox over the hidden select (the native popup can't be themed); the select stays the source of truth.
+const dd = { btn: $('al-dd-btn'), list: $('al-dd-list'), i: 0 };
+function ddOpen(open) {
+  dd.list.hidden = !open; dd.btn.setAttribute('aria-expanded', open);
+  if (open) ddMark(els.algo.selectedIndex);
+}
+function ddMark(i) { dd.i = i; [...dd.list.children].forEach((li, n) => li.classList.toggle('act', n === i)); }
+function ddPick(i) {
+  els.algo.selectedIndex = i; ddOpen(false); dd.btn.focus();
+  buildDd(); els.algo.dispatchEvent(new Event('change'));
+}
+function buildDd() {
+  const opts = [...els.algo.options], cur = els.algo.selectedIndex;
+  dd.btn.textContent = opts[cur] ? opts[cur].text : '';
+  dd.list.innerHTML = opts.map((o, n) => `<li role="option" aria-selected="${n === cur}">${o.text}</li>`).join('');
+  [...dd.list.children].forEach((li, n) => li.addEventListener('click', () => ddPick(n)));
+}
+dd.btn.addEventListener('click', () => ddOpen(dd.list.hidden));
+dd.btn.addEventListener('keydown', (e) => {
+  const n = els.algo.options.length;
+  if (e.key === 'Escape') ddOpen(false);
+  else if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (dd.list.hidden) return ddOpen(true);
+    ddMark((dd.i + (e.key === 'ArrowDown' ? 1 : n - 1)) % n);
+  } else if ((e.key === 'Enter' || e.key === ' ') && !dd.list.hidden) { e.preventDefault(); ddPick(dd.i); }
+});
+document.addEventListener('pointerdown', (e) => { if (!e.target.closest('#al-dd')) ddOpen(false); });
 els.algo.addEventListener('change', () => {
   mode.algo = els.algo.value; if (mode.clearTrace) mode.clearTrace(); start(); });
 els.run.addEventListener('click', () => { if (mode.clearTrace) mode.clearTrace(); start(); });

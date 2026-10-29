@@ -27,7 +27,19 @@
       font: inherit; font-size: 14px; padding: 5px 12px; cursor: pointer;
       border: 1px solid var(--border-strong); border-radius: 4px; background: var(--bg); color: var(--text);
     }
-    .al-bar button:hover, .al-bar select:hover { border-color: var(--text); }
+    .al-bar button:hover { border-color: var(--text); }
+    .al-dd { position: relative; }
+    #al-algo { display: none; }
+    .al-dd > button { min-width: 9.5em; text-align: left; display: flex; justify-content: space-between; gap: 12px; align-items: center; }
+    .al-dd > button::after { content: ""; width: 6px; height: 6px; border: solid currentColor; border-width: 0 1.5px 1.5px 0; transform: translateY(-2px) rotate(45deg); }
+    .al-dd ul {
+      position: absolute; z-index: 5; top: calc(100% + 4px); left: 0; min-width: 100%; margin: 0; padding: 4px; list-style: none;
+      background: var(--bg); border: 1px solid var(--border-strong); border-radius: 4px; box-shadow: 0 6px 20px rgba(0,0,0,.18);
+    }
+    .al-dd ul[hidden] { display: none; }
+    .al-dd li { padding: 6px 10px; border-radius: 3px; font-size: 14px; cursor: pointer; white-space: nowrap; color: var(--text); }
+    .al-dd li.act { background: var(--bg-subtle, rgba(127,127,127,.15)); }
+    .al-dd li[aria-selected="true"] { color: var(--accent); font-weight: 600; }
     .al-bar button.primary { background: var(--accent); border-color: var(--accent); color: var(--bg); }
     .al-stats {
       margin-left: auto; font-family: var(--font-mono); font-variant-numeric: tabular-nums;
@@ -53,13 +65,14 @@
     <p class="al-line" id="al-line"></p>
     <div class="al-bar">
       <select id="al-algo" aria-label="Algorithm"></select>
+      <div class="al-dd" id="al-dd"><button type="button" id="al-dd-btn" aria-haspopup="listbox" aria-expanded="false" aria-label="Algorithm"></button><ul role="listbox" id="al-dd-list" hidden></ul></div>
       <button class="primary" id="al-run">Run</button>
       <button id="al-new">New board</button>
       <span class="al-stats" id="al-stats"></span>
     </div>
     <div class="al-stage"><canvas id="al-canvas"></canvas></div>
   </main>
-  <script type="module" src="/projects/algorithms/algo-viz.js?v=18"></script>
+  <script type="module" src="/projects/algorithms/algo-viz.js?v=19"></script>
   <script src="/sidebar.js?v=6"></script>
 </body>
 </html>

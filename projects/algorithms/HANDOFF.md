@@ -94,3 +94,7 @@ and the 22-10 transport described above are gone.
   adds a city, a city removes it (4 to 40 cities). Above 15 the gap is to the
   best known tour, not a proven optimum.
 - Viz at `?v=17`.
+
+## 29-10-2026: themed dropdown
+
+The native select popup can't be styled, so `#al-algo` is hidden (still the source of truth for value and `change`) and a custom button plus `role=listbox` (`#al-dd`) sits over it. `buildDd()` re-renders it after every option rebuild; arrows, Enter, Escape and outside click handled. Viz at `?v=19`.
