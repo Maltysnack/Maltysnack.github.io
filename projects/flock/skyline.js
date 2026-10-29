@@ -453,6 +453,7 @@ export function create(ctx) {
 
   const api = {
     st, model: 'bird', flying: false,
+    spawn(k) { if (k === 'chute') startChute(); else if (k === 'gust') startGust(); else { if (fl.on) endPass(); launchPass(k); } },   // for ?debug
     before, drive, force, hawk: hawkStep, draw, theme, reset, setModel,
     toggleFly() {
       api.flying = !api.flying; canvas.style.cursor = api.flying ? 'crosshair' : '';

@@ -266,7 +266,7 @@
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=2')).create(ctx);
+      sky ??= (await import('./skyline.js?v=3')).create(ctx);
       mode = m; X = sky; seed(N); sky.enable(); $title.textContent = skyBlurb;
     } else {
       mode = m; if (X) X.disable(); X = null;
@@ -279,4 +279,12 @@
   }
   $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
   $('fly').addEventListener('click', () => { if (X) $('fly').classList.toggle('on', X.toggleFly()); });
+  // ?debug adds buttons to spawn each visitor, so nothing waits on the ambient timers.
+  if (new URLSearchParams(location.search).has('debug')) {
+    const bar = document.querySelector('.ov-bar');
+    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'chute', 'gust']) {
+      const b = document.createElement('button'); b.textContent = k; b.dataset.sky = '';
+      b.addEventListener('click', () => X && X.spawn(k)); bar.prepend(b);
+    }
+  }
   document.body.dataset.mode = 'classic';
