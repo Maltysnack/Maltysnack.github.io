@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>if (new URLSearchParams(location.search).has('ambient')) document.documentElement.dataset.ambient = '';</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flock - maltysnack</title>
@@ -44,6 +45,10 @@
     .ctl input[type=range]::-moz-range-thumb { width: 10px; height: 10px; background: var(--accent); border: 0; border-radius: 0; cursor: pointer; }
     .stats { position: absolute; right: clamp(12px, 2.5vw, 28px); bottom: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); pointer-events: none; }
 
+    /* ?ambient: the home page embeds this, so no chrome and no input. */
+    html[data-ambient] .sidebar, html[data-ambient] .ov-title, html[data-ambient] .ov-bar, html[data-ambient] .ov-top, html[data-ambient] .stats { display: none !important; }
+    html[data-ambient] #stage { pointer-events: none; cursor: default; }
+
     @media (max-width: 640px) {
       .ov-title p { display: none; }
       .stats { top: 10px; bottom: auto; }
@@ -86,7 +91,7 @@
     <div class="stats" id="stats"></div>
   </main>
 
-<script type="module" src="./flock.js?v=3"></script>
+<script type="module" src="./flock.js?v=4"></script>
   <script src="/sidebar.js?v=6"></script>
 </body>
 </html>

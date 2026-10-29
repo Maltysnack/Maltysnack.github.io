@@ -1,5 +1,10 @@
 # flock HANDOFF
 
+> **Standing rule:** the home page embeds `/projects/flock/?ambient` live.
+> Every new UI, control or input must be gated off in ambient mode, and no
+> Flock change is done until `?ambient` has been checked (chrome hidden, no
+> input, 30 fps cap, reduced-motion still frame, phone budget).
+
 Scratchpad for `/projects/flock/`. Root `HANDOFF.md` covers site-wide.
 
 ## Current state (23-10-2026)
@@ -87,3 +92,21 @@ count controls.
 - Headless check (6 min of sim): visitor bounding boxes never intersected a
   building, min clearance 9.8 over the roof; chute never hit one; tint and
   perching work. Still not eyeballed in a browser.
+
+## 29-10-2026: `?ambient` (home page embed)
+
+- `flock.js` reads `?ambient`: forces Skyline in watch mode with a slow
+  auto-orbit (camera high and loose), 900 birds (600 phone), pixel ratio cap
+  1.5 (1 on phone), 30 fps cap, no work while `document.hidden` or scrolled out
+  of view (IntersectionObserver), all pointer/wheel input ignored. Reduced
+  motion: simulate 4 s, render one frame, no loop (re-renders only on theme or
+  resize). Phone: visitors and gusts half as often, at most 2 clouds.
+- `index.html` hides the nav, title, bar, mode switch and stats with
+  `html[data-ambient]` (set by a tiny inline script) and disables canvas
+  pointer events. `sidebar.js` still loads (sanitize needs it); it is hidden.
+- Theme: parent posts exactly `{type:'flock-theme', theme:'light'|'dark'}`;
+  same-origin only; sets `data-theme` on the iframe's html, which re-themes
+  the scene (and the still frame).
+- Checked with a DOM-stubbed node run (ambient: 300 renders per 600 ticks, so
+  30 fps; reduced: 2 renders and no loop; phone and normal modes fine). Not
+  eyeballed in a browser.

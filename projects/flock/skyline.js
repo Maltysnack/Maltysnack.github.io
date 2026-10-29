@@ -284,10 +284,11 @@ export function create(ctx) {
       if (g.age > GUST_LIFE) { g.on = false; g.lines.visible = false; g.env = 0; }
     }
     if (!ctx.reduce) {   // ambient weather, off under reduced motion
-      if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55); }
-      if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55); }
-      if (clock > nextCloud && clouds.length < 5) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
-      if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90); }
+      const slow = ctx.ambient && ctx.phone ? 2 : 1;   // phones get half the visitors
+      if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55) * slow; }
+      if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55) * slow; }
+      if (clock > nextCloud && clouds.length < (slow > 1 ? 2 : 5)) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
+      if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90) * slow; }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
     if (freeSlots === 0) return;
@@ -488,7 +489,7 @@ export function create(ctx) {
       addEventListener('pointermove', onMove); canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
       addEventListener('keydown', kd); addEventListener('keyup', ku);
       api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
-      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } clearClouds(); pickWind(); for (let i = 0; i < 3; i++) spawnCloud(true); for (const g of gusts) { g.on = false; g.lines.visible = false; }
+      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } clearClouds(); pickWind(); for (let i = 0; i < (ctx.ambient && ctx.phone ? 2 : 3); i++) spawnCloud(true); for (const g of gusts) { g.on = false; g.lines.visible = false; }
       hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },

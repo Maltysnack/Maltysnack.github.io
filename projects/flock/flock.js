@@ -6,7 +6,11 @@
     school:      { sep: 1.2, ali: 2.6, coh: 1.4, vis: 5,   spd: 14 },
     swarm:       { sep: 2.4, ali: 0.2, coh: 1.8, vis: 9,   spd: 26 }
   };
-  const NUM = matchMedia('(max-width: 640px)').matches ? 900 : 1600;
+  // ?ambient: the home page embeds this live, so it runs chrome-free, input-free and light.
+  const AMBIENT = new URLSearchParams(location.search).has('ambient');
+  const PHONE = matchMedia('(max-width: 640px)').matches;
+  let frozen = AMBIENT && matchMedia('(prefers-reduced-motion: reduce)').matches;   // one still frame, no loop
+  const NUM = AMBIENT ? (PHONE ? 600 : 900) : PHONE ? 900 : 1600;
   const T = { ...PRESETS.murmuration };   // what the controls ask for
   const P = { ...T };                     // what the flock uses, eased toward T so big changes never snap
   const BX = 90, BY = 45, BZ = 60;          // half extents of the box the flock lives in
@@ -141,7 +145,7 @@
   // ── Rendering ────────────────────────────────────────────────────────
   const canvas = document.getElementById('stage');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, AMBIENT ? (PHONE ? 1 : 1.5) : 2));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 1, 800);
   scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.6));
@@ -185,6 +189,7 @@
     scene.background = bg; scene.fog = new THREE.Fog(bg, 120, 330);
     birdMat.color = col('--text'); hawkMat.color = col('--accent');
     if (X) X.theme(col);
+    if (frozen && X) still();
   }
   new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   matchMedia('(prefers-color-scheme: dark)').addEventListener('change', theme);
@@ -193,9 +198,9 @@
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
   const orbit = { th: 0.6, ph: 1.25, r: 120, idle: 0 };
   const pointers = new Map(); let pinch0 = 0;
-  canvas.addEventListener('pointerdown', e => { if (X && X.flying) return; canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); orbit.idle = 0; });
+  canvas.addEventListener('pointerdown', e => { if (AMBIENT || (X && X.flying)) return; canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); orbit.idle = 0; });
   canvas.addEventListener('pointermove', e => {
-    if (!pointers.has(e.pointerId) || (X && X.flying)) return;
+    if (AMBIENT || !pointers.has(e.pointerId) || (X && X.flying)) return;
     const [x0, y0] = pointers.get(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
@@ -208,11 +213,11 @@
   });
   const up = e => { pointers.delete(e.pointerId); pinch0 = 0; };
   canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
-  canvas.addEventListener('wheel', e => { e.preventDefault(); if (X && X.flying) return; orbit.r = Math.min(160, Math.max(40, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
+  canvas.addEventListener('wheel', e => { if (AMBIENT) return; e.preventDefault(); if (X && X.flying) return; orbit.r = Math.min(160, Math.max(40, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
   function placeCamera(dt) {
     if (X && X.flying) return;      // Skyline's chase camera sets itself in draw
     orbit.idle += dt;
-    if (!reduce && orbit.idle > 3) orbit.th += dt * 0.05;
+    if (!reduce && orbit.idle > 3) orbit.th += dt * (AMBIENT ? 0.03 : 0.05);
     camera.position.set(orbit.r * Math.sin(orbit.ph) * Math.sin(orbit.th), orbit.r * Math.cos(orbit.ph), orbit.r * Math.sin(orbit.ph) * Math.cos(orbit.th));
     camera.lookAt(0, 0, 0);
   }
@@ -221,7 +226,8 @@
     renderer.setSize(r.width, r.height, false);
     camera.aspect = r.width / Math.max(1, r.height); camera.updateProjectionMatrix();
   }
-  new ResizeObserver(resize).observe(canvas);
+  new ResizeObserver(() => { resize(); if (frozen && X) still(); }).observe(canvas);
+  function still() { placeCamera(0); draw(1, 0); }
 
   // ── Controls ─────────────────────────────────────────────────────────
   const $ = id => document.getElementById(id), $hawk = $('hawk');
@@ -242,19 +248,26 @@
   // ── Loop: fixed physics step, so behaviour does not depend on frame rate ─
   seed(NUM); makeMesh(); sync(); theme(); resize();
   const DT = 1 / 60; let last = performance.now(), accT = 0, frames = 0, fpsT = 0;
+  let visible = true;
+  if (AMBIENT) new IntersectionObserver(es => { visible = es[es.length - 1].isIntersecting; }).observe(canvas);
   function frame(now) {
+    if (frozen) return;
+    requestAnimationFrame(frame);
+    if (AMBIENT) {   // 30 fps, and nothing at all while hidden or scrolled away
+      if (document.hidden || !visible) { last = now; return; }
+      if (now - last < 32) return;
+    }
     const real = Math.min(0.1, (now - last) / 1000); last = now;
     accT += real; let n = 0; while (accT >= DT && n < 3) { step(DT); accT -= DT; n++; } if (n === 3) accT = 0;
     placeCamera(real); draw(accT / DT, real);
     frames++; fpsT += real;
     if (fpsT > 1) { $('stats').textContent = `${N} birds · ${Math.round(frames / fpsT)} fps`; frames = 0; fpsT = 0; }
-    requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);
 
   // ── Modes: Classic is the pure boids; Skyline loads the extras on demand ─
   const ctx = {
-    THREE, scene, camera, canvas, hawk, P, reduce,
+    THREE, scene, camera, canvas, hawk, P, reduce, ambient: AMBIENT, phone: PHONE,
     BX, BY, BZ, MAX_FORCE, orbit,
     get birds() { return birds; }, get pos() { return pos; }, get vel() { return vel; }, get N() { return N; },
     setLook(geo, mat) { look.geo = geo; look.mat = mat; birds.geometry = geo; birds.material = mat; },
@@ -266,7 +279,7 @@
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=5')).create(ctx);
+      sky ??= (await import('./skyline.js?v=6')).create(ctx);
       mode = m; X = sky; seed(N); sky.enable(); $title.textContent = skyBlurb;
     } else {
       mode = m; if (X) X.disable(); X = null;
@@ -288,3 +301,17 @@
     }
   }
   document.body.dataset.mode = 'classic';
+
+  // ── Ambient: Skyline in watch mode, slowly orbiting, themed by the parent ─
+  if (AMBIENT) {
+    addEventListener('message', e => {
+      const d = e.data;
+      if (e.origin === location.origin && d && d.type === 'flock-theme' && (d.theme === 'light' || d.theme === 'dark')) document.documentElement.dataset.theme = d.theme;
+    });
+    orbit.r = 135; orbit.ph = 1.1; orbit.idle = 99;
+    setMode('skyline').then(() => {
+      if (!frozen) return;
+      for (let i = 0; i < 240; i++) step(DT);   // let the flock settle, then hold one frame
+      still();
+    });
+  }
