@@ -101,9 +101,19 @@ section.on { display: grid; }
 .games[hidden], .glist[hidden], .soon[hidden] { display: none; }
 .glist { display: grid; gap: 4px; font: 500 12px/1.35 var(--mono); }
 .glist .tag { margin-bottom: 6px; }
-.g { display: grid; grid-template-columns: 11ch minmax(0, 1.4fr) repeat(3, 7ch) minmax(0, 1.2fr); gap: 14px; align-items: baseline; color: var(--ink-2); padding: 5px 0; border-top: 1px solid var(--rule); }
+.g { display: grid; grid-template-columns: 9ch minmax(0, 1.3fr) repeat(3, 7ch) minmax(0, 1fr); gap: 14px; align-items: center; color: var(--ink-2); padding: 5px 0; border-top: 1px solid var(--rule); }
 .g b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .g .p { text-align: right; font-variant-numeric: tabular-nums; }
+.g.head { border-top: 0; padding: 0; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.g .why { padding-left: 2ch; }
+.g .o { display: inline-block; width: 7ch; text-align: right; }
+.g .m { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
+.g .t { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); white-space: nowrap; }
+.g .t img { width: 20px; height: 13px; object-fit: cover; outline: 1px solid var(--rule); }
+.g .t i { font-style: normal; color: var(--ink-3); font-size: 11px; }
+.g .v { color: var(--ink-3); }
+.note[hidden] { display: none; }
+.note { align-self: end; text-transform: none; letter-spacing: .02em; }
 .g .p.pick { color: var(--ink); font-weight: 600; }
 .g .why { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .g .why em { font-style: normal; background: var(--hi); color: #fff; padding: 1px 6px; border-radius: 3px; }
@@ -140,8 +150,10 @@ dialog p b { color: var(--ink); }
   .bar .track { height: 16px; }
   .soon { grid-template-columns: 1fr; gap: 20px; }
   .g { grid-template-columns: minmax(0, 1fr) repeat(3, 6ch); gap: 8px; }
+  .g .m { flex-direction: column; align-items: flex-start; }
+  .g .v { display: none; }
   .g .d, .g .why { display: none; }
-  .glist .g:nth-of-type(n+10) { display: none; } /* tag div is type 1: 8 games */
+  .glist .g:nth-of-type(n+11) { display: none; } /* tag and header are types 1-2: 8 games */
   .card .ghostbars { display: none; }
   footer .tag.hide-sm { display: none; }
   .sub { font-size: 13px; }
@@ -160,11 +172,13 @@ dialog p b { color: var(--ink); }
 /* Ratings: the Elo table behind every probability on the page */
 .elo { align-self: center; display: grid; gap: 14px; min-height: 0; }
 .elist { display: grid; grid-auto-flow: column; grid-template-rows: repeat(10, auto); grid-template-columns: 1fr 1fr; gap: 0 clamp(24px, 4vw, 72px); font: 500 13px/1.35 var(--mono); }
-.e { display: grid; grid-template-columns: 3ch 24px minmax(0, 1fr) 5ch; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
+.e { display: grid; grid-template-columns: 3ch 4ch 24px minmax(0, 1fr) 5ch 4ch; gap: 10px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
 .e b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .e img { width: 24px; height: 16px; object-fit: cover; outline: 1px solid var(--rule); }
 .e:first-child .r { color: var(--hi); }
 .e .r { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+.e .mv { font-size: 11px; font-variant-numeric: tabular-nums; }
+.e .dr { text-align: right; font-size: 11px; color: var(--ink-3); font-variant-numeric: tabular-nums; }
 @media (max-width: 700px) {
   .elist { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
   .e:nth-child(n+11), .elo .all { display: none; }
@@ -224,15 +238,15 @@ dialog p b { color: var(--ink); }
 
     <section id="odds" role="tabpanel">
       <div class="games" id="games" hidden>
-        <div class="glist" id="upcoming" hidden><div class="tag">Upcoming · model / Sportsbet chance, home · draw · away · Sportsbet odds</div></div>
-        <div class="glist" id="passes" hidden><div class="tag">Recent passes · prices the bot saw and declined</div></div>
+        <div class="glist" id="upcoming" hidden><div class="tag">Upcoming · chance of each result, our model / the market</div><div class="g head"><span class="d">Date</span><span>Match · Elo</span><span class="p">Home</span><span class="p">Draw</span><span class="p">Away</span><span class="why">Odds</span></div></div>
+        <div class="glist" id="passes" hidden><div class="tag">Recent passes · prices the bot saw and declined</div><div class="g head"><span class="d">Date</span><span>Match · Elo</span><span class="p">Home</span><span class="p">Draw</span><span class="p">Away</span><span class="why">Why not</span></div></div>
       </div>
       <div class="soon" id="soon">
         <div class="card"><span class="tag">Opens 2027</span><h3>Euro 2028</h3><p>Title odds vs Sportsbet futures.</p><div class="ghostbars"><div style="width:80%"></div><div style="width:62%"></div><div style="width:48%"></div><div style="width:30%"></div></div></div>
         <div class="card"><span class="tag">Opens 2027</span><h3>Copa 2028</h3><p>Same model, CONMEBOL draw.</p><div class="ghostbars"><div style="width:74%"></div><div style="width:66%"></div><div style="width:35%"></div><div style="width:22%"></div></div></div>
         <div class="card"><span class="tag">Opens 2028</span><h3>WC 2030</h3><p>Elo drift model, years out.</p><div class="ghostbars"><div style="width:56%"></div><div style="width:50%"></div><div style="width:44%"></div><div style="width:38%"></div></div></div>
       </div>
-      <div></div>
+      <div class="tag note" id="odds-note" hidden>Odds from Sportsbet. Market chance is Sportsbet's odds with the bookmaker margin removed.</div>
     </section>
 
     <section id="ratings" role="tabpanel">
@@ -307,6 +321,12 @@ if (new URLSearchParams(location.search).has('frames')) {
 
   // Dates: data files are ISO, the page shows dd-mm-yyyy (site rule).
   const dmy = iso => iso ? iso.slice(0, 10).split('-').reverse().join('-') : '';
+  // Game dates in words, no year: "12th Nov" (maltysnack's call for the upcoming list).
+  const MON = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const dayMon = iso => {
+    const d = +iso.slice(8, 10), th = d % 10 === 1 && d !== 11 ? 'st' : d % 10 === 2 && d !== 12 ? 'nd' : d % 10 === 3 && d !== 13 ? 'rd' : 'th';
+    return `${d}${th} ${MON[+iso.slice(5, 7) - 1]}`;
+  };
   const sign = v => (v >= 0 ? '+' : '-');
   const pct = v => v == null ? '-' : `${sign(v)}${Math.abs(v * 100).toFixed(1)}%`;
   const tone = (el, v) => el.className = v == null ? '' : v >= 0 ? 'up' : 'down';
@@ -318,13 +338,14 @@ if (new URLSearchParams(location.search).has('frames')) {
     const m = g.model_p ? Math.round(g.model_p[i] * 100) : '-', k = g.market_p ? Math.round(g.market_p[i] * 100) : '-';
     return `<span class="p${g.pick === ['home', 'draw', 'away'][i] ? ' pick' : ''}">${m}/${k}</span>`;
   };
-  const row = (g, why) => `<div class="g"><span class="d">${dmy(g.kickoff)}</span><b>${g.home} v ${g.away}</b>${[0, 1, 2].map(i => cell(g, i)).join('')}<span class="why">${why}</span></div>`;
+  const team = (t, elo) => `<span class="t">${flag(t)}${t}${elo ? ` <i>${elo}</i>` : ''}</span>`;
+  const row = (g, why) => `<div class="g"><span class="d">${dayMon(g.kickoff)}</span><span class="m">${team(g.home, g.home_elo)}<span class="v">v</span>${team(g.away, g.away_elo)}</span>${[0, 1, 2].map(i => cell(g, i)).join('')}<span class="why">${why}</span></div>`;
   // fixtures.json lists every game on the feed, any distance out; before the
   // bot decides, the last column is Sportsbet's price, or a note if unpriced.
   const why = g => g.decision === 'bet' && g.pick
     ? `<em>${g.pick === 'draw' ? 'Draw' : g[g.pick]} ${g.odds[['home', 'draw', 'away'].indexOf(g.pick)].toFixed(2)}</em>`
     : g.decision === 'pass' ? (REASON[g.reason] || g.reason || 'pass')
-    : g.odds ? g.odds.map(o => o.toFixed(2)).join(' · ') : 'not priced yet';
+    : g.odds ? g.odds.map(o => `<span class="o">${o.toFixed(2)}</span>`).join('') : 'not priced yet';
   function renderGames(b, fx) {
     const today = new Date().toISOString().slice(0, 10);
     const up = (fx ? fx.games.filter(g => g.kickoff >= today) : b.upcoming || []).slice(0, 8);
@@ -335,7 +356,11 @@ if (new URLSearchParams(location.search).has('frames')) {
     $('passes').hidden = !passes.length;
     $('games').hidden = !up.length && !passes.length;
     $('soon').hidden = !$('games').hidden;
-    if (!$('games').hidden) stamps.odds = [`${up.length} upcoming · ${passes.length} passed`, 'live'];
+    $('odds-note').hidden = $('games').hidden;
+    if (up.length) {
+      const [a, z] = [dayMon(up[0].kickoff), dayMon(up[up.length - 1].kickoff)];
+      stamps.odds = [`Next games ${a === z ? a : `${a} to ${z}`}`, 'live'];
+    } else if (passes.length) stamps.odds = [`${passes.length} recent passes`, 'live'];
   }
 
   // fixtures.json is optional: until the bot writes one, upcoming comes from bankroll.json.
@@ -391,8 +416,13 @@ if (new URLSearchParams(location.search).has('frames')) {
   }).catch(() => { stamps.bankroll = ['Data failed to load', '']; paintStamp(); });
 
   fetch('elo.json').then(r => r.json()).then(e => {
-    $('elist').innerHTML = e.top.map(t => `<div class="e"><span>${t.rank}</span>${flag(t.team)}<b>${t.team}</b><span class="r">${t.rating}</span></div>`).join('');
-    $('elo-tag').innerHTML = `Elo ratings · top <span class="all">${e.top.length}</span><span class="ten">10</span> active teams · results to ${dmy(e.as_of)}`;
+    // Moves since before the latest international window; prev_* is absent in older exports.
+    const mv = d => `<span class="mv ${d > 0 ? 'up' : 'down'}">${d ? (d > 0 ? '▲' : '▼') + Math.abs(d) : ''}</span>`;
+    $('elist').innerHTML = e.top.map(t => {
+      const dr = t.prev_rank ? t.prev_rank - t.rank : 0, dp = t.prev_rating ? t.rating - t.prev_rating : 0;
+      return `<div class="e"><span>${t.rank}</span>${mv(dr)}${flag(t.team)}<b>${t.team}</b><span class="r">${t.rating}</span><span class="dr">${dp ? (dp > 0 ? '+' : '-') + Math.abs(dp) : ''}</span></div>`;
+    }).join('');
+    $('elo-tag').innerHTML = `Elo ratings · top <span class="all">${e.top.length}</span><span class="ten">10</span> active teams${e.window_start ? ` · moves since ${dayMon(e.window_start)}` : ''} · results to ${dmy(e.as_of)}`;
     stamps.ratings = [`Ratings as of ${dmy(e.as_of)}`, ''];
     paintStamp();
   }).catch(() => { stamps.ratings = ['Data failed to load', '']; paintStamp(); });
@@ -414,7 +444,7 @@ if (new URLSearchParams(location.search).has('frames')) {
       pts.map(([n, v], i) => `<circle cx="${x(v)}" cy="20" r="6" fill="${i === 2 ? 'var(--hi)' : 'var(--ink-3)'}"/>
         <text x="${x(v)}" y="${i === 1 ? 6 : 46}" text-anchor="${['start', 'end', 'start'][i]}" dx="${i === 1 ? 4 : -4}" fill="${i === 2 ? 'var(--ink)' : 'var(--ink-3)'}" style="font: 500 12px var(--mono)">${n} ${Math.round(v * 100)}%</text>`).join('');
     const gap = (ch('model') - ch('plain_elo')) * 100;
-    $('verdict').textContent = `Over ${c.n_matches} games the model typically gave the real result a ${Math.round(ch('model') * 100)}% chance, against 33% for guessing. That is a clear edge over guessing and ${gap > 0 ? `a small one (${gap.toFixed(1)} points) over` : 'no better than'} plain Elo, the simple ratings it starts from. Football is noisy: even a perfect model would miss plenty.`;
+    $('verdict').textContent = `Average chance each forecast gave the real result, over ${c.n_matches} games. Guessing: 1 in 3. Plain Elo, team ratings alone: ${Math.round(ch('plain_elo') * 100)}%. Our model adds squad, form and home advantage: ${Math.round(ch('model') * 100)}%${gap > 0 ? `, ${gap.toFixed(1)} points better` : ', no better'}. Most of the edge is in the ratings.`;
     const max = Math.max(...c.top.map(t => t.p_champion));
     $('bars').insertAdjacentHTML('beforeend', c.top.map(t =>
       `<div class="bar${t.stage === 'Won' ? ' won' : ''}"><span class="name">${t.team}</span>
