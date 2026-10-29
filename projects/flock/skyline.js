@@ -189,7 +189,7 @@ export function create(ctx) {
   }
   function startChute() {
     if (ch.on) return;
-    ch.on = true; ch.phase = 0; ch.t = 0; ch.open = 0; ch.v.set(0, 0, 0);
+    ch.on = true; ch.phase = 0; ch.t = 0; ch.open = 0; ch.v.set(0, 0, 0); ch.sway = rnd(0, 6.28); ch.side = Math.random() < 0.5 ? -1 : 1;
     ch.p.set(tallBox.x0 + (tallBox.x1 - tallBox.x0) / 2, tallBox.y1 + 0.05, tallBox.z1 - 0.9);   // standing at the open (front) edge
     chCanopy.visible = false; chute.rotation.set(0, 0, 0); scene.add(chute);
   }
@@ -204,8 +204,10 @@ export function create(ctx) {
       ch.open = Math.min(1, ch.open + dt / 0.7);
       let wx = 0, wz = 0; for (const g of gusts) if (g.on) { const d = Math.hypot(ch.p.x - g.c.x, ch.p.y - g.c.y, ch.p.z - g.c.z); if (d < GUST_R) { wx += g.dir.x * 6 * g.env * (1 - d / GUST_R); wz += g.dir.z * 6 * g.env * (1 - d / GUST_R); } }
       const k = Math.min(1, dt * 1.5);
-      ch.v.y += (-4.5 - ch.v.y) * Math.min(1, dt * 3); ch.v.x += (wx - ch.v.x) * k; ch.v.z += (1 + wz - ch.v.z) * k;
-      ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 3.4);
+      // a steady sideways drift plus a slow weave, so the path curves instead of dropping straight
+      const weave = Math.sin(clock * 0.6 + ch.sway);
+      ch.v.y += (-4.5 - ch.v.y) * Math.min(1, dt * 3); ch.v.x += (wx + ch.side * 2.2 + weave * 2.4 - ch.v.x) * k; ch.v.z += (1.5 + wz + Math.cos(clock * 0.45 + ch.sway) * 1.6 - ch.v.z) * k;
+      ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 3.4); ch.p.x = clamp(ch.p.x, -BX, BX);
       if (ch.p.y <= GROUND + 0.1) { ch.p.y = GROUND + 0.1; ch.phase = 4; ch.t = 0; chCanopy.visible = false; }
     } else if (ch.phase === 4 && ch.t > 2) { ch.on = false; scene.remove(chute); }
   }
