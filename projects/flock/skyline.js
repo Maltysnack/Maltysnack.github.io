@@ -1,5 +1,6 @@
-// Skyline: the extended map. Same three rules, plus bird models, a hawk you
-// steer, a skyline to perch on, gusts of wind and a plane the flock sees coming.
+// Skyline: the extended map. Same three rules, plus flapping birds, a hawk you
+// can take over, a skyline to perch on, gusts of wind, and visitors passing
+// through (plane, blimp, hang glider, jetpack, cloud, a parachutist).
 // flock.js owns the simulation and calls these hooks while the mode is on.
 import * as THREE from './vendor/three.module.min.js';
 
@@ -18,11 +19,6 @@ export function create(ctx) {
   const wingTris = w => w.map(tr => tr.flat());
   const both = w => [...wingTris(w), ...wingTris(w).map(flip)];
   const MODELS = {
-    cone: { amp: 0, geo: () => new THREE.ConeGeometry(0.45, 1.8, 4).rotateX(Math.PI / 2) },
-    dart: { amp: 0, tris: () => {
-      const T = [0, 0, 1], L = [-.75, 0, -.9], R = [.75, 0, -.9], C = [0, 0, -.5], K = [0, -.35, -.8];
-      return [[T, L, C], [T, C, R], [T, C, K], [C, K, L]].map(t => t.flat());
-    } },
     bird: { amp: 0.55, freq: 11, tris: () => [...body(1), ...both([
       [[.16, 0, .35], [.7, 0, .25], [.16, 0, -.45]], [[.7, 0, .25], [1.3, 0, -.45], [.16, 0, -.45]]])] },
     gull: { amp: 0.4, freq: 6.5, tris: () => [...body(1.25), ...both([
@@ -91,26 +87,131 @@ export function create(ctx) {
   const beacon = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), beaconMat);
   beacon.position.set(tall.x, GROUND + tall.h + 1.1, tall.z); world.add(beacon);
 
-  // ── Plane: a low-poly silhouette on a straight pass the flock sees coming ─
-  const planeMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
-  const planeMesh = new THREE.Group();
-  for (const [w, h, d, y, z] of [[1.8, 1.8, 13, 0, 0], [20, 0.4, 3.2, 0, 0.5], [6.5, 0.3, 2.2, 0.2, -5.6], [0.35, 3, 2.6, 1.6, -5.4]]) {
-    const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), planeMat); m.position.set(0, y, z); planeMesh.add(m);
+  // ── Visitors ─────────────────────────────────────────────────────────
+  // Every pass flies in a lane above the tallest roof (plus its own hang, bob
+  // and clearance), so nothing can touch a building.
+  const TOP = Math.max(...boxes.map(b => b.y1)), SAFE = TOP + 8, BOB = 1.2;
+  const solidMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true, side: THREE.DoubleSide });
+  const accentMat = new THREE.MeshLambertMaterial({ color: 0xff0000, flatShading: true, side: THREE.DoubleSide });
+  const flameMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true, transparent: true, opacity: 0.88 });
+  const box = (w, h, d, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); return m; };
+  const ball = (r, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), mat); m.position.set(x, y, z); return m; };
+  function figure(mat) {   // a stick person, feet at y = 0, about 2 tall
+    const g = new THREE.Group();
+    g.add(box(0.5, 0.9, 0.3, mat, 0, 1.15, 0), ball(0.28, mat, 0, 1.85), box(0.18, 0.8, 0.2, mat, -0.14, 0.4), box(0.18, 0.8, 0.2, mat, 0.14, 0.4),
+      box(0.14, 0.7, 0.14, mat, -0.36, 1.2), box(0.14, 0.7, 0.14, mat, 0.36, 1.2));
+    return g;
   }
-  planeMesh.visible = false; planeMesh.frustumCulled = false;
-  const pl = { on: false, p: new THREE.Vector3(), dir: new THREE.Vector3(), end: 0, speed: 30 };
-  const PLANE_R = 55, PLANE_LEN = 80;
-  function launchPlane() {
-    if (pl.on) return;
-    const sign = Math.random() < 0.5 ? -1 : 1, alongX = Math.random() < 0.5, ext = (alongX ? BX : BZ) + 90;
-    pl.dir.set(alongX ? sign : 0, 0, alongX ? 0 : sign);
-    pl.p.set(alongX ? -sign * ext : rnd(-BX * 0.6, BX * 0.6), rnd(20, 36), alongX ? rnd(-BZ * 0.3, BZ * 0.8) : -sign * ext);
-    pl.end = ext; pl.on = true; planeMesh.visible = true;
-    planeMesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), pl.dir);
+  // Banner for the blimp: the site icon, with a cloth ripple in the vertex shader.
+  const UBn = { uTime: { value: 0 }, uL: { value: 14 } };
+  const bannerCanvas = document.createElement('canvas'); bannerCanvas.width = 512; bannerCanvas.height = 160;
+  const bctx = bannerCanvas.getContext('2d'); bctx.fillStyle = '#ffffff'; bctx.fillRect(0, 0, 512, 160);
+  const bannerTex = new THREE.CanvasTexture(bannerCanvas); bannerTex.colorSpace = THREE.SRGBColorSpace;
+  const icon = new Image();
+  icon.onload = () => {
+    bctx.drawImage(icon, 0, 0, 160, 160);
+    const px = bctx.getImageData(2, 2, 1, 1).data;   // fill the rest with the icon's own background
+    bctx.fillStyle = `rgb(${px[0]},${px[1]},${px[2]})`; bctx.fillRect(0, 0, 512, 160); bctx.drawImage(icon, 176, 0, 160, 160);
+    bannerTex.needsUpdate = true;
+  };
+  icon.src = '/icons/icon-192.png';
+  const bannerMat = new THREE.MeshBasicMaterial({ map: bannerTex, side: THREE.DoubleSide });
+  bannerMat.onBeforeCompile = sh => {
+    Object.assign(sh.uniforms, UBn);
+    sh.vertexShader = sh.vertexShader
+      .replace('#include <common>', '#include <common>\nuniform float uTime; uniform float uL;')
+      .replace('#include <begin_vertex>', '#include <begin_vertex>\nfloat k = -position.z / uL;\ntransformed.x += sin(uTime * 5.0 + position.z * 1.1) * 1.1 * k;\ntransformed.y += sin(uTime * 3.0 + position.z * 0.8) * 0.4 * k;');
+  };
+  const MESH = {
+    plane() {
+      const g = new THREE.Group();
+      for (const [w, h, d, y, z] of [[1.8, 1.8, 13, 0, 0], [20, 0.4, 3.2, 0, 0.5], [6.5, 0.3, 2.2, 0.2, -5.6], [0.35, 3, 2.6, 1.6, -5.4]]) g.add(box(w, h, d, solidMat, 0, y, z));
+      return g;
+    },
+    blimp() {
+      const g = new THREE.Group(), hull = ball(1, solidMat); hull.scale.set(3.4, 3.4, 9);
+      const ban = new THREE.Mesh(new THREE.PlaneGeometry(14, 4.5, 20, 1).translate(7, 0, 0).rotateY(Math.PI / 2), bannerMat); ban.position.z = -10.5;
+      g.add(hull, box(1.4, 1.1, 3, solidMat, 0, -3.6, 0.5), box(0.3, 4.4, 2.6, solidMat, 0, 0, -8), box(4.4, 0.3, 2.6, solidMat, 0, 0, -8), ban);
+      return g;
+    },
+    glider() {
+      const g = new THREE.Group(), w = new THREE.BufferGeometry();
+      w.setAttribute('position', new THREE.BufferAttribute(new Float32Array([0, 0.6, 3, -4.6, 0.2, -2.6, 0, 0.1, -1.4, 0, 0.6, 3, 0, 0.1, -1.4, 4.6, 0.2, -2.6]), 3)); w.computeVertexNormals();
+      const f = figure(solidMat); f.scale.setScalar(0.9); f.position.y = -3.3; f.rotation.x = Math.PI / 2 * 0.9; f.position.z = 0.4;   // lying under the wing
+      g.add(new THREE.Mesh(w, accentMat), f, box(0.12, 2.6, 0.12, solidMat, 0, -1.3, 0.2));
+      return g;
+    },
+    jetpack() {
+      const g = new THREE.Group(), f = figure(solidMat); f.position.y = -1; f.rotation.x = 0.35;
+      const flame = new THREE.Mesh(new THREE.ConeGeometry(0.28, 1.6, 6).rotateX(Math.PI), flameMat); flame.position.set(0, -1.4, -0.45); flame.name = 'flame';
+      g.add(f, box(0.6, 1, 0.35, accentMat, 0, 0.1, -0.35), flame);
+      return g;
+    },
+    cloud() {
+      const g = new THREE.Group();
+      for (const [r, x, y, z] of [[7, 0, 0, 0], [5.5, 7, -1, 1], [5, -7, -1.4, -1], [4.5, 2.5, 3, 2], [4, -3, 2.5, -3], [3.6, 10, -2, -2]]) g.add(ball(r, cloudMat, x, y * 0.7, z));
+      return g;
+    }
+  };
+  // path: how far ahead of itself a visitor is felt; k: how hard birds flee (cloud is gentle).
+  const KINDS = {
+    plane:   { weight: 30, speed: 20, R: 60, k: 2.5, path: 90, y: [30, 38], drop: 1, ext: 90 },
+    blimp:   { weight: 22, speed: 11, R: 50, k: 2.0, path: 70, y: [32, 38], drop: 4.6, ext: 100 },
+    glider:  { weight: 14, speed: 9,  R: 36, k: 1.6, path: 40, y: [31, 37], drop: 4.4, ext: 60 },
+    jetpack: { weight: 12, speed: 14, R: 30, k: 1.6, path: 30, y: [30, 38], drop: 3.8, ext: 60 },
+    cloud:   { weight: 22, speed: 4,  R: 26, k: 0.8, path: 0,  y: [34, 40], drop: 8,   ext: 45 }
+  };
+  const fl = { on: false, kind: '', cfg: null, p: new THREE.Vector3(), dir: new THREE.Vector3(), y0: 0, end: 0, mesh: null };
+  const meshes = {};
+  function launchPass(kind) {
+    if (fl.on) return;
+    if (!kind) { let r = Math.random() * Object.values(KINDS).reduce((a, k) => a + k.weight, 0); for (const k in KINDS) { r -= KINDS[k].weight; if (r <= 0) { kind = k; break; } } }
+    const cfg = KINDS[kind], sign = Math.random() < 0.5 ? -1 : 1, alongX = Math.random() < 0.5, ext = (alongX ? BX : BZ) + cfg.ext;
+    meshes[kind] ??= MESH[kind](); fl.mesh = meshes[kind]; scene.add(fl.mesh);
+    fl.kind = kind; fl.cfg = cfg; fl.dir.set(alongX ? sign : 0, 0, alongX ? 0 : sign);
+    fl.y0 = Math.max(rnd(cfg.y[0], cfg.y[1]), SAFE + cfg.drop + BOB);   // clearance over the roofs, always
+    fl.p.set(alongX ? -sign * ext : rnd(-BX * 0.6, BX * 0.6), fl.y0, alongX ? rnd(-BZ * 0.3, BZ * 0.8) : -sign * ext);
+    fl.end = ext; fl.on = true;
+    fl.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), fl.dir);
+    if (kind === 'cloud') fl.mesh.quaternion.identity();
+  }
+  function endPass() { fl.on = false; scene.remove(fl.mesh); }
+
+  // ── Parachutist: steps off the tallest roof into open air and drifts down ─
+  const tallBox = boxes.reduce((a, b) => b.y1 > a.y1 ? b : a);
+  const ch = { on: false, phase: 0, t: 0, open: 0, p: new THREE.Vector3(), v: new THREE.Vector3() };
+  const chute = new THREE.Group(), chFig = figure(solidMat), chCanopy = new THREE.Group();
+  {
+    const dome = new THREE.Mesh(new THREE.SphereGeometry(2.7, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), accentMat); dome.position.y = 4.2;
+    const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([[1.8, 4.2, 0], [0, 2, 0.1], [-1.8, 4.2, 0], [0, 2, 0.1], [0, 4.2, 1.8], [0, 2, 0.1], [0, 4.2, -1.8], [0, 2, 0.1]].map(a => new THREE.Vector3(...a))), edgeMat);
+    chCanopy.add(dome, lines); chCanopy.position.y = 0; chute.add(chFig, chCanopy);
+  }
+  function startChute() {
+    if (ch.on) return;
+    ch.on = true; ch.phase = 0; ch.t = 0; ch.open = 0; ch.v.set(0, 0, 0);
+    ch.p.set(tallBox.x0 + (tallBox.x1 - tallBox.x0) / 2, tallBox.y1 + 0.05, tallBox.z1 - 0.9);   // standing at the open (front) edge
+    chCanopy.visible = false; chute.rotation.set(0, 0, 0); scene.add(chute);
+  }
+  function stepChute(dt) {
+    ch.t += dt;
+    if (ch.phase === 0 && ch.t > 2.5) { ch.phase = 1; ch.t = 0; ch.v.set(0, 2, 4); }
+    else if (ch.phase === 1) { ch.p.addScaledVector(ch.v, dt); if (ch.t > 0.6) { ch.phase = 2; ch.t = 0; ch.v.set(0, 0, 2.5); } }
+    else if (ch.phase === 2) {
+      ch.v.y = Math.max(ch.v.y - 12 * dt, -22); ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 1.2);
+      if (ch.t > 1.4) { ch.phase = 3; ch.t = 0; chCanopy.visible = true; }
+    } else if (ch.phase === 3) {
+      ch.open = Math.min(1, ch.open + dt / 0.7);
+      let wx = 0, wz = 0; for (const g of gusts) if (g.on) { const d = Math.hypot(ch.p.x - g.c.x, ch.p.y - g.c.y, ch.p.z - g.c.z); if (d < GUST_R) { wx += g.dir.x * 6 * g.env * (1 - d / GUST_R); wz += g.dir.z * 6 * g.env * (1 - d / GUST_R); } }
+      const k = Math.min(1, dt * 1.5);
+      ch.v.y += (-4.5 - ch.v.y) * Math.min(1, dt * 3); ch.v.x += (wx - ch.v.x) * k; ch.v.z += (1 + wz - ch.v.z) * k;
+      ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 3.4);
+      if (ch.p.y <= GROUND + 0.1) { ch.p.y = GROUND + 0.1; ch.phase = 4; ch.t = 0; chCanopy.visible = false; }
+    } else if (ch.phase === 4 && ch.t > 2) { ch.on = false; scene.remove(chute); }
   }
 
   // ── Gusts: a drifting volume of moving air, shown as streaks ─────────
-  const GUST_R = 30, GUST_SPEED = 24, GUST_LIFE = 7, STREAKS = 240;
+  const GUST_R = 34, GUST_SPEED = 9, GUST_LIFE = 16, STREAKS = 260;
   const streakMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
   const gusts = [0, 1].map(() => {
     const g = { on: false, c: new THREE.Vector3(), dir: new THREE.Vector3(), age: 0, env: 0, off: new Float32Array(STREAKS * 3) };
@@ -127,21 +228,23 @@ export function create(ctx) {
   function startGust() {
     const g = gusts.find(x => !x.on); if (!g) return;
     const a = rnd(0, Math.PI * 2); g.dir.set(Math.cos(a), 0, Math.sin(a));
-    g.c.set(-g.dir.x * (BX + 10) + rnd(-20, 20), rnd(-12, 24), -g.dir.z * (BZ + 10) + rnd(-20, 20));
+    g.c.set(-g.dir.x * (BX + 10) + rnd(-20, 20), rnd(-12, 22), -g.dir.z * (BZ + 10) + rnd(-20, 20));
     g.age = 0; g.on = true; g.lines.visible = true;
   }
 
   // ── Per-bird state: 0 flying, 1 landing, 2 perched ───────────────────
   let st = new Uint8Array(0), tgt = new Int16Array(0), leaveAt = new Float32Array(0), freeSlots = slots.length;
-  let clock = 0, nextGust = 0, nextPlane = 0;
+  let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, rt = new Float32Array(0), tint = new Float32Array(0);
   function reset() {
     N = ctx.N; st = new Uint8Array(N); tgt = new Int16Array(N); leaveAt = new Float32Array(N);
     flapAttr = new THREE.InstancedBufferAttribute(new Float32Array(N).fill(1), 1);
     phaseAttr = new THREE.InstancedBufferAttribute(Float32Array.from({ length: N }, () => rnd(0, 6.283)), 1);
     for (const k in geoCache) { geoCache[k].geometry.dispose(); delete geoCache[k]; }
     for (const s of slots) s.taken = false; freeSlots = slots.length;
+    rt = new Float32Array(N); tint = new Float32Array(N);
     api.st = st; setModel(api.model);
-    nextGust = clock + rnd(14, 24); nextPlane = clock + rnd(22, 40);
+    ctx.birds.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(N * 3).fill(1), 3);
+    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50);
   }
   function setModel(name) {
     api.model = name;
@@ -154,15 +257,20 @@ export function create(ctx) {
   // ── Hooks the engine calls ───────────────────────────────────────────
   function before(dt) {
     clock += dt;
-    if (pl.on) { pl.p.addScaledVector(pl.dir, pl.speed * dt); if (Math.abs(pl.p.x * pl.dir.x + pl.p.z * pl.dir.z) > pl.end) { pl.on = false; planeMesh.visible = false; } }
+    if (fl.on) {
+      fl.p.addScaledVector(fl.dir, fl.cfg.speed * dt); fl.p.y = fl.y0 + Math.sin(clock * 0.9) * (fl.cfg.drop > 1 && fl.kind !== 'cloud' ? BOB : 0);
+      if (Math.abs(fl.p.x * fl.dir.x + fl.p.z * fl.dir.z) > fl.end) endPass();
+    }
+    if (ch.on) stepChute(dt);
     for (const g of gusts) if (g.on) {
       g.age += dt; g.c.addScaledVector(g.dir, GUST_SPEED * dt);
       g.env = Math.sin(Math.PI * Math.min(1, g.age / GUST_LIFE));
       if (g.age > GUST_LIFE) { g.on = false; g.lines.visible = false; g.env = 0; }
     }
     if (!ctx.reduce) {   // ambient weather, off under reduced motion
-      if (clock > nextGust) { startGust(); nextGust = clock + rnd(22, 45); }
-      if (clock > nextPlane) { launchPlane(); nextPlane = clock + rnd(35, 70); }
+      if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55); }
+      if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55); }
+      if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90); }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
     if (freeSlots === 0) return;
@@ -212,7 +320,8 @@ export function create(ctx) {
 
   // Extra forces on a flying bird: buildings, the plane's path, wind.
   const PAD = 9;
-  function force(px, py, pz, out) {
+  function force(i, px, py, pz, out) {
+    let lvl = 0;   // how hard this bird is reacting to something big, 0 to 1, for the tint
     for (const b of boxes) {
       let dx = px - clamp(px, b.x0, b.x1), dy = py - clamp(py, b.y0, b.y1), dz = pz - clamp(pz, b.z0, b.z1), d2 = dx * dx + dy * dy + dz * dz;
       if (d2 >= PAD * PAD) continue;
@@ -220,19 +329,24 @@ export function create(ctx) {
       const d = Math.sqrt(d2), k = MAX_FORCE * 2.2 * (1 - d / PAD) / d;
       out[0] += dx * k; out[1] += dy * k; out[2] += dz * k;
     }
-    if (pl.on) {   // flee the line the plane is on, well ahead of it
-      const rx = px - pl.p.x, ry = py - pl.p.y, rz = pz - pl.p.z, t = clamp(rx * pl.dir.x + rz * pl.dir.z, -10, PLANE_LEN);
-      const ex = rx - pl.dir.x * t, ey = ry, ez = rz - pl.dir.z * t, d = Math.hypot(ex, ey, ez);
-      if (d < PLANE_R) { const k = MAX_FORCE * 2.5 * (1 - d / PLANE_R) ** 1.5 / (d || 1); out[0] += ex * k; out[1] += ey * k; out[2] += ez * k; }
+    if (fl.on) {   // flee the line a visitor is on, well ahead of it
+      const c = fl.cfg, rx = px - fl.p.x, ry = py - fl.p.y, rz = pz - fl.p.z, t = c.path ? clamp(rx * fl.dir.x + rz * fl.dir.z, -10, c.path) : 0;
+      const ex = rx - fl.dir.x * t, ez = rz - fl.dir.z * t, d = Math.hypot(ex, ry, ez);
+      if (d < c.R) { const u = 1 - d / c.R, k = MAX_FORCE * c.k * u ** 1.5 / (d || 1); out[0] += ex * k; out[1] += ry * k; out[2] += ez * k; lvl = Math.max(lvl, Math.min(1, u * c.k)); }
+    }
+    if (ch.on && ch.phase > 0) {   // a light berth for the parachutist
+      const rx = px - ch.p.x, ry = py - ch.p.y - 3, rz = pz - ch.p.z, d = Math.hypot(rx, ry, rz);
+      if (d < 14) { const u = 1 - d / 14, k = MAX_FORCE * 0.9 * u * u / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u); }
     }
     for (const g of gusts) if (g.on) {
       const d = Math.hypot(px - g.c.x, py - g.c.y, pz - g.c.z);
-      if (d < GUST_R) { const w = (1 - d / GUST_R) * g.env * 34; out[0] += g.dir.x * w; out[2] += g.dir.z * w; }
+      if (d < GUST_R) { const u = (1 - d / GUST_R) * g.env, w = u * 50; out[0] += g.dir.x * w; out[2] += g.dir.z * w; lvl = Math.max(lvl, u); }
     }
+    rt[i] = lvl;
   }
 
   // ── The hawk: steered by pointer or arrows, or left to chase ─────────
-  const H = { yaw: 0, pitch: 0, roll: 0, nx: 0, ny: 0 };
+  const H = { yaw: 0, pitch: 0, roll: 0, nx: 0, ny: 0, armed: false };   // armed: the pointer has moved since flying began
   const keys = { l: 0, r: 0, u: 0, d: 0 };
   const dead = v => Math.abs(v) < 0.08 ? 0 : (v - Math.sign(v) * 0.08) / 0.92;
   function pushOut(p, pad) {
@@ -245,7 +359,7 @@ export function create(ctx) {
     }
   }
   function steerHawk(dt) {
-    const turn = dead(H.nx) * -1 + (keys.l - keys.r), climb = dead(H.ny) + (keys.u - keys.d);
+    const turn = (H.armed ? dead(H.nx) * -1 : 0) + (keys.l - keys.r), climb = (H.armed ? dead(H.ny) : 0) + (keys.u - keys.d);
     const prevYaw = H.yaw;
     H.yaw += turn * 1.7 * dt; H.pitch = clamp(H.pitch + climb * 1.3 * dt, -1.1, 1.1);
     // Near a wall or the ground, the hawk banks back inside on its own.
@@ -288,12 +402,27 @@ export function create(ctx) {
       camera.position.lerp(cam, 1 - Math.exp(-dt * 5));
       look.copy(hp).addScaledVector(fwd, 28); camera.lookAt(look);
     }
-    if (pl.on) planeMesh.position.copy(pl.p);
+    UBn.uTime.value = tick;
+    if (fl.on) {
+      fl.mesh.position.copy(fl.p);
+      if (fl.kind === 'jetpack') { const f = fl.mesh.getObjectByName('flame'); f.scale.set(1, 0.8 + Math.random() * 0.6, 1); }
+      if (fl.kind === 'glider') fl.mesh.rotation.z = Math.sin(clock * 0.7) * 0.12;
+    }
+    if (ch.on) {
+      chute.position.copy(ch.p); chCanopy.scale.setScalar(Math.max(0.001, ch.open));
+      chute.rotation.z = ch.phase === 3 ? Math.sin(clock * 1.3) * 0.08 : 0; chute.rotation.x = ch.phase === 2 ? 0.5 : 0;
+    }
+    const col = ctx.birds.instanceColor.array, k = Math.min(1, dt * 6), tr = textC.r, tg = textC.g, tb = textC.b;
+    for (let i = 0; i < N; i++) {
+      tint[i] += ((st[i] ? 0 : rt[i]) - tint[i]) * k; const t = tint[i];
+      col[i * 3] = tr + (accC.r - tr) * t; col[i * 3 + 1] = tg + (accC.g - tg) * t; col[i * 3 + 2] = tb + (accC.b - tb) * t;
+    }
+    ctx.birds.instanceColor.needsUpdate = true;
     for (const g of gusts) if (g.on) {
-      const pa = g.geo.attributes.position.array, len = 5 * g.env;
+      const pa = g.geo.attributes.position.array, len = 7 * g.env;
       g.mat.opacity = 0.6 * g.env;
       for (let i = 0; i < STREAKS; i++) {
-        g.along[i] += 38 * dt; if (g.along[i] > GUST_R) g.along[i] -= 2 * GUST_R;
+        g.along[i] += 13 * dt; if (g.along[i] > GUST_R) g.along[i] -= 2 * GUST_R;
         const ox = g.off[i * 3], oy = g.off[i * 3 + 1], oz = g.off[i * 3 + 2];
         const al = ox * g.dir.x + oz * g.dir.z, px = ox - al * g.dir.x, pz = oz - al * g.dir.z;   // perpendicular part of the offset
         const inside = g.along[i] * g.along[i] + px * px + oy * oy + pz * pz < GUST_R * GUST_R;
@@ -305,41 +434,44 @@ export function create(ctx) {
     }
   }
 
+  const textC = new THREE.Color(), accC = new THREE.Color();
   function theme(col) {
     const text = col('--text'), bg = col('--bg'), accent = col('--accent');
-    birdMat.color.copy(text); hawkMat.color.copy(accent); planeMat.color.copy(text); edgeMat.color.copy(text);
+    textC.copy(text); accC.copy(accent); birdMat.color.set(0xffffff);
+    hawkMat.color.copy(accent); solidMat.color.copy(text); accentMat.color.copy(accent); flameMat.color.copy(accent); edgeMat.color.copy(text);
+    cloudMat.color.copy(bg).lerp(text, 0.4);
     streakMat.color.copy(text); for (const g of gusts) g.mat.color.copy(text);
     groundMat.color.copy(bg).lerp(text, 0.07); bldMat.color.copy(bg).lerp(text, 0.16); beaconMat.color.copy(accent);
   }
 
   // ── Input ────────────────────────────────────────────────────────────
-  const onMove = e => { const r = canvas.getBoundingClientRect(); H.nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1); H.ny = clamp(-(((e.clientY - r.top) / r.height) * 2 - 1), -1, 1); };
+  const onMove = e => { H.armed = true; const r = canvas.getBoundingClientRect(); H.nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1); H.ny = clamp(-(((e.clientY - r.top) / r.height) * 2 - 1), -1, 1); };
   const onUp = e => { if (e.pointerType === 'touch') { H.nx = 0; H.ny = 0; } };
   const KEY = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd' };
   const onKey = v => e => { const k = KEY[e.code]; if (!k) return; keys[k] = v; if (api.flying) e.preventDefault(); };
   const kd = onKey(1), ku = onKey(0);
 
   const api = {
-    st, model: 'bird', flying: true,
+    st, model: 'bird', flying: false,
     before, drive, force, hawk: hawkStep, draw, theme, reset, setModel,
-    gust: startGust, plane: launchPlane,
     toggleFly() {
       api.flying = !api.flying; canvas.style.cursor = api.flying ? 'crosshair' : '';
-      if (api.flying) { camReady = false; H.nx = 0; H.ny = 0; } else ctx.orbit.idle = 0;
+      if (api.flying) { camReady = false; H.nx = 0; H.ny = 0; H.armed = false; } else ctx.orbit.idle = 0;
       camera.fov = api.flying ? 65 : 50; camera.updateProjectionMatrix();
       return api.flying;
     },
     enable() {
-      scene.add(world, planeMesh, hawkMesh);
+      scene.add(world, hawkMesh);
       addEventListener('pointermove', onMove); canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
       addEventListener('keydown', kd); addEventListener('keyup', ku);
-      api.flying = true; camReady = false; camera.fov = 65; camera.updateProjectionMatrix(); canvas.style.cursor = 'crosshair';
-      pl.on = false; planeMesh.visible = false; for (const g of gusts) { g.on = false; g.lines.visible = false; }
+      api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
+      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } for (const g of gusts) { g.on = false; g.lines.visible = false; }
       hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },
     disable() {
-      scene.remove(world, planeMesh, hawkMesh);
+      scene.remove(world, hawkMesh); if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); }
+      ctx.birds.instanceColor = null;
       removeEventListener('pointermove', onMove); canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onUp);
       removeEventListener('keydown', kd); removeEventListener('keyup', ku);
       canvas.style.cursor = ''; api.flying = false;

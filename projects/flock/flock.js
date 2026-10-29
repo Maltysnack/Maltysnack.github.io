@@ -106,7 +106,7 @@
         const hx = px - hawk.p.x, hy = py - hawk.p.y, hz = pz - hawk.p.z, h2 = hx * hx + hy * hy + hz * hz;
         if (h2 < fleeR2) { const k = MAX_FORCE * 3 * (1 - h2 / fleeR2) / Math.sqrt(h2 + 1e-6); fx += hx * k; fy += hy * k; fz += hz * k; }
       }
-      if (X) { f3[0] = f3[1] = f3[2] = 0; X.force(px, py, pz, f3); fx += f3[0]; fy += f3[1]; fz += f3[2]; }
+      if (X) { f3[0] = f3[1] = f3[2] = 0; X.force(i, px, py, pz, f3); fx += f3[0]; fy += f3[1]; fz += f3[2]; }
       const fm = Math.hypot(fx, fy, fz), lim = useHawk ? MAX_FORCE * 3 : MAX_FORCE;
       if (fm > lim) { fx *= lim / fm; fy *= lim / fm; fz *= lim / fm; }
       // low-pass the force so heading changes ease in rather than twitch
@@ -256,17 +256,17 @@
   const ctx = {
     THREE, scene, camera, canvas, hawk, P, reduce,
     BX, BY, BZ, MAX_FORCE, orbit,
-    get pos() { return pos; }, get vel() { return vel; }, get N() { return N; },
+    get birds() { return birds; }, get pos() { return pos; }, get vel() { return vel; }, get N() { return N; },
     setLook(geo, mat) { look.geo = geo; look.mat = mat; birds.geometry = geo; birds.material = mat; },
     aiHawk: stepHawk
   };
   let sky = null, mode = 'classic';
   const $modes = document.querySelectorAll('#modes button'), $title = document.querySelector('.ov-title p');
-  const blurb = $title.textContent, skyBlurb = 'The same three rules, plus a skyline to land on, gusts of wind and the odd plane. You are the hawk: steer with the mouse or arrow keys, or press Fly hawk to let go and watch.';
+  const blurb = $title.textContent, skyBlurb = 'The same three rules, plus a skyline to land on, gusts of wind and the odd visitor passing through. Press Fly hawk to take the hawk: steer with the mouse or arrow keys.';
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=1')).create(ctx);
+      sky ??= (await import('./skyline.js?v=2')).create(ctx);
       mode = m; X = sky; seed(N); sky.enable(); $title.textContent = skyBlurb;
     } else {
       mode = m; if (X) X.disable(); X = null;
@@ -275,12 +275,8 @@
     }
     document.body.dataset.mode = m; $modes.forEach(b => b.classList.toggle('on', b.dataset.m === m));
     $('fly').classList.toggle('on', !!(X && X.flying));
-    document.querySelectorAll('#models button').forEach(b => b.classList.toggle('on', !!(X && b.dataset.m === X.model)));
     theme();
   }
   $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
-  $('models').addEventListener('click', e => { const b = e.target.closest('button'); if (!b || !X) return; X.setModel(b.dataset.m); document.querySelectorAll('#models button').forEach(x => x.classList.toggle('on', x === b)); });
   $('fly').addEventListener('click', () => { if (X) $('fly').classList.toggle('on', X.toggleFly()); });
-  $('gust').addEventListener('click', () => { if (X) X.gust(); });
-  $('plane').addEventListener('click', () => { if (X) X.plane(); });
   document.body.dataset.mode = 'classic';

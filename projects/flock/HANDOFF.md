@@ -68,3 +68,22 @@ count controls.
   the Skyline hooks (perch, takeoff, gust, plane, models, no NaN); assets
   resolve over a local server. NOT verified visually in a browser (no WebGL
   here), so flap look, hawk feel, chase camera and layout need an eyeball.
+
+## 29-10-2026: Skyline round 2
+
+- Skyline opens in Watch mode (AI hawk, orbit camera); Fly hawk is opt-in, and
+  the pointer is ignored until it moves after flying starts (was steering
+  from the mode button's corner). Model picker, Gust and Fly-by buttons gone:
+  Classic is the cone, Skyline is the bird, weather and visitors are ambient.
+- Gusts slower (9 u/s, 16 s) and stronger; birds reacting to a gust, a visitor
+  or the parachutist tint toward the accent (per-bird `instanceColor`, base
+  colour now lives in that attribute while Skyline is on).
+- Visitor roll (`KINDS` in `skyline.js`): plane, blimp (banner is
+  `/icons/icon-192.png` on a canvas with a cloth-ripple shader), hang glider,
+  jetpack figure, cloud (gentle avoidance, k 0.8, so fleeing birds can clip
+  it). Lane height is clamped to roof top + 8 + the kind's hang + bob, so
+  nothing can touch a building. A parachutist steps off the tallest roof's
+  front edge now and then (collision-pushed away from walls).
+- Headless check (6 min of sim): visitor bounding boxes never intersected a
+  building, min clearance 9.8 over the roof; chute never hit one; tint and
+  perching work. Still not eyeballed in a browser.
