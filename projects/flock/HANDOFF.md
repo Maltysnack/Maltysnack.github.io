@@ -1,9 +1,12 @@
 # flock HANDOFF
 
-> **Standing rule:** the home page embeds `/projects/flock/?ambient` live.
-> Every new UI, control or input must be gated off in ambient mode, and no
-> Flock change is done until `?ambient` has been checked (chrome hidden, no
-> input, 30 fps cap, reduced-motion still frame, phone budget).
+> **The root `/index.html` is the Flock page** (the home page). This folder
+> holds the engine (`flock.js`, `skyline.js`, vendored three.js) and this
+> HANDOFF; `projects/flock/index.html` is only a redirect to `/` that keeps the
+> query string. UI and markup changes go in the root `index.html`; bump
+> `flock.js?v=N` there, and the `skyline.js?v=N` import in `flock.js`, whenever
+> either file changes. Check `/` (intro, `?nointro`, idle fade) before calling
+> a change done.
 
 Scratchpad for `/projects/flock/`. Root `HANDOFF.md` covers site-wide.
 
@@ -201,3 +204,16 @@ count controls.
 - Checked headless: Skyline hooks, 66 chutes and 24 planes with zero building
   hits, perch cycle, soft edge under wind, intro/nointro/ambient/reduced
   modes. Still not eyeballed in a browser.
+
+## 29-10-2026: ambient removed
+
+- `?ambient` and everything that served it is gone (iframe-only chrome hiding,
+  theme message listener, 30 fps cap, pause on hidden, reduced-motion still
+  frame, phone budget). The home page no longer iframes Flock.
+- `projects/flock/index.html` is a redirect to `/` (query kept, so
+  `/projects/flock/?nointro` lands on `/?nointro`).
+- Modes now: `/` (intro, opens in Skyline), `/?nointro` (Classic, no intro),
+  `?debug` adds the spawn buttons. Reduced motion skips the intro.
+- Earlier HANDOFF sections that mention `?ambient` or "projects/flock/index.html
+  as the page" are history.
+- Cache-busting now: root loads `flock.js?v=10`; `flock.js` imports `skyline.js?v=12`.

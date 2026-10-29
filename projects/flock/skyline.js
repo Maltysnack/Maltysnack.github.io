@@ -369,13 +369,12 @@ export function create(ctx) {
       const c = clouds[i]; c.p.addScaledVector(wind, c.speed * dt);
       if (Math.abs(c.p.x * wind.x + c.p.z * wind.z) > c.end) { scene.remove(c.mesh); clouds.splice(i, 1); }
     }
-    if (!ctx.reduce) {   // ambient weather, off under reduced motion
-      const slow = ctx.ambient && ctx.phone ? 2 : 1;   // phones get half the visitors
-      if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55) * slow; }
-      if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55) * slow; }
-      if (clock > nextCloud && clouds.length < (slow > 1 ? 2 : 5)) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
+    if (!ctx.reduce) {   // ambient weather (visitors, gusts, storms), off under reduced motion
+      if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55); }
+      if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55); }
+      if (clock > nextCloud && clouds.length < 5) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
       if (clock > nextStrike) { nextStrike = clock + (startStrike() ? rnd(25, 50) : 3); }
-      if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90) * slow; }
+      if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90); }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
     if (freeSlots === 0) return;
@@ -627,7 +626,7 @@ export function create(ctx) {
       addEventListener('pointermove', onMove); canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
       addEventListener('keydown', kd); addEventListener('keyup', ku);
       api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
-      if (fl.on) endPass(); clearChutes(); clearStrike(); gust.on = false; streaks.visible = !ctx.reduce; clearClouds(); pickWind(); for (let i = 0; i < (ctx.ambient && ctx.phone ? 2 : 3); i++) spawnCloud(true);
+      if (fl.on) endPass(); clearChutes(); clearStrike(); gust.on = false; streaks.visible = !ctx.reduce; clearClouds(); pickWind(); for (let i = 0; i < 3; i++) spawnCloud(true);
       hkReset(); hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },
