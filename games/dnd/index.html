@@ -15,6 +15,7 @@
       <h1>Characters</h1>
       <label class="btn" for="import">Import</label>
       <input type="file" id="import" accept=".json,application/json" hidden />
+      <button class="btn" id="add-grosh" hidden>Add Grosh</button>
       <a class="btn primary" href="/games/dnd/edit.html">New character</a>
     </div>
     <p class="dnd-note">Saved in this browser only. Export a save file from a sheet to back up or move to another device.</p>
@@ -48,6 +49,16 @@
         if (id) location.href = `/games/dnd/sheet.html?id=${encodeURIComponent(id)}`;
       } catch (err) {
         alert('Could not import: ' + err.message);
+      }
+    });
+    const grosh = document.getElementById('add-grosh');
+    grosh.hidden = !!DND.get('grosh-chef-lifeguard');
+    grosh.addEventListener('click', async () => {
+      try {
+        const id = await DND.importFile(await (await fetch('/games/dnd/grosh-chef-lifeguard.json')).blob());
+        if (id) location.href = `/games/dnd/sheet.html?id=${encodeURIComponent(id)}`;
+      } catch (err) {
+        alert('Could not add Grosh: ' + err.message);
       }
     });
     renderRoster();

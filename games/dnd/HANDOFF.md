@@ -55,6 +55,12 @@ empty). Importing it on a device that used the old sheet picks up that
 device's old play state from the legacy key `sheet-grosh-chef-lifeguard-v1`,
 so HP, inventory and notes carry over.
 
+## Add Grosh (29-10-2026)
+
+`grosh-chef-lifeguard.json` is back in the folder and the roster shows an
+"Add Grosh" button whenever he is not in this browser. It runs the normal
+import (so legacy play state is still picked up). Public, as he was before.
+
 ## Removed 26-10-2026
 
 `api/` (upload + update functions), `vercel.json`, `.vercelignore`,
