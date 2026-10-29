@@ -125,7 +125,7 @@ Compaction is lossy. Fresh + layered handoffs beats long conversation + auto-sum
 1. Create the HTML page inside its own folder (`<folder>/index.html`). Don't drop loose `.html` files at a parent level.
 2. Include `<meta name="description" content="...">` in `<head>`. One sentence. Used by the README generator and search snippets.
 3. Add it to the `NAV` array in `sidebar.js`.
-4. Nothing on the home page: it is "Hello." over the ambient Flock, with no cards. The top bar is the only nav.
+4. Nothing on the home page: home is the Flock page (the "Hello." intro, then the scene). The top bar is the only nav.
 5. Add it to the `SECTIONS` list in `scripts/build-readme.py`.
 6. Run `python3 scripts/build-readme.py` to regenerate `README.md`.
 7. Include `<script src="/sidebar.js?v=N"></script>` before `</body>`, matching the version other pages use. It injects the canonical favicon links into `<head>` automatically; don't hand-roll the icon block.
@@ -143,7 +143,7 @@ site-specific tokens: sidebar colours, type scale, spacing, layout widths.
 
 - Display: **Big Shoulders Display** (heavy, condensed). Body: **Instrument Sans**. Figures: **IBM Plex Mono**, tabular.
 - Black and white with one red: accent `#d7261e` light, `#ff4a3d` dark, as `var(--accent)`. No browns or yellows (maltysnack's call, 28-10-2026).
-- Light/dark via `[data-theme="light|dark"]` on `<html>`.
+- **Dark only** (maltysnack's call, 29-10-2026): `sidebar.js` sets `data-theme="dark"` on every page and there is no toggle. The light palette stays in `design/palette.css` because the portfolio uses it.
 - A separate data palette (`--d1`..`--d6`, sequential and diverging ramps)
   exists for charts, which most of this site is.
 
@@ -232,7 +232,7 @@ own rules.
 Each page has its own long-lived session, all in this one checkout. The
 session started from the root (the master) creates them and does site-wide
 work; a page session owns one page folder plus that page's engine repo
-(see "Pages driven by another repo" in `HANDOFF.md`).
+(see "Pages driven by another repo" in `HANDOFF.md`). The root `index.html` is the Flock page, so the Flock session owns it.
 
 - **Edit only your folder.** Shared files (`sidebar.js`, `style.css`,
   `index.html`, `design/palette.css`, root `HANDOFF.md`, `README.md`,

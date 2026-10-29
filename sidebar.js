@@ -1,5 +1,5 @@
 /* ═══════════════════════════════════════
-   sidebar.js - universal nav + theme toggle + watermark + favicons
+   sidebar.js - universal nav + dark theme + watermark + favicons
    Single source of truth. Edit here only.
    Root-relative paths.
 
@@ -46,30 +46,8 @@
       : '';
   }
 
-  /* ── Theme: read prior choice or system pref ────────── */
-  function applyTheme(theme) {
-    if (theme === 'light' || theme === 'dark') {
-      document.documentElement.setAttribute('data-theme', theme);
-    } else {
-      document.documentElement.removeAttribute('data-theme');
-    }
-  }
-
-  function toggleTheme() {
-    const cur = document.documentElement.getAttribute('data-theme');
-    const sys = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-    let next;
-    if (!cur) next = sys === 'dark' ? 'light' : 'dark';
-    else if (cur === 'dark') next = 'light';
-    else next = 'dark';
-    applyTheme(next);
-    try { localStorage.setItem('theme', next); } catch (e) { /* ignore */ }
-  }
-
-  try {
-    const saved = localStorage.getItem('theme');
-    if (saved === 'light' || saved === 'dark') applyTheme(saved);
-  } catch (e) { /* ignore */ }
+  /* Dark only, site-wide (maltysnack's call, 29-10-2026). */
+  document.documentElement.setAttribute('data-theme', 'dark');
 
   /* Top bar.
      A flat horizontal bar matching the portfolio site's chrome, so the two
@@ -81,7 +59,6 @@
     { href: '/projects/worldcup/',   label: 'World Cup' },
     { href: '/projects/flox/',       label: 'Flox' },
     { href: '/projects/algorithms/', label: 'Algorithms' },
-    { href: '/projects/flock/',      label: 'Flock' },
     { href: '/games/dnd/',           label: 'dnd' },
     { href: '/games/duoclue/',       label: 'Duoclue' },
   ];
@@ -105,15 +82,6 @@
       </svg>
     </a>
 
-    <button class="bar-icon" id="theme-toggle" aria-label="Switch between light and dark">
-      <svg class="icon icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>
-      </svg>
-      <svg class="icon icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">
-        <circle cx="12" cy="12" r="4.2"/>
-        <path d="M12 3v1.8M12 19.2V21M3 12h1.8M19.2 12H21M5.6 5.6l1.3 1.3M17.1 17.1l1.3 1.3M5.6 18.4l1.3-1.3M17.1 6.9l1.3-1.3"/>
-      </svg>
-    </button>
   `;
 
   /* ── Watermark with red seed cell ────────── */
@@ -136,11 +104,6 @@
     const here = nav && nav.querySelector('[aria-current]');
     if (here && nav.scrollWidth > nav.clientWidth) {
       nav.scrollLeft = here.offsetLeft - nav.offsetLeft - (nav.clientWidth - here.offsetWidth) / 2;
-    }
-
-    const themeBtn = document.getElementById('theme-toggle');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', toggleTheme);
     }
 
     if (!document.querySelector('.watermark')) {

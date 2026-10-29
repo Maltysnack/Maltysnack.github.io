@@ -398,22 +398,6 @@ ul {
 .main[data-layout="full"]  { --content-max: var(--max-full); max-width: none; }
 
 
-/* ── INTRO / HOME HERO ─────────────────────── */
-.intro {
-  margin-bottom: 64px;
-}
-
-.intro-heading {
-  font-family: var(--font-display);
-  font-size: clamp(3rem, 9vw, 6.5rem);
-  font-weight: 900;
-  line-height: 0.88;
-  color: var(--text-strong);
-  margin-bottom: 24px;
-  letter-spacing: -0.01em;
-}
-
-
 /* ── PAGE HEADER ─────────────────────── */
 .page-header {
   margin-bottom: 48px;
@@ -594,10 +578,6 @@ ul {
     padding: 36px 24px 72px;
   }
 
-  .intro-heading {
-    font-size: 2.5rem;
-  }
-
   .page-title {
     font-size: 2rem;
   }
@@ -739,37 +719,3 @@ code, kbd, pre, time, .num, .mono {
   .bar-nav::-webkit-scrollbar { display: none; }
   .bar-nav a { flex-shrink: 0; white-space: nowrap; }
 }
-
-
-/* ── NO-SCROLL HOME ──────────────────────────────────────────────
-   The front door fits the viewport: "Hello." over a live, ambient
-   Flock Skyline that fills everything below the bar. */
-
-body.fit { height: 100dvh; overflow: hidden; }
-
-.home-sky {
-  position: fixed;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-  z-index: 0;
-  pointer-events: none;
-}
-
-body.fit .main {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: clamp(1rem, 4vh, 3rem) clamp(1rem, 4vw, 4rem);
-  max-width: min(1100px, 100%);
-  margin-inline: auto;
-  width: 100%;
-  pointer-events: none;
-}
-
-body.fit .intro { margin-bottom: 0; }

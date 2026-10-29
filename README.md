@@ -20,9 +20,6 @@ A small language for flow networks: write nodes and arrows, and it simulates how
 **Algorithms:**<br>
 Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle, a travelling salesman tour and sorting.
 
-**Flock:**<br>
-A flock in three dimensions from three local rules and no leader, with a hawk to run from.
-
 ### Games
 
 **dnd:**<br>

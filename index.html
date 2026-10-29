@@ -1,48 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  <script>(function () { var q = new URLSearchParams(location.search), d = document.documentElement;
+    d.dataset.theme = 'dark';
+    if (!q.has('nointro') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.dataset.intro = ''; })();</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>maltysnack</title>
-  <meta name="description" content="A workshop site by maltysnack. Football models, a small language, algorithm visualisations, and a couple of games." />
-  <link rel="stylesheet" href="/style.css?v=10" />
-  <script>
-    /* Apply theme before paint to avoid flash. */
-    (function () {
-      try {
-        var t = localStorage.getItem('theme');
-        if (t === 'light' || t === 'dark') document.documentElement.setAttribute('data-theme', t);
-      } catch (e) {}
-    })();
-  </script>
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
-  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
-  <link rel="manifest" href="/manifest.json?v=3" />
-  <meta name="theme-color" content="#0c0c0c" />
+  <meta name="description" content="maltysnack: a flock of birds from three simple rules, with a hawk, weather and a skyline." />
+  <link rel="stylesheet" href="/style.css?v=9" />
+  <style>
+    /* A tool, so it fills the screen and never scrolls. */
+    body { height: 100dvh; overflow: hidden; }
+    .flock { flex: 1; min-height: 0; position: relative; padding: 0; max-width: none; width: 100%; }
+    #stage { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+    #stage:active { cursor: grabbing; }
 
+    /* Controls stay out of the way: a title top left, one quiet bar bottom
+       left, and the sliders only when asked for. */
+    .ov-title { position: absolute; top: clamp(12px, 2.5vh, 24px); left: clamp(12px, 2.5vw, 28px); max-width: 30ch; pointer-events: none; }
+    .ov-title p { margin: 0; font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+    .ov-bar { position: absolute; left: clamp(12px, 2.5vw, 28px); bottom: clamp(12px, 2.5vh, 24px); display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap;
+              font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
+    .ov-bar button, .ov-top button, .tune summary { font: inherit; letter-spacing: inherit; text-transform: inherit; background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 0; color: var(--text-muted); cursor: pointer; }
+    .ov-bar button:hover, .ov-top button:hover, .tune summary:hover { color: var(--text); }
+    .presets { display: flex; gap: 14px; }
+    .presets button.on, .ov-bar button.on, .ov-top button.on, .tune[open] summary { color: var(--text); border-bottom-color: var(--accent); }
+    .ov-top { position: absolute; top: clamp(12px, 2.5vh, 24px); right: clamp(12px, 2.5vw, 28px); display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap; justify-content: flex-end;
+              font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
+    .ov-top span button { margin-left: 14px; } .ov-top span button:first-child { margin-left: 0; }
+    .rule { width: 1px; height: 14px; background: var(--border-strong); }
+    [data-mode=classic] [data-sky], [data-mode=skyline] .classic-only { display: none; }
+    body:not([data-mode]) [data-sky] { display: none; }
+    .ov-bar .rule { width: 1px; height: 14px; background: var(--border-strong); }
+    .ov-bar label { display: inline-flex; gap: 6px; align-items: center; color: var(--text-muted); cursor: pointer; }
+    .ov-bar input[type=checkbox] { accent-color: var(--accent); margin: 0; }
+    .tune summary { list-style: none; }
+    .tune summary::-webkit-details-marker { display: none; }
+    .tune .body { position: absolute; left: 0; bottom: calc(100% + 12px); width: 250px; padding: 10px 0 0; border-top: 2px solid var(--text);
+                  background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(6px); text-transform: none; letter-spacing: 0; }
+    .ctl { display: grid; grid-template-columns: 74px 1fr 36px; align-items: center; gap: 10px; color: var(--text-muted); margin: 8px 0; }
+    .ctl output { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
+    .ctl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--border-strong); margin: 0; }
+    .ctl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: var(--accent); border: 0; cursor: pointer; }
+    .ctl input[type=range]::-moz-range-thumb { width: 10px; height: 10px; background: var(--accent); border: 0; border-radius: 0; cursor: pointer; }
+    .stats { position: absolute; right: clamp(12px, 2.5vw, 28px); bottom: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); pointer-events: none; }
+
+    /* ?intro: the bar and controls stay hidden under the Hello. burst, then fade in. */
+    .sidebar, .ov-title, .ov-bar, .ov-top, .stats { transition: opacity .35s ease; }
+    html[data-revealing] .sidebar, html[data-revealing] .ov-title, html[data-revealing] .ov-bar, html[data-revealing] .ov-top, html[data-revealing] .stats { transition: opacity 1.2s ease .4s; }
+    /* Idle: after a while everything but the scene fades; movement brings it back. */
+    html[data-idle] .sidebar, html[data-idle] .ov-title, html[data-idle] .ov-bar, html[data-idle] .ov-top, html[data-idle] .stats { opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
+    html[data-idle] #stage { cursor: none; }
+    html[data-intro] .sidebar, html[data-intro] .ov-title, html[data-intro] .ov-bar, html[data-intro] .ov-top, html[data-intro] .stats { opacity: 0; pointer-events: none; }
+
+    @media (max-width: 640px) {
+      .stats { top: 10px; bottom: auto; }
+      .ov-top { top: 30px; }
+    }
+  </style>
 </head>
-<body class="fit">
-  <iframe class="home-sky" src="/projects/flock/?ambient" title="" aria-hidden="true" tabindex="-1"></iframe>
+<body>
   <aside class="sidebar"></aside>
-  <main class="main">
-    <section class="intro">
-      <h1 class="intro-heading">Hello.</h1>
-    </section>
+  <main class="main flock" data-layout="full">
+    <canvas id="stage" aria-label="A three-dimensional flock simulation"></canvas>
+
+    <div class="ov-title"><p>based on boids</p></div>
+    <div class="ov-top seg">
+      <span id="modes"><button data-m="classic" class="on">Classic</button><button data-m="skyline">Skyline</button></span>
+    </div>
+    <div class="ov-bar">
+      <div class="presets" id="presets">
+        <button data-p="murmuration" class="on">Murmuration</button>
+        <button data-p="school">School</button>
+        <button data-p="swarm">Swarm</button>
+      </div>
+      <span class="rule"></span>
+      <label class="classic-only"><input type="checkbox" id="hawk" checked> Hawk</label>
+      <button id="fly" data-sky>Fly hawk</button>
+      <button id="scatter">Scatter</button>
+      <details class="tune" id="panel">
+        <summary>Tune</summary>
+        <div class="body">
+          <div class="ctl"><span>Separation</span><input type="range" id="sep" min="0.3" max="4" step="0.05"><output for="sep"></output></div>
+          <div class="ctl"><span>Alignment</span><input type="range" id="ali" min="0" max="4" step="0.05"><output for="ali"></output></div>
+          <div class="ctl"><span>Cohesion</span><input type="range" id="coh" min="0" max="4" step="0.05"><output for="coh"></output></div>
+          <div class="ctl"><span>Vision</span><input type="range" id="vis" min="2" max="14" step="0.5"><output for="vis"></output></div>
+        </div>
+      </details>
+    </div>
+    <div class="stats" id="stats"></div>
   </main>
-  <script>
-    /* The sky is another document, so pass the theme across on load and on every toggle. */
-    (function () {
-      var sky = document.querySelector('.home-sky');
-      function send() {
-        var t = document.documentElement.getAttribute('data-theme') ||
-          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
-        sky.contentWindow.postMessage({ type: 'flock-theme', theme: t }, location.origin);
-      }
-      sky.addEventListener('load', send);
-      new MutationObserver(send).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
-    })();
-  </script>
-  <script src="/sidebar.js?v=6"></script>
+
+<script type="module" src="/projects/flock/flock.js?v=9"></script>
+  <script src="/sidebar.js?v=7"></script>
 </body>
 </html>

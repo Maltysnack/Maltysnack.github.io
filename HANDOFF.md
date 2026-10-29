@@ -148,6 +148,13 @@ commits too.
   do not shrink them), never a global CSS switch.
 
 ## Recent session log
+- **29-10-2026 (later):** Home *is* Flock now. Root `index.html` is the Flock
+  page (intro "Hello." that bursts into birds on input, then the full scene
+  and controls), loading `/projects/flock/flock.js`; the iframe and
+  `?ambient` are gone. Flock dropped from the nav and README; the Flock
+  session owns root `index.html`. Site is dark only: `sidebar.js` forces
+  `data-theme="dark"`, toggle removed, `sidebar.js` bumped to `?v=7` on every
+  page. Home-only CSS (intro, `.home-sky`, `body.fit`) deleted from `style.css`.
 - **29-10-2026:** Home is now "Hello." over a live ambient Flock Skyline
   (`<iframe class="home-sky" src="/projects/flock/?ambient">`), with no cards,
   intro line or colophon. It loads live, so Flock changes reach home without
