@@ -148,6 +148,14 @@ commits too.
   do not shrink them), never a global CSS switch.
 
 ## Recent session log
+- **29-10-2026:** Home is now "Hello." over a live ambient Flock Skyline
+  (`<iframe class="home-sky" src="/projects/flock/?ambient">`), with no cards,
+  intro line or colophon. It loads live, so Flock changes reach home without
+  master work; Flock owns hiding its UI in ambient mode (rule in
+  `projects/flock/HANDOFF.md`). Theme reaches the frame via
+  `postMessage({type:'flock-theme', theme})`. Home-only CSS removed from
+  `style.css`; only `index.html` bumped to `?v=10` because no other page used
+  the removed or added rules.
 
 - **28-10-2026:** Site retheme to the World Cup look: palette and fonts in
   `design/palette.css` (`?v=2`), warm tokens in `style.css` neutralised,

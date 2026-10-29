@@ -125,14 +125,14 @@ Compaction is lossy. Fresh + layered handoffs beats long conversation + auto-sum
 1. Create the HTML page inside its own folder (`<folder>/index.html`). Don't drop loose `.html` files at a parent level.
 2. Include `<meta name="description" content="...">` in `<head>`. One sentence. Used by the README generator and search snippets.
 3. Add it to the `NAV` array in `sidebar.js`.
-4. Add a card to `index.html`'s `home-links` section.
+4. Nothing on the home page: it is "Hello." over the ambient Flock, with no cards. The top bar is the only nav.
 5. Add it to the `SECTIONS` list in `scripts/build-readme.py`.
 6. Run `python3 scripts/build-readme.py` to regenerate `README.md`.
 7. Include `<script src="/sidebar.js?v=N"></script>` before `</body>`, matching the version other pages use. It injects the canonical favicon links into `<head>` automatically; don't hand-roll the icon block.
 8. `git add` the page and the regenerated `README.md`. CI fails if either is missing or stale.
 9. If the page is non-trivial (in-flight features, decisions pending, own wiring like a Vercel function or cron), create `<folder>/HANDOFF.md` and add it to the root HANDOFF link list. Otherwise, mention it under the closest parent index HANDOFF.
 
-Self-contained pages with their own design system can skip `/style.css` and the icon block. They still need a nav entry and a home card.
+Self-contained pages with their own design system can skip `/style.css` and the icon block. They still need a nav entry.
 
 ## Design system
 

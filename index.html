@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>maltysnack</title>
   <meta name="description" content="A workshop site by maltysnack. Football models, a small language, algorithm visualisations, and a couple of games." />
-  <link rel="stylesheet" href="/style.css?v=9" />
+  <link rel="stylesheet" href="/style.css?v=10" />
   <script>
     /* Apply theme before paint to avoid flash. */
     (function () {
@@ -23,79 +23,26 @@
 
 </head>
 <body class="fit">
-
+  <iframe class="home-sky" src="/projects/flock/?ambient" title="" aria-hidden="true" tabindex="-1"></iframe>
   <aside class="sidebar"></aside>
-
   <main class="main">
-
     <section class="intro">
-      <span class="intro-eyebrow">maltysnack</span>
       <h1 class="intro-heading">Hello.</h1>
-      <p class="intro-body">
-        A place to build things for the fun of it. Some <em>football</em> models,
-        a <em>language</em>, some <em>algorithms</em>, a couple of <em>games</em>.
-      </p>
     </section>
-
-    <div class="divider"></div>
-
-    <section class="home-links">
-
-      <a class="home-card" href="/projects/fpl/">
-        <span class="home-card-label">Project</span>
-        <span class="home-card-title">FPL bot</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-      <a class="home-card" href="/projects/worldcup/">
-        <span class="home-card-label">Project</span>
-        <span class="home-card-title">World Cup 2026</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-      <a class="home-card" href="/projects/flox/">
-        <span class="home-card-label">Project</span>
-        <span class="home-card-title">Flox</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-      <a class="home-card" href="/projects/algorithms/">
-        <span class="home-card-label">Project</span>
-        <span class="home-card-title">Algorithms</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-
-      <a class="home-card" href="/projects/flock/">
-        <span class="home-card-label">Project</span>
-        <span class="home-card-title">Flock</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-      <a class="home-card" href="/games/duoclue/">
-        <span class="home-card-label">Game</span>
-        <span class="home-card-title">Duoclue</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-      <a class="home-card" href="/games/dnd/">
-        <span class="home-card-label">Game</span>
-        <span class="home-card-title">dnd</span>
-        <span class="home-card-arrow">&rarr;</span>
-      </a>
-
-    </section>
-
-    <footer class="colophon">
-      <span>set in <em>Big Shoulders</em> and <em>Instrument Sans</em></span>
-      <span class="colophon-divider">&middot;</span>
-      <span>plain HTML, no framework</span>
-      <span class="colophon-divider">&middot;</span>
-      <a href="https://github.com/Maltysnack/Maltysnack.github.io">source</a>
-    </footer>
-
   </main>
-
+  <script>
+    /* The sky is another document, so pass the theme across on load and on every toggle. */
+    (function () {
+      var sky = document.querySelector('.home-sky');
+      function send() {
+        var t = document.documentElement.getAttribute('data-theme') ||
+          (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+        sky.contentWindow.postMessage({ type: 'flock-theme', theme: t }, location.origin);
+      }
+      sky.addEventListener('load', send);
+      new MutationObserver(send).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+    })();
+  </script>
   <script src="/sidebar.js?v=6"></script>
 </body>
 </html>
