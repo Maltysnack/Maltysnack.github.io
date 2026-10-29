@@ -108,10 +108,11 @@ section.on { display: grid; }
 .g.head { position: sticky; top: 0; z-index: 1; background: var(--paper); border-top: 0; padding: 8px 0 4px; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
 .g .why { padding-left: 2ch; }
 .g .o { display: inline-block; width: 7ch; text-align: right; }
-.g .m { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
-.g .t { display: inline-flex; align-items: center; gap: 6px; color: var(--ink); white-space: nowrap; }
+/* Home and away get their own columns so names and ratings line up down the list. */
+.g .m { display: grid; grid-template-columns: repeat(3, auto); justify-content: start; align-items: center; gap: 4px 12px; min-width: 0; }
+.g .t { display: grid; grid-template-columns: 20px 15ch 4ch; align-items: center; gap: 8px; min-width: 0; }
 .g .t img { width: 20px; height: 13px; object-fit: cover; outline: 1px solid var(--rule); }
-.g .t i { font-style: normal; color: var(--ink-3); font-size: 11px; }
+.g .t i { font-style: normal; color: var(--ink-3); font-size: 11px; text-align: right; font-variant-numeric: tabular-nums; }
 .g .v { color: var(--ink-3); }
 .note[hidden] { display: none; }
 .note { align-self: end; margin-top: 12px; text-transform: none; letter-spacing: .02em; }
@@ -151,7 +152,8 @@ dialog p b { color: var(--ink); }
   .bar .track { height: 16px; }
   .soon { grid-template-columns: 1fr; gap: 20px; }
   .g { grid-template-columns: minmax(0, 1fr) repeat(3, 6ch); gap: 8px; }
-  .g .m { flex-direction: column; align-items: flex-start; }
+  .g .m { grid-template-columns: minmax(0, 1fr); }
+  .g .t { grid-template-columns: 20px minmax(0, 1fr) 4ch; }
   .g .v { display: none; }
   .g .d, .g .why { display: none; }
   .card .ghostbars { display: none; }
@@ -338,7 +340,7 @@ if (new URLSearchParams(location.search).has('frames')) {
     const m = g.model_p ? Math.round(g.model_p[i] * 100) : '-', k = g.market_p ? Math.round(g.market_p[i] * 100) : '-';
     return `<span class="p${g.pick === ['home', 'draw', 'away'][i] ? ' pick' : ''}">${m}/${k}</span>`;
   };
-  const team = (t, elo) => `<span class="t">${flag(t)}${t}${elo ? ` <i>${elo}</i>` : ''}</span>`;
+  const team = (t, elo) => `<span class="t">${flag(t)}<b>${t}</b><i>${elo || ''}</i></span>`;
   const row = (g, why) => `<div class="g"><span class="d">${dayMon(g.kickoff)}</span><span class="m">${team(g.home, g.home_elo)}<span class="v">v</span>${team(g.away, g.away_elo)}</span>${[0, 1, 2].map(i => cell(g, i)).join('')}<span class="why">${why}</span></div>`;
   // fixtures.json lists every game on the feed, any distance out; before the
   // bot decides, the last column is Sportsbet's price, or a note if unpriced.
