@@ -97,14 +97,15 @@ section.on { display: grid; }
 .ghostbars { margin-top: 18px; display: grid; gap: 6px; }
 .ghostbars div { height: 10px; background: repeating-linear-gradient(90deg, var(--rule) 0 6px, transparent 6px 10px); }
 
-.games { align-self: center; display: grid; gap: clamp(16px, 3vh, 32px); min-height: 0; overflow: hidden; }
+/* Every listed game, no cap: the list scrolls inside the tab, the page never does. */
+.games { align-self: center; display: grid; gap: clamp(16px, 3vh, 32px); min-height: 0; max-height: 100%; overflow-y: auto; overscroll-behavior: contain; }
 .games[hidden], .glist[hidden], .soon[hidden] { display: none; }
 .glist { display: grid; gap: 4px; font: 500 12px/1.35 var(--mono); }
 .glist .tag { margin-bottom: 6px; }
 .g { display: grid; grid-template-columns: 9ch minmax(0, 1.3fr) repeat(3, 7ch) minmax(0, 1fr); gap: 14px; align-items: center; color: var(--ink-2); padding: 5px 0; border-top: 1px solid var(--rule); }
 .g b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .g .p { text-align: right; font-variant-numeric: tabular-nums; }
-.g.head { border-top: 0; padding: 0; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
+.g.head { position: sticky; top: 0; z-index: 1; background: var(--paper); border-top: 0; padding: 8px 0 4px; color: var(--ink-3); font-size: 11px; text-transform: uppercase; letter-spacing: .06em; }
 .g .why { padding-left: 2ch; }
 .g .o { display: inline-block; width: 7ch; text-align: right; }
 .g .m { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; min-width: 0; }
@@ -113,7 +114,7 @@ section.on { display: grid; }
 .g .t i { font-style: normal; color: var(--ink-3); font-size: 11px; }
 .g .v { color: var(--ink-3); }
 .note[hidden] { display: none; }
-.note { align-self: end; text-transform: none; letter-spacing: .02em; }
+.note { align-self: end; margin-top: 12px; text-transform: none; letter-spacing: .02em; }
 .g .p.pick { color: var(--ink); font-weight: 600; }
 .g .why { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .g .why em { font-style: normal; background: var(--hi); color: #fff; padding: 1px 6px; border-radius: 3px; }
@@ -153,7 +154,6 @@ dialog p b { color: var(--ink); }
   .g .m { flex-direction: column; align-items: flex-start; }
   .g .v { display: none; }
   .g .d, .g .why { display: none; }
-  .glist .g:nth-of-type(n+11) { display: none; } /* tag and header are types 1-2: 8 games */
   .card .ghostbars { display: none; }
   footer .tag.hide-sm { display: none; }
   .sub { font-size: 13px; }
@@ -348,7 +348,7 @@ if (new URLSearchParams(location.search).has('frames')) {
     : g.odds ? g.odds.map(o => `<span class="o">${o.toFixed(2)}</span>`).join('') : 'not priced yet';
   function renderGames(b, fx) {
     const today = new Date().toISOString().slice(0, 10);
-    const up = (fx ? fx.games.filter(g => g.kickoff >= today) : b.upcoming || []).slice(0, 8);
+    const up = fx ? fx.games.filter(g => g.kickoff >= today) : b.upcoming || [];
     const passes = (b.recent_passes || []).slice(0, fx ? 4 : 6);
     $('upcoming').insertAdjacentHTML('beforeend', up.map(g => row(g, why(g))).join(''));
     $('passes').insertAdjacentHTML('beforeend', passes.map(g => row(g, REASON[g.reason] || g.reason || '')).join(''));
