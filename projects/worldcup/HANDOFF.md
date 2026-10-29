@@ -25,3 +25,11 @@ Scratchpad for `/projects/worldcup/`.
   site tokens at the top of its `<style>`. Its yellow is now the site red.
 - Elo leaderboard (panel 8) not built: the worldcup repo does not export
   `elo.json` yet.
+
+## 29-10-2026: Ratings tab, all upcoming games
+
+- Data now comes in via `bash scripts/sync-data.sh worldcup` (copies `~/worldcup/site_data/*.json`).
+- New Ratings tab: `elo.json` top 20 as bars from 1500, two columns (top 10 on phones), `as_of` in the tag and stamp.
+- Odds tab upcoming list reads `fixtures.json` (DISPLAY 3b) when present: every game on the feed, any distance out, with Sportsbet odds or "not priced yet". Falls back to `bankroll.json.upcoming`. `fixtures.json` 404s until the next bot bet run writes it; the page handles that.
+- `odds.json` (title odds, panel 10) is synced but not rendered yet.
+

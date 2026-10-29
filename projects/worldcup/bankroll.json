@@ -1,5 +1,5 @@
 {
- "generated_at": "2026-10-26",
+ "generated_at": "2026-10-28",
  "rule": {
   "staking": "flat",
   "stake": 10.0,
@@ -7,6 +7,8 @@
   "max_odds": 6.0
  },
  "start": 1000.0,
+ "upcoming": [],
+ "recent_passes": [],
  "source": "not-started",
  "note": "No bets yet.",
  "first_kickoff": null,

@@ -147,6 +147,20 @@ dialog p b { color: var(--ink); }
 .board .clip { overflow: hidden; outline: 1px solid var(--rule); background: var(--paper); }
 .board iframe { border: 0; transform-origin: 0 0; display: block; }
 .stamp.live { color: var(--up); }
+
+/* Ratings: the Elo table behind every probability on the page */
+.elo { align-self: center; display: grid; gap: 14px; min-height: 0; }
+.elist { display: grid; grid-auto-flow: column; grid-template-rows: repeat(10, auto); grid-template-columns: 1fr 1fr; gap: 0 clamp(24px, 4vw, 72px); font: 500 13px/1.35 var(--mono); }
+.e { display: grid; grid-template-columns: 3ch minmax(0, 10ch) 1fr 5ch; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
+.e b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.e i { height: 8px; background: var(--ink); }
+.e:first-child i { background: var(--hi); }
+.e .r { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
+@media (max-width: 700px) {
+  .elist { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
+  .e:nth-child(n+11) { display: none; }
+  .e { padding: 5px 0; }
+}
 .muted { color: var(--ink-3); }
 </style>
 </head>
@@ -159,6 +173,7 @@ dialog p b { color: var(--ink); }
       <button role="tab" data-tab="bankroll" aria-selected="true">Bankroll</button>
       <button role="tab" data-tab="capsule" aria-selected="false">2026</button>
       <button role="tab" data-tab="odds" aria-selected="false">Odds</button>
+      <button role="tab" data-tab="ratings" aria-selected="false">Ratings</button>
     </nav>
     <button class="ghost" id="how">How it works</button>
   </header>
@@ -199,7 +214,7 @@ dialog p b { color: var(--ink); }
 
     <section id="odds" role="tabpanel">
       <div class="games" id="games" hidden>
-        <div class="glist" id="upcoming" hidden><div class="tag">Upcoming · model / Sportsbet chance, home · draw · away</div></div>
+        <div class="glist" id="upcoming" hidden><div class="tag">Upcoming · model / Sportsbet chance, home · draw · away · Sportsbet odds</div></div>
         <div class="glist" id="passes" hidden><div class="tag">Recent passes · prices the bot saw and declined</div></div>
       </div>
       <div class="soon" id="soon">
@@ -209,12 +224,20 @@ dialog p b { color: var(--ink); }
       </div>
       <div></div>
     </section>
+
+    <section id="ratings" role="tabpanel">
+      <div class="elo">
+        <div class="tag" id="elo-tag">Elo ratings · top 20</div>
+        <div class="elist" id="elist"></div>
+      </div>
+    </section>
   </main>
 
   <nav class="mobile-nav" role="tablist">
     <button role="tab" data-tab="bankroll" aria-selected="true">Bankroll</button>
     <button role="tab" data-tab="capsule" aria-selected="false">2026</button>
     <button role="tab" data-tab="odds" aria-selected="false">Odds</button>
+    <button role="tab" data-tab="ratings" aria-selected="false">Ratings</button>
   </nav>
 
   <footer>
@@ -245,7 +268,7 @@ if (new URLSearchParams(location.search).has('frames')) {
   const $ = id => document.getElementById(id);
   // Footer stamp follows the open tab: [text, extra class].
   let current = 'bankroll';
-  const stamps = { bankroll: ['Loading', ''], capsule: ['Loading', ''], odds: ['Not open yet', ''] };
+  const stamps = { bankroll: ['Loading', ''], capsule: ['Loading', ''], odds: ['Not open yet', ''], ratings: ['Loading', ''] };
   const paintStamp = () => {
     const [text, cls] = stamps[current];
     $('stamp').textContent = text;
@@ -272,14 +295,21 @@ if (new URLSearchParams(location.search).has('frames')) {
   // point; the bet, if any, is the outcome where the model is clearly higher.
   const REASON = { 'no edge': 'prices fair or model not confident enough', 'zero stake': 'zero stake' };
   const cell = (g, i) => {
-    const m = g.model_p ? Math.round(g.model_p[i] * 100) : '-', k = Math.round(g.market_p[i] * 100);
+    const m = g.model_p ? Math.round(g.model_p[i] * 100) : '-', k = g.market_p ? Math.round(g.market_p[i] * 100) : '-';
     return `<span class="p${g.pick === ['home', 'draw', 'away'][i] ? ' pick' : ''}">${m}/${k}</span>`;
   };
   const row = (g, why) => `<div class="g"><span class="d">${dmy(g.kickoff)}</span><b>${g.home} v ${g.away}</b>${[0, 1, 2].map(i => cell(g, i)).join('')}<span class="why">${why}</span></div>`;
-  function renderGames(b) {
-    const up = (b.upcoming || []).slice(0, 6), passes = (b.recent_passes || []).slice(0, 6);
-    $('upcoming').insertAdjacentHTML('beforeend', up.map(g => row(g,
-      g.decision === 'bet' && g.pick ? `<em>${g.pick === 'draw' ? 'Draw' : g[g.pick]} ${g.odds[['home', 'draw', 'away'].indexOf(g.pick)].toFixed(2)}</em>` : (REASON[g.reason] || g.reason || 'pass'))).join(''));
+  // fixtures.json lists every game on the feed, any distance out; before the
+  // bot decides, the last column is Sportsbet's price, or a note if unpriced.
+  const why = g => g.decision === 'bet' && g.pick
+    ? `<em>${g.pick === 'draw' ? 'Draw' : g[g.pick]} ${g.odds[['home', 'draw', 'away'].indexOf(g.pick)].toFixed(2)}</em>`
+    : g.decision === 'pass' ? (REASON[g.reason] || g.reason || 'pass')
+    : g.odds ? g.odds.map(o => o.toFixed(2)).join(' · ') : 'not priced yet';
+  function renderGames(b, fx) {
+    const today = new Date().toISOString().slice(0, 10);
+    const up = (fx ? fx.games.filter(g => g.kickoff >= today) : b.upcoming || []).slice(0, 8);
+    const passes = (b.recent_passes || []).slice(0, fx ? 4 : 6);
+    $('upcoming').insertAdjacentHTML('beforeend', up.map(g => row(g, why(g))).join(''));
     $('passes').insertAdjacentHTML('beforeend', passes.map(g => row(g, REASON[g.reason] || g.reason || '')).join(''));
     $('upcoming').hidden = !up.length;
     $('passes').hidden = !passes.length;
@@ -288,11 +318,13 @@ if (new URLSearchParams(location.search).has('frames')) {
     if (!$('games').hidden) stamps.odds = [`${up.length} upcoming · ${passes.length} passed`, 'live'];
   }
 
-  fetch('bankroll.json').then(r => r.json()).then(b => {
+  // fixtures.json is optional: until the bot writes one, upcoming comes from bankroll.json.
+  const fixtures = fetch('fixtures.json').then(r => r.ok ? r.json() : null).catch(() => null);
+  Promise.all([fetch('bankroll.json').then(r => r.json()), fixtures]).then(([b, fx]) => {
     const ru = b.rule;
     $('bk-rules').textContent = `Locked rules: $${ru.stake} flat · edge ${Math.round(ru.min_edge * 100)}%+ · odds up to ${ru.max_odds.toFixed(1)}`;
     stamps.bankroll = b.source === 'ledger' ? ['Live · paper money', 'live'] : ['Paper money · not started', ''];
-    renderGames(b);
+    renderGames(b, fx);
     if (b.source !== 'ledger') {
       // No bets yet: flat $1,000, empty chart with a baseline, no made-up numbers.
       $('curve').innerHTML = `
@@ -337,6 +369,14 @@ if (new URLSearchParams(location.search).has('frames')) {
       : 'None this week.';
     paintStamp();
   }).catch(() => { stamps.bankroll = ['Data failed to load', '']; paintStamp(); });
+
+  fetch('elo.json').then(r => r.json()).then(e => {
+    const lo = 1500, hi = e.top[0].rating;
+    $('elist').innerHTML = e.top.map(t => `<div class="e"><span>${t.rank}</span><b>${t.team}</b><i style="width:${Math.max(4, (t.rating - lo) / (hi - lo) * 100).toFixed(1)}%"></i><span class="r">${t.rating}</span></div>`).join('');
+    $('elo-tag').textContent = `Elo ratings · top ${e.top.length} active teams · results to ${dmy(e.as_of)}`;
+    stamps.ratings = [`Ratings as of ${dmy(e.as_of)}`, ''];
+    paintStamp();
+  }).catch(() => { stamps.ratings = ['Data failed to load', '']; paintStamp(); });
 
   fetch('capsule.json').then(r => r.json()).then(c => {
     const [h, a] = [c.final.home, c.final.away], [hg, ag] = c.final.score;
