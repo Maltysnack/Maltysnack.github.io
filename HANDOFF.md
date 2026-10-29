@@ -75,6 +75,23 @@ with `curl` what the server actually serves rather than trusting a browser.
   - [`games/dnd/HANDOFF.md`](games/dnd/HANDOFF.md): D&D character sheet
   - [`games/duoclue/HANDOFF.md`](games/duoclue/HANDOFF.md): Duoclue
 
+## Pages driven by another repo
+
+Talk to the site session only. It routes: layout, copy and styling change
+here; new or different data changes the engine repo's `DISPLAY.md` and
+exporter first (same commit), then the page here. `DISPLAY.md` in the engine
+repo is the contract and wins over the page. Engine repos never write here
+except fpl's workflow.
+
+| Page | Engine repo (local clone) | Brief | Site reads | Sync |
+|---|---|---|---|---|
+| `projects/worldcup/` | `Maltysnack/worldcup` (`~/worldcup`) | `DISPLAY.md` | `site_data/*.json` | `bash scripts/sync-data.sh worldcup` |
+| `projects/flox/` | `Maltysnack/flox` (`~/Documents/flox`) | `DISPLAY.md` | `ts/dist/flox.js`, `examples/showcase/*.flox` | `bash scripts/sync-data.sh flox` |
+| `projects/fpl/` | `Maltysnack/fpl` (`~/Documents/GitHub/fpl`) | `DISPLAY.md` | `dashboard.json` | pushed by its `sync-and-publish.yml` |
+
+Before touching one of these pages: read its brief, run the sync, then edit.
+A new engine-backed page adds a row here and a case in `scripts/sync-data.sh`.
+
 ## Current state (26-10-2026)
 
 Live and working. Seven pages in the nav: FPL, World Cup, Flox, Algorithms,
