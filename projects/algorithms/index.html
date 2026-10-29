@@ -7,7 +7,9 @@
   <meta name="description" content="Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle, a travelling salesman tour and sorting." />
   <link rel="stylesheet" href="/style.css?v=9" />
   <style>
+    body.fit { height: 100dvh; overflow: hidden; }
     body.fit .main.al {
+      position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; margin-inline: auto;
       justify-content: flex-start;
       gap: 10px;
       padding: clamp(0.75rem, 2vh, 1.5rem) clamp(1rem, 3vw, 2.5rem);
