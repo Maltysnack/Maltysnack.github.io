@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>if (new URLSearchParams(location.search).has('ambient')) document.documentElement.dataset.ambient = '';</script>
+  <script>(function () { var q = new URLSearchParams(location.search), d = document.documentElement;
+    if (q.has('ambient')) d.dataset.ambient = '';
+    d.dataset.theme = 'dark';
+    if (!q.has('ambient') && !q.has('nointro') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.dataset.intro = ''; })();</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Flock - maltysnack</title>
@@ -17,8 +20,7 @@
     /* Controls stay out of the way: a title top left, one quiet bar bottom
        left, and the sliders only when asked for. */
     .ov-title { position: absolute; top: clamp(12px, 2.5vh, 24px); left: clamp(12px, 2.5vw, 28px); max-width: 30ch; pointer-events: none; }
-    .ov-title h1 { font-size: clamp(2.4rem, 5vw, 4rem); margin: 0; line-height: .9; }
-    .ov-title p { font-size: var(--text-sm); color: var(--text-muted); line-height: 1.45; margin: 8px 0 0; }
+    .ov-title p { margin: 0; font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
     .ov-bar { position: absolute; left: clamp(12px, 2.5vw, 28px); bottom: clamp(12px, 2.5vh, 24px); display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap;
               font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
     .ov-bar button, .ov-top button, .tune summary { font: inherit; letter-spacing: inherit; text-transform: inherit; background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 0; color: var(--text-muted); cursor: pointer; }
@@ -45,12 +47,19 @@
     .ctl input[type=range]::-moz-range-thumb { width: 10px; height: 10px; background: var(--accent); border: 0; border-radius: 0; cursor: pointer; }
     .stats { position: absolute; right: clamp(12px, 2.5vw, 28px); bottom: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); pointer-events: none; }
 
+    /* ?intro: the bar and controls stay hidden under the Hello. burst, then fade in. */
+    .sidebar, .ov-title, .ov-bar, .ov-top, .stats { transition: opacity .35s ease; }
+    html[data-revealing] .sidebar, html[data-revealing] .ov-title, html[data-revealing] .ov-bar, html[data-revealing] .ov-top, html[data-revealing] .stats { transition: opacity 1.2s ease .4s; }
+    /* Idle: after a while everything but the scene fades; movement brings it back. */
+    html[data-idle] .sidebar, html[data-idle] .ov-title, html[data-idle] .ov-bar, html[data-idle] .ov-top, html[data-idle] .stats { opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
+    html[data-idle] #stage { cursor: none; }
+    html[data-intro] .sidebar, html[data-intro] .ov-title, html[data-intro] .ov-bar, html[data-intro] .ov-top, html[data-intro] .stats { opacity: 0; pointer-events: none; }
+
     /* ?ambient: the home page embeds this, so no chrome and no input. */
     html[data-ambient] .sidebar, html[data-ambient] .ov-title, html[data-ambient] .ov-bar, html[data-ambient] .ov-top, html[data-ambient] .stats { display: none !important; }
     html[data-ambient] #stage { pointer-events: none; cursor: default; }
 
     @media (max-width: 640px) {
-      .ov-title p { display: none; }
       .stats { top: 10px; bottom: auto; }
       .ov-top { top: 30px; }
     }
@@ -61,10 +70,7 @@
   <main class="main flock" data-layout="full">
     <canvas id="stage" aria-label="A three-dimensional flock simulation"></canvas>
 
-    <div class="ov-title">
-      <h1>Flock</h1>
-      <p>No bird knows where the flock is going. Each keeps its distance, matches its neighbours' heading and drifts toward their centre. After Craig Reynolds' boids, 1987. Drag to orbit, scroll to zoom.</p>
-    </div>
+    <div class="ov-title"><p>based on boids</p></div>
     <div class="ov-top seg">
       <span id="modes"><button data-m="classic" class="on">Classic</button><button data-m="skyline">Skyline</button></span>
     </div>
@@ -91,7 +97,7 @@
     <div class="stats" id="stats"></div>
   </main>
 
-<script type="module" src="./flock.js?v=5"></script>
+<script type="module" src="./flock.js?v=9"></script>
   <script src="/sidebar.js?v=6"></script>
 </body>
 </html>

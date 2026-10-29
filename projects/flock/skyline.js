@@ -63,10 +63,11 @@ export function create(ctx) {
   const groundMat = new THREE.MeshLambertMaterial({ color: 0x888888 });
   const ground = new THREE.Mesh(new THREE.PlaneGeometry(1200, 1200).rotateX(-Math.PI / 2), groundMat);
   ground.position.y = GROUND - 0.2; world.add(ground);
+  const SC = BX / 90;   // the skyline grows with the world
   const BLD = [
     { x: -62, z: -30, w: 14, d: 14, h: 34 }, { x: -40, z: -34, w: 12, d: 12, h: 52 }, { x: -20, z: -28, w: 16, d: 12, h: 28 },
     { x: 2, z: -36, w: 12, d: 14, h: 62 }, { x: 24, z: -30, w: 14, d: 12, h: 40 }, { x: 46, z: -34, w: 12, d: 12, h: 30 }
-  ];
+  ].map(b => ({ x: b.x * SC, z: b.z * SC, w: b.w * SC, d: b.d * SC, h: b.h * SC }));
   const bldMat = new THREE.MeshLambertMaterial({ color: 0x888888, flatShading: true });
   const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
   const boxes = [], slots = [];
@@ -78,14 +79,15 @@ export function create(ctx) {
     boxes.push(bx);
     // Birds sit along the roof edge, a little in from the lip.
     const inset = 0.9, sp = 2.2, top = bx.y1 + 0.5;
-    for (let x = bx.x0 + inset; x <= bx.x1 - inset + 1e-6; x += sp) { slots.push({ x, y: top, z: bx.z0 + inset }); slots.push({ x, y: top, z: bx.z1 - inset }); }
-    for (let z = bx.z0 + inset + sp; z <= bx.z1 - inset - sp + 1e-6; z += sp) { slots.push({ x: bx.x0 + inset, y: top, z }); slots.push({ x: bx.x1 - inset, y: top, z }); }
+    for (let x = bx.x0 + inset; x <= bx.x1 - inset + 1e-6; x += sp) { slots.push({ x, y: top, z: bx.z0 + inset, b: bx }); slots.push({ x, y: top, z: bx.z1 - inset, b: bx }); }
+    for (let z = bx.z0 + inset + sp; z <= bx.z1 - inset - sp + 1e-6; z += sp) { slots.push({ x: bx.x0 + inset, y: top, z, b: bx }); slots.push({ x: bx.x1 - inset, y: top, z, b: bx }); }
   }
   for (const s of slots) { s.taken = false; }
   const tall = BLD.reduce((a, b) => b.h > a.h ? b : a);
   const beaconMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
-  const beacon = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), beaconMat);
-  beacon.position.set(tall.x, GROUND + tall.h + 1.1, tall.z); world.add(beacon);
+  const MAST = 4.2;   // a thin antenna with a small ball on top that blinks
+  const mast = new THREE.Mesh(new THREE.BoxGeometry(0.22, MAST, 0.22), bldMat), beacon = new THREE.Mesh(new THREE.SphereGeometry(0.55, 10, 8), beaconMat);
+  mast.position.set(tall.x, GROUND + tall.h + MAST / 2, tall.z); beacon.position.set(tall.x, GROUND + tall.h + MAST + 0.4, tall.z); world.add(mast, beacon);
 
   // ── Visitors ─────────────────────────────────────────────────────────
   // Every pass flies in a lane above the tallest roof (plus its own hang, bob
@@ -105,7 +107,7 @@ export function create(ctx) {
     return g;
   }
   // Banner for the blimp: the site icon, with a cloth ripple in the vertex shader.
-  const UBn = { uTime: { value: 0 }, uL: { value: 14 } };
+  const UBn = { uTime: { value: 0 }, uL: { value: 9 } };
   const bannerCanvas = document.createElement('canvas'); bannerCanvas.width = 512; bannerCanvas.height = 160;
   const bctx = bannerCanvas.getContext('2d'); bctx.fillStyle = '#ffffff'; bctx.fillRect(0, 0, 512, 160);
   const bannerTex = new THREE.CanvasTexture(bannerCanvas); bannerTex.colorSpace = THREE.SRGBColorSpace;
@@ -132,7 +134,7 @@ export function create(ctx) {
     },
     blimp() {
       const g = new THREE.Group(), hull = ball(1, solidMat); hull.scale.set(3.4, 3.4, 9);
-      const ban = new THREE.Mesh(new THREE.PlaneGeometry(14, 4.5, 20, 1).translate(7, 0, 0).rotateY(Math.PI / 2), bannerMat); ban.position.z = -10.5;
+      const ban = new THREE.Mesh(new THREE.PlaneGeometry(9, 2.8, 14, 1).translate(4.5, 0, 0).rotateY(Math.PI / 2), bannerMat); ban.position.z = -10.5;
       g.add(hull, box(1.4, 1.1, 3, solidMat, 0, -3.6, 0.5), box(0.3, 4.4, 2.6, solidMat, 0, 0, -8), box(4.4, 0.3, 2.6, solidMat, 0, 0, -8), ban);
       return g;
     },
@@ -158,12 +160,13 @@ export function create(ctx) {
   // path: how far ahead of itself a visitor is felt; k: how hard birds flee (cloud is gentle).
   const KINDS = {
     plane:   { weight: 30, speed: 20, R: 60, k: 2.5, path: 90, y: [30, 38], drop: 1, ext: 90 },
-    blimp:   { weight: 22, speed: 11, R: 50, k: 2.0, path: 70, y: [32, 38], drop: 4.6, ext: 100 },
+    blimp:   { weight: 22, speed: 11, R: 50, k: 2.0, path: 70, y: [34, 40], drop: 6.6, ext: 100 },
     glider:  { weight: 14, speed: 9,  R: 36, k: 1.6, path: 40, y: [31, 37], drop: 4.4, ext: 60 },
     jetpack: { weight: 12, speed: 14, R: 30, k: 1.6, path: 30, y: [30, 38], drop: 3.8, ext: 60 }
   };
   const fl = { on: false, kind: '', cfg: null, p: new THREE.Vector3(), dir: new THREE.Vector3(), y0: 0, end: 0, mesh: null };
   const meshes = {};
+  function edgeFade(a, end, span) { const f = clamp((end - a) / span, 0, 1); return f * f * (3 - 2 * f); }
   function launchPass(kind) {
     if (fl.on) return;
     if (!kind) { let r = Math.random() * Object.values(KINDS).reduce((a, k) => a + k.weight, 0); for (const k in KINDS) { r -= KINDS[k].weight; if (r <= 0) { kind = k; break; } } }
@@ -172,7 +175,7 @@ export function create(ctx) {
     fl.kind = kind; fl.cfg = cfg; fl.dir.set(alongX ? sign : 0, 0, alongX ? 0 : sign);
     fl.y0 = Math.max(rnd(cfg.y[0], cfg.y[1]), SAFE + cfg.drop + BOB);   // clearance over the roofs, always
     fl.p.set(alongX ? -sign * ext : rnd(-BX * 0.6, BX * 0.6), fl.y0, alongX ? rnd(-BZ * 0.3, BZ * 0.8) : -sign * ext);
-    fl.end = ext; fl.on = true;
+    fl.end = ext; fl.on = true; fl.base = kind === 'blimp' ? 1.35 : 1;
     fl.jumpers = kind === 'plane' && Math.random() < 0.55 ? (Math.random() < 0.4 ? 2 : 1) : 0; fl.jumpAt = 0;
     fl.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), fl.dir);
   }
@@ -184,10 +187,10 @@ export function create(ctx) {
   function pickWind() { const r = Math.random(); if (r < 0.34) wind.set(1, 0, 0); else if (r < 0.67) wind.set(-1, 0, 0); else wind.set(0, 0, 1); }
   function spawnCloud(anywhere, storm, at) {
     const alongX = wind.x !== 0, ext = (alongX ? BX : BZ) + 45, sc = rnd(0.6, 1.4);
-    storm ??= Math.random() < 0.3;
+    storm ??= Math.random() < 0.2;
     const a = anywhere ? rnd(-ext, ext) : -(alongX ? wind.x : wind.z) * ext, l = alongX ? rnd(-BZ, BZ) : rnd(-BX, BX);
-    const mesh = MESH.cloud(storm ? stormMat : cloudMat); mesh.scale.setScalar(sc); scene.add(mesh);
-    clouds.push({ mesh, sc, storm, speed: rnd(2.5, 6), end: ext, p: at ? at.clone() : new THREE.Vector3(alongX ? a : l, storm ? rnd(22, 40) : rnd(-5, 40), alongX ? l : a) });
+    const base = storm ? stormMat : cloudMat, mat = base.clone(), mesh = MESH.cloud(mat); mesh.scale.setScalar(sc); scene.add(mesh);
+    clouds.push({ mesh, mat, base, sc, storm, speed: rnd(2.5, 6), end: ext, p: at ? at.clone() : new THREE.Vector3(alongX ? a : l, storm ? rnd(22, 40) : rnd(-5, 40), alongX ? l : a) });
   }
   function clearClouds() { for (const c of clouds) scene.remove(c.mesh); clouds.length = 0; }
   function endPass() { fl.on = false; scene.remove(fl.mesh); }
@@ -234,15 +237,23 @@ export function create(ctx) {
   }
 
   // ── Wind: a breeze over the whole map, and gusts that sweep across it as fronts ─
-  const BREEZE = 3.5, GUST_FORCE = 48, FRONT_W = 40, FRONT_SPEED = 13, STREAKS = 440;
-  const gust = { on: false, s: 0, end: 0 };   // s: where the front is, measured along the wind
+  const BREEZE = 3.5, GUST_FORCE = 34, FRONT_W = 75, FRONT_SPEED = 16, STREAKS = 440;
+  const gust = { on: false, s: 0, end: 0, tilt: 0, ph: 0 };   // s: where the front is, measured along the wind
   let breeze = BREEZE;
   function gustAt(x, z) {   // 0 to 1: how hard a gust blows at this spot
     if (!gust.on) return 0;
-    const u = (x * wind.x + z * wind.z - gust.s) / FRONT_W;
-    return Math.exp(-u * u) * (0.75 + 0.25 * Math.sin((x * wind.z - z * wind.x) * 0.09 + clock * 1.1));   // ripples along the front
+    const along = x * wind.x + z * wind.z, lat = x * wind.z - z * wind.x;
+    // The front is slanted and wavy, so it reaches different places at different moments, and it blows in patches
+    // rather than as an even wall.
+    const front = gust.s + lat * gust.tilt + Math.sin(lat * 0.05 + gust.ph) * 22 + Math.sin(lat * 0.13 + gust.ph * 1.7) * 9;
+    const u = (along - front) / FRONT_W, patch = 0.3 + 0.7 * (0.5 + 0.5 * Math.sin(lat * 0.045 + gust.ph * 0.6));
+    return Math.exp(-u * u) * patch * (0.85 + 0.15 * Math.sin(lat * 0.2 + clock * 1.1));
   }
-  function startGust() { if (gust.on) return; const ext = (wind.x ? BX : BZ) + FRONT_W * 1.6; gust.s = -ext; gust.end = ext; gust.on = true; }
+  function startGust() {
+    if (gust.on) return;
+    const ext = (wind.x ? BX : BZ) + FRONT_W * 1.6 + 90;
+    gust.tilt = rnd(0.2, 0.5) * (Math.random() < 0.5 ? -1 : 1); gust.ph = rnd(0, 6.28); gust.s = -ext; gust.end = ext; gust.on = true;
+  }
   // Streaks fill the whole map and drift with the wind; they lengthen and brighten inside a gust.
   const sPos = new Float32Array(STREAKS * 6), sCol = new Float32Array(STREAKS * 6), sBase = new Float32Array(STREAKS * 3);
   for (let i = 0; i < STREAKS; i++) { sBase[i * 3] = rnd(-BX, BX); sBase[i * 3 + 1] = rnd(GROUND + 4, BY); sBase[i * 3 + 2] = rnd(-BZ, BZ); }
@@ -266,7 +277,7 @@ export function create(ctx) {
   // ── Lightning: storm clouds (the dark ones) now and then strike the ground or a roof ─
   const boltMat = new THREE.MeshBasicMaterial({ color: 0xffd23c, transparent: true });
   const flashC = new THREE.Color(1, 0.93, 0.62), UP = new THREE.Vector3(0, 1, 0), segGeo = new THREE.BoxGeometry(0.36, 1, 0.36);
-  const strike = { on: false, t: 0, a: new THREE.Vector3(), b: new THREE.Vector3(), group: null, flash: 0 };
+  const strike = { on: false, t: 0, c: new THREE.Vector3(), a: new THREE.Vector3(), b: new THREE.Vector3(), group: null, flash: 0 };
   let flashed = false;
   function topAt(x, z) { let y = GROUND; for (const b of boxes) if (x >= b.x0 && x <= b.x1 && z >= b.z0 && z <= b.z1) y = Math.max(y, b.y1); return y; }
   function bolt(a, b) {   // a jagged line of thin boxes, plus two short branches
@@ -290,8 +301,15 @@ export function create(ctx) {
     if (!cands.length) return false;
     const c = cands[(Math.random() * cands.length) | 0];
     strike.a.set(c.p.x + rnd(-4, 4) * c.sc, c.p.y - 2 * c.sc, c.p.z + rnd(-4, 4) * c.sc);
-    if (Math.hypot(c.p.x - tallBox.x0 - 6, c.p.z - tallBox.z0 - 7) < 40) strike.b.set((tallBox.x0 + tallBox.x1) / 2, tallBox.y1 + 2.4, (tallBox.z0 + tallBox.z1) / 2);   // the tall tower draws it
+    if (Math.hypot(c.p.x - (tallBox.x0 + tallBox.x1) / 2, c.p.z - (tallBox.z0 + tallBox.z1) / 2) < 50) strike.b.set((tallBox.x0 + tallBox.x1) / 2, tallBox.y1 + MAST + 0.9, (tallBox.z0 + tallBox.z1) / 2);   // the tall tower draws it
     else { const x = strike.a.x + rnd(-10, 10), z = strike.a.z + rnd(-10, 10); strike.b.set(x, topAt(x, z), z); }
+    strike.c.copy(c.p);
+    const pos = ctx.pos, vel = ctx.vel;   // an immediate kick away from the cloud, so the flock bolts rather than eases off
+    for (let i = 0, n = ctx.N; i < n; i++) {
+      if (st[i]) continue;
+      const i3 = i * 3, dx = pos[i3] - c.p.x, dy = pos[i3 + 1] - c.p.y, dz = pos[i3 + 2] - c.p.z, d = Math.hypot(dx, dy, dz);
+      if (d < 55) { const k = P.spd * 1.3 * (1 - d / 55) / (d || 1); vel[i3] += dx * k; vel[i3 + 1] += (dy - 6) * k; vel[i3 + 2] += dz * k; }
+    }
     strike.group = bolt(strike.a, strike.b); scene.add(strike.group); strike.on = true; strike.t = 0;
     return true;
   }
@@ -314,7 +332,8 @@ export function create(ctx) {
   let st = new Uint8Array(0), tgt = new Int16Array(0), leaveAt = new Float32Array(0), freeSlots = slots.length;
   let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, nextCloud = 0, nextStrike = 0, rt = new Float32Array(0), tint = new Float32Array(0);
   function reset() {
-    N = ctx.N; st = new Uint8Array(N); tgt = new Int16Array(N); leaveAt = new Float32Array(N);
+    N = ctx.CAP; st = new Uint8Array(N);   // N here is capacity; the live count is ctx.N
+     tgt = new Int16Array(N); leaveAt = new Float32Array(N);
     flapAttr = new THREE.InstancedBufferAttribute(new Float32Array(N).fill(1), 1);
     phaseAttr = new THREE.InstancedBufferAttribute(Float32Array.from({ length: N }, () => rnd(0, 6.283)), 1);
     for (const k in geoCache) { geoCache[k].geometry.dispose(); delete geoCache[k]; }
@@ -322,7 +341,7 @@ export function create(ctx) {
     rt = new Float32Array(N); tint = new Float32Array(N);
     api.st = st; setModel(api.model);
     ctx.birds.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(N * 3).fill(1), 3);
-    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50); nextCloud = clock + rnd(4, 10); nextStrike = clock + rnd(8, 16);
+    hkReset(); nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50); nextCloud = clock + rnd(4, 10); nextStrike = clock + rnd(15, 30);
   }
   function setModel(name) {
     api.model = name;
@@ -355,18 +374,18 @@ export function create(ctx) {
       if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55) * slow; }
       if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55) * slow; }
       if (clock > nextCloud && clouds.length < (slow > 1 ? 2 : 5)) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
-      if (clock > nextStrike) { nextStrike = clock + (startStrike() ? rnd(7, 15) : 2); }
+      if (clock > nextStrike) { nextStrike = clock + (startStrike() ? rnd(25, 50) : 3); }
       if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90) * slow; }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
     if (freeSlots === 0) return;
     const pos = ctx.pos;
     for (let s = 0; s < 8; s++) {
-      const i = (Math.random() * N) | 0; if (st[i] || Math.random() > 0.3) continue;
+      const i = (Math.random() * ctx.N) | 0; if (st[i] || Math.random() > 0.3) continue;
       const i3 = i * 3, px = pos[i3], py = pos[i3 + 1], pz = pos[i3 + 2];
       let best = -1, bd = 24 * 24;
       for (let k = 0; k < slots.length; k++) {
-        const sl = slots[k]; if (sl.taken || py < sl.y + 1.5) continue;
+        const sl = slots[k]; if (sl.taken || py < sl.y + 1.5 || (hk.mode > 0 && sl.b === hk.box)) continue;
         const d = (sl.x - px) ** 2 + (sl.y - py) ** 2 + (sl.z - pz) ** 2;
         if (d < bd) { bd = d; best = k; }
       }
@@ -394,9 +413,9 @@ export function create(ctx) {
       const want = Math.min(P.spd, d * 1.8 + 2) / d, k = Math.min(1, dt * 4);
       vel[i3] += (dx * want - vel[i3]) * k; vel[i3 + 1] += (dy * want - vel[i3 + 1]) * k; vel[i3 + 2] += (dz * want - vel[i3 + 2]) * k;
       pos[i3] += vel[i3] * dt; pos[i3 + 1] += vel[i3 + 1] * dt; pos[i3 + 2] += vel[i3 + 2] * dt;
-    } else {
+    } else if (st[i] === 2) {
       const h = (pos[i3] - hawk.p.x) ** 2 + (pos[i3 + 1] - hawk.p.y) ** 2 + (pos[i3 + 2] - hawk.p.z) ** 2;
-      if (clock > leaveAt[i] || h < 30 * 30 || gustAt(pos[i3], pos[i3 + 2]) > 0.35 || strikeDist(pos[i3], pos[i3 + 1], pos[i3 + 2]) < 20) takeOff(i);
+      if (clock > leaveAt[i] || h < (hk.mode > 0 ? 9 * 9 : 30 * 30) || gustAt(pos[i3], pos[i3 + 2]) > 0.35 || strikeDist(pos[i3], pos[i3 + 1], pos[i3 + 2]) < 20) takeOff(i);
     }
   }
 
@@ -427,6 +446,10 @@ export function create(ctx) {
     out[0] += wind.x * breeze; out[2] += wind.z * breeze;   // the breeze moves everything, everywhere
     const I = gustAt(px, pz);
     if (I > 0.02) { const w = I * GUST_FORCE; out[0] += wind.x * w; out[2] += wind.z * w; out[1] += Math.sin(px * 0.15 + pz * 0.11 + clock * 2) * I * 10; lvl = Math.max(lvl, I); }
+    if (strike.on && strike.t < 2.2) {   // and for a couple of seconds everything keeps moving away from the cloud
+      const dx = px - strike.c.x, dy = py - strike.c.y, dz = pz - strike.c.z, d = Math.hypot(dx, dy, dz);
+      if (d < 55) { const u = 1 - d / 55, k = MAX_FORCE * 3 * u * Math.max(0, 1 - strike.t / 2.2) / (d || 1); out[0] += dx * k; out[1] += (dy - 6) * k * 0.6; out[2] += dz * k; lvl = Math.max(lvl, u); }
+    }
     const sd = strikeDist(px, py, pz);   // a strike scatters everything near the bolt
     if (sd < 24) {
       const u = 1 - sd / 24, k = MAX_FORCE * 3 * u * Math.max(0, 1 - strike.t / 1.5) / (sd || 1);
@@ -437,10 +460,11 @@ export function create(ctx) {
 
   // ── The hawk: steered by pointer or arrows, or left to chase ─────────
   const H = { yaw: 0, pitch: 0, roll: 0, nx: 0, ny: 0, armed: false };   // armed: the pointer has moved since flying began
-  const keys = { l: 0, r: 0, u: 0, d: 0 };
+  const keys = { l: 0, r: 0, u: 0, d: 0, s: 0, sPrev: 0 };   // s: space, perch or take off
   const dead = v => Math.abs(v) < 0.08 ? 0 : (v - Math.sign(v) * 0.08) / 0.92;
-  function pushOut(p, pad) {
+  function pushOut(p, pad, skip) {
     for (const b of boxes) {
+      if (b === skip) continue;
       if (p.x < b.x0 - pad || p.x > b.x1 + pad || p.y < b.y0 - pad || p.y > b.y1 + pad || p.z < b.z0 - pad || p.z > b.z1 + pad) continue;
       // nearest face
       const ds = [p.x - (b.x0 - pad), (b.x1 + pad) - p.x, p.y - (b.y0 - pad), (b.y1 + pad) - p.y, p.z - (b.z0 - pad), (b.z1 + pad) - p.z];
@@ -464,17 +488,61 @@ export function create(ctx) {
     hawk.v.set(Math.sin(H.yaw) * c * sp, Math.sin(H.pitch) * sp, Math.cos(H.yaw) * c * sp);
     p.addScaledVector(hawk.v, dt);
   }
-  function hawkStep(dt) {
-    if (api.flying) steerHawk(dt);
-    else {
-      const prevYaw = H.yaw;
-      ctx.aiHawk(dt);
-      const v = hawk.v, m = v.length() || 1;
-      H.yaw = Math.atan2(v.x, v.z); H.pitch = Math.asin(clamp(v.y / m, -1, 1));
-      H.roll += (clamp(Math.atan2(Math.sin(H.yaw - prevYaw), Math.cos(H.yaw - prevYaw)) / dt * 0.45, -0.9, 0.9) - H.roll) * Math.min(1, dt * 6);
+  // The hawk can perch on a free roof edge: the AI one now and then, the player's on Space near a roof.
+  // mode 0 flying, 1 gliding in, 2 perched. Perched, it is calm: birds keep clear but do not bolt.
+  const hk = { mode: 0, slot: -1, box: null, pt: new THREE.Vector3(), until: 0, next: 0 };
+  function hkBegin(k) {
+    const sl = slots[k]; sl.taken = true; freeSlots--; hk.mode = 1; hk.slot = k; hk.box = sl.b; hk.pt.set(sl.x, sl.y + 1.5, sl.z);
+    for (let i = 0, n = ctx.N; i < n; i++) {   // everyone on that roof clears off, staggered over about a second
+      if (st[i] === 1 && slots[tgt[i]].b === hk.box) takeOff(i);
+      else if (st[i] === 2 && slots[tgt[i]].b === hk.box) leaveAt[i] = Math.min(leaveAt[i], clock + rnd(0.1, 1));
     }
-    pushOut(hawk.p, 2.5);
-    hawk.p.x = clamp(hawk.p.x, -BX - 10, BX + 10); hawk.p.z = clamp(hawk.p.z, -BZ - 10, BZ + 10); hawk.p.y = clamp(hawk.p.y, GROUND + 2, BY + 8);
+  }
+  function hkReset() { hk.mode = 0; hk.slot = -1; UH.uAmp.value = 0.3; hk.next = clock + rnd(25, 45); }
+  function hkEnd() {   // take off facing the way it was looking
+    if (hk.slot >= 0) { slots[hk.slot].taken = false; freeSlots++; }
+    hkReset(); H.pitch = 0.5; const c = Math.cos(H.pitch);
+    hawk.v.set(Math.sin(H.yaw) * c, Math.sin(H.pitch), Math.cos(H.yaw) * c).multiplyScalar(P.spd * 1.2);
+  }
+  function tryPerch(maxD) {   // the nearest free edge that is below the hawk, so it always lands from above
+    let best = -1, bd = maxD * maxD;
+    for (let k = 0; k < slots.length; k++) {
+      const sl = slots[k]; if (sl.taken || hawk.p.y < sl.y + 1.5) continue;
+      const d = (sl.x - hawk.p.x) ** 2 + (sl.y - hawk.p.y) ** 2 + (sl.z - hawk.p.z) ** 2;
+      if (d < bd) { bd = d; best = k; }
+    }
+    if (best >= 0) hkBegin(best);
+  }
+  function hawkStep(dt) {
+    const space = keys.s && !keys.sPrev; keys.sPrev = keys.s;
+    const steerKey = keys.l || keys.r || keys.u || keys.d;
+    if (hk.mode === 2) {
+      hawk.p.copy(hk.pt); hawk.v.set(0, 0, 0);
+      if (api.flying ? (steerKey || space) : clock > hk.until) hkEnd();
+    } else if (hk.mode === 1) {
+      const dx = hk.pt.x - hawk.p.x, dy = hk.pt.y - hawk.p.y, dz = hk.pt.z - hawk.p.z, d = Math.hypot(dx, dy, dz), want = Math.min(P.spd * 1.2, d * 1.5 + 2) / (d || 1), k = Math.min(1, dt * 3);
+      hawk.v.x += (dx * want - hawk.v.x) * k; hawk.v.y += (dy * want - hawk.v.y) * k; hawk.v.z += (dz * want - hawk.v.z) * k;
+      hawk.p.addScaledVector(hawk.v, dt); pushOut(hawk.p, 1.5, slots[hk.slot].b);
+      const m = hawk.v.length();
+      if (m > 1) { H.yaw = Math.atan2(hawk.v.x, hawk.v.z); H.pitch = Math.asin(clamp(hawk.v.y / m, -1, 1)); }
+      if (d < 0.7) { hk.mode = 2; hk.until = clock + rnd(6, 12); UH.uAmp.value = 0; H.pitch = 0; H.roll = 0; }   // wings fold
+      else if (api.flying && (steerKey || space)) hkEnd();
+    } else {
+      if (api.flying) { if (space) tryPerch(16); }
+      else if (clock > hk.next && !ctx.reduce) tryPerch(45);
+      if (hk.mode === 0) {
+        if (api.flying) steerHawk(dt);
+        else {
+          const prevYaw = H.yaw;
+          ctx.aiHawk(dt);
+          const v = hawk.v, m = v.length() || 1;
+          H.yaw = Math.atan2(v.x, v.z); H.pitch = Math.asin(clamp(v.y / m, -1, 1));
+          H.roll += (clamp(Math.atan2(Math.sin(H.yaw - prevYaw), Math.cos(H.yaw - prevYaw)) / dt * 0.45, -0.9, 0.9) - H.roll) * Math.min(1, dt * 6);
+        }
+        pushOut(hawk.p, 2.5);
+      }
+    }
+    hawk.p.x = clamp(hawk.p.x, -BX - 30, BX + 30); hawk.p.z = clamp(hawk.p.z, -BZ - 30, BZ + 30); hawk.p.y = clamp(hawk.p.y, GROUND + 2, BY + 8);
   }
 
   // ── Per-frame drawing: hawk, camera, plane, streaks ──────────────────
@@ -494,47 +562,56 @@ export function create(ctx) {
     }
     UBn.uTime.value = tick;
     if (fl.on) {
-      fl.mesh.position.copy(fl.p);
+      fl.mesh.position.copy(fl.p); fl.mesh.scale.setScalar(fl.base * Math.max(0.001, edgeFade(Math.abs(fl.p.x * fl.dir.x + fl.p.z * fl.dir.z), fl.end, fl.cfg.ext)));   // shrinks away across the outer margin
       if (fl.kind === 'jetpack') { const f = fl.mesh.getObjectByName('flame'); f.scale.set(1, 0.8 + Math.random() * 0.6, 1); }
       if (fl.kind === 'glider') fl.mesh.rotation.z = Math.sin(clock * 0.7) * 0.12;
     }
-    for (const c of clouds) c.mesh.position.copy(c.p);
+    for (const c of clouds) {
+      c.mesh.position.copy(c.p); c.mat.color.copy(c.base.color); c.mat.emissive.copy(c.base.emissive);
+      c.mat.opacity = c.base.opacity * edgeFade(Math.abs(c.p.x * wind.x + c.p.z * wind.z), c.end, 45);   // fades in and out across the outer margin
+    }
     for (const c of chutes) {
       c.g.position.copy(c.p); c.canopy.scale.setScalar(Math.max(0.001, c.open));
       c.g.rotation.z = c.phase === 3 ? Math.sin(clock * 1.3 + c.sway) * 0.08 : 0; c.g.rotation.x = c.phase === 2 ? 0.5 : 0;
     }
-    beaconMat.color.copy((tick % 1.8) < 0.35 ? beaconC : bldMat.color);   // a slow aircraft-style blink
+    beaconMat.color.copy((tick % 1.8) < 0.35 ? beaconC : beaconOff);   // a slow aircraft-style blink
     if (!ctx.reduce) moveStreaks(dt);
     const f = strike.on ? strike.flash * 0.2 : 0;   // the whole sky takes a brief, soft flash
     if (f > 0 || flashed) { scene.background.copy(bgC).lerp(flashC, f); if (scene.fog) scene.fog.color.copy(scene.background); flashed = f > 0; }
     stormMat.emissive.setRGB(1, 0.85, 0.3).multiplyScalar(strike.on ? strike.flash * 0.45 : 0);
     const col = ctx.birds.instanceColor.array, k = Math.min(1, dt * 6), tr = textC.r, tg = textC.g, tb = textC.b;
-    for (let i = 0; i < N; i++) {
+    for (let i = 0, n = ctx.N; i < n; i++) {
       tint[i] += ((st[i] ? 0 : rt[i]) - tint[i]) * k; const t = tint[i];
       col[i * 3] = tr + (accC.r - tr) * t; col[i * 3 + 1] = tg + (accC.g - tg) * t; col[i * 3 + 2] = tb + (accC.b - tb) * t;
     }
     ctx.birds.instanceColor.needsUpdate = true;
   }
 
-  const textC = new THREE.Color(), accC = new THREE.Color(), bgC = new THREE.Color(), beaconC = new THREE.Color();
+  const textC = new THREE.Color(), accC = new THREE.Color(), bgC = new THREE.Color(), beaconC = new THREE.Color(), beaconOff = new THREE.Color();
   function theme(col) {
     const text = col('--text'), bg = col('--bg'), accent = col('--accent');
-    textC.copy(text); accC.copy(accent); bgC.copy(bg); beaconC.copy(col('--d2')); birdMat.color.set(0xffffff);
+    textC.copy(text); accC.copy(accent); bgC.copy(bg); beaconC.copy(accent); birdMat.color.set(0xffffff);
     hawkMat.color.copy(accent); solidMat.color.copy(text); accentMat.color.copy(accent); flameMat.color.copy(accent); edgeMat.color.copy(text);
     cloudMat.color.copy(bg).lerp(text, 0.4);
     stormMat.color.setRGB(cloudMat.color.r * 0.42, cloudMat.color.g * 0.46, cloudMat.color.b * 0.55);
-    groundMat.color.copy(bg).lerp(text, 0.07); bldMat.color.copy(bg).lerp(text, 0.16); }
+    groundMat.color.copy(bg).lerp(text, 0.07); bldMat.color.copy(bg).lerp(text, 0.16); beaconOff.copy(beaconC).lerp(bg, 0.8); }
 
   // ── Input ────────────────────────────────────────────────────────────
   const onMove = e => { H.armed = true; const r = canvas.getBoundingClientRect(); H.nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1); H.ny = clamp(-(((e.clientY - r.top) / r.height) * 2 - 1), -1, 1); };
   const onUp = e => { if (e.pointerType === 'touch') { H.nx = 0; H.ny = 0; } };
-  const KEY = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd' };
-  const onKey = v => e => { const k = KEY[e.code]; if (!k) return; keys[k] = v; if (api.flying) e.preventDefault(); };
+  const KEY = { ArrowLeft: 'l', ArrowRight: 'r', ArrowUp: 'u', ArrowDown: 'd', Space: 's' };
+  const onKey = v => e => { const k = KEY[e.code]; if (!k) return; keys[k] = v; if (api.flying) e.preventDefault(); };   // (arrows and space only)
   const kd = onKey(1), ku = onKey(0);
 
   const api = {
     st, model: 'bird', flying: false,
+    // state 3 = held: pinned in place by the Hello. intro until freed
+    recruit(i) { if (st[i] === 1 || st[i] === 2) { slots[tgt[i]].taken = false; freeSlots++; } st[i] = 3; flapAttr.array[i] = 1; flapAttr.needsUpdate = true; },
+    free(i) { st[i] = 0; },
+    blocked(x, y, z) { for (const b of boxes) if (x > b.x0 - 3 && x < b.x1 + 3 && y > b.y0 - 3 && y < b.y1 + 3 && z > b.z0 - 3 && z < b.z1 + 3) return true; return false; },   // inside or hugging a building
+    get hawkCalm() { return hk.mode > 0; },
     spawn(k) {
+      if (k === 'perch') { if (hk.mode) hkEnd(); else { const free = slots.filter(x => !x.taken), sl = free[(Math.random() * free.length) | 0]; if (sl) { hawk.p.set(sl.x + 5, sl.y + 9, sl.z + 9); hawk.q.copy(hawk.p); hkBegin(slots.indexOf(sl)); } } return; }
       if (k === 'chute') startChute(); else if (k === 'cloud') spawnCloud(true, false); else if (k === 'storm') spawnCloud(true, true); else if (k === 'strike') startStrike(true); else if (k === 'gust') startGust();
       else { if (fl.on) endPass(); launchPass(k); if (k === 'plane') fl.jumpers = 2; }
     },   // for ?debug
@@ -551,7 +628,7 @@ export function create(ctx) {
       addEventListener('keydown', kd); addEventListener('keyup', ku);
       api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
       if (fl.on) endPass(); clearChutes(); clearStrike(); gust.on = false; streaks.visible = !ctx.reduce; clearClouds(); pickWind(); for (let i = 0; i < (ctx.ambient && ctx.phone ? 2 : 3); i++) spawnCloud(true);
-      hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
+      hkReset(); hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },
     disable() {
@@ -560,6 +637,7 @@ export function create(ctx) {
       removeEventListener('pointermove', onMove); canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onUp);
       removeEventListener('keydown', kd); removeEventListener('keyup', ku);
       canvas.style.cursor = ''; api.flying = false;
+      if (hk.slot >= 0) { slots[hk.slot].taken = false; freeSlots++; } hkReset();
       hawk.p.set(BX, BY * 0.5, 0); hawk.v.set(-1, 0, 0); hawk.q.copy(hawk.p);
     }
   };
