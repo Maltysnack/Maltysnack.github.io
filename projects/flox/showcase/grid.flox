@@ -15,5 +15,5 @@ node SouthCity { supply:  -65 }
 
 compare PowerGrid 500 as
   "Baseline",
-  "Plant offline" with disable Plant,
+  "Plant offline" with disable Plant with Backup.supply = 130,
   "Tie line cut"  with disable NorthCity -> SouthCity;
