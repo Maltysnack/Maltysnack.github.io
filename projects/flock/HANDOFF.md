@@ -110,3 +110,28 @@ count controls.
 - Checked with a DOM-stubbed node run (ambient: 300 renders per 600 ticks, so
   30 fps; reduced: 2 renders and no loop; phone and normal modes fine). Not
   eyeballed in a browser.
+
+## 29-10-2026: global wind, plane jumpers, storms, blinking beacon
+
+- Wind is one direction for the whole map (+x, -x or +z, never toward the
+  skyline front), picked each time Skyline starts. A light breeze pushes every
+  bird, cloud, canopy and banner; a gust is a front (Gaussian band, 40 wide,
+  13 u/s) that sweeps the full width of the map, with ripples along it.
+  Streaks (440) fill the whole map, lengthen and brighten inside the front.
+  Canopies drift with the wind (harder in a gust). `?debug` buttons: gust.
+- Chutes are an array now (max 5). Planes carry 0 to 2 jumpers (55% of
+  planes), who only leave over open ground (z > -4, inside the box), shed the
+  plane's speed in the fall, then open and drift. Tower jumper unchanged
+  except it edges +z away from the skyline.
+- 30% of clouds are storm clouds (darker, tinted). Every 7 to 15 s one inside
+  the box strikes: jagged thin-box bolt (yellow, 0xffd23c), branches, one soft
+  sky flash (peak 0.2, no strobe), storm clouds glow briefly, birds near the
+  bolt scatter and tint, perched ones leave. The tall tower draws strikes when
+  a storm is within 40. Off under reduced motion (inside the ambient gate).
+  `?debug` buttons: storm, strike.
+- Beacon blinks (0.35 s every 1.8 s) in `--d2`, not the accent (accent means
+  warning/avoidance).
+- Checked headless: 6 min sim and 24 plane passes (67 chutes), zero building
+  intersections; ambient/reduced/phone/normal modes load via a DOM stub.
+  Still not eyeballed in a browser. Ambient embed (`?ambient`) gets all of
+  this; confirm the flash is not too bright behind the home page text.

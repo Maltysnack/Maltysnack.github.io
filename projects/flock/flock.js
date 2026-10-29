@@ -275,11 +275,11 @@
   };
   let sky = null, mode = 'classic';
   const $modes = document.querySelectorAll('#modes button'), $title = document.querySelector('.ov-title p');
-  const blurb = $title.textContent, skyBlurb = 'The same three rules, plus a skyline to land on, gusts of wind and the odd visitor passing through. Press Fly hawk to take the hawk: steer with the mouse or arrow keys.';
+  const blurb = $title.textContent, skyBlurb = 'The same three rules, plus a skyline to land on, a breeze with gusts that sweep the whole map, storms, and the odd visitor passing through. Press Fly hawk to take the hawk: steer with the mouse or arrow keys.';
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=6')).create(ctx);
+      sky ??= (await import('./skyline.js?v=7')).create(ctx);
       mode = m; X = sky; seed(N); sky.enable(); $title.textContent = skyBlurb;
     } else {
       mode = m; if (X) X.disable(); X = null;
@@ -295,7 +295,7 @@
   // ?debug adds buttons to spawn each visitor, so nothing waits on the ambient timers.
   if (new URLSearchParams(location.search).has('debug')) {
     const bar = document.querySelector('.ov-bar');
-    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'chute', 'gust']) {
+    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'storm', 'strike', 'chute', 'gust']) {
       const b = document.createElement('button'); b.textContent = k; b.dataset.sky = '';
       b.addEventListener('click', () => X && X.spawn(k)); bar.prepend(b);
     }

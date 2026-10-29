@@ -83,7 +83,7 @@ export function create(ctx) {
   }
   for (const s of slots) { s.taken = false; }
   const tall = BLD.reduce((a, b) => b.h > a.h ? b : a);
-  const beaconMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+  const beaconMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
   const beacon = new THREE.Mesh(new THREE.BoxGeometry(1.2, 2.2, 1.2), beaconMat);
   beacon.position.set(tall.x, GROUND + tall.h + 1.1, tall.z); world.add(beacon);
 
@@ -95,6 +95,7 @@ export function create(ctx) {
   const accentMat = new THREE.MeshLambertMaterial({ color: 0xff0000, flatShading: true, side: THREE.DoubleSide });
   const flameMat = new THREE.MeshBasicMaterial({ color: 0xff0000 });
   const cloudMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true, transparent: true, opacity: 0.88 });
+  const stormMat = new THREE.MeshLambertMaterial({ color: 0x444444, flatShading: true, transparent: true, opacity: 0.94, emissive: 0x000000 });
   const box = (w, h, d, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); return m; };
   const ball = (r, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(new THREE.IcosahedronGeometry(r, 1), mat); m.position.set(x, y, z); return m; };
   function figure(mat) {   // a stick person, feet at y = 0, about 2 tall
@@ -148,9 +149,9 @@ export function create(ctx) {
       g.add(f, box(0.6, 1, 0.35, accentMat, 0, 0.1, -0.35), flame);
       return g;
     },
-    cloud() {
+    cloud(mat = cloudMat) {
       const g = new THREE.Group();
-      for (const [r, x, y, z] of [[7, 0, 0, 0], [5.5, 7, -1, 1], [5, -7, -1.4, -1], [4.5, 2.5, 3, 2], [4, -3, 2.5, -3], [3.6, 10, -2, -2]]) g.add(ball(r, cloudMat, x, y * 0.7, z));
+      for (const [r, x, y, z] of [[7, 0, 0, 0], [5.5, 7, -1, 1], [5, -7, -1.4, -1], [4.5, 2.5, 3, 2], [4, -3, 2.5, -3], [3.6, 10, -2, -2]]) g.add(ball(r, mat, x, y * 0.7, z));
       return g;
     }
   };
@@ -172,81 +173,146 @@ export function create(ctx) {
     fl.y0 = Math.max(rnd(cfg.y[0], cfg.y[1]), SAFE + cfg.drop + BOB);   // clearance over the roofs, always
     fl.p.set(alongX ? -sign * ext : rnd(-BX * 0.6, BX * 0.6), fl.y0, alongX ? rnd(-BZ * 0.3, BZ * 0.8) : -sign * ext);
     fl.end = ext; fl.on = true;
+    fl.jumpers = kind === 'plane' && Math.random() < 0.55 ? (Math.random() < 0.4 ? 2 : 1) : 0; fl.jumpAt = 0;
     fl.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), fl.dir);
   }
   // Clouds are their own thing: several at once, each its own speed, height and size,
   // all drifting the same way, through the buildings if they like. Birds shy from them gently.
   const CLOUD_R = 26, CLOUD_K = 0.8, clouds = [];
-  const wind = new THREE.Vector3();
-  function pickWind() { const sign = Math.random() < 0.5 ? -1 : 1; if (Math.random() < 0.5) wind.set(sign, 0, 0); else wind.set(0, 0, sign); }
-  function spawnCloud(anywhere) {
+  const wind = new THREE.Vector3();   // one direction for the whole map: clouds, canopies, banners and birds all feel it
+  // Never blows toward the skyline's front (-z), so canopies are not pressed against the towers.
+  function pickWind() { const r = Math.random(); if (r < 0.34) wind.set(1, 0, 0); else if (r < 0.67) wind.set(-1, 0, 0); else wind.set(0, 0, 1); }
+  function spawnCloud(anywhere, storm, at) {
     const alongX = wind.x !== 0, ext = (alongX ? BX : BZ) + 45, sc = rnd(0.6, 1.4);
+    storm ??= Math.random() < 0.3;
     const a = anywhere ? rnd(-ext, ext) : -(alongX ? wind.x : wind.z) * ext, l = alongX ? rnd(-BZ, BZ) : rnd(-BX, BX);
-    const mesh = MESH.cloud(); mesh.scale.setScalar(sc); scene.add(mesh);
-    clouds.push({ mesh, sc, speed: rnd(2.5, 6), end: ext, p: new THREE.Vector3(alongX ? a : l, rnd(-5, 40), alongX ? l : a) });
+    const mesh = MESH.cloud(storm ? stormMat : cloudMat); mesh.scale.setScalar(sc); scene.add(mesh);
+    clouds.push({ mesh, sc, storm, speed: rnd(2.5, 6), end: ext, p: at ? at.clone() : new THREE.Vector3(alongX ? a : l, storm ? rnd(22, 40) : rnd(-5, 40), alongX ? l : a) });
   }
   function clearClouds() { for (const c of clouds) scene.remove(c.mesh); clouds.length = 0; }
   function endPass() { fl.on = false; scene.remove(fl.mesh); }
 
-  // ── Parachutist: steps off the tallest roof into open air and drifts down ─
+  // ── Parachutists: off the tallest roof, or out of a plane over open ground ─
   const tallBox = boxes.reduce((a, b) => b.y1 > a.y1 ? b : a);
-  const ch = { on: false, phase: 0, t: 0, open: 0, p: new THREE.Vector3(), v: new THREE.Vector3() };
-  const chute = new THREE.Group(), chFig = figure(solidMat), chCanopy = new THREE.Group();
+  const chutes = [], chuteTpl = new THREE.Group();
   {
+    const canopy = new THREE.Group(); canopy.name = 'canopy';
     const dome = new THREE.Mesh(new THREE.SphereGeometry(2.7, 12, 6, 0, Math.PI * 2, 0, Math.PI / 2), accentMat); dome.position.y = 4.2;
     const lines = new THREE.LineSegments(new THREE.BufferGeometry().setFromPoints([[1.8, 4.2, 0], [0, 2, 0.1], [-1.8, 4.2, 0], [0, 2, 0.1], [0, 4.2, 1.8], [0, 2, 0.1], [0, 4.2, -1.8], [0, 2, 0.1]].map(a => new THREE.Vector3(...a))), edgeMat);
-    chCanopy.add(dome, lines); chCanopy.position.y = 0; chute.add(chFig, chCanopy);
+    canopy.add(dome, lines); chuteTpl.add(figure(solidMat), canopy);
+  }
+  function addChute(p, v, phase, tower) {
+    const g = chuteTpl.clone(true), canopy = g.getObjectByName('canopy'); canopy.visible = false; scene.add(g);
+    chutes.push({ g, canopy, phase, tower, t: 0, open: 0, p: p.clone(), v: v.clone(), sway: rnd(0, 6.28) });
   }
   function startChute() {
-    if (ch.on) return;
-    ch.on = true; ch.phase = 0; ch.t = 0; ch.open = 0; ch.v.set(0, 0, 0); ch.sway = rnd(0, 6.28); ch.side = Math.random() < 0.5 ? -1 : 1;
-    ch.p.set(tallBox.x0 + (tallBox.x1 - tallBox.x0) / 2, tallBox.y1 + 0.05, tallBox.z1 - 0.9);   // standing at the open (front) edge
-    chCanopy.visible = false; chute.rotation.set(0, 0, 0); scene.add(chute);
+    if (chutes.length >= 5) return;
+    addChute(new THREE.Vector3((tallBox.x0 + tallBox.x1) / 2, tallBox.y1 + 0.05, tallBox.z1 - 0.9), new THREE.Vector3(), 0, true);   // standing at the open (front) edge
   }
-  function stepChute(dt) {
-    ch.t += dt;
-    if (ch.phase === 0 && ch.t > 2.5) { ch.phase = 1; ch.t = 0; ch.v.set(0, 2, 4); }
-    else if (ch.phase === 1) { ch.p.addScaledVector(ch.v, dt); if (ch.t > 0.6) { ch.phase = 2; ch.t = 0; ch.v.set(0, 0, 2.5); } }
-    else if (ch.phase === 2) {
-      ch.v.y = Math.max(ch.v.y - 12 * dt, -22); ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 1.2);
-      if (ch.t > 1.4) { ch.phase = 3; ch.t = 0; chCanopy.visible = true; }
-    } else if (ch.phase === 3) {
-      ch.open = Math.min(1, ch.open + dt / 0.7);
-      let wx = 0, wz = 0; for (const g of gusts) if (g.on) { const d = Math.hypot(ch.p.x - g.c.x, ch.p.y - g.c.y, ch.p.z - g.c.z); if (d < GUST_R) { wx += g.dir.x * 6 * g.env * (1 - d / GUST_R); wz += g.dir.z * 6 * g.env * (1 - d / GUST_R); } }
-      const k = Math.min(1, dt * 1.5);
-      // a steady sideways drift plus a slow weave, so the path curves instead of dropping straight
-      const weave = Math.sin(clock * 0.6 + ch.sway);
-      ch.v.y += (-4.5 - ch.v.y) * Math.min(1, dt * 3); ch.v.x += (wx + ch.side * 2.2 + weave * 2.4 - ch.v.x) * k; ch.v.z += (1.5 + wz + Math.cos(clock * 0.45 + ch.sway) * 1.6 - ch.v.z) * k;
-      ch.p.addScaledVector(ch.v, dt); pushOut(ch.p, 3.4); ch.p.x = clamp(ch.p.x, -BX, BX);
-      if (ch.p.y <= GROUND + 0.1) { ch.p.y = GROUND + 0.1; ch.phase = 4; ch.t = 0; chCanopy.visible = false; }
-    } else if (ch.phase === 4 && ch.t > 2) { ch.on = false; scene.remove(chute); }
+  function jumpFromPlane() { addChute(vtmp.copy(fl.p).setY(fl.p.y - 1.5), fl.dir.clone().multiplyScalar(fl.cfg.speed), 2, false); }
+  function clearChutes() { for (const c of chutes) scene.remove(c.g); chutes.length = 0; }
+  const vtmp = new THREE.Vector3();
+  function stepChute(c, dt) {   // true when finished
+    c.t += dt;
+    if (c.phase === 0 && c.t > 2.5) { c.phase = 1; c.t = 0; c.v.set(0, 2, 4); }
+    else if (c.phase === 1) { c.p.addScaledVector(c.v, dt); if (c.t > 0.6) { c.phase = 2; c.t = 0; c.v.set(0, 0, 2.5); } }
+    else if (c.phase === 2) {
+      c.v.y = Math.max(c.v.y - 12 * dt, -22);
+      if (!c.tower) { const d = Math.max(0, 1 - 1.6 * dt); c.v.x *= d; c.v.z *= d; }   // a jumper sheds the plane's speed
+      c.p.addScaledVector(c.v, dt); pushOut(c.p, 1.2);
+      if (c.t > 1.4) { c.phase = 3; c.t = 0; c.canopy.visible = true; }
+    } else if (c.phase === 3) {
+      c.open = Math.min(1, c.open + dt / 0.7);
+      // drifts with the wind (harder in a gust) plus a slow weave across it; the tower jumper also edges away from the skyline
+      const wv = 2.2 + gustAt(c.p.x, c.p.z) * 9, weave = Math.sin(clock * 0.6 + c.sway) * 2.2, k = Math.min(1, dt * 1.5);
+      c.v.y += (-4.5 - c.v.y) * Math.min(1, dt * 3);
+      c.v.x += (wind.x * wv + wind.z * weave - c.v.x) * k; c.v.z += (wind.z * wv - wind.x * weave + (c.tower ? 3 : 0) - c.v.z) * k;
+      c.p.addScaledVector(c.v, dt); pushOut(c.p, 3.4); c.p.x = clamp(c.p.x, -BX, BX); c.p.z = clamp(c.p.z, -BZ, BZ);
+      if (c.p.y <= GROUND + 0.1) { c.p.y = GROUND + 0.1; c.phase = 4; c.t = 0; c.canopy.visible = false; }
+    } else if (c.phase === 4 && c.t > 2) return true;
+    return false;
   }
 
-  // ── Gusts: a drifting volume of moving air, shown as streaks ─────────
-  const GUST_R = 34, GUST_SPEED = 9, GUST_LIFE = 16, STREAKS = 260;
-  const streakMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0 });
-  const gusts = [0, 1].map(() => {
-    const g = { on: false, c: new THREE.Vector3(), dir: new THREE.Vector3(), age: 0, env: 0, off: new Float32Array(STREAKS * 3) };
-    for (let i = 0; i < STREAKS; i++) {
-      let x, y, z; do { x = rnd(-1, 1); y = rnd(-1, 1); z = rnd(-1, 1); } while (x * x + y * y + z * z > 1);
-      g.off[i * 3] = x * GUST_R; g.off[i * 3 + 1] = y * GUST_R * 0.7; g.off[i * 3 + 2] = z * GUST_R;
-    }
-    g.geo = new THREE.BufferGeometry(); g.geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(STREAKS * 6), 3));
-    g.mat = streakMat.clone(); g.lines = new THREE.LineSegments(g.geo, g.mat); g.lines.frustumCulled = false; g.lines.visible = false;
-    g.along = new Float32Array(STREAKS).map(() => rnd(-GUST_R, GUST_R));
-    return g;
-  });
-  for (const g of gusts) world.add(g.lines);
-  function startGust() {
-    const g = gusts.find(x => !x.on); if (!g) return;
-    const a = rnd(0, Math.PI * 2); g.dir.set(Math.cos(a), 0, Math.sin(a));
-    g.c.set(-g.dir.x * (BX + 10) + rnd(-20, 20), rnd(-12, 22), -g.dir.z * (BZ + 10) + rnd(-20, 20));
-    g.age = 0; g.on = true; g.lines.visible = true;
+  // ── Wind: a breeze over the whole map, and gusts that sweep across it as fronts ─
+  const BREEZE = 3.5, GUST_FORCE = 48, FRONT_W = 40, FRONT_SPEED = 13, STREAKS = 440;
+  const gust = { on: false, s: 0, end: 0 };   // s: where the front is, measured along the wind
+  let breeze = BREEZE;
+  function gustAt(x, z) {   // 0 to 1: how hard a gust blows at this spot
+    if (!gust.on) return 0;
+    const u = (x * wind.x + z * wind.z - gust.s) / FRONT_W;
+    return Math.exp(-u * u) * (0.75 + 0.25 * Math.sin((x * wind.z - z * wind.x) * 0.09 + clock * 1.1));   // ripples along the front
   }
+  function startGust() { if (gust.on) return; const ext = (wind.x ? BX : BZ) + FRONT_W * 1.6; gust.s = -ext; gust.end = ext; gust.on = true; }
+  // Streaks fill the whole map and drift with the wind; they lengthen and brighten inside a gust.
+  const sPos = new Float32Array(STREAKS * 6), sCol = new Float32Array(STREAKS * 6), sBase = new Float32Array(STREAKS * 3);
+  for (let i = 0; i < STREAKS; i++) { sBase[i * 3] = rnd(-BX, BX); sBase[i * 3 + 1] = rnd(GROUND + 4, BY); sBase[i * 3 + 2] = rnd(-BZ, BZ); }
+  const streakGeo = new THREE.BufferGeometry();
+  streakGeo.setAttribute('position', new THREE.BufferAttribute(sPos, 3)); streakGeo.setAttribute('color', new THREE.BufferAttribute(sCol, 3));
+  const streaks = new THREE.LineSegments(streakGeo, new THREE.LineBasicMaterial({ vertexColors: true })); streaks.frustumCulled = false; world.add(streaks);
+  function moveStreaks(dt) {
+    const bg3 = [bgC.r, bgC.g, bgC.b], tx3 = [textC.r, textC.g, textC.b];
+    for (let i = 0; i < STREAKS; i++) {
+      const i3 = i * 3, i6 = i * 6, I = gustAt(sBase[i3], sBase[i3 + 2]), sp = (6 + 30 * I) * dt, len = 2 + 9 * I;
+      sBase[i3] += wind.x * sp; sBase[i3 + 2] += wind.z * sp;
+      if (sBase[i3] > BX) sBase[i3] -= 2 * BX; else if (sBase[i3] < -BX) sBase[i3] += 2 * BX;
+      if (sBase[i3 + 2] > BZ) sBase[i3 + 2] -= 2 * BZ; else if (sBase[i3 + 2] < -BZ) sBase[i3 + 2] += 2 * BZ;
+      const x = sBase[i3], y = sBase[i3 + 1], z = sBase[i3 + 2], a = 0.18 + 0.82 * I;
+      sPos[i6] = x; sPos[i6 + 1] = y; sPos[i6 + 2] = z; sPos[i6 + 3] = x - wind.x * len; sPos[i6 + 4] = y; sPos[i6 + 5] = z - wind.z * len;
+      for (let c = 0; c < 3; c++) { const b = bg3[c], t = tx3[c]; sCol[i6 + c] = b + (t - b) * a; sCol[i6 + 3 + c] = b + (t - b) * a * 0.15; }
+    }
+    streakGeo.attributes.position.needsUpdate = true; streakGeo.attributes.color.needsUpdate = true;
+  }
+
+  // ── Lightning: storm clouds (the dark ones) now and then strike the ground or a roof ─
+  const boltMat = new THREE.MeshBasicMaterial({ color: 0xffd23c, transparent: true });
+  const flashC = new THREE.Color(1, 0.93, 0.62), UP = new THREE.Vector3(0, 1, 0), segGeo = new THREE.BoxGeometry(0.36, 1, 0.36);
+  const strike = { on: false, t: 0, a: new THREE.Vector3(), b: new THREE.Vector3(), group: null, flash: 0 };
+  let flashed = false;
+  function topAt(x, z) { let y = GROUND; for (const b of boxes) if (x >= b.x0 && x <= b.x1 && z >= b.z0 && z <= b.z1) y = Math.max(y, b.y1); return y; }
+  function bolt(a, b) {   // a jagged line of thin boxes, plus two short branches
+    const g = new THREE.Group(), n = Math.max(8, Math.ceil(a.distanceTo(b) / 4)), pts = [];
+    for (let k = 0; k <= n; k++) {
+      const u = k / n, j = Math.sin(Math.PI * u) * 3.2;
+      pts.push(new THREE.Vector3(a.x + (b.x - a.x) * u + (k && k < n ? rnd(-j, j) : 0), a.y + (b.y - a.y) * u, a.z + (b.z - a.z) * u + (k && k < n ? rnd(-j, j) : 0)));
+    }
+    const seg = (p, q) => { const m = new THREE.Mesh(segGeo, boltMat), d = vtmp.copy(q).sub(p), len = d.length(); m.position.copy(p).addScaledVector(d, 0.5); m.scale.y = len; m.quaternion.setFromUnitVectors(UP, d.divideScalar(len || 1)); g.add(m); };
+    for (let k = 0; k < n; k++) seg(pts[k], pts[k + 1]);
+    for (let br = 0; br < 2; br++) {
+      let p = pts[1 + ((Math.random() * (n - 2)) | 0)].clone(); const sx = rnd(-1, 1) * 3.5, sz = rnd(-1, 1) * 3.5;
+      for (let k = 0; k < 3; k++) { const q = p.clone().add(new THREE.Vector3(sx + rnd(-1, 1), -rnd(2.5, 4.5), sz + rnd(-1, 1))); seg(p, q); p = q; }
+    }
+    return g;
+  }
+  function startStrike(force) {
+    if (strike.on) return true;
+    let cands = clouds.filter(c => c.storm && Math.abs(c.p.x) < BX * 0.9 && Math.abs(c.p.z) < BZ * 0.9);
+    if (!cands.length && force) { spawnCloud(true, true, new THREE.Vector3(rnd(-30, 30), 30, rnd(-10, 20))); cands = clouds.slice(-1); }
+    if (!cands.length) return false;
+    const c = cands[(Math.random() * cands.length) | 0];
+    strike.a.set(c.p.x + rnd(-4, 4) * c.sc, c.p.y - 2 * c.sc, c.p.z + rnd(-4, 4) * c.sc);
+    if (Math.hypot(c.p.x - tallBox.x0 - 6, c.p.z - tallBox.z0 - 7) < 40) strike.b.set((tallBox.x0 + tallBox.x1) / 2, tallBox.y1 + 2.4, (tallBox.z0 + tallBox.z1) / 2);   // the tall tower draws it
+    else { const x = strike.a.x + rnd(-10, 10), z = strike.a.z + rnd(-10, 10); strike.b.set(x, topAt(x, z), z); }
+    strike.group = bolt(strike.a, strike.b); scene.add(strike.group); strike.on = true; strike.t = 0;
+    return true;
+  }
+  function stepStrike(dt) {
+    if (!strike.on) return;
+    strike.t += dt;
+    boltMat.opacity = strike.t < 0.12 ? 1 : Math.max(0, 1 - (strike.t - 0.12) / 0.4);
+    strike.flash = strike.t < 0.08 ? strike.t / 0.08 : Math.max(0, 1 - (strike.t - 0.08) / 0.5);   // one soft flash, no strobing
+    if (strike.t > 0.9) { scene.remove(strike.group); strike.on = false; strike.flash = 0; }
+  }
+  function strikeDist(x, y, z) {   // distance to the bolt line while the birds are still shaken
+    if (!strike.on || strike.t > 1.5) return 1e9;
+    const a = strike.a, b = strike.b, abx = b.x - a.x, aby = b.y - a.y, abz = b.z - a.z;
+    const t = clamp(((x - a.x) * abx + (y - a.y) * aby + (z - a.z) * abz) / (abx * abx + aby * aby + abz * abz), 0, 1);
+    return Math.hypot(x - (a.x + abx * t), y - (a.y + aby * t), z - (a.z + abz * t));
+  }
+  function clearStrike() { if (strike.on) scene.remove(strike.group); strike.on = false; strike.flash = 0; }
 
   // ── Per-bird state: 0 flying, 1 landing, 2 perched ───────────────────
   let st = new Uint8Array(0), tgt = new Int16Array(0), leaveAt = new Float32Array(0), freeSlots = slots.length;
-  let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, nextCloud = 0, rt = new Float32Array(0), tint = new Float32Array(0);
+  let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, nextCloud = 0, nextStrike = 0, rt = new Float32Array(0), tint = new Float32Array(0);
   function reset() {
     N = ctx.N; st = new Uint8Array(N); tgt = new Int16Array(N); leaveAt = new Float32Array(N);
     flapAttr = new THREE.InstancedBufferAttribute(new Float32Array(N).fill(1), 1);
@@ -256,7 +322,7 @@ export function create(ctx) {
     rt = new Float32Array(N); tint = new Float32Array(N);
     api.st = st; setModel(api.model);
     ctx.birds.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(N * 3).fill(1), 3);
-    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50); nextCloud = clock + rnd(4, 10);
+    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50); nextCloud = clock + rnd(4, 10); nextStrike = clock + rnd(8, 16);
   }
   function setModel(name) {
     api.model = name;
@@ -273,21 +339,23 @@ export function create(ctx) {
       fl.p.addScaledVector(fl.dir, fl.cfg.speed * dt); fl.p.y = fl.y0 + Math.sin(clock * 0.9) * (fl.cfg.drop > 1 ? BOB : 0);
       if (Math.abs(fl.p.x * fl.dir.x + fl.p.z * fl.dir.z) > fl.end) endPass();
     }
-    if (ch.on) stepChute(dt);
+    if (fl.on && fl.jumpers > 0 && clock > fl.jumpAt && fl.p.z > -4 && Math.abs(fl.p.x) < BX * 0.85 && Math.abs(fl.p.z) < BZ * 0.85 && chutes.length < 5) {
+      jumpFromPlane(); fl.jumpers--; fl.jumpAt = clock + 1.5;   // only over open ground, well clear of the skyline
+    }
+    for (let i = chutes.length - 1; i >= 0; i--) if (stepChute(chutes[i], dt)) { scene.remove(chutes[i].g); chutes.splice(i, 1); }
+    breeze = BREEZE * (0.8 + 0.2 * Math.sin(clock * 0.07));
+    if (gust.on) { gust.s += FRONT_SPEED * dt; if (gust.s > gust.end) gust.on = false; }
+    stepStrike(dt);
     for (let i = clouds.length - 1; i >= 0; i--) {
       const c = clouds[i]; c.p.addScaledVector(wind, c.speed * dt);
       if (Math.abs(c.p.x * wind.x + c.p.z * wind.z) > c.end) { scene.remove(c.mesh); clouds.splice(i, 1); }
-    }
-    for (const g of gusts) if (g.on) {
-      g.age += dt; g.c.addScaledVector(g.dir, GUST_SPEED * dt);
-      g.env = Math.sin(Math.PI * Math.min(1, g.age / GUST_LIFE));
-      if (g.age > GUST_LIFE) { g.on = false; g.lines.visible = false; g.env = 0; }
     }
     if (!ctx.reduce) {   // ambient weather, off under reduced motion
       const slow = ctx.ambient && ctx.phone ? 2 : 1;   // phones get half the visitors
       if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55) * slow; }
       if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55) * slow; }
       if (clock > nextCloud && clouds.length < (slow > 1 ? 2 : 5)) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
+      if (clock > nextStrike) { nextStrike = clock + (startStrike() ? rnd(7, 15) : 2); }
       if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90) * slow; }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
@@ -306,10 +374,6 @@ export function create(ctx) {
     }
   }
 
-  function inGust(x, y, z) {
-    for (const g of gusts) if (g.on && (x - g.c.x) ** 2 + (y - g.c.y) ** 2 + (z - g.c.z) ** 2 < GUST_R * GUST_R) return true;
-    return false;
-  }
   function takeOff(i) {
     const vel = ctx.vel, i3 = i * 3;
     slots[tgt[i]].taken = false; freeSlots++; st[i] = 0; flapAttr.array[i] = 1; flapAttr.needsUpdate = true;
@@ -332,7 +396,7 @@ export function create(ctx) {
       pos[i3] += vel[i3] * dt; pos[i3 + 1] += vel[i3 + 1] * dt; pos[i3 + 2] += vel[i3 + 2] * dt;
     } else {
       const h = (pos[i3] - hawk.p.x) ** 2 + (pos[i3 + 1] - hawk.p.y) ** 2 + (pos[i3 + 2] - hawk.p.z) ** 2;
-      if (clock > leaveAt[i] || h < 30 * 30 || inGust(pos[i3], pos[i3 + 1], pos[i3 + 2])) takeOff(i);
+      if (clock > leaveAt[i] || h < 30 * 30 || gustAt(pos[i3], pos[i3 + 2]) > 0.35 || strikeDist(pos[i3], pos[i3 + 1], pos[i3 + 2]) < 20) takeOff(i);
     }
   }
 
@@ -352,17 +416,21 @@ export function create(ctx) {
       const ex = rx - fl.dir.x * t, ez = rz - fl.dir.z * t, d = Math.hypot(ex, ry, ez);
       if (d < c.R) { const u = 1 - d / c.R, k = MAX_FORCE * c.k * u ** 1.5 / (d || 1); out[0] += ex * k; out[1] += ry * k; out[2] += ez * k; lvl = Math.max(lvl, Math.min(1, u * c.k)); }
     }
-    if (ch.on && ch.phase > 0) {   // a light berth for the parachutist
-      const rx = px - ch.p.x, ry = py - ch.p.y - 3, rz = pz - ch.p.z, d = Math.hypot(rx, ry, rz);
+    for (const c of chutes) if (c.phase > 0) {   // a light berth for parachutists
+      const rx = px - c.p.x, ry = py - c.p.y - 3, rz = pz - c.p.z, d = Math.hypot(rx, ry, rz);
       if (d < 14) { const u = 1 - d / 14, k = MAX_FORCE * 0.9 * u * u / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u); }
     }
     for (const c of clouds) {
       const R = CLOUD_R * c.sc, rx = px - c.p.x, ry = py - c.p.y, rz = pz - c.p.z, d = Math.hypot(rx, ry, rz);
       if (d < R) { const u = 1 - d / R, k = MAX_FORCE * CLOUD_K * u ** 1.5 / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u * CLOUD_K); }
     }
-    for (const g of gusts) if (g.on) {
-      const d = Math.hypot(px - g.c.x, py - g.c.y, pz - g.c.z);
-      if (d < GUST_R) { const u = (1 - d / GUST_R) * g.env, w = u * 50; out[0] += g.dir.x * w; out[2] += g.dir.z * w; lvl = Math.max(lvl, u); }
+    out[0] += wind.x * breeze; out[2] += wind.z * breeze;   // the breeze moves everything, everywhere
+    const I = gustAt(px, pz);
+    if (I > 0.02) { const w = I * GUST_FORCE; out[0] += wind.x * w; out[2] += wind.z * w; out[1] += Math.sin(px * 0.15 + pz * 0.11 + clock * 2) * I * 10; lvl = Math.max(lvl, I); }
+    const sd = strikeDist(px, py, pz);   // a strike scatters everything near the bolt
+    if (sd < 24) {
+      const u = 1 - sd / 24, k = MAX_FORCE * 3 * u * Math.max(0, 1 - strike.t / 1.5) / (sd || 1);
+      out[0] += (px - strike.a.x) * k * 0.4; out[1] += 8 * u; out[2] += (pz - strike.a.z) * k * 0.4; lvl = Math.max(lvl, u);
     }
     rt[i] = lvl;
   }
@@ -431,41 +499,31 @@ export function create(ctx) {
       if (fl.kind === 'glider') fl.mesh.rotation.z = Math.sin(clock * 0.7) * 0.12;
     }
     for (const c of clouds) c.mesh.position.copy(c.p);
-    if (ch.on) {
-      chute.position.copy(ch.p); chCanopy.scale.setScalar(Math.max(0.001, ch.open));
-      chute.rotation.z = ch.phase === 3 ? Math.sin(clock * 1.3) * 0.08 : 0; chute.rotation.x = ch.phase === 2 ? 0.5 : 0;
+    for (const c of chutes) {
+      c.g.position.copy(c.p); c.canopy.scale.setScalar(Math.max(0.001, c.open));
+      c.g.rotation.z = c.phase === 3 ? Math.sin(clock * 1.3 + c.sway) * 0.08 : 0; c.g.rotation.x = c.phase === 2 ? 0.5 : 0;
     }
+    beaconMat.color.copy((tick % 1.8) < 0.35 ? beaconC : bldMat.color);   // a slow aircraft-style blink
+    if (!ctx.reduce) moveStreaks(dt);
+    const f = strike.on ? strike.flash * 0.2 : 0;   // the whole sky takes a brief, soft flash
+    if (f > 0 || flashed) { scene.background.copy(bgC).lerp(flashC, f); if (scene.fog) scene.fog.color.copy(scene.background); flashed = f > 0; }
+    stormMat.emissive.setRGB(1, 0.85, 0.3).multiplyScalar(strike.on ? strike.flash * 0.45 : 0);
     const col = ctx.birds.instanceColor.array, k = Math.min(1, dt * 6), tr = textC.r, tg = textC.g, tb = textC.b;
     for (let i = 0; i < N; i++) {
       tint[i] += ((st[i] ? 0 : rt[i]) - tint[i]) * k; const t = tint[i];
       col[i * 3] = tr + (accC.r - tr) * t; col[i * 3 + 1] = tg + (accC.g - tg) * t; col[i * 3 + 2] = tb + (accC.b - tb) * t;
     }
     ctx.birds.instanceColor.needsUpdate = true;
-    for (const g of gusts) if (g.on) {
-      const pa = g.geo.attributes.position.array, len = 7 * g.env;
-      g.mat.opacity = 0.6 * g.env;
-      for (let i = 0; i < STREAKS; i++) {
-        g.along[i] += 13 * dt; if (g.along[i] > GUST_R) g.along[i] -= 2 * GUST_R;
-        const ox = g.off[i * 3], oy = g.off[i * 3 + 1], oz = g.off[i * 3 + 2];
-        const al = ox * g.dir.x + oz * g.dir.z, px = ox - al * g.dir.x, pz = oz - al * g.dir.z;   // perpendicular part of the offset
-        const inside = g.along[i] * g.along[i] + px * px + oy * oy + pz * pz < GUST_R * GUST_R;
-        const x = g.c.x + px + g.dir.x * g.along[i], y = g.c.y + oy, z = g.c.z + pz + g.dir.z * g.along[i], l = inside ? len : 0;
-        pa[i * 6] = x; pa[i * 6 + 1] = y; pa[i * 6 + 2] = z;
-        pa[i * 6 + 3] = x - g.dir.x * l; pa[i * 6 + 4] = y; pa[i * 6 + 5] = z - g.dir.z * l;
-      }
-      g.geo.attributes.position.needsUpdate = true;
-    }
   }
 
-  const textC = new THREE.Color(), accC = new THREE.Color();
+  const textC = new THREE.Color(), accC = new THREE.Color(), bgC = new THREE.Color(), beaconC = new THREE.Color();
   function theme(col) {
     const text = col('--text'), bg = col('--bg'), accent = col('--accent');
-    textC.copy(text); accC.copy(accent); birdMat.color.set(0xffffff);
+    textC.copy(text); accC.copy(accent); bgC.copy(bg); beaconC.copy(col('--d2')); birdMat.color.set(0xffffff);
     hawkMat.color.copy(accent); solidMat.color.copy(text); accentMat.color.copy(accent); flameMat.color.copy(accent); edgeMat.color.copy(text);
     cloudMat.color.copy(bg).lerp(text, 0.4);
-    streakMat.color.copy(text); for (const g of gusts) g.mat.color.copy(text);
-    groundMat.color.copy(bg).lerp(text, 0.07); bldMat.color.copy(bg).lerp(text, 0.16); beaconMat.color.copy(accent);
-  }
+    stormMat.color.setRGB(cloudMat.color.r * 0.42, cloudMat.color.g * 0.46, cloudMat.color.b * 0.55);
+    groundMat.color.copy(bg).lerp(text, 0.07); bldMat.color.copy(bg).lerp(text, 0.16); }
 
   // ── Input ────────────────────────────────────────────────────────────
   const onMove = e => { H.armed = true; const r = canvas.getBoundingClientRect(); H.nx = clamp(((e.clientX - r.left) / r.width) * 2 - 1, -1, 1); H.ny = clamp(-(((e.clientY - r.top) / r.height) * 2 - 1), -1, 1); };
@@ -476,7 +534,10 @@ export function create(ctx) {
 
   const api = {
     st, model: 'bird', flying: false,
-    spawn(k) { if (k === 'chute') startChute(); else if (k === 'cloud') spawnCloud(); else if (k === 'gust') startGust(); else { if (fl.on) endPass(); launchPass(k); } },   // for ?debug
+    spawn(k) {
+      if (k === 'chute') startChute(); else if (k === 'cloud') spawnCloud(true, false); else if (k === 'storm') spawnCloud(true, true); else if (k === 'strike') startStrike(true); else if (k === 'gust') startGust();
+      else { if (fl.on) endPass(); launchPass(k); if (k === 'plane') fl.jumpers = 2; }
+    },   // for ?debug
     before, drive, force, hawk: hawkStep, draw, theme, reset, setModel,
     toggleFly() {
       api.flying = !api.flying; canvas.style.cursor = api.flying ? 'crosshair' : '';
@@ -489,12 +550,12 @@ export function create(ctx) {
       addEventListener('pointermove', onMove); canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
       addEventListener('keydown', kd); addEventListener('keyup', ku);
       api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
-      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } clearClouds(); pickWind(); for (let i = 0; i < (ctx.ambient && ctx.phone ? 2 : 3); i++) spawnCloud(true); for (const g of gusts) { g.on = false; g.lines.visible = false; }
+      if (fl.on) endPass(); clearChutes(); clearStrike(); gust.on = false; streaks.visible = !ctx.reduce; clearClouds(); pickWind(); for (let i = 0; i < (ctx.ambient && ctx.phone ? 2 : 3); i++) spawnCloud(true);
       hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },
     disable() {
-      scene.remove(world, hawkMesh); clearClouds(); if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); }
+      scene.remove(world, hawkMesh); clearClouds(); clearChutes(); clearStrike(); if (fl.on) endPass();
       ctx.birds.instanceColor = null;
       removeEventListener('pointermove', onMove); canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onUp);
       removeEventListener('keydown', kd); removeEventListener('keyup', ku);
