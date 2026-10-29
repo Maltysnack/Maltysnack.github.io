@@ -98,3 +98,9 @@ and the 22-10 transport described above are gone.
 ## 29-10-2026: themed dropdown
 
 The native select popup can't be styled, so `#al-algo` is hidden (still the source of truth for value and `change`) and a custom button plus `role=listbox` (`#al-dd`) sits over it. `buildDd()` re-renders it after every option rebuild; arrows, Enter, Escape and outside click handled. Viz at `?v=19`.
+
+## 29-10-2026: Sort tab
+
+Fourth tab, `#sort`. `algo-sort.mjs` records each algorithm (bubble, insertion, quick, merge) as a step list: compare, swap, write. The mode in `algo-viz.js` replays it at a fixed 5 ms per step, so slow algorithms look slow. 48 bars on a shuffled permutation, coloured by value on the seq ramp (sorted reads as a smooth gradient), accent on the bars in play. Stat line is compares, writes, seconds. Insertion uses adjacent swaps (so writes are double compares); merge uses writes. Viz at `?v=20`.
+
+Prototyped and binned first (maltysnack judged each by "do you get it at first glance"): packing, interval scheduling, data-centre scheduling, k-means, N-Queens, Game of Life, convex hull. Only sort kept. The meta description in `index.html` still omits sorting, left alone because it feeds `README.md` (master session's file).

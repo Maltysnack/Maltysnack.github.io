@@ -7,6 +7,7 @@ import { aStar, bfs, greedyBestFirst, iterativeDeepening } from './algo-core.mjs
 import { randomTileState, tileProblem } from './algo-tile.mjs?v=15';
 import { key, fromKey, gridProblem } from './algo-grid.mjs?v=15';
 import { createGA, createACO, referenceTour } from './algo-tsp.mjs?v=15';
+import { sortSteps } from './algo-sort.mjs?v=15';
 
 const $ = (id) => document.getElementById(id);
 const canvas = $('al-canvas');
@@ -366,10 +367,70 @@ const tour = {
 };
 
 // ============================================================================
+// Sort
+// ============================================================================
+
+const SORT_N = 48;
+const SORT_STEP_MS = 5;
+
+const sort = {
+  line: 'Same shuffle, same goal, very different amounts of work.',
+  algos: [['bubble', 'Bubble'], ['insertion', 'Insertion'], ['quick', 'Quick'], ['merge', 'Merge']],
+  board: [], shown: [], hot: [],
+
+  newBoard() {
+    const a = Array.from({ length: SORT_N }, (_, i) => i + 1);
+    for (let i = a.length - 1; i > 0; i--) { const j = (Math.random() * (i + 1)) | 0; [a[i], a[j]] = [a[j], a[i]]; }
+    this.board = a; this.clearTrace();
+  },
+  clearTrace() { this.shown = this.board.slice(); this.hot = []; },
+
+  async run(algo, my) {
+    this.clearTrace();
+    const steps = sortSteps(algo, this.board);
+    let n = 0, cmps = 0, writes = 0, ms = 0, last = performance.now(), acc = 0;
+    const report = () => stats([['compares', fmt(cmps)], ['writes', fmt(writes)], ['s', (ms / 1000).toFixed(1)]]);
+    report(); draw();
+    while (n < steps.length) {
+      await frame();
+      if (my !== epoch) return;
+      const now = performance.now(); acc += now - last; last = now;
+      while (acc >= SORT_STEP_MS && n < steps.length) {
+        acc -= SORT_STEP_MS; ms += SORT_STEP_MS;
+        const [t, i, j] = steps[n++];
+        if (t === 'c') { cmps++; this.hot = [i, j]; }
+        else if (t === 's') { writes += 2; [this.shown[i], this.shown[j]] = [this.shown[j], this.shown[i]]; this.hot = [i, j]; }
+        else { writes++; this.shown[i] = j; this.hot = [i]; }
+      }
+      report(); draw();
+    }
+    this.hot = []; draw();
+  },
+
+  // Value to colour on the sequential ramp: sorted reads as a smooth gradient, shuffled as noise.
+  ramp(t) {
+    const stops = ['--seq2', '--seq3', '--seq4', '--seq5', '--seq6'].map(css);
+    const f = t * (stops.length - 1), i = Math.min(stops.length - 2, Math.floor(f));
+    const hex = (s) => [1, 3, 5].map((k) => parseInt(s.slice(k, k + 2), 16));
+    const a = hex(stops[i]), b = hex(stops[i + 1]), u = f - i;
+    return `rgb(${a.map((x, k) => Math.round(x + (b[k] - x) * u)).join(',')})`;
+  },
+
+  draw() {
+    const gap = Math.max(1, (W / SORT_N) * 0.18), bw = W / SORT_N - gap;
+    this.shown.forEach((v, i) => {
+      const h = (v / SORT_N) * (H - 4);
+      ctx.fillStyle = this.hot.includes(i) ? css('--accent') : this.ramp((v - 1) / (SORT_N - 1));
+      ctx.fillRect(i * (bw + gap) + gap / 2, H - h, bw, h);
+    });
+  },
+};
+
+// ============================================================================
 // Shell
 // ============================================================================
 
-const MODES = { path, tiles, tour };
+const MODES = { path, tiles, tour, sort };
 
 function draw() {
   ctx.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
