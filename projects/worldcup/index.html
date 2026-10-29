@@ -35,7 +35,7 @@ nav button, .ghost {
   font: 500 13px/1 var(--sans); color: var(--ink-2); background: none; border: 0;
   padding: 10px 14px; border-radius: 999px; cursor: pointer; letter-spacing: .02em;
 }
-nav button[aria-selected="true"] { background: var(--ink); color: var(--paper); }
+nav button[aria-selected="true"] { color: var(--ink); box-shadow: inset 0 -2px 0 var(--hi); border-radius: 0; }
 nav button:hover:not([aria-selected="true"]), .ghost:hover { color: var(--ink); }
 .ghost { border: 1px solid var(--rule); }
 .tag { font: 500 11px/1 var(--mono); text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); }
@@ -82,6 +82,10 @@ section.on { display: grid; }
 .bar .stage { font: 500 11px var(--mono); text-transform: uppercase; color: var(--ink-3); text-align: right; letter-spacing: .06em; }
 .bar.won .stage { color: var(--ink); }
 .bars .tag { margin-bottom: 4px; }
+#capsule .verdict { grid-template-columns: minmax(0, 3fr) minmax(0, 5fr) minmax(0, 4fr); align-items: start; }
+.verdict .stat .tag:last-child { display: block; margin-top: 8px; }
+.verdict .sub { margin: 0; }
+#scale { width: 100%; height: 56px; margin-top: 8px; overflow: visible; }
 
 /* Odds */
 #odds { grid-template-rows: 1fr auto; }
@@ -115,7 +119,7 @@ dialog p b { color: var(--ink); }
 /* Phone: tabs move to a bottom bar, one column, chart shrinks */
 @media (max-width: 700px) {
   .app { grid-template-rows: auto 1fr auto auto; }
-  nav { order: 3; grid-row: 4; justify-content: space-between; background: var(--paper-2); border-radius: 999px; padding: 4px; }
+  nav { order: 3; grid-row: 4; justify-content: space-between; border-top: 1px solid var(--rule); }
   nav button { flex: 1; }
   header nav { display: none; }
   .mobile-nav { display: flex !important; }
@@ -123,7 +127,8 @@ dialog p b { color: var(--ink); }
   .chart { border-left: 0; padding-left: 0; border-top: 1px solid var(--rule); padding-top: 8px; margin: 12px 0; }
   .stats { grid-template-columns: repeat(3, 1fr); }
   .recent { display: none; }
-  #capsule .stats { grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  #capsule .verdict { grid-template-columns: 1fr 2fr; gap: 8px 12px; }
+  .verdict .sub { grid-column: 1 / -1; }
   .stats .next { grid-column: 1 / -1; }
   .stat b { font-size: 20px; }
   .bars { align-self: stretch; align-content: center; }
@@ -151,10 +156,10 @@ dialog p b { color: var(--ink); }
 /* Ratings: the Elo table behind every probability on the page */
 .elo { align-self: center; display: grid; gap: 14px; min-height: 0; }
 .elist { display: grid; grid-auto-flow: column; grid-template-rows: repeat(10, auto); grid-template-columns: 1fr 1fr; gap: 0 clamp(24px, 4vw, 72px); font: 500 13px/1.35 var(--mono); }
-.e { display: grid; grid-template-columns: 3ch minmax(0, 10ch) 1fr 5ch; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
+.e { display: grid; grid-template-columns: 3ch 24px minmax(0, 1fr) 5ch; gap: 12px; align-items: center; padding: 6px 0; border-top: 1px solid var(--rule); color: var(--ink-2); }
 .e b { font-weight: 500; color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.e i { height: 8px; background: var(--ink); }
-.e:first-child i { background: var(--hi); }
+.e img { width: 24px; height: 16px; object-fit: cover; outline: 1px solid var(--rule); }
+.e:first-child .r { color: var(--hi); }
 .e .r { text-align: right; font-variant-numeric: tabular-nums; color: var(--ink); }
 @media (max-width: 700px) {
   .elist { grid-template-columns: 1fr; grid-template-rows: none; grid-auto-flow: row; }
@@ -204,11 +209,10 @@ dialog p b { color: var(--ink); }
         <p class="sub" id="cap-sub"></p>
       </div>
       <div class="bars" id="bars"><div class="tag">Pre-tournament title odds · how far they got</div></div>
-      <div class="stats">
-        <div class="stat"><span class="tag">Model</span><b id="ll-model">-</b></div>
-        <div class="stat"><span class="tag">Plain Elo</span><b id="ll-elo">-</b></div>
-        <div class="stat"><span class="tag">Guessing</span><b id="ll-uni">-</b></div>
-        <div class="stat"><span class="tag">Called</span><b id="acc">-</b></div>
+      <div class="stats verdict">
+        <div class="stat"><span class="tag">Results called right</span><b id="acc">-</b><span class="tag" id="acc-sub"></span></div>
+        <div class="scale"><span class="tag">Typical chance it gave what actually happened</span><svg id="scale" viewBox="0 0 600 56" preserveAspectRatio="none" aria-label="Model versus plain Elo versus guessing"></svg></div>
+        <p class="sub" id="verdict"></p>
       </div>
     </section>
 
@@ -284,6 +288,16 @@ if (new URLSearchParams(location.search).has('frames')) {
   document.querySelectorAll('[data-tab]').forEach(b => b.onclick = () => show(b.dataset.tab));
   try { const t = localStorage.getItem('wc-tab'); if (t) show(t); } catch (e) {}
   $('how').onclick = () => $('method').showModal();
+
+  // Flags from flagcdn by ISO code; unmapped teams get an empty slot, not a wrong flag.
+  const ISO = { Spain: 'es', Argentina: 'ar', France: 'fr', England: 'gb-eng', Scotland: 'gb-sct', Wales: 'gb-wls',
+    'Northern Ireland': 'gb-nir', 'Republic of Ireland': 'ie', Portugal: 'pt', Brazil: 'br', Colombia: 'co', Netherlands: 'nl',
+    Morocco: 'ma', Switzerland: 'ch', Japan: 'jp', Belgium: 'be', Italy: 'it', Germany: 'de', Mexico: 'mx',
+    'United States': 'us', Norway: 'no', Ecuador: 'ec', Croatia: 'hr', Paraguay: 'py', Uruguay: 'uy', Denmark: 'dk',
+    Turkey: 'tr', Austria: 'at', Senegal: 'sn', 'South Korea': 'kr', Iran: 'ir', Australia: 'au', Canada: 'ca',
+    Serbia: 'rs', Greece: 'gr', 'Czech Republic': 'cz', Poland: 'pl', Sweden: 'se', Ukraine: 'ua', Hungary: 'hu',
+    Egypt: 'eg', Nigeria: 'ng', Algeria: 'dz', Tunisia: 'tn', 'Ivory Coast': 'ci', Peru: 'pe', Chile: 'cl', Venezuela: 've' };
+  const flag = t => ISO[t] ? `<img src="https://flagcdn.com/w40/${ISO[t]}.png" alt="" loading="lazy">` : '<span></span>';
 
   // Dates: data files are ISO, the page shows dd-mm-yyyy (site rule).
   const dmy = iso => iso ? iso.slice(0, 10).split('-').reverse().join('-') : '';
@@ -371,8 +385,7 @@ if (new URLSearchParams(location.search).has('frames')) {
   }).catch(() => { stamps.bankroll = ['Data failed to load', '']; paintStamp(); });
 
   fetch('elo.json').then(r => r.json()).then(e => {
-    const lo = 1500, hi = e.top[0].rating;
-    $('elist').innerHTML = e.top.map(t => `<div class="e"><span>${t.rank}</span><b>${t.team}</b><i style="width:${Math.max(4, (t.rating - lo) / (hi - lo) * 100).toFixed(1)}%"></i><span class="r">${t.rating}</span></div>`).join('');
+    $('elist').innerHTML = e.top.map(t => `<div class="e"><span>${t.rank}</span>${flag(t.team)}<b>${t.team}</b><span class="r">${t.rating}</span></div>`).join('');
     $('elo-tag').textContent = `Elo ratings · top ${e.top.length} active teams · results to ${dmy(e.as_of)}`;
     stamps.ratings = [`Ratings as of ${dmy(e.as_of)}`, ''];
     paintStamp();
@@ -384,11 +397,18 @@ if (new URLSearchParams(location.search).has('frames')) {
     stamps.capsule = [`Scored · ${c.n_matches} matches`, 'live'];
     paintStamp();
     $('cap-team').textContent = `${c.champion.team}.`;
-    $('cap-sub').textContent = `Our #${c.champion.rank_by_p_champion} pick at ${c.champion.p_champion.toFixed(1)}%. Final: ${h} ${hg}-${ag} ${a}. Log-loss over ${c.n_matches} matches, lower is better: the model ${c.log_loss.model < c.log_loss.plain_elo ? 'edged' : 'trailed'} plain Elo.`;
-    $('ll-model').textContent = c.log_loss.model.toFixed(3);
-    $('ll-elo').textContent = c.log_loss.plain_elo.toFixed(3);
-    $('ll-uni').textContent = c.log_loss.uniform.toFixed(3);
-    $('acc').textContent = `${(c.accuracy * 100).toFixed(1)}%`;
+    $('cap-sub').textContent = `Our #${c.champion.rank_by_p_champion} pick at ${c.champion.p_champion.toFixed(1)}%. Final: ${h} ${hg}-${ag} ${a}.`;
+    // Log-loss is unreadable; exp(-log-loss) is the same score as the typical (geometric mean) chance given to the real result.
+    const hit = Math.round(c.accuracy * c.n_matches), ch = k => Math.exp(-c.log_loss[k]);
+    $('acc').textContent = `${hit} / ${c.n_matches}`;
+    $('acc-sub').textContent = `${Math.round(c.accuracy * 100)}% · guessing gets 1 in 3`;
+    const pts = [['Guessing', ch('uniform')], ['Plain Elo', ch('plain_elo')], ['Model', ch('model')]];
+    const lo = .30, hi = .50, x = v => ((v - lo) / (hi - lo)) * 600;
+    $('scale').innerHTML = `<line x1="0" x2="600" y1="20" y2="20" stroke="var(--rule)" stroke-width="2" vector-effect="non-scaling-stroke"/>` +
+      pts.map(([n, v], i) => `<circle cx="${x(v)}" cy="20" r="6" fill="${i === 2 ? 'var(--hi)' : 'var(--ink-3)'}"/>
+        <text x="${x(v)}" y="${i === 1 ? 6 : 46}" text-anchor="${i === 1 ? 'end' : i === 2 ? 'start' : 'middle'}" fill="${i === 2 ? 'var(--ink)' : 'var(--ink-3)'}" style="font: 500 12px var(--mono)">${n} ${Math.round(v * 100)}%</text>`).join('');
+    const gap = (ch('model') - ch('plain_elo')) * 100;
+    $('verdict').textContent = `Over ${c.n_matches} games the model typically gave the real result a ${Math.round(ch('model') * 100)}% chance, against 33% for guessing. That is a clear edge over guessing and ${gap > 0 ? `a small one (${gap.toFixed(1)} points) over` : 'no better than'} plain Elo, the simple ratings it starts from. Football is noisy: even a perfect model would miss plenty.`;
     const max = Math.max(...c.top.map(t => t.p_champion));
     $('bars').insertAdjacentHTML('beforeend', c.top.map(t =>
       `<div class="bar${t.stage === 'Won' ? ' won' : ''}"><span class="name">${t.team}</span>

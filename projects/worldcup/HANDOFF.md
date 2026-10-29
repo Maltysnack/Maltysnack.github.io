@@ -32,4 +32,4 @@ Scratchpad for `/projects/worldcup/`.
 - New Ratings tab: `elo.json` top 20 as bars from 1500, two columns (top 10 on phones), `as_of` in the tag and stamp.
 - Odds tab upcoming list reads `fixtures.json` (DISPLAY 3b) when present: every game on the feed, any distance out, with Sportsbet odds or "not priced yet". Falls back to `bankroll.json.upcoming`. `fixtures.json` 404s until the next bot bet run writes it; the page handles that.
 - `odds.json` (title odds, panel 10) is synced but not rendered yet.
-
+- Later 29-10: `fixtures.json` live (8 UNL games 12-14 Nov; the feed lists nothing further out). Ratings now flag (flagcdn, ISO map in page) + number, no bars. 2026 stats replaced: "65 / 104 called" plus a dot scale of typical chance given to the real result (exp(-log-loss)): guessing 33, plain Elo 42, model 43, with a verdict sentence. Selected tab is now a red underline, not a filled pill. Not yet eyeballed in a browser.
