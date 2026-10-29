@@ -49,3 +49,22 @@ count controls.
 2. Split script into `flock.js` (engine) and `skyline.js` (extras), add mode switch.
 3. Skyline: models and picker, then player hawk, then plane and gusts, then
    skyline and perching. Commit per concept.
+
+## 29-10-2026: built
+
+- `index.html` is markup and CSS only. `flock.js` is the engine (Classic) and
+  calls hooks on `X` (the Skyline object) when that mode is on. `skyline.js`
+  is lazy-loaded on first switch: bird models (cone, dart, bird, gull; wings
+  flap in a patched vertex shader), player hawk (pointer or arrows, chase
+  camera, "Fly hawk" toggles to AI hawk plus orbit camera), plane fly-by,
+  wind gusts with streaks, six-building skyline with perch slots on the roof
+  edges, ambient perching. Ambient gust/plane/perch run on their own timers;
+  off under reduced motion (perching stays).
+- Classic: soft proportional steering, force low-pass, render interpolation,
+  separation floor 0.3, slider changes eased (`T` target, `P` live), zoom 40
+  to 160. Speed stays in presets only. Bump `?v=` on `flock.js` and the
+  `skyline.js` import in `flock.js` when either changes.
+- Verified: node harness for the sim (smooth, no fps cliff at sep 0.3) and for
+  the Skyline hooks (perch, takeoff, gust, plane, models, no NaN); assets
+  resolve over a local server. NOT verified visually in a browser (no WebGL
+  here), so flap look, hawk feel, chase camera and layout need an eyeball.
