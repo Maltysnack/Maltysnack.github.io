@@ -62,16 +62,13 @@
       <span class="rule"></span>
       <label><input type="checkbox" id="hawk" checked> Hawk</label>
       <button id="scatter">Scatter</button>
-      <button id="pause">Pause</button>
       <details class="tune" id="panel">
         <summary>Tune</summary>
         <div class="body">
-          <div class="ctl"><span>Separation</span><input type="range" id="sep" min="0" max="4" step="0.05"><output for="sep"></output></div>
+          <div class="ctl"><span>Separation</span><input type="range" id="sep" min="0.3" max="4" step="0.05"><output for="sep"></output></div>
           <div class="ctl"><span>Alignment</span><input type="range" id="ali" min="0" max="4" step="0.05"><output for="ali"></output></div>
           <div class="ctl"><span>Cohesion</span><input type="range" id="coh" min="0" max="4" step="0.05"><output for="coh"></output></div>
           <div class="ctl"><span>Vision</span><input type="range" id="vis" min="2" max="14" step="0.5"><output for="vis"></output></div>
-          <div class="ctl"><span>Speed</span><input type="range" id="spd" min="6" max="40" step="1"><output for="spd"></output></div>
-          <div class="ctl"><span>Birds</span><input type="range" id="num" min="100" max="4000" step="100"><output for="num"></output></div>
         </div>
       </details>
     </div>
@@ -87,24 +84,27 @@
     school:      { sep: 1.2, ali: 2.6, coh: 1.4, vis: 5,   spd: 14 },
     swarm:       { sep: 2.4, ali: 0.2, coh: 1.8, vis: 9,   spd: 26 }
   };
-  const P = { ...PRESETS.murmuration, num: matchMedia('(max-width: 640px)').matches ? 900 : 1600 };
+  const NUM = matchMedia('(max-width: 640px)').matches ? 900 : 1600;
+  const T = { ...PRESETS.murmuration };   // what the controls ask for
+  const P = { ...T };                     // what the flock uses, eased toward T so big changes never snap
   const BX = 90, BY = 45, BZ = 60;          // half extents of the box the flock lives in
   const MARGIN = 14;                        // how early the walls start to push
   const MAX_FORCE = 40;
 
   // ── State, in flat typed arrays: one slot per bird ───────────────────
-  let N = 0, pos, vel, acc;
+  let N = 0, pos, vel, acc, prev;
   function seed(n) {
-    N = n; pos = new Float32Array(n * 3); vel = new Float32Array(n * 3); acc = new Float32Array(n * 3);
+    N = n; pos = new Float32Array(n * 3); prev = new Float32Array(n * 3); vel = new Float32Array(n * 3); acc = new Float32Array(n * 3);
     for (let i = 0; i < n; i++) {
       pos[i * 3] = (Math.random() * 2 - 1) * BX * 0.6;
       pos[i * 3 + 1] = (Math.random() * 2 - 1) * BY * 0.6;
       pos[i * 3 + 2] = (Math.random() * 2 - 1) * BZ * 0.6;
       const a = Math.random() * Math.PI * 2, b = (Math.random() - 0.5) * 0.6;
+      prev[i * 3] = pos[i * 3]; prev[i * 3 + 1] = pos[i * 3 + 1]; prev[i * 3 + 2] = pos[i * 3 + 2];
       vel[i * 3] = Math.cos(a) * P.spd; vel[i * 3 + 1] = b * P.spd; vel[i * 3 + 2] = Math.sin(a) * P.spd;
     }
   }
-  const hawk = { p: new THREE.Vector3(BX, BY * 0.5, 0), v: new THREE.Vector3(-1, 0, 0) };
+  const hawk = { p: new THREE.Vector3(BX, BY * 0.5, 0), v: new THREE.Vector3(-1, 0, 0), q: new THREE.Vector3(BX, BY * 0.5, 0) };
 
   // ── Spatial hash: counting sort into cells the size of a bird's vision,
   //    so each bird only looks at the 27 cells around it, not all N. ────
@@ -133,8 +133,11 @@
 
   // ── One step of the three rules, plus walls and the hawk ─────────────
   function step(dt) {
+    const ease = Math.min(1, dt * 2.5);
+    for (const k in T) P[k] += (T[k] - P[k]) * ease;
+    prev.set(pos); hawk.q.copy(hawk.p);
     buildGrid();
-    const r2 = P.vis * P.vis, sepR2 = r2 * 0.2;
+    const r2 = P.vis * P.vis, sepR2 = r2 * 0.2, sepR = Math.sqrt(sepR2), sepK = 30 * P.sep;
     const maxS = P.spd, minS = P.spd * 0.45;
     const useHawk = $hawk.checked, fleeR2 = 22 * 22;
     for (let i = 0; i < N; i++) {
@@ -151,18 +154,23 @@
               const d2 = ex * ex + ey * ey + ez * ez;
               if (d2 > r2) continue;
               n++; cx += ex; cy += ey; cz += ez; ax += vel[j3]; ay += vel[j3 + 1]; az += vel[j3 + 2];
-              if (d2 < sepR2 && d2 > 1e-6) { sx -= ex / d2; sy -= ey / d2; sz -= ez / d2; }
+              if (d2 < sepR2 && d2 > 1e-6) { const d = Math.sqrt(d2), w = (1 / d - 1 / sepR) / d; sx -= ex * w; sy -= ey * w; sz -= ez * w; }
             }
           }
         }
       }
       const vx = vel[i3], vy = vel[i3 + 1], vz = vel[i3 + 2];
       let fx = 0, fy = 0, fz = 0;
-      // Each rule asks for a desired velocity at full speed; the steering
-      // force is the difference from the current one.
-      const steer = (x, y, z, w) => { const m = Math.hypot(x, y, z); if (m < 1e-6 || w === 0) return; const k = maxS / m; fx += (x * k - vx) * w; fy += (y * k - vy) * w; fz += (z * k - vz) * w; };
-      if (n) { steer(ax, ay, az, P.ali); steer(cx, cy, cz, P.coh * 0.6); }
-      steer(sx, sy, sz, P.sep);
+      // Forces scale with how far off a bird is, never a fixed-size shove, so
+      // a tiny disagreement gives a tiny correction and flight stays smooth.
+      if (n) {
+        fx += (ax / n - vx) * P.ali; fy += (ay / n - vy) * P.ali; fz += (az / n - vz) * P.ali;
+        const k = P.coh * 0.6 * maxS / P.vis / n;   // pull grows with distance from the centre
+        fx += cx * k; fy += cy * k; fz += cz * k;
+      }
+      const sp = Math.hypot(vx, vy, vz) || 1, hold = (maxS * 0.85 - sp) * 2 / sp;   // keep cruising speed along the current heading
+      fx += vx * hold; fy += vy * hold; fz += vz * hold;
+      fx += sx * sepK; fy += sy * sepK; fz += sz * sepK;
       // Walls push back harder the deeper a bird gets into the margin.
       const wall = (p, b) => p > b - MARGIN ? -(p - (b - MARGIN)) / MARGIN : p < -b + MARGIN ? (-b + MARGIN - p) / MARGIN : 0;
       fx += wall(px, BX) * MAX_FORCE * 1.5; fy += wall(py, BY) * MAX_FORCE * 1.5; fz += wall(pz, BZ) * MAX_FORCE * 1.5;
@@ -172,7 +180,8 @@
       }
       const fm = Math.hypot(fx, fy, fz), lim = useHawk ? MAX_FORCE * 3 : MAX_FORCE;
       if (fm > lim) { fx *= lim / fm; fy *= lim / fm; fz *= lim / fm; }
-      acc[i3] = fx; acc[i3 + 1] = fy; acc[i3 + 2] = fz;
+      // low-pass the force so heading changes ease in rather than twitch
+      const b = 0.25; acc[i3] += (fx - acc[i3]) * b; acc[i3 + 1] += (fy - acc[i3 + 1]) * b; acc[i3 + 2] += (fz - acc[i3 + 2]) * b;
     }
     for (let i = 0; i < N; i++) {
       const i3 = i * 3;
@@ -222,17 +231,17 @@
     scene.add(birds);
   }
   const m4 = new THREE.Matrix4(), q = new THREE.Quaternion(), fwd = new THREE.Vector3(0, 0, 1), dir = new THREE.Vector3(), one = new THREE.Vector3(1, 1, 1), at = new THREE.Vector3();
-  function draw() {
+  function draw(a) {
     for (let i = 0; i < N; i++) {
       const i3 = i * 3;
       dir.set(vel[i3], vel[i3 + 1], vel[i3 + 2]).normalize();
       q.setFromUnitVectors(fwd, dir);
-      m4.compose(at.set(pos[i3], pos[i3 + 1], pos[i3 + 2]), q, one);
+      m4.compose(at.set(prev[i3] + (pos[i3] - prev[i3]) * a, prev[i3 + 1] + (pos[i3 + 1] - prev[i3 + 1]) * a, prev[i3 + 2] + (pos[i3 + 2] - prev[i3 + 2]) * a), q, one);
       birds.setMatrixAt(i, m4);
     }
     birds.instanceMatrix.needsUpdate = true;
     hawkMesh.visible = $hawk.checked;
-    if (hawkMesh.visible) { hawkMesh.position.copy(hawk.p); hawkMesh.quaternion.setFromUnitVectors(fwd, dir.copy(hawk.v).normalize()); }
+    if (hawkMesh.visible) { hawkMesh.position.lerpVectors(hawk.q, hawk.p, a); hawkMesh.quaternion.setFromUnitVectors(fwd, dir.copy(hawk.v).normalize()); }
     renderer.render(scene, camera);
   }
 
@@ -249,7 +258,7 @@
 
   // ── Camera: drag to orbit, wheel or pinch to zoom, slow drift when idle ─
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const orbit = { th: 0.6, ph: 1.25, r: 210, idle: 0 };
+  const orbit = { th: 0.6, ph: 1.25, r: 120, idle: 0 };
   const pointers = new Map(); let pinch0 = 0;
   canvas.addEventListener('pointerdown', e => { canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); orbit.idle = 0; });
   canvas.addEventListener('pointermove', e => {
@@ -257,7 +266,7 @@
     const [x0, y0] = pointers.get(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (pinch0) orbit.r = Math.min(420, Math.max(60, orbit.r * pinch0 / d));
+      if (pinch0) orbit.r = Math.min(160, Math.max(40, orbit.r * pinch0 / d));
       pinch0 = d; return;
     }
     orbit.th -= (e.clientX - x0) * 0.006;
@@ -266,7 +275,7 @@
   });
   const up = e => { pointers.delete(e.pointerId); pinch0 = 0; };
   canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
-  canvas.addEventListener('wheel', e => { e.preventDefault(); orbit.r = Math.min(420, Math.max(60, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
+  canvas.addEventListener('wheel', e => { e.preventDefault(); orbit.r = Math.min(160, Math.max(40, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
   function placeCamera(dt) {
     orbit.idle += dt;
     if (!reduce && orbit.idle > 3) orbit.th += dt * 0.05;
@@ -282,30 +291,27 @@
 
   // ── Controls ─────────────────────────────────────────────────────────
   const $ = id => document.getElementById(id), $hawk = $('hawk');
-  const keys = ['sep', 'ali', 'coh', 'vis', 'spd', 'num'];
-  function sync() { for (const k of keys) { $(k).value = P[k]; $(k).nextElementSibling.value = k === 'num' ? P[k] : (+P[k]).toFixed(k === 'spd' ? 0 : 1); } }
+  const keys = ['sep', 'ali', 'coh', 'vis'];
+  function sync() { for (const k of keys) { $(k).value = T[k]; $(k).nextElementSibling.value = (+T[k]).toFixed(1); } }
   for (const k of keys) $(k).addEventListener('input', e => {
-    P[k] = +e.target.value; sync();
-    if (k === 'num') { seed(P.num); makeMesh(); }
-    else document.querySelectorAll('#presets button').forEach(b => b.classList.remove('on'));
+    T[k] = +e.target.value; sync();
+    document.querySelectorAll('#presets button').forEach(b => b.classList.remove('on'));
   });
   $('presets').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
-    Object.assign(P, PRESETS[b.dataset.p]); sync();
+    Object.assign(T, PRESETS[b.dataset.p]); sync();
     document.querySelectorAll('#presets button').forEach(x => x.classList.toggle('on', x === b));
   });
-  let paused = false;
-  $('pause').addEventListener('click', () => { paused = !paused; $('pause').textContent = paused ? 'Play' : 'Pause'; });
   $('scatter').addEventListener('click', () => { seed(N); });
   if (matchMedia('(max-width: 640px)').matches) $('panel').open = false;
 
   // ── Loop: fixed physics step, so behaviour does not depend on frame rate ─
-  seed(P.num); makeMesh(); sync(); theme(); resize();
+  seed(NUM); makeMesh(); sync(); theme(); resize();
   const DT = 1 / 60; let last = performance.now(), accT = 0, frames = 0, fpsT = 0;
   function frame(now) {
     const real = Math.min(0.1, (now - last) / 1000); last = now;
-    if (!paused) { accT += real; let n = 0; while (accT >= DT && n < 3) { step(DT); accT -= DT; n++; } if (n === 3) accT = 0; }
-    placeCamera(real); draw();
+    accT += real; let n = 0; while (accT >= DT && n < 3) { step(DT); accT -= DT; n++; } if (n === 3) accT = 0;
+    placeCamera(real); draw(accT / DT);
     frames++; fpsT += real;
     if (fpsT > 1) { $('stats').textContent = `${N} birds · ${Math.round(frames / fpsT)} fps`; frames = 0; fpsT = 0; }
     requestAnimationFrame(frame);

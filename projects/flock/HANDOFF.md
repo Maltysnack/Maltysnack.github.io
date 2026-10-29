@@ -32,3 +32,20 @@ The boxed panel is gone. Title and one paragraph top left (paragraph hidden
 on phones), one uppercase text bar bottom left (presets, Hawk, Scatter,
 Pause, Tune). Tune opens the six sliders above the bar; thin track, square
 red thumb. Element ids unchanged, so the script is untouched.
+
+## 29-10-2026: plan (maltysnack gave the go)
+
+Two modes on one page, one shared engine. **Classic** (opens by default) is
+the pure boids: three rules, cones, AI hawk, presets, Tune. **Skyline** is the
+extended map: immersive view, flapping bird models, picker, player-steered
+hawk with chase camera, fly-by plane, wind gusts with streaks, small skyline,
+ambient perching. Decisions: Classic gets smoothing only (no feature changes,
+no model picker); mode not remembered; birds fixed per device, no speed/pause/
+count controls.
+
+1. Classic fixes: soft steering (no normalised bang-bang), force low-pass,
+   render interpolation, separation floor 0.3 with eased slider changes,
+   tighter zoom range and closer default. Remove speed, pause, birds controls.
+2. Split script into `flock.js` (engine) and `skyline.js` (extras), add mode switch.
+3. Skyline: models and picker, then player hawk, then plane and gusts, then
+   skyline and perching. Commit per concept.
