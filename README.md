@@ -18,7 +18,7 @@ A paper-money betting bot that bets Elo model chances against Sportsbet 1X2 pric
 A small language for flow networks: write nodes and arrows, and it simulates how something moves through them.
 
 **Algorithms:**<br>
-Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle and a travelling salesman tour.
+Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle, a travelling salesman tour and sorting.
 
 **Flock:**<br>
 A flock in three dimensions from three local rules and no leader, with a hawk to run from.
