@@ -159,8 +159,7 @@ export function create(ctx) {
     plane:   { weight: 30, speed: 20, R: 60, k: 2.5, path: 90, y: [30, 38], drop: 1, ext: 90 },
     blimp:   { weight: 22, speed: 11, R: 50, k: 2.0, path: 70, y: [32, 38], drop: 4.6, ext: 100 },
     glider:  { weight: 14, speed: 9,  R: 36, k: 1.6, path: 40, y: [31, 37], drop: 4.4, ext: 60 },
-    jetpack: { weight: 12, speed: 14, R: 30, k: 1.6, path: 30, y: [30, 38], drop: 3.8, ext: 60 },
-    cloud:   { weight: 22, speed: 4,  R: 26, k: 0.8, path: 0,  y: [34, 40], drop: 8,   ext: 45 }
+    jetpack: { weight: 12, speed: 14, R: 30, k: 1.6, path: 30, y: [30, 38], drop: 3.8, ext: 60 }
   };
   const fl = { on: false, kind: '', cfg: null, p: new THREE.Vector3(), dir: new THREE.Vector3(), y0: 0, end: 0, mesh: null };
   const meshes = {};
@@ -174,8 +173,19 @@ export function create(ctx) {
     fl.p.set(alongX ? -sign * ext : rnd(-BX * 0.6, BX * 0.6), fl.y0, alongX ? rnd(-BZ * 0.3, BZ * 0.8) : -sign * ext);
     fl.end = ext; fl.on = true;
     fl.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), fl.dir);
-    if (kind === 'cloud') fl.mesh.quaternion.identity();
   }
+  // Clouds are their own thing: several at once, each its own speed, height and size,
+  // all drifting the same way, through the buildings if they like. Birds shy from them gently.
+  const CLOUD_R = 26, CLOUD_K = 0.8, clouds = [];
+  const wind = new THREE.Vector3();
+  function pickWind() { const sign = Math.random() < 0.5 ? -1 : 1; if (Math.random() < 0.5) wind.set(sign, 0, 0); else wind.set(0, 0, sign); }
+  function spawnCloud(anywhere) {
+    const alongX = wind.x !== 0, ext = (alongX ? BX : BZ) + 45, sc = rnd(0.6, 1.4);
+    const a = anywhere ? rnd(-ext, ext) : -(alongX ? wind.x : wind.z) * ext, l = alongX ? rnd(-BZ, BZ) : rnd(-BX, BX);
+    const mesh = MESH.cloud(); mesh.scale.setScalar(sc); scene.add(mesh);
+    clouds.push({ mesh, sc, speed: rnd(2.5, 6), end: ext, p: new THREE.Vector3(alongX ? a : l, rnd(-5, 40), alongX ? l : a) });
+  }
+  function clearClouds() { for (const c of clouds) scene.remove(c.mesh); clouds.length = 0; }
   function endPass() { fl.on = false; scene.remove(fl.mesh); }
 
   // ── Parachutist: steps off the tallest roof into open air and drifts down ─
@@ -236,7 +246,7 @@ export function create(ctx) {
 
   // ── Per-bird state: 0 flying, 1 landing, 2 perched ───────────────────
   let st = new Uint8Array(0), tgt = new Int16Array(0), leaveAt = new Float32Array(0), freeSlots = slots.length;
-  let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, rt = new Float32Array(0), tint = new Float32Array(0);
+  let clock = 0, nextGust = 0, nextPass = 0, nextChute = 0, nextCloud = 0, rt = new Float32Array(0), tint = new Float32Array(0);
   function reset() {
     N = ctx.N; st = new Uint8Array(N); tgt = new Int16Array(N); leaveAt = new Float32Array(N);
     flapAttr = new THREE.InstancedBufferAttribute(new Float32Array(N).fill(1), 1);
@@ -246,7 +256,7 @@ export function create(ctx) {
     rt = new Float32Array(N); tint = new Float32Array(N);
     api.st = st; setModel(api.model);
     ctx.birds.instanceColor = new THREE.InstancedBufferAttribute(new Float32Array(N * 3).fill(1), 3);
-    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50);
+    nextGust = clock + rnd(10, 18); nextPass = clock + rnd(8, 16); nextChute = clock + rnd(25, 50); nextCloud = clock + rnd(4, 10);
   }
   function setModel(name) {
     api.model = name;
@@ -260,10 +270,14 @@ export function create(ctx) {
   function before(dt) {
     clock += dt;
     if (fl.on) {
-      fl.p.addScaledVector(fl.dir, fl.cfg.speed * dt); fl.p.y = fl.y0 + Math.sin(clock * 0.9) * (fl.cfg.drop > 1 && fl.kind !== 'cloud' ? BOB : 0);
+      fl.p.addScaledVector(fl.dir, fl.cfg.speed * dt); fl.p.y = fl.y0 + Math.sin(clock * 0.9) * (fl.cfg.drop > 1 ? BOB : 0);
       if (Math.abs(fl.p.x * fl.dir.x + fl.p.z * fl.dir.z) > fl.end) endPass();
     }
     if (ch.on) stepChute(dt);
+    for (let i = clouds.length - 1; i >= 0; i--) {
+      const c = clouds[i]; c.p.addScaledVector(wind, c.speed * dt);
+      if (Math.abs(c.p.x * wind.x + c.p.z * wind.z) > c.end) { scene.remove(c.mesh); clouds.splice(i, 1); }
+    }
     for (const g of gusts) if (g.on) {
       g.age += dt; g.c.addScaledVector(g.dir, GUST_SPEED * dt);
       g.env = Math.sin(Math.PI * Math.min(1, g.age / GUST_LIFE));
@@ -272,6 +286,7 @@ export function create(ctx) {
     if (!ctx.reduce) {   // ambient weather, off under reduced motion
       if (clock > nextGust) { startGust(); nextGust = clock + rnd(30, 55); }
       if (clock > nextPass) { launchPass(); nextPass = clock + rnd(28, 55); }
+      if (clock > nextCloud && clouds.length < 5) { spawnCloud(); nextCloud = clock + rnd(10, 22); }
       if (clock > nextChute) { startChute(); nextChute = clock + rnd(45, 90); }
     }
     // Ambient perching: sample a few birds a step; any near a free roof edge may land.
@@ -339,6 +354,10 @@ export function create(ctx) {
     if (ch.on && ch.phase > 0) {   // a light berth for the parachutist
       const rx = px - ch.p.x, ry = py - ch.p.y - 3, rz = pz - ch.p.z, d = Math.hypot(rx, ry, rz);
       if (d < 14) { const u = 1 - d / 14, k = MAX_FORCE * 0.9 * u * u / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u); }
+    }
+    for (const c of clouds) {
+      const R = CLOUD_R * c.sc, rx = px - c.p.x, ry = py - c.p.y, rz = pz - c.p.z, d = Math.hypot(rx, ry, rz);
+      if (d < R) { const u = 1 - d / R, k = MAX_FORCE * CLOUD_K * u ** 1.5 / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u * CLOUD_K); }
     }
     for (const g of gusts) if (g.on) {
       const d = Math.hypot(px - g.c.x, py - g.c.y, pz - g.c.z);
@@ -410,6 +429,7 @@ export function create(ctx) {
       if (fl.kind === 'jetpack') { const f = fl.mesh.getObjectByName('flame'); f.scale.set(1, 0.8 + Math.random() * 0.6, 1); }
       if (fl.kind === 'glider') fl.mesh.rotation.z = Math.sin(clock * 0.7) * 0.12;
     }
+    for (const c of clouds) c.mesh.position.copy(c.p);
     if (ch.on) {
       chute.position.copy(ch.p); chCanopy.scale.setScalar(Math.max(0.001, ch.open));
       chute.rotation.z = ch.phase === 3 ? Math.sin(clock * 1.3) * 0.08 : 0; chute.rotation.x = ch.phase === 2 ? 0.5 : 0;
@@ -455,7 +475,7 @@ export function create(ctx) {
 
   const api = {
     st, model: 'bird', flying: false,
-    spawn(k) { if (k === 'chute') startChute(); else if (k === 'gust') startGust(); else { if (fl.on) endPass(); launchPass(k); } },   // for ?debug
+    spawn(k) { if (k === 'chute') startChute(); else if (k === 'cloud') spawnCloud(); else if (k === 'gust') startGust(); else { if (fl.on) endPass(); launchPass(k); } },   // for ?debug
     before, drive, force, hawk: hawkStep, draw, theme, reset, setModel,
     toggleFly() {
       api.flying = !api.flying; canvas.style.cursor = api.flying ? 'crosshair' : '';
@@ -468,12 +488,12 @@ export function create(ctx) {
       addEventListener('pointermove', onMove); canvas.addEventListener('pointerup', onUp); canvas.addEventListener('pointercancel', onUp);
       addEventListener('keydown', kd); addEventListener('keyup', ku);
       api.flying = false; camReady = false; camera.fov = 50; camera.updateProjectionMatrix(); canvas.style.cursor = '';
-      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } for (const g of gusts) { g.on = false; g.lines.visible = false; }
+      if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); } clearClouds(); pickWind(); for (let i = 0; i < 3; i++) spawnCloud(true); for (const g of gusts) { g.on = false; g.lines.visible = false; }
       hawk.p.set(BX * 0.5, 0, BZ * 0.5); H.yaw = -Math.PI * 0.75; H.pitch = 0; H.roll = 0; hawk.q.copy(hawk.p);
       reset();
     },
     disable() {
-      scene.remove(world, hawkMesh); if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); }
+      scene.remove(world, hawkMesh); clearClouds(); if (fl.on) endPass(); if (ch.on) { ch.on = false; scene.remove(chute); }
       ctx.birds.instanceColor = null;
       removeEventListener('pointermove', onMove); canvas.removeEventListener('pointerup', onUp); canvas.removeEventListener('pointercancel', onUp);
       removeEventListener('keydown', kd); removeEventListener('keyup', ku);

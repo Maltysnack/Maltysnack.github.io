@@ -266,7 +266,7 @@
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=4')).create(ctx);
+      sky ??= (await import('./skyline.js?v=5')).create(ctx);
       mode = m; X = sky; seed(N); sky.enable(); $title.textContent = skyBlurb;
     } else {
       mode = m; if (X) X.disable(); X = null;
