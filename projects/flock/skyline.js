@@ -3,7 +3,7 @@
 // through (plane, blimp, hang glider, jetpack, cloud, a parachutist).
 // flock.js owns the simulation and calls these hooks while the mode is on.
 import * as THREE from './vendor/three.module.min.js';
-import { createExtras } from './extras.js?v=9';
+import { createExtras } from './extras.js?v=10';
 
 export function create(ctx) {
   const { scene, camera, canvas, hawk, P, BX, BY, BZ, MAX_FORCE } = ctx;

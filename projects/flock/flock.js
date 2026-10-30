@@ -1,6 +1,6 @@
   import * as THREE from './vendor/three.module.min.js';
 import { createSound } from './sound.js?v=5';
-const skyP = import('./skyline.js?v=31');   // start fetching the world at once, not when the intro asks for it
+const skyP = import('./skyline.js?v=32');   // start fetching the world at once, not when the intro asks for it
 const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() => {});   // and the heading font the intro draws with
 
   // ── Parameters ──────────────────────────────────────────────────────

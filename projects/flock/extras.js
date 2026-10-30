@@ -663,7 +663,7 @@ export function createExtras(K) {
   }
   const plat = { on: false, t: 0, g: new THREE.Group(), x: 0, z: 0, yaw: 0, next: rnd(60, 160), ring: null };
   {
-    plat.g.add(new THREE.Mesh(new THREE.SphereGeometry(1, 8, 6).scale(0.45, 0.2, 0.9), platMat), box(0.5, 0.08, 0.5, platMat, 0, 0, 0.9), box(0.3, 0.06, 0.9, platMat, 0, 0, -1)); plat.g.visible = false; world.add(plat.g);
+    plat.g.add(new THREE.Mesh(new THREE.SphereGeometry(1, 8, 6).scale(0.45, 0.2, 0.9), platMat), box(0.5, 0.08, 0.5, platMat, 0, 0, 0.9), box(0.3, 0.06, 0.9, platMat, 0, 0, -1)); plat.g.visible = false; plat.g.scale.setScalar(3); world.add(plat.g);
     plat.ring = new THREE.Mesh(new THREE.RingGeometry(0.8, 1, 24).rotateX(-Math.PI / 2), new THREE.MeshBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0, depthWrite: false })); plat.ring.visible = false; world.add(plat.ring);
   }
   function startPlatypus() { if (plat.on) return; plat.on = true; plat.t = 0; const a = rnd(0, 6.28), r = rnd(0.2, 0.55); plat.x = LAKE.x + Math.cos(a) * LAKE.rx * r; plat.z = LAKE.z + Math.sin(a) * LAKE.rz * r; plat.yaw = rnd(0, 6.28); plat.g.visible = true; plat.ring.visible = true; event('splash', { x: plat.x, y: GROUND, z: plat.z }); }
@@ -685,10 +685,10 @@ export function createExtras(K) {
     }
     if (plat.on) {   // a platypus surfaces, swims a small loop with ripples, and dives
       plat.t += dt; plat.yaw += dt * 0.5; plat.x += Math.sin(plat.yaw) * 1.1 * dt; plat.z += Math.cos(plat.yaw) * 1.1 * dt;
-      const vis = clamp(Math.min(plat.t / 1.5, (16 - plat.t) / 1.5), 0, 1), r = (plat.t * 0.8) % 3;
+      const vis = clamp(Math.min(plat.t / 1.5, (30 - plat.t) / 1.5), 0, 1), r = (plat.t * 0.8) % 3;
       plat.g.position.set(plat.x, GROUND + 0.38 - (1 - vis) * 0.7, plat.z); plat.g.rotation.y = plat.yaw + Math.PI / 2;
-      plat.ring.position.set(plat.x, GROUND + 0.4, plat.z); plat.ring.scale.set(1 + r * 1.6, 1, 1 + r * 1.6); plat.ring.material.opacity = 0.35 * vis * (1 - r / 3);
-      if (plat.t > 16) { plat.on = false; plat.g.visible = false; plat.ring.visible = false; plat.next = rnd(120, 300); }
+      plat.ring.position.set(plat.x, GROUND + 0.4, plat.z); plat.ring.scale.set(3 + r * 3, 1, 3 + r * 3); plat.ring.material.opacity = 0.35 * vis * (1 - r / 3);
+      if (plat.t > 30) { plat.on = false; plat.g.visible = false; plat.ring.visible = false; plat.next = rnd(120, 300); }
     } else { plat.next -= dt; if (plat.next <= 0 && !ctxReduce()) startPlatypus(); }
     for (const pod of pods) {
       pod.x += pod.dir * pod.v * dt; pod.t += dt; if (Math.abs(pod.x) > 520) pod.dir = -pod.dir;
