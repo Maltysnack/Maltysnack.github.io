@@ -1,4 +1,5 @@
   import * as THREE from './vendor/three.module.min.js';
+import { createSound } from './sound.js?v=2';
 
   // ── Parameters ──────────────────────────────────────────────────────
   const PRESETS = {
@@ -15,10 +16,10 @@
   const intro = INTRO && !REDUCED;                   // reduced motion skips the burst and shows the bar at once
   let introRun = null;                               // the Hello. hand-off, ticked each frame while it plays
   let introLock = intro;                             // while true the canvas ignores orbit input
-  const NUM = PHONE ? 900 : 1600;
+  const NUM = PHONE ? 750 : 1300;
   const T = { ...PRESETS.murmuration };   // what the controls ask for
   const P = { ...T };                     // what the flock uses, eased toward T so big changes never snap
-  const BX = 117, BY = 58, BZ = 78;          // half extents of the box the flock lives in
+  const BX = 210, BY = 58, BZ = 230;          // half extents of the box the flock lives in
   const MARGIN = 40;                        // padding around the box for the spatial grid, so birds that drift past the soft edge are still indexed
   const MAX_FORCE = 40;
 
@@ -75,7 +76,7 @@
     buildGrid();
     const r2 = P.vis * P.vis, sepR2 = r2 * 0.2, sepR = Math.sqrt(sepR2), sepK = 30 * P.sep;
     const maxS = P.spd, minS = P.spd * 0.45;
-    const useHawk = $hawk.checked || !!X, fleeR2 = 22 * 22;
+    const useHawk = !!(X && X.hawkOn), fleeR2 = 42 * 42;
     for (let i = 0; i < N; i++) {
       const i3 = i * 3;
       if (st && st[i]) { X.drive(i, dt); acc[i3] = acc[i3 + 1] = acc[i3 + 2] = 0; continue; }   // landing or perched
@@ -116,7 +117,7 @@
       if (py < -BY + 14) fy += (-BY + 14 - py) / 14 * MAX_FORCE * 1.5;
       if (useHawk) {
         const hx = px - hawk.p.x, hy = py - hawk.p.y, hz = pz - hawk.p.z, h2 = hx * hx + hy * hy + hz * hz;
-        if (h2 < fleeR2) { const k = MAX_FORCE * (X && X.hawkCalm ? 1 : 3) * (1 - h2 / fleeR2) / Math.sqrt(h2 + 1e-6); fx += hx * k; fy += hy * k; fz += hz * k; }
+        if (h2 < fleeR2) { const k = MAX_FORCE * 3 * (1 - h2 / fleeR2) / Math.sqrt(h2 + 1e-6); fx += hx * k; fy += hy * k; fz += hz * k; }
       }
       if (X) { f3[0] = f3[1] = f3[2] = 0; X.force(i, px, py, pz, f3); fx += f3[0]; fy += f3[1]; fz += f3[2]; }
       const fm = Math.hypot(fx, fy, fz), lim = useHawk ? MAX_FORCE * 3 : MAX_FORCE;
@@ -132,7 +133,7 @@
       vel[i3] = vx * t; vel[i3 + 1] = vy * t; vel[i3 + 2] = vz * t;
       pos[i3] += vel[i3] * dt; pos[i3 + 1] += vel[i3 + 1] * dt; pos[i3 + 2] += vel[i3 + 2] * dt;
     }
-    if (useHawk) { if (X) X.hawk(dt); else stepHawk(dt); }
+    if (X) X.hawk(dt);
   }
 
   // The hawk chases whichever bird is nearest, a little faster than the
@@ -155,15 +156,14 @@
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   const scene = new THREE.Scene();
-  const camera = new THREE.PerspectiveCamera(50, 1, 1, 800);
+  const camera = new THREE.PerspectiveCamera(50, 1, 2, 4200);
+  const sound = createSound(camera);
+  for (const ev of ['pointerdown', 'keydown', 'touchend']) addEventListener(ev, () => sound.gesture(), { once: true, passive: true });   // browsers only allow sound after a gesture
   scene.add(new THREE.HemisphereLight(0xffffff, 0x444444, 1.6));
   const sun = new THREE.DirectionalLight(0xffffff, 1.4); sun.position.set(40, 80, 30); scene.add(sun);
 
   const birdGeo = new THREE.ConeGeometry(0.45, 1.8, 4); birdGeo.rotateX(Math.PI / 2);   // nose along +z
   const birdMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
-  const hawkMat = new THREE.MeshLambertMaterial({ color: 0xffffff, flatShading: true });
-  const hawkMesh = new THREE.Mesh(new THREE.ConeGeometry(1.4, 5, 4).rotateX(Math.PI / 2), hawkMat);
-  scene.add(hawkMesh);
   let birds;
   const look = { geo: birdGeo, mat: birdMat };
   function makeMesh() {
@@ -184,9 +184,7 @@
       birds.setMatrixAt(i, m4);
     }
     birds.instanceMatrix.needsUpdate = true;
-    hawkMesh.visible = $hawk.checked && !X;
     if (X) X.draw(a, real);
-    if (hawkMesh.visible) { hawkMesh.position.lerpVectors(hawk.q, hawk.p, a); hawkMesh.quaternion.setFromUnitVectors(fwd, dir.copy(hawk.v).normalize()); }
     renderer.render(scene, camera);
   }
 
@@ -195,8 +193,8 @@
     const cs = getComputedStyle(document.documentElement);
     const col = v => new THREE.Color().setStyle(cs.getPropertyValue(v).trim() || '#888');
     const bg = col('--bg');
-    scene.background = bg; scene.fog = new THREE.Fog(bg, 160, 430);
-    birdMat.color = col('--text'); hawkMat.color = col('--accent');
+    scene.background = bg; scene.fog = new THREE.Fog(bg, 280, 760);
+    birdMat.color = col('--text');
     if (X) X.theme(col);
   }
   new MutationObserver(theme).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
@@ -204,7 +202,7 @@
 
   // ── Camera: drag to orbit, wheel or pinch to zoom, slow drift when idle ─
   const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
-  const orbit = { th: 0.6, ph: 1.25, r: 150, idle: 0 };
+  const orbit = { th: 0.6, ph: 1.25, r: 265, idle: 0, tx: 0, ty: 0, tz: 0 };   // tx, ty, tz: the point it looks at, which WASD or the arrows move
   const pointers = new Map(); let pinch0 = 0;
   canvas.addEventListener('pointerdown', e => { if (introLock || (X && X.flying)) return; canvas.setPointerCapture(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]); orbit.idle = 0; });
   canvas.addEventListener('pointermove', e => {
@@ -212,7 +210,7 @@
     const [x0, y0] = pointers.get(e.pointerId); pointers.set(e.pointerId, [e.clientX, e.clientY]);
     if (pointers.size === 2) {
       const [a, b] = [...pointers.values()], d = Math.hypot(a[0] - b[0], a[1] - b[1]);
-      if (pinch0) orbit.r = Math.min(210, Math.max(50, orbit.r * pinch0 / d));
+      if (pinch0) orbit.r = Math.min(520, Math.max(60, orbit.r * pinch0 / d));
       pinch0 = d; return;
     }
     orbit.th -= (e.clientX - x0) * 0.006;
@@ -221,13 +219,29 @@
   });
   const up = e => { pointers.delete(e.pointerId); pinch0 = 0; };
   canvas.addEventListener('pointerup', up); canvas.addEventListener('pointercancel', up);
-  canvas.addEventListener('wheel', e => { if (introLock) return; e.preventDefault(); if (X && X.flying) return; orbit.r = Math.min(210, Math.max(50, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
+  canvas.addEventListener('wheel', e => { if (introLock) return; e.preventDefault(); if (X && X.flying) return; orbit.r = Math.min(520, Math.max(60, orbit.r * Math.exp(e.deltaY * 0.001))); orbit.idle = 0; }, { passive: false });
+  const move = { w: 0, s: 0, a: 0, d: 0, u: 0, dn: 0, fast: 0 };
+  const KEYS = { KeyW: 'w', ArrowUp: 'w', KeyS: 's', ArrowDown: 's', KeyA: 'a', ArrowLeft: 'a', KeyD: 'd', ArrowRight: 'd', KeyE: 'u', KeyQ: 'dn', ShiftLeft: 'fast', ShiftRight: 'fast' };
+  const onKey = v => e => { const k = KEYS[e.code]; if (!k || introLock || e.metaKey || e.ctrlKey || e.altKey) return; move[k] = v; if (k !== 'fast') e.preventDefault(); };
+  addEventListener('keydown', onKey(1)); addEventListener('keyup', onKey(0)); addEventListener('blur', () => { for (const k in move) move[k] = 0; });
   function placeCamera(dt) {
-    if (X && X.flying) return;      // Skyline's chase camera sets itself in draw
     orbit.idle += dt;
+    const dx = move.d - move.a, df = move.w - move.s, dy = move.u - move.dn;
+    if (dx || df || dy) {   // free movement: slide the point the camera looks at
+      orbit.idle = 0; orbit.moved = 0; const sp = (orbit.r * 0.7 + 40) * dt * (move.fast ? 2.5 : 1), fx = -Math.sin(orbit.th), fz = -Math.cos(orbit.th), rx = Math.cos(orbit.th), rz = -Math.sin(orbit.th);
+      orbit.tx = Math.max(-BX - 150, Math.min(BX + 150, orbit.tx + (fx * df + rx * dx) * sp)); orbit.tz = Math.max(-BZ - 250, Math.min(BZ + 250, orbit.tz + (fz * df + rz * dx) * sp)); orbit.ty = Math.max(-40, Math.min(140, orbit.ty + dy * sp * 0.6));
+    }
     if (!reduce && orbit.idle > 5) orbit.th += dt * 0.05;
-    camera.position.set(orbit.r * Math.sin(orbit.ph) * Math.sin(orbit.th), orbit.r * Math.cos(orbit.ph), orbit.r * Math.sin(orbit.ph) * Math.cos(orbit.th));
-    camera.lookAt(0, 0, 0);
+    orbit.moved = (orbit.moved ?? 99) + dt;
+    if (X && !reduce && orbit.idle > 5 && orbit.moved > 60) {   // left alone, the view drifts after the flock as its centre wanders
+      let sx = 0, sz = 0, n = 0; for (let i = 0; i < N; i += 9) { sx += pos[i * 3]; sz += pos[i * 3 + 2]; n++; }
+      if (n) { const k = Math.min(1, dt * 0.04); orbit.tx += (sx / n * 0.8 - orbit.tx) * k; orbit.tz += (sz / n * 0.8 - orbit.tz) * k; }
+    }
+    camera.position.set(orbit.tx + orbit.r * Math.sin(orbit.ph) * Math.sin(orbit.th), orbit.ty + orbit.r * Math.cos(orbit.ph), orbit.tz + orbit.r * Math.sin(orbit.ph) * Math.cos(orbit.th));
+    const floor = (X ? X.surface(camera.position.x, camera.position.z) : -BY) + 6;   // never under the ground or inside a mountain
+    if (camera.position.y < floor) camera.position.y = floor;
+    camera.lookAt(orbit.tx, orbit.ty, orbit.tz);
+    if (X && X.shake > 0.02) { const k = X.shake * 0.6; camera.position.x += (Math.random() - 0.5) * k; camera.position.y += (Math.random() - 0.5) * k; camera.position.z += (Math.random() - 0.5) * k; }
   }
   function resize() {
     const r = canvas.getBoundingClientRect();
@@ -237,41 +251,40 @@
   new ResizeObserver(resize).observe(canvas);
 
   // ── Controls ─────────────────────────────────────────────────────────
-  const $ = id => document.getElementById(id), $hawk = $('hawk');
-  const keys = ['sep', 'ali', 'coh', 'vis'];
-  function sync() { for (const k of keys) { $(k).value = T[k]; $(k).nextElementSibling.value = (+T[k]).toFixed(1); } }
-  for (const k of keys) $(k).addEventListener('input', e => {
-    T[k] = +e.target.value; sync();
-    document.querySelectorAll('#presets button').forEach(b => b.classList.remove('on'));
-  });
-  $('presets').addEventListener('click', e => {
-    const b = e.target.closest('button'); if (!b) return;
-    Object.assign(T, PRESETS[b.dataset.p]); sync();
-    document.querySelectorAll('#presets button').forEach(x => x.classList.toggle('on', x === b));
-  });
+  const $ = id => document.getElementById(id);
+  // The flock drifts between the three presets on its own: a long hold on each, then a slow blend to the next.
+  const NAMES = Object.keys(PRESETS), BLEND = 25;
+  let dA = 'murmuration', dB = dA, dClock = 0, dHold = 60;
+  function drift(dt) {
+    dClock += dt;
+    if (dA === dB) { if (dClock > dHold) { dB = NAMES.filter(n => n !== dA)[(Math.random() * 2) | 0]; dClock = 0; } return; }
+    const u = Math.min(1, dClock / BLEND), e = u * u * (3 - 2 * u), p = PRESETS[dA], q = PRESETS[dB];
+    for (const k in p) T[k] = p[k] + (q[k] - p[k]) * e;
+    if (u >= 1) { dA = dB; dClock = 0; dHold = 40 + Math.random() * 40; }
+  }
+  const $snd = $('snd'), sndLabel = () => { $snd.title = sound.muted ? 'Sound off' : 'Sound on'; $snd.setAttribute('aria-label', $snd.title); $snd.classList.toggle('on', !sound.muted); };
+  sndLabel(); $snd.addEventListener('click', () => { sound.toggle(); sndLabel(); });
   $('scatter').addEventListener('click', () => { seed(N, CAP); if (X) X.reset(); });
-  if (matchMedia('(max-width: 640px)').matches) $('panel').open = false;
 
   // ── Idle: after 5 s of nothing the camera starts to spin; after 10 s the nav, title and controls fade away.
-  //    Any movement, touch or key brings them back. An open Tune drawer or a flying hawk counts as activity.
+  //    Any movement, touch or key brings them back. A flying hawk counts as activity.
   let idleSec = 0;
-  const wake = () => { idleSec = 0; if (!introLock) orbit.idle = 0; if (document.documentElement.hasAttribute('data-idle')) document.documentElement.removeAttribute('data-idle'); };
+  const wake = () => { idleSec = 0; if (document.documentElement.hasAttribute('data-idle')) document.documentElement.removeAttribute('data-idle'); };
   for (const ev of ['pointermove', 'pointerdown', 'keydown', 'wheel', 'touchstart']) addEventListener(ev, wake, { passive: true });
   function idleTick(dt) {
     if (introLock) return;
-    if ($('panel').open) { idleSec = 0; return; }
     idleSec += dt;
     if (idleSec > 10 && !document.documentElement.hasAttribute('data-idle')) document.documentElement.setAttribute('data-idle', '');
   }
 
   // ── Loop: fixed physics step, so behaviour does not depend on frame rate ─
-  seed(NUM); makeMesh(); sync(); theme(); resize();
+  seed(NUM); makeMesh(); theme(); resize();
   const DT = 1 / 60; let last = performance.now(), accT = 0, frames = 0, fpsT = 0;
   function frame(now) {
     requestAnimationFrame(frame);
     const real = Math.min(0.1, (now - last) / 1000); last = now;
     accT += real; let n = 0; while (accT >= DT && n < 3) { step(DT); accT -= DT; n++; } if (n === 3) accT = 0;
-    idleTick(real);
+    idleTick(real); drift(real);
     placeCamera(real); if (introRun) introRun(real); draw(accT / DT, real);
     frames++; fpsT += real;
     if (fpsT > 1) { $('stats').textContent = `${N} birds · ${Math.round(frames / fpsT)} fps`; frames = 0; fpsT = 0; }
@@ -280,7 +293,7 @@
 
   // ── Modes: Classic is the pure boids; Skyline loads the extras on demand ─
   const ctx = {
-    THREE, scene, camera, canvas, hawk, P, reduce, phone: PHONE,
+    THREE, scene, camera, canvas, hawk, P, reduce, phone: PHONE, sound,
     BX, BY, BZ, MAX_FORCE, orbit,
     get birds() { return birds; }, get CAP() { return CAP; }, get pos() { return pos; }, get vel() { return vel; }, get N() { return N; },
     setLook(geo, mat) { look.geo = geo; look.mat = mat; birds.geometry = geo; birds.material = mat; },
@@ -291,23 +304,22 @@
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=12')).create(ctx);
+      sky ??= (await import('./skyline.js?v=26')).create(ctx);
       mode = m; X = sky; seed(N, CAP); sky.enable();
     } else {
       mode = m; if (X) X.disable(); X = null;
       ctx.setLook(birdGeo, birdMat); camera.fov = 50; camera.updateProjectionMatrix(); orbit.idle = 0;
       seed(N, CAP);
     }
+    sound.setActive(m === 'skyline');
     document.body.dataset.mode = m; $modes.forEach(b => b.classList.toggle('on', b.dataset.m === m));
-    $('fly').classList.toggle('on', !!(X && X.flying));
     theme();
   }
   $('modes').addEventListener('click', e => { const b = e.target.closest('button'); if (b) setMode(b.dataset.m); });
-  $('fly').addEventListener('click', () => { if (X) $('fly').classList.toggle('on', X.toggleFly()); });
   // ?debug adds buttons to spawn each visitor, so nothing waits on the ambient timers.
   if (new URLSearchParams(location.search).has('debug')) {
     const bar = document.querySelector('.ov-bar');
-    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'storm', 'strike', 'chute', 'gust', 'perch']) {
+    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'storm', 'strike', 'chute', 'gust', 'hawk', 'heli', 'boat', 'ship', 'pirate', 'fire', 'scout', 'yeti', 'ufo', 'train', 'balloon', 'fireworks', 'tornado', 'storms', 'military']) {
       const b = document.createElement('button'); b.textContent = k; b.dataset.sky = '';
       b.addEventListener('click', () => X && X.spawn(k)); bar.prepend(b);
     }
@@ -317,8 +329,8 @@
   // ── ?intro: Hello. made of pixels, then a burst of birds from where each pixel was ─
   if (INTRO) {
     const html = document.documentElement;
-    orbit.r = 175; orbit.ph = 1.1; orbit.idle = 99;
-    const reveal = () => { introLock = false; orbit.idle = 0; idleSec = 0; html.dataset.revealing = ''; html.removeAttribute('data-intro'); setTimeout(() => html.removeAttribute('data-revealing'), 2200); };   // CSS fades the bar and controls in
+    orbit.r = 310; orbit.ph = 1.1; orbit.idle = 99;
+    const reveal = () => { introLock = false; idleSec = 0; html.dataset.revealing = ''; html.removeAttribute('data-intro'); setTimeout(() => html.removeAttribute('data-revealing'), 2200); };   // CSS fades the bar and controls in
     setMode('skyline').then(async () => {
       if (!intro) { reveal(); return; }
       try { await document.fonts.load('900 120px "Big Shoulders Display"'); } catch (e) { /* falls back to the stack's next font */ }

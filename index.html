@@ -7,7 +7,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>maltysnack</title>
-  <meta name="description" content="maltysnack: a flock of birds from three simple rules, with a hawk, weather and a skyline." />
+  <meta name="description" content="maltysnack: a flock of birds from three simple rules, with weather, a skyline and a few visitors." />
   <link rel="stylesheet" href="/style.css?v=9" />
   <style>
     /* A tool, so it fills the screen and never scrolls. */
@@ -32,6 +32,7 @@
     .rule { width: 1px; height: 14px; background: var(--border-strong); }
     [data-mode=classic] [data-sky], [data-mode=skyline] .classic-only { display: none; }
     body:not([data-mode]) [data-sky] { display: none; }
+    #snd svg { display: block; } #snd.on .slash { display: none; }
     .ov-bar .rule { width: 1px; height: 14px; background: var(--border-strong); }
     .ov-bar label { display: inline-flex; gap: 6px; align-items: center; color: var(--text-muted); cursor: pointer; }
     .ov-bar input[type=checkbox] { accent-color: var(--accent); margin: 0; }
@@ -70,29 +71,13 @@
       <span id="modes"><button data-m="classic" class="on">Classic</button><button data-m="skyline">Skyline</button></span>
     </div>
     <div class="ov-bar">
-      <div class="presets" id="presets">
-        <button data-p="murmuration" class="on">Murmuration</button>
-        <button data-p="school">School</button>
-        <button data-p="swarm">Swarm</button>
-      </div>
-      <span class="rule"></span>
-      <label class="classic-only"><input type="checkbox" id="hawk" checked> Hawk</label>
-      <button id="fly" data-sky>Fly hawk</button>
+      <button id="snd" data-sky title="Sound off" aria-label="Sound off"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5" fill="currentColor"/><circle cx="17.5" cy="16" r="2.5" fill="currentColor"/><path class="slash" d="M3 3l18 18"/></svg></button>
       <button id="scatter">Scatter</button>
-      <details class="tune" id="panel">
-        <summary>Tune</summary>
-        <div class="body">
-          <div class="ctl"><span>Separation</span><input type="range" id="sep" min="0.3" max="4" step="0.05"><output for="sep"></output></div>
-          <div class="ctl"><span>Alignment</span><input type="range" id="ali" min="0" max="4" step="0.05"><output for="ali"></output></div>
-          <div class="ctl"><span>Cohesion</span><input type="range" id="coh" min="0" max="4" step="0.05"><output for="coh"></output></div>
-          <div class="ctl"><span>Vision</span><input type="range" id="vis" min="2" max="14" step="0.5"><output for="vis"></output></div>
-        </div>
-      </details>
     </div>
     <div class="stats" id="stats"></div>
   </main>
 
-<script type="module" src="/projects/flock/flock.js?v=10"></script>
+<script type="module" src="/projects/flock/flock.js?v=24"></script>
   <script src="/sidebar.js?v=7"></script>
 </body>
 </html>
