@@ -266,7 +266,16 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   }
   const $snd = $('snd'), sndLabel = () => { $snd.title = sound.muted ? 'Sound off' : 'Sound on'; $snd.setAttribute('aria-label', $snd.title); $snd.classList.toggle('on', !sound.muted); };
   sndLabel(); $snd.addEventListener('click', () => { sound.toggle(); sndLabel(); });
-  $('scatter').addEventListener('click', () => { seed(N, CAP); if (X) X.reset(); });
+  $('scatter').addEventListener('click', () => {   // each bird bolts away from its neighbours' centre; flocking then pulls them back together
+    for (let i = 0; i < N; i++) {
+      const i3 = i * 3; let cx = 0, cy = 0, cz = 0, c = 0;
+      for (let j = 0; j < N; j++) { const j3 = j * 3, dx = pos[j3] - pos[i3], dy = pos[j3 + 1] - pos[i3 + 1], dz = pos[j3 + 2] - pos[i3 + 2]; if (dx * dx + dy * dy + dz * dz < 2500) { cx += dx; cy += dy; cz += dz; c++; } }
+      let ax = -cx, ay = -cy, az = -cz; const l = Math.hypot(ax, ay, az);
+      if (l < 1e-3) { ax = Math.random() - 0.5; ay = Math.random() - 0.5; az = Math.random() - 0.5; } else { ax += (Math.random() - 0.5) * l * 0.3; az += (Math.random() - 0.5) * l * 0.3; }
+      const k = P.spd * 1.8 / (Math.hypot(ax, ay, az) || 1);
+      vel[i3] += ax * k; vel[i3 + 1] += ay * k * 0.6; vel[i3 + 2] += az * k;
+    }
+  });
 
   // ── Idle: after 5 s of nothing the camera starts to spin; after 10 s the nav, title and controls fade away.
   //    Any movement, touch or key brings them back. A flying hawk counts as activity.
