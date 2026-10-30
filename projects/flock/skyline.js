@@ -3,7 +3,7 @@
 // through (plane, blimp, hang glider, jetpack, cloud, a parachutist).
 // flock.js owns the simulation and calls these hooks while the mode is on.
 import * as THREE from './vendor/three.module.min.js';
-import { createExtras } from './extras.js?v=4';
+import { createExtras } from './extras.js?v=9';
 
 export function create(ctx) {
   const { scene, camera, canvas, hawk, P, BX, BY, BZ, MAX_FORCE } = ctx;
@@ -83,6 +83,7 @@ export function create(ctx) {
   for (const side of [-1, 1]) for (const [zc, dr, hr] of [[-38, [10, 16], [10, 38]], [-62, [12, 18], [8, 26]]]) {   // the city runs on along the rail line, both ways, thinning out
     for (let x = 156; x < 352;) { const w = rr(10, 18), d = rr(dr[0], dr[1]), xc = side * (x + w / 2), h = rr(hr[0], hr[1]) * (1 - 0.55 * (x - 156) / 200); if (fits(xc, zc, w, d)) BLD.push({ x: xc, z: zc, w, d, h }); x += w + rr(3, 9); }
   }
+  for (const [x, z, w, d, h] of [[-176, -40, 15, 15, 96], [168, -42, 16, 16, 112], [-128, -96, 15, 15, 88], [132, -98, 16, 16, 104], [-224, -38, 14, 14, 72], [222, -40, 15, 15, 80]]) if (fits(x, z, w, d)) BLD.push({ x, z, w, d, h });   // taller towers out at the edges so the skyline is not so even
   const bldMat = new THREE.MeshLambertMaterial({ color: 0x888888, flatShading: true });
   const edgeMat = new THREE.LineBasicMaterial({ color: 0xffffff, transparent: true, opacity: 0.4 });
   const boxes = [], slots = [];
@@ -195,7 +196,7 @@ export function create(ctx) {
   // path: how far ahead of itself a visitor is felt; k: how hard birds flee (cloud is gentle).
   const KINDS = {
     plane:   { weight: 30, speed: 20, R: 90, k: 2.5, path: 130, y: [42, 50], drop: 1, ext: 90 },
-    blimp:   { weight: 22, speed: 10, R: 120, k: 2.0, path: 150, y: [50, 56], drop: 12.4, ext: 150 },
+    blimp:   { weight: 22, speed: 10, R: 150, k: 2.0, path: 180, y: [60, 66], drop: 18.2, ext: 180 },
     tanker: { weight: 0, speed: 24, R: 90, k: 2.5, path: 130, y: [34, 40], drop: 1, ext: 110 },
     military: { weight: 3, speed: 22, R: 100, k: 2.5, path: 130, y: [44, 52], drop: 1, ext: 110 },
     glider:  { weight: 14, speed: 9,  R: 56, k: 1.6, path: 60, y: [42, 48], drop: 4.4, ext: 60 },
@@ -220,9 +221,12 @@ export function create(ctx) {
     for (const b of boxes) if (b.y1 > y && b.x0 - r < x && b.x1 + r > x && b.z0 - r < z && b.z1 + r > z) y = b.y1;
     return y;
   }
+  const yAxis = new THREE.Vector3(0, 1, 0), zAxis = new THREE.Vector3(0, 0, 1), rollQ = new THREE.Quaternion();
   function launchPass(kind, at) {
     if (fl.on) return;
+    const auto = !kind;
     if (!kind) { let r = Math.random() * Object.values(KINDS).reduce((a, k) => a + k.weight, 0); for (const k in KINDS) { r -= KINDS[k].weight; if (r <= 0) { kind = k; break; } } }
+    if (auto && kind === 'plane' && Math.random() < 0.35 && EX.requestLanding()) return;   // some visiting planes land at the airport instead of flying past
     const cfg = KINDS[kind], sign = Math.random() < 0.5 ? -1 : 1, ang = (Math.random() < 0.5 ? 0 : Math.PI / 2) + (sign < 0 ? Math.PI : 0) + rnd(-0.6, 0.6);   // any heading, roughly along an axis
     meshes[kind] ??= fadeable(MESH[kind]()); fl.mesh = meshes[kind]; scene.add(fl.mesh);
     fl.kind = kind; fl.cfg = cfg; fl.dir.set(Math.cos(ang), 0, Math.sin(ang));
@@ -231,9 +235,9 @@ export function create(ctx) {
     let lane = rnd(cfg.y[0], cfg.y[1]);
     for (let k = 0; k <= 30; k++) lane = Math.max(lane, surfMax(fl.p.x + fl.dir.x * 2 * ext * k / 30, fl.p.z + fl.dir.z * 2 * ext * k / 30, 16) + 8 + cfg.drop + BOB);   // clear of everything under the whole pass
     fl.y0 = lane; fl.p.y = lane;
-    fl.end = ext; fl.on = true; fl.base = kind === 'blimp' ? 2.6 : kind === 'military' ? 1.2 : 1;
+    fl.end = ext; fl.on = true; fl.base = kind === 'blimp' ? 3.8 : kind === 'military' ? 1.2 : 1;
     fl.jumpers = kind === 'military' ? 14 : 0; fl.jumpAt = 0; fl.dropped = false;   // only the rare transport drops people, and then a whole stream
-    fl.mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 0, 1), fl.dir);
+    fl.mesh.quaternion.setFromAxisAngle(new THREE.Vector3(0, 1, 0), Math.atan2(fl.dir.x, fl.dir.z));   // a plain turn about the vertical, so nothing can roll over
   }
   // Clouds are their own thing: several at once, each its own speed, height and size,
   // all drifting the same way, through the buildings if they like. Birds shy from them gently.
@@ -351,7 +355,8 @@ export function create(ctx) {
   const smooth = a => { a = a < 0 ? 0 : a > 1 ? 1 : a; return a * a * (3 - 2 * a); };
   function hillH(x, z) {   // smooth rolling hills behind the city that ease down to the sea; flat everywhere else, and along the highway
     if (z > -108) return 0;
-    const w = smooth((-z - 112) / 60) * (1 - smooth((-z - 262) / 58)) * (1 - smooth((Math.abs(x) - 430) / 70)) * smooth((Math.abs(x - 48) - 10) / 22);
+    let w = smooth((-z - 112) / 60) * (1 - smooth((-z - 262) / 58)) * (1 - smooth((Math.abs(x) - 430) / 70)) * smooth((Math.abs(x - 48) - 10) / 22);
+    { const fx = Math.abs(x - 290) - 180, fz = Math.abs(z + 250) - 40, m = Math.max(fx, fz); if (m < 40) w *= smooth(m / 40); }   // a flat pad for the airport
     if (w <= 0) return 0;
     return w * (12 * (1 + Math.sin(x * 0.011 + 1) * Math.sin(z * 0.013)) + 3.5 * (1 + Math.sin(x * 0.027 + z * 0.019)) + 2 * Math.sin(x * 0.05 - z * 0.04) + 4);
   }
@@ -938,10 +943,11 @@ export function create(ctx) {
     if (T && Math.hypot(h.p.x - T.x, h.p.z - T.z) > 140) T = null;   // the light only reaches so far
     if (T) h.aim.copy(T); else { const sweep = h.yaw + Math.sin(h.t * 0.45) * 0.9, reach = 22 + 12 * Math.sin(h.t * 0.31), gx = h.p.x + Math.sin(sweep) * reach, gz = h.p.z + Math.cos(sweep) * reach; h.aim.set(gx, topAt(gx, gz) + 0.2, gz); }
     if (!h.beam.visible) h.beamG.copy(h.aim); else h.beamG.lerp(h.aim, T ? 0.12 : 0.05);
-    beamD.copy(h.beamG).sub(g.position).add(fpos.set(0, 1.8, -2)); const L = beamD.length() || 1, rad = T ? 3.2 : 7;
-    h.beam.position.copy(g.position).addScaledVector(beamD, 0.5).add(fpos.set(0, -1.8, 2)); h.beam.quaternion.setFromUnitVectors(fpos.set(0, -1, 0), beamD.divideScalar(L)); h.beam.scale.set(rad, L, rad);
-    h.spot.position.copy(h.beamG); h.spot.scale.set(7, 1, 7); h.glow.position.copy(h.beamG);
-    const on = h.fade > 0.02; h.beam.visible = on; h.spot.visible = on && !T; h.glow.visible = on && !!T; h.lm.opacity = 0.1 * h.fade; h.sm.opacity = 0.3 * h.fade;
+    const onFire = !!(T && h.lock && h.lock.fire);
+    beamD.copy(h.beamG).sub(g.position).add(fpos.set(0, 1.8, -2)); const L0 = beamD.length() || 1, L = T && !onFire ? Math.max(1, L0 - 4) : L0, rad = T ? 3.2 : 7;   // a beam on an object stops just short of it, so it never hides it
+    h.beam.position.copy(g.position).addScaledVector(beamD, 0.5 * L / L0).add(fpos.set(0, -1.8, 2)); h.beam.quaternion.setFromUnitVectors(fpos.set(0, -1, 0), beamD.divideScalar(L0)); h.beam.scale.set(rad, L, rad);
+    h.spot.position.copy(h.beamG); h.spot.scale.set(7, 1, 7);
+    const on = h.fade > 0.02; h.beam.visible = on; h.spot.visible = on && (!T || onFire); h.glow.visible = false; h.lm.opacity = 0.1 * h.fade; h.sm.opacity = 0.3 * h.fade;
   }
   const beamD = new THREE.Vector3();
 
@@ -969,7 +975,7 @@ export function create(ctx) {
   }
 
   const S = { get windStr() { return windStr; }, wind, get tw() { return tw; }, fire, helis, get storms() { return SND.storms; } };
-  const K = { SEGS, HWYP, airStart, airStep, grabbed, PK, THREE, world, scene, camera, GROUND, BX, BZ, reduce: ctx.reduce, rnd, clamp, rand, box, figure, fadeable, solidMat, accentMat, milMat, edgeMat, bldMat, waterMat, terrainY, hillH, PEAKS, boxes, slots, CL, LAKE, CAMP, TOWERS, ISL, S, event: (n, p) => ctx.sound?.event(n, p), scatter, shake, makeSmoke, stepSmoke, fishGeo, fishMat, UP: new THREE.Vector3(0, 1, 0) };
+  const K = { boats, SEGS, HWYP, airStart, airStep, grabbed, PK, THREE, world, scene, camera, GROUND, BX, BZ, reduce: ctx.reduce, rnd, clamp, rand, box, figure, fadeable, solidMat, accentMat, milMat, edgeMat, bldMat, waterMat, terrainY, hillH, PEAKS, boxes, slots, CL, LAKE, CAMP, TOWERS, ISL, S, event: (n, p) => ctx.sound?.event(n, p), scatter, shake, makeSmoke, stepSmoke, fishGeo, fishMat, UP: new THREE.Vector3(0, 1, 0) };
   const EX = createExtras(K);
 
   // ── Rain and snow: once five storms are up they all rain, light blue; ordinary clouds over the mountains snow ─
@@ -1198,12 +1204,13 @@ export function create(ctx) {
   }
 
   // ── Hooks the engine calls ───────────────────────────────────────────
-  // The flock's centre of gravity wanders: a point drifts between faraway places (forest, coast, mountains, city) and every bird feels a soft pull toward it.
-  const roam = { x: 0, y: 0, z: 0, tx: 0, ty: 0, tz: 0, t: 40 };
+  // The flock splits into groups that each wander toward their own faraway place (forest, coast, mountains, city), now and then all gathering at one for a while.
+  const NG = 5, gather = { t: rnd(200, 360), until: 0, x: 0, z: 0 };
+  const roams = Array.from({ length: NG }, () => { const r = { x: rnd(-0.6, 0.6) * BX, y: rnd(-10, 25), z: rnd(-0.6, 0.7) * BZ, t: rnd(10, 60) }; r.tx = r.x; r.ty = r.y; r.tz = r.z; return r; });
+  function pickRoam(r) { r.t = rnd(70, 150); r.tx = rnd(-0.85, 0.85) * BX; r.tz = rnd(-0.75, 0.9) * BZ; r.ty = rnd(-15, 30); if (clock < gather.until) { r.tx = gather.x + rnd(-40, 40); r.tz = gather.z + rnd(-40, 40); } }
   function stepRoam(dt) {
-    roam.t -= dt;
-    if (roam.t <= 0) { roam.t = rnd(70, 140); roam.tx = rnd(-0.8, 0.8) * BX; roam.tz = rnd(-0.7, 0.85) * BZ; roam.ty = rnd(-15, 30); }
-    const k = Math.min(1, dt * 0.03); roam.x += (roam.tx - roam.x) * k; roam.y += (roam.ty - roam.y) * k; roam.z += (roam.tz - roam.z) * k;
+    gather.t -= dt; if (gather.t <= 0) { gather.t = rnd(300, 480); gather.until = clock + 75; gather.x = rnd(-0.6, 0.6) * BX; gather.z = rnd(-0.5, 0.7) * BZ; for (const r of roams) r.t = 0; }
+    for (const r of roams) { r.t -= dt; if (r.t <= 0) pickRoam(r); const k = Math.min(1, dt * 0.03); r.x += (r.tx - r.x) * k; r.y += (r.ty - r.y) * k; r.z += (r.tz - r.z) * k; }
   }
   function before(dt) {
     clock += dt; if (!ctx.reduce) stepRoam(dt);
@@ -1337,7 +1344,7 @@ export function create(ctx) {
       const d = Math.hypot(rx, ry, rz);
       if (d < R) { const u = 1 - d / R, k = MAX_FORCE * CLOUD_K * u ** 1.5 / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u * CLOUD_K); }
     }
-    { const dx = roam.x - px, dy = roam.y - py, dz = roam.z - pz, d = Math.hypot(dx, dy, dz); if (d > 70) { const k = MAX_FORCE * 0.3 * Math.min(1, (d - 70) / 350) / d; out[0] += dx * k; out[1] += dy * k * 0.4; out[2] += dz * k; } }   // the wandering centre
+    { const r = roams[i % NG], dx = r.x - px, dy = r.y - py, dz = r.z - pz, d = Math.hypot(dx, dy, dz); if (d > 60) { const k = MAX_FORCE * 0.5 * Math.min(1, (d - 60) / 250) / d; out[0] += dx * k; out[1] += dy * k * 0.4; out[2] += dz * k; } }   // each group's wandering centre
     out[0] += wind.x * breeze; out[2] += wind.z * breeze;   // the breeze moves everything, everywhere
     if (tw.on && tw.env > 0.02) {   // the tornado: spin, suck in, lift
       const dx = px - tw.p.x, dz = pz - tw.p.z, d2 = dx * dx + dz * dz;
@@ -1376,7 +1383,23 @@ export function create(ctx) {
       if (k === 0) p.x = b.x0 - pad; else if (k === 1) p.x = b.x1 + pad; else if (k === 2) p.y = b.y0 - pad; else if (k === 3) p.y = b.y1 + pad; else if (k === 4) p.z = b.z0 - pad; else p.z = b.z1 + pad;
     }
   }
-  const hvec = new THREE.Vector3();
+  const hvec = new THREE.Vector3(), hOut = [0, 0, 0];
+  function solids(px, py, pz, out) {   // a copy of the building, mountain and hill repulsion the birds feel
+    for (const b of boxes) {
+      if (px < b.x0 - PAD || px > b.x1 + PAD || pz < b.z0 - PAD || pz > b.z1 + PAD || py > b.y1 + PAD) continue;
+      let dx = px - clamp(px, b.x0, b.x1), dy = py - clamp(py, b.y0, b.y1), dz = pz - clamp(pz, b.z0, b.z1), d2 = dx * dx + dy * dy + dz * dz;
+      if (d2 >= PAD * PAD) continue;
+      if (d2 < 1e-6) { dy = 1; d2 = 1; }
+      const d = Math.sqrt(d2), k = MAX_FORCE * 2.2 * (1 - d / PAD) / d; out[0] += dx * k; out[1] += dy * k; out[2] += dz * k;
+    }
+    for (const p of PEAKS) {
+      const dx = px - p.x, dz = pz - p.z, d = Math.hypot(dx, dz);
+      if (d >= p.r + 4 || py > GROUND + p.h + PAD) continue;
+      const s2 = p.h / p.r, n = 1 / Math.sqrt(1 + s2 * s2), gap = Math.max(0, (py - GROUND - p.h * (1 - Math.min(d, p.r) / p.r)) * n);
+      if (gap >= PAD) continue;
+      const k = MAX_FORCE * 2.2 * (1 - gap / PAD), o = d > 1e-3 ? s2 * n / d : 0; out[0] += dx * o * k; out[1] += n * k; out[2] += dz * o * k;
+    }
+  }
   function startHawk() {
     if (hv.on) return;
     const side = Math.random() < 0.5 ? -1 : 1, alongX = Math.random() < 0.6;
@@ -1396,7 +1419,10 @@ export function create(ctx) {
       hawk.v.lerp(hvec, Math.min(1, dt * 1.2)); hawk.p.addScaledVector(hawk.v, dt);
       if (Math.abs(hawk.p.x) > BX + 42 || Math.abs(hawk.p.z) > BZ + 42) { endHawk(); return; }
     } else ctx.aiHawk(dt);
+    hOut[0] = hOut[1] = hOut[2] = 0; solids(hawk.p.x + hawk.v.x * 0.9, hawk.p.y + hawk.v.y * 0.9, hawk.p.z + hawk.v.z * 0.9, hOut); solids(hawk.p.x, hawk.p.y, hawk.p.z, hOut);   // looks ahead and steers clear
+    hawk.v.x += hOut[0] * dt * 1.5; hawk.v.y += hOut[1] * dt * 1.5; hawk.v.z += hOut[2] * dt * 1.5; hawk.p.x += hOut[0] * dt * 0.3; hawk.p.y += hOut[1] * dt * 0.3; hawk.p.z += hOut[2] * dt * 0.3;
     pushOut(hawk.p, 2.5);
+    { const ty = terrainY(hawk.p.x, hawk.p.z); if (hawk.p.z > 50 || ty > GROUND + 0.5) hawk.p.y = Math.max(hawk.p.y, ty + 17); }   // above the tree tops
     if (tw.on) { const u = twPush(hawk.p, dt, 0.8); if (u > 0) H.yaw += 0.5 * u * dt; }   // a moderate tug, a little spin
     hawk.p.y = clamp(hawk.p.y, GROUND + 2, BY + 8);
     const v = hawk.v, m = v.length() || 1;
@@ -1419,7 +1445,7 @@ export function create(ctx) {
       const fade = edgeFade(Math.abs(fl.p.x * fl.dir.x + fl.p.z * fl.dir.z), fl.end, fl.cfg.ext); fl.mesh.visible = fade > 0.01; SND.visFade = fade;   // fades away across the outer margin
       for (const e of fl.mesh.userData.fade) { if (e.src) e.m.color.copy(e.src.color); e.m.opacity = fade; }
       if (fl.kind === 'jetpack') { const f = fl.mesh.getObjectByName('flame'); f.scale.set(1, 0.8 + Math.random() * 0.6, 1); }
-      if (fl.kind === 'glider') fl.mesh.rotation.z = Math.sin(clock * 0.7) * 0.12;
+      if (fl.kind === 'glider') { fl.mesh.quaternion.setFromAxisAngle(yAxis, Math.atan2(fl.dir.x, fl.dir.z)).multiply(rollQ.setFromAxisAngle(zAxis, Math.sin(clock * 0.7) * 0.12)); }   // (setting rotation.z directly rolled it over whenever it flew toward -z)
     }
     for (const c of clouds) {
       c.mesh.position.copy(c.p); c.mat.color.copy(c.base.color); c.mat.emissive.copy(c.base.emissive);
@@ -1481,7 +1507,7 @@ export function create(ctx) {
     blocked(x, y, z) { for (const b of boxes) if (x > b.x0 - 3 && x < b.x1 + 3 && y > b.y0 - 3 && y < b.y1 + 3 && z > b.z0 - 3 && z < b.z1 + 3) return true; return y < terrainY(x, z) + 3 && terrainY(x, z) > GROUND + 0.01; },   // inside or hugging a building
     get shake() { return shakeAmt; },
     surface: (x, z) => Math.max(terrainY(x, z), boxTop(x, z)),
-    boxes, terrainY, PEAKS, dbg: { roam, EX, VEH, boats, camp, helis, fl, fobj, hut, fire, puffs, CL, SEGS, NF, fx, fz, fi, LO, HI, get tw() { return tw; } },   // for tests
+    boxes, terrainY, PEAKS, dbg: { roams, EX, VEH, boats, camp, helis, fl, fobj, hut, fire, puffs, CL, SEGS, NF, fx, fz, fi, LO, HI, get tw() { return tw; } },   // for tests
     get hawkOn() { return hv.on; },
     spawn(k) {
       if (EX.spawn(k)) return; if (k === 'hawk') { startHawk(); return; } if (k === 'heli') { startHeli(); return; } if (k === 'scout') { startScout(); return; } if (k === 'boat') { startBoat('sail'); return; } if (k === 'ship') { startBoat('ship'); return; } if (k === 'pirate') { startBoat('pirate'); return; } if (k === 'fire') { startFire(true); return; }

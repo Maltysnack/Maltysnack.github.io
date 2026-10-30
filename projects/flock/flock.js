@@ -1,5 +1,7 @@
   import * as THREE from './vendor/three.module.min.js';
-import { createSound } from './sound.js?v=2';
+import { createSound } from './sound.js?v=5';
+const skyP = import('./skyline.js?v=31');   // start fetching the world at once, not when the intro asks for it
+const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() => {});   // and the heading font the intro draws with
 
   // ── Parameters ──────────────────────────────────────────────────────
   const PRESETS = {
@@ -234,7 +236,7 @@ import { createSound } from './sound.js?v=2';
     if (!reduce && orbit.idle > 5) orbit.th += dt * 0.05;
     orbit.moved = (orbit.moved ?? 99) + dt;
     if (X && !reduce && orbit.idle > 5 && orbit.moved > 60) {   // left alone, the view drifts after the flock as its centre wanders
-      let sx = 0, sz = 0, n = 0; for (let i = 0; i < N; i += 9) { sx += pos[i * 3]; sz += pos[i * 3 + 2]; n++; }
+      let sx = 0, sz = 0, n = 0; for (let i = 0; i < N; i += 5) { sx += pos[i * 3]; sz += pos[i * 3 + 2]; n++; }   // follows one of the groups
       if (n) { const k = Math.min(1, dt * 0.04); orbit.tx += (sx / n * 0.8 - orbit.tx) * k; orbit.tz += (sz / n * 0.8 - orbit.tz) * k; }
     }
     camera.position.set(orbit.tx + orbit.r * Math.sin(orbit.ph) * Math.sin(orbit.th), orbit.ty + orbit.r * Math.cos(orbit.ph), orbit.tz + orbit.r * Math.sin(orbit.ph) * Math.cos(orbit.th));
@@ -304,7 +306,7 @@ import { createSound } from './sound.js?v=2';
   async function setMode(m) {
     if (m === mode) return;
     if (m === 'skyline') {
-      sky ??= (await import('./skyline.js?v=26')).create(ctx);
+      sky ??= (await skyP).create(ctx);
       mode = m; X = sky; seed(N, CAP); sky.enable();
     } else {
       mode = m; if (X) X.disable(); X = null;
@@ -319,7 +321,7 @@ import { createSound } from './sound.js?v=2';
   // ?debug adds buttons to spawn each visitor, so nothing waits on the ambient timers.
   if (new URLSearchParams(location.search).has('debug')) {
     const bar = document.querySelector('.ov-bar');
-    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'storm', 'strike', 'chute', 'gust', 'hawk', 'heli', 'boat', 'ship', 'pirate', 'fire', 'scout', 'yeti', 'ufo', 'train', 'balloon', 'fireworks', 'tornado', 'storms', 'military']) {
+    for (const k of ['plane', 'blimp', 'glider', 'jetpack', 'cloud', 'storm', 'strike', 'chute', 'gust', 'hawk', 'heli', 'boat', 'ship', 'pirate', 'fire', 'scout', 'yeti', 'ufo', 'train', 'balloon', 'fireworks', 'jets', 'platypus', 'roadcar', 'airliner', 'cessna', 'whale', 'tornado', 'storms', 'military']) {
       const b = document.createElement('button'); b.textContent = k; b.dataset.sky = '';
       b.addEventListener('click', () => X && X.spawn(k)); bar.prepend(b);
     }
@@ -333,7 +335,8 @@ import { createSound } from './sound.js?v=2';
     const reveal = () => { introLock = false; idleSec = 0; html.dataset.revealing = ''; html.removeAttribute('data-intro'); setTimeout(() => html.removeAttribute('data-revealing'), 2200); };   // CSS fades the bar and controls in
     setMode('skyline').then(async () => {
       if (!intro) { reveal(); return; }
-      try { await document.fonts.load('900 120px "Big Shoulders Display"'); } catch (e) { /* falls back to the stack's next font */ }
+      // get the shaders compiled off the main thread and the font in, but never wait long: the Hello. should not lag behind the birds
+      await Promise.race([Promise.all([renderer.compileAsync(scene, camera).catch(() => {}), fontP]), new Promise(r => setTimeout(r, 1200))]);
       const hello = document.createElement('canvas'); hello.id = 'hello';
       hello.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:5;transition:opacity .3s ease';
       canvas.parentElement.appendChild(hello);

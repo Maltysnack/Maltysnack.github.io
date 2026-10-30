@@ -27,6 +27,7 @@ export function createSound(camera) {
     L('tornado', out => { const x = n(90, 1.4, 'lowpass'), gg = g(1.4), y = n(300, 2), hh = g(0.35); x.connect(gg).connect(out); lfo(gg.gain, 0.5, 0.5); y.connect(hh).connect(out); lfo(y.frequency, 0.35, 180); return {}; });
     L('fire', out => { const x = n(260, 0.5, 'lowpass'), gg = g(0.4); x.connect(gg).connect(out); return {}; });
     L('alarm', out => { const o = ac.createOscillator(), f = flt('lowpass', 1400), gg = g(0.1); o.type = 'sawtooth'; o.frequency.value = 760; o.connect(f).connect(gg).connect(out); lfo(o.frequency, 0.45, 260, 'triangle'); o.start(); return {}; });   // a watchtower siren
+    L('surf', out => { const x = n(500, 0.5, 'lowpass'), gg = g(0.5); x.connect(gg).connect(out); lfo(gg.gain, 0.07, 0.35); lfo(x.frequency, 0.07, 200); return {}; });   // breakers on the beach
     L('river', out => { const x = n(700, 0.6), gg = g(0.18); x.connect(gg).connect(out); lfo(x.frequency, 0.3, 300); lfo(gg.gain, 0.5, 0.05); return {}; });
     // a low minor drone for the stormy bed, always running, its bus decides whether it is heard
     for (const note of [36, 43, 46, 51]) { const o = ac.createOscillator(), gg = g(0.016), f = flt('lowpass', 220); o.type = 'sine'; o.frequency.value = hz(note); o.detune.value = R(-8, 8); o.connect(f).connect(gg).connect(bus.storm); lfo(f.frequency, 0.07, 140); lfo(gg.gain, 0.11, 0.02); o.start(); }
@@ -132,6 +133,23 @@ export function createSound(camera) {
       for (const m of [1, 1.26]) { const o = ac.createOscillator(), gg = g(0.0001), f = flt('lowpass', 700); o.type = 'sawtooth'; o.frequency.value = 220 * m; o.connect(f).connect(gg).connect(out); gg.gain.setValueAtTime(0.0001, t); gg.gain.exponentialRampToValueAtTime(0.12, t + 0.06); gg.gain.setValueAtTime(0.12, t + 0.9); gg.gain.exponentialRampToValueAtTime(0.0001, t + 1.5); o.start(t); o.stop(t + 1.6); }
     } else if (name === 'burner') {
       const s2 = noise(), f = flt('bandpass', 500, 0.8), ng = g(0.0001); s2.connect(f).connect(ng).connect(out); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.25, t + 0.15); ng.gain.setValueAtTime(0.25, t + 0.8); ng.gain.exponentialRampToValueAtTime(0.0001, t + 1.4); s2.start(t, 1); s2.stop(t + 1.5);
+    } else if (name === 'jets') {   // a roar that sweeps past, then a low boom
+      const sn = noise(), bf = flt('bandpass', 400, 0.7), ng = g(0.0001); sn.connect(bf).connect(ng).connect(out); bf.frequency.setValueAtTime(300, t); bf.frequency.exponentialRampToValueAtTime(2200, t + 2.5); bf.frequency.exponentialRampToValueAtTime(260, t + 7);
+      ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.9, t + 2.5); ng.gain.exponentialRampToValueAtTime(0.0001, t + 7); sn.start(t, 0.5); sn.stop(t + 7.2);
+      tone(46, t + 2.4, 0.02, 1.8, 0.9, 'sine', out);
+    } else if (name === 'kookaburra') {   // a laugh that speeds up and falls away
+      let tt = t; for (let k = 0; k < 9; k++) { const f = 900 - k * 40 + (k % 2 ? 160 : 0); const o = ac.createOscillator(), gg = g(0.0001), bf = flt('bandpass', f, 3); o.type = 'sawtooth'; o.frequency.setValueAtTime(f, tt); o.frequency.exponentialRampToValueAtTime(f * 0.7, tt + 0.16); o.connect(bf).connect(gg).connect(out); gg.gain.setValueAtTime(0.0001, tt); gg.gain.exponentialRampToValueAtTime(0.12, tt + 0.02); gg.gain.exponentialRampToValueAtTime(0.0001, tt + 0.17); o.start(tt); o.stop(tt + 0.2); tt += 0.17 - k * 0.008; }
+    } else if (name === 'chuff') {
+      const sn = noise(), bf = flt('bandpass', 700, 0.8), ng = g(0.0001); sn.connect(bf).connect(ng).connect(out); ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.22, t + 0.03); ng.gain.exponentialRampToValueAtTime(0.0001, t + 0.28); sn.start(t, Math.random() * 3); sn.stop(t + 0.3);
+    } else if (name === 'whale') {   // a long, low song with a wobble
+      const o = ac.createOscillator(), gg = g(0.0001); o.type = 'sine'; o.frequency.setValueAtTime(95, t); o.frequency.linearRampToValueAtTime(175, t + 2.4); o.frequency.linearRampToValueAtTime(110, t + 5); lfo(o.frequency, 5, 6); o.connect(gg).connect(out);
+      gg.gain.setValueAtTime(0.0001, t); gg.gain.exponentialRampToValueAtTime(0.25, t + 1.2); gg.gain.setValueAtTime(0.25, t + 3.5); gg.gain.exponentialRampToValueAtTime(0.0001, t + 5.5); o.start(t); o.stop(t + 5.6);
+    } else if (name === 'airliner') {
+      const sn = noise(), bf = flt('bandpass', 500, 0.8), ng = g(0.0001); sn.connect(bf).connect(ng).connect(out); bf.frequency.setValueAtTime(350, t); bf.frequency.exponentialRampToValueAtTime(1200, t + 4); bf.frequency.exponentialRampToValueAtTime(300, t + 9);
+      ng.gain.setValueAtTime(0.0001, t); ng.gain.exponentialRampToValueAtTime(0.55, t + 3.5); ng.gain.exponentialRampToValueAtTime(0.0001, t + 9); sn.start(t, 1); sn.stop(t + 9.2);
+    } else if (name === 'cessna') {   // a small engine buzz that passes
+      const o = ac.createOscillator(), gg = g(0.0001), f2 = flt('lowpass', 900); o.type = 'sawtooth'; o.frequency.setValueAtTime(118, t); o.frequency.linearRampToValueAtTime(150, t + 3); o.frequency.linearRampToValueAtTime(110, t + 6); lfo(o.frequency, 18, 6); o.connect(f2).connect(gg).connect(out);
+      gg.gain.setValueAtTime(0.0001, t); gg.gain.exponentialRampToValueAtTime(0.14, t + 1.5); gg.gain.setValueAtTime(0.14, t + 3); gg.gain.exponentialRampToValueAtTime(0.0001, t + 6); o.start(t); o.stop(t + 6.2);
     } else if (name === 'land') {
       if (t - lastLand < 0.5) return; lastLand = t;
       const o = ac.createOscillator(), gg = g(0.0001); o.type = 'sine'; o.frequency.setValueAtTime(3600, t); o.frequency.exponentialRampToValueAtTime(2400, t + 0.05); o.connect(gg).connect(out);
@@ -212,6 +230,7 @@ export function createSound(camera) {
       for (const F of s.fires) { if (F.l <= 0.02) continue; const w = where({ x: F.x, y: -58, z: F.z }), near = Math.pow(clamp(1 - w.d / 170, 0, 1), 1.6); fire = Math.max(fire, F.l * (0.12 * w.gain + 0.9 * near)); if (Math.random() < dt * 18 * F.l * near) pop(w); }
       set('fire', fire * 0.9);
       set('river', 0.5 * where({ x: 20, y: -58, z: 20 }).gain);
+      set('surf', 0.7 * Math.pow(clamp(1 - where({ x: -330, y: -58, z: -335 }).d / 260, 0, 1), 1.5));
       set('alarm', s.alarm.l * where({ x: s.alarm.x, y: -40, z: s.alarm.z }).gain * 0.4);
       drive('vis', s.vis ? s.vis.kind : '', s.vis ? s.vis.p : null, dt, s.visFade);
       drive('heli0', 'heli', s.helis[0].p, dt, s.helis[0].fade);
