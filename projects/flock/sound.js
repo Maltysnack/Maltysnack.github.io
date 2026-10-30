@@ -4,7 +4,6 @@ export function createSound(camera) {
   let ac = null, master, fx, musicBus, bus = {}, loops = {}, voices = {}, rev, noiseBuf, active = false, lastLand = 0, nextChirp = 8, mood = { calm: 1, happy: 0, storm: 0 }, moodT = 0, moodBase = 'calm', step = 0, chordT = 0, melT = 0;
   const LEVEL = 0.3;
   let muted = true;   // off until asked for
-  try { muted = localStorage.getItem('flock-sound') !== 'on'; } catch (e) { /* storage can be blocked */ }
   const R = (a, b) => a + Math.random() * (b - a), clamp = (v, a, b) => v < a ? a : v > b ? b : v, hz = n => 440 * Math.pow(2, (n - 69) / 12);
   const cam = { x: 0, y: 0, z: 0, rx: 1, ry: 0, rz: 0 };
 
@@ -217,7 +216,7 @@ export function createSound(camera) {
     get muted() { return muted; },
     gesture() { if (!ac) build(); if (ac.state === 'suspended') ac.resume(); setMaster(); },
     setActive(on) { active = on; setMaster(); },
-    toggle() { muted = !muted; try { localStorage.setItem('flock-sound', muted ? 'off' : 'on'); } catch (e) { /* storage can be blocked */ } setMaster(); if (!muted && !ac) api.gesture(); return muted; },
+    toggle() { muted = !muted; setMaster(); if (!muted && !ac) api.gesture(); return muted; },
     event,
     update(s, dt) {
       if (!ac || !active || muted || ac.state !== 'running') return;
