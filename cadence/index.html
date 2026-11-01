@@ -102,7 +102,7 @@ body.moved .fbtn,#focus.adding .fbtn{opacity:1}
   </div>
   <div class="cols" id="cols"></div>
   <div class="bottom">
-    <input id="add" class="addin" placeholder="Add anything:  Pullups every45m  ·  Run before1800  ·  Pickup @1730  ·  or paste a list" aria-label="Add">
+    <input id="add" class="addin" placeholder="Stretch every120m  ·  Call mum by1600  ·  Pickup @1530" aria-label="Add">
     <button class="begin" id="b-begin" data-act="begin">Start</button>
   </div>
 </div>
@@ -113,7 +113,7 @@ body.moved .fbtn,#focus.adding .fbtn{opacity:1}
   <button class="fbtn snd" id="b-snd" data-act="snd">Alerts</button>
   <button class="fbtn" id="b-add" data-act="cadd" aria-label="Add">+</button>
   <button class="fbtn" id="b-back" data-act="setup" aria-label="Back to setup">&lt;</button>
-  <input id="cadd" class="cadd" hidden placeholder="Add:  Pullups every45m  ·  Pickup @1730  ·  Run by1800" aria-label="Add">
+  <input id="cadd" class="cadd" hidden placeholder="Stretch every120m  ·  Call mum by1600  ·  Pickup @1530" aria-label="Add">
 </div>
 
 <div id="toast" aria-live="polite"></div>
@@ -134,11 +134,7 @@ const hm2ms=hm=>{const [h,m]=hm.split(':').map(Number);const d=new Date();d.setH
 function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,doneDate:'',warned:0,when:0,fin:0,...o}}
 const water=()=>mk('every','Drink water',{n:30}),stretch=()=>mk('every','Stand up and stretch',{n:60});
 function fresh(){return {v:3,lead:30,ctx:'Home',places:[
-  {name:'Home',items:[mk('every','Pullups',{n:45}),water(),stretch(),mk('every','Apply for 3 jobs',{n:90}),
-    mk('random','Go for a run',{to:'18:00'}),mk('random','Do the washing',{to:'20:00'}),mk('random','Take a walk',{to:'16:00'}),
-    mk('at','Pick up partner',{at:'17:30'}),mk('at','Lunch',{at:'12:30'})]},
-  {name:'Work',items:[water(),stretch(),mk('at','Pick up partner',{at:'17:30'}),mk('at','Lunch',{at:'12:30'})]},
-  {name:'Library',items:[water(),mk('every','Apply for 3 jobs',{n:90})]}]}}
+  {name:'Home',items:[water(),mk('random','Take a walk',{to:'16:00'}),mk('at','Lunch',{at:'12:30'})]}]}}
 
 let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
 if(!S||S.v!==3||!S.places?.length)S=fresh();
