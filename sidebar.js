@@ -61,6 +61,7 @@
     { href: '/projects/algorithms/', label: 'Algorithms' },
     { href: '/games/dnd/',           label: 'dnd' },
     { href: '/games/duoclue/',       label: 'Duoclue' },
+    { href: '/cadence/',             label: 'Cadence' },
   ];
 
   const navLinks = NAV.map(function (item) {

@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="en-AU">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cadence</title>
+<link id="ico" rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect width=%2732%27 height=%2732%27 fill=%27%231a1814%27/%3E%3Ccircle cx=%2716%27 cy=%2716%27 r=%277%27 fill=%27%23e6e2d9%27/%3E%3C/svg%3E">
+<style>
+/* "Paper": off-white, near-black ink, hairlines, square corners, system type, one weight of ultra-light numerals. */
+:root{--bg:#e6e2d9;--bgimg:linear-gradient(160deg,#ece8df 0%,#e2ddd2 55%,#d6d0c4 100%);--panel:#f2efe8;--ink:#1a1814;--mute:rgba(26,24,20,.58);--line:#c9c4b8;--hover:#e8e4da;
+  --sys:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",system-ui,sans-serif;color-scheme:light}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{margin:0;background:var(--bg) var(--bgimg) fixed;color:var(--ink);font:15px/1.4 var(--sys);overflow:hidden;padding:0 20px}
+button,input{font:inherit;color:inherit;background:var(--panel);border:1px solid var(--line);border-radius:0;padding:4px 8px}
+button{cursor:pointer}
+button:hover{background:var(--hover)}
+:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+h1,h2{margin:0}
+
+/* ---------- setup ---------- */
+#setup{height:100%;min-width:1040px;display:grid;grid-template-rows:auto minmax(0,1fr) auto;gap:16px;padding:18px 0}
+.top{display:flex;align-items:center;justify-content:space-between;gap:24px}
+.brand h1{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.seg{display:flex;align-items:center;gap:6px}
+.seg button.on{background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.seg input{width:110px}
+.lk{border-color:transparent;color:var(--mute);text-decoration:underline;background:none}
+.lk:hover{background:none;color:var(--ink)}
+
+.cols{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;min-height:0;align-items:start}
+.col{background:var(--panel);border:1px solid var(--line);padding:12px;display:flex;flex-direction:column;max-height:100%;min-height:0;gap:8px}
+.ch{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.ch h2{font-size:14px;font-weight:600;letter-spacing:.01em}
+.ch label{font-size:13px;color:var(--mute);display:flex;align-items:center;gap:6px}
+.list{min-height:0;overflow:auto;display:flex;flex-direction:column}
+.row{display:flex;align-items:center;gap:10px;padding:6px 0;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.nm{flex:1;min-width:0;border-color:transparent;background:transparent;font-weight:600;padding:2px 4px;margin-left:-4px}
+.nm:focus{border-color:var(--line);background:var(--panel)}
+.row:not(.on) .nm,.row:not(.on) .sc{color:var(--mute)}
+.sc{display:flex;align-items:center;gap:4px;font-size:13px;white-space:nowrap;color:var(--mute)}
+.val{border:0;border-bottom:1px dotted var(--mute);border-radius:0;padding:0;margin:0;background:transparent;font:inherit;color:var(--ink);text-align:center;min-width:2ch}
+.val:hover{border-bottom-color:var(--ink)}
+.val:focus{outline:none;border-bottom:1px solid var(--ink);background:var(--hover)}
+.row:not(.on) .val{color:var(--mute)}
+.x{border-color:transparent;background:transparent;color:var(--mute);padding:0 6px}
+.x:hover{background:transparent;color:var(--ink)}
+.sw{width:42px;font-size:11px;padding:2px 0;flex:none;color:var(--mute)}
+.sw::before{content:"Off"}
+.sw[aria-checked="true"]{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.sw[aria-checked="true"]::before{content:"On"}
+
+.bottom{display:flex;align-items:center;gap:16px}
+.addin{flex:1;min-width:0;padding:9px 12px}
+.begin{font-weight:600;padding:9px 30px;background:var(--ink);border-color:var(--ink);color:var(--bg)}
+.begin:hover{background:#333}
+
+/* ---------- clock room ---------- */
+#focus{position:fixed;inset:0;background:var(--bg) var(--bgimg);color:var(--ink);z-index:2;cursor:none;overflow:hidden;animation:fadein 1.6s ease}
+body.moved #focus{cursor:default}
+#clock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+#clock .tm{display:flex;align-items:baseline;font:400 clamp(130px,24vw,400px)/1 var(--sys);letter-spacing:-.025em}
+#clock .tm small{font-size:.17em;font-weight:400;letter-spacing:0;margin-left:.22em;color:var(--mute)}
+#date{position:absolute;top:22px;left:26px;font:500 13px var(--sys);letter-spacing:.04em;color:var(--mute)}
+.fbtn{position:absolute;top:16px;width:32px;height:32px;padding:0;font-size:18px;line-height:1;background:transparent;color:var(--mute);opacity:0;transition:opacity .4s}
+#b-back{right:20px}#b-add{right:60px}#b-snd{right:100px;width:auto;padding:0 12px;font-size:14px}
+.snd.off{color:var(--mute);text-decoration:line-through}
+body.moved .fbtn,#focus.adding .fbtn{opacity:1}
+#focus.adding{cursor:default}
+.cadd{position:absolute;bottom:44px;left:50%;transform:translateX(-50%);width:min(440px,80vw);padding:9px 12px}
+@keyframes fadein{from{opacity:0}}
+@media (prefers-reduced-motion:reduce){#focus{animation:none}}
+
+/* ---------- ping ---------- */
+#pop{position:fixed;inset:0;z-index:10;background:rgba(230,226,217,.82);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center}
+.ping{min-width:min(300px,90vw);max-width:min(420px,90vw);background:var(--panel);border:1px solid var(--line);box-shadow:0 24px 60px rgba(26,24,20,.14);padding:18px 20px;position:relative;display:flex;flex-direction:column;align-items:center;text-align:center;gap:12px}
+.ping h2{display:flex;flex-wrap:wrap;justify-content:center;align-items:baseline;column-gap:.5em;font-size:22px;font-weight:300;line-height:1.2}
+.ping h2 span{text-wrap:balance;overflow-wrap:anywhere}
+.ping h2 small{font-size:.7em;color:var(--mute);flex:none}
+.ping .acts{display:flex;gap:8px}
+.ping .acts button{width:84px;padding:6px 0}
+.ping .pl{font-size:.75em;margin-right:.3em}
+.ping .done{background:var(--ink);border-color:var(--ink);color:var(--bg);font-weight:600}
+.ping .done:hover{background:#333}
+.ping .more{position:absolute;top:4px;right:8px;font-size:11px;color:var(--mute)}
+
+/* ---------- reminder (heads-up before an appointment; never pauses anything) ---------- */
+#toast{position:fixed;top:20px;left:50%;transform:translateX(-50%);z-index:9;display:flex;flex-direction:column;gap:8px}
+#toast .t{background:var(--panel);border:1px solid var(--line);padding:9px 14px;font-size:14px;cursor:pointer;display:flex;gap:10px;align-items:baseline}
+#toast .t small{color:var(--mute);font-size:.82em}
+#toast .t:hover{background:var(--hover)}
+</style>
+</head>
+<body>
+
+<div id="setup">
+  <div class="top">
+    <div class="brand"><h1>Cadence</h1></div>
+    <div class="seg" id="places" role="group" aria-label="Where I am"></div>
+  </div>
+  <div class="cols" id="cols"></div>
+  <div class="bottom">
+    <input id="add" class="addin" placeholder="Add anything:  Pullups every45m  ·  Run before1800  ·  Pickup @1730  ·  or paste a list" aria-label="Add">
+    <button class="begin" id="b-begin" data-act="begin">Start</button>
+  </div>
+</div>
+
+<div id="focus" hidden>
+  <div id="date"></div>
+  <div id="clock" aria-label="Current time"></div>
+  <button class="fbtn snd" id="b-snd" data-act="snd">Alerts</button>
+  <button class="fbtn" id="b-add" data-act="cadd" aria-label="Add">+</button>
+  <button class="fbtn" id="b-back" data-act="setup" aria-label="Back to setup">&lt;</button>
+  <input id="cadd" class="cadd" hidden placeholder="Add:  Pullups every45m  ·  Pickup @1730  ·  Run by1800" aria-label="Add">
+</div>
+
+<div id="toast" aria-live="polite"></div>
+<div id="pop" hidden></div>
+
+<script>
+const KEY='cadence.v3';
+// First ping is rolled between these minutes (capped by 2x the interval). Repeats vary by +/- vary.
+const CFG={first:[10,100],vary:0.11}
+const $=s=>document.querySelector(s);
+const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const uid=()=>Math.random().toString(36).slice(2,8);
+const pad=n=>String(n).padStart(2,'0');
+const rand=(a,b)=>a+Math.random()*(b-a);
+const day=()=>new Date().toLocaleDateString('en-CA');
+const hm2ms=hm=>{const [h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()};
+
+function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,doneDate:'',warned:0,when:0,fin:0,...o}}
+const water=()=>mk('every','Drink water',{n:30}),stretch=()=>mk('every','Stand up and stretch',{n:60});
+function fresh(){return {v:3,lead:30,ctx:'Home',places:[
+  {name:'Home',items:[mk('every','Pullups',{n:45}),water(),stretch(),mk('every','Apply for 3 jobs',{n:90}),
+    mk('random','Go for a run',{to:'18:00'}),mk('random','Do the washing',{to:'20:00'}),mk('random','Take a walk',{to:'16:00'}),
+    mk('at','Pick up partner',{at:'17:30'}),mk('at','Lunch',{at:'12:30'})]},
+  {name:'Work',items:[water(),stretch(),mk('at','Pick up partner',{at:'17:30'}),mk('at','Lunch',{at:'12:30'})]},
+  {name:'Library',items:[water(),mk('every','Apply for 3 jobs',{n:90})]}]}}
+
+let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
+if(!S||S.v!==3||!S.places?.length)S=fresh();
+S.places.forEach(p=>p.items.forEach(i=>{if(i.kind==='at'&&!('when' in i)){i.when=0;i.fin=0;i.armed=''}})); // older saves: re-arm appointments at next Start
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S))}catch{}};
+const UI={view:'setup',addPlace:false,delPlace:false,rename:null,key:'',lastChime:0,saved:0,toasts:[],day:day()};
+const P=()=>S.places.find(p=>p.name===S.ctx)||S.places[0];
+const byId=id=>P().items.find(i=>i.id===id);
+
+/* ---------- engine ---------- */
+const isOn=it=>it.onDate===day();
+const nextIn=n=>Date.now()+n*60000*(1+rand(-CFG.vary,CFG.vary));
+function isDue(it,now){
+  if(!isOn(it)||it.armed!==day()||it.snooze>now)return false;
+  if(it.kind==='at')return !it.fin&&it.when>0&&now>=it.when;
+  return it.kind==='every'?now>=it.next:it.slot>0&&it.doneDate!==day()&&now>=it.slot}
+const dueList=now=>P().items.filter(i=>isDue(i,now)).sort((a,b)=>(b.kind==='at')-(a.kind==='at'));
+function pickSlot(it){
+  const lo=Date.now()+60000,hi=hm2ms(it.to);
+  if(hi<=lo)return 0; // end time already passed, nothing today
+  return Math.round(rand(lo,hi))}
+function arm(it){
+  const now=Date.now();it.armed=day();it.snooze=0;
+  if(it.kind==='every'){const lo=Math.min(CFG.first[0],it.n),hi=Math.min(CFG.first[1],it.n*2);it.next=Date.now()+rand(lo,Math.max(lo,hi))*60000}
+  else if(it.kind==='random'){it.doneDate='';it.slot=pickSlot(it)}
+  else{const w=hm2ms(it.at);it.when=w>now?w:w+864e5;it.fin=0; // a time that has passed means tomorrow
+    it.warned=now>=it.when-S.lead*60000?1:0}} // already inside the heads-up window: skip it, no instant ping
+function complete(it){
+  it.snooze=0;
+  if(it.kind==='every')it.next=nextIn(it.n);
+  else if(it.kind==='random'){it.slot=0;it.doneDate=day()}
+  else it.fin=1}
+// Heads-up before an appointment: a quiet toast and a short sound, nothing pauses.
+const remDue=(it,now)=>it.kind==='at'&&isOn(it)&&it.armed===day()&&!it.fin&&!it.warned&&S.lead>0&&now>=it.when-S.lead*60000&&now<it.when;
+// Keeps a running session going past midnight: whatever was on yesterday stays on.
+function rollover(){const d=day();if(UI.day===d)return;
+  P().items.forEach(it=>{if(it.onDate!==UI.day||it.armed!==UI.day)return;
+    it.onDate=d;
+    if(it.kind==='every')it.armed=d;
+    else if(it.kind==='at'&&!it.fin&&it.when>Date.now())it.armed=d;
+    else if(it.kind==='random')arm(it);
+    else it.onDate=''});
+  UI.day=d;save()}
+
+/* ---------- sound and attention (sound always on: a ping you cannot hear is no ping) ---------- */
+const SND={popup:new Audio('sounds/popup.wav'),reminder:new Audio('sounds/reminder.wav')};
+Object.values(SND).forEach(a=>a.volume=.75); // 75%
+const play=k=>{if(!S.sound)return;try{SND[k].currentTime=0;SND[k].play().catch(()=>{})}catch{}};
+const ICO=f=>'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" fill="${f?'#e6e2d9':'#1a1814'}"/><circle cx="16" cy="16" r="${f?11:7}" fill="${f?'#1a1814':'#e6e2d9'}"/></svg>`);
+let fl;
+function flash(on,txt){clearInterval(fl);document.title='Cadence';$('#ico').href=ICO(0);
+  if(!on)return;let f=0;fl=setInterval(()=>{f^=1;document.title=f?'\u25CF '+txt:'Cadence';$('#ico').href=ICO(f)},900)}
+
+/* ---------- quick add ----------
+   Pullups every45m   Run before1800 (or by1800)   Pickup @1730 (or at1730)   24-hour time only.
+   Pasted lists work too, one per line, with * or - bullets. */
+const TIME='(\\d{3,4}|\\d{1,2}:\\d{2})';
+const RE={
+  every:new RegExp('^(.*?)\\s*\\bevery\\s*(\\d+(?:\\.\\d+)?)\\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)?\\s*$','i'),
+  random:new RegExp('^(.*?)\\s*\\b(?:before|by)\\s*'+TIME+'\\s*$','i'),
+  at:new RegExp('^(.*?)\\s*(?:@|\\bat)\\s*'+TIME+'\\s*$','i')};
+function toHM(d){
+  let h,m;
+  if(/^\d{3,4}$/.test(d)){m=+d.slice(-2);h=+d.slice(0,-2)}else{const p=d.split(':');h=+p[0];m=+p[1]}
+  if(h>23||m>59)return null;
+  return pad(h)+':'+pad(m)}
+function parseLine(line,def){
+  line=line.replace(/^\s*(?:(?:[*\-•]|\d+[.)])\s*)?(?:\[[ xX]?\]\s*)?/,'').trim();
+  if(!line)return null;
+  let m,t;
+  if((m=line.match(RE.every))&&m[1].trim()){const n=Math.round(+m[2]*(/^h/i.test(m[3]||'')?60:1));if(n>=1)return {kind:'every',name:m[1].trim(),n}}
+  if((m=line.match(RE.random))&&m[1].trim()&&(t=toHM(m[2])))return {kind:'random',name:m[1].trim(),to:t};
+  if((m=line.match(RE.at))&&m[1].trim()&&(t=toHM(m[2])))return {kind:'at',name:m[1].trim(),at:t};
+  return {kind:def,name:line}}
+function addLines(text,def='random'){
+  let c=0;
+  text.split(/\r?\n/).forEach(l=>{const p=parseLine(l,def);if(p){const {kind,...o}=p;P().items.push(mk(kind,o.name,{...o,onDate:day()}));c++}});
+  return c}
+
+/* ---------- render: setup ---------- */
+const COLS=[['every','Repeating'],['random','Sometime today'],['at','At a set time']];
+const val=(id,k,v,x='')=>`<input id="${id}" class="val" data-f="${k}" value="${esc(v)}" style="width:${String(v).length+.5}ch" ${x}>`;
+
+function rowHtml(it){
+  const on=isOn(it);
+  const f=k=>val(`f-${it.id}-${k}`,k,it[k],`aria-label="${k}"`+(k==='n'?' inputmode="numeric"':''));
+  const sc={every:`every ${f('n')} min`,random:`by ${f('to')}`,at:`at ${f('at')}`}[it.kind];
+  return `<div class="row ${on?'on':''}" data-id="${it.id}">
+    <button class="sw" role="switch" aria-checked="${on}" aria-label="On today: ${esc(it.name)}" data-act="toggle"></button>
+    <input id="f-${it.id}-name" class="nm" data-f="name" value="${esc(it.name)}" maxlength="50" aria-label="Name">
+    <span class="sc">${sc}</span>
+    <button class="x" data-act="del" aria-label="Delete ${esc(it.name)}">×</button></div>`}
+
+function renderSetup(){
+  $('#places').innerHTML=S.places.map(p=>UI.rename===p.name?`<input id="place-ren" value="${esc(p.name)}" maxlength="20" aria-label="Rename place">`:`<button class="${p.name===S.ctx?'on':''}" data-act="place" data-v="${esc(p.name)}" title="Double-click to rename">${esc(p.name)}</button>`).join('')+
+    (UI.addPlace?'<input id="place-new" placeholder="Place name" maxlength="20" aria-label="New place">':'<button data-act="placeadd" aria-label="Add a place">+</button>')+
+    (S.places.length>1?`<button class="${UI.delPlace?'on':''}" data-act="delplace" aria-label="Delete place" title="Delete this place">${UI.delPlace?'Delete '+esc(S.ctx)+'?':'×'}</button>`:'');
+  if(UI.addPlace)$('#place-new').focus();
+  if(UI.rename){const e=$('#place-ren');e.focus();e.select()}
+  const items=P().items;
+  $('#cols').innerHTML=COLS.map(([k,t])=>{
+    const rows=items.filter(i=>i.kind===k);
+    return `<section class="col"><div class="ch"><h2>${t}</h2>${k==='at'?`<label>remind ${val('g-lead','lead',S.lead,'data-g="lead"')} min before</label>`:''}</div>
+    ${rows.length?`<div class="list">${rows.map(rowHtml).join('')}</div>`:''}
+    </section>`}).join('')}
+
+/* ---------- render: clock room + ping ---------- */
+function paintClock(){
+  const d=new Date(),h=d.getHours(),s=(h%12||12)+':'+pad(d.getMinutes()),ap=h<12?'am':'pm',el=$('#clock');
+  const ds=d.toLocaleDateString('en-AU',{weekday:'long',day:'numeric',month:'long'});
+  if($('#date').textContent!==ds)$('#date').textContent=ds;
+  if(el.dataset.v===s+ap)return;
+  el.dataset.v=s+ap;el.innerHTML=`<div class="tm">${s}<small>${ap}</small></div>`}
+
+function renderPop(cur,count){
+  const el=$('#pop');
+  if(!cur){el.hidden=true;el.innerHTML='';return}
+  el.hidden=false;
+  el.innerHTML=`<div class="ping" role="alertdialog" aria-label="${esc(cur.name)}" data-id="${cur.id}">
+    ${count>1?`<span class="more">+${count-1} more</span>`:''}
+    <h2><span>${esc(cur.name)}</span>${cur.kind==='at'?`<small>${cur.at}</small>`:''}</h2>
+    <div class="acts"><button class="done" id="b-done" data-act="done">Done</button>
+      <button data-act="delay" data-m="5"><span class="pl">+</span>5m</button><button data-act="delay" data-m="60"><span class="pl">+</span>1h</button></div></div>`;
+  $('#b-done').focus()}
+
+function paintToast(now){
+  UI.toasts=UI.toasts.filter(id=>{const i=byId(id);return i&&isOn(i)&&!i.fin&&now<i.when});
+  const h=UI.toasts.map(id=>{const i=byId(id);return `<div class="t" data-id="${id}" data-act="toastx">${esc(i.name)}<small>${i.at}</small></div>`}).join('');
+  const el=$('#toast');if(el.dataset.v!==h){el.dataset.v=h;el.innerHTML=h}}
+
+const paintSnd=()=>document.querySelectorAll('.snd').forEach(b=>b.classList.toggle('off',!S.sound));
+function setView(v){
+  UI.view=v;$('#setup').hidden=v!=='setup';$('#focus').hidden=v!=='focus';$('#cadd').hidden=true;$('#focus').classList.remove('adding');
+  if(v==='focus')paintClock()}
+
+/* ---------- loop ---------- */
+let last=Date.now();
+function tick(){
+  const now=Date.now(),dt=now-last;last=now;
+  rollover();
+  const d=dueList(now),cur=d[0]||null;
+  // While a ping is open, everything not yet due is frozen, so nothing piles up behind you. Appointments are real time and never frozen.
+  if(cur&&dt>0&&dt<5000){
+    let ch=false;
+    P().items.forEach(it=>{
+      if(!isOn(it)||it.armed!==day()||it.kind==='at')return;
+      if(it.snooze>now){it.snooze+=dt;ch=true}
+      if(it.kind==='every'&&it.next>now){it.next+=dt;ch=true}
+      else if(it.kind==='random'&&it.slot>now){it.slot+=dt;ch=true}});
+    if(ch&&now-UI.saved>5000){save();UI.saved=now}}
+  P().items.filter(i=>remDue(i,now)).forEach(i=>{i.warned=1;UI.toasts.push(i.id);save();play('reminder')});
+  paintToast(now);
+  const key=cur?[cur.id,cur.snooze,d.length].join(':'):'';
+  if(key!==UI.key){const isNew=cur&&!UI.key.startsWith(cur.id+':'+cur.snooze+':');
+    UI.key=key;renderPop(cur,d.length);flash(!!cur,cur&&cur.name);
+    if(isNew){play('popup');UI.lastChime=now}}
+  else if(cur&&now-UI.lastChime>90000){play('popup');UI.lastChime=now} // keep nudging until answered
+  if(UI.view==='focus')paintClock()}
+
+/* ---------- events ---------- */
+function begin(){
+  P().items.forEach(it=>{if(isOn(it)&&it.armed!==day())arm(it)});
+  save();setView('focus');tick();}
+
+document.addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');
+  const a=b?b.dataset.act:'';
+  if(UI.delPlace&&a!=='delplace'){UI.delPlace=false;renderSetup()}
+  if(!b)return;
+  const box=b.closest('[data-id]'),it=box&&byId(box.dataset.id),now=Date.now();
+  if(a==='place'){
+    if(e.detail>=2){UI.rename=b.dataset.v;renderSetup();return}
+    if(S.ctx!==b.dataset.v){S.ctx=b.dataset.v;P().items.forEach(i=>i.armed='');save();renderSetup()}} // new place starts fresh; clicking the current one changes nothing
+  else if(a==='placeadd'){UI.addPlace=true;renderSetup()}
+  else if(a==='delplace'){
+    if(!UI.delPlace){UI.delPlace=true;renderSetup()}
+    else{S.places=S.places.filter(p=>p.name!==S.ctx);S.ctx=S.places[0].name;UI.delPlace=false;save();renderSetup()}}
+  else if(a==='begin')begin();
+  else if(a==='setup')setView('setup');
+  else if(a==='toggle'&&it){if(isOn(it))it.onDate='';else{it.onDate=day();it.armed=''}save();renderSetup()}
+  else if(a==='del'&&it){P().items=P().items.filter(i=>i!==it);save();renderSetup()}
+  else if(a==='done'&&it){complete(it);save();tick()}
+  else if(a==='delay'&&it){it.snooze=now+ +b.dataset.m*60000;save();tick()}
+  else if(a==='snd'){S.sound=S.sound?0:1;save();paintSnd();play('reminder')}
+  else if(a==='toastx'&&it){UI.toasts=UI.toasts.filter(x=>x!==it.id);tick()}
+  else if(a==='cadd'){const c=$('#cadd');c.hidden=!c.hidden;$('#focus').classList.toggle('adding',!c.hidden);if(!c.hidden)c.focus()}
+});
+
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.dataset.g){S[t.dataset.g]=Math.max(0,Math.round(+t.value)||0);t.value=S[t.dataset.g];save();return}
+  const box=t.closest('[data-id]'),it=box&&byId(box.dataset.id),k=t.dataset.f;
+  if(!k||!it)return;
+  let v=t.value;
+  if(k==='n'){v=Math.max(1,Math.round(+v)||1);t.value=v}
+  else if(k==='to'||k==='at'){const hm=toHM(v.trim());if(!hm){t.value=it[k];return}v=hm;t.value=hm}
+  else if(!v.trim()){t.value=it[k];return}
+  it[k]=v;
+  if(k!=='name')it.armed=''; // edited schedule re-arms at the next Start
+  save()});
+
+function renamePlace(v){v=v.trim();const p=S.places.find(x=>x.name===UI.rename);
+  if(p&&v&&!S.places.some(x=>x.name===v)){if(S.ctx===p.name)S.ctx=v;p.name=v;save()}
+  UI.rename=null;renderSetup()}
+document.addEventListener('focusout',e=>{if(e.target.id==='place-ren'&&UI.rename)renamePlace(e.target.value)});
+document.addEventListener('focusout',e=>{if(e.target.id==='cadd'&&e.relatedTarget?.id!=='b-add'){e.target.hidden=true;$('#focus').classList.remove('adding')}});
+document.addEventListener('keydown',e=>{
+  const t=e.target;
+  if(t.id==='cadd'){
+    if(e.key==='Enter'){const v=t.value.trim();
+      if(v){const n=P().items.length;addLines(v);P().items.slice(n).forEach(arm);save();tick()} // arm only the new ones, nothing else is rejigged
+      t.value='';t.hidden=true;$('#focus').classList.remove('adding')}
+    else if(e.key==='Escape'){t.hidden=true;$('#focus').classList.remove('adding')}
+    return}
+  if(t.id==='place-ren'){if(e.key==='Enter')renamePlace(t.value);else if(e.key==='Escape'){UI.rename=null;renderSetup()}return}
+  if(t.id==='place-new'){
+    if(e.key==='Enter'){const v=t.value.trim();
+      if(v&&!S.places.some(p=>p.name===v))S.places.push({name:v,items:[water()]});
+      if(v)S.ctx=v;UI.addPlace=false;save();renderSetup()}
+    else if(e.key==='Escape'){UI.addPlace=false;renderSetup()}}
+  else if(t.id==='add'&&e.key==='Enter'&&t.value.trim()){addLines(t.value);t.value='';save();renderSetup()}
+  else if(e.key==='Escape'&&UI.view==='focus'&&$('#pop').hidden)setView('setup');
+  else if(e.key==='Enter'&&!$('#pop').hidden&&t.tagName!=='BUTTON'){const d=$('#b-done');d&&d.click()}});
+
+document.addEventListener('paste',e=>{
+  const t=e.target,txt=(e.clipboardData||window.clipboardData).getData('text');
+  if(t.id!=='add'||!/\n/.test(txt.trim()))return;
+  e.preventDefault();addLines(txt);save();renderSetup()});
+
+document.addEventListener('input',e=>{const t=e.target;if(t.classList.contains('val'))t.style.width=Math.max(2,t.value.length+.5)+'ch'});
+
+let mv;document.addEventListener('mousemove',()=>{document.body.classList.add('moved');clearTimeout(mv);mv=setTimeout(()=>document.body.classList.remove('moved'),2500)});
+
+renderSetup();setView('setup');paintSnd();tick();setInterval(tick,500);
+</script>
+</body>
+</html>
