@@ -212,7 +212,7 @@ git config core.hooksPath scripts/hooks
 
 ## Discuss before build
 
-Every session in this repo, page or master, works in this order for any
+Every session in this repo works in this order for any
 change to a page or engine:
 
 1. **Brainstorm**: what maltysnack wants and why (`brainstorming` skill).
@@ -229,15 +229,21 @@ own rules.
 
 ## Parallel page sessions
 
-Each page has its own long-lived session, all in this one checkout. The
-session started from the root (the master) creates them and does site-wide
-work; a page session owns one page folder plus that page's engine repo
-(see "Pages driven by another repo" in `HANDOFF.md`). The root `index.html` is the Flock page, so the Flock session owns it.
+Sessions are short and per task, not long-lived (maltysnack's call,
+01-11-2026; long-lived page sessions re-read big histories and woke the
+master on every turn). To change a page, open a fresh session in this repo
+and name the page in the first message ("flock: ..."). It reads this file,
+the root `HANDOFF.md` and that page's HANDOFF, and owns that folder plus
+the page's engine repo (see "Pages driven by another repo" in
+`HANDOFF.md`). Archive or clear it when the work is done; the HANDOFF
+carries state to the next one. Use Sonnet unless the work is design-heavy
+or deep engine work. Shared files go through a session about the site as a
+whole. The root `index.html` is the Flock page, so it belongs to Flock work.
+Several sessions may still run at once in this one checkout, so:
 
 - **Edit only your folder.** Shared files (`sidebar.js`, `style.css`,
-  `index.html`, `design/palette.css`, root `HANDOFF.md`, `README.md`,
-  `scripts/`) belong to the master. If your page needs one changed, say so
-  and let maltysnack route it.
+  `design/palette.css`, root `HANDOFF.md`, `README.md`, `scripts/`) are
+  site-wide work. If your page needs one changed, say so before touching it.
 - **Commit and push your own paths only**, straight after each change:
   `git add projects/<page>/` then `git commit -m "..." -- projects/<page>/`,
   then `git pull --rebase --autostash origin main && git push origin main`.
