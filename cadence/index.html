@@ -133,7 +133,7 @@ const hm2ms=hm=>{const [h,m]=hm.split(':').map(Number);const d=new Date();d.setH
 
 function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,doneDate:'',warned:0,when:0,fin:0,...o}}
 const water=()=>mk('every','Drink water',{n:30}),stretch=()=>mk('every','Stand up and stretch',{n:60});
-function fresh(){return {v:3,lead:30,ctx:'Home',places:[
+function fresh(){return {v:3,lead:30,sound:1,ctx:'Home',places:[
   {name:'Home',items:[water(),mk('random','Take a walk',{to:'16:00'}),mk('at','Lunch',{at:'12:30'})]}]}}
 
 let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
