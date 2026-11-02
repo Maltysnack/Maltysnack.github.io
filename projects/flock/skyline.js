@@ -1205,12 +1205,32 @@ export function create(ctx) {
 
   // ── Hooks the engine calls ───────────────────────────────────────────
   // The flock splits into groups that each wander toward their own faraway place (forest, coast, mountains, city), now and then all gathering at one for a while.
-  const NG = 5, gather = { t: rnd(200, 360), until: 0, x: 0, z: 0 };
-  const roams = Array.from({ length: NG }, () => { const r = { x: rnd(-0.6, 0.6) * BX, y: rnd(-10, 25), z: rnd(-0.6, 0.7) * BZ, t: rnd(10, 60) }; r.tx = r.x; r.ty = r.y; r.tz = r.z; return r; });
-  function pickRoam(r) { r.t = rnd(70, 150); r.tx = rnd(-0.85, 0.85) * BX; r.tz = rnd(-0.75, 0.9) * BZ; r.ty = rnd(-15, 30); if (clock < gather.until) { r.tx = gather.x + rnd(-40, 40); r.tz = gather.z + rnd(-40, 40); } }
+  const NG = ctx.NGRP, gmap = ctx.gmap, gather = { t: rnd(200, 360), until: 0, x: 0, z: 0 };
+  const roams = Array.from({ length: NG }, () => { const r = { x: rnd(-0.8, 0.8) * BX, y: rnd(-10, 25), z: rnd(-0.7, 0.8) * BZ, t: rnd(10, 60) }; r.tx = r.x; r.ty = r.y; r.tz = r.z; return r; });
+  let NC = 1, phaseT = 0;   // K clusters of birds, each with its own roam; the count swings between many small flocks and a few big ones
+  // shortcut: clusters are whole bird groups (i % NGRP), so sizes are roughly equal, unequal sizes would need per-bird ids
+  function regroup(k, hold) {
+    NC = k; phaseT = hold;
+    const o = [...Array(NG).keys()].sort(() => Math.random() - 0.5); o.forEach((g, n) => { gmap[g] = n % k; });
+    for (const r of roams) r.t = 0;
+  }
+  function pickRoam(r) {   // best of six random spots: the one furthest from the other flocks' targets and from here, so the whole map gets used
+    r.t = rnd(70, 150); r.ty = rnd(-15, 30);
+    if (clock < gather.until) { r.tx = gather.x + rnd(-40, 40); r.tz = gather.z + rnd(-40, 40); return; }
+    let bd = -1;
+    for (let n = 0; n < 6; n++) {
+      const x = rnd(-0.9, 0.9) * BX, z = rnd(-0.85, 0.9) * BZ; let d = Math.hypot(x - r.x, z - r.z) * 1.5;
+      for (let c = 0; c < NC; c++) if (roams[c] !== r) d = Math.min(d, Math.hypot(x - roams[c].tx, z - roams[c].tz));
+      if (d > bd) { bd = d; r.tx = x; r.tz = z; }
+    }
+  }
+  const SIZES = [1, 2, 3, 4, 6, 8, 12];
+  ctx.onScatter = () => { gather.until = 0; regroup(rnd(8, 12) | 0, rnd(35, 55)); };   // scatter breaks the flock into small flocks that fly to different corners
+  regroup(4, rnd(60, 100));
   function stepRoam(dt) {
-    gather.t -= dt; if (gather.t <= 0) { gather.t = rnd(300, 480); gather.until = clock + 75; gather.x = rnd(-0.6, 0.6) * BX; gather.z = rnd(-0.5, 0.7) * BZ; for (const r of roams) r.t = 0; }
-    for (const r of roams) { r.t -= dt; if (r.t <= 0) pickRoam(r); const k = Math.min(1, dt * 0.03); r.x += (r.tx - r.x) * k; r.y += (r.ty - r.y) * k; r.z += (r.tz - r.z) * k; }
+    gather.t -= dt; if (gather.t <= 0) { gather.t = rnd(300, 480); gather.until = clock + 75; gather.x = rnd(-0.6, 0.6) * BX; gather.z = rnd(-0.5, 0.7) * BZ; regroup(1, 75 + rnd(20, 40)); }
+    else if ((phaseT -= dt) <= 0) { const o = SIZES.filter(k => k !== NC); regroup(o[(Math.random() * o.length) | 0], rnd(70, 130)); }
+    for (const r of roams) { r.t -= dt; if (r.t <= 0) pickRoam(r); const k = Math.min(1, dt * 0.06); r.x += (r.tx - r.x) * k; r.y += (r.ty - r.y) * k; r.z += (r.tz - r.z) * k; }
   }
   function before(dt) {
     clock += dt; if (!ctx.reduce) stepRoam(dt);
@@ -1344,7 +1364,7 @@ export function create(ctx) {
       const d = Math.hypot(rx, ry, rz);
       if (d < R) { const u = 1 - d / R, k = MAX_FORCE * CLOUD_K * u ** 1.5 / (d || 1); out[0] += rx * k; out[1] += ry * k; out[2] += rz * k; lvl = Math.max(lvl, u * CLOUD_K); }
     }
-    { const r = roams[i % NG], dx = r.x - px, dy = r.y - py, dz = r.z - pz, d = Math.hypot(dx, dy, dz); if (d > 60) { const k = MAX_FORCE * 0.5 * Math.min(1, (d - 60) / 250) / d; out[0] += dx * k; out[1] += dy * k * 0.4; out[2] += dz * k; } }   // each group's wandering centre
+    { const r = roams[gmap[i % NG]], dx = r.x - px, dy = r.y - py, dz = r.z - pz, d = Math.hypot(dx, dy, dz); if (d > 40) { const k = MAX_FORCE * 0.8 * Math.min(1, (d - 40) / 150) / d; out[0] += dx * k; out[1] += dy * k * 0.4; out[2] += dz * k; } }   // each group's wandering centre
     out[0] += wind.x * breeze; out[2] += wind.z * breeze;   // the breeze moves everything, everywhere
     if (tw.on && tw.env > 0.02) {   // the tornado: spin, suck in, lift
       const dx = px - tw.p.x, dz = pz - tw.p.z, d2 = dx * dx + dz * dz;

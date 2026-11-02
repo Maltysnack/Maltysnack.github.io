@@ -147,8 +147,8 @@ shake, hawkOn`. `create(ctx)` builds everything; `K` (kernel) is handed to
 - **Town** on the south bank (rejects z < 6 so it stays off the rail), dock,
   boathouse; **roads** (`SEGS`, streets and avenues cut by buildings, highway
   `HWYP` bending east to the harbour), 8 cars, 2 trucks, 3 big highway trucks.
-- **Flock groups**: five groups (`roams`, bird `i % 5`) each pulled to a
-  wandering place; every 5 to 8 minutes they gather for 75 s.
+- **Flock clusters** (02-11-2026): birds are in 12 groups (`i % NGRP`); `gmap` (flock.js) maps group to cluster and birds only cohere and align with their own cluster, so clusters stay distinct. Skyline `regroup(k)` reshuffles `gmap` every 70 to 130 s between 1, 2, 3, 4, 6, 8 or 12 clusters; each cluster has a roam target chosen best-of-six to be far from the others (whole map used), pull 0.8 x MAX_FORCE beyond 40. Every 5 to 8 minutes all merge into one and gather for 75 s. Scatter keeps its kick and also calls `ctx.onScatter` to split into 8 to 12 small flocks for 35 to 55 s. Clusters are whole groups so sizes are near equal. Not visually verified in a full run (preview sat on the intro); tune by watching.
+- **Power**: hidden tab skips all work; once the UI has faded (`data-idle`) frames are capped to ~30 fps; pixel ratio capped at 1.5.
 - **Fear field**: fireworks set `EX.fear` (12 s) that pushes birds outward;
   `EX.spheres` are balloons, the UFO, jets and airborne aircraft.
 - `api.dbg` exposes internals for tests (`EX`, `boats`, `fire`, `helis`, `VEH`,
@@ -244,3 +244,11 @@ airliner lands, jets curve.
   life and landmarks everywhere; colour kept subdued with highlights; nothing
   looking "flat" or uniform. They dislike: boxy placeholders, things that fly
   through scenery, shrinking-away fades, repeated asks for the same fix.
+
+## Sydney (parked, 01-11-2026)
+
+- **Not in the site.** The Sydney tab was removed and nothing about it was pushed. `index.html` and `flock.js` are back to what is live; Skyline was never touched.
+- `projects/flock/sydney.js` is an unreferenced standalone harbour world kept as an asset library: Harbour Bridge (lattice arch, smooth eased deck, piers), the approved pylon (three straight blocks, middle one easing in, arched window at road level), green and yellow ferries (16 x 6.6, flat stern, tapered bow), harbour shoreline and a first-pass Opera House. To use it, import `create(ctx)` the way `flock.js` loads Skyline and add a mode button. `BIRDS = false` at the top hides the flock.
+- Tried and dropped: a full Skyline copy with the bridge swapped for the lift bridge. It was too big for the river and landed in the mountains. Options if revisited: move the bridge east to about x 260 (open ground both banks) or clear a hub of buildings and widen the river and approach roads at x 90.
+- Opera House: the real geometry is a fan of ribs cut from a 75.2 m sphere, four main shells per hall (two mirrored halves meeting at a ridge) and a smaller restaurant group. The flat-shaded sail attempt in `sydney.js` is weak. A better sphere-based version was only in a scratch page. Needs a reference photo of the harbour side to settle height order and the side shells.
+- Left undone: Circular Quay, Goat Island, Barangaroo, Botanic Garden, Luna Park.

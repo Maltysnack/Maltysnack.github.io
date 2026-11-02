@@ -1,6 +1,6 @@
   import * as THREE from './vendor/three.module.min.js';
 import { createSound } from './sound.js?v=6';
-const skyP = import('./skyline.js?v=32');   // start fetching the world at once, not when the intro asks for it
+const skyP = import('./skyline.js?v=33');   // start fetching the world at once, not when the intro asks for it
 const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() => {});   // and the heading font the intro draws with
 
   // ── Parameters ──────────────────────────────────────────────────────
@@ -24,6 +24,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   const BX = 210, BY = 58, BZ = 230;          // half extents of the box the flock lives in
   const MARGIN = 40;                        // padding around the box for the spatial grid, so birds that drift past the soft edge are still indexed
   const MAX_FORCE = 40;
+  const NGRP = 12, gmap = new Uint8Array(NGRP);   // bird i is in group i % NGRP; gmap sends each group to a cluster. Birds only cohere and align with their own cluster (Skyline reshuffles gmap to split and merge flocks).
 
   // ── State, in flat typed arrays: one slot per bird ───────────────────
   let N = 0, CAP = 0, pos, vel, acc, prev, scl;
@@ -83,6 +84,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
       const i3 = i * 3;
       if (st && st[i]) { X.drive(i, dt); acc[i3] = acc[i3 + 1] = acc[i3 + 2] = 0; continue; }   // landing or perched
       const px = pos[i3], py = pos[i3 + 1], pz = pos[i3 + 2];
+      const gi = gmap[i % NGRP];
       let cx = 0, cy = 0, cz = 0, ax = 0, ay = 0, az = 0, sx = 0, sy = 0, sz = 0, n = 0;
       const ix = clampI(Math.floor((px + BX + MARGIN) / CS), GX), iy = clampI(Math.floor((py + BY + MARGIN) / CS), GY), iz = clampI(Math.floor((pz + BZ + MARGIN) / CS), GZ);
       for (let dx = -1; dx <= 1; dx++) { const X = ix + dx; if (X < 0 || X >= GX) continue;
@@ -94,7 +96,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
               const j3 = j * 3, ex = pos[j3] - px, ey = pos[j3 + 1] - py, ez = pos[j3 + 2] - pz;
               const d2 = ex * ex + ey * ey + ez * ez;
               if (d2 > r2) continue;
-              n++; cx += ex; cy += ey; cz += ez; ax += vel[j3]; ay += vel[j3 + 1]; az += vel[j3 + 2];
+              if (gmap[j % NGRP] === gi) { n++; cx += ex; cy += ey; cz += ez; ax += vel[j3]; ay += vel[j3 + 1]; az += vel[j3 + 2]; }
               if (d2 < sepR2 && d2 > 1e-6) { const d = Math.sqrt(d2), w = (1 / d - 1 / sepR) / d; sx -= ex * w; sy -= ey * w; sz -= ez * w; }
             }
           }
@@ -156,7 +158,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   // ── Rendering ────────────────────────────────────────────────────────
   const canvas = document.getElementById('stage');
   const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 1.5));
   const scene = new THREE.Scene();
   const camera = new THREE.PerspectiveCamera(50, 1, 2, 4200);
   const sound = createSound(camera);
@@ -266,7 +268,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   }
   const $snd = $('snd'), sndLabel = () => { $snd.title = sound.muted ? 'Sound off' : 'Sound on'; $snd.setAttribute('aria-label', $snd.title); $snd.classList.toggle('on', !sound.muted); };
   sndLabel(); $snd.addEventListener('click', () => { sound.toggle(); sndLabel(); });
-  $('scatter').addEventListener('click', () => {   // each bird bolts away from its neighbours' centre; flocking then pulls them back together
+  $('scatter').addEventListener('click', () => {   // also splits the flock into many small ones (ctx.onScatter); each bird bolts away from its neighbours' centre
     for (let i = 0; i < N; i++) {
       const i3 = i * 3; let cx = 0, cy = 0, cz = 0, c = 0;
       for (let j = 0; j < N; j++) { const j3 = j * 3, dx = pos[j3] - pos[i3], dy = pos[j3 + 1] - pos[i3 + 1], dz = pos[j3 + 2] - pos[i3 + 2]; if (dx * dx + dy * dy + dz * dz < 2500) { cx += dx; cy += dy; cz += dz; c++; } }
@@ -275,6 +277,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
       const k = P.spd * 1.8 / (Math.hypot(ax, ay, az) || 1);
       vel[i3] += ax * k; vel[i3 + 1] += ay * k * 0.6; vel[i3 + 2] += az * k;
     }
+    ctx.onScatter?.();
   });
 
   // ── Idle: after 5 s of nothing the camera starts to spin; after 10 s the nav, title and controls fade away.
@@ -293,6 +296,8 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   const DT = 1 / 60; let last = performance.now(), accT = 0, frames = 0, fpsT = 0;
   function frame(now) {
     requestAnimationFrame(frame);
+    if (document.hidden) { last = now; return; }   // a hidden tab does no work
+    if (now - last < 28 && document.documentElement.hasAttribute('data-idle')) return;   // faded UI means nobody is touching it: 30 fps
     const real = Math.min(0.1, (now - last) / 1000); last = now;
     accT += real; let n = 0; while (accT >= DT && n < 3) { step(DT); accT -= DT; n++; } if (n === 3) accT = 0;
     idleTick(real); drift(real);
@@ -305,7 +310,7 @@ const fontP = document.fonts.load('900 120px "Big Shoulders Display"').catch(() 
   // ── Modes: Classic is the pure boids; Skyline loads the extras on demand ─
   const ctx = {
     THREE, scene, camera, canvas, hawk, P, reduce, phone: PHONE, sound,
-    BX, BY, BZ, MAX_FORCE, orbit,
+    BX, BY, BZ, MAX_FORCE, orbit, NGRP, gmap,
     get birds() { return birds; }, get CAP() { return CAP; }, get pos() { return pos; }, get vel() { return vel; }, get N() { return N; },
     setLook(geo, mat) { look.geo = geo; look.mat = mat; birds.geometry = geo; birds.material = mat; },
     aiHawk: stepHawk
