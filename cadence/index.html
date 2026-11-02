@@ -133,7 +133,7 @@ const hm2ms=hm=>{const [h,m]=hm.split(':').map(Number);const d=new Date();d.setH
 
 function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,pick:'',doneDate:'',warned:0,when:0,fin:0,...o}}
 const water=()=>mk('every','Drink water',{n:30}),stretch=()=>mk('every','Stand up and stretch',{n:60});
-function fresh(){return {v:3,lead:30,sound:1,ctx:'Home',places:[
+function fresh(){return {v:3,sound:1,ctx:'Home',places:[
   {name:'Home',items:[water(),mk('random','Take a walk',{to:'16:00'}),mk('at','Lunch',{at:'12:30'})]}]}}
 
 let S;try{S=JSON.parse(localStorage.getItem(KEY)||'null')}catch{}
@@ -161,7 +161,7 @@ function arm(it){
   if(it.kind==='every'){const lo=Math.min(CFG.first[0],it.n),hi=Math.min(CFG.first[1],it.n*2);it.next=Date.now()+rand(lo,Math.max(lo,hi))*60000}
   else if(it.kind==='random'){it.doneDate='';it.slot=pickSlot(it)}
   else{const w=hm2ms(it.at);it.when=w>now?w:w+864e5;it.fin=0; // a time that has passed means tomorrow
-    it.warned=now>=it.when-S.lead*60000?1:0}} // already inside the heads-up window: skip it, no instant ping
+    it.warned=LEAD.filter(m=>now>=it.when-m*60000).length}} // heads-ups already passed: skip them, no instant ping
 // "Pullups/Dips/Swings" is one item that shows one option per cycle, never the same one twice running.
 const opts=n=>n.split('/').map(x=>x.trim()).filter(Boolean);
 const choose=a=>a[Math.floor(Math.random()*a.length)];
@@ -172,7 +172,8 @@ function complete(it){
   else if(it.kind==='random'){it.slot=0;it.doneDate=day()}
   else it.fin=1}
 // Heads-up before an appointment: a quiet toast and a short sound, nothing pauses.
-const remDue=(it,now)=>it.kind==='at'&&isOn(it)&&it.armed===day()&&!it.fin&&!it.warned&&S.lead>0&&now>=it.when-S.lead*60000&&now<it.when;
+const LEAD=[30,10]; // heads-ups, minutes before an appointment; it.warned counts how many have gone
+const remDue=(it,now)=>it.kind==='at'&&isOn(it)&&it.armed===day()&&!it.fin&&it.warned<LEAD.length&&now>=it.when-LEAD[it.warned]*60000&&now<it.when;
 // Keeps a running session going past midnight: whatever was on yesterday stays on.
 function rollover(){const d=day();if(UI.day===d)return;
   P().items.forEach(it=>{if(it.onDate!==UI.day||it.armed!==UI.day)return;
@@ -248,7 +249,7 @@ function renderSetup(){
   const items=P().items;
   $('#cols').innerHTML=COLS.map(([k,t])=>{
     const rows=items.filter(i=>i.kind===k);
-    return `<section class="col"><div class="ch"><h2>${t}</h2>${k==='at'?`<label>remind ${val('g-lead','lead',S.lead,'data-g="lead"')} min before</label>`:''}</div>
+    return `<section class="col"><div class="ch"><h2>${t}</h2></div>
     ${rows.length?`<div class="list">${rows.map(rowHtml).join('')}</div>`:''}
     </section>`}).join('')}
 
@@ -296,7 +297,7 @@ function tick(){
       if(it.kind==='every'&&it.next>now){it.next+=dt;ch=true}
       else if(it.kind==='random'&&it.slot>now){it.slot+=dt;ch=true}});
     if(ch&&now-UI.saved>5000){save();UI.saved=now}}
-  P().items.filter(i=>remDue(i,now)).forEach(i=>{i.warned=1;UI.toasts.push(i.id);save();play('reminder')});
+  P().items.filter(i=>remDue(i,now)).forEach(i=>{i.warned++;if(!UI.toasts.includes(i.id))UI.toasts.push(i.id);save();play('reminder')});
   paintToast(now);
   const key=cur?[cur.id,cur.snooze,d.length].join(':'):'';
   if(key!==UI.key){const isNew=cur&&!UI.key.startsWith(cur.id+':'+cur.snooze+':');
@@ -336,7 +337,6 @@ document.addEventListener('click',e=>{
 
 document.addEventListener('change',e=>{
   const t=e.target;
-  if(t.dataset.g){S[t.dataset.g]=Math.max(0,Math.round(+t.value)||0);t.value=S[t.dataset.g];save();return}
   const box=t.closest('[data-id]'),it=box&&byId(box.dataset.id),k=t.dataset.f;
   if(!k||!it)return;
   let v=t.value;
