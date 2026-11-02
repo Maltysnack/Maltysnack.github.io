@@ -189,29 +189,36 @@ function flash(on,txt){clearInterval(fl);document.title='Cadence';$('#ico').href
   if(!on)return;let f=0;fl=setInterval(()=>{f^=1;document.title=f?'\u25CF '+txt:'Cadence';$('#ico').href=ICO(f)},900)}
 
 /* ---------- quick add ----------
-   Pullups every45m   Run before1800 (or by1800)   Pickup @1730 (or at1730)   24-hour time only.
-   Pasted lists work too, one per line, with * or - bullets. */
-const TIME='(\\d{3,4}|\\d{1,2}:\\d{2})';
-const RE={
-  every:new RegExp('^(.*?)\\s*\\bevery\\s*(\\d+(?:\\.\\d+)?)\\s*(h|hr|hrs|hour|hours|m|min|mins|minute|minutes)?\\s*$','i'),
-  random:new RegExp('^(.*?)\\s*\\b(?:before|by)\\s*'+TIME+'\\s*$','i'),
-  at:new RegExp('^(.*?)\\s*(?:@|\\bat)\\s*'+TIME+'\\s*$','i')};
-function toHM(d){
+   Pullups every45m   Run before1800 (or by1800)   Pickup @1730 (or at1730)
+   Spaces optional (every 45, every45m), times 1730 / 17:30 / 5:30pm, and several on one line:
+   "Pullups every45m  Book cipher by 1700". Pasted lists work too, one per line, with * or - bullets. */
+const T='(\\d{1,2}:\\d{2}|\\d{3,4}|\\d{1,2}(?=\\s*[ap]m\\b))(?:\\s*([ap])m\\b)?';
+const TRIG=new RegExp('\\bevery\\s*(\\d+(?:\\.\\d+)?)(?:\\s*(hours|hour|hrs|hr|h|minutes|minute|mins|min|m)\\b)?|\\b(?:before|by)\\s*'+T+'|(?:@|\\bat)\\s*'+T,'gi');
+function toHM(d,ap){
   let h,m;
-  if(/^\d{3,4}$/.test(d)){m=+d.slice(-2);h=+d.slice(0,-2)}else{const p=d.split(':');h=+p[0];m=+p[1]}
+  if(/^\d{3,4}$/.test(d)){m=+d.slice(-2);h=+d.slice(0,-2)}else if(/^\d{1,2}$/.test(d)){h=+d;m=0}else{const p=d.split(':');h=+p[0];m=+p[1]}
+  if(ap){if(h<1||h>12)return null;h=h%12+(/p/i.test(ap)?12:0)}
   if(h>23||m>59)return null;
   return pad(h)+':'+pad(m)}
+const tidy=s=>s.replace(/^[\s·,;|]+|[\s·,;|]+$/g,'');
+// Each trigger (every N, by T, at T) ends an item; the words since the last trigger are its name.
 function parseLine(line,def){
   line=line.replace(/^\s*(?:(?:[*\-•]|\d+[.)])\s*)?(?:\[[ xX]?\]\s*)?/,'').trim();
-  if(!line)return null;
-  let m,t;
-  if((m=line.match(RE.every))&&m[1].trim()){const n=Math.round(+m[2]*(/^h/i.test(m[3]||'')?60:1));if(n>=1)return {kind:'every',name:m[1].trim(),n}}
-  if((m=line.match(RE.random))&&m[1].trim()&&(t=toHM(m[2])))return {kind:'random',name:m[1].trim(),to:t};
-  if((m=line.match(RE.at))&&m[1].trim()&&(t=toHM(m[2])))return {kind:'at',name:m[1].trim(),at:t};
-  return {kind:def,name:line}}
+  const out=[];let start=0,m,it,t;
+  TRIG.lastIndex=0;
+  while((m=TRIG.exec(line))){
+    it=null;
+    if(m[1]){const n=Math.round(+m[1]*(/^h/i.test(m[2]||'')?60:1));if(n>=1)it={kind:'every',n}}
+    else if(m[3]){if(t=toHM(m[3],m[4]))it={kind:'random',to:t}}
+    else if(t=toHM(m[5],m[6]))it={kind:'at',at:t};
+    const name=tidy(line.slice(start,m.index));
+    if(it&&name){out.push({...it,name});start=TRIG.lastIndex}}
+  const rest=tidy(line.slice(start));
+  if(rest)out.push({kind:def,name:rest});
+  return out}
 function addLines(text,def='random'){
   let c=0;
-  text.split(/\r?\n/).forEach(l=>{const p=parseLine(l,def);if(p){const {kind,...o}=p;P().items.push(mk(kind,o.name,{...o,onDate:day()}));c++}});
+  text.split(/\r?\n/).forEach(l=>parseLine(l,def).forEach(p=>{const {kind,...o}=p;P().items.push(mk(kind,o.name,{...o,onDate:day()}));c++}));
   return c}
 
 /* ---------- render: setup ---------- */
@@ -330,7 +337,7 @@ document.addEventListener('change',e=>{
   if(!k||!it)return;
   let v=t.value;
   if(k==='n'){v=Math.max(1,Math.round(+v)||1);t.value=v}
-  else if(k==='to'||k==='at'){const hm=toHM(v.trim());if(!hm){t.value=it[k];return}v=hm;t.value=hm}
+  else if(k==='to'||k==='at'){const tm=v.trim().match(/^(\d{1,2}:\d{2}|\d{1,4})\s*(?:([ap])m)?$/i),hm=tm&&toHM(tm[1],tm[2]);if(!hm){t.value=it[k];return}v=hm;t.value=hm}
   else if(!v.trim()){t.value=it[k];return}
   it[k]=v;
   if(k!=='name')it.armed=''; // edited schedule re-arms at the next Start
