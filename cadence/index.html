@@ -131,7 +131,7 @@ const rand=(a,b)=>a+Math.random()*(b-a);
 const day=()=>new Date().toLocaleDateString('en-CA');
 const hm2ms=hm=>{const [h,m]=hm.split(':').map(Number);const d=new Date();d.setHours(h,m,0,0);return d.getTime()};
 
-function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,doneDate:'',warned:0,when:0,fin:0,...o}}
+function mk(kind,name,o={}){return {id:uid(),kind,name,n:45,at:'12:00',to:'18:00',onDate:'',armed:'',next:0,slot:0,snooze:0,pick:'',doneDate:'',warned:0,when:0,fin:0,...o}}
 const water=()=>mk('every','Drink water',{n:30}),stretch=()=>mk('every','Stand up and stretch',{n:60});
 function fresh(){return {v:3,lead:30,sound:1,ctx:'Home',places:[
   {name:'Home',items:[water(),mk('random','Take a walk',{to:'16:00'}),mk('at','Lunch',{at:'12:30'})]}]}}
@@ -162,8 +162,12 @@ function arm(it){
   else if(it.kind==='random'){it.doneDate='';it.slot=pickSlot(it)}
   else{const w=hm2ms(it.at);it.when=w>now?w:w+864e5;it.fin=0; // a time that has passed means tomorrow
     it.warned=now>=it.when-S.lead*60000?1:0}} // already inside the heads-up window: skip it, no instant ping
+// "Pullups/Dips/Swings" is one item that shows one option per cycle, never the same one twice running.
+const opts=n=>n.split('/').map(x=>x.trim()).filter(Boolean);
+const choose=a=>a[Math.floor(Math.random()*a.length)];
+function label(it){const o=opts(it.name);if(o.length<2)return it.name;if(!o.includes(it.pick))it.pick=choose(o);return it.pick}
 function complete(it){
-  it.snooze=0;
+  it.snooze=0;if(opts(it.name).length>1)it.pick=choose(opts(it.name).filter(x=>x!==it.pick))||'';
   if(it.kind==='every')it.next=nextIn(it.n);
   else if(it.kind==='random'){it.slot=0;it.doneDate=day()}
   else it.fin=1}
@@ -260,16 +264,16 @@ function renderPop(cur,count){
   const el=$('#pop');
   if(!cur){el.hidden=true;el.innerHTML='';return}
   el.hidden=false;
-  el.innerHTML=`<div class="ping" role="alertdialog" aria-label="${esc(cur.name)}" data-id="${cur.id}">
+  el.innerHTML=`<div class="ping" role="alertdialog" aria-label="${esc(label(cur))}" data-id="${cur.id}">
     ${count>1?`<span class="more">+${count-1} more</span>`:''}
-    <h2><span>${esc(cur.name)}</span>${cur.kind==='at'?`<small>${cur.at}</small>`:''}</h2>
+    <h2><span>${esc(label(cur))}</span>${cur.kind==='at'?`<small>${cur.at}</small>`:''}</h2>
     <div class="acts"><button class="done" id="b-done" data-act="done">Done</button>
       <button data-act="delay" data-m="5"><span class="pl">+</span>5m</button><button data-act="delay" data-m="60"><span class="pl">+</span>1h</button></div></div>`;
   $('#b-done').focus()}
 
 function paintToast(now){
   UI.toasts=UI.toasts.filter(id=>{const i=byId(id);return i&&isOn(i)&&!i.fin&&now<i.when});
-  const h=UI.toasts.map(id=>{const i=byId(id);return `<div class="t" data-id="${id}" data-act="toastx">${esc(i.name)}<small>${i.at}</small></div>`}).join('');
+  const h=UI.toasts.map(id=>{const i=byId(id);return `<div class="t" data-id="${id}" data-act="toastx">${esc(label(i))}<small>${i.at}</small></div>`}).join('');
   const el=$('#toast');if(el.dataset.v!==h){el.dataset.v=h;el.innerHTML=h}}
 
 const paintSnd=()=>document.querySelectorAll('.snd').forEach(b=>b.classList.toggle('off',!S.sound));
@@ -296,7 +300,7 @@ function tick(){
   paintToast(now);
   const key=cur?[cur.id,cur.snooze,d.length].join(':'):'';
   if(key!==UI.key){const isNew=cur&&!UI.key.startsWith(cur.id+':'+cur.snooze+':');
-    UI.key=key;renderPop(cur,d.length);flash(!!cur,cur&&cur.name);
+    UI.key=key;renderPop(cur,d.length);flash(!!cur,cur&&label(cur));
     if(isNew){play('popup');UI.lastChime=now}}
   else if(cur&&now-UI.lastChime>90000){play('popup');UI.lastChime=now} // keep nudging until answered
   if(UI.view==='focus')paintClock()}
