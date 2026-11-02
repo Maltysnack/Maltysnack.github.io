@@ -303,8 +303,8 @@ function tick(){
   const key=cur?[cur.id,cur.snooze,d.length].join(':'):'';
   if(key!==UI.key){const isNew=cur&&!UI.key.startsWith(cur.id+':'+cur.snooze+':');
     UI.key=key;renderPop(cur,d.length);flash(!!cur,cur&&label(cur));
-    if(isNew){play('popup');UI.lastChime=now}}
-  else if(cur&&now-UI.lastChime>90000){play('popup');UI.lastChime=now} // keep nudging until answered
+    if(isNew){play('popup');UI.lastChime=now;UI.nudged=0}}
+  else if(cur&&!UI.nudged&&now-UI.lastChime>30*60000){play('popup');UI.nudged=1} // one catch-up ping for a missed popup, then quiet
   if(UI.view==='focus')paintClock()}
 
 /* ---------- events ---------- */
