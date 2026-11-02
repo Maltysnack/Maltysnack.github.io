@@ -285,11 +285,12 @@ function setView(v){
 /* ---------- loop ---------- */
 let last=Date.now();
 function tick(){
-  const now=Date.now(),dt=now-last;last=now;
+  const now=Date.now(),dt=now-last,wasOpen=!!UI.key;last=now;
   rollover();
   const d=dueList(now),cur=d[0]||null;
   // While a ping is open, everything not yet due is frozen, so nothing piles up behind you. Appointments are real time and never frozen.
-  if(cur&&dt>0&&dt<5000){
+  // No upper limit on dt: a background tab ticks about once a minute, and the freeze must still cover that gap.
+  if(cur&&wasOpen&&dt>0){
     let ch=false;
     P().items.forEach(it=>{
       if(!isOn(it)||it.armed!==day()||it.kind==='at')return;
