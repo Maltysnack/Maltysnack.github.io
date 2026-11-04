@@ -56,12 +56,17 @@ fi
 # ── 3. Personal info leaks ────────────────────────────────────────────────────
 echo ""
 echo "[3] personal info"
-real_name=$(src_files | xargs grep -lEi "milo[-. ]?watkinson|milo\.watkinson" 2>/dev/null | grep -v scripts/sanitize.sh || true)
+# Private patterns (real name etc.) live in a gitignored file so they are never published.
+pp=scripts/.private-patterns
+real_name=""
+[[ -s "$pp" ]] && real_name=$(src_files | xargs grep -lEif "$pp" 2>/dev/null | grep -v scripts/sanitize.sh || true)
+home_paths=$(src_files | xargs grep -lE '/Users/[a-z]+/' 2>/dev/null | grep -v scripts/sanitize.sh || true)
 phones=$(src_files | xargs grep -lE '\b[0-9]{3}[-.\ ][0-9]{3}[-.\ ][0-9]{4}\b' 2>/dev/null | grep -v scripts/sanitize.sh || true)
 emails=$(src_files | xargs grep -lE '[A-Za-z0-9._%+-]+@(gmail|yahoo|hotmail|outlook|icloud|students\.mq)\.' 2>/dev/null | grep -v scripts/sanitize.sh || true)
 
 pi_clean=1
 if [[ -n "$real_name" ]]; then note_fail "real name pattern found:"; echo "$real_name" | sed 's/^/        /'; pi_clean=0; fi
+if [[ -n "$home_paths" ]]; then note_fail "local home path found:"; echo "$home_paths" | sed 's/^/        /'; pi_clean=0; fi
 if [[ -n "$phones" ]];    then note_fail "phone number pattern found:"; echo "$phones" | sed 's/^/        /'; pi_clean=0; fi
 if [[ -n "$emails" ]];    then note_fail "personal email pattern found:"; echo "$emails" | sed 's/^/        /'; pi_clean=0; fi
 [[ "$pi_clean" -eq 1 ]] && note_ok "no personal info patterns"

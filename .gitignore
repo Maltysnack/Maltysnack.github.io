@@ -3,3 +3,4 @@
 
 # CodeGraph index (local only)
 .codegraph/
+scripts/.private-patterns
