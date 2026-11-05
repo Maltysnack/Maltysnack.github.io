@@ -128,6 +128,26 @@ commits too.
   the browser. Add the bar, or leave it a standalone full-screen game.
 - `.github/workflows/sync-fpl.yml.disabled` is left untracked on purpose.
   See `projects/fpl/HANDOFF.md`.
+- **Restructure to a hub plus per-page public repos (proposed 05-11-2026, no
+  go-ahead yet).** Idea: each engine-driven page becomes its own public repo
+  with its own Pages site (`maltysnack.github.io/<repo>/`, same origin). This
+  repo becomes the home page plus a directory (nav only), and no longer holds
+  synced copies. Plan:
+  1. Inventory private repos and which hub pages each feeds. Scan every
+     history (gitleaks plus private name patterns) before making any public.
+  2. New public `design` repo at `/design/v1/`: palette.css, fonts, topbar JS,
+     sanitize checks as a reusable workflow plus a shared hook. Hub and
+     portfolio both load from it. Breaking changes go to `/v2/`.
+  3. Pilot one page (fpl suggested): make public, add the design include,
+     leave a redirect stub at the old `/projects/<page>/`, delete its sync job,
+     verify with the curl check.
+  4. Repeat per engine page. Pages with no engine repo stay as hub folders.
+  5. Housekeeping: expand `.gitignore` (.env*, keys, logs, node_modules,
+     venv, dist, `.claude/*.local.*`), global ignore for .DS_Store/.idea/.vscode,
+     private patterns at `~/.config/maltysnack/` read by the shared hook.
+  Leak checks must run in a local pre-commit hook; CI on a public repo runs
+  after the push, so it is only a backstop. Open: which page to pilot, and
+  confirm static pages stay in the hub.
 
 ## Decided
 
