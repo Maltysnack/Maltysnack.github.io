@@ -239,6 +239,9 @@ airliner lands, jets curve.
   night mode with stars/aurora and a lit pier; photo mode; time-lapse controls;
   bushfire haze; rocket launch; regatta; splitting `skyline.js` into modules
   (offered, deferred; everything shares one closure of state).
+- **Decided 05-11-2026**: no world editor, and no separate repo. Flock stays a
+  folder in this repo (no build step, one page, already the home page). Revisit
+  only if it gains its own tooling or a second page.
 - maltysnack likes: dynamic, curved, "performance" movement; rare spawns that
   interact (tornado grabs things, cannons blow up boats, fires spread); more
   life and landmarks everywhere; colour kept subdued with highlights; nothing
