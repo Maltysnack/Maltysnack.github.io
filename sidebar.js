@@ -59,8 +59,6 @@
     { href: '/projects/worldcup/',   label: 'World Cup' },
     { href: '/projects/flox/',       label: 'Flox' },
     { href: '/projects/algorithms/', label: 'Algorithms' },
-    { href: '/games/dnd/',           label: 'dnd' },
-    { href: '/games/duoclue/',       label: 'Duoclue' },
     { href: '/projects/cadence/',             label: 'Cadence' },
   ];
 

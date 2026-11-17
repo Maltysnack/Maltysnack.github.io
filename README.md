@@ -20,14 +20,6 @@ A small language for flow networks: write nodes and arrows, and it simulates how
 **Algorithms:**<br>
 Search and optimisation algorithms running live: pathfinding, a sliding-tile puzzle, a travelling salesman tour and sorting.
 
-### Games
-
-**dnd:**<br>
-D&D 5e character sheets that save in your browser: track HP, slots, spells and loot.
-
-**Duoclue:**<br>
-Describe the word using exactly two words. A party game for one phone.
-
 <!-- END: pages -->
 
 ## Notes
