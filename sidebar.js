@@ -54,8 +54,7 @@
      read as one design. Pages still contain <aside class="sidebar">; it is
      styled as the bar, so no page markup had to change. */
 
-  // Each project lives on its own site; keep this list in step with
-  // page/bar.js in worldcup-model and flox.
+  // Each project lives on its own site and does not link back.
   const NAV = [
     { href: 'https://filmclub.watch',                     label: 'Filmclub' },
     { href: '/worldcup-model/',                           label: 'World Cup' },
