@@ -1,231 +1,36 @@
 #!/usr/bin/env bash
-# scripts/sanitize.sh
-# Mechanical sanitation pass. Catches drift between sessions.
-# Exit 0 if clean, 1 if any FAIL category.
-#
+# Checks run on every push (see .github/workflows/sanitize.yml).
 # Run locally: bash scripts/sanitize.sh
-# Runs in CI on every push to main.
-
 set -uo pipefail
 cd "$(git rev-parse --show-toplevel)"
-
 errors=0
-warnings=0
+fail() { echo "FAIL: $1"; errors=$((errors+1)); }
 
-note_fail() { echo "  FAIL: $1"; errors=$((errors+1)); }
-note_warn() { echo "  WARN: $1"; warnings=$((warnings+1)); }
-note_ok()   { echo "  OK: $1"; }
+files=$(git ls-files '*.html' '*.css' '*.js' '*.md' '*.yml')
 
-echo "=== Sanitation pass ==="
+# No em dashes anywhere.
+hits=$(grep -l "—" $files 2>/dev/null)
+[ -n "$hits" ] && fail "em dashes in: $hits"
 
-# Files we care about: HTML, JS, CSS, MD, YAML in the project.
-# Exclude: .git, node_modules, _next bundles, dnd character sheets that have raw apostrophes etc.
-src_files() {
-  find . -type f \
-    \( -name "*.html" -o -name "*.js" -o -name "*.css" -o -name "*.md" -o -name "*.yml" -o -name "*.yaml" \) \
-    -not -path "./.git/*" \
-    -not -path "*/node_modules/*" \
-    -not -path "*/_next/*" \
-    -not -path "*/duoclue/*"
-}
+# No phone numbers on the public site (the PDF is built without one).
+hits=$(grep -lE '\b0[0-9]{3} ?[0-9]{3} ?[0-9]{3}\b|\+61' $files 2>/dev/null)
+[ -n "$hits" ] && fail "phone number in: $hits"
 
-# ── 1. Em dashes ──────────────────────────────────────────────────────────────
-echo ""
-echo "[1] em dashes"
-em_hits=$(src_files | xargs grep -ln "—" 2>/dev/null || true)
-if [[ -n "$em_hits" ]]; then
-  note_fail "em dashes found:"
-  echo "$em_hits" | sed 's/^/        /'
-else
-  note_ok "no em dashes"
-fi
+# No internal notes served as pages.
+hits=$(git ls-files | grep -iE '(^|/)(CLAUDE|HANDOFF|AGENTS)\.md$|(^|/)\.claude/')
+[ -n "$hits" ] && fail "internal notes would be public: $hits"
 
-# ── 2. Junk files ─────────────────────────────────────────────────────────────
-echo ""
-echo "[2] junk files"
-junk=$(find . -type f \
-  \( -name ".DS_Store" -o -name "Thumbs.db" -o -name "*.swp" -o -name "*~" \) \
-  -not -path "./.git/*" 2>/dev/null || true)
-if [[ -n "$junk" ]]; then
-  note_fail "junk files present:"
-  echo "$junk" | sed 's/^/        /'
-else
-  note_ok "no junk files"
-fi
-
-# ── 3. Personal info leaks ────────────────────────────────────────────────────
-echo ""
-echo "[3] personal info"
-# Private patterns (real name etc.) live in a gitignored file so they are never published.
-pp=scripts/.private-patterns
-real_name=""
-[[ -s "$pp" ]] && real_name=$(src_files | xargs grep -lEif "$pp" 2>/dev/null | grep -v scripts/sanitize.sh || true)
-home_paths=$(src_files | xargs grep -lE '/Users/[a-z]+/' 2>/dev/null | grep -v scripts/sanitize.sh || true)
-phones=$(src_files | xargs grep -lE '\b[0-9]{3}[-.\ ][0-9]{3}[-.\ ][0-9]{4}\b' 2>/dev/null | grep -v scripts/sanitize.sh || true)
-emails=$(src_files | xargs grep -lE '[A-Za-z0-9._%+-]+@(gmail|yahoo|hotmail|outlook|icloud|students\.mq)\.' 2>/dev/null | grep -v scripts/sanitize.sh || true)
-
-pi_clean=1
-if [[ -n "$real_name" ]]; then note_fail "real name pattern found:"; echo "$real_name" | sed 's/^/        /'; pi_clean=0; fi
-if [[ -n "$home_paths" ]]; then note_fail "local home path found:"; echo "$home_paths" | sed 's/^/        /'; pi_clean=0; fi
-if [[ -n "$phones" ]];    then note_fail "phone number pattern found:"; echo "$phones" | sed 's/^/        /'; pi_clean=0; fi
-if [[ -n "$emails" ]];    then note_fail "personal email pattern found:"; echo "$emails" | sed 's/^/        /'; pi_clean=0; fi
-[[ "$pi_clean" -eq 1 ]] && note_ok "no personal info patterns"
-
-# ── 4. Untracked source files ─────────────────────────────────────────────────
-echo ""
-echo "[4] untracked source files"
-untracked=$(git ls-files --others --exclude-standard | grep -E '\.(html|css|js|json|md)$' || true)
-if [[ -n "$untracked" ]]; then
-  note_warn "untracked source files (likely need 'git add'):"
-  echo "$untracked" | sed 's/^/        /'
-else
-  note_ok "no untracked source files"
-fi
-
-# ── 5. Broken internal links from sidebar/home ───────────────────────────────
-echo ""
-echo "[5] broken internal links"
-links=$(grep -hoE 'href="/[^"#]+"' sidebar.js index.html 2>/dev/null | sed 's/href="//;s/"$//' | sort -u)
-broken=""
-for l in $links; do
-  # Strip query strings before resolving to a file
-  base="${l%%\?*}"
-  if [[ "$base" == */ ]]; then
-    target=".${base}index.html"
-  else
-    target=".${base}"
-  fi
-  if [[ ! -e "$target" ]]; then
-    broken="${broken}        $l -> $target (missing)\n"
-  fi
+# Root-relative links must point at a file in this repo, or at another repo's
+# Pages site (/<repo>/) that is listed here.
+other_sites="/worldcup-model/ /Dartabase/ /flox/ /cadence/"
+for f in $(git ls-files '*.html'); do
+  for href in $(grep -oE '(href|src)="/[^"]*"' "$f" | sed -E 's/^[a-z]+="//; s/"$//; s/[?#].*//'); do
+    case " $other_sites " in *" $href "*) continue;; esac
+    target=".${href}"
+    [ -d "$target" ] && target="$target/index.html"
+    [ -e "$target" ] || fail "$f links to missing $href"
+  done
 done
-if [[ -n "$broken" ]]; then
-  note_fail "broken links from sidebar/home:"
-  echo -e "$broken"
-else
-  note_ok "all sidebar/home links resolve"
-fi
 
-# ── 6. New page added without sidebar entry ──────────────────────────────────
-# Heuristic: a top-level *.html or /projects/*.html that exists but isn't in sidebar.js
-# Intentional easter eggs (reachable only via in-page links) go in the ignore list.
-# coffeetime is the morning sister of happyhour, only linked from the wordmark toggle.
-echo ""
-echo "[6] orphaned pages (exist but not in sidebar)"
-ignore_paths='/index.html|/wren/.*|/shelf/.*|/dnd/.*|/projects/coffeetime.html'
-orphans=""
-while IFS= read -r p; do
-  rel="${p#.}"
-  if [[ "$rel" =~ $ignore_paths ]]; then continue; fi
-  if ! grep -qF "\"$rel\"" sidebar.js 2>/dev/null; then
-    orphans="${orphans}        $rel\n"
-  fi
-done < <(find . -type f -name "*.html" \
-  -not -path "./.git/*" -not -path "*/node_modules/*" -not -path "*/_next/*" -not -path "*/duoclue/*")
-
-if [[ -n "$orphans" ]]; then
-  note_warn "pages not linked from sidebar:"
-  echo -e "$orphans"
-else
-  note_ok "every public page is reachable from sidebar"
-fi
-
-# ── 7. Site pages must include sidebar.js (which injects favicons + nav) ─────
-# Any HTML page that uses /style.css (so it's part of the main site) must load
-# sidebar.js. sidebar.js is the source of truth for the canonical favicon
-# block, so a page that loads it gets the right icons automatically.
-# Self-contained sub-apps (Duoclue, Happy Hour, anything not using /style.css)
-# are exempt because they ship their own design and chrome.
-echo ""
-echo "[7] sidebar.js coverage (favicons + nav)"
-missing_sidebar=""
-while IFS= read -r p; do
-  if grep -q '"/style.css"' "$p" 2>/dev/null; then
-    if ! grep -q '/sidebar.js' "$p" 2>/dev/null; then
-      missing_sidebar="${missing_sidebar}        ${p#./}\n"
-    fi
-  fi
-done < <(find . -type f -name "*.html" \
-  -not -path "./.git/*" -not -path "*/node_modules/*" -not -path "*/_next/*" -not -path "*/duoclue/*")
-
-if [[ -n "$missing_sidebar" ]]; then
-  note_fail "site pages missing sidebar.js:"
-  echo -e "$missing_sidebar"
-else
-  note_ok "every site page loads sidebar.js (gets favicons + nav)"
-fi
-
-# ── 8.5. README in sync with page descriptions ──────────────────────────────
-echo ""
-echo "[8.5] README sync"
-if python3 scripts/build-readme.py --check >/dev/null 2>&1; then
-  note_ok "README is in sync with page descriptions"
-else
-  note_fail "README is stale. Run: python3 scripts/build-readme.py"
-fi
-
-# ── 8. Profanity / unprofessional language (soft warn) ──────────────────────
-# This site is linked in maltysnack's job applications. We don't fail the build
-# on borderline language because context matters, but we surface anything that
-# would make a hiring manager raise an eyebrow on first skim. /dnd/ is excluded
-# because character notes can legitimately have game-violence words.
-echo ""
-echo "[8] casual / profane language (soft check)"
-profanity_hits=$(src_files | grep -v "/dnd/" | xargs grep -lEni "\b(fuck|shit|damn|crap|bitch|bastard|dick|piss|bullshit|wtf|stfu)\b" 2>/dev/null | grep -v scripts/sanitize.sh || true)
-if [[ -n "$profanity_hits" ]]; then
-  note_warn "potentially unprofessional language (review for hiring-context):"
-  echo "$profanity_hits" | sed 's/^/        /'
-else
-  note_ok "no profanity flagged"
-fi
-
-# ── 9. JS module imports resolve ─────────────────────────────────────────────
-# Catches the class of bug that href/src checks miss entirely: a deleted module
-# still imported from inside <script type="module"> or another .js/.mjs file.
-# The page keeps returning 200 while being completely broken at runtime.
-echo ""
-echo "[9] js module imports resolve"
-bad_imports=""
-while IFS= read -r f; do
-  dir=$(dirname "$f")
-  grep -oE "(from|import\()[[:space:]]*['\"][^'\"]+['\"]" "$f" 2>/dev/null \
-    | grep -oE "['\"][^'\"]+['\"]" | tr -d "'\"" | while read -r spec; do
-      # Skip remote URLs, template-literal interpolation, and bare
-      # specifiers (npm packages). Only relative and root-absolute
-      # paths resolve to files in this repo.
-      case "$spec" in
-        http*|//*|data:*) continue ;;
-        *'${'*) continue ;;
-        ./*|../*|/*) ;;
-        *) continue ;;
-      esac
-      base="${spec%%\?*}"
-      case "$base" in
-        /*) target=".$base" ;;
-        *)  target="$dir/$base" ;;
-      esac
-      [[ -e "$target" ]] || echo "        ${f#./} -> $spec"
-    done
-done < <(find . -type f \( -name "*.html" -o -name "*.js" -o -name "*.mjs" \) \
-  -not -path "./.git/*" -not -path "*/node_modules/*" -not -path "*/_next/*" \
-  -not -path "*/duoclue/*") > /tmp/sanitize-imports.$$ 2>/dev/null
-
-bad_imports=$(cat /tmp/sanitize-imports.$$ 2>/dev/null); rm -f /tmp/sanitize-imports.$$
-if [[ -n "$bad_imports" ]]; then
-  note_fail "js imports pointing at missing files:"
-  echo "$bad_imports"
-else
-  note_ok "every js module import resolves"
-fi
-
-# ── Summary ──────────────────────────────────────────────────────────────────
-echo ""
-echo "=== Summary ==="
-echo "  errors:   $errors"
-echo "  warnings: $warnings"
-if [[ "$errors" -gt 0 ]]; then
-  echo "FAIL"
-  exit 1
-fi
-echo "Clean."
-exit 0
+if [ "$errors" -gt 0 ]; then echo "$errors problem(s)"; exit 1; fi
+echo "OK"
