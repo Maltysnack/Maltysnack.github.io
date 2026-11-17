@@ -1,15 +1,14 @@
 # maltysnack.github.io
 
-Milo Watkinson's portfolio: a short intro, contact details, a resume PDF and
-links to each project. Live at [maltysnack.github.io](https://maltysnack.github.io/).
+Milo Watkinson's site. Live at [maltysnack.github.io](https://maltysnack.github.io/).
 
-Plain HTML and CSS, no build step. Each project lives in its own repo with its
-own GitHub Pages site; this site only links to them. Nothing publishes into
-this repo.
+The home page is a flock simulation (boids) over a small city. The top bar
+links to each project, which lives in its own repo with its own GitHub Pages
+site. Plain HTML, CSS and JavaScript, no build step.
 
-- `index.html`, `style.css`: the page
-- `milo-watkinson-resume.pdf`: built from the private resume repo with the
-  phone number left out
+- `index.html`, `projects/flock/`: the flock
+- `sidebar.js`: the top bar on every page; the project list lives here
+- `style.css`, `design/palette.css`: styles
 - `projects/*/index.html`: redirects from old addresses
 - `scripts/sanitize.sh`: checks run on every push (em dashes, phone numbers,
   internal notes, broken links)

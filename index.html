@@ -1,68 +1,89 @@
 <!DOCTYPE html>
 <html lang="en-AU">
 <head>
+  <script>(function () { var q = new URLSearchParams(location.search), d = document.documentElement;
+    d.dataset.theme = 'dark';
+    if (!q.has('nointro') && !matchMedia('(prefers-reduced-motion: reduce)').matches) d.dataset.intro = ''; })();</script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Milo Watkinson</title>
-  <meta name="description" content="Milo Watkinson, IT graduate in Sydney. Projects, resume and contact." />
-  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png?v=3" />
-  <link rel="icon" href="/favicon.ico?v=3" sizes="any" />
-  <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=3" />
-  <link rel="stylesheet" href="/style.css?v=10" />
+  <meta name="description" content="Milo Watkinson: projects, and a flock of birds from three simple rules, with weather, a skyline and a few visitors." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="modulepreload" href="/projects/flock/vendor/three.module.min.js" />
+  <link rel="modulepreload" href="/projects/flock/skyline.js?v=33" />
+  <link rel="modulepreload" href="/projects/flock/extras.js?v=10" />
+  <link rel="modulepreload" href="/projects/flock/sound.js?v=6" />
+  <link rel="stylesheet" href="/style.css?v=9" />
+  <style>
+    /* A tool, so it fills the screen and never scrolls. */
+    body { height: 100dvh; overflow: hidden; }
+    .flock { flex: 1; min-height: 0; position: relative; padding: 0; max-width: none; width: 100%; }
+    #stage { position: absolute; inset: 0; display: block; width: 100%; height: 100%; cursor: grab; touch-action: none; }
+    #stage:active { cursor: grabbing; }
+
+    /* Controls stay out of the way: a title top left, one quiet bar bottom
+       left, and the sliders only when asked for. */
+    .ov-title { position: absolute; top: clamp(12px, 2.5vh, 24px); left: clamp(12px, 2.5vw, 28px); max-width: 30ch; pointer-events: none; }
+    .ov-title p { margin: 0; font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; color: var(--text-dim); }
+    .ov-bar { position: absolute; left: clamp(12px, 2.5vw, 28px); bottom: clamp(12px, 2.5vh, 24px); display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap;
+              font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
+    .ov-bar button, .ov-top button, .tune summary { font: inherit; letter-spacing: inherit; text-transform: inherit; background: none; border: 0; border-bottom: 2px solid transparent; padding: 4px 0; color: var(--text-muted); cursor: pointer; }
+    .ov-bar button:hover, .ov-top button:hover, .tune summary:hover { color: var(--text); }
+    .presets { display: flex; gap: 14px; }
+    .presets button.on, .ov-bar button.on, .ov-top button.on, .tune[open] summary { color: var(--text); border-bottom-color: var(--accent); }
+    .ov-top { position: absolute; top: clamp(12px, 2.5vh, 24px); right: clamp(12px, 2.5vw, 28px); display: flex; align-items: center; gap: 4px 14px; flex-wrap: wrap; justify-content: flex-end;
+              font-size: var(--text-xs); letter-spacing: .08em; text-transform: uppercase; }
+    .ov-top span button { margin-left: 14px; } .ov-top span button:first-child { margin-left: 0; }
+    .rule { width: 1px; height: 14px; background: var(--border-strong); }
+    [data-mode=classic] [data-sky], [data-mode=skyline] .classic-only { display: none; }
+    body:not([data-mode]) [data-sky] { display: none; }
+    #snd svg { display: block; } #snd.on .slash { display: none; }
+    .ov-bar .rule { width: 1px; height: 14px; background: var(--border-strong); }
+    .ov-bar label { display: inline-flex; gap: 6px; align-items: center; color: var(--text-muted); cursor: pointer; }
+    .ov-bar input[type=checkbox] { accent-color: var(--accent); margin: 0; }
+    .tune summary { list-style: none; }
+    .tune summary::-webkit-details-marker { display: none; }
+    .tune .body { position: absolute; left: 0; bottom: calc(100% + 12px); width: 250px; padding: 10px 0 0; border-top: 2px solid var(--text);
+                  background: color-mix(in srgb, var(--bg) 85%, transparent); backdrop-filter: blur(6px); text-transform: none; letter-spacing: 0; }
+    .ctl { display: grid; grid-template-columns: 74px 1fr 36px; align-items: center; gap: 10px; color: var(--text-muted); margin: 8px 0; }
+    .ctl output { font-family: var(--font-mono); font-variant-numeric: tabular-nums; text-align: right; color: var(--text); }
+    .ctl input[type=range] { -webkit-appearance: none; appearance: none; width: 100%; height: 2px; background: var(--border-strong); margin: 0; }
+    .ctl input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 10px; height: 10px; background: var(--accent); border: 0; cursor: pointer; }
+    .ctl input[type=range]::-moz-range-thumb { width: 10px; height: 10px; background: var(--accent); border: 0; border-radius: 0; cursor: pointer; }
+    .stats { position: absolute; right: clamp(12px, 2.5vw, 28px); bottom: 12px; font-family: var(--font-mono); font-size: 10px; color: var(--text-dim); pointer-events: none; }
+
+    /* ?intro: the bar and controls stay hidden under the Hello. burst, then fade in. */
+    .sidebar, .ov-title, .ov-bar, .ov-top, .stats { transition: opacity .35s ease; }
+    html[data-revealing] .sidebar, html[data-revealing] .ov-title, html[data-revealing] .ov-bar, html[data-revealing] .ov-top, html[data-revealing] .stats { transition: opacity 1.2s ease .4s; }
+    /* Idle: after a while everything but the scene fades; movement brings it back. */
+    html[data-idle] .sidebar, html[data-idle] .ov-title, html[data-idle] .ov-bar, html[data-idle] .ov-top, html[data-idle] .stats { opacity: 0; pointer-events: none; transition: opacity 1.5s ease; }
+    html[data-idle] #stage { cursor: none; }
+    html[data-intro] .sidebar, html[data-intro] .ov-title, html[data-intro] .ov-bar, html[data-intro] .ov-top, html[data-intro] .stats { opacity: 0; pointer-events: none; }
+
+    @media (max-width: 640px) {
+      .stats { top: 10px; bottom: auto; }
+      .ov-top { top: 30px; }
+    }
+  </style>
 </head>
 <body>
-  <main>
-    <header>
-      <h1>Milo Watkinson</h1>
-      <p class="lede">IT graduate in Sydney.</p>
-      <p>I finished a Bachelor of Information Technology at Macquarie University in 2026. Before that I spent two years at a fintech startup, looking after the company website and helping customers with the app.</p>
-      <p>I'm looking for IT support, customer support, web or testing roles, including games QA, and working towards development. Available now, anywhere in Sydney.</p>
-      <nav class="links" aria-label="Contact">
-        <a href="mailto:milo.watkinson@gmail.com">milo.watkinson@gmail.com</a>
-        <a href="/milo-watkinson-resume.pdf">Resume (PDF)</a>
-        <a href="https://github.com/maltysnack">GitHub</a>
-      </nav>
-    </header>
+  <aside class="sidebar"></aside>
+  <main class="main flock" data-layout="full">
+    <canvas id="stage" aria-label="A three-dimensional flock simulation"></canvas>
 
-    <section aria-labelledby="projects">
-      <h2 id="projects">Projects</h2>
-      <p class="note">I designed, directed and tested each of these, and built them with AI coding tools.</p>
-
-      <article>
-        <h3><a href="https://filmclub.watch">Filmclub</a></h3>
-        <p>A group on a couch picks a film together. Everyone swipes posters on their own phone, then a quick vote narrows the favourites to one. No accounts.</p>
-        <p class="meta">Next.js · TypeScript · Supabase · <a href="https://github.com/maltysnack/Filmclub">Code</a></p>
-      </article>
-
-      <article>
-        <h3><a href="/worldcup-model/">World Cup model</a></h3>
-        <p>Elo ratings for every international match since 1990, fed into a simulation of whole tournaments. It predicted the 2026 World Cup before kickoff, with Spain favourite at 18.3%, and was scored on all 104 matches. It now tests its ratings against bookmaker prices with paper money.</p>
-        <p class="meta">Python · <a href="https://github.com/maltysnack/worldcup-model">Code</a></p>
-      </article>
-
-      <article>
-        <h3><a href="/Dartabase/">Dartabase</a></h3>
-        <p>About 128,000 artworks from open museum collections in one searchable format, with a ready-made citation for any record in Chicago, MLA, APA or Harvard style. Fully static, with no server.</p>
-        <p class="meta">TypeScript · <a href="https://github.com/maltysnack/Dartabase">Code</a></p>
-      </article>
-
-      <article>
-        <h3><a href="/flox/">Flox</a></h3>
-        <p>A tiny programming language: draw a network with arrows and it simulates what flows through it. Every example on the page can be edited and reruns live.</p>
-        <p class="meta">Java · TypeScript · <a href="https://github.com/maltysnack/flox">Code</a></p>
-      </article>
-
-      <article>
-        <h3><a href="https://github.com/maltysnack/fpl-engine">FPL engine</a></h3>
-        <p>Points forecasts and a transfer planner for Fantasy Premier League. It predicts each player's points, searches transfer plans over the next eight gameweeks, times the chips, and can replay a past season to test its own decisions. Runs from the command line on your own team.</p>
-        <p class="meta">JavaScript · Node.js · <a href="https://github.com/maltysnack/fpl-engine">Code</a></p>
-      </article>
-
-      <h2 class="small-h">Small things</h2>
-      <ul class="small">
-        <li><a href="/cadence/">Cadence</a>: a focus companion in the browser. Reminders interrupt at the right moment, and nothing is uploaded.</li>
-      </ul>
-    </section>
+    <div class="ov-title"><p>based on boids</p></div>
+    <div class="ov-top seg">
+      <span id="modes"><button data-m="classic" class="on">Classic</button><button data-m="skyline">Skyline</button></span>
+    </div>
+    <div class="ov-bar">
+      <button id="snd" data-sky title="Sound off" aria-label="Sound off"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17V4l6 3"/><circle cx="7.5" cy="17" r="2.5" fill="currentColor"/><path class="slash" d="M3 3l18 18"/></svg></button>
+      <button id="scatter">Scatter</button>
+    </div>
+    <div class="stats" id="stats"></div>
   </main>
+
+<script type="module" src="/projects/flock/flock.js?v=34"></script>
+  <script src="/sidebar.js?v=9"></script>
 </body>
 </html>

@@ -6,7 +6,7 @@ cd "$(git rev-parse --show-toplevel)"
 errors=0
 fail() { echo "FAIL: $1"; errors=$((errors+1)); }
 
-files=$(git ls-files '*.html' '*.css' '*.js' '*.md' '*.yml')
+files=$(git ls-files '*.html' '*.css' '*.js' '*.md' '*.yml' | grep -v '/vendor/')
 
 # No em dashes anywhere.
 hits=$(grep -l "—" $files 2>/dev/null)

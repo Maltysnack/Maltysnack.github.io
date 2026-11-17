@@ -1,0 +1,125 @@
+/* ============================================================
+   Shared palette and type primitives.
+
+   CANONICAL SOURCE for both sites. This file lives here, in the
+   public repo, and the portfolio site copies it in. The direction
+   matters: this repo holds no reference to the portfolio, only the
+   other way round.
+
+   Only put things here that BOTH sites need: colour and type
+   primitives. Anything specific to one site (sidebar colours here,
+   deck and pane metrics there) stays in that site's own stylesheet.
+
+   Change a value here and both sites move together. Change it
+   anywhere else and they drift.
+   ============================================================ */
+
+:root {
+  /* ---- type ---- */
+  --font-body: 'Instrument Sans', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Big Shoulders Display', 'Arial Narrow', sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --tracking-display: 0.01em;
+  --tracking-label: 0.1em;
+
+  /* ---- light: black on white, one red ---- */
+  --bg: #ffffff;
+  --bg-soft: #f5f5f4;
+  --surface: #ececeb;
+  --border: #e2e2e0;
+  --border-strong: #b8b8b5;
+
+  --text: #111111;
+  --text-strong: #000000;
+  --text-muted: #555555;
+  --text-dim: #8a8a8a;
+
+  --accent-red: #d7261e;
+  --accent: var(--accent-red);
+
+  /* Data palette. Separate from the UI palette because most of both
+     sites is charts, and chart colour has to stay stable while UI
+     colour changes. Red leads; no browns or yellows. The sequential
+     ramp is grey so an accent mark always reads on top of it. */
+  --d1: #d7261e;  --d2: #1f5fa8;  --d3: #6b6b6b;
+  --d4: #12805a;  --d5: #7a3fb0;  --d6: #c2307a;
+
+  --seq1: #f2f2f1; --seq2: #dcdcda; --seq3: #bdbdba;
+  --seq4: #8f8f8c; --seq5: #5e5e5b; --seq6: #2b2b29;
+
+  --div-neg: #1f5fa8;
+  --div-mid: #e6e6e4;
+  --div-pos: #d7261e;
+
+  --good: #0f7a4a;
+  --bad: #d7261e;
+
+  color-scheme: light;
+}
+
+/* Dark is authored rather than derived: the red is lifted and the greys
+   re-picked against a near-black ground. */
+:root[data-theme="dark"] {
+  --bg: #0c0c0c;
+  --bg-soft: #161616;
+  --surface: #1c1c1c;
+  --border: #2a2a2a;
+  --border-strong: #474747;
+
+  --text: #f2f2f2;
+  --text-strong: #ffffff;
+  --text-muted: #a8a8a8;
+  --text-dim: #707070;
+
+  --accent-red: #ff4a3d;
+  --accent: var(--accent-red);
+
+  --d1: #ff4a3d;  --d2: #5b9cf0;  --d3: #a3a3a3;
+  --d4: #3fcf8a;  --d5: #b98af0;  --d6: #f06aaf;
+
+  --seq1: #1a1a1a; --seq2: #2b2b2b; --seq3: #444444;
+  --seq4: #666666; --seq5: #8f8f8f; --seq6: #c4c4c4;
+
+  --div-neg: #5b9cf0;
+  --div-mid: #333333;
+  --div-pos: #ff4a3d;
+
+  --good: #3fcf8a;
+  --bad: #ff4a3d;
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0c0c0c;
+    --bg-soft: #161616;
+    --surface: #1c1c1c;
+    --border: #2a2a2a;
+    --border-strong: #474747;
+
+    --text: #f2f2f2;
+    --text-strong: #ffffff;
+    --text-muted: #a8a8a8;
+    --text-dim: #707070;
+
+    --accent-red: #ff4a3d;
+    --accent: var(--accent-red);
+
+    --d1: #ff4a3d;  --d2: #5b9cf0;  --d3: #a3a3a3;
+    --d4: #3fcf8a;  --d5: #b98af0;  --d6: #f06aaf;
+
+    --seq1: #1a1a1a; --seq2: #2b2b2b; --seq3: #444444;
+    --seq4: #666666; --seq5: #8f8f8f; --seq6: #c4c4c4;
+
+    --div-neg: #5b9cf0;
+    --div-mid: #333333;
+    --div-pos: #ff4a3d;
+
+    --good: #3fcf8a;
+    --bad: #ff4a3d;
+
+    color-scheme: dark;
+  }
+}
